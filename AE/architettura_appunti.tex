@@ -1,0 +1,112 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{multicol}
+\usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\begin{document}
+\title{Architettura degli Elaboratori}
+\author{Federico Matteoni}
+\date{ }
+\renewcommand*\contentsname{Indice}
+
+\maketitle
+\tableofcontents
+\pagebreak
+\section{Introduzione}
+Appunti del corso di \textbf{Architettura degli Elaboratori} presi a lezione da \textbf{Federico Matteoni}.\\\\
+Prof.: \textbf{Maurizio Bonuccelli}, maurizio.angelo.bonuccelli@unipi.it\\
+\begin{list}{-}{Riferimenti web:}
+\item \emph{http://pages.di.unipi.it/bonuccelli/aeb.html}
+\item \emph{didawiki.cli.di.unipi.it/doku.php/informatica/ae/start}
+\end{list}
+Ricevimento: Martedì 10-12, stanza 294 DE\\
+Esame: \textbf{scritto} (\textit{closed book}) e \textbf{orale}. I compitini sono validi solo per la sessione invernale (gen-feb)\\
+\begin{list}{-}{Libri}
+\item  M. Vanneschi \textit{Architettura degli Elaboratori}, Pisa University Press
+\item D. A. Patterson \textit{Computer Organization \& Design - The Hardware/Software Interface}
+\end{list}
+\section{Cosa riguarda il corso}
+Consiste in come sono fatti pc internamento da un punto di vista di sottosistemi senza scendere nei dettagli elettrici.
+\begin{list}{-}{Il corso è diviso in quattro parti:}
+\item Fondamenti e strutturazione firmware (I Compitino)
+\item Macchina assembler (D-RISC) e processi
+\item Architetture General-Purpose
+\item Architetture parallele (II Compitino)
+\end{list}
+\section{Struttura a livelli}
+Quando voglio costruire qualcosa di complesso lo faccio a pezzi, partendo da comp elementari messe insieme o studiate ad altro livello, messe ulteriorimente insieme ecc.\\
+Ogni livello lo chiameremo \textbf{macchina virtuale} o MV, seguito da un numero che indica il numero di livello.\\
+\begin{list}{-}{Due approcci fondamentali:}
+\item \textbf{Linguistico}: stabilisce i livelli in base ai linguaggi usati
+\item \textbf{Funzionale}: stabilisce i livelli in base a cosa fanno
+\end{list}
+\subsection{Macchine Virtuali}
+[disegno]\\
+MV$_{i}$ realizza politica P$_{i}$ con linguaggio L$_{i}$ e risorse R$_{i}$.\\Utilizza le funzionalità che il livello MV$_{i-1}$ (primitive) fornisce attraverso l'interfaccia\\\\
+\textbf{Supporto a tempo di esecuzione} o \textbf{Runtime Support}: insieme dei livelli sottostanti. Nell'esempio, MVi ha come runtime support i livelli MVi-1 ... MV0.
+Una macchina virtuale è modulare perché devo poterla modificare, deve essere portabile (riutilizzabile in più contesti possibili).
+\begin{list}{}{}
+\item \textbf{MV$_{4}$} Applicazioni\\L$_{4}$: Java, C\\R$_{4}$: costrutti
+\item \textit{Interfaccia}: chiamate di sistema
+\item \textbf{MV$_{3}$} Sistema Operativo\\L$_{3}$: C\\R$_{3}$: variabili condivise, risorse condivise
+\item \textit{Interfaccia}: istruzioni assembler
+\item \textbf{MV$_{2}$} Macchina assembler\\L$_{2}$: assembler (D-RISC)\\R$_{2}$: registri, memoria, canali di comunicazione
+\item \textit{Interfaccia}: istruzioni firmware per l'assembler
+\item \textbf{MV$_{1}$} Firmware\\L$_{1}$: microlinguaggio\\R$_{1}$: sommatore, commutatore
+\item \textit{Interfaccia}: hardware
+\item \textbf{MV$_{0}$} Hardware\\L$_{0}$: \textit{funzionamento dei circuiti elettronici}\\R$_{0}$: circuiti elettronici elemntari (AND, OR, NOT) 
+\end{list}
+Il corso riguarderà principalmente i livelli MV$_{2}$ $\rightarrow$ MV$_{0}$ incluse, comprese le istruzioni assembler.\\
+Il livello firmware sarà fatto da \textbf{memoria}, \textbf{processore} e \textbf{dispositivi I/O}. I/O comunica bilaterale con memoria e Processore comunica bilaterale con memoria. Opzionalmente I/O comunica bilaterale direttamente con processore. Questa è l'architettura standard in maniera estremamente semplicistica.
+Vedremo processore e memoria, non i dispositivi I/O perché troppo complessi.
+
+\subsection{Compilazione vs Interpretazione}
+\begin{multicols}{2}
+\textbf{Compilatore}: è \textbf{statico}, vedendo tutto il codice può ottimizzarlo. Sostanzialmente è l'opera di un traduttore, che può leggersi il testo più volte per tradurlo alla perfezione.\\
+\columnbreak
+
+\textbf{Interprete}: è \textbf{dinamico}, quindi non può ottimizzare. Il firmware riceve un'istruzione alla volta quindi la interpreta.\\\\
+\end{multicols}
+Entrambe servono per tradurre il \textbf{codice sorgente} nel \textbf{programma oggetto} o \textbf{eseguibile}.\\
+
+\textbf{Suppongo programmi}:\\
+\begin{multicols}{2}
+\texttt{for i=0; i++; i<n\\    A[i] = A[i] + B[i];}
+
+\columnbreak
+\texttt{for i=0; i++; i<n\\    B[i] = B[i] + C;}
+\end{multicols}
+Ricevendo i due blocchi di istruzioni, il compilatore riconosce che sono diverse e le compila in modo diverso. Però in entrambi i casi sono del tipo \textit{oggetto = somma due oggetti}, quindi produce una sequenza di istruzioni analoga (a meno di registri e dati, ovviamente).\\\\
+Parte del secondo pezzo di codice, ad esempio, verrà tradotto in questa maniera:
+\begin{multicols}{2}
+\begin{list}{}{}
+\item \texttt{LOAD R$_{base}$, R$_{I}$, R$_{1}$}
+\item \texttt{ADD R$_{1}$, R$_{2}$, R$_{1}$}
+\item \texttt{STORE R$_{base}$, R$_{I}$, R$_{1}$}
+\item \texttt{INC R$_{I}$}
+\item \texttt{IF$<$ R$_{I}$, R$_{N}$, LOOP}
+\end{list}
+\columnbreak
+\begin{list}{}{}
+\item \texttt{M[R[base] + R[I]] $\rightarrow$ R[1]}
+\item \texttt{R[1] + R[2] $\rightarrow$ R[1]}
+\item \texttt{R[1]  $\rightarrow$ M[R[base] + R[I]]}
+\item \texttt{R[I] + 1 $\rightarrow$ R[I]}
+\end{list}
+Microlinguaggio corrispondente
+\end{multicols}
+\pagebreak
+\section{Assembler D-RISC}
+Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
+2$^{6}$ = 64 registri generali nel processore\\
+Ad esempio \texttt{ADD R$_{i}$, R$_{j}$, R$_{h}$} significa \texttt{M[R[i] + R[j]] $\rightarrow$ R[h]}, e \texttt{ADD} è memorizzato con un determinato codice identificativo.\\
+Per l'inizializzazione, ho il registro \texttt{R$_{0}$} che contiene sempre 0.\\
+
+\paragraph{Esempio di RTS} \texttt{MV3 C = A + B}\\
+Su MV2 diventa \texttt{ADD R$_{A}$, R$_{B}$, R$_{C}$}\\
+Su MV1 ho registro A, registro B verso addizionatore/sottrattore (con alfa che indica operazione) e porta in C (con beta che indica scrittura attiva o meno)\\
+Su MV0 i vari componenti sono costruiti da una serie di gate (AND, OR, NOT).
+
+PO Parte Operativa
+PC Parte Controllo
+\end{document}
