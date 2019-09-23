@@ -3,6 +3,7 @@
 \usepackage[italian]{babel}
 \usepackage{multicol}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\usepackage{listings}
 \begin{document}
 \title{Reti di Calcolatori e Laboratorio}
 \author{Federico Matteoni}
@@ -89,8 +90,7 @@ Le risorse sono riservate end-to-end per una connessione. Le risorse di rete (es
 \paragraph{Packet-Switched Network} Reti a commutazione di pacchetto, più moderno\\
 Flusso di dati punto-punto suddiviso in pacchetti. I pacchetti degli utenti condividono le risorse di rete. Ciascun pacchetto utilizza completamente il canale.\\\textbf{Store and Forward}: il commutatore deve ricevere l'intero pacchetto prima di ritrasmetterlo in uscita.\\Le risorse vengono usate \textbf{a seconda delle necessità}. Vi è \textbf{contesa per le risorse}: la richiesta di risorse può eccedere la disponibilità e si può verificare \textbf{congestione} quando i pacchetti vengono accodati in attesa di utilizzare il collegamento. Si possono anche verificare perdite.
 
-$16/09/19
-
+16/09/19
 Chiave elearning: RETI2019
 Introduzione
 Una rete è un’interconnessione di dispositivi in grado di scambiarsi informazioni, quali sistemi terminali (end system), router, switch e modem.
@@ -114,7 +114,7 @@ Internet
 Una internet è costituita da due o più reti interconnesse.
 L’internet più famosa è chiamata Internet ed è composta da migliaia di reti interconnesse.
 Ogni rete connessa a Internet deve usare IP e rispettare certe convenzioni su nomi e indirizzi. Nuove reti si aggiungono facilmente.
-I dispositivi connessi possono essere host, end_system come pc, workstation, server, pda, telefoni ect.
+$I dispositivi connessi possono essere host, end_system come pc, workstation, server, pda, telefoni ect.$
 I link di comunicazione possono essere fibre ottiche, doppini telefonici, cavi coassiali, onde radio.
 I router instradano i pacchetti (sequenze) di dati attraverso la rete.
 Le entità software possono essere:
@@ -160,9 +160,78 @@ Ritardo di elaborazione del nodo è dato da un controllo sui bit e dalla determi
 Ritardo di accodamento: attesa di trasmissione…
 Ritardo di trasmissione tempo impiegato per trasmette un pacchetto sul link. R = rete di trasmissione del collegamento in bps. L = lunghezza del pacchetto in bit. Ritardo di trasmissione = L/R
 Ritardo di propagazione d/s tempo impiegato da 1 bit per essere propagato da un nodo all’altro.
-D = lunghezza del collegamento, s = velocità di propagazione del collegamento (si usa la velocità della luce circa 3-2x10^8 m/sec). Ritardo di propagazione = d/s
+$D = lunghezza del collegamento, s = velocita di propagazione del collegamento (si usa la velocita della luce circa 3-2x10^8 m/sec). Ritardo di propagazione = d/s$
 (slides di esempio)
 (slides analogia del casello autostradale)
-(slides di ricapitolazione)$
+(slides di ricapitolazione)
 
-\end{document}
+\section{Modelli Stratificati}
+\subsection{Protocollo}
+\paragraph{Cos'è un protocollo} insieme di regole che dice come comunicare ed esporre verso l'esterno.
+\paragraph{Es. modello stratificato: sistema postale} vedi slide, da livello alto a livello basso per spedizione, viceversa per ricevere (da basso ad alto). Il problema grosso di mandare lettera in ita a jap in una serie di passi, in cui viene eseguito un particolare compito su un messaggio, che viene trasferito ad un altro livello. Segretaria prepara lettera affinché postino la possa prendere. Però il messaggio scritto da un livello è pensato per essere interpretato dallo stesso livello del sistema di arrivo (segretaria scrive per segretaria, direttore scrive per direttore).
+\subsection{Incapsulamento} aggiungo strati, involucri al messaggio originale che vengono man mano tolti alla destinazione.
+\subsection{Perché stratificare} prendo sistema che per una singola coppia di aziende è costoso, lo trasformo a strati così che il costo della singola lettera sia irrisorio.
+Definisco funzioni di base per effettuare trasferimento e agenti che le svolgono.
+Principi di base: separation of concern e information hiding
+\subsubsection{Separation of Concern}
+Fare ciò che compete delegando agli altri ciò che è delegabile.
+\subsubsection{Information Hiding}
+Nascondere info non indispensabili affinché il committente possa svolgere l'operazione.
+
+se traduco modlelo postale in a strati ho\\
+utente\\segretaria\\postino\\smistamento\\stazione\\
+smistamento intermedio: arrivo fino ad un livello intermedio per evitare che si possano esporre info sensibili.\\\\
+vantaggi a strati: svilupp e impl singolo strato più semplice rispetto a fare tutto il complesso\\
+servizi di strati inferiori usati da più entità di strati superiori\\\\
+\subsection{OSI RM (Open Systems Interconnction Reference Model)}
+Prime reti chiuse, tecnologie e protocolli proprietari. Es. ARPANET, SNA (IBM), Dna (Digital), non intercomunicavano. Le reti erano per servizi specifici (TELCO)\\
+Quindi obiettivo: modello riferimento per sistemi aprti (quasliasi terminale deve poter comunicarer mediante qualsiasi rete). $\rightarrow$ accordarsi sulle regole\\\\
+OSI era un set di protocolli aperti: dettagli pubblici e cambiamenti gestiti da organizzazione con partecipazione aperta al pubblico. Un sistema che implementa protocolli aperti è un sistema aperto. L'ISO.\\
+Elementi fondamentali modello stratificiato:\\
+flusso dati\\servizi\\protocolli\\interfacce\\
+uno strato fornisce servizi a strato sopra e richiede servizi a strato sotto. Strato n comunica con strato n di altra unità tramite protocollo assegnato. comunicaz strati attraverso interfaccia.\\
+
+\subsection{Protocolli}
+\paragraph{cos'è un protocollo (x2)} protocolli definiscono formatop e ordine messaggi inviati e ricevute e azioni per trasmette e ricevere messaggi.
+\subparagraph{efficace} sistema raggiunge socpo con maggior freq possibile
+\subparagraph{efficiente} sistema raggiunge scopo con minor sforzo possibile
+
+\subsubsection{Pila di protocolli}
+OSI prevede sette strati\\
+7-5 più modi di raggrupparli, livello software e applicativo\\
+7 applicativo: elaborazione dati\\
+6 presentazione: unificazione dati, preparazione del pacchetto\\
+5 sessione: controllo del dialogo tra due host sorgente e dest. Decidere regole per la comunicazione tra due host.\\
+4 trasporto: offre trasferimento dati tra host terminali. Astrazione logica per cui si consegna a questo livello un messaggio e dove mandarlo. \textbf{dialogo end-to-end}\\
+3 rete: instradamento del traffico (router, offre il servizio di consegna attraverso sistema distribuito di nodi intermedi)\\
+2 datalink: frame fra interfacce, scheda di rete deve interpretare il flusso di bit\\
+1 fisico: mezzo fisico, modulare segnale elettrico per trasmettere il flusso di bit\\
+4-1 livelli fisico+sw\\\\
+servizio: funzione che uno strato offre a strato superiore, attraverso un'interfaccia\\
+interfaccia: regole che governano formato e significato frame, pacchetti o messaggi che vengono scmabiati tra strati successivi della stessa entità\\
+servizi cosa, interfaccia come\\\\
+connection-oriented: livello trasferimento crea connessione logica tra due sistemi (instaurazione connessione, trasferimento dati, chiusura connesione)\\
+connectionless: dati trasmessi senza stabilire connessione\\
+
+\section{Flusso dell'Informazione}
+Qualcuno (livello applicativo) genera dati da mandare in remoto. L'info scende i livelli fino al canale fisico, e ogni livello aggiungeall'informazione ricevuta dal livello superiore una propria (o più) sezione informativa sotto forma di header con info esclusive di quel livello.\\
+HEADER|DATA|TRAILER\\
+header: qualificazione del pacchetto per questo livello\\
+data: payload dal liv superiore\\
+trailer: coda\\
+slide esempio incapsulamento dei dati\\
+
+\section{Stack protocollare TCP/IP}
+famiglia protocollo attualmente usati in interneti. gerarchia di protocollli costituita da moduli interagenti ciascuno ocn funz specifiche.\\
+gerarchia: ciascun protocollo liv superiore è supportato da servizi di livelli inferiore\\\\
+applicaizone: supporta applicazione rete: smtp, ftp, http\\
+trasporto: trasferimento dati host-host: tcp, udp\\
+rete: instradamento datagrammi dalla sorgente alla destinazione e protocolli di management rete: ip, icmp\\
+link: trasferimento dati tra elementi di rete vicini (da un hop all'altro): ppp, ethernet,... qualunque cosa\\
+fisico: aggiunto successivamente: bits on the wire\\\\
+come protocollo la specifica fa comuniazione a livello orizzontale (da livello n origine a livello n destinazione).\\
+\lstset{language=Java}
+\begin{lstlisting}
+Ciao ciao = new Ciao();
+\end{lstlisting}
+\end{document} 
