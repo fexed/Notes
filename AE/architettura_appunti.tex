@@ -100,13 +100,96 @@ Microlinguaggio corrispondente
 Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
 2$^{6}$ = 64 registri generali nel processore\\
 Ad esempio \texttt{ADD R$_{i}$, R$_{j}$, R$_{h}$} significa \texttt{M[R[i] + R[j]] $\rightarrow$ R[h]}, e \texttt{ADD} è memorizzato con un determinato codice identificativo.\\
-Per l'inizializzazione, ho il registro \texttt{R$_{0}$} che contiene sempre 0.\\
+Per l'inizializzazione, ho il registro \texttt{R$_{0}$} che contiene sempre 0.
 
 \paragraph{Esempio di RTS} \texttt{MV3 C = A + B}\\
-Su MV2 diventa \texttt{ADD R$_{A}$, R$_{B}$, R$_{C}$}\\
-Su MV1 ho registro A, registro B verso addizionatore/sottrattore (con alfa che indica operazione) e porta in C (con beta che indica scrittura attiva o meno)\\
-Su MV0 i vari componenti sono costruiti da una serie di gate (AND, OR, NOT).
-
-PO Parte Operativa
-PC Parte Controllo
+Su MV$_{2}$ diventa \texttt{ADD R$_{A}$, R$_{B}$, R$_{C}$}\\
+Su MV$_{1}$ ho registro A, registro B verso addizionatore/sottrattore (con alfa che indica operazione) e porta in C (con beta che indica scrittura attiva o meno)\\
+Su MV$_{0}$ i vari componenti sono costruiti da una serie di gate (\texttt{AND}, \texttt{OR}, \texttt{NOT}).\\
+\\
+PO Parte Operativa\\
+PC Parte Controllo\\
+\texttt{roba eventuale}
+\section{Reti Combinatorie}
+In una rete combinatoria si ha una serie di segnali in input (X$_{1}$ ... X$_{n}$) che vengono trasformati in una serie di segnali in output (Y$_{1}$ ... Y$_{m}$). A seconda delle varie componenti presenti sulla rete combinatoria, un insieme di segnali 0/1 viene trasformato in un altro insieme di segnali 0/1 seguendo le regole dell'\textbf{algebra booleana}.\\
+Elettricamente, quando un segnale vale 1 significa che la tensione è circa 5V.
+\subsection{Algebra Booleana}
+L'algebra booleana è computata su \textbf{due valori} e \textbf{tre operatori}:
+\begin{center}
+\begin{multicols}{2}
+\texttt{false}\\\texttt{true}\\
+\columnbreak
+\texttt{AND}\\\texttt{OR}\\\texttt{NOT}
+\end{multicols}
+\end{center}
+Esistono anche altri operatori, derivati dai tre precedenti: \texttt{XOR}, \texttt{NAND}, \texttt{NOR} ecc..
+\paragraph{Proprietà} Vale la proprietà distributiva anche per la somma rispetto alla moltiplicazione, oltre il viceversa, quindi: \texttt{A(B+C) = AB + AC}, ma anche \texttt{A + BC = (A + B)(A + C)}.\\
+\begin{list}{-}{Inoltre si hanno le cosiddette \textbf{proprietà di DeMorgan}:}
+\item \texttt{$\overline{A + B}$ = $\overline{A}$ * $\overline{B}$}
+\item \texttt{$\overline{AB}$ = $\overline{A}$ + $\overline{B}$}
+\end{list}
+\begin{multicols}{3}
+\subsubsection{AND}
+Anche detta \textbf{moltiplicazione logica}.\\
+\begin{tabular}{cc|c}
+X & Y & Z \\
+0 & 0 & 0 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & 1 \\
+\end{tabular}
+\columnbreak
+\subsubsection{OR}
+Anche detta \textbf{somma logica}.\\
+\begin{tabular}{cc|c}
+X & Y & Z \\
+0 & 0 & 0 \\
+0 & 1 & 1 \\
+1 & 0 & 1 \\
+1 & 1 & 1 \\
+\end{tabular}
+\columnbreak
+\subsubsection{NOT}
+Anche detta \textbf{negazione logica}.\\
+\begin{tabular}{c|c}
+Y & Z \\
+0 & 1 \\
+1 & 0 \\
+\end{tabular}
+\end{multicols}
+\pagebreak
+Per costruire una \textbf{rete combinatoria} esistono varie tecniche. Quella che useremo si chiama \textbf{somma di prodotti}.
+\subsection{Tecnica della Somma di Prodotti, o codifica degli 1}
+\paragraph{La tecnica nel dettaglio} Partendo dalla \textbf{tabella di verità}, identifico le uscite che valgono 1. Di quelle uscite, \textbf{moltiplico (\texttt{AND})} tra loro le entrate \textbf{sulla stessa riga}, \textbf{nego le entrate che valgono 0} e \textbf{sommo (\texttt{OR}) tra loro le diverse righe}.
+\paragraph{Un esempio con la somma algebrica} Partendo dalla seguente tabella di verità.\\
+\begin{multicols}{2}
+\begin{tabular}{cc|c|c}
+X & Y & Z & R \\
+0 & 0 & 0 & 0 \\
+0 & 1 & 1 & 0 \\
+1 & 0 & 1 & 0 \\
+1 & 1 & 0 & 1\\
+\end{tabular}
+\columnbreak
+\\Sfruttando la tecnica descritta sopra ottengo le seguenti espressioni per le due uscite:
+\begin{list}{}{}
+\item \texttt{Z = $\overline{X}$ * Y + X * $\overline{Y}$}
+\item \texttt{R = X * Y}
+\end{list}
+\end{multicols}
+Alternativamente, posso anche realizzare la \textbf{funzione complementare}, ovver fare il solito procedimento ma per le uscite che valgono 0 per poi negarle.\\
+\begin{multicols}{2}
+\begin{tabular}{cc|c|c}
+X & Y & $\overline{Z}$ & R \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+1 & 1 & 1 & 1\\
+\end{tabular}
+\columnbreak
+\begin{list}{}{}
+\item \texttt{Z = $\overline{\overline{X} * \overline{Y} + X * Y}$}
+\item \texttt{R = X * Y}
+\end{list}
+\end{multicols}
 \end{document}
