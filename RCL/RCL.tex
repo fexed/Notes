@@ -117,7 +117,8 @@ Il \textbf{ritardo di propagazione} è il tempo impiegato da 1 bit per essere pr
 \texttt{d$_{prop}$} = \textbf{ritardo di propagazione}, \texttt{d/s}, da pochi microsecondi a centinaia di millisecondi\\
 \section{Modelli Stratificati}
 $https://elearning.di.unipi.it/pluginfile.php/27387/mod_resource/content/1/L02_introduzione_protocolli.pdf$
-\paragraph{Perché un modello a strati} Per mandare dati da un host all'altro comunicando su rete si devono eseguire una serie di operazioni: \textbf{trovare il percorso} di rete da attraversare, \textbf{decidere in che modo spedire e codificare} i dati, \textbf{risolvere eventuali problemi} di comunicazione e altro ancora. Programmare ogni volta tutto il procedimento è un lavoro estremamente complesso e ripetitivo. Il modello a strati \textbf{astrae su più livelli il problema della trasmissione dati} in modo da fornire di volta in volta strumenti al programmatore per poter evitare di "\textit{reinventare la ruota}".
+\paragraph{Perché usare un modello a strati} Per mandare dei dati da un host ad un altro comunicando su una rete, si devono eseguire una \textbf{serie di operazioni}: \textbf{trovare il percorso} di rete da attraversare, \textbf{decidere in che modo spedire e codificare} i dati, \textbf{risolvere eventuali problemi} di comunicazione e altro ancora.\\
+Programmare ogni volta tutto il procedimento è un \textbf{lavoro estremamente complesso} e ripetitivo. Un modello a strati \textbf{astrae su più livelli il problema della trasmissione dati} in modo da fornire di volta in volta strumenti utili al programmatore per poter evitare di "\textit{reinventare la ruota}".
 \paragraph{Definizioni generali} Nelle architetture di comunicazione a strati sono importanti una serie di definizioni:
 \begin{list}{-}{}
 \item Stratificazione
@@ -127,40 +128,49 @@ $https://elearning.di.unipi.it/pluginfile.php/27387/mod_resource/content/1/L02_i
 \item Stack TCP/IP
 \end{list}
 Tali definizioni verranno viste durante il corso.
+\paragraph{Es. modello stratificato: sistema postale}\texttt{Vedi slide\\$https://elearning.di.unipi.it/pluginfile.php/27387/mod_resource/content/1/L02_introduzione_protocolli.pdf$, 48}\\
+Dal livello più alto al livello più basso per la spedizione, viceversa per la ricezione. Un problema importante che si incontra quando si manda una lettera, ad esempio, dall'Italia al Giappone è la traduzione. In una \textbf{serie di passi}, in cui in ognuno viene \textbf{eseguito un particolare compito su un messaggio}, che viene poi \textbf{trasferito ad un altro livello}. Nell'esempio, la segretaria prepara lettera (traduce in giapponese e imbusta) affinché il postino la possa prendere. Però il "messaggio" della segretaria è "scritto" per essere interpretato dalla segretaria giapponese, il direttore italiano scrive per il direttore giapponese. \textbf{Messaggi di un livello del sistema che spedisce sono scritti per essere interpretati dal medesimo livello del sistema ricevente}.
+\subsection{Perché stratificare} La stratificazione è molto utile per \textbf{scomporre il sistema complesso della gestione della comunicazione}. Prendo un sistema estremamente costoso da costruire per una singola coppia di aziende, quindi lo trasformo in strati così che il costo della singola lettera sia irrisorio.\\
+\textbf{Definisco funzioni di base per effettuare trasferimento e agenti che le svolgono}.
+\begin{list}{}{Principi di base:}
+\item \textbf{Separation of Concern}\\\textbf{Far fare} ad un determinato strato \textbf{solo ciò che gli compete}, \textbf{delegando agli altri tutto ciò che è delegabile}
+\item \textbf{Information Hiding}\\\textbf{Nascondo} ad un determinato strato \textbf{le informazioni non indispensabili allo svolgere della sua operazione}.
+\end{list}
 
---roba simone--
+\paragraph{Esempio} Se traduco il modello postale nel modello a strati ho, ad esempio:\\
+\begin{center}
+\begin{multicols}{2}
+Utente\\Segretaria\\Postino\\Smistamento\\Stazione\\
+\columnbreak
+Utente\\Segretaria\\Postino\\Smistamento\\Stazione\\
+\end{multicols}
+---Viaggio$\rightarrow$
+\end{center}
 
-\subsection{Protocollo}
-\paragraph{Cos'è un protocollo} insieme di regole che dice come comunicare ed esporre verso l'esterno.
-\paragraph{Es. modello stratificato: sistema postale} vedi slide, da livello alto a livello basso per spedizione, viceversa per ricevere (da basso ad alto). Il problema grosso di mandare lettera in ita a jap in una serie di passi, in cui viene eseguito un particolare compito su un messaggio, che viene trasferito ad un altro livello. Segretaria prepara lettera affinché postino la possa prendere. Però il messaggio scritto da un livello è pensato per essere interpretato dallo stesso livello del sistema di arrivo (segretaria scrive per segretaria, direttore scrive per direttore).
-\subsection{Incapsulamento} aggiungo strati, involucri al messaggio originale che vengono man mano tolti alla destinazione.
-\subsection{Perché stratificare} prendo sistema che per una singola coppia di aziende è costoso, lo trasformo a strati così che il costo della singola lettera sia irrisorio.
-Definisco funzioni di base per effettuare trasferimento e agenti che le svolgono.
-Principi di base: separation of concern e information hiding
-\subsubsection{Separation of Concern}
-Fare ciò che compete delegando agli altri ciò che è delegabile.
-\subsubsection{Information Hiding}
-Nascondere info non indispensabili affinché il committente possa svolgere l'operazione.
-
-se traduco modlelo postale in a strati ho\\
-utente\\segretaria\\postino\\smistamento\\stazione\\
-smistamento intermedio: arrivo fino ad un livello intermedio per evitare che si possano esporre info sensibili.\\\\
-vantaggi a strati: svilupp e impl singolo strato più semplice rispetto a fare tutto il complesso\\
-servizi di strati inferiori usati da più entità di strati superiori\\\\
-\subsection{OSI RM (Open Systems Interconnction Reference Model)}
-Prime reti chiuse, tecnologie e protocolli proprietari. Es. ARPANET, SNA (IBM), Dna (Digital), non intercomunicavano. Le reti erano per servizi specifici (TELCO)\\
-Quindi obiettivo: modello riferimento per sistemi aprti (quasliasi terminale deve poter comunicarer mediante qualsiasi rete). $\rightarrow$ accordarsi sulle regole\\\\
-OSI era un set di protocolli aperti: dettagli pubblici e cambiamenti gestiti da organizzazione con partecipazione aperta al pubblico. Un sistema che implementa protocolli aperti è un sistema aperto. L'ISO.\\
+\subsection{Smistamento Intermedio} Spedire un pacchetto che è destinato ad determinato livello intermedio. Quindi \textbf{arrivo fino al corrispondente livello intermedio per evitare che si possano esporre info sensibili}.
+\subsection{Elementi fondamentali}
 Elementi fondamentali modello stratificiato:\\
 flusso dati\\servizi\\protocolli\\interfacce\\
-uno strato fornisce servizi a strato sopra e richiede servizi a strato sotto. Strato n comunica con strato n di altra unità tramite protocollo assegnato. comunicaz strati attraverso interfaccia.\\
+uno strato fornisce servizi a strato sopra e richiede servizi a strato sotto. Strato n comunica con strato n di altra unità tramite protocollo assegnato. comunicaz strati attraverso interfaccia.
+\subsection{Vantaggi}
+Il vantaggio più grosso è che \textbf{sviluppare il singolo strato è più semplice ed economico rispetto a sviluppare tutto il sistema complesso}. Questo perché \textbf{i servizi degli strati inferiori vengono usati da più entità che implementano gli strati superiori}.
+\section{Protocolli}
+\paragraph{Cos'è un protocollo} Un \textbf{protocollo} è un \textbf{insieme di regole} che dice come comunicare ed esporre dati verso l'esterno. I protocolli \textbf{definiscono il formato e l'ordine dei messaggi inviati e ricevuti, con le azioni per trasmette e ricevere tali messaggi}.
+\subsection{Incapsulamento} Processo in cui \textbf{aggiungo strati, "involucri" al messaggio originale che vengono man mano tolti alla destinazione}.
+\section{OSI RM (Open Systems Interconnction Reference Model)}
+Le prime reti erano chiuse, composte da tecnologie e protocolli proprietari. Alcuni esempi sono ARPANET, SNA (IBM), DNA (Digital). Non potevano intercomunicare tra loro, perché usavano \textbf{protocolli diversi}, erano costruite per servizi specifici (TELCO). Insorse quindi un obiettivo: creare un \textbf{modello di riferimento per sistemi aperti}, per permettere a qualsiasi terminale di poter comunicare mediante qualsiasi rete. C'era quindi necessità di \textbf{accordarsi sulle regole}.
+\paragraph{OSI} L'OSI è una \textbf{collezione di protocolli aperti}: questo significa che i loro \textbf{dettagli sono pubblici} e i \textbf{cambiamenti vengono gestiti da un'organizzazione con partecipazione aperta al pubblico}. \textbf{Un sistema che implementa i protocolli aperti è un sistema aperto}.
+\subsubsection{Pila di protocolli} L'\textbf{OSI} prevede \textbf{sette strati di protocolli}: 
+\begin{list}{-}{}
+\item\textbf{Applicativo}
+\item\textbf{Presentazione}
+\item\textbf{Sessione}
+\item\textbf{Trasporto}
+\item\textbf{Rete}
+\item\textbf{Datalink}
+\item\textbf{Fisico}
+\end{list}
 
-\subsection{Protocolli}
-\paragraph{cos'è un protocollo (x2)} protocolli definiscono formatop e ordine messaggi inviati e ricevute e azioni per trasmette e ricevere messaggi.
-\subparagraph{efficace} sistema raggiunge socpo con maggior freq possibile
-\subparagraph{efficiente} sistema raggiunge scopo con minor sforzo possibile
-
-\subsubsection{Pila di protocolli}
 OSI prevede sette strati\\
 7-5 più modi di raggrupparli, livello software e applicativo\\
 7 applicativo: elaborazione dati\\
