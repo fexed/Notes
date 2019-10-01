@@ -128,6 +128,8 @@ Programmare ogni volta tutto il procedimento è un \textbf{lavoro estremamente c
 \item Stack TCP/IP
 \end{list}
 Tali definizioni verranno viste durante il corso.
+\paragraph{Lo Strato} Uno \textbf{strato} è un \textbf{modulo interamente definito} attraverso i servizi, le interfacce e i protocolli che lo caratterizzano. Si indica anche col nome di livello.\\
+Uno strato \texttt{n} \textbf{comunica direttamente} con lo strato \texttt{n} di un'altra unità tramite un \textbf{protocollo assegnato}. Lo stesso strato \texttt{n} può richiedere servizi allo strato \texttt{n-1} attraverso la \textbf{loro interfaccia}, e fornisce servizi allo strato \texttt{n+1} attraverso la \textbf{rispettiva interfaccia}.
 \paragraph{Es. modello stratificato: sistema postale}\texttt{Vedi slide\\$https://elearning.di.unipi.it/pluginfile.php/27387/mod_resource/content/1/L02_introduzione_protocolli.pdf$, 48}\\
 Dal livello più alto al livello più basso per la spedizione, viceversa per la ricezione. Un problema importante che si incontra quando si manda una lettera, ad esempio, dall'Italia al Giappone è la traduzione. In una \textbf{serie di passi}, in cui in ognuno viene \textbf{eseguito un particolare compito su un messaggio}, che viene poi \textbf{trasferito ad un altro livello}. Nell'esempio, la segretaria prepara lettera (traduce in giapponese e imbusta) affinché il postino la possa prendere. Però il "messaggio" della segretaria è "scritto" per essere interpretato dalla segretaria giapponese, il direttore italiano scrive per il direttore giapponese. \textbf{Messaggi di un livello del sistema che spedisce sono scritti per essere interpretati dal medesimo livello del sistema ricevente}.
 \subsection{Perché stratificare} La stratificazione è molto utile per \textbf{scomporre il sistema complesso della gestione della comunicazione}. Prendo un sistema estremamente costoso da costruire per una singola coppia di aziende, quindi lo trasformo in strati così che il costo della singola lettera sia irrisorio.\\
@@ -149,9 +151,25 @@ Utente\\Segretaria\\Postino\\Smistamento\\Stazione\\
 
 \subsection{Smistamento Intermedio} Spedire un pacchetto che è destinato ad determinato livello intermedio. Quindi \textbf{arrivo fino al corrispondente livello intermedio per evitare che si possano esporre info sensibili}.
 \subsection{Elementi fondamentali}
-Elementi fondamentali modello stratificiato:\\
-flusso dati\\servizi\\protocolli\\interfacce\\
-uno strato fornisce servizi a strato sopra e richiede servizi a strato sotto. Strato n comunica con strato n di altra unità tramite protocollo assegnato. comunicaz strati attraverso interfaccia.
+Gli \textbf{elementi fondamentali} del modello stratificato sono:
+\begin{list}{}{}
+\item Flusso dati
+\item \textbf{Servizio}: una \textbf{funzione} che uno strato offre allo strato superiore, attraverso un'interfaccia.
+\item Protocollo
+\item \textbf{Interfaccia}: \textbf{insieme di regole} che governano il formato e il significato dei frame, pacchetti o messaggi che vengono \textbf{scambiati tra strati adiacenti della stessa entità}.
+\end{list}
+\textbf{I servizi indicano \textit{cosa} si può fare, le interfaccie regolano \textit{come} si può fare.}
+
+\subsection{Modalità di Servizio}
+\begin{list}{}{I \textbf{dati} possono essere scambiati in due modalità diverse:}
+\item \textbf{Connection-Oriented}: il livello di trasferimento stabilisce una \textbf{connessione logica} tra due sistemi.
+\begin{list}{--}{La connessione è quindi \textbf{gestita}:}
+\item \textbf{Instaurazione} della connessione
+\item \textbf{Trasferimento} dei dati
+\item \textbf{Chiusura} della connessione
+\end{list}
+\item \textbf{Connectionless}: i dati vengono \textbf{trasferiti senza stabilire una connessione}.
+\end{list}
 \subsection{Vantaggi}
 Il vantaggio più grosso è che \textbf{sviluppare il singolo strato è più semplice ed economico rispetto a sviluppare tutto il sistema complesso}. Questo perché \textbf{i servizi degli strati inferiori vengono usati da più entità che implementano gli strati superiori}.
 \section{Protocolli}
@@ -161,31 +179,17 @@ Il vantaggio più grosso è che \textbf{sviluppare il singolo strato è più sem
 Le prime reti erano chiuse, composte da tecnologie e protocolli proprietari. Alcuni esempi sono ARPANET, SNA (IBM), DNA (Digital). Non potevano intercomunicare tra loro, perché usavano \textbf{protocolli diversi}, erano costruite per servizi specifici (TELCO). Insorse quindi un obiettivo: creare un \textbf{modello di riferimento per sistemi aperti}, per permettere a qualsiasi terminale di poter comunicare mediante qualsiasi rete. C'era quindi necessità di \textbf{accordarsi sulle regole}.
 \paragraph{OSI} L'OSI è una \textbf{collezione di protocolli aperti}: questo significa che i loro \textbf{dettagli sono pubblici} e i \textbf{cambiamenti vengono gestiti da un'organizzazione con partecipazione aperta al pubblico}. \textbf{Un sistema che implementa i protocolli aperti è un sistema aperto}.
 \subsubsection{Pila di protocolli} L'\textbf{OSI} prevede \textbf{sette strati di protocolli}: 
-\begin{list}{-}{}
-\item\textbf{Applicativo}
-\item\textbf{Presentazione}
-\item\textbf{Sessione}
-\item\textbf{Trasporto}
-\item\textbf{Rete}
-\item\textbf{Datalink}
-\item\textbf{Fisico}
+\begin{list}{}{}
+\item\textbf{7. Applicativo}: elaborazione dei dati
+\item\textbf{6. Presentazione}: unificazione dei dati, preparazione del \textbf{pacchetto} da trasmettere/ricevere
+\item\textbf{5. Sessione}:  controllo del dialogo tra gli host sorgente e destinazione.
+\item\textbf{4. Trasporto}: offre il vero e proprio trasferimento dati tra gli host terminali, cioè \textbf{astrae la logica} con la quale si scambiano i dati tra host e gestisce gli errori. Realizza il \textbf{dialogo end-to-end}.
+\item\textbf{3. Rete}: instradamento del traffico (principalmente router, offre il servizio di consegna attraverso il sistema distribuito dei nodi intermedi).
+\item\textbf{2. Datalink}: consegna il frame tra le interfacce, interpretato dalla scheda di rete.
+\item\textbf{1. Fisico}: modulazione del segnale elettrico per trasmettere correttamente il flusso di bit sul mezzo fisico.
 \end{list}
-
-OSI prevede sette strati\\
-7-5 più modi di raggrupparli, livello software e applicativo\\
-7 applicativo: elaborazione dati\\
-6 presentazione: unificazione dati, preparazione del pacchetto\\
-5 sessione: controllo del dialogo tra due host sorgente e dest. Decidere regole per la comunicazione tra due host.\\
-4 trasporto: offre trasferimento dati tra host terminali. Astrazione logica per cui si consegna a questo livello un messaggio e dove mandarlo. \textbf{dialogo end-to-end}\\
-3 rete: instradamento del traffico (router, offre il servizio di consegna attraverso sistema distribuito di nodi intermedi)\\
-2 datalink: frame fra interfacce, scheda di rete deve interpretare il flusso di bit\\
-1 fisico: mezzo fisico, modulare segnale elettrico per trasmettere il flusso di bit\\
-4-1 livelli fisico+sw\\\\
-servizio: funzione che uno strato offre a strato superiore, attraverso un'interfaccia\\
-interfaccia: regole che governano formato e significato frame, pacchetti o messaggi che vengono scmabiati tra strati successivi della stessa entità\\
-servizi cosa, interfaccia come\\\\
-connection-oriented: livello trasferimento crea connessione logica tra due sistemi (instaurazione connessione, trasferimento dati, chiusura connesione)\\
-connectionless: dati trasmessi senza stabilire connessione\\
+I livelli \textbf{7-5} si possono raggruppare in più modi, principalmente sono gli strati di supporto all'elaborazione e all'interazione con l'utente. Sono livelli \textbf{software}\\
+I livelli \textbf{4-1} sono \textbf{software e hardware}. Sono strati di supporto alla rete e all'infrastruttura trasmissiva, cioè gestiscono la vera e propria trasmissione dei dati.
 
 \section{Flusso dell'Informazione}
 Qualcuno (livello applicativo) genera dati da mandare in remoto. L'info scende i livelli fino al canale fisico, e ogni livello aggiungeall'informazione ricevuta dal livello superiore una propria (o più) sezione informativa sotto forma di header con info esclusive di quel livello.\\
@@ -227,4 +231,11 @@ Cenni livello link\\
 Ethernet\\
 \subsection{strato applicativo}
 $https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf$
+...
+URI: idetinificativo per una risorsa due tipi\\
+	urn\\
+	url\\
+<authority><path>?<query>\\
+authority: nome di dominio che dà risorsa (hostname o indirizzo in notaz puntata)\\
+
 \end{document}
