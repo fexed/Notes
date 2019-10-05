@@ -258,11 +258,11 @@ Ethernet
 \paragraph{Livello Fisico} Bit sul filo
 \end{multicols}
 \pagebreak
-\subsection{Livello Applicativo}
+\section{Livello Applicativo}
 \paragraph{Applicazioni e processi} Le applicazioni possono essere composte da \textbf{vari processi distribuiti} comunicanti fra loro. Un \textbf{processo} sono programmi eseguiti degli host di una rete. Due processi possono anche comunicare all'interno dello stesso host attraverso la \textbf{comunicazione inter-processo} (definita dal S.O.).\\
 Nella \textbf{comunicazione a livello applicativo fra due host di una rete}, due o più processi vengono eseguiti da ciascuno degli host comunicanti e \textbf{si scambiano messaggi}.\\\\
 I livelli applicazione dei due host \textbf{si comportano come se esistesse un collegamento diretto} attraverso cui mandare e ricevere messaggi.
-\subsubsection{Protocollo a Livello Applicativo}
+\subsection{Protocollo a Livello Applicativo}
 Un protocollo di livello applicativo \textbf{definisce}:
 \begin{list}{}{}
 \item \textbf{Tipi di messaggi} scambiati a quel livello, ad esempio di richiesta o di risposta
@@ -270,14 +270,14 @@ Un protocollo di livello applicativo \textbf{definisce}:
 \item \textbf{Semantica} dei campi
 \item \textbf{Regole} per determinare quando e come un processo invia o risponde ai messaggi
 \end{list}
-\subsubsection{Paradigmi}
+\subsection{Paradigmi}
 I due programmi applicativi devono essere entrambi in grado di richiedere e offrie servizi oppure ognuno deve occuparsi di uno dei due compiti?
 \paragraph{Client-Server} Un \textbf{numero limitato} di \textbf{processi server} che \textbf{offrono} un servizio, in esecuzione \textbf{in attesa di richieste} dai \textbf{processi client}, che \textbf{richiedono} servizi.
 \subparagraph{Client} \textit{Parla per primo}, cioè inizia il contatto con il server. Tipicamente richiede un servizio al server, ad esempio: per il web il client è implementato nel browser, per l'e-mail è implementato nel mail reader.
 \subparagraph{Server} Fornisce al client il servizio richiesto e \textbf{rimane sempre attivo}. Ad esempio: un web server invia le pagine richieste, un mail server smista ed invia le mail.
 \paragraph{Peer-to-Peer} Host \textbf{peer} che possono \textbf{offrire servizi e inviare richieste}.
 \paragraph{Misto} Un misto tra i due paradigmi sopra.
-\subsubsection{Componenti di un'Applicazione di Rete}
+\subsection{Componenti di un'Applicazione di Rete}
 Due esempi
 \paragraph{Web}
 \begin{list}{-}{Composto da:}
@@ -293,10 +293,10 @@ Due esempi
 \item \textbf{Standard per il formato} dei messaggi
 \item \textbf{Protocolli} SMTP, POP3 ecc.
 \end{list}
-\subsubsection{Terminologia}
+\subsection{Terminologia}
 \paragraph{API} \textbf{Application Programming Interface}: si tratta di un \textbf{insieme di regole} che un programmatore deve rispettare per utilizzare delle risorse.
 \paragraph{Socket} Una \textbf{API} che funge da \textbf{interfaccia} tra gli strati di applicazione e di trasporto. A tutti gli effetti è la \textbf{API di internet per eccellenza}, due processi comunicano mandando dati sul socket e leggendoli da esso. Forma una \textbf{connessione logica}, l'invio e ricezione dei dati sono responsabilità del S.O. e del TCP/IP.
-\subsubsection{Identificazione di un Processo}
+\subsection{Identificazione di un Processo}
 \includegraphics[scale=0.73]{identifprocesso.png}
 I servizi di trasporto sono offerti al livello applicativo tramite le API. Ogni servizio di transport è \textbf{usato simultaneamente} da più processi application.\\
 Come identifico i processi di livello application \textbf{di host diversi}? Serve un identificativo che identifichi sia l'host che il processo.\\
@@ -307,7 +307,7 @@ $\rightarrow$ Coppie \texttt{<Indirizzo IP, Numero di porta>}
 		\fbox{\parbox{4cm}{Numero di porta [16 bit]}}
 }
 \end{center}
-\subsubsection{Esempio di API: TCP}
+\subsection{Esempio di API: TCP}
 \begin{lstlisting}
 Connection TCPopen(IPAddress, int)	//per aprire una connessione
 void TCPsend(Connection, Data)		//per spedire dati su una connessione
@@ -323,7 +323,7 @@ Connection TCPaccept(int)		//per attendere le richieste di connessione
 //Astraggo dalle possibili eccezioni sollevate e dal loro trattamento
 \end{lstlisting}
 \pagebreak
-\subsubsection{Uso dei Servizi di Trasporto}
+\subsection{Uso dei Servizi di Trasporto}
 Una coppia di processi fornisce servizi agli utenti di Internet, siano questi persone o applicazioni. La coppia di processi, tuttavia, \textbf{deve utilizzare i servizi offerti dal livello di trasporto} per la comunicazione, poiché non vi è una comunicazione fisica a livello applicativo. Le applicazioni di retesono quindi \textbf{realizzate \textit{sopra} ai servizi di trasporto dati}.\\
 Nel livello trasporto dello stack protocollare TCP/IP sono previsti \textbf{due protocolli di trasporto principali}:
 \begin{list}{}{}
@@ -346,4 +346,101 @@ Nel livello trasporto dello stack protocollare TCP/IP sono previsti \textbf{due 
 \end{list}
 \end{list}
 \paragraph{Che tipo di trasporto richiede un'applicazione?}
+\subparagraph{Throughput} Anche detta \textbf{banda}, è la frequenza alla quale il processo mittente può inviare i bit al processo ricevente. Alcune applicazioni (es. multimedia) richiedono una \textbf{banda minima} per essere efficaci, altri (\textbf{elastic apps}) usano la banda che trovano a disposizione.\\Velocità di trasferimento $\neq$ velocità di propagazione
+\subparagraph{Perdita di dati} Alcune applicazioni (es. audio) possono tollerare alcune perdite, altre (es. telnet, trasferimento file) richiedono un trasferimenti dati \textbf{affidabile} al 100%
+\subparagraph{Timing} Alcune applicazioni (es. teleconferenze, videogame) richiedono un basso ritardo per essere efficaci
+\begin{center}
+\begin{tabbing}
+\begin{tabular}{c | c c c }
+\textbf{Applicazione} & \textbf{Tolleranza alla perdita dati} & \textbf{Throughput} & \textbf{Sensibilità al tempo}\\\hline\\
+Trasferimento file & No & Variabile & No\\\\
+Posta Elettronica & No & Variabile & No\\\\
+Documenti Web & No & Variabile & No\\\\
+Audio/Video in tempo reale & Si & \begin{tabular}{@{}c@{}}Audio: 5Kbps -- 1 Mbps\\Video: 10Kbps -- 5MKbps\end{tabular} & Si, centinaia di millisecondi\\\\
+Audio/Video memorizzati & Si & \begin{tabular}{@{}c@{}}Audio: 5Kbps -- 1 Mbps\\Video: 10Kbps -- 5MKbps\end{tabular} & Si, pochi secondi\\\\
+Videogame & Si & Fino a pochi Kbps & Si, centinaia di millisecondi\\\\
+Messaggistica istantanea & No & Variabile & Si e no
+\end{tabular}
+\end{tabbing}
+\end{center}
+\pagebreak
+
+\begin{center}
+\begin{tabbing}
+\begin{tabular}{c | c c }
+\textbf{Applicazione} & \textbf{Protocollo a Livello Applicativo} & \textbf{Protocollo di Trasporto}\\\hline\\
+Posta Elettronica & SMTP (RFC 2821) & TCP\\
+Accesso a terminali remoti & Telnet (RFC 854) & TCP\\
+Web & HTTP (RFC 2616) & TCP\\
+Trasferimento file & FTP (RFC 959) & TCP\\
+Streaming multimediale & HTTP (es. YouTube), RTP (RFC 1889) & TCP o UDP\\
+Telefonia internet & SIP, RTP, proprietario (es. Skype) & Tipicamente UDP
+\end{tabular}
+\end{tabbing}
+\end{center}
+\section{Applicazioni Web e HTTP}
+\subsection{Terminologia}
+\paragraph{WEB} Consiste di \textit{oggetti} indirizzati da un \textbf{URL} (Uniform Resource Locator)
+\paragraph{Pagine Web} Solitamente formate da: \textit{pagine WEB} (HTML, Javascript\ldots) e diversi \textbf{oggetti referenziati} (altre pagine, immagini, script\ldots)
+\paragraph{Browser} Lo user agent per il web, ad esempio: Chrome, Firefox, Netscape, Lynx
+\paragraph{Web server} Il server per il web, ad esempio: Apache, MS Internet Information Server
+\subsection{Uniform Resource Identifier}
+Una \textbf{URI} è una \textbf{forma generale per identificare una risorsa presente sulla rete} (IETF RFC 2396: \textit{una Uniform Resource Identifier è una stringa compatta di caratteri usata per identificare una risorsa astratta o fisica}).\\
+La sintassi di uno URI è stata progettata ponendo la \textbf{trascrivibilità globale} come uno degli obiettivi principali: utilizza caratteri da un \textbf{alfabeto molto limitato} (es. le lettere dell'alfabeto latino base, numeri e qualche carattere speciale).\\
+Uno URI può essere \textbf{rappresentato in molti modi}, ad esempio: inchiostro su carta, pixel su schermo, sequenza di ottetti\ldots L'\textbf{interpretazione di uno URI dipende soltanto dai caratteri utilizzati e non da come essi vengono rappresentati} nel protocollo di rete.
+\subparagraph{Uniform} \textbf{Uniformità della sintassi} dell'identificatore, anche se i meccanismi per accedere alle risorse possono variare.
+\subparagraph{Resource} Qualsiasi cosa abbia un'identità: documento, servizio, immagine, collezione di risorse\ldots
+\subparagraph{Identifier} Oggetto che può agire da riferimento verso qualcosa che ha identità
+\paragraph{}Esistono due tipi di URI:
+\begin{list}{}{}
+\item \textbf{URL} Uniform Resource Locator: sottotipo di URI che identifica una risorsa attraverso il suo \textbf{meccanismo di accesso primario}, ad esempio la \textit{posizione} nella rete.\\
+\begin{list}{URL}{Esempi:}
+\item \texttt{https://doi.org/10.1109/LCN.1988.10239}
+\item \texttt{ftp://ftp.is.co.za/rfc/rfc1808.txt}
+\item \texttt{https://www.apple.com/index.html}
+\end{list}
+\item \textbf{URN} Uniform Resource Name: sottotipo di URI che devono essere \textbf{globalmente univoci e persistenti}, anche quando la risorse cessa di esistere o di essere disponibile.\\
+\begin{list}{URN}{Esempi:}
+\item \texttt{urn:oasis:names:specification:docbook:dtd:xml:4.1.2:}
+\item \texttt{urn:doi:10.1109/LCN.1988.10239}
+\end{list}
+\end{list}
+\pagebreak
+\subsubsection{Sintassi}
+La sintassi di un URI è \textbf{organizzata gerarchicamente}, con le componenti \textbf{elencate in ordine decrescente} di importanza da sinistra a destra.\\
+Una \textbf{URI assoluta} può essere formata da \textbf{quattro} componenti\\
+\begin{center}
+\texttt{<scheme>://<authority><path>?<query>}
+\end{center}
+\begin{list}{}{}
+\item \texttt{<scheme>} \textbf{Obbligatorio}, schema per identificare la risorsa.\\
+Lo URI scheme \textbf{definisce il namespace} dello URI, quindi potrebbe porre ulteriori vincoli su sintassi e semantica degli identificatori che usano quello schema. Nonostante molti URL scheme prendono il nome da protocolli, \textbf{questo non implica che l'unico modo di accedere} la risorsa dello URL \textbf{sia attraverso il protocollo specificato}.
+\item \texttt{<authority>} Elemento gerarchico per richiamare un'authority così che la gestione del namespace definito sia delegato a quella authority. Il \textbf{nome di dominio} di un host o il suo \textbf{indirizzo IP} in notazione puntata decimale.\\
+\texttt{authority = [userinfo@]host[:port]}
+\item \texttt{<path>} Contiene dati specifici per l’authority (o lo scheme) e \textbf{identifica la risorsa nel contesto} di quello schema e di quella autorità. Può consistere in una sequenza di segmenti.
+\item \texttt{<query>} L'interrogazione o i dati da passare alla risorsa richiesta
+\end{list}
+\begin{list}{}{Esempi:}
+\item \texttt{foo://example.com:8042/over/there?name=ferret\#nose}
+\begin{list}{}{}
+\item \texttt{scheme = foo}
+\item \texttt{authority = example.com:8042}
+\item \texttt{path = /over/there}
+\item \texttt{query = name=ferret}
+\item \texttt{fragment = nose}
+\end{list}
+\item \texttt{urn:example:animal:ferret:nose}
+\begin{list}{}{}
+\item \texttt{scheme = urn}
+\item \texttt{path = example:animal:ferret:nose}
+\end{list}
+\item \texttt{http://maps.google.it/maps/place?q=largo+bruno+pontecorvo+pisa\&hl=it}
+\begin{list}{}{}
+\item \texttt{scheme = http}
+\item \texttt{authority = maps.google.it}
+\item \texttt{path = /maps/place}
+\item \texttt{query = q=largo+bruno+pontecorvo+pisa\&hl=it}
+\end{list}
+\end{list}
+%https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf slide 26
 \end{document}
