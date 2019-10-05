@@ -6,11 +6,29 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \graphicspath{ {./img/} }
+\usepackage{color}
+
 \begin{document}
 \title{Reti di Calcolatori e Laboratorio}
 \author{Federico Matteoni}
 \date{ }
 \renewcommand*\contentsname{Indice}
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+\lstset{
+  language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  basicstyle=\small\ttfamily
+}
 
 \maketitle
 \tableofcontents
@@ -255,7 +273,77 @@ Un protocollo di livello applicativo \textbf{definisce}:
 \subsubsection{Paradigmi}
 I due programmi applicativi devono essere entrambi in grado di richiedere e offrie servizi oppure ognuno deve occuparsi di uno dei due compiti?
 \paragraph{Client-Server} Un \textbf{numero limitato} di \textbf{processi server} che \textbf{offrono} un servizio, in esecuzione \textbf{in attesa di richieste} dai \textbf{processi client}, che \textbf{richiedono} servizi.
+\subparagraph{Client} \textit{Parla per primo}, cioè inizia il contatto con il server. Tipicamente richiede un servizio al server, ad esempio: per il web il client è implementato nel browser, per l'e-mail è implementato nel mail reader.
+\subparagraph{Server} Fornisce al client il servizio richiesto e \textbf{rimane sempre attivo}. Ad esempio: un web server invia le pagine richieste, un mail server smista ed invia le mail.
 \paragraph{Peer-to-Peer} Host \textbf{peer} che possono \textbf{offrire servizi e inviare richieste}.
 \paragraph{Misto} Un misto tra i due paradigmi sopra.
-$https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf$ slide 7
+\subsubsection{Componenti di un'Applicazione di Rete}
+Due esempi
+\paragraph{Web}
+\begin{list}{-}{Composto da:}
+\item Web Browser, sul \textbf{client}
+\item Web \textbf{Server}
+\item \textbf{Standard per il formato} delle risorse (pagine ecc.)
+\item \textbf{Protocollo} HTTP
+\end{list}
+\paragraph{Posta Elettronica}
+\begin{list}{-}{Composta da:}
+\item Programmi di lettura e scrittura sul \textbf{client}
+\item \textbf{Server} di posta in internet
+\item \textbf{Standard per il formato} dei messaggi
+\item \textbf{Protocolli} SMTP, POP3 ecc.
+\end{list}
+\subsubsection{Terminologia}
+\paragraph{API} \textbf{Application Programming Interface}: si tratta di un \textbf{insieme di regole} che un programmatore deve rispettare per utilizzare delle risorse.
+\paragraph{Socket} Una \textbf{API} che funge da \textbf{interfaccia} tra gli strati di applicazione e di trasporto. A tutti gli effetti è la \textbf{API di internet per eccellenza}, due processi comunicano mandando dati sul socket e leggendoli da esso. Forma una \textbf{connessione logica}, l'invio e ricezione dei dati sono responsabilità del S.O. e del TCP/IP.
+\subsubsection{Identificazione di un Processo}
+\includegraphics[scale=0.73]{identifprocesso.png}
+I servizi di trasporto sono offerti al livello applicativo tramite le API. Ogni servizio di transport è \textbf{usato simultaneamente} da più processi application.\\
+Come identifico i processi di livello application \textbf{di host diversi}? Serve un identificativo che identifichi sia l'host che il processo.\\
+$\rightarrow$ Coppie \texttt{<Indirizzo IP, Numero di porta>}
+\begin{center}
+\fbox{
+        \fbox{\parbox{6cm}{Indirizzo IP [32bit]}}
+		\fbox{\parbox{4cm}{Numero di porta [16 bit]}}
+}
+\end{center}
+\subsubsection{Esempio di API: TCP}
+\begin{lstlisting}
+Connection TCPopen(IPAddress, int)	//per aprire una connessione
+void TCPsend(Connection, Data)		//per spedire dati su una connessione
+Data TCPreceive(Connection)		//per ricevere dati da una connessione
+void TCPclose(Connection)		//per chiudere una connessione
+int TCPbind(int)			//per richiedere l'assegnazione della porta su
+					//cui attendere le richieste di connessione
+
+void TCPunbind(int)			//per liberare la porta assegnata
+Connection TCPaccept(int)		//per attendere le richieste di connessione
+
+//Connection: identificata da una quadrupla
+//Astraggo dalle possibili eccezioni sollevate e dal loro trattamento
+\end{lstlisting}
+\pagebreak
+\subsubsection{Uso dei Servizi di Trasporto}
+Una coppia di processi fornisce servizi agli utenti di Internet, siano questi persone o applicazioni. La coppia di processi, tuttavia, \textbf{deve utilizzare i servizi offerti dal livello di trasporto} per la comunicazione, poiché non vi è una comunicazione fisica a livello applicativo. Le applicazioni di retesono quindi \textbf{realizzate \textit{sopra} ai servizi di trasporto dati}.\\
+Nel livello trasporto dello stack protocollare TCP/IP sono previsti \textbf{due protocolli di trasporto principali}:
+\begin{list}{}{}
+\item \textbf{TCP} Transfer Control Protocol
+\begin{list}{}{}
+\item \textbf{Connection-Oriented}: è richiesto un setup tra client e server
+\item Trasporto \textbf{affidabile} tra mittente e destinatario
+\item \textbf{Controllo del flusso}: il mittente non \textit{inonderà} di dati il destinatario
+\item \textbf{Controllo di congestione}: \textit{limita} il mittente quando la rete è satura
+\item Non offre garanzie di timing né di ampiezza minima di banda
+\end{list}
+\item \textbf{UDP} User Datagram Protocol
+\begin{list}{}{}
+\item \textbf{Connectionless}
+\item Trasporto \textbf{non affidabile}
+\item \textbf{NO} controllo del flusso
+\item \textbf{NO} controllo di congestione
+\item \textbf{NO} garanzie di timing o di ampiezza minima di banda
+\item \textit{Quindi quali applicazioni usano UDP, e perché?}
+\end{list}
+\end{list}
+\paragraph{Che tipo di trasporto richiede un'applicazione?}
 \end{document}
