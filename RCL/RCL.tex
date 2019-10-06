@@ -442,5 +442,81 @@ Lo URI scheme \textbf{definisce il namespace} dello URI, quindi potrebbe porre u
 \item \texttt{query = q=largo+bruno+pontecorvo+pisa\&hl=it}
 \end{list}
 \end{list}
-%https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf slide 26
+\subsubsection{Assolute e Relative}
+Le URI possono essere assolute o relative.
+\subparagraph{URI Assoluta} Identifica una risorsa \textbf{indipendentemente dal contesto} in cui è usata.
+\subparagraph{URI Relativa} Informazioni per \textbf{identificare una risorsa in relazione ad un'altra URL} (è priva di \texttt{scheme} e \texttt{authority}). \textbf{Non viaggiano sulla rete}, sono interpretate dal browser in relazione al documento di partenza.
+\pagebreak
+\paragraph{Esempio di URI relativa}
+Sia \texttt{http://a/b/c/d;p?q} il documento di partenza, allora
+\begin{list}{}{}
+\item \texttt{g} = \texttt{http://a/b/c/g}
+\item \texttt{/g} = \texttt{http://a/g}
+\item \texttt{//g} = \texttt{http://g}
+\item \texttt{?y} = \texttt{http://a/b/c/?y}
+\item \texttt{\#s} = \textit{documento corrente}\texttt{\#s}
+\item \texttt{g;x?y\#s} = \texttt{http://a/b/c/g;x?y\#s}
+\item \texttt{..} = \texttt{http://a/b/}
+\item \texttt{../../g} = \texttt{http://a/g}
+\end{list}
+\section{HyperText Transfer Protocol}
+Lo HTTP è usato dal 1990 come \textbf{protocollo di trasferimento per il World Wide Web}. Definito nel seguente modo (RFC 2068, RFC 2616): \textit{\textbf{procollo di livello applicazione} per sistemi di informazione distribuiti, collaborativi ed impermediali}.\\
+Protocollo \textbf{generico}, \textbf{stateless} e \textbf{object-oriented} che può essere usato per molte attività, come name server e sistemi distribuiti di gestione oggetti, attraverso l'estensione dei suoi \textbf{request methods} (comandi). Una funzionalità dell'HTTP è la rappresentazione del tipo di dati, consentendo al sistema di essere \textbf{costruito indipendentemente dai dati che vengono trasferiti}.
+\subsection{HTTP URL}
+Lo schema \texttt{http} è usato per accedere alla risorsa attraverso il protocollo HTTP.
+\paragraph{Sintassi} La sintassi per un URL http è:\\
+\begin{center}
+\texttt{http\_URL = http://host[:port][path]}
+\end{center}
+\begin{list}{}{}
+\item \textbf{Host}: un dominio, hostname o indirizzo IP in forma decimale puntata di Internet.
+\item \textbf{Porta}: un numero, se omessa viene usata la porta 80.
+\end{list}
+La risorsa è localizzata nel server in ascolto per connessioni TCP su quella porta di quell'host. Il path specifica la \textbf{Request-URI}.
+\subsection{Caratteristiche}
+Il protocollo HTTP è un protocollo \textbf{request/response}: la \textbf{connessione} viene \textbf{iniziata dal client}, che invia un \textbf{messaggio di request} al quale il server risponde con una \textbf{response}.\\
+In quanto \textbf{generico e stateless} le coppie \textbf{richiesta/risposta sono indipendenti}.
+\subsubsection{Modello} Il modello del protocollo HTTP è \textbf{client-server}:
+\begin{list}{}{}
+\item \textbf{Client}: browser che richiede, riceve e visualizza oggetti web.\\Stabilisce una connessione con il server e invia una \textbf{richiesta sotto forma di request-method, URI e versione di protocollo}, seguito da un messaggio.
+\item \textbf{Server}: web server che invia oggetti in risposta ad una richiesta.\\Accetta le connessioni e serve le richieste rispondendo con i dati richiesti.
+\end{list}
+\subsubsection{Connessioni} Una \textbf{connessione} è un \textbf{circuito logico di livello trasporto} stabilito tra due programmi applicativi per comunicare tra loro.
+\paragraph{Non-Persistent Connection} \texttt{http1.0: RFC 1945}\\Viene stabilita una \textbf{connessione TCP separata} per raggiungere ogni URL. \textbf{Aumenta il carico} sui server HTTP e \textbf{può causare congestioni su Internet} (questo perché, ad esempio, se vengono usate tante immagini allora si creano richieste multiple del solito server in un breve lasso di tempo).
+\paragraph{Persistent Connection} \texttt{http1.1: RFC 2616}\\Se non è indicato altrimenti, il client può \textbf{assumere che il server manterrà una connessione persistente}.\\Lo standard specifica un \textbf{meccanismo con il quale} un client o un server \textbf{può segnalare la chiusura di una connessione TCP} (il campo \texttt{connection} nell'header). Una volta che la chiusura viene segnalata, il cliente \textbf{non deve più mandare richieste} su quella connessione.
+\subsection{Esempio HTTP}
+\texttt{Vedi slide}\footnote{https://elearning.di.unipi.it/pluginfile.php/27477/mod\_resource/content/2/L03\_Applicativo\_HTTP.pdf, slide 34}
+\subsection{Messaggi HTTP}
+\begin{center}
+\texttt{generic-message = start-line *message-header CRLF [message-body]\\
+start-line = Request-Line | Status-Line}
+\end{center}
+La \texttt{start-line} distingue \textbf{request} da \textbf{response}.\\\\
+\textbf{HTTP Request Message}\\
+\includegraphics[scale=0.75]{httpmessage.png}\\
+\textbf{HTTP Response Message}\\
+\includegraphics[scale=0.75]{httpresponse.png}
+\pagebreak
+\paragraph{HTTP Request} \texttt{Request-Line *( general-header | request-header | entity-header ) CRLF [message-body]}
+Ad esempio:\\
+\texttt{GET /pub/WWW/TheProject.html HTTP/1.1\\
+Host: www.w3.org\\
+Connection: close\\
+User Agent: Mozilla/4.0\\
+Accept-language: it\\\\
+(Body)}
+\subparagraph{HTTP Request Line} \texttt{Request-Line = Method SP Request-URI SP HTTP-Version CRLF}\\\texttt{GET http://www.w3.org/pub/WW/TheProject.html HTTP/1.1}
+\begin{list}{}{}
+\item \texttt{Method = GET}
+\item \texttt{Request-URI = http://www.w3.org/pub/WW/TheProject.html}
+\item \texttt{HTTP-Version = HTTP/1.1}
+\end{list}
+\texttt{Method = "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | extension-method}\\
+\begin{list}{}{}
+\item \textbf{Method}: indica il \textbf{metodo che deve essere eseguito} sulla risorsa identificata dal \texttt{Request-URI}. \textbf{Case sensitive}.
+\item \textbf{HTTP-Version}: indicare la versione del protocollo è pensato per consentire al mittente di indicare il formato di un messaggio e la sua capacità di capire il resto della comunicazione HTTP.
+\item Le \textbf{URI} sono stringhe formattate in modo semplice che identificano una risorsa di rete.
+\subsection{Header}
+% https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf slide 47
+\end{list}
 \end{document}
