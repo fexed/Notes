@@ -517,6 +517,153 @@ Accept-language: it\\\\
 \item \textbf{HTTP-Version}: indicare la versione del protocollo è pensato per consentire al mittente di indicare il formato di un messaggio e la sua capacità di capire il resto della comunicazione HTTP.
 \item Le \textbf{URI} sono stringhe formattate in modo semplice che identificano una risorsa di rete.
 \subsection{Header}
-% https://elearning.di.unipi.it/pluginfile.php/27477/mod_resource/content/2/L03_Applicativo_HTTP.pdf slide 47
+Gli \textbf{header} sono insiemi di coppie <nome:valore> che \textbf{specificano alcuni parametri} del messaggio trasmesso o ricevuto.
+\begin{list}{}{}
+\item \textbf{General header} Relativi alla trasmissione
+\begin{list}{}{}
+\item \textbf{Data}: data e ora di generazione del messaggio
+\item \textbf{Connection}: consente al mittente di specificare le opzioni desiderate per quella particolare connessione. L'opzione "close" segnala che la connessione verrà chiusa al completamento della response
+\item \textbf{Transfer-encoding}: indica quale (se presente) tipo di trasformazione è stata applicata al message body per trasferirlo correttamente dal mittente al destinatario (chunked, gzip\ldots)
+\item \textbf{Cache Control}
+\begin{list}{}{}
+\item \textbf{Public} Indica che la response è cachable in qualsiasi cache
+\item \textbf{Private} Indica che tutte o parti della response sono destinate ad un singolo utente e \textbf{non devono essere} memorizzate in una cache condivisa (shared cache). Una cache privata (non-shared) potrebbe memorizzare la response
+\item \textbf{no-cache} Indica che tutte o parti della response \textbf{non devono essere memorizzate in nessuna cache}
 \end{list}
+\end{list}
+\texttt{general-header = Cache-Control | Connection | Date | Pragma | Transfer-Encoding | Upgrade | Via}\\Questi header si applicano \textbf{a tutto il messaggio}. Esempi:
+\begin{list}{}{}
+\item \texttt{Date: Tue, 15 Nov 1994 08:12:31 GMT}
+\item \texttt{Connection: close}
+\item \texttt{Transfer-Encoding: chunked}
+\end{list}
+\item \textbf{Entity header} Relativi all'entità trasmessa\\Content-type, Content-length, data di scadenza\ldots
+\item \subsubsection{Request header} Relativi alla richiesta\\Chi fa la richiesta, a chi viene fatta, che tipo di caratteristiche è in grado di accettare il client, autorizzazione\ldots consente al client di passare \textbf{informazioni aggiuntive} a proposito della richiesta o del client stesso al server. Questi campi agiscono come \textbf{modificatori di richiesta}, con \textbf{semantica equivalente a quella dei parametri} di un metodo.\\
+\texttt{request-header = Accept | Accept-Charset | Accept-Encoding | Accept-Language | Authorization | Proxy-Authorization | From | Host | If-Modified-Since | If-Unmodified-Since | If-Match | If-None-Match | If-Range | Max-Forwards | Range | Referer | User-Agent}\\
+\begin{list}{}{}
+\item \textbf{Accept} Specifica che tipi di media sono accettabili nella response. Parametro \texttt{q} per indicare un fattore di qualità relativo, default a 1.
+\item \textbf{Accept-Charset} Indica il set di caratteri accettato per la risposta
+\item \textbf{Accept-Encoding} Tipi di trasformazioni accettate (es. compressione)
+\item
+\item \texttt{Accept: text/plain;q=0.5, text/html, text/x-dvi;q=0.8, text/x-c}
+\item \texttt{Accept-Charset: iso-8859-5, unicode-1-1;q=0.8}
+\item \texttt{Accept-Encoding: compress, gzip}
+\end{list}
+\begin{list}{}{(Alcuni) metodi request:}
+\item \textbf{OPTIONS} Richiede \textbf{solo le opzioni di comunicazione} associate ad un URL o al server stesso (capacità, metodi esposti ecc.). Un esempio:\\
+\texttt{OPTIONS http://192.168.11.66/manual/index.html HTTP/1.1\\host: 192.168.11.66\\
+Connection: close\\\\
+HTTP/1.1 200 OK\\
+Date: Sun, 14 May 2000 19:52:12 GMT\\
+Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\\
+Content-Length: 0\\
+Allow: GET, HEAD, OPTIONS, TRACE\\
+Connection: close\\}
+\item \textbf{GET} Richiede il trasferimento di una risorsa identificata da un URL o le operazioni associate all'URL stessa. Un esempio:\\
+\texttt{GET http://192.168.11.66 HTTP/1.1\\
+host: 192.168.11.66\\
+Connection: close}\\\\
+Response\\
+\texttt{HTTP/1.1 200 OK\\
+Date: Sun, 14 May 2000 19:57:13 GMT\\
+Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\\
+Last-Modified: Tue, 21 Sep 1999 14:46:36 GMT\\
+ETag: "f2fc-799-37e79a4c"\\
+Accept-Ranges: bytes\\
+Content-Length: 1945\\
+Connection: close\\
+Content-Type: text/html\\\\
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2\\
+Final//EN">\\
+<HTML>\ldots\\}
+Sono possibili \textbf{GET condizionali e parziali}. Esempio di GET condizionale:\\
+\texttt{GET http://192.168.11.66 HTTP/1.1\\
+Host: 192.168.11.66\\
+If-Modified-Since: Tue, 21 Sep 1999\\
+14:46:36 GMT}\\\\
+Response:\\
+\texttt{HTTP/1.1 304 Not Modified\\
+Date: Wed, 22 Sep 1999 15:06:36 GMT\\
+Server: Apache/1.3.9 (Unix) (RedHat/Linux)}\\
+\item \textbf{HEAD} Simile al GET, ma il server \textbf{non trasferisce il body} nella response. Utile per controllare lo stato dei documenti (validità, modifiche\ldots). Un esempio:\\
+\texttt{HEAD http://192.168.11.66 HTTP/1.1\\
+host: 192.168.11.66\\
+Connection: close}\\\\
+Response (notare la somiglianza con GET, esclusa la mancanza qua del body):\\
+\texttt{HTTP/1.1 200 OK\\
+Date: Sun, 14 May 2000 20:02:41 GMT\\
+Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\\
+Last-Modified: Tue, 21 Sep 1999 14:46:36 GMT\\
+ETag: "f2fc-799-37e79a4c"\\
+Accept-Ranges: bytes\\
+Content-Length: 1945\\
+Connection: close\\
+Content-Type: text/html}\\
+\item \textbf{POST} Serve per \textbf{inviare dal client al server} informazioni inserite nel body del messaggio.\\In teoria lo standard dice che il metodo POST è usato per richiedere che il server \textbf{accetti l'entità racchiusa nella richiesta come nuovo suboordinato della risorsa identificata} dallo Request-URI nel Request-Line.\\\textbf{Nella pratica}, \textbf{la funzionalità effettiva del metodo POST} è \textbf{determinata dal server} e solitamente dipende dalla Request-URI.\\
+\item \textbf{DELETE} Il client \textbf{chiede di cancellare una risorsa identificata} dalla Request-URI.\\Solitamente non attivo su server pubblici.\\
+\item \textbf{PUT} Il client \textbf{chiede di creare/modificare una risorsa identificata} dalla Request-URI. Dopo posso usare una GET per recuperarla.\\Solitamente non attivo su server pubblici.
+\end{list}
+\item \textbf{Response header} Nel messaggio di risposta\\Server, autorizzazione richiesta\ldots
+\end{list}
+\paragraph{Safe Methods} Metodi che \textbf{non hanno effetti collaterali} (es. non modificano la risorsa): GET, HEAD, OPTIONS, TRACE
+\paragraph{Idempotent Methods} Metodi che \textbf{non hanno effetti ulteriori se vengono fatti N > 0 richieste identiche}: GET, HEAD, PUT, DELETE, OPTIONS, TRACE
+\end{list}
+\pagebreak
+\subsection{HTTP Response}
+\begin{center}
+\texttt{Response = Status-Line *( general-header | response-header | entity-header ) CRLF [message-body]}
+\end{center}
+Un esempio:\\
+\texttt{HTTP/1.1 200 OK\\
+Date: Sun, 14 May 2000 23:49:39 GMT\\
+Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\\
+Last-Modified: Tue, 21 Sep 1999 14:46:36 GMT}\\
+\paragraph{Status-Line} La prima linea del messaggio di risposta.\\
+\texttt{Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF}\\Esempio: \texttt{HTTP/1.1 200 OK}
+\subparagraph{Status-Code} Intero a 3 cifre, risultato del tentativo di comprendere e soddisfare la richiesta.\\\begin{center}
+\includegraphics[scale=0.5]{httpresponsecode.png}\\\texttt{http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html}
+\end{center}
+\subparagraph{Reason-Phrase} Ha l'obiettivo di fornire una breve descrizione testuale dello Status-Code. Lo Status-Code è indirizzato ai computer mentre la Reason-Phrase è per gli umani.
+\subsubsection{Response Headers} Il campo response-header consente al server di passare ulteriori informazioni sulla response. Questi campi dell'header forniscono informazioni sul server e sull'accesso alla risorsa identificata dallo Request-URI.\\
+\texttt{response-header = Age | Location | Proxy-Authenticate | Public | Retry-After | Server | Vary | Warning | WWW-Authenticate}\\\\Esempio:\\
+\texttt{Age: 150 // età del doc. se tramite Proxy\\
+Location: http://www.w3.org/pub/WWW/People.html\\
+Server: CERN/3.0 libwww/2.17}
+\begin{list}{}{}
+\item \textbf{Age} Una stima in secondi del tempo passato dalla generazione della risposta dal server di origine
+\item \textbf{Location} Usato per reindirizzare il ricevente verso una destinazione diversa dalla Request-URI per il completamento della richiesta o l'identificazione di una nuova risorsa
+\item \textbf{Server} Informazioni sul software usato dal server d'origine per gestire la richiesta
+\end{list}
+\subsection{Negoziazione del contenuto}
+Le risorse possono essere \textbf{disponibili in multiple rappresentazioni}, ad esempio più lingue, formati, dimensioni e risoluzioni, o variare in altri modi ancora. La \textbf{content negotiation} è il meccanismo usato per \textbf{selezionare l'appropriata rappresentazione} quando si serve una richiesta. Ogni entità è costituita da un \textbf{entity body} e da una serie di \textbf{entity headers} che ne definiscono il contenuto e le proprietà. Gli entity header sono \textbf{informazioni sulle informazioni}, cioè \textbf{metadati}.
+\subsubsection{Entity Headers}
+\texttt{entity-header = Allow | Content-Base | Content-Encoding | Content-Language | Content-Length |\\Content-Location | Content-MD5 | Content-Range | Content-Type | ETag | Expires | Last-Modified |\\extension-header}
+\begin{list}{}{}
+\item \textbf{Content-Base} URI assoluta da usare per risolvere le URL relative contenute nell'entity-body
+\item \textbf{Content-Encoding} Codifica dell'entity-body (es. gzip)
+\item \textbf{Content-Language} Lingua dell'entity-body (es. en, it)
+\item \textbf{Content-Type} Tipo dell'entity-body (es. text/html)
+\item \textbf{Expires} Valore temporale dell'entity-body (utile nel caching)
+\item \textbf{Last-Modified} Data dell'ultima modifica sul server (utile nel caching)
+\end{list}
+\section{Web Caching}
+L'obiettivo è \textbf{soddisfare una richiesta} del cliente \textbf{senza contattare il server}. Si \textbf{memorizzano copie temporanee delle risorse web} (es. pagine HTML e immagini) e si servono al client per ridurre l'uso di risorse (es. banda e workload sul server), diminuendo anche il tempo di risposta.
+\paragraph{User Agent Cache} lo \textbf{user agent} (il browser) mantiene una \textbf{copia delle risorse visitate dall'utente}.
+\paragraph{Proxy Cache} Il proxy intercetta il traffico e \textbf{mette in cache le risposte}. Le successive richieste alla stessa Request-URI \textbf{possono essere servite dal proxy senza inoltrare la richiesta} al server.
+\subparagraph{Proxy} Programma intermediario che agisce sia da server che da client, con l'obiettivo di fare richieste per conto di altri client. Le richieste sono servite internamente o passandole oltre, anche traducendole, ad altri server.
+\section{Cookies}
+L'HTTP è \textbf{stateless}, per cui non mantiene info sui client. Come posso riconoscere il cliente di un'applicazione web (es. Amazon)? Come posso realizzare applicazioni web con stato (es. carrello della spesa)? Ricordiamo che \textbf{tipicamente l'utente si connette ogni volta con un indirizzo IP e porta diversi}.\\
+\textbf{Soluzione}: \textbf{numerare i client} e obbligarli a \textbf{farsi riconoscere ogni volta presentando un cookie}.
+\paragraph{Funzionamento} Il client C invia al server S una normale richiesta HTTP.\\
+Il server invia la normale risposta + una linea \textbf{Set-Cookie: 1678453}\\
+Il client memorizza il cookie in un file associato a S, e aggiunge una linea \textbf{Cookie: 1678453} a \textbf{tutte le successive richieste} verso quel sito.\\
+Il server confronta il cookie presentato con l'informazione che ha associato a quel cookie.
+\paragraph{Utilizzi} I cookie vengono utilizzati per:
+\begin{list}{-}{}
+\item Autenticazione
+\item Ricordare il profilo utente e le scelte precedenti (alla carta-socio)
+\item Creare sessioni sopra un protocollo stateless (es. carrelli della spesa)
+\end{list}
+\textbf{Non accettare dolci dagli sconosciuti}: \texttt{cookiecentral.com}
+% https://elearning.di.unipi.it/pluginfile.php/27733/mod_resource/content/1/L04_Applicativo_FTP_telnet.pdf
 \end{document}
