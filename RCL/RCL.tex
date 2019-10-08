@@ -696,10 +696,35 @@ Usa il TCP, con una connessione TCP persistente per tutta la durata della sessio
 \item Client \textbf{stabilisce una connessione TCP} con il server
 \item Client \textbf{accetta le battute di tasti} sul terminale \textbf{e le invia al server}.\\
 \textbf{Accetta i caratteri} che il server manda indietro \textbf{e li visualizza} sul terminale utente.
-\item Server \textbf{accetta la connessione TCP} e trasmette i dati al S.O. locale.
+\item Server \textbf{accetta la connessione TCP} e trasmette i dati al S.O. locale.\\\\
 \end{list}
-\hline
-telnet e ftp
+\begin{multicols}{2}
+\includegraphics[scale=0.5]{locallogin.png}\\
+In \textbf{Local Login} il S.O. assume che gli input ad un processo vengano forniti dallo standard input (tastiera) e che gli output siano inviati allo standard output (monitor).
+\end{multicols}
+\pagebreak
+\includegraphics[scale=0.75]{remotelogin.png}\\
+In \textbf{Remote Login} lo \textbf{Pseudo Terminal Driver} è l'entry point del S.O. che consente di trasferire caratteri ad un processo \textbf{come se provenissero dal terminale}. Ha il compito di \textbf{accettare i caratteri} dal server e \textbf{trasmetteri al S.O} che li consegnerà all'applicazione opportuna.
+\subsection{NVT}
+Il Telnet deve \textbf{poter operare con il numero massimo di sistem}, quindi gestire \textbf{dettagli di S.O. eterogenei} che possono differire per:
+\begin{list}{}{}
+\item \textbf{Set di codifica} dei caratteri
+\item \textbf{Lunghezza} della linea e della pagina
+\item \textbf{Tasti funzione} individuati da diverse sequenze di caratteri (\textbf{escape sequence})\\
+Es. diverse combinazioni per interrompere un processo(\texttt{CTR+C}, \texttt{ESC}), caratteri ASCII diversi per la terminazione di righe di testo.
+\end{list}
+Per risolvere questo problema si definisce \textbf{un ambiente virtuale}. Sulla rete si considera un \textbf{unico terminale standard} e in corrispondenza di ogni stazione di lavoro si effettuano le \textbf{conversioni da terminale locale a terminale virtuale e viceversa}.
+\paragraph{Network Virtual Terminal} Telnet assume che sui due host sia in esecuzione un \textbf{Network Virtual Terminal}, la connessione TCP è stabilita tra i due terminali NVT.\\
+L'NVT è un dispositivo \textit{immaginario} che \textbf{fornisce una rappresentazione astratta di un terminale canonico}. Gli host, sia client che server, traducono le loro caratteristiche locali così da \textbf{apparire esternamente come un NVT} e assumo che l'host remoto sia un NVT.\\\\
+Il Network Virtual Terminal definisce un \textbf{set di caratteri e di comandi} universale, che permette di:
+\begin{list}{}{}
+\item \textbf{Trasformare il set di caratteri in uso} localmente \textbf{in un set di caratteri universale} (lettere accentate, tasti freccia, backspace\ldots), includendo anche i caratteri di controllo più importanti (break\ldots)
+\item \textbf{Inviare i caratteri di controllo in maniera privilegiata} (meccanismo URGENT del TCP)
+\end{list}
+\includegraphics[scale=0.75]{NVT.png}\\
+\subsection{Architettura}
+\includegraphics[scale=0.75]{telnetarch.png}
+
 \section{...modello FTP}
 modello stateful\\
 comandi di controllo, principali. codici di ritorno\\\\
