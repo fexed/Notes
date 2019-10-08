@@ -459,7 +459,7 @@ Sia \texttt{http://a/b/c/d;p?q} il documento di partenza, allora
 \item \texttt{..} = \texttt{http://a/b/}
 \item \texttt{../../g} = \texttt{http://a/g}
 \end{list}
-\section{HyperText Transfer Protocol}
+\section{HTTP}
 Lo HTTP è usato dal 1990 come \textbf{protocollo di trasferimento per il World Wide Web}. Definito nel seguente modo (RFC 2068, RFC 2616): \textit{\textbf{procollo di livello applicazione} per sistemi di informazione distribuiti, collaborativi ed impermediali}.\\
 Protocollo \textbf{generico}, \textbf{stateless} e \textbf{object-oriented} che può essere usato per molte attività, come name server e sistemi distribuiti di gestione oggetti, attraverso l'estensione dei suoi \textbf{request methods} (comandi). Una funzionalità dell'HTTP è la rappresentazione del tipo di dati, consentendo al sistema di essere \textbf{costruito indipendentemente dai dati che vengono trasferiti}.
 \subsection{HTTP URL}
@@ -677,8 +677,8 @@ Realizza coppie client-server generiche per login remoto, non specializzate per 
 \item \textbf{Maschera} sia la rete che i S.O.
 \item Utilizza un'\textbf{interfaccia minima ma veloce}, tipicamente a caratteri
 \end{list}
-\subsection{Funzionamento}
-Telnet permette ad un utente su una macchian di \textbf{stabilire una connessione con un login su server remoto}.\\In seguito, passa la \textbf{battute dei tasti} della macchina locale \textbf{alla macchina remota}: i comandi vengno \textbf{eseguiti come se fossero stati battuti al terminale della macchina remota}.\\Dopodiché, l'\textbf{output} della macchina remota \textbf{viene trasportato al terminale utente}.\\\\
+\subsection{Introduzione}
+Telnet permette ad un utente su una macchina di \textbf{stabilire una connessione con un login su server remoto}.\\In seguito, passa la \textbf{battute dei tasti} della macchina locale \textbf{alla macchina remota}: i comandi vengno \textbf{eseguiti come se fossero stati battuti al terminale della macchina remota}.\\Dopodiché, l'\textbf{output} della macchina remota \textbf{viene trasportato al terminale utente}.\\\\
 Questo è un \textbf{servizio trasparente}: il terminale dell'utente \textit{sembra} essere \textbf{connesso direttamente} alla macchina remota\\\\
 \begin{list}{}{Il modello di Telnet include:}
 \item \textbf{Server} che \textbf{accetta} le richieste
@@ -724,6 +724,73 @@ Il Network Virtual Terminal definisce un \textbf{set di caratteri e di comandi} 
 \includegraphics[scale=0.75]{NVT.png}\\
 \subsection{Architettura}
 \includegraphics[scale=0.75]{telnetarch.png}
+\pagebreak
+\subsection{Funzionamento}
+Rispetto alla esecuzione in locale, sono aggiunti una \textbf{serie di intermediari}:
+\begin{list}{}{}
+\item Il client Telnet \textbf{trasforma in NVT} ed usa il S.O. per inviare sulla rete;
+\item la rete ed il S.O. server portano i dati al server Telnet;
+\item il server Telnet \textbf{traduce da NVT a S.O.} remoto;
+\item il S.O. remoto \textbf{esegue} il dovuto;
+\item si percorre il cammino inverso con gli stessi soggetti.
+\end{list}
+Un esempio:
+\begin{enumerate}
+\item L'utente digita \texttt{INVIO} sulla tastiera
+\item Il S.O. passa al client il carattere \texttt{CR}
+\item Il client converte \texttt{CR} in \texttt{CR-LF} e lo invia sulla connessione TCP
+\item Il server riceve \texttt{CR-LF}, lo converte in \texttt{LF} e lo passa allo pseudoterminale
+\item Lo pseudoterminale passa all'applicazione \texttt{LF}
+\item L'applicazione esegue l'operazione di \texttt{INVIO}
+\end{enumerate}
+\paragraph{Formato} I terminali NVT si scambiano i dati in \textbf{formato 7bit US-ASCII}. Ogni carattere è inviato come un ottetto con il primo bit settato a 0. I byte con il bit più significativo a 1 sono usati per le \textbf{sequenze di comandi}.\\
+I comandi (es. end-of-line trasmesso come la seuqenza \texttt{CR-LF}) iniziano con un ottetto speciale (\textbf{Interpret as Command} o \texttt{IAC}) di 1 $\rightarrow$ \textbf{Inband Signalling} (comandi e dati sulla stessa connessione).\\\\
+I messaggi di controllo iniziali sono usati per scambiare informazioni sulle caratteristiche degli host (\textbf{Telnet  Option Negotiation}).\\
+\paragraph{Comandi} Qualche esempio
+\begin{center}
+\begin{tabular}{c | c c}
+\textbf{Comando} & \textbf{Codifica Decimale} & \textbf{Significato} \\
+\texttt{IAC} & 255 & Interpreta come comando l'ottetto successivo \\
+\texttt{EL} & 248 & Erase Line \\
+\texttt{EC} & 247 & Erase Character \\
+\texttt{IP} & 244 & Interrupt Process \\
+\texttt{EOR} & 239 & End of Record \\
+\end{tabular}
+\end{center}
+\paragraph{NVT conviene?} Suppongo di voler far interoperare N sistemi.\\
+Senza usare NVT, ho bisogno di scrivere N-1 client per ogni sistema, e N server (uno per sistema) = \textbf{devo scrivere N(N-1)+N applicazioni}.\\
+Usando NVT invece devo scrivere soltanto N server e N client, cioè \textbf{2N applicativi}.\\
+Per N $>$ 2 conviene NVT.
+\pagebreak
+\section{SSH}
+Poiché Telnet passa tutto in chiaro, \textbf{anche le password}, con il tempo si è resa necessaria una maggiore sicurezza.
+\paragraph{Secure Shell} SSH è un'applicazione nata per \textbf{sostituire Telnet} e \textbf{risolvere i suoi problemi di sicurezza}. Facilita la comunicazione sicura tra client e server e permette la login remota, resa sicura attraverso \textbf{tecniche di cifratura}. Nella realtà SSH offre \textbf{funzionalità molto superiori} a quelle di Telnet\footnote{Vedi su Forouzan}.
+\begin{multicols}{2}
+\includegraphics[scale=0.55]{stackssh.png}\\
+\columnbreak
+
+\paragraph{SSH-TRANSPORT} Realizza la \textbf{connessione sicura} tra due host:
+\begin{list}{}{}
+\item Autenticazione del server
+\item Negoziazione degli algoritmi di cifratura
+\item Scambio di chiavi
+\end{list}
+\paragraph{SSH-AUTHENTICATION} Meccanismi per autenticare l'utente
+\paragraph{SSH-CONNECTION} Sessioen di login remoto, tunneling
+\end{multicols}
+\section{TCP Port Forwarding}
+\paragraph{Port Forwarding} L'inoltro delle porte è un meccanismo che permette di creare un \textbf{canale di comunicazione sicuro} attraverso il quale veicolare qualsiasi tipo di connessione TCP.\\
+Viene \textbf{creato un canale di comunicazione cifrato tra la porta all'indirizzo remoto} al quale ci si vuole collegare \textbf{ed una porta locale libera}. In questo modo le applicazioni punteranno il collegamento alla porta locale e la connessione verrà \textbf{inoltrata automaticamente} all'host remoto tramite un canale sicuro.\\
+\includegraphics[scale=0.75]{portforwarding.png}\\\\
+\texttt{ssh -L 123:localhost:456 remotehost}
+
+\texttt{-L} specifica che la data porta sull'host locale è da 
+
+inoltrare alal data porta sull'host remoto.\\
+
+\texttt{<porta locale>:<host>:<porta remota di host>}
+\pagebreak
+\section{FTP}
 
 \section{...modello FTP}
 modello stateful\\
