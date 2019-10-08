@@ -791,10 +791,85 @@ inoltrare alal data porta sull'host remoto.\\
 \texttt{<porta locale>:<host>:<porta remota di host>}
 \pagebreak
 \section{FTP}
-
-\section{...modello FTP}
-modello stateful\\
-comandi di controllo, principali. codici di ritorno\\\\
+Il \textbf{File Transfer Protocol} (\texttt{RFC 959}) è usato per il \textbf{trasferimento di file da/a un host remoto}. Segue il modello client server:
+\begin{list}{}{}
+\item Client: il lato che \textbf{chiede} il trasferimento
+\item Server: l'host remoto
+\end{list}
+\paragraph{Standard} Nelle reti TCP/IP lo FTP è lo \textbf{standard per il trasferimento di file}. Questo è un servizio \textbf{diverso} dall'accesso condiviso online (che è un \textbf{accesso simultaneo} da parte di più programmi \textbf{ad un singolo file}).\\
+\begin{list}{}{L'FTP fornisce anche \textbf{funzionalità aggiuntive} oltre al semplice trasferimento di file:}
+\item \textbf{Accesso interattivo}: l'utente può \textbf{navigare} e \textbf{cambiare/modificare} l'albero di directory nel file system remoto
+\item \textbf{Specifica del formato} dei dati da trasferire (es. file di testo o file binari)
+\item \textbf{Autenticazione}: il client può specificare username e password
+\end{list}
+\subsection{Modello FTP}
+\begin{list}{}{L'FTP ha \textbf{due tipi di connessione}:}
+\item \textbf{Control connection}: scambio di comandi e risposte tra client e server, segue il protocollo Telnet
+\item \textbf{Data connection}: connessione su cui i dati sono trasferiti con modi e tipi specificati. I dati trasferiti possono essere \textbf{parte} di file, \textbf{un} file o \textbf{un set} di file.
+\end{list}
+\subsubsection{Connessione di Controllo}
+Il client FTP \textbf{contatta il server FTP alla porta 21} usando il TCP come protocollo di trasporto. Il client \textbf{ottiene l'autorizzazione} sulla connessione di controllo (es. cambio directory, invio file ecc\ldots).\\
+La \textbf{connessione} è \textbf{persistente}.
+\subsubsection{Connessione Dati}
+Quando il server riceve un comando per trasferire file (da o verso il client), \textbf{apre una connessione TCP} con il client.\\ \textbf{Active Mode}: una connessione per ciascun trasferimento e dopo il trasferimento di un file il server chiude la connessione.\\\\
+\includegraphics[scale=0.75]{modelloftp.png}
+\pagebreak
+\subsection{Altri Dettagli}
+\begin{list}{}{}
+\item Quando un client attiva la connessione di controllo con il server usa un \textbf{numero di porta assegnato localmente in modo casuale} e contatta il server ad una porta nota, cioè la 21
+\item FTP usa la connessione di controllo per permettere a client e server di \textbf{coordinare l'uso delle porte assegnate dinamicamente} per il trasferimento dati
+\item La \textbf{connessione di controllo} FTP \textbf{si basa sul protocollo Telnet}
+\item \subsubsection{Due Modalità} Per creare la connessione TCP per il trasferimento dati sono possibili due modalità:
+\begin{list}{}{}
+\item \textbf{Active Mode}: vedi sopra, una connessione per ciascun trasferimento e dopo il trasferimento di un file il server chiude la connessione. Il server deve conoscere il numero di porta lato client (glielo comunica)
+\item \textbf{Passive Mode}: il \textbf{client ottiene un numero di porta dal server} (porta 20, non necessariamente).\\
+Il server non deve accettare connessioni da un processo arbitrario.\\\
+Da \texttt{RFC 959} -- PASV: questo comando richede che il server-DTP "ascolti" su una porta dati (che non è quella predefinita) e di aspettare una connessione piuttosto che iniziarne una alla ricezione del comando di trasferimento. La risposta a questo comando include l'host e l'indirizzo e porta su cui il server sta ascoltando.
+\end{list}
+\end{list}
+\textbf{DTP}: Data Transfer Process\\
+\textbf{PI}: Protocol Interpreter\\
+\includegraphics[scale=0.75]{modelloftp2.png}
+\begin{list}{}{}
+\item \textbf{I dispositivi} dove risiedono client e server FTP \textbf{sono diversi}: S.O., diverse strutture per gestire i file, diversi formati dei file\ldots
+\item Per effettuare il trasferimento di file, il client deve \textbf{definire il tipo di file}, la \textbf{struttura dati} e la \textbf{modalità di trasmissione} al fine di risolvere i problemi di eterogeneità tra client e server.
+\item Il \textbf{trasferimento file} viene \textbf{preparato attraverso uno scambio di informazioni lungo la connessione di controllo}
+\item La \textbf{comunicazione} sulla connessione di controllo \textbf{avviene per mezzo di caratteri con una codifica standard NVT ASCII}, sia per i comandi che per le risposte
+\item \subsubsection{Stateful} \textbf{FTP è un protocollo stateful}. Il server deve \textbf{tenere traccia dello stato} dell'utente: tra le altre cose anche della connessione di controllo associata ad un account e della directory attuale.
+\item \subsubsection{Modalità di trasmissione}
+\begin{list}{}{}
+\item \textbf{Stream mode}: FTP invia i dati a TCP con un \textbf{flusso continuo di bit}
+\item \textbf{Block mode}: FTP invia i dati a TCP \textbf{suddivisi in blocchi}, ognuno dei quali \textbf{preceduto da un header}
+\item \textbf{Compressed mode}: si trasmette il \textbf{file compresso}
+\end{list}
+\end{list}
+\subsection*{Comandi di Controllo}
+\begin{list}{}{}
+\item \texttt{USER username}
+\item \texttt{PASS password}
+\item \texttt{LIST}, elenca i file della directory corrente
+\item \texttt{NLST}, richiede l'elenco di file e directory (\texttt{ls})
+\item \texttt{RETR filename}, recupera (\texttt{get}) un file dalla directory corrente
+\item \texttt{STOR filename}, memorizza (\texttt{put}) un file nell'host remoto
+\item \texttt{ABOR}, interrompe l'ultimo comando ed i trasferimenti in corso
+\item \texttt{PORT}, indirizzo e numero di porta del client
+\item \texttt{SYST}, il server restituisce il tipo di sistema
+\item \texttt{QUIT}, chiude la connessione
+\end{list}
+\subsection*{Codici di Ritorno}
+I codici di ritorno sono composti da un codice di stato e da un'espressione, come in HTTP:
+\begin{list}{}{}
+\item \texttt{331 Username OK, password required}
+\item \texttt{425 Can't open data connection}
+\item \texttt{452 Error writing file}
+\item \texttt{200 Comando OK}
+\item \texttt{125 Data connection already open, transfer starting}
+\item \texttt{225 Data connection open}
+\item \texttt{225 Closing data connection. Requested file action succesful} (es. trasferimento file o \texttt{ABOR})
+\item \texttt{426 Connection closed, transfer aborted}
+\item \texttt{227 Entering passive mode}
+\end{list}
+\subsection{Anonymous FTP} Server che supportano connessioni FTP senza autenticazione, spesso consentendo operazioni limitate.\\
 \texttt{ftp.ed.ac.uk}, user: \texttt{ftp} e password la mail.
 \section{DNS}
 domain name system, fondamentale per interazione applicativo--trasporto.\\
