@@ -873,14 +873,27 @@ I codici di ritorno sono composti da un codice di stato e da un'espressione, com
 \texttt{ftp.ed.ac.uk}, user: \texttt{ftp} e password la mail.
 \pagebreak
 \section{DNS}
-domain name system, fondamentale per interazione applicativo--trasporto.\\
-un nome identifica un oggetto: seq di caratteri alfanumerici scelta per scopo mnemonico. in realtà è proprio l'identificativo a livello applicativo. a un nome possono corrispondere più indirizzi ip (disaccoppiamento tra nome e indirizzo). nome tradotto in indirizzo (32 bit) passato al livello rete.\\\\
-Inizialmente associazione nomi logici e indirizzi era statica: tutti contenuti in un file (host file) periodicamente aggiornato da un server ufficiale. infattibile nella rete internet attuale:\\
-- non possibile da tenere copia aggiornata dell'elenco\\
-- non possibile centralizzare elenco del genere, unico punto di fallimento, vlolume di traffico... non scala\\\\
-dns nel livello applicativo, gira sui terminali a paradigma server-client. si affida al sottostante protocollo di trasporto punto-èinto per trasferire messaggi tra terminali.\\
-non interagisce direttamente con utenti\\
-complessità spostata alle estramità della rete i terminali.\\
+\paragraph{Identificare il processo} Ogni processo di livello applicativo ha necessità di \textbf{individuare il processo omologo} con il quale vuole comunicare. Il processo omologo \textbf{risiede su una} particolare \textbf{macchina remota anch'essa da indivudare} (sappiamo che usa lo stesso protocollo).
+\subparagraph{Nome} Uno \textbf{nome identifica un oggetto}. Consiste in una sequenza di caratteri scelti da un alfabeto finito, scelta per scopo mnemonico.\\
+Nome significativo di alto livello (alfanumerico), vero e proprio identificativo di livello applicativo.
+\subparagraph{Indirizzo} Un \textbf{indirizzo identifica dove tale oggetto è situato}.\\
+Host di internet usano indirizzi IP (32bit) per instradare i datagrammi (livello di rete). Il formato è scelto per garantire l'efficienza dell'instradamento.\\
+\textbf{Disaccoppiamento}: ad un nome possono essere associati più indirizzi.\\\\
+\textbf{Come associare indirizzo IP e nome?}
+\subsection{Motivazioni}
+\paragraph{Inizi} All'inizio l'associazione fra nomi logici e indirizzi IP era \textbf{statica}: tutti i nomi logici ed i relativi indirizzi erano contenuti in un file (\textbf{host file}) periodicamente aggiornato da un server ufficiale. Questo approccio è infattibile nella rete internet attuale:
+\begin{list}{}{}
+\item Non è possibile che \textbf{ogni host mantenga una copia aggiornata} dell'elenco. Questo per dimensioni dell'elenco, per i volumi di traffico per trasferire i cambiamenti\ldots
+\item Non è possibile \textbf{centralizzare un elenco del genere}: si avrebbe così un unico punto di fallimento, un gigantesco volume di traffico sul server\ldots\\
+Questa soluzione non è scalabile.
+\end{list}
+Per questo si utilizza il \textbf{Domain Name System}
+\subsection{Servizio di Risoluzione}
+Il DNS è \textbf{posizionato nel livello applicativo}: gira sui terminali a paradigma client-server. Si affida al sottostante protocollo di trasporto punto-punto per trasferire i messaggi tra i terminali.
+\begin{list}{}{}
+\item \textbf{Non interagisce direttamente con utenti}
+\item La \textbf{complessità} è \textbf{spostata alle estremità} della rete
+\end{list}
 schema di utilizzo.\\\\
 dns meccanismo che deve: specificare sintassi nomi e regole per gestirli, e consentire conversione nomi-indirizzi e viceversa. Costituito essenz da\\
 - shcema assegnaz nomi gerarchico basato su domini\\
