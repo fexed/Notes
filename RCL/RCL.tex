@@ -31,7 +31,9 @@
 }
 
 \maketitle
+\begin{multicols}{2}
 \tableofcontents
+\end{multicols}
 \pagebreak
 \section{Introduzione}
 Appunti del corso di \textbf{Reti di Calcolatori} presi a lezione da \textbf{Federico Matteoni}.\\\\
@@ -888,22 +890,102 @@ Host di internet usano indirizzi IP (32bit) per instradare i datagrammi (livello
 Questa soluzione non è scalabile.
 \end{list}
 Per questo si utilizza il \textbf{Domain Name System}
-\subsection{Servizio di Risoluzione}
+\subsection{Struttura}
 Il DNS è \textbf{posizionato nel livello applicativo}: gira sui terminali a paradigma client-server. Si affida al sottostante protocollo di trasporto punto-punto per trasferire i messaggi tra i terminali.
 \begin{list}{}{}
 \item \textbf{Non interagisce direttamente con utenti}
 \item La \textbf{complessità} è \textbf{spostata alle estremità} della rete
 \end{list}
-schema di utilizzo.\\\\
-dns meccanismo che deve: specificare sintassi nomi e regole per gestirli, e consentire conversione nomi-indirizzi e viceversa. Costituito essenz da\\
-- shcema assegnaz nomi gerarchico basato su domini\\
-- database distribuito contenetne nomi e corrispondenz con indirizzi\\
-- protocollo per distribuzione info e nomi tra name server\\\\
-servizi offerti:\\
-- risoluzione\\
-- host aliasing\\
-- mail server aliasing\\
-- distribuzione carico\\\\
-dominio = sottoalbero di un certo nodo radice.\\
+\begin{multicols}{2}
+\includegraphics[scale=0.7]{schemadns.png}
+\columnbreak
 
+Il DNS è un meccanismo che deve:
+\begin{list}{}{}
+\item \textbf{Specificare la sintassi} dei nomi \textbf{e le regole} per gestirli
+\item \textbf{Consentire la conversione} nomi $\rightarrow$ indirizzi e viceversa
+\end{list}
+
+Il DNS è costituito essenzialmente da:
+\begin{list}{}{}
+\item \textbf{Schema di assegnazione dei nomi}, gerarchico e basato su domini
+\item \textbf{Database distribuito} contenente i \textbf{nomi} e le \textbf{corrispondenze} con gli indirizzi
+\item \textbf{Protocollo per la distribuzione} delle informazioni sui nomi \textbf{tra i vari name server}
+\end{list}
+\end{multicols}
+\pagebreak
+\subsection{Servizi}
+I servizi offerti dal DNS sono molteplici:
+\begin{list}{}{}
+\item \textbf{Risoluzione} di nomi di alto livello (\textbf{hostname}) in indirizzi IP
+\item \textbf{Host aliasing}: un host può avere più nomi, solitamente il nome canonico + sinonimi.\\
+Es. \texttt{realy1.west-coast.enterprise} può avere due alias \texttt{enterprise.com} e \texttt{www.enterprise.com}.
+\item \textbf{Mail Server aliasing}: ci possono essere domain name identici per mail server e web server
+\item \textbf{Distribuzione del carico} tra vari server replicati.\\
+Ad un hostname canonico possono corrispondere diversi indirizzi IP. La lista di indirizzi viene ordinata in modo diverso in ogni risposta alla richiesta di risoluzione del nome, così che ogni server replicato possa essere scelto con uguale probabilità, distribuendo così efficientemente le richieste.
+\end{list}
+\subsection{Spazio dei nomi}
+Dato che internet è una rete di proporzioni enormi, si presentano i problemi di \textbf{identificazione delle macchine} e \textbf{instradamento dei pacchetti}. si adotta un \textbf{approccio stratificato} poiché è un sistema complesso.\\
+\subsubsection{Indirizzi} In internet esistono più indirizzi
+\begin{list}{}{}
+\item Indirizzi \textbf{MAC}, quello della scheda di rete.\\Solitamente prefissato
+\item Indirizzo \textbf{di rete} (\textbf{IP})\\Es. \texttt{150.217.8.21}\\Assegnato dal gestore di rete in base al tipo di rete a cui si appartiene (classe di sottorete)
+\item Indirizzo \textbf{di trasporto}\\Coppia $<$\texttt{indirizzo IP}, \texttt{porta}$>$\\La porta è scelta a livello applicativo con regole appropriate
+\item Indirizzo \textbf{alfanumerico}\\Es \texttt{medialab.det.unifi.it}\\Libero, basta che sia mappato in un NameServer
+\end{list}
+\subsubsection{Nomi}
+Lo \textbf{spazio dei nomi} deve permettere di \textbf{identificare in modo univoco} un host.
+\begin{list}{}{}
+\item \textbf{Struttura flat}: sequenza di caratteri senza alcuna ulteriore struttura. Poco applicabile.
+\item \textbf{Struttura gerarchica}: un nome è \textbf{costituito da diverse parti}.\\Requisiti per la partizione dello spazio dei nomi:
+\begin{list}{}{}
+\item \textbf{Conversione efficiente}
+\item \textbf{Controllo decentralizzato} dell'assegnazione dei nomi.\\Delega dell'autorità per le varie parti dello spazio dei nomi e \textbf{distribuzione della responsabilità} della conversione tra nomi e indirizzi
+\end{list}
+Vantaggi e svantaggi
+\begin{list}{}{}
+\item -- Minore velocità
+\item + Maggiore flessibilità
+\item + Riconfigurazione più veloce
+\item + Possibilità di aggiornamenti decentrati
+\end{list}
+\end{list}
+\pagebreak
+\paragraph{Nomi di dominio} Spazio dei nomi con \textbf{struttura gerarchica}. I nomi hanno una \textbf{struttura ad albero} con un numero di livelli variabile. \textbf{Ogni nodo definisce un livello gerarchico} ed è individuato da un'\textbf{etichetta} (max 63 caratteri). Alla radice è associata un'etichetta vuota.\\
+\includegraphics[scale=0.7]{nomidominio.png}\\
+Ogni nodo dell'albero ha un nome di dominio, ovvero una \textbf{sequenza di etichette separate da punti} ovvero il cammino foglia $\rightarrow$ radice.
+\subparagraph{Dominio} Sottoalbero nello spazio di nomi di dominio che viene identificato dal nome di dominio del nodo in cima al sottoalbero.\\Può essere suddiviso in ulteriori domini, detti \textbf{sottodomini}.
+\paragraph{In Internet} Su internet i nomi gerarchici delle macchine sono \textbf{assegnati in base alla struttura delle organizzazioni} che ottengono l'autorità per porzioni dello spazio dei nomi. La struttura gerarchica permette \textbf{autonomia nella scelta dei nomi all'interno di un dominio} perché l'univocità è comunque garantita.\\
+Ad es. \texttt{\textbf{server1}.di.unipi.it} e \texttt{\textbf{server1}.cs.cornell.edu} sono due nomi diversi.\\\\
+Internet è divisa in \textbf{diverse centinaia di domini} ognuno dei quali \textbf{partizionato in sottodomini} e così via.
+\begin{center}
+\includegraphics[scale=0.7]{domini.png}
+\end{center}
+\pagebreak
+\subsubsection{Top-Level Domains}
+\textbf{Internet Assigned Number Authority} IANA -- \texttt{iana.org}
+\begin{list}{}{}
+\item \texttt{com} Organizzazioni commerciali
+\item \texttt{edu} Istituti d'istruzione (università, scuole\ldots)
+\item \texttt{mil} Gruppi militari
+\item \texttt{gov} Istituzioni governative
+\item \texttt{net} Principali centri di supporto alla rete
+\item \texttt{org} Organizzazioni diverse dalle precedenti
+\item Codici geografici, schema geografico per nazioni\\Es. \texttt{ir}, \texttt{uk}, \texttt{us}, \texttt{fr}\ldots
+\end{list}
+\begin{center}
+\includegraphics[scale=0.7]{gerarchianomidominio.png}
+\end{center}
+\subsubsection{Struttura di un nome alfanumerico}
+\begin{center}
+\texttt{mmedia5.di.unipi.it}
+\end{center}
+\begin{list}{}{}
+\item \texttt{mmedia5} nome locale della macchina (etichetta \textbf{più specifica})
+\item \texttt{di.unipi.it} nome del dominio (\texttt{.it} è l'etichetta \textbf{meno specifica})
+\item La parte dominio \textbf{può essere ulteriormente suddivisa}, creando così una \textbf{struttura logica gerarchica}\\(\texttt{di} nome locale, \texttt{unipi.it} dominio e così via\ldots)
+\end{list}
+\pagebreak
+\subsection{Conversione}
+% https://elearning.di.unipi.it/pluginfile.php/27887/mod_resource/content/1/L05_Applicativo_DNS.pdf slide 24
 \end{document}
