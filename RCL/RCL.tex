@@ -1007,5 +1007,101 @@ Il server \textbf{immagazzina le informazioni relative alla propria zona}, inclu
 \includegraphics[scale=0.7]{zonadominio.png}
 \end{multicols}
 \pagebreak
+\subsubsection{Root Name Servers}
+I \textbf{root name servers} vengono conttatati dai \textbf{local name servers} che non possono risolvere un determinato nome.
+\begin{list}{}{Il root name server:}
+\item Contatta gli \textbf{authoritative name server} se quella traduzione non è nota
+\item \textbf{Recupera la traduzione}
+\item \textbf{Invia la traduzione} al local name server
+\end{list}
+Ce ne sono centinaia in tutto il mondo.\\\\
+\includegraphics[scale=0.65]{rootns.png}\\
+\texttt{root-servers.org}\\
+\subsubsection{Gerarchia dei server}
+\begin{list}{}{}
+\item \textbf{Root Name Server}, server radice
+\item \textbf{Top-Level Domain Server}: si occupano dei domini .com, .org, .edu\ldots\\
+Ad es. Network Solution gestisce i TLD server per il dominio .com
+\item \textbf{Authoritative Name Server}, server di competenza\\
+Per un host archivia l'indirizzo IP di quello stesso host. Capace di risolvere la traduzione name/address per quell'hostname.\\
+Ogni organizzazione dotata di host internet pubblicamente accessibili (es. web server, server di posta) deve \textbf{fornire i record DNS di pubblico dominio} che mappano i nomi di tali host in indirizzi IP (server mantenuti dall'organizzazione o ISP).
+\item Per una certa zona ci possono essere \textbf{server primari} e \textbf{secondari}.
+\begin{list}{}{}
+\item \textbf{Server primari} mantengono il file di zona
+\item \textbf{Server secondari} ricevono il file di zona e offrono il servizio di traduzione
+\end{list}
+\item \textbf{Local Name Server}\\
+Non appartengono strettamente alla gerarchia dei server. Ogni ISP (Università, Società, ISP) ha il \textbf{proprio (default) name server locale}. Le query DNS passano prima dal name server locale.
+\end{list}
+\pagebreak
+\subsection{Risoluzione dei nomi}
+Esempio: il client vuole l'IP di \texttt{www.amazon.com}. Prima approssimazione:
+\begin{list}{}{}
+\item Client \textbf{interroga il server radice} per trovare il server DNS \texttt{com}
+\item Client \textbf{interroga il server DNS \texttt{com}} per ottenere il server DNS \texttt{amazon.com}
+\item Client \textbf{interrga il server DNS \texttt{amazon.com}} per ottenere l'indirizzo IP di \texttt{www.amazon.com}
+\end{list}
 
+\textbf{Query Ricorsiva}\\
+Host \texttt{www.tintin.fr} cerca l'IP di \texttt{www.topolino.it}.
+\begin{list}{}{}
+\item Contatta il suo DNS locale \texttt{dns.tintin.fr}
+\item \texttt{dns.tintin.fr} contatta il root name server se necessario
+\item Il root name server contatta l'authoritative name server \texttt{dns.topolino.it} se è necessario
+\end{list}
+Il local name server ha richiesto una conversione completa\\\\
+\textbf{Query Iterativa} Le risposte vengono restituite direttamente al client, cioè i name server rispondono con il riferimento al name server da contattare.\\
+\begin{multicols}{2}
+\textbf{Query Iterativa}\\
+\includegraphics[scale=0.6]{dnsqueryiterativa.png}\\\\\\\\\\
+
+
+
+\textbf{Query Ricorsiva}\\
+\includegraphics[scale=0.7]{dnsqueryricorsiva.png}
+\end{multicols}
+\pagebreak
+\subsection{Caching e Aggiornamento Record}
+Una volta che un name server ha appreso un'associazione, la mette nella \textbf{cache}. \textbf{I record} nella cache vengono \textbf{cancellati dopo un certo tempo} (timeout, TTL). L'utilizzo della cache \textbf{migliora il ritardo} e \textbf{riduce il numero di messaggi DNS}.\\
+I meccanismi di update/notifica sono descritti nella \texttt{RFC 2136}.
+\subsection{Record DNS}
+Il DNS è un \textbf{database distribuito di "resource records"} (\textbf{RR}).
+\begin{center}
+Formato RR: \texttt{(name, value, type, TTL)}
+\end{center}
+\begin{list}{}{}
+\item \textbf{TTL}: quando la risorsa dovrà essere rimossa dalla cache
+\item I significati di \textbf{name} e \textbf{value} dipendono da \textbf{type}
+\begin{list}{}{}
+\item type = A\\name = hostname\\value = indirizzo IP
+\item type = CNAME\\name = hostname (sinonimo)\\value = nome canonico dell'host
+\item type = NS\\name = dominio (es. \texttt{unifi.it})\\value = hostname dell'authoritative name server per quel dominio
+\item type = MX\\name = nome di dominio\\value = nome canonico del server di posta associato a name
+\item Ci sono altri type\ldots
+\end{list}
+\end{list}
+\begin{list}{}{Esempi di record DNS}
+\item \texttt{(hostname, indirizzoip, A, \ldots)}\\
+\texttt{(www.cnn.com, 157.166.224.25, A, \ldots)}\\
+\texttt{(www.cnn.com, 157.166.224.26, A, \ldots)}
+\item \texttt{(dominio, nomeDiAuthoritativeServerPerDominio, NS, \ldots)}\\
+\texttt{(cli.di.unipi.it, nameserver.cli.di.unipi.it*, NS, \ldots)}\\
+$[$* ANSWER conterrà anche \texttt{(nameserver.cli.di.unipi.it, 131.114.120.2,A, \ldots)}$]$
+\item \texttt{(alias, hostnameMailServerConTaleAlias, MX, \ldots)}\\
+\texttt{(cli.di.unipi.it, mailserver.cli.di.unipi.it*, MX, \ldots)}\\
+$[$* ANSWER conterrà anche \texttt{(mailserver.cli.di.unipi.it, 131.114.11.39, A, \ldots)}$]$
+\end{list}
+\subsection{Messaggi DNS}
+Query e risposte hanno lo \textbf{stesso formato}.\\
+Le query contengono \textbf{QName} e \textbf{QType} nella sezione "\textbf{question}".\\
+Le risposte contengono 0 o più RR nella sezione "\textbf{answer}" e 0 o più RR nella sezione "\textbf{additional}".\\
+Per esempio:
+\begin{list}{}{}
+\item \texttt{dns.poly.edu} $\longrightarrow$ TLD server\\
+Question: QName=\texttt{gaia.cs.mass.edu} QType=A
+\item \texttt{dns.poly.edu} $\longleftarrow$ TLD server\\
+Answer: \texttt{(umass.edu, dns.umass.edu, NS)}\\
+Additional: \texttt{(dns.umass.edu, 128.115.40.41, A)}
+\end{list}
+% https://elearning.di.unipi.it/pluginfile.php/27887/mod_resource/content/1/L05_Applicativo_DNS.pdf slide 38
 \end{document}
