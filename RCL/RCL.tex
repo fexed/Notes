@@ -1103,5 +1103,57 @@ Question: QName=\texttt{gaia.cs.mass.edu} QType=A
 Answer: \texttt{(umass.edu, dns.umass.edu, NS)}\\
 Additional: \texttt{(dns.umass.edu, 128.115.40.41, A)}
 \end{list}
-% https://elearning.di.unipi.it/pluginfile.php/27887/mod_resource/content/1/L05_Applicativo_DNS.pdf slide 38
+\pagebreak
+\begin{multicols}{2}
+\textbf{Header} dei messaggi DNS
+\begin{list}{}{}
+\item \textbf{Identification}: 16 bit. Identification usato dalle query, la reply ad una query usa lo stesso identification.
+\item \textbf{Flags}
+\begin{list}{}{}
+\item Query (0) o reply (1)
+\item Recursion desired
+\item Recursion available
+\item Reply is authoritative
+\end{list}
+\end{list}
+Il protocollo DNS usa tipicamente \textbf{UDP sulla porta 53 per le query DNS} (dimensioni del messaggio inferiori a 512B). Possibile usare TCP, ad esempio per trasferire i dati tra DNS server -- Zone Transfers)
+
+
+\includegraphics[scale=0.7]{dnsmsgheader.png}
+\end{multicols}
+\begin{list}{}{}
+\item \textbf{Domande}: campi per il nome richiesto ed il tipo di domanda
+\item \textbf{Risposte}: RR nella risposta della domanda
+\item \textbf{Competenza}: record per i server di competenza
+\item Informazioni aggiuntive
+\end{list}
+\begin{multicols}{2}
+\textbf{Questions}\\
+\includegraphics[scale=0.5]{dnsquestions.png}
+\columnbreak
+\begin{list}{}{}
+\item \textbf{Tipo di Interrogazione}: tipo di domanda (nome di una macchina o indirizzo di posta)
+\item Il \textbf{client} riempie la sezione di \textbf{domanda}
+\item Il \textbf{server}, nel proprio messaggio di \textbf{risposta}:
+\begin{list}{}{}
+\item \textbf{ricopia la} sezione di \textbf{domanda}
+\item \textbf{riempie le altre sezioni} (risposta, autorità, altre info) con RR
+\end{list}
+\end{list}
+\end{multicols}
+\textbf{Le RFC di riferimento} sono:
+\begin{list}{}{}
+\item \texttt{RFC 1034: DOMAIN NAMES - CONCEPTS AND FACILITIES}\\
+Definisce i seguenti tipi di record:
+\begin{list}{}{}
+\item \textbf{A} indirizzo dell'host
+\item \textbf{CNAME} nome canonico
+\item \textbf{HINFO} CPU e S.O. usato dall'host
+\item \textbf{MX} mail exchange
+\item \textbf{NS} Authoritative Name Server
+\item \textbf{PTR} name space pointer
+\item \textbf{SOA} Inizio di una zona d'autorità
+\end{list}
+\item \texttt{RFC 1035: DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION}
+\end{list}
 \end{document}
