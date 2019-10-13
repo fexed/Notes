@@ -1156,4 +1156,75 @@ Definisce i seguenti tipi di record:
 \end{list}
 \item \texttt{RFC 1035: DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION}
 \end{list}
+\pagebreak
+\section{SMTP}
+\paragraph{Posta Elettronica} Uno dei primi servizi nati su internet è la posta elettronica (1982). Essa consiste nel \textbf{trasferimento di un messaggio tra} uno user \textbf{mittente} e uno user \textbf{destinatario}. Il \textbf{destinatario potrebbe non essere disponibile} in quel momento, e quindi non poter accettare i messaggi: utente impegnato, \textbf{computer spento}.\\\\
+Il servizio di posta elettronica si \textbf{basa su componenti intermediari} per trasferire i messaggi: \textbf{disaccoppiamento} lato mittente e destinatario, analogia con posta tradizionale.\\
+Il trasferimento di messaggi di posta elettronica si basa sul \textbf{Simple Mail Transfer Protocol} (\texttt{RFC 821}, \texttt{RFC 2821}, \texttt{RFC 5321}).
+\paragraph{Componenti principali}
+\begin{list}{}{}
+\item \textbf{Agenti utente}
+\item \textbf{Mail Server}
+\item \textbf{Protocolli}
+\end{list}
+\subsection{Agenti Utente}
+Detti anche \textbf{mail reader}, usati per la \textbf{composizione}, editing, \textbf{lettura} di messaggi di posta.
+\begin{list}{}{Ad es:}
+\item Eudora
+\item Outlook
+\item Thunderbird
+\end{list}
+I messaggi in entrata e uscita \textbf{vengono archiviati sul server}
+\subsection{Mail Server}
+Le \textbf{mailbox} (casella) \textbf{contengono}
+\begin{list}{}{}
+\item \textbf{i messaggi in ingresso diretti all'utente} ancora da leggere
+\item una \textbf{coda di messaggi in uscita} ancora da inviare
+\item il \textbf{protocollo SMTP} per il dialogo tra mail server, allo scopo di scambiare i messaggi
+\begin{list}{}{}
+\item \textbf{Client}: mail server che invia
+\item \textbf{Server}: mail server che riceve
+\end{list}
+\end{list}
+Esempio di scenario: Alice invia un messaggio di posta a Bob.
+\begin{enumerate}
+\item \textbf{Alice}, grazie al suo mail user agent \textbf{compone il messaggio}.\\Alice \textbf{fornisce} allo user agent l'\textbf{indirizzo di destinazione}, cioè l'indirizzo di Bob
+\item Lo user agent di Alice \textbf{spedisce il messaggio} al suo server di posta e il messaggio \textbf{viene accodato in attesa di invio}
+\item Il \textbf{lato client} dell'SMTP sul server di posta di Alice \textbf{vede il messaggio} e \textbf{apre una connessione al server} SMTP sul server di posta \textbf{di Bob}
+\item L'\textbf{SMTP client invia il messaggio nella connessione}
+\item Sull'\textbf{host server} di posta di Bob, \textbf{il lato server} dell'SMTP \textbf{riceve il messaggio} e lo \textbf{colloca nella casella di posta di Bob}
+\item Bob, \textbf{quando vuole}, \textbf{chiede al suo user agent di leggere il messaggio}
+\end{enumerate}
+\pagebreak
+\subsection{Schema di principio}
+\begin{center}
+\includegraphics[scale=0.7]{smtpschemascambio.png}
+\end{center}
+La tecnica adottata dai server di posta si chiama \textbf{spooling}.
+\begin{list}{}{}
+\item L'utente invia un messaggio, il sistema ne pone una copia in memoria spool -- o \textbf{area di accomodamento della posta}, insieme all'id mittente, id destinatario, id macchina di destinazione e tempo di deposito.
+\item Il sistema \textbf{avvia il trasferimento alla macchina remota}. Il sistema (client) stabilisce una connessione TCP con la macchina destinazione.
+\item Se la connessione viene aperta, \textbf{inizia il trasferimento del messaggio}
+\item Se il trasferimento va a buon fine il \textbf{client cancella la copia locale del film}\\
+Se il trasferimento non va a buon fine, il \textbf{processo di trasferimento scandisce periodicamente l'area di spooling} e \textbf{tenta il trasferimento dei messaggi non consegnati}. Oltre un certo intervallo di tempo (definito dall'amministratore del server), se il messaggio non è stato consegnato \textbf{viene inviata una notifica all'utente mittente}.
+\end{list}
+
+\subsection{Indirizzo}
+Un ricevente è identificato da un indirizzo email del tipo:
+\begin{center}
+\texttt{local-part @ domain-name}
+\end{center}
+\begin{list}{}{}
+\item \texttt{domain-name}: specifica un \textbf{mail server}. Determina il nome di dominio della destinazione verso la quale la mail deve essere consegnata.\\\textbf{Nome di dominio del server di posta}
+\item \texttt{local-part}: specifica una \textbf{casella di posta} sul mail server. Spesso identica al login o al nome completo dell'utente.\\\textbf{Indirizzo della casella di posta del destinatario}
+\end{list}
+\pagebreak
+\subsection{Gestione Alias}
+\begin{center}
+\includegraphics[scale=0.7]{smtpgestalias.png}
+\end{center}
+L'\textbf{alias} è una \textbf{casella postale virtuale} che serve a \textbf{ridistribuire i messaggi} verso uno o più indirizzi di posta elettronica personali.
+\begin{list}{}{}
+\item \textbf{Molti -- Uno}: 
+\end{list}
 \end{document}
