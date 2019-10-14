@@ -1246,5 +1246,30 @@ Una funzionalità importante dell'SMTP è la capacità di \textbf{trasportare ma
 \begin{center}
 \includegraphics[scale=0.9]{smtpmailrelaying.png}
 \end{center}
-% L06_email_SMTP, 14
+\pagebreak
+\subsection{Modello SMTP}
+Quando un client SMTP ha un messaggio da trasmettere, stabilisce una \textbf{canale di trasmissione bidirezionale verso un server SMTP}. La \textbf{responsabilità del client} SMTP è di \textbf{trasferire messaggi di posta a uno o più server SMTP}, o comunicarne il fallimento.
+\begin{center}
+\includegraphics[scale=0.7]{smtpmodello.png}\\
+\end{center}
+Un client SMTP determina l'indirizzo di un host appropriato che esegue un server SMTP \textbf{risolvendo un nome di dominio di destinazione} ottenendo o un \textbf{mail server intermedio} o l'\textbf{host finale} (tramite query DNS).
+\paragraph{Trasferimento} Il trasferimento di un messaggio può avvenire \textbf{in una singola connessione} tra mittente e destinatario o tramite \textbf{una serie di salti tra sistemi intermedi}.\\
+In entrambi i casi, una volta che il server ha risposto positivamente alla fine della trasmissione dei dati della mail, avviene una \textbf{cessione di responsabilità del messaggio}: il \textbf{protocollo richiede che un server \textit{debba} accettare la responsabilità di o consegnare} il messaggio \textbf{o segnalare il fallimento} della consegna.
+\subsubsection{Fallimenti nella consegna}
+\begin{list}{}{Possibili problemi}
+\item Connessione con il mail server del mittente\\Server \textbf{inesistente} o \textbf{irraggiungibile}
+\item Connessione con il mail server del destinatario\\Server \textbf{insesistente} o \textbf{irraggiungibile}
+\item Inserimento nella casella di posta del destinatario\\\textbf{User sconosciuto}, \textbf{casella piena}
+\end{list}
+In tutti i casi \textbf{il mittente riceve una notifica}!\\
+L'unico caso in cui il destinatario non riceve il messaggio e il mittente non viene avvisato è se \textbf{qualcuno rimuove il messaggio} (intrusi, filtri antispam\ldots)
+\subsection{Protocollo}
+Nella pratica viene usato il \textbf{protocollo TCP} sulla porta 25 per \textbf{consegnare in modo affidabile} i messaggi dal client al server.
+\begin{list}{}{Questo avviene in tre fasi:}
+\item Handshaking
+\item Trasferimento del messaggio
+\item Chiusura della connessione
+\end{list}
+L'\textbf{interazione} avviene tramite \textbf{comando/risposta}, con comandi in testo ASCII e risposte con codici di stato e descrizione facoltativa.\\
+I messaggi, header e body, sono in caratteri ASCII a 7bit.
 \end{document}
