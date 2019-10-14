@@ -1272,4 +1272,77 @@ Nella pratica viene usato il \textbf{protocollo TCP} sulla porta 25 per \textbf{
 \end{list}
 L'\textbf{interazione} avviene tramite \textbf{comando/risposta}, con comandi in testo ASCII e risposte con codici di stato e descrizione facoltativa.\\
 I messaggi, header e body, sono in caratteri ASCII a 7bit.
+\pagebreak
+\begin{multicols}{2}
+\paragraph{Protocollo semplice, di comandi e risposte}
+I \textbf{comandi e} (a meno di alterazioni dovute ad un estensione del servizio) i \textbf{dati dei messaggi SMTP sono trasmessi} da mittente a destinario \textbf{attraverso il canale di trasmissione in "right"}.\\\\
+Una \textbf{risposta SMTP} è un \textbf{riconoscimento} (positivo o negativo) mandato in "righe" da destinatario a mittente attraverso il canale di trasmissione in risposta ad un comando.\\
+La forma generale di risposta è un \textbf{codice numerico}, solitamente seguito da una stringa di testo.
+\columnbreak
+\begin{verbatim}
+S: MAIL FROM: <Smith@Alpha.ARPA>
+R: 250 OK
+
+S: RCPT TO:<Jones@Beta.ARPA>
+R: 250 OK
+
+S: RCPT TO:<Green@Beta.ARPA>
+R: 550 No such user here
+
+S: RCPT TO:<Brown@Beta.ARPA>
+R: 250 OK
+
+S: DATA
+R: 354 Start mail input; end with <CRLF>.<CRLF>
+S: Blah blah blah...
+S: ...etc. etc. etc.
+S: <CRLF>.<CRLF>
+R: 250 OK
+\end{verbatim}
+\end{multicols}
+\begin{multicols}{2}
+\paragraph{Handshaking}
+Il client \textbf{stabilisce la connessione e attende} che il server invii "\texttt{220 READY FOR MAIL}", cioè la disponibilità a ricevere la posta.\\
+Il \textbf{client risponde con il comando} \texttt{HELO}\\
+Il \textbf{server risponde identificandosi}\\
+A questo punto il client può trasmettere i messaggi
+\columnbreak
+\begin{verbatim}
+S: 220 Beta.GOV Simple Mail Transfer Service ready
+C: HELO Alfa.EDU
+S: 250 Beta.GOV
+\end{verbatim}
+\end{multicols}
+\begin{multicols}{2}
+\subsection{Comandi SMTP}
+\begin{list}{}{Alcuni comandi:}
+\item \texttt{HELO <client identifier>}
+\item \texttt{MAIL FROM:<reverse-path> [SP <mail-parameters>] <CRLF>}
+\item \texttt{RCPT TO:<forward-path> [SP <rcpt-parameters>] <CRLF>}
+\item \texttt{DATA}
+\item \texttt{QUIT}
+\end{list}
+\paragraph{Nota bene} \texttt{<CRLF>.<CRLF>} per terminare la fine di un messaggio
+\subsection{Esempio}
+\begin{verbatim}
+S: MAIL FROM:<Smith@Alpha.ARPA>
+R: 250 OK
+S: RCPT TO:<Jones@Beta.ARPA>
+R: 250 OK
+S: RCPT TO:<Green@Beta.ARPA>
+R: 550 No such user here
+S: RCPT TO:<Brown@Beta.ARPA>
+R: 250 OK
+S: DATA
+R: 354 Start mail input; end with <CRLF>.<CRLF>
+S: Blah blah blah...
+S: ...etc. etc. etc.
+S: <CRLF>.<CRLF>
+R: 250 OK
+\end{verbatim}
+\columnbreak
+\textbf{Esempio d'interazione}\\
+\includegraphics[scale=0.68]{smtpesempio.png}
+\end{multicols}
+\pagebreak
 \end{document}
