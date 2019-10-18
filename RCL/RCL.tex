@@ -1403,8 +1403,97 @@ Message-ID: <4231.629.XYzi-What@Other-Host>
 \end{list}
 % L06_email_SMTP, 26
 \pagebreak
+\subsection{Estensioni multimediali}
+L'\texttt{RFC 822} permette di inviare \textbf{solo messaggi di testo} in ASCII. rice\textbf{Problema: permettere} agli utenti di Internet \textbf{di inviare/ricevere} messaggi
+\begin{list}{}{}
+\item In \textbf{lingue con accenti} (come l'italiano), in \textbf{alfabeti non latini} (come il russo o l'ebraico) o in \textbf{lingue senza alfabeto} (come il cinese o il giapponese)
+\item \textbf{Contenuti audio o video}
+\end{list}
+\subsubsection{MIME}
+\paragraph{Idea di base} \textbf{Continuare ad usare il formato} del messaggio specificato in \texttt{RFC 822} ma \textbf{aggiungendo una struttura al message body} e \textbf{definendo regole di encoding} per il trasferimento di testo non-ASCII.\\
+Questo ha permesso di \textbf{inviare messaggi MIME usando protocolli e mail server esistenti}, rendendo però \textbf{necessario cambiare gli user agent}.
+\paragraph{Multipurpose Internet Mail Extension} \texttt{RFC 2045} e \texttt{RFC 2046}. Questo standard di Internet \textbf{estende il formato delle mail} per supportare:
+\begin{list}{}{}
+\item Testo in \textbf{character set diversi} dall'US-ASCII
+\item \textbf{Allegati} non di testo
+\item Corpo del messaggio diviso in più parti
+\item Informazioni nell'header in character set non ASCII
+\end{list}
+Si realizza con linee di intestazione aggiuntive per dichiarare il tipo di contenuti MIME. La \texttt{RFC 2045} definisce una serie di metodi per rappresentare dati binari in formato ASCII.
+\begin{center}
+\includegraphics[scale=1]{mime.png}
+\end{center}
+\begin{verbatim}
+From: alice@crepes.fr
+To: bob@hamburger.edu
+Subject: Picture of yummy crepe.
+MIME-Version: 1.0                   \\Versione MIME
+Content-Transfer-Encoding: base64   \\Metodo usato per la codifica dei dati
+Content-Type: image/jpeg            \\Dati multimediali (tipo, sottotipo, parametri...)
 
-protocollo di accesso alla mail\\
+base64 encoded data .....
+.........................           \\Dati codificati
+......base64 encoded data
+\end{verbatim}
+\begin{list}{}{Campi nell'header:}
+\item \textbf{MIME-Version}: un \textbf{numero di versione} per dichiarare a quale versione aderisce il formato del messaggio
+\item \textbf{Content-Type}: usato per \textbf{specificare il tipo del media e il sottotipo dei dati} nel corpo del messaggio, e per specificare completamente la rappresentazione nativa di quei dati
+\item \textbf{Content-Transfer-Encoding}: specifica la \textbf{codifica applicata} al corpo del messaggio. La codifica è solitamente applicata ai dati per consentire loro di passare attraverso i meccanismi di trasporto delle mail, che potrebbero avere limitazioni sui dati o sui character set.
+\end{list}
+La maggior parte dei tipi di media che è utile trasportare via mail sono \textbf{nativamente rappresentati con caratteri di 8bit} o dati binari. I \textbf{client e i server} SMTP si \textbf{aspettano messaggi ASCII} (caratteri a \textbf{7 bit}), i \textbf{dati binari invece usato tutti e 8 bit} del byte (es. immagini, eseguibili, set estesi di caratteri).\\
+MIME fornisce \textbf{cinque schemi di transfer encoding} tra cui:
+\begin{list}{}{}
+\item \textbf{Codifica ASCII} dei dati binari: \textbf{codifica base64}\\
+Gruppi di 28bit divisi in 4 unità da 6bit, ciascuna unità inviata come un carattere ASCII
+\item \textbf{Quoted-printable encoding}: per messaggi con pochi caratteri non-ASCII, più efficiente
+\end{list}
+Oggigiorno i mail server possono negoziare l’invio di dati in codifica binario (8 bit), se la negoziazione non ha successo si usano i caratteri ASCII.
+\subsubsection{Tipi MIME}
+\begin{center}
+\texttt{Content-Type: type/subtype; parameters}
+\end{center}
+\begin{list}{}{}
+\item \textbf{Text}\\Esempi di subtype: \texttt{plain}, \texttt{html}
+\item \textbf{Image}\\Esempi di subtype: \texttt{jpeg}, \texttt{gif}
+\item \textbf{Audio}\\Esempi di subtype: \texttt{basic} (8bit mu-law encoded), \texttt{32kadpcm} (32 kbps)
+\item \textbf{Video}\\Esempi di subtype: \texttt{mpeg}
+\item \textbf{Application}\\Altri dati che devono essere processati da un'applicazione prima di essere visualizzabili.\\Esempi di subtype: \texttt{msword}, \texttt{octet-stream} (dati arbitrari binari)
+\end{list}
+\subsection{Protocolli di accesso alla mail}
+\begin{center}
+\includegraphics[scale=1]{mailaccesso.png}
+\end{center}
+Per trasferire la posta fino al server del destinatario si utilizza l'SMTP, che è un protocollo di tipo push: la maggiorparte dei dati è dal client al server. Per \textbf{leggere la posta} invece, è richiesto un protocollo di tipo pull, cioè in cui i dati viaggiano prevalentemente dal server al client.
+\paragraph{Messagge Access Agent} Attualmente si utilizzano due protocolli di accesso alla posta
+\begin{list}{}{}
+\item \textbf{POP}  Post Office Protocol\\Semplice ma con funzionalità limitate. Attualmente è in uso la terza versione, POP3.
+\begin{list}{}{}
+\item \textbf{Fase di autorizzazione}\\L'accesso avviene con lo \textbf{user agent} che \textbf{apre una connessione TCP sulla porta 110} e si autentica con i comandi
+\begin{list}{}{}
+\item \texttt{user}: specifica lo username
+\item \texttt{pass}: specifica la password
+\end{list}
+ed il server risponderà con \texttt{OK} o \texttt{ERR}.
+\pagebreak
+\item \textbf{Fase di transazione}\\Il client può utilizzare i comandi:
+\begin{list}{}{}
+\item \texttt{list}: visualizza la \textbf{lista dei messaggi}
+\item \texttt{retr}: \textbf{preleva il messaggio} per numero
+\item \texttt{dele}: \textbf{elimina il messaggio dal server}
+\item \texttt{quit}: \textbf{chiude la sessione}
+\end{list}
+\item \textbf{Fase di aggiornamento}\\Dopo aver ricevuto \texttt{quit} il server cancella i messaggi marcati per la rimozione
+\end{list}
+Il POP3 ha due modalità:
+\begin{list}{}{}
+\item \textbf{Delete}: i \textbf{messaggi vengono automaticamente eliminati} dalla mailbox \textbf{dopo il  prelievo}
+\item \textbf{Keep}: i \textbf{messaggi vengono conservati dopo il prelievo}
+\end{list}
+Inoltre non mantiene le informazioni di stato tra le sessioni, solo le cancellazioni sono permesse.
+\item \textbf{IMAP}  Internet Mail Access Protocol\\
+Ha più funzionalità, ed è più complesso, del POP3. Consente tra le altre cose di \textbf{manipolare i messaggi memorizzati sul server} con cartelle, e di \textbf{estrarre solo alcuni componenti dei messaggi} come solo l'intestazione se si sta usando una connessione lenta.
+\item \textbf{HTTP}\\Es. Hotmail, Yahoo! Mail, \ldots
+\end{list}
 \section{Livello di Trasporto}
 realizza connessione logica fra processi residenti in host system diversi
 
