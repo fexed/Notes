@@ -1519,4 +1519,91 @@ Ha più funzionalità, ed è più complesso, del POP3. Consente tra le altre cos
 Il livello di trasporto effettua il \textbf{multiplexing sul mittente} e il \textbf{demultiplexing sul destinatario}.\\
 Si basano sui socket address dei processi e quindi dipendono dal numero di porta su cui i processi sono attivi.
 \paragraph{Controllo degli errori}
+\section{UDP}
+Rispetto al TCP, lo UDP è meno complesso, offre meno servizi, ma è \textbf{più indicato in contesti in cui occorre un controllo completo della temporizzazione} cioè in applicazioni time-sensitive come lo streaming.
+\paragraph{Nessuna garanzia} Lo \textbf{User Datagram Protocol} è un \textbf{protocolo di consegna a massimo sforzo}. I segmenti UDP possono andare perduti o essere consegnati fuori sequenza. Notare però che l'affidabilità può essere aggiunta a livello applicazione.
+\paragraph{Orientato al messaggio} Ogni \textbf{datagramma UDP è indipendente} dall'altro. I processi devono inviare \textbf{messaggi di dimensioni limitate, incapsulabili in un datagramma UDP}.
+\subsection{Proprietà}
+\begin{list}{}{}
+\item \textbf{Nessuna connessione} quindi non si introduce ritardo.\\\textbf{Semplice}: non viene gestito lo strato di connessione. Le intestazioni sono corte e \textbf{non ha controllo di congestione e di flusso}, quindi si possono sparare dati a raffica.
+\item \textbf{Checksum facoltativo}
+\item Facile e leggero da gestire, non richiede particolari meccanismi
+\item Concepito solo in funzione del DNS e del TFTP, nel 1980
+\item Utilizzato spesso in \textbf{applicazioni multimediali}: tolleranza a piccole perdite e sensibilità alla frequenza
+\item Altri impieghi: DNS, SNMP\ldots
+\end{list}
+\pagebreak
+\subsection{Datagramma UDP}
+\begin{center}
+\includegraphics[scale=1]{udpdatagram.png}
+\end{center}
+\begin{list}{}{}
+\item 8 Byte di intestazione
+\item La \textbf{prima parte è uno pseudo-header che \textit{non} viene trasmesso}
+\item \textbf{Porta}: numeri di porta della comunicazione (per il demultiplexing è usato solo quello di destinazione.\\
+La \textbf{porta di provenienza} è un campo facoltativo. Quando è significativo, indica la porta del processo mittente, e può essere considerata come la porta alla quale rispondere in assenza di altre informazioni. Se non è usata, viene riempita col valore 0.
+\item \textbf{Lunghezza} del messaggio: lunghezza totale del datagramma UDP, header+dati, è di 65535 Byte.
+\item \textbf{Checksum} checksum dell'intero pacchetto, compreso lo pseudo-header ovvero con il controllo dell'indirizzo host). \textbf{Opzionale}, se non è usato è posto a 0xFF (complemento a 1 di 0x00)\\
+Controllo dell'errore end-to-end: il pacchetto corrotto è scartato ma l'utente non viene notificato
+\item L'indirizzo di livello trasporto è una coppia composta dall'indirizzo IP e dalla porta del destinatario (con indicazione dell'indirizzo IP e della porta del mittente)
+\end{list}
+\subsection{Calcolo del checksum}
+\textbf{Mittente}
+\begin{list}{}{}
+\item Tratta il contenuto del segmento \textbf{come una sequenza di interi da 16 bit}
+\item \textbf{Checksum}: somma (complemento a 1) i contenuti del segmento
+\item Il mittente pone il valore della checksum nel campo checksum del segmento UDP
+\end{list}
+\textbf{Destinatario}
+\begin{list}{}{}
+\item \textbf{Calcola} il checksum del segmento ricevuto
+\item \textbf{Controlla se} il checksum calcolato \textbf{è uguale} al valore del campo checksum
+\begin{list}{}{}
+\item No -- Errore rilevato
+\item Si -- Nessun errore rilevato
+\end{list}
+\end{list}
+\pagebreak
+\subsection{TCP vs UDP}
+\begin{multicols}{2}
+\begin{list}{}{\textbf{UDP}}
+\item \textbf{Trasferimento} dati \textbf{non affidabile}
+\item \textbf{Non fornisce}: setup della \textbf{connessione}, \textbf{affidabilità}, \textbf{controllo del flusso}, \textbf{controllo della congestione}, \textbf{timing} o \textbf{garanzia di banda}
+\item Richiede \textbf{minor overhead}
+\end{list}
+\columnbreak
+\begin{list}{}{\textbf{TCP}}
+\item \textbf{Connection-oriented}: richiesto \textbf{handshake} tra client e server
+\item \textbf{Trasporto affidabile} tra i processi
+\item \textbf{Controllo di flusso}: il mittente non satura il destinatario
+\item \textbf{Controllo della congestione}: limita il mittente a rete sovraccarica
+\item \textbf{Non fornisce}: \textbf{timing}, \textbf{banda minima}
+\end{list}
+\end{multicols}
+\paragraph{Pro e contro} Nella programmazione di rete si deve ricordare che
+\begin{list}{}{}
+\item Il TCP offre un \textbf{servizio di trasporto a stream}, quindi si può leggere da un input di rete quanti byte si desiderano
+\item L'UDP invece offre un \textbf{servizio a messaggi}, quindi occorre \textbf{leggere tutto} il messaggio in arrivo
+\item L'UDP è adeguato per
+\begin{list}{}{}
+\item Processi che richiedono uno scambio di dati con volume limitato \textbf{in caso di scarso interesse al controllo del flusso e degli errori}
+\item Processi con \textbf{meccanismi interni di controllo del flusso e degli errori}
+\item Trasmissioni \textbf{multicast}
+\item \textbf{Applicazioni interattive in tempo reale} che non tollerano ritardi variabili
+\end{list}
+\end{list}
+\paragraph{Considerazioni} La \texttt{RFC 768} che definisce l'UDP è del 1980, non è stata cambiata o integrata da altre RFC ed è di tre pagine.\\
+La \texttt{RFC 793} che definisce il TCP è del 1981, è stata aggiornata o cambiata da diverse altre \texttt{RFC}, ad esempio
+\begin{list}{}{}
+\item \texttt{2018 - TCP Selective Acknowledgement Options}
+\item \texttt{1146 - TCP Alternate Checksum Options}
+\item \texttt{2581 - TCP Congestion Control}
+\item \texttt{1323 - TCP Extensions for High Performance}
+\item \texttt{1693 - An Extension to TCP : Partial Order Service}
+\item \texttt{1792 - TCP/IPX Connection Mib Specification}
+\end{list}
+e la lunghezza totale è di 85 pagine, con un glossario di 67 voci.
+\pagebreak
+\section{TCP}
+% https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf
 \end{document}
