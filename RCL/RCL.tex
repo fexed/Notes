@@ -1634,5 +1634,27 @@ La \textbf{connessione} è \textbf{vista dagli applicativi} (USERS) \textbf{come
 \item \textbf{Controllo di congestione}: ha lo scopo di recuperare situazioni di sovraccarico nella rete
 \end{list}
 \pagebreak
-% https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf, 23
+\subsection{Processi e Socket TPC}
+\begin{center}
+\includegraphics[scale=1]{procsockettcp.png}
+\end{center}
+I processi in esecuzione su diverse macchine comunicano tra loro mandando messaggi \textbf{attraverso i socket}. Un po' come se ogni processo fosse una casa e ogni socket fosse la porta, \textbf{un socket è la porta tra il processo dell'applicazione e il TCP}.\\
+Lo \textbf{sviluppatore ha il controllo su} tutta la parte del \textbf{lato applicazione del socket}, ma \textbf{non può controllare il lato del livello di trasporto}. Al più, lo sviluppatore può specificare alcuni parametri del TCP, come la dimensione massima del buffer e dei segmenti.\footnote{http://www3.gdin.edu.cn/jpkc/dzxnw/jsjkj/chapter2/26.htm}
+\subsection{Trasferimento bufferizzato}
+\begin{center}
+\includegraphics[scale=1]{trasfbufftcp.png}
+\end{center}
+I \textbf{processi} a livello applicativo \textbf{scrivono e leggono byte nel/dal buffer}, e questo può avvenire a velocità diverse.
+\subsection{Segmenti TCP}
+\begin{center}
+\includegraphics[scale=1]{segmentitcp.png}
+\end{center}
+Il flusso di byte è \textbf{partizionato in segmenti}: ogni segmento \textbf{ha il suo header} e \textbf{viene consegnato al livello IP}.
+\pagebreak
+\subsection{Numeri di sequenza e di riscontro}
+Il \textbf{TCP numera i byte} anziché i segmenti
+\paragraph{Numero di sequenza} Associato al segmento, è il numero (nel flusso) del primo byte (di dati) del segmento. In genere si parte da un \textbf{initial sequence number} generato in modo casuale e diverso da 0.
+\paragraph{Numero di riscontro} 1 + numero dell'ultimo byte correttamente ricevuto. I riscontri sono interpretati come \textbf{cumulativi}: se ricevo \texttt{ACK = y} significa che \textit{aspetto il byte} \texttt{y} e quindi ho ricevuto tutti i byte fino a \texttt{y - 1}.
+\subsection{Segmento TCP}
+% https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf, 27
 \end{document}
