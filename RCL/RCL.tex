@@ -1656,5 +1656,52 @@ Il \textbf{TCP numera i byte} anziché i segmenti
 \paragraph{Numero di sequenza} Associato al segmento, è il numero (nel flusso) del primo byte (di dati) del segmento. In genere si parte da un \textbf{initial sequence number} generato in modo casuale e diverso da 0.
 \paragraph{Numero di riscontro} 1 + numero dell'ultimo byte correttamente ricevuto. I riscontri sono interpretati come \textbf{cumulativi}: se ricevo \texttt{ACK = y} significa che \textit{aspetto il byte} \texttt{y} e quindi ho ricevuto tutti i byte fino a \texttt{y - 1}.
 \subsection{Segmento TCP}
+\begin{center}
+\includegraphics[scale=0.5]{tcpsegment.png}
+\end{center}
+\begin{list}{}{}
+\item Lo \textbf{pseudo header NON viene trasmesso}.\\
+Ha valenza logica, contiente \textbf{IP sorgente} e \textbf{destinazione}. Queste info \textbf{vengono inserite} effettivamente \textbf{e trasmesse dal livello inferiore}.\\
+\textbf{Proto}: codice del protocollo.\\
+\textbf{Lunghezza TCP}: lunghezza del segmento TCP escluso lo pseudoheader, server per il calcolo del checksum.
+\item Nel segmento TCP bisogna notare la presenza di:
+	\begin{list}{}{}
+	\item Numero di \textbf{sequenza}
+	\item Numero di \textbf{riscontro}
+	\item \textbf{Finestra}
+	\end{list}
+Essi permettono il \textbf{controllo del flusso}, il meccanismo di \textbf{ritrasmissione} ed il \textbf{riordino} dei pacchetti in ricezione, necessari per la struttura stream-based del TCP
+\item Inoltre è presente un campo \textbf{urgent} che permette la trasmissione dei dati "\textbf{fuori banda}", ovvero \textbf{a priorità maggiore degli altri} (la loro gestione però è affidata all'applicazione.
+\end{list}
+\pagebreak
+\subsubsection{Campi del segmento TCP}
+\begin{list}{}{}
+\item \textbf{Porta} (16 bit): numeri di porta della comunicazione
+\item \textbf{Numero di sequenza} (32 bit): è il \textbf{numero di sequenza} nello stream \textbf{del primo byte di dati di questo segmento}.\\Se il flag \texttt{SYN} è settato, allora il numero di sequenza è \texttt{ISN} (Initial Sequence Number) e il primo byte di dati è \texttt{ISN + 1}.
+\item \textbf{Numero di riscontro} (32 bit): se il flag \texttt{ACK} è settato, allora questo campo \textbf{contiene il valore del prossimo numero di sequenza che il mittente del segmento si aspetta di ricevere dall'altro host}. Una volta che la connessione è stabilita è sempre inviato.
+\item \textbf{Hlen} (4bit): \textbf{lunghezza dell'header} TCP espressa in parole da 4 byte\\La lunghezza dell'header può variare da 20 a 60 byte)
+\item \textbf{Bit codice}: sono \textbf{6 flag} e, da sinistra a destra, servono per:
+	\begin{center}
+	\includegraphics[scale=0.7]{flagtcp.png}
+	\end{center}
+	\begin{list}{}{}
+	\item \texttt{URG}: il campo \textbf{puntatore urgente contiene dati sgnificativi} da trasferire in via prioritaria
+	\item \texttt{ACK}: il campo \textbf{numero di riscontro contiene dati significativi}
+	\item \texttt{PSH}: \textbf{funzione push}, cioè \textbf{trasferimento immediato} dei dati in un \textbf{segmento dal livello trasporto al livello applicativo}
+	\item \texttt{RST}: reset della connessione
+	\item \texttt{SYN}: sincronizza il numero di sequenza
+	\item \texttt{FIN}: non ci sono altri dati utente -- chiusura della connessione
+	\end{list}
+\item \textbf{Finestra di ricezione} (16 bit): indica il \textbf{numero di byte di dati} a partire da quello indicato nel campo \textit{numero di riscontro} \textbf{che il mittente di questo segmento è in grado di accettare}.\\Serve per il controllo del flusso.
+\item \textbf{Checksum} (16 bit): checksum dell'intero pacchetto (compreso lo pseudo header).\\Serve per il \textbf{rilevamento degli errori} in caso di alterazione dei bit del segmento, e si calcola come per l'UDP (ma \textbf{per il TCP + obbligatorio})
+\item \textbf{Opzioni} (facoltativo, lunghezza variabile di massimo 40 byte): \textbf{negoziazione di vari parametri}, ad esempio: dimensione massima del segmento (\texttt{MSS}), selective acknowledgment supportato e blocchi di dati riscontrati selettivamente.\\Le opzioni \textbf{sono sempre multipli di 8 bit} e il loro valore è incluso nel checksum.
+\item \textbf{Puntatore urgente} (16 bit): questo campo è un \textbf{offset positivo a partire dal numero di sequenza del segmento corrente}. Viene \textbf{interpretato solo se} il bit \texttt{URG} è uguale a 1.\\\textbf{Punta al primo byte di dati non urgenti} in attesa nella coda di ricezione. Nel segmento contenente dati urgenti \textbf{deve essere presente almeno un byte di dati}.\\
+Ad es. se un segmento contiene 400 byte di dati urgenti e 200 byte di dati non urgenti, il puntatore urgente vale 400.
+\end{list}
+\pagebreak
+\subsubsection{Formato del segmento TCP}
+\begin{center}
+\includegraphics[scale=0.7]{formatosegmentotcp.png}
+\end{center}
 % https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf, 27
 \end{document}
