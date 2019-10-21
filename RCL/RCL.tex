@@ -1701,7 +1701,30 @@ Ad es. se un segmento contiene 400 byte di dati urgenti e 200 byte di dati non u
 \pagebreak
 \subsubsection{Formato del segmento TCP}
 \begin{center}
-\includegraphics[scale=0.7]{formatosegmentotcp.png}
+\includegraphics[scale=0.60]{formatosegmentotcp.png}
 \end{center}
+\subsection{Gestione della connessione}
+\subsubsection{Handshake}
+\paragraph{Handshake a tre vie} Dopo l'handshaking a livello di trasporto, non c'è più distinzione tra client e server. \begin{list}{-}{Sequenza:}
+\item Il \textbf{client} \textbf{invia una richiesta di connessione} ad un server TCP.\\
+\texttt{SYN} è attivo\\
+Il segmento non contiene dati\\
+Si trasmette anche un numero di sequenza iniziale casuali\\
+Es. \texttt{SYN = 1}, \texttt{clientISN = 41}
+\item Il \textbf{server} \textbf{estrae il segmento}, alloca i buffer e le variabili TCP per la connessione.\\
+Invia in \textbf{risposta} un \textbf{segmento di connessione garantita} chiamato \texttt{SYNACK}\\
+\texttt{SYN} è attivo\\
+Il numero di sequenza è il valore iniziale (es. 78)\\
+\texttt{ACK} è attivo, il server aspetta \texttt{clientISN + 1} (es. 42)\\
+Es. \texttt{SYN = 1}, \texttt{ACK = clientISN + 1}, \texttt{serverISN = 78}
+\item Il \textbf{client} \textbf{alloca buffer e variabili} di connessione, poi \textbf{manda un riscontro positivo del messaggio del server}.\\
+\texttt{SYN} è inattivo, questo segmento può già trasportare dati.\\
+Il prossimo dato datà \texttt{clientISN + 1} (es. 42) ed il client attende \texttt{serverISN + 1} (es. 79)\\
+\texttt{SYN = 0}, riscontro \texttt{serverISN + 1}\\
+\item \textbf{Inizia lo scambio di dati}
+\end{list}
+I primi segmenti non hanno carico utile. All'arrivo del primo segmento il server iniziazilizza due buffer e le variabili, necessari per il controllo del flusso e delle congestione.\\
+All'arrivo del riscontro del primo segmento il client alloca due buffer e le variabili, per lo stesso motivo.\\
+Alla ricezione del terzo segmento la connessione è instaurata.
 % https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf, 27
 \end{document}
