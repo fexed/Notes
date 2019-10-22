@@ -1704,7 +1704,7 @@ Ad es. se un segmento contiene 400 byte di dati urgenti e 200 byte di dati non u
 \includegraphics[scale=0.60]{formatosegmentotcp.png}
 \end{center}
 \subsection{Gestione della connessione}
-\subsubsection{Handshake}
+\subsubsection{Three-Way Handshake}
 \paragraph{Handshake a tre vie} Dopo l'handshaking a livello di trasporto, non c'è più distinzione tra client e server. \begin{list}{-}{Sequenza:}
 \item Il \textbf{client} \textbf{invia una richiesta di connessione} ad un server TCP.\\
 \texttt{SYN} è attivo\\
@@ -1727,6 +1727,108 @@ I primi segmenti non hanno carico utile. All'arrivo del primo segmento il server
 All'arrivo del riscontro del primo segmento il client alloca due buffer e le variabili, per lo stesso motivo.\\
 Alla ricezione del terzo segmento la connessione è instaurata.
 \pagebreak
+\subsubsection{Perché a tre vie}
+Esempio degli scalatori:
+\begin{center}
+\begin{list}{}{}
+\item \textit{Ti tengo la corda?} $\rightarrow$ 
+\item $\leftarrow$ \textit{Si, tienimi}
+\item \textit{Ok} $\rightarrow$
+\end{list}
+\end{center}
+Le cose possono andare male in tanti modi diversi, alcuni di questi sono \textbf{situazioni indistinguibili per A mittente}
+\begin{center}
+	\begin{multicols}{2}
+		\begin{list}{}{}
+		\item \textit{Ti tengo la corda?} $\rightarrow$
+		\item X $\leftarrow$ \textit{Si, tienimi}
+		\item 
+		\end{list}
+		\begin{list}{}{}
+		\item \textit{Ti tengo la corda?} $\rightarrow$ X
+		\item
+		\item
+		\end{list}
+	\end{multicols}
+\end{center}
+Altre invece sono \textbf{situazioni indistinguibili per B destinatario}
+\begin{center}
+	\begin{multicols}{2}
+		\begin{list}{}{}
+		\item \textit{Ti tengo la corda?} $\rightarrow$
+		\item $\leftarrow$ \textit{Si, tienimi}
+		\item \textit{Ok} $\rightarrow$ X
+		\end{list}
+		\begin{list}{}{}
+		\item \textit{Ti tengo la corda?} $\rightarrow$
+		\item X $\leftarrow$ \textit{Si, tienimi}
+		\item 
+		\end{list}
+	\end{multicols}
+\end{center}
+\subsubsection{Esempio}
+\begin{center}
+\includegraphics[scale=0.65]{handshakeesempio.png}\\
+\texttt{SYN} e \texttt{SYN + ACK} \textbf{non contengono dati} utente ma \textbf{consumano un numero di sequenza}
+\end{center}
+\pagebreak
+\subsubsection{Chiusura della connessione con handshake}
+In una connessione TCP normale, dopo l'ACK finale per la chiusura si aspetta un tempo di \textbf{timeout molto grande}.\\
+\texttt{timeout = 2 * MSL}\\
+\texttt{MSL} è il \texttt{Maximum Segment Lifetime = 120s}
+\begin{center}
+\includegraphics[scale=0.7]{conntcpclose.png}
+\end{center}
+Invece con il three-way handshake, \textbf{dopo l'ACK finale la connessione è immediatamente chiusa}.
+\begin{center}
+\includegraphics[scale=0.7]{conntcphandshakeclose.png}\\
+Un \texttt{FIN} che \textbf{non trasporta dati} ma \textbf{consuma un numero di sequenza}. Idem per \texttt{FIN + ACK}.
+\end{center}
+\pagebreak
+\subsection{Half-Close}
+\textbf{Uno} dei due processi può \textbf{smettere di inviare dati mentre sta ancora ricevendo dati}.\\
+\texttt{TCP.close(conn) = "}\textit{I have no more data to send.}\texttt{"}
+\begin{center}
+\includegraphics[scale=0.8]{halfclose.png}
+\end{center}
+Di seguito l'ASF corrispondente agli stati dell'\textbf{half-close}
+\begin{center}
+\includegraphics[scale=0.7]{halfcloseasf.png}
+\end{center}
+\subsubsection{Scenario Half-Close}
+\begin{center}
+\includegraphics[scale=1]{halfclosees.png}
+\end{center}
+\subsubsection{Stato Time-Wait}
+\paragraph{Finale} \textbf{Time-Wait} è lo \textbf{stato finale} in cui \textbf{il capo di una connessione che esegue la chiusura attiva resta prima di passare alla chiusura definitiva} della connessione. Dura \textbf{due volte la Maximum Segment Lifetime}.
+\paragraph{MSL} La \textbf{Maximum Segment Lifetime} è la \textbf{stima} del \textbf{massimo periodo di tempo che un pacchetto IP può vivere} sulla rete.\\
+Questo tempo è \textbf{limitato} perché \textbf{ogni pacchetto IP può essere ritrasmesso dai router un numero massimo di volte} detto \textbf{hop limit}.\\
+Ogni implementazione del TCP sceglie il proprio valore per la MSL (\texttt{RFC 1122} indica 2 minuti, Linux usa 30 secondi).
+\paragraph{Perché Time-Wait} Lo stato Time-Wait viene usato dal protocollo \textbf{per due motivi principali}:
+\begin{list}{-}{}
+\item \textbf{Implementare} in maniera affidabile \textbf{la terminazione della connessione in entrambe le direzioni}.\\
+Se l'ultimo \texttt{ACK} della sequenza viene perso, chi esegue la chiusura passiva manderà un ulteriore \texttt{FIN}, chi esegue la chiusura attiva deve mantenere lo stato della connessione per essere in grado di rinviare l'\texttt{ACK}.
+\item \textbf{Consentire l'eliminazione di segmenti duplicati} in rete
+\end{list}
+\pagebreak
+\subsection{Stati del TCP}
+\begin{center}
+\includegraphics[scale=0.7]{tcpstates.png}
+\end{center}
+\begin{list}{}{Gli stati del TCP:}
+\item \textbf{LISTEN}: attesa di una richiesta di connessione remota TCP
+\item \textbf{SYN-SENT}: attesa di ricezione di una connection request corrispondente dopo aver mandato la propria connection request
+\item \textbf{SYN-RECEIVED}: attesa dell'ACK dopo aver entrambi spedito la connection request
+\item \textbf{ESTABLISHED}: connessione aperta, i dati possono essere trasferiti all'utente. Questo è lo stato normale per la fase di trasferimento dati della connessione
+\item \textbf{FIN-WAIT-1}: attesa della richiesta di terminazione della connessione dal TCP remoto, oppure un'ACK sulla richiesta di terminazione della connessione precedentemente spedita
+\item \textbf{FIN-WAIT-2}: attesa della richiesta di terminazione attiva della connessione dal TCP remoto
+\item \textbf{CLOSE-WAIT}: attesa della richiesta di terminazione della connessione dall'utente locale. Si è ricevuta la richiesta di chiusura della connessione e si è già mandato l'ACK, quindi la chiusura passiva è già avvenuta e si attende di avviare la chiusura attiva
+\item \textbf{CLOSING}: attesa dell'ACK sulla chiusura della connessione prima di andare in TIME-WAIT
+\item \textbf{LAST-ACK}: attesa dell'ACK sulla chiusura attiva della connessione. Chiusura passiva effettuata e chiusura attiva iniziata
+\item \textbf{TIME-WAIT}: attesa di abbastanza tempo per assicurarsi che l'host remoto riceva l'ACK per la chiusura della connessione
+\item \textbf{CLOSED}: nessuna connessione
+\end{list}
+\pagebreak
 
-% https://elearning.di.unipi.it/pluginfile.php/28129/mod_resource/content/1/L07_Trasporto_TCP_intro.pdf, 39
+% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf
 \end{document}
