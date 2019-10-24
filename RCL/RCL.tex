@@ -1970,5 +1970,60 @@ Se RcvWindow = 0, il mittente mandera \textbf{segmenti "sonda"} di 1 byte per ri
 \begin{center}
 \includegraphics[scale=0.7]{tcprcvwinesempio.png}
 \end{center}
+\subsection{Controllo della congestione}
+\texttt{RFC 2581}
+\paragraph{Origine} Il fenomeno della congestione ha origine quando una o più delle sorgenti \textbf{tentano di richiedere più banda di quella disponibile sul percorso}. Troppe sorgenti che trasmettono troppi dati ad una velocità troppo alta, per cui \textbf{la rete non può gestirli}.\\
+Il \textbf{traffico eccessivo può provocare}:
+\begin{list}{}{}
+\item \textbf{lunghi ritardi}, accodamenti nei buffer dei router
+\item \textbf{perdita di pacchetti}, overflow nei buffer dei router
+\end{list}
+\paragraph{Controlli} Il protocollo TCP prevede il \textbf{controllo della congestione}, \textbf{imponendo} a ciascun mittente di \textbf{limitare la frequenza di invio di pacchetti sulla connessione}, in funzione della \textbf{congestione percepita}.\\
+\textbf{Capacità del TCP di adattarsi alla velocità di rete}: se il TCP percepisce scarso traffico, aumenta la frequenza di invio, altrimenti la diminuisce.\\
+\textbf{Controllo di congestione punto-punto}: nessun supporto esplicito della rete, la \textbf{congestione} è \textbf{dedotta dai sistemi terminali}
+\pagebreak
+\begin{multicols}{2}
+\textbf{Come gestire entrambi i tipi di congestione}?
+\begin{list}{}{}
+\item \textbf{Receiver window}: dipende dalla dimensione del buffer di ricezione
+\item \textbf{Congestion window}: basata su una stima della capacità di rete
+\end{list}
+I byte trasmessi corrispondono alla \textbf{dimensione della finestra più piccola}:\\
+\texttt{dimFinestraInvio = min(rWnd, cWnd)}
 
+\columnbreak
+\includegraphics[scale=0.6]{congestionetipi.png}
+\end{multicols}
+\subsubsection{Algoritmo per il controllo della congestione}
+\paragraph{Algoritmo} L'algoritmo che il \textbf{mittente TCP} utilizza per \textbf{regolare la propria frequenza di invio} in funzione della congestione rilevata, è costituito da \textbf{tre passi}:
+\begin{enumerate}
+\item \textbf{Partenza}, \textit{slow start}
+\item \textbf{AIMD}: \textbf{incremento additivo} e \textbf{decremento moltiplicativo}
+\item \textbf{Ripresa veloce}, \textit{fast recovery}
+\item \textbf{Reazione ai time-out}
+\end{enumerate}
+cWnd impone un \textbf{vincolo} alla frequenza di immissione del traffico sulla rete, in base alla congestione percepita.
+\subsubsection{cWnd}
+Solitamente è misurata in termini di \textbf{Maximum Segment Size}, MSS.\\
+1 MSS è la \textbf{quantita massima di dati trasportabili da un segmento}.
+\begin{list}{}{}
+\item Viene \textbf{determinato in base alla MTU} (Maximum Transfer Unit), cioè alla lunghezza massima del payload del frame di collegamento inviabile dall'host mittente
+\item MSS scelto in modo tale che \textbf{il segmento TCP, incapsulato dentro il pacchetto IP, stia dentro un singolo frame} di collegamento.
+\end{list}
+RTT (\textbf{Round Trip Time}) è il \textbf{tempo impiegato da un segmento per effettuare il percorso di andata e ritorno}.
+\subsubsection{AIMD}
+\textbf{Additive Increase Multiplicative Decrease}\\\\
+Il TCP del mittente \textbf{aumenta proporzionalmente la propria finestra di congestione ad ogni ACK ricevuto}. Di quanto aumenta?\\
+Ad ogni ACK la cWnd viene incrementata in modo che si abbia una \textbf{crescita pari ad 1 MSS per ogni RTT} (\textbf{congestion avoidance})\\
+Incremento di \texttt{1MSS * (MSS/cWnd)}\\
+Ad esempio se \texttt{cWnd = 4MSS} allora l'incremento è di \texttt{MSS/4}\\\\
+Il TCP del mittente \textbf{dimezza la propria finestra di congestione ad ogni evento di perdita}, ad es. timeout o ACK duplicati.\\
+
+
+\pagebreak
+\textbf{Andamento della dimensione della cWnd nel tempo}: andamento a "sawtooth"
+\begin{center}
+\includegraphics[scale=0.65]{cwndgraph.png}
+\end{center}
+% https://elearning.di.unipi.it/pluginfile.php/28406/mod_resource/content/1/L09_TCP_controlloCongestione.pdf, 10
 \end{document}
