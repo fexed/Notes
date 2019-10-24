@@ -1873,6 +1873,54 @@ Un \textbf{segmento TCP} può essere \textbf{smarrito} o \textbf{corrotto}. Il T
 Se il mittente \textbf{riceve tre \texttt{ACK} duplicati}, allora significa che il \textbf{segmento successivo a quello riscontrato è andato perso}.\\
 \textbf{Ritrasmissione rapida} (fast retransmission) \textbf{prima} dello scadere del timer.
 \item \textbf{Ritrasmissione dei segmenti}
+	\begin{list}{-}{}
+	\item se timeout
+	\item se il mittente riceve tre \texttt{ACK} duplicati (fast retransmission)
+	\end{list}
+\item \textbf{Segmenti fuori sequenza}\\
+I dati \textbf{possono arrivare fuori sequenza} ed essere temporaneamente memorizzati dall'entità TCP destinataria. Il TCP \textbf{non dice come} il destinatario \textbf{deve gestire i pacchetti fuori sequenza}, dipende dall'implementazione.\\
+Nelle versioni più recenti si implementa \textbf{SACK}: i \textbf{pacchetti fuori sequenza} vengono \textbf{memorizzati}, il \textbf{riscontro} dei pacchetti fuori sequenza e duplicati è \textbf{inviato in \texttt{OPTIONS}}.
 \end{list}
-% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf, 6
+\paragraph{Ritrasmissione dovuta a riscontro perso}
+\begin{center}
+\includegraphics[scale=0.7]{tcplostack.png}
+\end{center}
+\subsubsection{Eventi lato destinatario}
+\textbf{Tutti i segmenti inviati per trasmettere dati includono l'\texttt{ACK}}. Se il destinatario non ha dati da inviare e \textbf{riceve un segmento "in ordine"}, allora \textbf{ritarda l'invio dell'\texttt{ACK} di 500ms} a meno che non riceva un nuovo segmento.\\\\
+Se il destinatario \textbf{riceve un segmento atteso ma il precedente non è stato riscontrato} allora \textbf{invia immediatamente l'\texttt{ACK}}.\\\\
+Se il destinatario riceve:
+\begin{list}{}{}
+\item \textbf{segmento fuori sequenza}
+\item \textbf{segmento mancante} ("buco" nella sequenza")
+\item \textbf{segmento duplicato}
+\end{list}
+allora \textbf{invia immediatamente l'\texttt{ACK}} indicando il prossimo numero atteso.
+\subsubsection{Esempi}
+\begin{center}
+\textbf{Operatività normale}
+\includegraphics[scale=0.65]{tcpnorm.png}\\
+\textbf{Segmento smarrito}
+\includegraphics[scale=0.68]{tcplostsegm.png}
+\pagebreak
+
+
+\textbf{Ritrasmissione veloce}
+\includegraphics[scale=0.7]{tcpfastretr.png}\\
+\textbf{Riscontro smarrito}
+\includegraphics[scale=0.7]{tcplostack2.png}
+\pagebreak
+
+
+\textbf{Riscontro smarrito corretto da ritrasmissione}
+\includegraphics[scale=0.7]{tcpostackretransm.png}
+\pagebreak
+
+\textbf{ASM semplificato per il mittente}
+\includegraphics[scale=0.6]{tcpasmmit.png}\\
+\textbf{ASM semplificato per il destinatario}
+\includegraphics[scale=0.6]{tcpasmdest.png}
+\end{center}
+
+\subsection{Calcolo del timeout}
+% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf, 16
 \end{document}
