@@ -1839,5 +1839,40 @@ Un \textbf{segmento TCP} può essere \textbf{smarrito} o \textbf{corrotto}. Il T
 \item \textbf{Riscontro cumulativo}: si effettua il \textbf{riscontro dei byte fino al primo byte mancante} del flusso.
 \item \textbf{Timer}
 \end{list}
-% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf, 3
+\subsubsection{Sequenza e riscontro}
+\paragraph{Esempio: Telnet su TCP}
+	\begin{list}{}{}
+	\item A \texttt{SEQ = 42, ACK = 79, DATA = 'C'} $\longrightarrow$ B\\
+	Viene inviato il carattere "C" da A verso B, \textit{ti mando il 42 aspetto il 79}\\
+	Nella direzione opposta si rimanda quanto ricevuto
+	\item A $\longleftarrow$ \texttt{SEQ = 79, ACK = 43, DATA = 'C'} B\\
+	\texttt{ACK} dell'host per ricevuta di "C", restituisco "C", \textit{ti mando il 79, aspetto il 43}
+	\item A \texttt{SEQ = 43, ACK = 80} $\longrightarrow$ B\\
+	\texttt{ACK} dell'host sulla ricevuta di "C" di ritorno, \textit{ti mando il 43 (o niente) e aspetto l'80}
+	\end{list}
+\paragraph{Pipeline} Con il \textbf{pipeline} il \textbf{mittente può inviare più segmenti senza attendere il riscontro}. Permette di aumentare la produttività
+\begin{list}{}{}
+\item A \texttt{SEQ = 42} $\longrightarrow$ B
+\item A \texttt{SEQ = 43} $\longrightarrow$ B
+\item A $\longleftarrow$ \texttt{ACK = 43} B
+\item A $\longleftarrow$ \texttt{ACK = 44} B
+\end{list}
+\subsubsection{Eventi lato mittente}
+\begin{list}{}{}
+\item \textbf{TCP riceve i dati dall'applicazione}:
+	\begin{list}{-}{}
+	\item assegna un numero di sequenza
+	\item avvia il timer (intervallo di scadenza -- timeout)
+	\end{list}
+\item \textbf{Timeout}
+	\begin{list}{-}{}
+	\item ritrasmette il segmento non riscontrato
+	\item riavvia il timer
+	\end{list}
+\item \textbf{\texttt{ACK} duplicato}\\
+Se il mittente \textbf{riceve tre \texttt{ACK} duplicati}, allora significa che il \textbf{segmento successivo a quello riscontrato è andato perso}.\\
+\textbf{Ritrasmissione rapida} (fast retransmission) \textbf{prima} dello scadere del timer.
+\item \textbf{Ritrasmissione dei segmenti}
+\end{list}
+% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf, 6
 \end{document}
