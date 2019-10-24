@@ -49,6 +49,10 @@ Esame: scritto (o compitini), discussione orale facoltativa + progetto con discu
 \end{list}
 Ricevimento: stanza 355 DO, II piano
 
+\begin{verbatim}
+Immagini: Copyright 1996-2005 J.F Kurose and K.W. Ross
+\end{verbatim}
+\pagebreak
 \section{Rete}
 \paragraph{Definizione di rete} Interconnessione di dispositivi in grado di scambiarsi informazioni, come end system, router, switch e modem.\\
 \begin{list}{}{Gli end system possono essere di due tipi:}
@@ -1920,7 +1924,51 @@ allora \textbf{invia immediatamente l'\texttt{ACK}} indicando il prossimo numero
 \textbf{ASM semplificato per il destinatario}
 \includegraphics[scale=0.6]{tcpasmdest.png}
 \end{center}
-
+\pagebreak
 \subsection{Calcolo del timeout}
-% https://elearning.di.unipi.it/pluginfile.php/28365/mod_resource/content/1/L08_TCP_trasfaffidabile_ctrlflusso.pdf, 16
+\paragraph{RTO} Il \textbf{Retransmission Timeout}, o tempo di timeout, è \textbf{fondamentale} per il funzionamento del TCP. L'RTO deve essere maggiore dell'RTT (\textbf{Round Trip Time})
+\paragraph{RTT} Il Round Trip Time \textbf{tempo trascorso da quando si invia} un segmento \textbf{a quando se ne riceve il riscontro.}. Viene calcolato analizzando gli RTT dei segmenti \textbf{non ritrasmessi}: Sample RTT, stimato per un segmento trasmesso, non per ogni invio)\\
+\texttt{EstimatedRTT = (1 - $\alpha$)*EstimatedRTT + $\alpha$*SampleRTT}\\
+Poiché SampleRTT può fluttuare, si considera EstimatedRTT, cioè la \textbf{combinazione} dei precedenti valori di EstimatedRTT con il nuovo valore SampleRTT.
+\paragraph{} \texttt{RFC 2988} -- Il valore $\alpha$ viene posto a $\frac{1}{8}$, in modo da rendere via via meno importanti gli RTT dei pacchetti più vecchi.
+\begin{center}
+\texttt{EstimatedRTT = 0.875*EstimatedRTT + 0.125*SampleRTT}
+\end{center}
+\paragraph{Variabilità} Oltre al valore RTT stimato, è necessaria anche una \textbf{stima della variabilità} di RTT, data dalla seguente formula che \textbf{stima di quanto SampleRTT si discosta da EstimatedRTT}:
+\begin{center}
+\texttt{RTT$_{DEV}$ = (1 - $\beta$)RTT$_{DEV}$ + $\beta$*|RTT$_{SAMPLE}$ - RTT$_{ESTIMATED}$|}
+\end{center}
+\paragraph{} \texttt{RFC2988} -- Il valore di $\beta$ viene posto a $\frac{1}{4}$
+\paragraph{Calcolo del timeout} Una volta ottenuti questi valori, il timeout viene normalmente calcolato come:
+\begin{center}
+\texttt{RTO = RTT$_{ESTIMATED}$ + 4*RTT$_{DEV}$}
+\end{center}
+Inoltre in molte implementazioni, dopo un errore (es. \texttt{ACK} non ricevuto) \textbf{si raddoppia il timeout}. Questo è un primo meccanismo di controllo della congestione.
+\subsection{Finestra di trasmissione}
+\paragraph{Sliding Window} Il \textbf{controllo del flusso} (flow control) del TCP si basa sulla \textbf{finestra di trasmissione}. La finestra è \textbf{sovrapposta alla sequenza da trasmettere}, viene \textbf{negoziata dinamicamente} e viene \textbf{fatta avanzare alla ricezione di un \texttt{ACK}}.\\
+\begin{center}
+\includegraphics[scale=0.7]{tcpwindow.png}
+\end{center}
+\pagebreak
+\begin{center}
+\textbf{Mittente}\\
+\includegraphics[scale=0.7]{tcpwindow2.png}\\
+\textbf{Destinatario}\\
+\includegraphics[scale=0.7]{tcpwindow3.png}
+\end{center}
+\textbf{Ogni host} imposta buffer di invio e ricezione. Il \textbf{processo destinatario legge} i dati dal buffer di ricezione (\textbf{non necessariamente nell'istante in cui arrivano})\\
+Con \textbf{controllo di flusso} si intende \textbf{la capacità del mittente di evitare la possibilità di saturare il buffer del ricevitore}, modulando la propria frequenza di invio. Quindi si \textbf{mette in relazione la frequenza di invio} del mittente \textbf{con al frequenza di lettura} dell'applicazione ricevente.
+\paragraph{Receive Window} Il TCP implementa questa funzionalità con una \textbf{variabile} detta \textbf{receive window}, \textbf{mantenuta dal mittente}. Questa variabile \textbf{fornisce un'idea di quanto spazio è ancora a disposizione} nel buffer del ricevitore. Tale valore è comunicato nel \textbf{campo window} dell'header TCP.
+\begin{center}
+\includegraphics[scale=0.7]{tcprecwindow.png}
+\end{center}
+Lo spazio disponibile nel buffer del destinatario è:\\
+\texttt{RcvWindow = RcvBuffer - (LastByteReceived - LastByteRead)}\\\\
+\textbf{RcvWindow} è \textbf{dinamica}, il \textbf{destinatario comunica la dimensione} di RcvWindow al mittente. Il mittente si assicura che:\\
+\texttt{LastByteSent - LastByteAcked $<$ RcvWindow}\\
+Se RcvWindow = 0, il mittente mandera \textbf{segmenti "sonda"} di 1 byte per ricevere l'aggiornamento sulla dimensione di RcvWindow. Di seguito un esempio:
+\begin{center}
+\includegraphics[scale=0.7]{tcprcvwinesempio.png}
+\end{center}
+
 \end{document}
