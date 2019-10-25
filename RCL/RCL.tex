@@ -2025,5 +2025,59 @@ Il TCP del mittente \textbf{dimezza la propria finestra di congestione ad ogni e
 \begin{center}
 \includegraphics[scale=0.65]{cwndgraph.png}
 \end{center}
-% https://elearning.di.unipi.it/pluginfile.php/28406/mod_resource/content/1/L09_TCP_controlloCongestione.pdf, 10
+\subsubsection{Slow Start}
+All'inizio, la finestra di congestione cWnd è posta pari a 1 MSS: equivale a dire che la \textbf{frequenza di invio è pari a 1 MSS/RTT}.
+\subparagraph{Esempio} Se MSS = 500Byte e RTT = 200ms si ha una frequenza di invio di circa 20 Kb/s. Se ho una banda da 1 Mb/s impiegherò molto tempo per sfruttarla con un incremento lineare.\\\\
+cWnd viene incrementata di 1 MSS ad ogni \texttt{ACK}. L'effetto è che cWnd \textbf{raddoppia ad ogni \texttt{RTT}} avendo così una \textbf{crescita esponenziale} fino ad un errore, poi cWnd dimezza.
+\begin{center}
+\includegraphics[scale=0.7]{slowstartgraph.png}
+\end{center}
+\pagebreak
+\subsubsection{Politica Reno per il controllo della congestione}
+\paragraph{Soglia} Viene definita una \textbf{variabile "soglia"}, alla quale è assegnato un valore alto (ad esempio 64 Kb).\\
+Questa soglia \textbf{determina quando termina la slow start ed inizia la congestion avoidance (AIMD)}.
+\begin{list}{}{}
+\item \textbf{cWnd $<$ soglia}: cWnd \textbf{aumenta esponenzialmente} (\textit{slow start})
+\item \textbf{cWnd $>$ soglia}: cWnd \textbf{aumenta linearmente} (\textit{AI})
+\end{list}
+\paragraph{Evento di perdita} Se ho \textbf{3 \texttt{ACK} duplicati} pongo prima la \textbf{soglia a metà di cWnd} e poi \textbf{cWnd = soglia + 3 MSS} (\textit{fast recovery})\\
+Se ho \textbf{un \texttt{ACK} perso per timeout} pongo la \textbf{soglia a metà di cWnd} e pongo \textbf{cWnd = 1 MSS} (\textit{slow start})
+\paragraph{Nella fast recovery} Se avviene un \textbf{timeout} si va in \textbf{slow start}, se arriva un \texttt{ACK} \textbf{non duplicato} si va in \textbf{congestion avoidance}.
+\paragraph{Esempio di controllo della congestione con TCP Reno}
+\begin{center}
+\includegraphics[scale=0.75]{congestionerenoesempio.png}
+\pagebreak
+
+\textbf{TCP Reno}\\
+\includegraphics[scale=0.65]{tcpreno.png}
+\end{center}
+\subsubsection{Politica Tahoe per il controllo della congestione}
+Versione precedente della politica Reno: \textbf{timeout e 3 \texttt{ACK} duplicati sono trattati allo stesso modo}.
+\begin{center}
+\includegraphics[scale=0.75]{tcptahoeesempio.png}\\
+\includegraphics[scale=0.65]{tcptahoe.png}
+\end{center}
+\subsection{Throughput}
+Indicando con \texttt{W} il \textbf{valore massimo di byte della finestra} (ovvero quando si verifica l'errore), il \textbf{TCP in regime stazionario} offre il seguente throughput medio:
+\begin{center}
+\texttt{throughput = $\frac{0.75 * W}{RTT}$}
+\end{center}
+Calcolo macroscopico che ignora le fasi di slow start.
+\begin{list}{}{Con \texttt{W} la dimensione della finestra alla perdita:}
+\item Quando la finestra è \texttt{W}, il troughput è $\frac{W}{RTT}$
+\item Appena dopo la perdita, la finestra è ridotta a $\frac{W}{2}$ e il throughput a $\frac{W}{2 * RTT}$
+\item Throughput medio: \texttt{0.75 * RTT}
+\end{list}
+\subsection{Fairness}
+\paragraph{Ipotesi} \begin{list}{}{}
+\item \textbf{K connessioni TCP} esistono su un \textbf{unico link di capacità R bit/s}
+\item \textbf{Non ci sono altri protocolli} esistenti sullo stesso link
+\end{list}
+\paragraph{Risultato} Ognuna delle \textbf{connessioni TCP} tende a \textbf{trasmettere a R/K bit/s}.
+\subsection{Transmission Control Block}
+\paragraph{Struttura dati} Poiché ogni connessione è distinta, bisogna \textbf{mantenere delle informazioni} su ogni connessione \textbf{separatamente}.
+\paragraph{TCB} Il TCP usa una struttura dati speciale per questo scopo, chiamata \textbf{Transmission Control Block} o TCB.\\
+Il TCB contiene tutte le informazioni a proposito della connessione, come \textbf{i due numeri di socket} che la identificano e \textbf{i puntatori ai buffer} dove vengono mantenute le informazioni in arrivo e in partenza.\\
+Il TCB è anche usato per \textbf{implementare il meccanismo delle sliding windows}. Mantiene delle variabili che tengono traccia dei \textbf{numeri di byte ricevuti e riscontrati}, \textbf{byte ricevuti e non riscontrati}, \textbf{dimensione attuale della finestra} e così via.\\
+Ovviamente, \textbf{ogni dispositivo mantiene il proprio TCB per la connessione}.
 \end{document}
