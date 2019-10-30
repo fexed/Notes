@@ -2080,4 +2080,84 @@ Calcolo macroscopico che ignora le fasi di slow start.
 Il TCB contiene tutte le informazioni a proposito della connessione, come \textbf{i due numeri di socket} che la identificano e \textbf{i puntatori ai buffer} dove vengono mantenute le informazioni in arrivo e in partenza.\\
 Il TCB è anche usato per \textbf{implementare il meccanismo delle sliding windows}. Mantiene delle variabili che tengono traccia dei \textbf{numeri di byte ricevuti e riscontrati}, \textbf{byte ricevuti e non riscontrati}, \textbf{dimensione attuale della finestra} e così via.\\
 Ovviamente, \textbf{ogni dispositivo mantiene il proprio TCB per la connessione}.
+\pagebreak
+\section{Esercizi}
+\subsection{SMTP}
+\paragraph{Testo} L’utente mickey@disney.com invia dal suo PC una email a donald@disney.com.\\
+Indicare la sequenza di comandi SMTP inviati e ricevuti dal PC di mickey@disney.com se:
+\begin{enumerate}
+\item Il mailserver disney.com non è raggiungibile
+\item Il mailserver disney.com è raggiungibile
+\end{enumerate}
+\paragraph{Soluzione}
+\begin{enumerate}
+\item Il PC del mittente non può stabilire una connessione TCP con il mailserver, di conseguenza nessun messaggio SMTP può essere inviato o ricevuto
+\item Il mittente stabilisce una connessione TCP con il mailserver, e avviene lo scambio dei seguenti comandi:
+\begin{verbatim}
+R: 220 service ready
+I: HELO . . .
+R: 250 OK
+I: MAIL FROM: mickey@disney.com
+R: 250 OK
+I: RCPT TO: donnald@disney.com
+R: 250 OK
+I: DATA
+I: . . .
+I: . . .
+I: .
+R: 250 OK
+I: QUIT
+R: 221 service closed
+\end{verbatim}
+Notare che il corpo del messaggio termina sempre con \texttt{<CRLF>.<CRLF>}.
+\end{enumerate}
+\pagebreak
+\subsection{DNS}
+\paragraph{Testo} Un host deve risolvere il nome simbolico \texttt{host.engineering.vanderbilt.edu}, il cui indirizzo IP non è noto al suo resolver (i.e. servizio DNS dell’host).\\
+Supponendo che la gerarchia dei name server abbia 4 livelli, indicare – giustificando la risposta - il numero di messaggi DNS che, nel caso peggiore, circoleranno in Internet per risolvere tale nome
+simbolico, se:
+\begin{enumerate}
+\item Si utilizza ad ogni livello una risoluzione ricorsiva
+\item Si utilizza ad ogni livello una risoluzione iterativa
+\end{enumerate}
+\paragraph{Soluzione}
+\begin{multicols}{2}
+\begin{enumerate}
+\item Bisogna percorrere tutto l'albero dei nameserver, dal locale fino ad un root server, e poi da questo all'authoritative name server che, nel caso peggiore, è il nameserver locale di \texttt{engineering.vanderbilt.edu}, per poi tornare indietro.\\
+In totale sono 4 + 4 messaggi + 2 dal resolver al nameserver locale del client e viceversa.\begin{center}
+\includegraphics[scale=0.3]{dnsqueryricorsiva.png}
+\end{center}
+\item Analogamente i messaggi saranno sempre 10, perché i nameserver coinvolti sono 4, nel caso pessimo, più i 2 messaggi tra il nameserver locale del client e il resolver.
+\begin{center}
+\includegraphics[scale=0.3]{dnsqueryiterativa.png}
+\end{center}
+\end{enumerate}
+\end{multicols}
+\pagebreak
+\subsection{TCP}
+\paragraph{Testo} Un client C chiede la pagina web \texttt{http://www.acme.com/home/products.html} al server B di \texttt{www.acme.com} con una GET che è contenuta in un segmento TCP il cui payload (campo Dati) è lungo X byte. Indicare, giustificando la risposta, i valori dei campi sequence number, \texttt{ACK} number, e dei flags \texttt{ACK} e \texttt{SYN} e lunghezza del campo DATA, in ciascuno dei segmenti che C e B si scambiano per aprire la connessione nell’ipotesi che l’\texttt{ACK} finale dell’apertura della connessione sia inviato in piggybacking assieme alla GET. Si supponga che in B ed in C rWnd sia molto grande, che non scada alcun timeout, che non ci siano errori di trasmissione, che nessun segmento vada perduto, e che il numero di sequenza iniziale di C sia 1111 e quello di B sia 2222
+\paragraph{Soluzione}
+\begin{center}
+\includegraphics[scale=1]{es_tcp1.png}
+\end{center}
+\subparagraph{Piggybacking} L'invio dei primi dati e l'invio dell'ultimo \texttt{ACK} dell'handshake sono uniti.
+\paragraph{Testo} Un client C ha stabilito una connessione TCP con un server web S per scaricare una pagina web che consiste di tre oggetti. Al tempo t, subito dopo avere inviato la richiesta per il terzo oggetto, l’host di C invia a S un segmento con il flag FIN a true.\\
+Indicare, giustificando la risposta, il tempo minimo necessario al TCP di C per chiudere definitivamente la connessione supponendo che:
+\begin{enumerate}
+\item La dimensione del terzo oggetto sia 1.5 MSS
+\item RTT sia costantemente 700ms e che il Maximum Segment Lifetime sia 1100ms
+\item Tutti i segmenti vengano ricevuti corretti ed in ordine, e che il valore di cwnd del TCP di S sia 1MSS quando esso riceve il FIN inviato dall’host di C. Trascurare i tempi di preparazione e di trasmissione dei segmenti e assumere che S abbia già a disposizione tutti i dati da inviare.
+\end{enumerate}
+\paragraph{Soluzione} \texttt{3RTT + 2MSL = 4300ms}\\
+Il TCP di C riceve al tempo t + RTT il riscontro S1 del segmento FIN da lui inviato. Se S1 trasporta in piggybacking il primo MSS dei dati del terzo oggetto e il TCP di C invierà un riscontro C2 per tali dati, quindi S potrà inviare l’ultima porzione di dati e attenderne il riscontro, infine il TCP di S invierà un segmento con il flag FIN a true. Il TCP di C invierà un riscontro del FIN e considererà chiusa la connessione dopo avere atteso 2MSL, ovvero al tempo t + 3RTT + 2MSL = t + 4300 msec.
+\pagebreak
+\paragraph{Testo} Si descriva il meccanismo di controllo di flusso del TCP
+\paragraph{Soluzione possibile}  Si intende con controllo di flusso la capacità del mittente di evitare la possibilità di saturare il buffer del ricevitore. Infatti, a livello TCP ogni host imposta un buffer di invio e uno di ricezione. Il processo applicativo destinatario legge i dati dal buffer di ricezione (non necessariamente nell’istante in cui arrivano). Il controllo di flusso ha lo scopo di regolare la frequenza di invio del mittente in base alla frequenza di lettura dell’applicazione ricevente allo scopo di non saturare il buffer del ricevente. TCP implementa questa funzione tramite una variabile detta receive window mantenuta nel mittente: questa variabile fornisce un’idea di quanto spazio è ancora a disposizione nel buffer del ricevitore. Tale valore è comunicato nel campo window dell’header TCP dall’host destinatario.
+\begin{list}{}{}
+\item Il valore di receive window RcvWindow= RcvBuffer-( LastByteReceivedLastByteRead).
+\item L’host destinatario comunica la dimensione di RcvWindow al mittente.
+\item Il mittente si assicura che LastByteSent-LastByteAcked $<$ RcvWindow pari ovvero alla quantità di dati trasmessi e non ancora riscontrati.
+\end{list}
+Nelle situazioni in cui il buffer risulta pieno (RcvWindow=0), il mittente continua a mandare segmenti sonda di 1 byte per ricevere l’aggiornamento sulla dimensione di RcvWindow.
+%dal 6, p. 88 PDF di gerthsman
 \end{document}
