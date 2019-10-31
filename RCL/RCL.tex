@@ -2159,5 +2159,106 @@ Il TCP di C riceve al tempo t + RTT il riscontro S1 del segmento FIN da lui invi
 \item Il mittente si assicura che LastByteSent-LastByteAcked $<$ RcvWindow pari ovvero alla quantità di dati trasmessi e non ancora riscontrati.
 \end{list}
 Nelle situazioni in cui il buffer risulta pieno (RcvWindow=0), il mittente continua a mandare segmenti sonda di 1 byte per ricevere l’aggiornamento sulla dimensione di RcvWindow.
+\paragraph{Testo}  Due host H1 e H2 comunicano tramite un canale che attraversa tre router R1, R2 e R3 e 4 link di capacit`a C1, C2, C3 e C4, rispettivamente come mostrato in figura. La comunicazione avviene tramite commutazione di pacchetto con trasmissione di tipo store and forward.\\
+Assumendo che il ritardo di propagazione sia trascurabile, che i ritardi di accodamento nei router R1, R2 e R3 sia rispettivamente a1, a2 e a3, e che il ritardo di elaborazione nei tre router sia uguale a 1 ms, dire quanto tempo `e necessario per la trasmissione da H1 a H2 di un pacchetto di dimensione L nel seguente caso:
+\begin{list}{-}{}
+\item L = 10 KBytes
+\item C1 = C2 = C3 = C4 = 2 Mbps
+\item a1 = a3 = a4 = 0.01 s
+\end{list}
+\begin{center}
+\includegraphics[scale=1]{es_tcp6testo.png}
+\end{center}
+\paragraph{Soluzione} Il ritardo introdotto da ogni router `e dato dalla somma
+tra: ritardo di trasmissione, ritardo di propagazione, ritardo di
+accodamento e tempo di elaborazione. In particolare:
+\begin{list}{-}{}
+\item il tempo di trasmissione di H1 è pari a L/C1 = 40 ms.
+\item il tempo di trasmissione di R1 è pari a L/C2 = 40 ms.
+\item il tempo di trasmissione di R2 è pari a L/C3 = 40 ms
+\item il tempo di trasmissione di R3 è pari a L/C4 = 40 ms
+\end{list}
+Quindi il ritardo introdotto dai router è: 40 + 10 + 1 = 51 ms\\
+Il ritardo dovuto alla trasmissione da H1 è pari a $\frac{L}{R}$ = 40 ms.\\
+Quindi il tempo complessivo per la trasmissione del pacchetto da H1 a H2 è\\
+\texttt{51 * 3 + 40 = 193 ms}
+\pagebreak
+\paragraph{Testo} Tizio manda dal suo account mail tizio@libero.it un messaggio di posta elettronica con testo di 256 caratteri a Caio, di indirizzo caio@occupato.it.
+\begin{enumerate}
+\item  Specificare il contenuto dei primi due messaggi TCP inviati dal mailserver di libero.it, ms.libero.it, per ricevere tale messaggio.
+\item Specificare, per ciascun segmento, payload, numero di sequenza, \texttt{ACK} number, flags posti ad 1, porta origine e porta destinazione.
+\end{enumerate}
+\paragraph{Soluzione}
+\begin{enumerate}
+\item Il primo segmento avrà il payload vuoto e il payload del secondo conterrà \texttt{220 service ready}
+\item Il pimo segmento sarà \texttt{SYNACK}, e quindi: come già detto, payload vuoto, flags \texttt{SYN} e \texttt{ACK} ad 1, numero sequenza Z, \texttt{ACK} number Y, porta mittente 25, porta destinazione effimera. Il secondo segmento conterrà come payload \texttt{220 service ready}, nessun flag ad 1, numero sequenza Z+1, \texttt{ACK} number Y, porta mittente 25, porta destinazione effimera.
+\end{enumerate}
+\paragraph{Testo} Dire in quali delle seguenti circostanze il TCP cambia la dimensione della finestra di congestione cWnd, e, nel caso, come viene ricalcolata.
+\begin{center}
+\includegraphics[scale=1]{es_tcp8testo.png}
+\end{center}
+\paragraph{Soluzione}
+\begin{center}
+\includegraphics[scale=1]{es_tcp8.png}
+\end{center}
+\pagebreak
+\paragraph{Testo} Si consideri il seguente scenario TCP in cui, per semplicità, non sono indicati i segmenti inviati o re-inviati dal sender TCP al receiver TCP, che si suppone essere quelli necessari per avere i riscontri descritti di seguito.
+\begin{list}{-}{}
+\item Al tempo t0 il TCP di un host A ha una connessione già stabilita, per la quale ha 4 segmenti full sized in volo (inviati ma non riscontrati) e nessun nuovo dato da spedire, il primo byte dei segmenti in volo `e il byte Y, ssthresh = 6.5 MSS, cwnd = 5 MSS. Inoltre, non ha ricevuto nessun riscontro duplicato.
+\item Tra il tempo t0 e il tempo t1 riceve 7 riscontri: i primi due non duplicati e con \texttt{ACK} number uguale a Y + 1 MSS per il primo, e Y + 3 MSS per il secondo. I seguenti 4 riscontri sono tutti duplicati, ed infine, al tempo t1, riceve un settimo riscontro con \texttt{ACK} number uguale a Y + 4 MSS.
+\end{list}
+Si supponga che non scatti alcun timeout tra t0 e t1. Indicare, per ciascun riscontro ricevuto, lo stato del TCP e i valori di ssthresh e cWnd, giustificando la risposta.
+\paragraph{Soluzione} 
+\begin{center}
+\includegraphics[scale=1]{es_tcp9testo.png}
+\end{center}
+\pagebreak
+\paragraph{Testo} Descrivere in modo dettagliato e mediante uno pseudocodice le azioni svolte da un destinatario TCP per realizzare il controllo di flusso. Si assuma che ogni segmento ricevuto dal destinatario contenga anche lo pseudoheader (lunghezza segmento TCP). Inoltre, si supponga che la chiusura della connessione venga fatta dal mittente e che i segmenti di chiusura non contengano dati in piggybacking. Non occorre realizzare la parte iniziale delle azioni svolte (quindi le inizializzazioni delle variabili e l’apertura della connessione). Infine, si supponga che si invii un riscontro appropriato per ogni segmento ricevuto, e che il destinatario non debba inviare dati al mittente. Inoltre, per semplicità, si specifichino solamente i campi dell’header del riscontro relativi al controllo del flusso e al riscontro. Non occorre realizzare le interazioni con il livello applicativo (processo che legge dal buffer), ma solamente quelle con il mittente TCP. Si hanno a disposizione le seguenti procedure:
+\begin{list}{}{}
+\item \texttt{receive(segm)}, per ricevere il segmento \texttt{segm} dal livello di rete
+\item \texttt{OK(segm)}, restituisce true solo se \texttt{segm} è corretto
+\item \texttt{nuovo(segm.x)}, vettore di booleani che vale true se dal campo x di \texttt{segm} si deduce che i dati contenuti in \texttt{segm} non sono doppioni (specificare x nella soluzione)
+\item \texttt{insert(segm.y,finestra)}, per inserire \texttt{segm.y} nel buffer di ricezione nella posizione corretta
+\item \texttt{calcolacknum(segm)}, restituisce il numero di riscontro per il riscontro associato a \texttt{segm}
+\item \texttt{send(risp)}, per inviare risp al mittente
+\end{list}
+Descrivere il contenuto o la funzionalità delle variabili e delle altre funzioni/procedure eventualmente utilizzate.
+\paragraph{Soluzione}
+\begin{verbatim}
+finito = false;
+while(!finito) {
+    receive(segm);
+    finito = segm.FIN;
+    if (!finito) { //controllare l'inizio della chiusura della connessione
+        if (OK(segm)) { //se il segmento non è corrotto
+            if (nuovo(segm.seqnum)) { //se il segmento contiene nuovi dati
+                insert(segm.dati, finestra); //inserisco i dati nel buffer
+                rWnd = rWnd - (segm.lTotTCP - segm.HLEN); //nuovo valore di rWnd
+                risposta.ACK = true; //flag settato a true
+                risposta.ACKnum = calcolachecksum(segm);
+                risposta.rWnd = rWnd;
+            }
+            send(risposta); //Invia o il nuovo ACK o l'ultimo ACK inviato
+        }
+    }
+}
+\end{verbatim}
+\pagebreak
+\paragraph{Testo} Discutere l’affermazione “poichè FTP e HTTP sono protocolli adatti a trasferire file, possono essere usati indifferentemente”.
+\paragraph{Soluzione possibile} Un esempio di risposta potrebbe seguire questo schema:
+\begin{list}{-}{}
+\item Descrivere brevemente l'obiettivo di HTTP e FTP
+\item Entrambi usano TCP, elencare le differenze ai fini del trasferimento file
+\end{list}
+\begin{list}{}{FTP}
+\item Connessione controllo, persistente, inizializzata dal client, porta 21. Comandi in formato ASCII a 7 bit
+\item Connessione dati, inizializzata da server, porta 20, non persistente
+\item Stateful
+\item Offre funzionalità aggiuntive rispetto a HTTP per la gestione di file e directory (list, retr, put).
+\end{list}
+\begin{list}{}{HTTP}
+\item Unica connessione per dati + comandi
+\item Interazione stateless
+\end{list}
 %dal 6, p. 88 PDF di gerthsman
 \end{document}
