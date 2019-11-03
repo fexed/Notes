@@ -1,4 +1,4 @@
-\documentclass[10pt]{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
@@ -41,4 +41,52 @@
 \item \textbf{Perdita: 3 ACK duplicati} soglia = cWnd/2, cWnd = soglia + 3 MSS (\textit{fast recovery})
 \item \textbf{Timeout}: soglia = cWnd/2, cWnd = 1 MSS (\textit{slow start})
 \end{list}
+\paragraph{TAHOE} \begin{list}{-}{}
+\item \textbf{Timeout/3 ACK duplicati} soglia = cWnd/2, cWnd = 1 MSS
+\end{list}
+\subsubsection{Throughput}
+\texttt{W} = valore massimo di byte della finestra\\
+\texttt{throughput = $\frac{0.75 * W}{RTT}$}
+
+\section{SMTP}
+\subsubsection{Scambio di messaggi}
+\paragraph{Apertura connessione}
+\begin{verbatim}
+R: 220 service ready
+S: HELO server.com
+R: 250 OK
+\end{verbatim}
+\paragraph{Invio messaggio}
+\subparagraph{Busta}
+\begin{verbatim}
+S: MAIL FROM: user@server.com
+R: 250 OK
+S: RCPT TO: receiver@other.com
+R: 250 OK
+\end{verbatim}
+\subparagraph{Intestazioni e corpo}
+\begin{verbatim}
+S: DATA
+R: 354 start mail input
+S: From: name surname
+S: To: othername othersurname
+S: Date: dd/mm/yyyy
+S: Subject: text
+S: <empty line>
+S: <message
+S: body>
+...
+S: .                          //un punto, il <CRLF>.<CRLF>
+R: 250 OK
+\end{verbatim}
+\subparagraph{Chiusura connessione}
+\begin{verbatim}
+S: QUIT
+R: 221 service closed
+\end{verbatim}
+\section{DNS}
+\subsubsection{Risoluzione dei nomi}
+n livelli $\Rightarrow$ n server DNS \textit{oltre} quello locale\\
+\textbf{Iterativo}: il local name server contatta uno alla volta i name server esterni\\
+\textbf{Ricorsivo}: ogni name server contatta il successivo e riceve la risposta, che rigira a chi ha fatto la richiesta.
 \end{document}
