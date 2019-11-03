@@ -37,7 +37,7 @@
 \paragraph{cWnd} parte a \textbf{1 MSS}
 \paragraph{RENO} \begin{list}{-}{}
 \item \texttt{cWnd $<$ soglia} -- crescita \textbf{esponenziale} (\textit{slow start}): + 1 MSS ad ogni ACK
-\item \texttt{cWnd $>$ soglia} -- crescita \textbf{lineare} (\textit{AI})
+\item \texttt{cWnd $>$ soglia} -- crescita \textbf{lineare} (\textit{AI}): incremento di \texttt{1MSS * (MSS/cWnd)}
 \item \textbf{Perdita: 3 ACK duplicati} soglia = cWnd/2, cWnd = soglia + 3 MSS (\textit{fast recovery})
 \item \textbf{Timeout}: soglia = cWnd/2, cWnd = 1 MSS (\textit{slow start})
 \end{list}
@@ -47,6 +47,14 @@
 \subsubsection{Throughput}
 \texttt{W} = valore massimo di byte della finestra\\
 \texttt{throughput = $\frac{0.75 * W}{RTT}$}
+\subsubsection{Apertura connessione}
+\begin{verbatim}
+   SYN    ACK    SEQ num    ACK num    DATA
+S:  T      F       1111        -        --
+R:  T      T       2222       1112      --
+S:  F      T       1112       2223     X byte    //Se piggybacking
+\end{verbatim}
+\subsubsection{Tempo necessario chiusura connessione}
 
 \section{SMTP}
 \subsubsection{Scambio di messaggi}
