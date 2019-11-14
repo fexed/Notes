@@ -2149,8 +2149,57 @@ Strumento per identificare gli host nella rete interconnessa
 \pagebreak
 \subsubsection{Campi}
 \begin{list}{}{}
-\item \textbf{Versione}, 4bit: specifica la versione usata. Attualmente IPv4 o IPv6.
+\item \textbf{Versione}, 4 bit: specifica la versione usata. Attualmente IPv4 o IPv6.
+\item \textbf{Hlen}, 4 bit: lunghezza dell'header espressa in parole da 32 bit. Tipicamente vale 0101, cioè 20 Byte.
+\item \textbf{Tipo di servizio}, 8 bit: serve per "colorare" il datagramma IP (basso ritardo, affidabilità\ldots). Nella \texttt{RFC 791} c'è una prima classificazione, ma si veda anche \texttt{RFC2474}.
+\item \textbf{Lunghezza del datagramma}, 16 bit: lunghezza di tutto il datagramma in byte, header incluso. Max 65535 Byte (nella pratica, max 1500 Byte).
+\item \textbf{Identificazione}, \textbf{flag}, \textbf{offset}: campi per la frammentazione
+\item \textbf{Tempo di vita}, 8 bit: ad ogni passaggio da un router viene decrementato, quando raggiunge lo 0 viene scartato. Assicura che \textbf{eventuali circuiti ad anello non provochino traffico perpetuo sulla rete}.\\
+Il valore dipende dal S.O., esempi: 30, 64, 128, 255.
+\item \textbf{Protocollo}, 8 bit: in ricezione indica quale protocollo dello strato superiore deve ricevere i dati. Inizialmente la tabella era nella \texttt{RFC 1700}, attualmente è un database online su \texttt{iana.org}.
+\item \textbf{Checksum dell'intestazione}, 16 bit: ad ogni router (TTL cambia ad ogni hop) viene calcolato il checksum \textbf{della sola intestazione} ponendo questo campo pari a 0. Se si ottiene un errore si scarta il datagramma.
+\item \textbf{Indirizzi sorgente e destinazione}, 32 bit: indirizzi IP mittente e destinatario
+\item \textbf{Opzioni}, variabile multiplo di 32 bit: principalmente usati a scopo di test o debug
+\item \textbf{Dati}: i dati effettivamente trasportati
 \end{list}
+\subsection{Frammentazione}
+La \textbf{MTU} pone un \textbf{limite alla lunghezza dei datagrammi IP} e tratte diverse possono porre limiti diversi.\\
+\textbf{Maximum Transfer Unit} è la quantità massima di dati trasportata dal protocollo di collegamento (\textbf{in un frame}). Può variare da una tecnologia di collegamento all'altra.
+\begin{center}
+\includegraphics[scale=0.7]{ipmtu.png}
+\end{center}
+\paragraph{Meccanismo di frammentazione} Se un router \textbf{riceve un datagramma la cui dimensione supera l'MTU della rete su cui deve spedirlo, lo spezza} in due o più datagrammi più piccoli detti \textbf{frammenti}.\\
+Il riassemblaggio è effettuato dall'entità rete nel sistema destinatario. \textbf{Se qualche frammento non arriva a destinazione si butta via tutto il datagramma}.\\\\
+\textbf{Ciascun frammento è un datagramma IP indipendente e completo}, che viene trasmesso attraverso una serie di reti fisiche indipendentemente dagli altri.
+\pagebreak
+\paragraph{Ricomporre i frammenti} Per ricomporre si usano i flag \textbf{identificazione}, \textbf{flag} e \textbf{offset}.
+\begin{list}{}{}
+\item \textbf{Identificazione}, 16 bit: identificatore associato al datagramma dall'host sorgente. Associato a IP sorgente e destinazione \textbf{identifica quel datagramma in un intervallo di tempo ragionevolmente lungo}. I \textbf{frammenti mantengono il valore di questo campo} e il destinatario riconosce i frammenti che vanno assemblati insieme.
+\item \textbf{Offset}, 13 bit: indica la posizione relativa come multiplo di 8 Byte. Serve ad ordinare i frammenti nell'assemblaggio.\\
+I frammenti \textbf{devono essere multipli di 8 Byte}, ed il primo frammento ha offset = 0.
+\item \textbf{Flag}, 3 bit: serve ad identificare l'ultimo frammento.
+\begin{list}{}{3 bit}
+\item Il bit 0 è \textbf{riservato}, per ora vale sempre 0
+\item Il bit 1 è \textbf{do not fragment}. Vale
+\begin{list}{}{}
+\item 0, se il pacchetto \textbf{può} essere frammentato
+\item 1, se il pacchetto \textbf{non può} essere (ulteriormente) frammentato
+\end{list}
+\item Il bit 2 è \textbf{more fragments}. Vale
+\begin{list}{}{}
+\item 0, se il pacchetto \textbf{è l'ultimo} frammento
+\item 1, se il pacchetto \textbf{non è l'ultimo} frammento
+\end{list}
+\end{list}
+\end{list}
+\paragraph{Ripetuto} Il processo di frammentazione \textbf{può essere ripetuto}, ad es. nel caso in cui un frammento viene inoltrato su un collegamento con MTU ancora più piccolo.
+\paragraph{Critico} La ricostruzione del datagramma è un \textbf{processo critico}, richiede risorse e se un frammento manca il datagramma è scartato.
+\begin{center}
+\includegraphics[scale=0.8]{ipframmentazioneesempio.png}
+\end{center}
+\pagebreak
+\section{Indirizzamento IP}
+%https://elearning.di.unipi.it/pluginfile.php/28806/mod_resource/content/1/L10_Rete_IntroIP.pdf, 27
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
