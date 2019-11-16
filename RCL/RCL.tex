@@ -2285,6 +2285,68 @@ L'host ottiene il proprio indirizzo e le altre informazioni in modo automatico
 \end{enumerate}
 \includegraphics[scale=0.6]{dhcpschema.png}
 \end{multicols}
+\section{IP Forwarding}
+\textbf{Ogni datagramma IP è soggetto a forwarding} da parte dell'host di origine e del router che sta attraversando.
+\subsection{Forwarding Diretto} Il pachetto IP ha come \textbf{destinazione un host nella propria rete IP}
+\begin{list}{}{}
+\item L'invio è diretto sul destinatario
+\item L'indirizzo di destinazione a livello link è quello del destinatario (MAC address)
+\item Non viene interpellata nessun'altra entità
+\end{list}
+\subsection{Forwarding Indiretto} Il pacchetto IP ha come \textbf{destinazione un host di un'altra rete IP}
+\begin{list}{}{}
+\item Viene delegato l'invio ad "un altro", cioè un router
+\item L'indirizzo di destinazione a livello link è quello del router
+\end{list}
+\textbf{In entrambi i casi}, le \textbf{condizioni necessarie} perché tutto funzioni sono che:
+\begin{list}{}{}
+\item \textbf{Esista un cammino} funzionante e diretto, a livello data link, \textbf{tra tutti gli host che appartengono ad una stessa sottorete}
+\item \textbf{Ogni host coinvolto abbia un indirizzo IP corretto}, cioè con \textbf{uguale Net ID} (cioè stessa sottorete) e con \textbf{Host ID univoco} nella sottorete.
+\end{list}
+Le due condizioni insieme diventano \textbf{condizione necessaria e sufficiente perché la comunicazione funzioni}.
+\pagebreak
+\section{NAT}
+Il \textbf{Network Address Translation} (\texttt{RFC 2663}, \texttt{RFC 3022}) permette di \textbf{trasmettere su internet il traffico proveniente da sistemai attestati su sottoreti private}, in cui sono assegnati indirizzi IP privati.\\
+L'\textbf{accesso di una rete privata ad internet} è \textbf{realizzato attraverso un router abilitato alla NAT}, il quale \textbf{ha un indirizzo IP pubblico unico}.\\
+\textbf{Tutto il traffico in uscita} dal router di accesso \textbf{ha un unico indirizzo IP sorgente pubblico} (quello del router).\\
+\textbf{Tutto il traffico in ingresso} alla subnet \textbf{ha indirizzo IP di destinazione del router} di accesso.
+\paragraph{Funzionamento} Il router di accesso \textbf{maniente in memoria una tabella di traduzione NAT}, le cui righe contengono indirizzi IP privati e numeri di porta.
+\begin{center}
+\includegraphics[scale=0.7]{nattabella.png}
+\end{center}
+\begin{enumerate}
+\item Host 10.0.0.1 manda un datagramma a 128.119.40.186:80
+\item Router NAT \textbf{traduce} l'indirizzo di origine del datagramma da 10.0.0.1:3345 a 138.76.29.7:5001 e aggiorna la tabella
+\item Arriva la risposta, l'indirizzo di destinazione è 138.76.29.7:5001
+\item Router NAT \textbf{traduce} l'indirizzo di destinazione del datagramma da 138.76.29.7:5001 a 10.0.0.1:3345
+\end{enumerate}
+\pagebreak
+\section{ICMP}
+L'\textbf{Internet Control Message Protocol} (\texttt{RFC 792})è usato da host e router per \textbf{scambiarsi messaggi di errore} o altre situazioni che \textbf{richiedono intervento}. I \textbf{messaggi ICMP sono incapsulati in datagrammi IP}, ma viene comunque considerato parte integrante dello strato di rete. \textbf{Chi implementa IP deve implementare anche ICMP}. Quando un host destinatario deve informare il mittente di errori o eventi avvenuti nell'inoltro di un pacchetto IP, utilizza il protocollo \textbf{ICMP}.\\\\
+I \textbf{pacchetti ICMP vengono instradati} dai router \textbf{prima dei pacchetti IP ordinari}.\\
+Per i pacchetti IP frammentati, i \textbf{messaggi ICMP sono relativi solo al frammento 0}. Inoltre, i \textbf{messaggi ICMP non sono \textit{mai} inviati in risposta a pacchetti IP con indirizzo mittente che non rappresenta un host unico} (\texttt{0.0.0.0}, \texttt{127.0.0.1}, broadcast).\\
+I \textbf{messaggi ICMP non sono mai inviati in risposta a messaggi di errore ICMP}, ma \textbf{possono essere inviati in risposta a messaggi ICMP di interrogazione}.
+\subsection{Formato dei messaggi}
+\begin{center}
+\includegraphics[scale=0.7]{icmpmessaggi.png}
+\end{center}
+\section{Ping}
+Una delle applicazioni che un host può utilizzare per verificare il funzionamento di un altro host è il \textbf{ping}.\\
+Il programma ping \textbf{si basa sui messaggi di richiesta e risposta eco} dell'ICMP. Un host \textbf{invia una richiesta eco} (tipo 8, codice 0) a un altro host che, se attivo, può \textbf{rispondere con una risposta eco} (tipo 0, codice 0). Fornisce anche misure dell'RTT.\\\\
+In maniera grossolana, ping può anche \textbf{misurare l'affidabilità e la congestione del router tra due host} inviando una sequenza di messaggi richiesta e risposta.
+\pagebreak
+\section{Traceroute}
+Il programma \textbf{traceroute} in UNIX (o \textbf{tracert} in Windows) può essere utilizzato per \textbf{individuare il percorso di un datagramma dalla sorgente alla destinazione} tramite l'identificazione dell'indirizzo IP di tutti i router che vengono visitati lungo il percorso.\\
+Solitamente il programma viene impostato per un massimo di 30 salti, che sono usualmente sufficienti per raggiungere la destinazione.
+\paragraph{Funzionamento} Traceroute ha un \textbf{funzionamento molto diverso da ping}. Ping è basato su due messaggi query. Traceroute invece è \textbf{implementato per mezzo di due messaggi di segnalazione degli errori}: tempo scaduto e destinazione non raggiungibile.
+\begin{center}
+\includegraphics[scale=0.7]{traceroute.png}
+\end{center}
+Traceroute \textbf{imposta inoltre un timer per trovare il tempo di round-trip} di ciascun router e della destinazione. La maggior parte dei programmi traceroute \textbf{invia tre messaggi} a ogni dispositivo, con lo stesso TTL, per poter effettuare una stima migliore del tempo di round-trip.\\
+Di seguito un esempio di funzionamento con tre messaggi per ogni dispositivo e quindi tre RTT ottenuti:
+\begin{center}
+\includegraphics[scale=0.7]{tracerouteesempio.png}
+\end{center}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
