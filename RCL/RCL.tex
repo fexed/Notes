@@ -2370,12 +2370,55 @@ Sono individuate quindi una \textbf{serie di componenti di un router}:
 \begin{center}
 \includegraphics[scale=0.7]{forwardingengine.png}
 \end{center}
-\subsection{Routing}
+\subsection{Algoritmi di Routing}
 In una rete come Internet lo \textbf{scopo del livello di rete} è quello di \textbf{consegnare un datagramma dalla sorgente alla}/e \textbf{destinazione}/i.
 \begin{list}{}{}
 \item \textbf{Routing Unicast}: \textbf{uno-a-uno}, un datagramma è destinato ad una sola destinazione
 \item \textbf{Routing Multicast}: \textbf{uno-a-molti}, un datagramma è destinato ad un gruppo di host
 \end{list}
+Rappresentiamo una rete di router \textbf{come un grafo} con \textbf{costo associato agli archi} = la distanza fra i nodi, il numero di hop\ldots
+\begin{center}
+\includegraphics[scale=0.7]{routergrafo.png}
+\end{center}
+\pagebreak
+\subsubsection{Distance Vector Routing}
+\begin{multicols}{2}
+Rappresentazione grafica dell'\textbf{equazione di Bellman-Ford}. \textbf{Aggiornamento di un percorso} usando un nodo intermedio.
+\begin{center}
+\texttt{D$_{XY}$ = min(D$_{XY}$, (C$_{XZ}$ + D$_{ZY}$))}\\
+\includegraphics[scale=0.5]{bellmanford.png}
+\end{center}
+\columnbreak
+\textbf{Vettori distanza iniziali} dei nodi di una rete.\\
+\includegraphics[scale=0.5]{vettoriiniziali.png}
+\end{multicols}
+\textbf{Aggiornamento dei vettori di distanza}.
+\begin{center}
+\includegraphics[scale=0.7]{vectorroutingaggiornamento.png}
+\end{center}
+\begin{lstlisting}
+DistanceVectorRouting() {
+	//Inizializzazione: creazione dei vettori distanza iniziali del nodo
+	D[this] = 0
+	for (y = 1 to N) {
+		if (y is vicino) D[y] = c[this][y]
+		else D[y] = INF
+	}
+	Spedisci il vettore {D[1], ..., D[N]} a tutti i vicini
+	
+	//Aggiornamento: usare il vettore ricevuto dal vicino per aggiornare quello locale
+	repeat (sempre) {
+		wait (un vettore Dw da un vicino w o un qualsiasi cambiamento negli archi)
+		for (y = 1 to N) {
+			D[y] = min(D[y], (c[this][w] + Dw[y])] //Equazione di Bellman-Ford
+		}
+		if (avviene cambiamento nel vettore)
+			spedisci il vettore {D[1], ..., D[N]} a tutti i vicini
+	}
+	
+	//Fine dell'algorimto DistanceVectorRouting
+}
+\end{lstlisting}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
