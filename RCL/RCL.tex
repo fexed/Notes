@@ -2306,7 +2306,7 @@ L'host ottiene il proprio indirizzo e le altre informazioni in modo automatico
 Le due condizioni insieme diventano \textbf{condizione necessaria e sufficiente perché la comunicazione funzioni}.
 \pagebreak
 \section{NAT}
-Il \textbf{Network Address Translation} (\texttt{RFC 2663}, \texttt{RFC 3022}) permette di \textbf{trasmettere su internet il traffico proveniente da sistemai attestati su sottoreti private}, in cui sono assegnati indirizzi IP privati.\\
+Il \textbf{Network Address Translation} (\texttt{RFC 2663}, \texttt{RFC 3022}) permette di \textbf{trasmettere su internet il traffico proveniente da sistemi attestati su sottoreti private}, in cui sono assegnati indirizzi IP privati.\\
 L'\textbf{accesso di una rete privata ad internet} è \textbf{realizzato attraverso un router abilitato alla NAT}, il quale \textbf{ha un indirizzo IP pubblico unico}.\\
 \textbf{Tutto il traffico in uscita} dal router di accesso \textbf{ha un unico indirizzo IP sorgente pubblico} (quello del router).\\
 \textbf{Tutto il traffico in ingresso} alla subnet \textbf{ha indirizzo IP di destinazione del router} di accesso.
@@ -2622,4 +2622,60 @@ while(!finito) {
 \item Unica connessione per dati + comandi
 \item Interazione stateless
 \end{list}
+\subsection{IP}
+\paragraph{Testo} Il sistema autonomo di una grande azienda è logicamente diviso in due sottosistemi: un sottosistema che usa indirizzi IP pubblici nel blocco 113.141.0.0/21, e uno che usa indirizzi IP privati nel blocco 192.168.0.0/16. Quali sono le maschere di rete (in notazione decimale puntata) usate nel sistema autonomo?
+\paragraph{Soluzione} La prima subnet mask è 255.255.248.0 e la seconda è 255.255.0.0
+\paragraph{Testo} Una rete aziendale che contiene 8000 hosts e quattro server (web, email, ftp e DNS), adotta al suo interno indirizzi privati del gruppo 192.168.0.0/16, ed usa per i suoi router NAT 6 degli indirizzi pubblici del gruppo 114.113.87.24/29.\\
+Qual è il numero massimo di connessioni TCP uscenti da AS e relative agli host che possono essere contemporaneamente attive nell’AS? Giustificare la risposta.
+\paragraph{Soluzione} 8003 (host + server) divisi in (8003/253 indirizzi per rete) 32 reti.\\
+Reti suddivise in 6 router: 5 reti per router, 7 reti sull'ultimo router.\\
+$\longrightarrow$ 32 connessioni in contemporanea.
+\pagebreak
+\paragraph{Testo} Un router IP connette tre sottoreti: 100.100.100.0/24, 111.99.99.0/24 e 200.200.200.0/24,, con MTU (Maximum Transfer Unit) pari a 900, 1000, e 1400, rispettivamente.\\
+I datagrammi gestiti dal router rispettano il formato IPV4, in particolare contengono i campi IP-S (indirizzo sorgente), IP-D (indirizzo destinazione), L (lunghezza del datagramma, inclusa l’intestazione), Id (identificatore del datagramma), F (flag di frammentazione) e O (offset).\\
+Si considerino i seguenti datagrammi ricevuti dal router:
+\begin{center}
+\includegraphics[scale=0.7]{ipes2_tabella.png}
+\end{center}
+Per ognuno di questi datagrammi dire da quale sottorete è stato ricevuto, e quali datagrammi il router invia in uscita specificandone anche la sottorete di destinazione.
+\paragraph{Soluzione}
+\begin{list}{}{}
+\item \textbf{Datagramma D1}
+	\begin{list}{-}{}
+	\item Ricevuto dalla sottorete: 100.100.100.0/24
+	\item Inviato alla sottorete: 200.200.200.0/24
+	\item Frammentato in uscita: NO
+	\item Pacchetti in uscita: uguale a D1
+	\end{list}
+\item \textbf{Datagramma D2}
+	\begin{list}{-}{}
+	\item Ricevuto dalla sottorete: 111.99.99.0/24
+	\item Inviato alla sottorete: 100.100.100.0/24
+	\item Frammentato in uscita: SI (L = 1000 $>$ MTU della destinazione che è 900)
+	\item Pacchetti in uscita:\\
+		\texttt{  Sorgente      Destinazione      L    ID    F    O}\\
+		\texttt{111.99.99.12   100.100.100.150   900   56    1    0}\\
+		\texttt{111.99.99.12   100.100.100.150   120   56    0  110}
+	\end{list}
+\item \textbf{Datagramma D3}
+	\begin{list}{-}{}
+	\item Ricevuto dalla sottorete: 200.200.200.0/24
+	\item Inviato alla sottorete: 100.100.100.0/24
+	\item Frammentato in uscita: SI (L = 1390 $>$ MTU della destinazione che è 900)
+	\item Pacchetti in uscita:\\
+		\texttt{  Sorgente      Destinazione      L    ID    F    O}\\
+		\texttt{200.200.200.28   100.100.100.65   900   123    1    0}\\
+		\texttt{200.200.200.28   100.100.100.65   120   123    0  110}
+	\end{list}
+\item \textbf{Datagramma D3}
+	\begin{list}{-}{}
+	\item Ricevuto dalla sottorete: 200.200.200.0/24
+	\item Inviato alla sottorete: 111.99.99.0/24
+	\item Frammentato in uscita: SI (L = 1398 $>$ MTU della destinazione che è 900)
+	\item Pacchetti in uscita:\\
+		\texttt{  Sorgente      Destinazione      L    ID    F    O}\\
+		\texttt{200.200.200.28   100.99.99.12   996   98    1    0}\\
+		\texttt{200.200.200.28   100.99.99.12   422   98    0  122}
+	\end{list}
+\end{list} 
 \end{document}
