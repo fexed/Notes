@@ -1,11 +1,11 @@
-\documentclass[10pt]{article}
+\documentclass[10pt]{report}
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
-\usepackage[a4paper, total={18cm, 25cm}]{geometrY}
+\usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \begin{document}
 \title{Architettura degli Elaboratori}
-\author{Federico Matteoni}
+\author{Appunti: Simone Pepi\\Stesura: Federico Matteoni}
 \date{ }
 \renewcommand*\contentsname{Indice}
 
@@ -33,14 +33,21 @@ Consiste in come sono fatti pc internamento da un punto di vista di sottosistemi
 \item Architetture General-Purpose
 \item Architetture parallele (II Compitino)
 \end{list}
+\chapter{Fondamenti di strutturazione}
 \section{Struttura a livelli}
-Quando voglio costruire qualcosa di complesso lo faccio a pezzi, partendo da comp elementari messe insieme o studiate ad altro livello, messe ulteriorimente insieme ecc.\\
-Ogni livello lo chiameremo \textbf{macchina virtuale} o MV, seguito da un numero che indica il numero di livello.\\
-\begin{list}{-}{Due approcci fondamentali:}
-\item \textbf{Linguistico}: stabilisce i livelli in base ai linguaggi usati
-\item \textbf{Funzionale}: stabilisce i livelli in base a cosa fanno
+\paragraph{Dividere} Per dedicarci allo studio di un sistema complesso spesso è utile \textbf{dividerlo in pezzi}. Nel caso di un sistema di elaborazione, in alcuni casi è \textbf{interessante avere una visione vicina alla struttura fisica} in termini di componenti hardware. In altri casi è \textbf{interessante avere una visione astratta del sistema} per poterne osservare le funzionalità e le strutture più adatte alla specifica applicazione.
+\paragraph{Astrarre} Da questa necessità deriva la possibilità di strutturare un sistema a vari \textbf{livelli di astrazione} che non descrivono una reale struttura fisica, ma è \textbf{utile per ragioni specifiche} quali:
+\begin{list}{}{}
+\item Saper riconoscere \textbf{quale metodo di progettazione strutturata} viene seguito o conviene seguire (\textbf{top-down}, \textbf{bottom-up}, \textbf{middle-out})
+\item Saper riconoscere \textbf{se i vari livelli rispettano una relazione gerarchica} oppure se non esiste alcun tipo di ordinamento
+\item Essere in grado di \textbf{valutare a quali livelli conviene descrivere e implementare} determinate funzioni del sistema
 \end{list}
-\subsection{Macchine Virtuali}
+\section{Macchine Virtuali}
+\paragraph{Sistema di elaborazione} \textbf{Le funzionalità di un sistema di elaborazione} nel suo complesso possono essere \textbf{ripartite su un certo numero di livelli} che vengono definite \textbf{macchine virtuali}. \begin{list}{-}{La suddivisione può seguire \textbf{due approcci} fondamentali:}
+	\item \textbf{Linguistico}: stabilisce i livelli in base ai linguaggi usati
+	\item \textbf{Funzionale}: stabilisce i livelli in base a cosa fanno
+\end{list}
+I vari livelli sono schematizzati come in figura:
 \begin{center}
 \rule{5cm}{1pt} Interfaccia \rule{5cm}{1pt}\\
 MV$_{i}$	R$_{i}$ = {risorse} + L$_{i}$ = {linguaggi}\\
@@ -48,20 +55,30 @@ MV$_{i}$	R$_{i}$ = {risorse} + L$_{i}$ = {linguaggi}\\
 MV$_{i-1}$	R$_{i-1}$ = {risorse} + L$_{i-1}$ = {linguaggi}\\
 \rule{5cm}{1pt} Interfaccia \rule{5cm}{1pt}\\
 \end{center}
-MV$_{i}$ realizza politica P$_{i}$ con linguaggio L$_{i}$ e risorse R$_{i}$.\\Utilizza le funzionalità che il livello MV$_{i-1}$ (primitive) fornisce attraverso l'interfaccia\\\\
-\textbf{Supporto a tempo di esecuzione} o \textbf{Runtime Support}: insieme dei livelli sottostanti. Nell'esempio, MVi ha come runtime support i livelli MVi-1 ... MV0.
-Una macchina virtuale è modulare perché devo poterla modificare, deve essere portabile (riutilizzabile in più contesti possibili).
-\pagebreak
+MV$_{i}$ realizza politica P$_{i}$ con linguaggio L$_{i}$ e risorse R$_{i}$.\\
+MV$_{i}$ utilizza le funzionalità che il livello MV$_{i-1}$ (cioè le sue primitive) fornisce \textbf{attraverso l'interfaccia}.\\
+L'interfaccia definita è fondamentale per poter rendere possibile la collaborazione tra le macchine virtuali, e permettere così ai linguaggi di MV$_{i}$ di sfruttare funzionalità e meccanismi di MV$_{i-1}$.\\
+Le macchine virtuali godono delle \textbf{seguenti proprietà}:
 \begin{list}{}{}
-\item \textbf{MV$_{4}$} Applicazioni\\L$_{4}$: Java, C, ...\\R$_{4}$: costrutti
+	\item L'\textbf{insieme} degli oggetti o risorse \textbf{R}$_{i}$ di MV$_{i}$ \textbf{è accessibile soltanto da parte dei meccanismi di L}$_{i}$ 
+	\item Al livello MV$_{i}$ \textbf{non sono note le politiche adottate dai livelli inferiori}
+\end{list}
+\paragraph{Supporto a tempo di esecuzione} Anche detto \textbf{Runtime Support}, è l'\textbf{insieme dei livelli sottostanti}.\\
+Nell'esempio, MV$_{i}$ ha come runtime support i livelli MV$_{i-1}$ \ldots MV$_{0}$.
+\paragraph{Virtualizzazione ed Emulazione} Con \textbf{virtualizzazione} o astrazione intendiamo il \textbf{processo secondo cui un livello MV$_{i}$ usa funzionalità dei livelli superiori}.\\
+Con \textbf{emulazione} o concretizzazione intendiamo il \textbf{processo secondo cui un livello MV$_{i}$ usa funzionalità dei livelli inferiori}.
+\paragraph{Modularità} Tutte queste funzionalità sono \textbf{alla base della strutturazione di sistemi con elevata modularià}, \textbf{modificabilità}, \textbf{portabilità}, \textbf{manutebilità} e \textbf{testabilità}.
+\subsection{Le Macchine Virtuali}
+\begin{list}{}{}
+\item \textbf{MV$_{4}$} Applicazioni\\L$_{4}$: Java, C, ML\ldots\\R$_{4}$: oggetti astratti, costrutti, tipi di dato definibili dall'utente
 \item \rule{5cm}{1pt} \textit{Interfaccia}: chiamate di sistema \rule{5cm}{1pt}
-\item \textbf{MV$_{3}$} Sistema Operativo\\L$_{3}$: C\\R$_{3}$: variabili condivise, risorse condivise
+\item \textbf{MV$_{3}$} Sistema Operativo\\L$_{3}$: C, linguaggi di programmazione concorrente, linguaggi sequenziali con librerie che implementano meccanismi di concorrenza\\R$_{3}$: variabili condivise, risorse condivise, oggetti astratti usati per la cooperazione tra processi e thread
 \item \rule{5cm}{1pt} \textit{Interfaccia}: istruzioni assembler \rule{5cm}{1pt}
 \item \textbf{MV$_{2}$} Macchina assembler\\L$_{2}$: assembler (D-RISC)\\R$_{2}$: registri, memoria, canali di comunicazione
 \item \rule{5cm}{1pt} \textit{Interfaccia}: istruzioni firmware per l'assembler \rule{2.8cm}{1pt}
-\item \textbf{MV$_{1}$} Firmware\\L$_{1}$: microlinguaggio\\R$_{1}$: sommatore, commutatore
+\item \textbf{MV$_{1}$} Firmware\\L$_{1}$: microlinguaggio\\R$_{1}$: sommatore, commutatore, registri, strutture di interconnessione intra-unità e inter-unità
 \item \rule{5cm}{1pt} \textit{Interfaccia}: hardware \rule{6.7cm}{1pt}
-\item \textbf{MV$_{0}$} Hardware\\L$_{0}$: \textit{funzionamento dei circuiti elettronici}\\R$_{0}$: circuiti elettronici elemntari (AND, OR, NOT) 
+\item \textbf{MV$_{0}$} Hardware\\L$_{0}$: \textit{funzionamento dei circuiti elettronici}\\R$_{0}$: circuiti elettronici elementari (AND, OR, NOT), collegamenti fisici, reti logiche
 \end{list}
 Il corso riguarderà principalmente i livelli MV$_{2}$ $\rightarrow$ MV$_{0}$ inclusi, comprese le istruzioni assembler.\\
 Il livello firmware sarà fatto da \textbf{memoria}, \textbf{processore} e \textbf{dispositivi I/O}. I dispositivi di I/O comunicano bilateralmente con la memoria e il processore comunica bilateralmente con memoria. Opzionalmente, i dispositivi di I/O comunicano bilateralmente direttamente con il processore. Questa è l'architettura standard, presentata in maniera estremamente semplicistica.\\
