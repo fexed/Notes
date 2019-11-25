@@ -3,6 +3,8 @@
 \usepackage[italian]{babel}
 \usepackage{multicol}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\usepackage{graphicx}
+\graphicspath{ {./img/} }
 \begin{document}
 \title{Architettura degli Elaboratori}
 \author{Appunti: Simone Pepi\\Stesura in \LaTeX: Federico Matteoni}
@@ -83,6 +85,37 @@ Con \textbf{emulazione} o concretizzazione intendiamo il \textbf{processo second
 Il corso riguarderà principalmente i livelli MV$_{2}$ $\rightarrow$ MV$_{0}$ inclusi, comprese le istruzioni assembler.\\
 Il livello firmware sarà fatto da \textbf{memoria}, \textbf{processore} e \textbf{dispositivi I/O}. I dispositivi di I/O comunicano bilateralmente con la memoria e il processore comunica bilateralmente con memoria. Opzionalmente, i dispositivi di I/O comunicano bilateralmente direttamente con il processore. Questa è l'\textbf{architettura standard}, presentata in maniera \textbf{estremamente semplicistica}.\\
 Vedremo nel dettaglio il processore e la memoria, non i dispositivi di I/O perché troppo complessi.
+\pagebreak
+\subsection{Struttura Interna}
+\paragraph{Da Verticale a Orizzontale} Fin'ora abbiamo parlato delle macchine virtuali in senso \textbf{verticale}, adesso vogliamo trovare un modo concettualmente uniforme -- \textbf{orizzontale} -- per poter studaire i livelli \textbf{al loro interno}.
+\paragraph{Sistema di Elaborazione} Una volta scelta la struttura verticale di un sistema, dobbiamo capire come funziona l'interno di ciascun livello per poter far funzionare tutto il sistema, cioè dobbiamo capire \textbf{come funziona il sistema di elaborazione di un livello} composto da due componenti:
+\begin{list}{}{}
+	\item \textbf{Moduli di Elaborazione}, \textbf{ad ognuno} dei quali \textbf{è affidata l'elaborazione di un sottoinsieme di operazioni} del livello.
+	\item \textbf{Struttura di Interconnessione}, \textbf{con la quale i moduli} di elaborazione del livello \textbf{cooperano e comunicano tra loro}.\\
+	Essa può essere di due tipi:
+\end{list}
+\begin{center}
+\includegraphics[scale=0.6]{strutturainterna.png}
+\end{center}
+\paragraph{Moduli di Elaborazione} Un modulo di elaborazione è definito come \textbf{un'entità autonoma e sequenziale}.
+\subparagraph{Autonomia} L'autonomia è \textbf{data dal fatto che ogni modulo} di elaborazione \textbf{esegue un proprio controllo in maniera indipendente da altri moduli}.\\
+Esso dunque \textbf{definisce le proprie strutture dati, operazioni elementari e interfacce} verso altri moduli.
+\subparagraph{Sequenzialità} La sequenzialità è \textbf{data dal fatto che ogni modulo} di elaborazione \textbf{ha un singolo luogo di controllo}: \textbf{la sua attività è descritta} da un algoritmo di controllo costituito \textbf{da una lista sequenziale di comandi}.\\
+La sequenzialità \textbf{non implica che un modulo non possa fare uso di forme di elaborazione concorrenti o parallele}. Alcuni o tutti i comandi di una lista sequenziale possono essere costituiti da una o più operazioni elementari \textbf{eseguite simultaneamente}.
+\subsection{Parallelismo}
+\paragraph{Sovrapporre} Poichè i moduli sono autonomi fra loro, sono in grado di \textbf{operare indipendentemente l'uno dall'altro}. \textbf{Le loro attività possono quindi essere sovrapposte nel tempo} eccetto quando, per ragioni legate alla sincronizzazione, alcuni di loro devono attendere il verificarsi di certi eventi dipendenti dall'elaborazione di altri.\\
+In alcuni \textbf{casi limite} seppur realistici, il \textbf{funzionamento di tutti i moduli è rigidamente sequenziale}.\\\\
+Tutto questo \textbf{vale per qualsiasi livello} o Macchina Virtuale, quindi sia per firmware che hardware.
+\pagebreak
+\subsection{Modelli di Cooperazione}
+Dato un sistema di elaborazione a un certo livello, \textbf{i vari moduli} presenti \textbf{possono cooperare secondo due modalità}:
+\begin{list}{}{}
+	\item \textbf{Ambiente Globale}: esiste un \textbf{insieme di oggetti comuni accessibili da tutti i moduli} che devono cooperare tra loro, e \textbf{tutti i moduli possono operare su tale insieme}
+	\item \textbf{Ambiente Locale}: \textbf{i moduli non condividono nulla}, quindi \textbf{non esiste alcun oggetto condivisio tra i moduli}. La \textbf{cooperazione avviene tramite scambio di messaggi}.
+\end{list}
+\begin{center}
+\includegraphics[scale=0.5]{modellicoop.png}
+\end{center}
 \pagebreak
 \section{Compilazione vs Interpretazione}
 \paragraph{Programmi} L'obiettivo di un calcolatore è \textbf{rendere possibile l'esecuzione di programmi} con una certa qualità di servizio. I programmi vengono \textbf{progettati mediante linguaggi di alto livello}, quindi \textbf{occorre operare una traduzione da linguaggio di alto livello a linguaggio assembler}.\\
