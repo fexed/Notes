@@ -169,23 +169,15 @@ Parte del secondo pezzo di codice, ad esempio, verrà tradotto in questa maniera
 \end{list}
 \textbf{Microlinguaggio corrispondente}
 \end{multicols}
-\section{Assembler D-RISC}
-Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
-2$^{6}$ = 64 registri generali nel processore\\
-Ad esempio \texttt{ADD R$_{i}$, R$_{j}$, R$_{h}$} significa \texttt{M[R[i] + R[j]] $\rightarrow$ R[h]}, e \texttt{ADD} è memorizzato con un determinato codice identificativo.\\
-Per l'inizializzazione, ho il registro \texttt{R$_{0}$} che contiene sempre 0.
-
-\paragraph{Esempio di RTS} \texttt{MV3 C = A + B}\\
-Su MV$_{2}$ diventa \texttt{ADD R$_{A}$, R$_{B}$, R$_{C}$}\\
-Su MV$_{1}$ ho registro A, registro B verso addizionatore/sottrattore (con alfa che indica operazione) e porta in C (con beta che indica scrittura attiva o meno)\\
-Su MV$_{0}$ i vari componenti sono costruiti da una serie di gate (\texttt{AND}, \texttt{OR}, \texttt{NOT}).\\
-\\
-PO Parte Operativa\\
-PC Parte Controllo\\
-\texttt{roba eventuale}
-\section{Reti Combinatorie}
-In una rete combinatoria si ha una serie di segnali in input (X$_{1}$ \ldots X$_{n}$) che vengono trasformati in una serie di segnali in output (Y$_{1}$ \ldots Y$_{m}$). A seconda delle varie componenti presenti sulla rete combinatoria, un insieme di segnali 0/1 viene trasformato in un altro insieme di segnali 0/1 seguendo le regole dell'\textbf{algebra booleana}.\\
-Elettricamente, quando un segnale vale 1 significa che la tensione è circa 5V.
+\chapter{MV0 -- Hardware}
+\section{Reti Logiche}
+L'\textbf{implementazione a livello hardware di funzioni "pure"} dà luogo alle \textbf{Reti Combinatorie}.\\
+L'\textbf{implementazione} a livello hardware \textbf{di funzioni "con stato"} dà luogo alle \textbf{Reti Sequenziali}.
+\paragraph{Famiglia} Entrambe definiscono la famiglia delle \textbf{Reti Logiche} che permettono di \textbf{realizzare il livello hardware di un sistema di elaborazione}.
+\subsection{Reti Combinatorie}
+Una \textbf{rete combinatoria è} una rete logica \textbf{con \texttt{n} ingressi binari X$_{1}$ \ldots X$_{n}$ e \texttt{m} uscite binarie Z$_{1}$ \ldots Z$_{m}$}. Ad \textbf{ogni combinazione di valori in entrata corrisponde una ed una sola combinazione di valori in uscita}. La corrispondenza è definita secondo la funzione implementata dalla rete combinatoria.\\
+Indichiamo X$_{1}$ \ldots X$_{n}$ e Z$_{1}$ \ldots Z$_{m}$ come \textbf{variabili logiche} di ingresso ed uscita. \textbf{Tutte le combinazioni possibili} delle variabili logiche \textbf{sono dette stati} di ingresso -- con 2$^n$ possibilità -- e di uscita -- 2$^m$ possibilità.\\\\
+Pe rdescrivere le proprietà e la struttura interna delle reti combinatorie si usa un'\textbf{algebra isomorfa a quella logica}, chiama \textbf{Algebra Booleana}.
 \subsection{Algebra Booleana}
 L'algebra booleana è computata su \textbf{due valori} e \textbf{tre operatori}:
 \begin{center}
@@ -264,8 +256,8 @@ X & Y & $\overline{Z}$ & R \\
 \item \texttt{R = X * Y}
 \end{list}
 \end{multicols}
-
-\section{26-09-2019}
+\paragraph{Esempio}
+\begin{center}
 \begin{tabular}{cccc|c}
 S1 & S2 & X & Y & S1* \\
 0 & 0 & 0 & 0 & 0\\
@@ -284,12 +276,31 @@ S1 & S2 & X & Y & S1* \\
 1 & 1 & 0 & 1 & 1\\
 1 & 1 & 1 & 0 & 1\\
 1 & 1 & 1 & 1 & 1\\
-\end{tabular}\\
-S1* = $\overline{S1}$*$\overline{S2}$*X*Y + $\overline{S1}$*S2*X*Y + S1*$\overline{S2}$*$\overline{X}$*$\overline{Y}$ + S1*$\overline{S2}$*X*$\overline{Y}$ + S1*$\overline{S2}$*X*Y + S1*S2*$\overline{X}$*Y + S1*S2*X*$\overline{Y}$ + S1*S2*X*Y\\
-mappa di carnaut\\
-00 01 11 10, così che tra due colonne cambi un solo bit\\
-prendere multipli di due "uni", cioè 2/4/8\ldots uni\\
-Gli estremi sono logicamente collegati (colonna 00 e colonna 10 sono adiacenti quindi posso formare rettangoli anche tra loro)
+\end{tabular}
+\end{center}
+S1* = $\overline{S1}$*$\overline{S2}$*X*Y + $\overline{S1}$*S2*X*Y + S1*$\overline{S2}$*$\overline{X}$*$\overline{Y}$ + S1*$\overline{S2}$*X*$\overline{Y}$ + S1*$\overline{S2}$*X*Y + S1*S2*$\overline{X}$*Y + S1*S2*X*$\overline{Y}$ + S1*S2*X*Y
+\pagebreak
+\subsection{Porte Logiche}
+Una volta ricavata l'espressione logica dalla tabella di verità, è \textbf{immediato realizzare lo schema logico utilizzando le componenti hardware elementari}, dette anche \textbf{porte logiche}:
+\begin{center}
+\includegraphics[scale=0.9]{portelogiche.png}
+\end{center}
+Ogni porta logica AND e OR \textbf{comporta un ritardo nel calcolo di 1tp}. Inoltre, ogni AND e OR può avere \textbf{massimo 8 ingressi}, quindi se ho più di 8 segnali in ingresso devo avere \textit{almeno} due livelli: un livello con tante porte logiche quando n/8 con n numero di segnali in ingresso, e \textit{almeno} un livello in cui "unire" i segnali in uscita in una porta logica analoga.
+\subsection{Componenti Standard}
+\section{Assembler D-RISC}
+Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
+2$^{6}$ = 64 registri generali nel processore\\
+Ad esempio \texttt{ADD R$_{i}$, R$_{j}$, R$_{h}$} significa \texttt{M[R[i] + R[j]] $\rightarrow$ R[h]}, e \texttt{ADD} è memorizzato con un determinato codice identificativo.\\
+Per l'inizializzazione, ho il registro \texttt{R$_{0}$} che contiene sempre 0.
+
+\paragraph{Esempio di RTS} \texttt{MV3 C = A + B}\\
+Su MV$_{2}$ diventa \texttt{ADD R$_{A}$, R$_{B}$, R$_{C}$}\\
+Su MV$_{1}$ ho registro A, registro B verso addizionatore/sottrattore (con alfa che indica operazione) e porta in C (con beta che indica scrittura attiva o meno)\\
+Su MV$_{0}$ i vari componenti sono costruiti da una serie di gate (\texttt{AND}, \texttt{OR}, \texttt{NOT}).\\
+\\
+PO Parte Operativa\\
+PC Parte Controllo\\
+\texttt{roba eventuale}
 \section{moduli operativi/unità funzionali}
 Parte operativa: produce l'output\\
 Parte controllo: dice alla PO \textit{come controllare} i suoi componenti (es. produe gli alfa (dicono cosa fare ai componenti) e i beta (quali registri in scrittura e quali no)). La PO porta alla PC le \textbf{variabili di condizionamento}, che istruiscono la PC su \textit{come} produrre alfa e beta.\\
