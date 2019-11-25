@@ -5,7 +5,7 @@
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \begin{document}
 \title{Architettura degli Elaboratori}
-\author{Appunti: Simone Pepi\\Stesura: Federico Matteoni}
+\author{Appunti: Simone Pepi\\Stesura in \LaTeX: Federico Matteoni}
 \date{ }
 \renewcommand*\contentsname{Indice}
 
@@ -81,27 +81,43 @@ Con \textbf{emulazione} o concretizzazione intendiamo il \textbf{processo second
 \item \textbf{MV$_{0}$} Hardware\\L$_{0}$: \textit{funzionamento dei circuiti elettronici}\\R$_{0}$: circuiti elettronici elementari (AND, OR, NOT), collegamenti fisici, reti logiche
 \end{list}
 Il corso riguarderà principalmente i livelli MV$_{2}$ $\rightarrow$ MV$_{0}$ inclusi, comprese le istruzioni assembler.\\
-Il livello firmware sarà fatto da \textbf{memoria}, \textbf{processore} e \textbf{dispositivi I/O}. I dispositivi di I/O comunicano bilateralmente con la memoria e il processore comunica bilateralmente con memoria. Opzionalmente, i dispositivi di I/O comunicano bilateralmente direttamente con il processore. Questa è l'architettura standard, presentata in maniera estremamente semplicistica.\\
+Il livello firmware sarà fatto da \textbf{memoria}, \textbf{processore} e \textbf{dispositivi I/O}. I dispositivi di I/O comunicano bilateralmente con la memoria e il processore comunica bilateralmente con memoria. Opzionalmente, i dispositivi di I/O comunicano bilateralmente direttamente con il processore. Questa è l'\textbf{architettura standard}, presentata in maniera \textbf{estremamente semplicistica}.\\
 Vedremo nel dettaglio il processore e la memoria, non i dispositivi di I/O perché troppo complessi.
-\subsection{Compilazione vs Interpretazione}
-\begin{multicols}{2}
-\textbf{Compilatore}: è \textbf{statico}, vedendo tutto il codice può ottimizzarlo. Sostanzialmente è l'opera di un traduttore, che può leggersi il testo più volte per tradurlo alla perfezione.\\
-\columnbreak
-
-\textbf{Interprete}: è \textbf{dinamico}, quindi non può ottimizzare. Il firmware riceve un'istruzione alla volta quindi la interpreta.\\\\
-\end{multicols}
-Entrambe servono per tradurre il \textbf{codice sorgente} nel \textbf{programma oggetto} o \textbf{eseguibile}.\\
-
-\textbf{Suppongo programmi}:\\
-\begin{multicols}{2}
-\texttt{for i=0; i++; i<n\\    A[i] = A[i] + B[i];}
-
-\columnbreak
-\texttt{for i=0; i++; i<n\\    B[i] = B[i] + C;}
-\end{multicols}
-Ricevendo i due blocchi di istruzioni, il compilatore riconosce che sono diverse e le compila in modo diverso. Però in entrambi i casi sono del tipo \textit{oggetto = somma due oggetti}, quindi produce una sequenza di istruzioni analoga (a meno di registri e dati, ovviamente).\\
-
 \pagebreak
+\section{Compilazione vs Interpretazione}
+\paragraph{Programmi} L'obiettivo di un calcolatore è \textbf{rendere possibile l'esecuzione di programmi} con una certa qualità di servizio. I programmi vengono \textbf{progettati mediante linguaggi di alto livello}, quindi \textbf{occorre operare una traduzione da linguaggio di alto livello a linguaggio assembler}.\\
+Tale traduzione può essere effettuata tramite due ben note tecniche e loro combinazioni:
+\begin{multicols}{2}
+\textbf{Compilatore}: è \textbf{statico}.\\\textbf{Sostituisce l'intera sequenza del programma} sorgente con un sequenza di istruzioni assembler. Questa traduzione viene effettuata staticamente, vale a dire in fase di preparazione e \textbf{prima che il programma passi in esecuzione}.\\
+Uno compilatore ha \textbf{completa visione del codice} e quindi \textbf{può ottimizzarlo}. La sua attività è analoga all'opera di un traduttore, che può leggersi il testo più volte per tradurlo alla perfezione.
+\columnbreak
+
+\textbf{Interprete}: è \textbf{dinamico}\\ Scandisce la sequenza \textbf{sostituendo ogni singolo comando} con una sequenza na di istruzioni assembler. La traduzione è effettuata dinamicamente, cioè \textbf{a tempo di esecuzione}, quindi non può ottimizzare. Il firmware riceve un'istruzione alla volta, quindi la interpreta.\\
+Il suo svantaggio è che il \textbf{tempo di interpretazione viene pagato ogni volta che lancio il programma} e che \textbf{non può ottimizzare non avendo una visione globale} del programma.
+\end{multicols}
+Entrambe servono per tradurre il \textbf{codice sorgente} nel \textbf{programma oggetto} o \textbf{eseguibile}. L'esecuzione è quindi \textbf{più veloce in un programma compilato} rispetto ad un programma interpretato.
+\begin{center}
+\texttt{ADD R1, R2, R3} $\longrightarrow$ \textit{compilatore} $\longrightarrow$ \textbf{OBJ} $\longrightarrow$ Interprete Firmware (interfaccia tra MV ASM e MV FW)
+\end{center}
+Intuitivamente, dall'istruzione ad alto livello viene \textbf{compilato un programma oggetto OBJ} il quale è un insieme di bit che \textbf{viene interpretato dall'interprete firmware}.
+\paragraph{Esempio} \textbf{Suppongo programmi}:\\
+\begin{center}
+	\begin{multicols}{2}
+	\textbf{A}
+	\begin{verbatim}
+for i=0; i++; i<n
+    A[i] = A[i] + B[i];
+	\end{verbatim}
+
+	\columnbreak
+	\textbf{B}
+	\begin{verbatim}
+for i=0; i++; i<n
+    B[i] = B[i] + C;
+	\end{verbatim}
+	\end{multicols}
+\end{center}
+Ricevendo i due blocchi di istruzioni, il \textbf{compilatore riconosce che sono diverse e le compila in modo diverso}. Però in entrambi i casi sono del tipo \textit{oggetto = somma due oggetti}, quindi produce una sequenza di istruzioni analoga (a meno di registri e dati, ovviamente).
 Parte del secondo pezzo di codice, ad esempio, verrà tradotto in questa maniera:
 \begin{multicols}{2}
 \begin{list}{}{}
@@ -118,7 +134,7 @@ Parte del secondo pezzo di codice, ad esempio, verrà tradotto in questa maniera
 \item \texttt{R[1]  $\rightarrow$ M[R[base] + R[I]]}
 \item \texttt{R[I] + 1 $\rightarrow$ R[I]}
 \end{list}
-Microlinguaggio corrispondente
+\textbf{Microlinguaggio corrispondente}
 \end{multicols}
 \section{Assembler D-RISC}
 Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
