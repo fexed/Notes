@@ -2349,6 +2349,7 @@ Di seguito un esempio di funzionamento con tre messaggi per ogni dispositivo e q
 \end{center}
 \pagebreak
 \section{Routing}
+\subsection{Router}
 Fin'ora abbiamo considerato il \textbf{router} come una \textbf{scatola che accetta pacchetti in entrata} da una delle interfacce, \textbf{usa una tabella d'inoltro per trovare la porta} di output e da quest'ultima \textbf{invia il pacchetto}.\\
 Sono individuate quindi una \textbf{serie di componenti di un router}:
 \begin{list}{}{}
@@ -2383,10 +2384,59 @@ Rappresentiamo una rete di router \textbf{come un grafo} con \textbf{costo assoc
 \end{center}
 \pagebreak
 \subsubsection{Tipologie}
-\paragraph{Routing Statico}
-\paragraph{Routing Dinamico} algoritmi
-\paragraph{Globali} Link State
-\paragraph{Decentralizzati} Distance Vector
+\paragraph{Routing Statico} In questo tipo di routing, le \textbf{entry della tabella vengono configurate manualmente} dall'operatore. Questo metodo \textbf{viene usato per reti di piccole dimensioni}, la cui topologia è poco variabile e \textbf{dove è possibile prevedere tutti i possibili percorsi di un pacchetto IP} nella rete.
+\paragraph{Routing Dinamico} Con il routing dinamico si rendono necessari \textbf{protocolli specifici che provvedono automaticamente ad inserire} nella tabella di routing \textbf{le entry relative ai possibili percorsi}. \textbf{Viene usato per reti medie-grandi ed a topologia variabile} come grandi LAN private ed Internet.
+\paragraph{Algoritmi} Gli \textbf{algoritmi di routing} si possono \textbf{classificare} in:
+\begin{list}{}{}
+\item \textbf{Globali}, se \textbf{si basano sulla conoscenza della topologia di tutta la rete}. Il \textbf{calcolo} può essere \textbf{fatto in un unico sito} (\textbf{algoritmo centralizzato}) o in più nodi, utilizzando informazioni sulla connettività di tutti i nodi e sui costi di tutti i link. L'algoritmo riceve quindi \textbf{in ingrasso tutti i collegamenti tra i nodi ed i loro costi}.\\Esempio: \textbf{algoritmo Link State}
+\item \textbf{Decentralizzati}, quando \textbf{nessun nodo conosce la topologia di tutta la rete} ma ha \textbf{informazioni solo sui nodi ed i collegamenti vicini}. Il \textbf{calcolo} del percorso è \textbf{iterativo distribuito}. \textbf{Ogni nodo elabora un vettore di stima dei costi} (distanza) verso tutti gli altri nodi della rete. Il cammino a costo minimo viene calcolato in modo iterativo distribuito.\\Esempio: \textbf{algoritmo Distance Vector}.
+\end{list}
+\pagebreak
+\subsubsection{Algoritmo Link State}
+\paragraph{Premesse} La \textbf{topologia} di rete e tutti i \textbf{costi dei collegamenti} sono \textbf{noti a tutti i nodi}, attraverso il \textbf{link-state broadcast}. Inoltre, \textbf{tutti i nodi dispongono delle stesse informazioni}.
+\paragraph{Obiettivo} Calcola il \textbf{cammino a costo minimo} da un nodo \textbf{origine a tutti i nodi della rete}, e crea una tabella d'inoltro per quel nodo, sfruttanto l'\textbf{Algoritmo di Dijkstra}: iterativo, alla k-esima iterazioni sono noti i cammini a costo minimo fino a k nodi.
+\paragraph{Link-State Database}
+\begin{center}
+	\begin{multicols}{2}
+		\includegraphics[scale=0.7]{linkstategraph.png}\\
+		\includegraphics[scale=0.7]{linkstatedatabase.png}
+	\end{multicols}
+\end{center}
+\paragraph{Link-State Packet} Vengono creati ed inviati da ciascun nodo.
+\begin{center}
+	\includegraphics[scale=0.7]{linkstatepacket.png}
+\end{center}
+\paragraph{Notazione}
+\begin{list}{}{}
+	\item \texttt{C(x, y)}: costo del collegamento dal nodo \texttt{x} al nodo \texttt{y}\\
+	= $\infty$ \textbf{se non sono adiacenti}.
+	\item \texttt{D(v)}: costo del cammino dal nodo origine alla destinazione \texttt{v} per quanto riguarda l'iterazione corrente.
+	\item \texttt{p(v)}: immediato predecessore di \texttt{v} lungo il cammino.
+	\item \texttt{N*}: sottoinsieme di nodi per cui il cammino a costo minimo dall'origine è definitivamente noto.
+\end{list}
+\pagebreak
+\begin{lstlisting}
+DijkstraAlgorithm() {
+	//Inizializzazione
+	N* = {u}
+	per tutti i nodi v
+		if (v adiacente a u) D(v) = C(u, v)
+		else D(v) = inf
+	
+	//Loop
+	while (fino a che tutti i nodi non sono in N*) {
+		trova w non in N* tale che D(w) minimo
+		aggiungi w a N*
+		aggiorna D(v) per tutti i v adiacenti a w e non in N*
+		D(v) = min{D(v), D(w) + c(w, v)}
+		//Il nuovo costo verso v = il vecchio costo verso v, oppure il costo del cammino minimo noto verso w + il costo da w a v
+	}
+}
+\end{lstlisting}
+\paragraph{Esempio}
+\begin{center}
+	\includegraphics[scale=0.7]{dijkstraexample.png}
+\end{center}
 \pagebreak
 \subsubsection{Distance Vector Routing}
 \begin{multicols}{2}
@@ -2414,7 +2464,7 @@ DistanceVectorRouting() {
 	Spedisci il vettore {D[1], ..., D[N]} a tutti i vicini
 	
 	//Aggiornamento: usare il vettore ricevuto dal vicino per aggiornare quello locale
-	repeat (sempre) {
+	while (sempre) {
 		wait (un vettore Dw da un vicino w o un qualsiasi cambiamento negli archi)
 		for (y = 1 to N) {
 			D[y] = min(D[y], (c[this][w] + Dw[y])] //Equazione di Bellman-Ford
@@ -2449,6 +2499,39 @@ https://tools.ietf.org/html/rfc7868#page-38
 \end{verbatim}
 \end{list}
 \end{list}
+\subsubsection{Link-State vs Distance Vector}
+\begin{list}{}{}
+	\item \textbf{Complessità dei messaggi}
+	\begin{list}{}{}
+		\item \textbf{Link-State}: con n nodi, E collegamenti, si inviano O(nE) messaggi.
+		\item \textbf{Distance Vector}: richiede scambi tra nodi adiacenti. Il tempo di convergenza può variare
+	\end{list}
+	\item \textbf{Velocità di convergenza}
+	\begin{list}{}{}
+		\item \textbf{Link-State}: l'algoritmo O(n$^2$) richiede O(nE) messaggi. Ci possono essere oscillazioni di velocità
+		\item \textbf{Distance Vector}: può convergere lentamente. Può presentare cicli d'instradamento. Può presentare il Count-To-Infinity problem
+	\end{list}
+	\item \textbf{Robustezza}
+	\begin{list}{}{}
+		\item \textbf{Link-State}: un router può comunicare via broadcast un costo sbagliato per uno dei suoi collegamenti connessi, ma non per altri. I nodi si occupano di calcolare soltanto le proprie tabelle.
+		\item \textbf{Distance Vector}: un nodo può comunicare cammini a costo minimo errati a tutte le destinazioni. La tabella di ciascun nodo può essere usata dagli altri. Un \textbf{calcolo errato si può diffondere per l'intera rete}.
+	\end{list}
+\end{list}
+\pagebreak
+\section{Struttura di Internet}
+\begin{center}
+	\includegraphics[scale=0.7]{strutturainternet.png}
+\end{center}
+\subsection{Instradamento Gerarchico}
+Vedere internet come una rete costituita da un insieme di router omogenei interconnessi è \textbf{una visione semplicistica}: problemi di scalabilità e autonomia amministrativa.
+\paragraph{Sistemi Autonomi} Nella realtà, i router sono organizzati in \textbf{sistemi autonomi} (\textbf{AS}).
+\begin{list}{}{}
+	\item Un AS è un \textbf{gruppo connesso di una o più reti IP} gestite da uno o più operatori \textbf{che adottano le stesse politiche di routing verso gli altri AS}.
+	\item I vari AS \textbf{decidono autonomamente i protocolli e le politiche di routing che intendono adottare al loro interno}. I protocollo di routing all'interno di un AS sono detti \textbf{Interior Gateway Protocol} (\textbf{IGP}).
+	\item I protocolli di routing fra le AS sono detti \textbf{Exterior Gateway Protocol} (\textbf{EGP})
+	\item All'interno di ciascun AS i \textbf{router sono sotto uno stesso controllo amministrativo} e \textbf{usano lo stesso protocollo di routing} (es RIP, OSPF\ldots)
+\end{list}
+% https://elearning.di.unipi.it/pluginfile.php/29050/mod_resource/content/1/L13_LinkState_AS_protocolli.pdf, 10 compresa
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
