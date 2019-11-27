@@ -2576,8 +2576,55 @@ Altrimenti sceglierà\ldots\footnote{Vedi più avanti}
 \end{center}
 \paragraph{Caratteristiche} Processo demone \texttt{routed} su porta 520 in UDP. Gli aggiornamenti vengono inviati ogni 30 secondi, oppure quando cambia la tabella d'inoltro.
 \begin{lstlisting}
-Nodo R riceve advertisement da vicino V con Dv[y] = 
+Nodo R riceve advertisement da vicino V con DV[y]: DR[y] = 1 + DV[y]
+
+Se DR[y] >= 1 + DV[y] e nextHopR[y] != V
+//costo ricevuto inferiore a quello del vecchio percorso
+Oppure
+Se nextHopR[y] = V
+//il percorso era noto ed era stato annunciato da V, ma costo cambiato
 \end{lstlisting}
+\pagebreak
+\subsubsection{OSPF}
+\paragraph{Open Shortest-Path First} INTRA-AS, Link-State
+\begin{center}
+\includegraphics[scale=0.7]{ospf.png}
+\end{center}
+\paragraph{Idea} Un AS può essere \textbf{partizionato in aree} per ridurre il flooding di pacchetti Link-State, una delle quali fa da \textbf{dorsale} (\textbf{backbone area}).\\
+Usa il protocollo IP.
+\begin{center}
+\includegraphics[scale=0.7]{ospfaree.png}
+\end{center}
+\pagebreak
+\subsubsection{BGP}
+\paragraph{Border Gateway Protocol} Questo è l'\textbf{unico protocollo INTER-AS} usato su Internet.
+\paragraph{Funzionamento} Coppie di router si \textbf{scambiano info sulle connessioni TCP semi-permanenti}: sessioni BGP \textbf{esterne} e \textbf{interne}.
+\begin{center}
+\includegraphics[scale=1]{bgp.png}
+\end{center}
+\paragraph{Caratteristiche}
+\begin{list}{}{}
+	\item \textbf{Aggregazione degli indirizzi}, destinazioni rappresentate da prefissi CIDR (\textbf{Class Inter-Domain Routing}).\\
+	Pubblicare un prefisso significa \textbf{impegnarsi a instradare pacchetti destinati a reti in quel prefisso}.
+	\item \textbf{Distribuzione delle informazioni di raggiungibilità}: il gateway riceve info sulla sessione eBGP e distribuisce info sulle sessioni iBGP.\\
+	Altro gateway dell'AS può ripubblicizzare info con eBGP\ldots
+	\item \textbf{Politiche d'importazione}: quando un gateway riceve un advertisement, usa tali politiche per accettarlo o rifiutarlo.
+	\item \textbf{Scelta delle rotte}: un router può riceve più di una rotta per lo stesso prefisso. Sequenza di regole principale:
+		\begin{enumerate}
+			\item Attributo di "preferenza locale", scelta dell'amministratore o impostato dai router dell'AS. Vengono selezionati gli advertisement con i valori più alti
+			\item \texttt{AS\_PATH} più breve
+			\item \texttt{NEXT\_HOP} più vicino ("\textbf{hot potato routing}")
+		\end{enumerate}
+\end{list}
+\paragraph{Advertisement BGP} \texttt{route = prefix + attributes}\\
+I due attributi più importanti sono:
+\begin{list}{}{}
+	\item \texttt{AS\_PATH}\\
+	Sequenza degli AS attraversati dall'advertisement. Usato per scartare gli advertisement già ricevuti e \textbf{scegliere tra più percorsi} per lo stesso prefisso.
+	\item \texttt{NEXT\_HOP}\\
+	Indica l'interfaccia del gateway da usare per il prefisso pubblicato.\\
+	\texttt{RFC 1163}: l'attributo \texttt{NEXT\_HOP} definisce l'indirizzo IP del router di bordo che dovrebbe essere usato come next hop verso le reti elencate nel messaggio \texttt{UPDATE}. Questo router di bordo deve appartenere alla stessa AS di chi emette l'advertisement.
+\end{list}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
