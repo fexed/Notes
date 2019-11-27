@@ -2522,7 +2522,7 @@ https://tools.ietf.org/html/rfc7868#page-38
 \begin{center}
 	\includegraphics[scale=0.7]{strutturainternet.png}
 \end{center}
-\subsection{Instradamento Gerarchico}
+\subsection{Sistemi Autonomi}
 Vedere internet come una rete costituita da un insieme di router omogenei interconnessi è \textbf{una visione semplicistica}: problemi di scalabilità e autonomia amministrativa.
 \paragraph{Sistemi Autonomi} Nella realtà, i router sono organizzati in \textbf{sistemi autonomi} (\textbf{AS}).
 \begin{list}{}{}
@@ -2531,7 +2531,53 @@ Vedere internet come una rete costituita da un insieme di router omogenei interc
 	\item I protocolli di routing fra le AS sono detti \textbf{Exterior Gateway Protocol} (\textbf{EGP})
 	\item All'interno di ciascun AS i \textbf{router sono sotto uno stesso controllo amministrativo} e \textbf{usano lo stesso protocollo di routing} (es RIP, OSPF\ldots)
 \end{list}
-% https://elearning.di.unipi.it/pluginfile.php/29050/mod_resource/content/1/L13_LinkState_AS_protocolli.pdf, 10 compresa
+\begin{center}
+\includegraphics[scale=0.7]{asinterconn.png}
+\end{center}
+Ciascun \textbf{sistema autonomo}  sa come inoltrare pacchetti lungo il percorso ottimo verso qualsiasi destinazione interna al gruppo.
+\begin{list}{}{}
+	\item I sistemi AS2 e AS3 hanno tre router ciascuno
+	\item I \textbf{protocolli d'instradamento} dei tre AS \textbf{non sono necessariamente gli stessi}
+	\item I router 1b, 1c, 2a e 3a sono \textbf{gateway}
+\end{list}
+\subsection{Protocolli d'Instradamento}
+\paragraph{Partizioni} Internet è \textbf{partizionata in sistemi autonomi}:
+\begin{list}{}{}
+	\item \textbf{AS Stub}: collegato \textbf{solo ad un altro} AS
+	\item \textbf{AS Multihomed}: collegato \textbf{a più} di un altro AS, ma \textbf{trasporta solo traffico di cui è origine o destinazione} -- come stub.
+	\item AS di transito
+\end{list}
+\paragraph{INTRA-AS} Un protocollo di routing \textbf{INTRA-AS determina da solo le rotte per le destinazioni interne} ad una AS.
+\begin{list}{}{}
+	\item \textbf{Routing Information Protocol} (RIP) -- Algoritmo di tipo Distance Vector
+	\item \textbf{Open Shortest Path First} (OSPF) -- Algoritmo di tipo Link-State
+\end{list}
+\paragraph{INTER-AS} Protocolli di routing \textbf{INTRA-AS e INTER-AS determinano insieme le rotter per le destinazioni esterne} all'AS.
+\begin{list}{}{}
+	\item \textbf{Border Gateway Protocol} (BGP), standard \textit{de facto}.\\
+	Permette di \textbf{conoscere le destinazioni raggiungibili attraverso AS vicini}.\\Propaga le informazioni di raggiungibilità ai router interni del proprio AS.\\Determina percorsi buoni verso le sottoreti di destinazione.
+\end{list}
+\pagebreak
+\subsection{Routing Gerarchico}
+\paragraph{Obiettivi} Scalabilità, autonomia amministrativa
+\paragraph{Esempio} AS1 scopre -- tramite ad un protocollo INTER-AS -- che una sottorete X è raggiungibile via AS2, a cui AS1 è collegata tramite un gateway G.\\
+AS1 propaga -- con un protocollo INTER-AS -- questa informazione al suo interno.\\
+Il router R di AS1 riceve l'informazione "\textit{rete X raggiungibile via gateway G}":
+
+Se R non ha nessuna riga per X, allora R aggiunge (X, I) alla sua tabella d'inoltro, dove I è l'interfaccia su cui R inoltra i pacchetti destinati a G (secondo quanto indicato dal protocollo INTRA-AS).
+
+Altrimenti sceglierà\ldots\footnote{Vedi più avanti}
+\subsection{Protocolli}
+\subsubsection{RIP}
+\paragraph{Routing Information Protocol} INTRA-AS. La metrica è il numero di sottoreti attraversate, massimo 15. Usa il Distance Vector ($\infty$ = 16)
+\begin{center}
+\includegraphics[scale=0.7]{rip.png}\\
+\includegraphics[scale=0.6]{riptab.png}
+\end{center}
+\paragraph{Caratteristiche} Processo demone \texttt{routed} su porta 520 in UDP. Gli aggiornamenti vengono inviati ogni 30 secondi, oppure quando cambia la tabella d'inoltro.
+\begin{lstlisting}
+Nodo R riceve advertisement da vicino V con Dv[y] = 
+\end{lstlisting}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
