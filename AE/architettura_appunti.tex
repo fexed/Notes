@@ -410,7 +410,65 @@ Per capire bene cosa sono e a cosa servono le parti controllo (PC) e operativa (
 \begin{center}
 \includegraphics[scale=0.6]{ufesempio.png}
 \end{center}
-
+Il nostro obiettivo è quello di realizzare una unità capace di produrre un risultato Z a partire dalle variabili in input, \textbf{fornendogli solo le istruzioni per l'operazione da implementare} e \textbf{capace di gestire tutte le variabili di controllo} ($\alpha$, $\beta$) \textbf{in maniera autonoma}.\\
+L'unità firmware è quindi l'unione di due oggetti:
+\begin{list}{}{}
+\item \textbf{Parte Controllo} che "comanda" l'operazione da eseguire
+\item \textbf{Parte Operativa} che "esegue" l'operazione
+\end{list}
+\pagebreak
+\subsubsection{Ciclo di Clock}
+\begin{center}
+\includegraphics[scale=1]{ufclock.png}
+\end{center}
+PO e PC sono\textbf{reti sequenziali impulsate} dallo stesso segnale di clock, quindi aventi lo stesso ciclo di clock. Il \textbf{ciclo di clock dell'unità firmware} viene determinato in modo da \textbf{permettere la stabilizzazione di entrambe le reti per l'esecuzione di una qualsiasi microisitruzione}.\\
+Questo modello di programmazione è \textbf{sincrono}.\\\\
+\textbf{Schematizzazione} del diagramma del ciclo di clock sopra:
+\begin{list}{}{}
+	\item $\omega_{PO}$: prepara i valori che servono alla PC per decidere cosa fare
+	\item $\omega_{PC}$: prepara \{$\alpha$, $\beta$\} che implementano l'operazione richiesta
+	\item $\sigma_{PC}$: decido il prossimo stato interno della PC $\rightarrow$ scrivo il registro R della PC
+	\item $\sigma_{PO}$: eseguo l'operazione pianificata $\rightarrow$ scrivo i nuovi valori nei registri che compongono lo stato interno della PO
+\end{list}
+\subsubsection{Parte Operativa, Moore}
+\textbf{Rete Sequenziale} progettata con \textbf{componenti standard} che provvede all'esecuzione di \textbf{istruzioni} tramite commutatori, selettori, ALU e registri.
+\subsubsection{Parte Controllo, Mealy}
+\textbf{Rete Sequenziale} progettata tramite \textbf{sintesi classica} che provvede a determinare le \textbf{variabili di controllo} $\alpha$ e $\beta$ per la parte operativa.
+\subsubsection{Mealy o Moore?}
+Essendo entrambe due reti sequenziali bisogna decidere quale modello usare. Analizziamo le varie combinazioni di modelli.
+\paragraph{Mealy--Mealy} Se uso un modello Mealy--Mealy le uscite di $\omega_{PO}$ vanno direttamente nella $\omega_{PC}$ e le uscite di $\omega_{PC}$ ritornano in $\omega_{PO}$. Non ho un registro che ferma il ciclo continuo tra $\omega_{PC}$  e $\omega_{PO}$, quindi non riuscirò mai a stabilizzare i segnali che si scambiano PO e PC.\\
+Viene naturale pensare di farle entrambe Mealy--Mealy poiché, come visto in precedenza, il modello di Mealy è più veloce di quello di Moore.
+\paragraph{Almeno una Moore} Concludiamo che almeno una tra PC e PO deve essere di Moore per poter stabilizzare l'intera UF, ma quale?\\
+La risposta corretta è usare il \textbf{modello di Mealy per la Parte Controllo} e il \textbf{modello di Moore per la Parte Operativa} in modo da avere dei \textbf{comandi veloci} ed una \textbf{esecuzione più lenta} rispetto alla PC.
+\paragraph{Il contrario?} Non scegliamo un modello Moore per PC e Mealy per PO perché è \textbf{illogico avere un esecutore veloce che deve aspettare un controllore lento}: inutile avere una macchina molto veloce se inserisco i comandi molto lentamente.\\
+Anche un modello Moore--Moore non è comodo da usare, seppure funzionante correttamente, perché avrei entrambe le parti lente.
+\pagebreak
+\begin{multicols}{2}
+	\begin{center}
+		\includegraphics[scale=0.5]{pcposchema.png}
+	\end{center}
+	\columnbreak
+	\begin{center}
+		\includegraphics[scale=1]{ufschema.png}
+	\end{center}
+\end{multicols}
+\paragraph{Condizione di Correttezza} $\Rightarrow$ PO di Moore\\
+Le uscite della Parte Operativa, cioè le variabili di condizionamento, dipendono esclusivamente dallo stato interno di PO, cioè \textbf{tutte le variabili di condizionamento devono essere prodotte senza usare alcun $\alpha$}
+\subsection{Procedimento Formale}
+Schematizzazione dei passaggi del procedimento formale per la costruzione e l'analisi di una rete sequenziale.
+\begin{enumerate}
+	\item Descrizione a parole delle operazioni esterne
+	\item Programma scritto in $\mu$-linguaggio
+	\begin{list}{}{}
+		\item R$_{PO}$: capire quali sono i registri di stato della PO
+		\item $\omega_{PO}$, $\sigma_{PO}$: capire le funzioni che mi servono nella PO
+		\item R$_{PC}$: capire cosa è lo stato della PC
+		\item $\omega_{PC}$, $\sigma_{PC}$: capire cosa calcolare nella PC
+		\item $\longrightarrow$ T = t($\omega_{PO}$) + MAX\{t($\omega_{PC}$) + t($\sigma_{PO}$), t($\omega_{PC}$)\} + $\delta$
+	\end{list}
+\end{enumerate}
+\pagebreak
+\chapter{$\mu$-linguaggio}
 \pagebreak
 \section{Assembler D-RISC}
 Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
