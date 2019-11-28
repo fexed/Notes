@@ -459,6 +459,7 @@ Schematizzazione dei passaggi del procedimento formale per la costruzione e l'an
 \begin{enumerate}
 	\item Descrizione a parole delle operazioni esterne
 	\item Programma scritto in $\mu$-linguaggio
+	\item Componenti
 	\begin{list}{}{}
 		\item R$_{PO}$: capire quali sono i registri di stato della PO
 		\item $\omega_{PO}$, $\sigma_{PO}$: capire le funzioni che mi servono nella PO
@@ -469,6 +470,88 @@ Schematizzazione dei passaggi del procedimento formale per la costruzione e l'an
 \end{enumerate}
 \pagebreak
 \chapter{$\mu$-linguaggio}
+Si formalizza un linguaggio chiamato \textbf{$\mu$-linguaggio} che permetta di \textbf{derivare formalmente com'è fatta la PC e la PO di una certa UF}.
+\section{Istruzioni}
+Nel $\mu$-linguaggio sono presenti solamente \textbf{due tipi di istruzione}:
+\begin{list}{}{}
+	\item \texttt{n. $\mu$op$_1$, \ldots, $\mu$op$_k$, m}\\
+	Le \texttt{op} sono \textbf{operazioni di trasferimento tra registri}. Le varie \texttt{op} \textbf{separate da una virgola sono eseguite contemporaneamente} -- cioè nello stesso ciclo di clock.\\
+	\texttt{m} finale indica \textbf{a quale istruzione andare dopo aver eseguito questa istruzione}, la \texttt{n}.
+	\item \texttt{n. (condizione = T) $\mu$op$_1$, \ldots, $\mu$op$_k$, m'\\
+	(condizione = F) $\mu$op$_1$, \ldots, $\mu$op$_h$, m''}\\
+	Le \textbf{condizioni} sono \textbf{date in termini di variabili di condizionamento}. Possono essere messe in sequenza, venendo \textbf{valutate in sequenza}.\\
+	Posso considerare solo \textbf{variabili booleane} o \textbf{espressioni di cui mi interessa solo il risultato} senza memorizzarlo.
+\end{list}
+\paragraph{Esempio} Vediamo un esempio di come scrivere un programma in $\mu$-linguaggio. Prendiamo come esempio la divisione fra interi.\\
+\begin{multicols}{2}
+\begin{center}
+\textbf{Linguaggio pseudo-C}
+\begin{verbatim}
+Q = 0
+while (A >= B) {
+    Q = Q + 1
+    A = A - B
+}
+R = A
+\end{verbatim}
+\end{center}
+\columnbreak
+\begin{center}
+\textbf{$\mu$-linguaggio}
+\begin{verbatim}
+0.  0 -> Q, 1
+1.  (segno(A - B) = 0) nop, 2
+    (= 1)              nop, 4
+2.  Q + 1 -> Q, 3
+3.  A - B -> A, 1
+4.  A -> R, 0
+\end{verbatim}
+\end{center}
+\end{multicols}
+Ogni $\mu$-istruzione è \textbf{eseguita esattamente in un ciclo di clock}. Nell'esempio, per eseguire il programma avrò bisogno di almeno 5 cicli di clock, a meno di iterazioni interne.
+\pagebreak
+\section{Ottimizzazione del codice}
+Dopo aver scritto il $\mu$-codice possiamo provare ad \textbf{ottimizzarlo}, cioè \textbf{ridurre il numero di cicli di clock necessari ad eseguirlo}.\\
+Un'ottimizzazione possibile dell'esempio precedente è la seguente.
+\begin{multicols}{2}
+\begin{center}
+Prima
+\begin{verbatim}
+0.  0 -> Q, 1
+1.  (segno(A - B) = 0) nop, 2
+    (= 1)              nop, 4
+2.  Q + 1 -> Q, 3
+3.  A - B -> A, 1
+4.  A -> R, 0
+\end{verbatim}
+\end{center}
+\columnbreak
+\begin{center}
+Dopo
+\begin{verbatim}
+0.  0 -> Q, A - B -> T, A - B -> A, 1
+1.  (T0 = 0) Q + 1 -> Q, A - B -> A, A - B -> T, 1
+    (= 1)    A -> R, 0
+\end{verbatim}
+\end{center}
+\end{multicols}
+Considero un registro T dove memorizzo il risultato di A - B. Di quel registro T, considero T$_0$ -- cioè il bit più significativo -- per il segno.\\
+Inoltre elimino le \texttt{nop}, che sono \textit{tempo sprecato}.
+\subsection{Condizioni di Bernstein}
+Per eseguire le ottimizzazioni sul $\mu$-codice, dobbiamo \textbf{seguire le Condizioni di Bernstein}. Tali condizioni forniscono delle regole per verificare se due o più $\mu$-operazioni possono essere eseguite nella medesima $\mu$-istruzione.
+\paragraph{Le Condizioni} Per capire se\\
+\texttt{i. $\mu$op$_A$, i+1\\
+i+1. $\mu$op$_B$, k}\\
+è equivalente a\\
+\texttt{i. $\mu$op$_A$, $\mu$op$_B$, k}\\
+Bisogna \textbf{valutare il dominio R(op)} -- registri \textbf{letti} da op -- e \textbf{il codominio W(op)} -- registri \textbf{scritti} da op -- delle $\mu$-operazioni.\\
+Nell'esempio precedente:
+\begin{list}{}{}
+	\item R(A - B $\rightarrow$ T) = \{A, B\}
+	\item W(A - B $\rightarrow$ T) = \{T\}
+	\item R(Q + 1 $\rightarrow$ Q) = \{Q\}
+	\item W(Q + 1 $\rightarrow$ Q) = \{Q\}
+\end{list}
 \pagebreak
 \section{Assembler D-RISC}
 Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
