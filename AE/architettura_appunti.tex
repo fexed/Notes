@@ -552,6 +552,41 @@ Nell'esempio precedente:
 	\item R(Q + 1 $\rightarrow$ Q) = \{Q\}
 	\item W(Q + 1 $\rightarrow$ Q) = \{Q\}
 \end{list}
+Le \textbf{condizioni da verificare} sono:
+\begin{list}{}{}
+	\item W($\mu$op$_A$) $\cap$ R($\mu$op$_B$) = $\emptyset$\\
+	\textbf{Dipendenza}: non posso mettere insieme $\mu$-operazioni tali che la prima scrive in un registro letto dalla seconda.
+	\item W($\mu$op$_A$) $\cap$ W($\mu$op$_B$) = $\emptyset$\\
+	\textbf{Dipendenza di output}: non posso scrivere nello stesso registro con due $\mu$-operazioni diverse nella stessa $\mu$-istruzione.
+\end{list}
+\subsection{Variabili di Condizionamento}
+Le \textbf{variabili di condizionamento} possono essere così categorizzate:
+\begin{list}{}{}
+	\item \textbf{Semplici}: indicano le uscite di registri \textbf{senza trasformazioni}\\
+	$\longrightarrow$ t$_{\omega PO}$ = 0
+	\item \textbf{Complesse}: indicano \textbf{trasformazioni delle uscite di registri} fatte tramite reti combinatorie prive di ingressi di controllo.\\
+	Esempio: \texttt{segno(A - B)}, \texttt{OR(A)}\\
+	$\longrightarrow$ t$_{\omega PO}$ = k t$_p$
+\end{list}
+\pagebreak
+\subsection{Tempo medio di elaborazione}
+Il \textbf{tempo medio di elaborazione} di una UF viene valutato come: \texttt{$T = \sum_{i = 0}^{n - 1}(p_i * k_i) $}\\
+Dove:
+\begin{list}{}{}
+	\item $k_i$ è il numero medio di cicli di clock necessari per eseguire una generica operazione i
+	\item $p_i$ è la probabilità di eseguire tale operazione
+\end{list}
+Quando non sono note le $p_i$, si assume che tutte le sottosequenze siano equiprobabili. Calcoliamo quindi T come media aritmetica dei $k_i$, oppure si cerca di stimare se possibile una distribuzione probabilistica attendibile.
+\subsection{Riflessioni finali sull'ottimizzazione}
+Bisogna prestare particolare attenzione quando si ottimizza il $\mu$-codice. Ridurre il numero di $\mu$-istruzioni ($k_i$) non è sempre qualcosa di buono.\\
+Talvolta, \textbf{unire due o più $\mu$-istruzioni obbliga ad aumentare il ciclo di clock T} per consentire al $\mu$-programma di eseguirle tutte. Questa modifica, che si applica a \textbf{tutte} le $\mu$-istruzioni, potrebbe aumentare il tempo medio di elaborazione T, rendendo il programma complessivamente più lento.\\\\
+Concludendo, le ottimizzazioni che si possono fare sono:
+\begin{list}{}{}
+	\item Eliminare le \texttt{nop}, tranne quelle di attesa per operazioni esterne
+	\item Raggruppare le $\mu$-operazioni, attraverso le condizioni di Bernstein
+	\item Raggruppare le condizioni logiche
+\end{list}
+\section{Controllo Residuo}
 \pagebreak
 \section{Assembler D-RISC}
 Istruzioni lunghe 32bit, primi 8bit per identificativo istruzione. Poi tre blocchi di 6Bit (R$_{i}$, R$_{j}$, R$_{h}$, in ogni blocco vi è mem semplicemente l'indice i, j o h). Poi 6 bit tipicamente inutilizzati (per estensioni future, istruzioni particolare e per riempire le locaz. di mem che sono tutte a 32 bit).\\
