@@ -630,4 +630,176 @@ Vediamo alcuni esempi:
 	\end{multicols}
 \end{list}
 \section{Comunicazioni}
+Con \textbf{comunicazioni} si intendono le \textbf{comunicazioni fra unità firmware e mondo esterno} e viceversa.\\
+Nell'esempio preso in esame, della divisione fra A e B interi con Q ed R risultati, \textbf{A e B provengono dal mondo esterno e Q ed R sono comunicati verso di esso}.
+\begin{center}
+A,B $\longrightarrow$ UF $\longrightarrow$ Q,R
+\end{center}
+\paragraph{Categorie} Le comunicazioni sono \textbf{classificate in due categorie}:
+\begin{list}{}{}
+	\item \textbf{Simmetriche/Asimmetriche}\\
+	Simmetriche: un solo mittente, un solo destinatario (\textbf{uno-a-uno})\\
+	Asimmetriche: asimmetria in ingresso (\textbf{più mittenti}) o in uscita (\textbf{più destinatari})
+	\item \textbf{Sincrone/Asincrone}\\
+	Sincrone: la comunicazione avviene "\textbf{istantaneamente}"\\
+	Asincrone: il destinatario legge il messaggio \textbf{dopo del tempo} (es. e-mail)
+\end{list}
+\pagebreak
+\subsection{Protocollo a Livelli}
+\textbf{Simmetrico e asincrono}, il protocollo a livelli \textbf{funziona aggiungendo ai registri} XOUT di UF$_1$ e XIN di UF$_2$ \textbf{altri due registri da 1 bit ciascuno}, che \textbf{indicano quando avviene la comunicazione}: \textbf{ACK e RDY}
+\begin{center}
+\includegraphics[scale=0.7]{ufprotliv.png}
+\end{center}
+Di seguito i passi del funzionamento del protocollo:
+\begin{list}{}{}
+	\item 1. UF$_1$ scrive XOUT e il primo registro da 1 bit
+	\begin{multicols}{2}
+		\begin{center}
+		Situazione iniziale\\
+		\begin{tabular}{ c c c }
+			 0 &   & 0 \\ 
+			 1 & $\longrightarrow$ & 0
+		\end{tabular}
+		\end{center}
+		\columnbreak
+		\begin{center}
+		Situazione finale\\
+		\begin{tabular}{ c c c }
+			 0 &   & 0 \\ 
+			 1 & $\longrightarrow$ & 1
+		\end{tabular}
+		\end{center}
+		1 in RDY di UF$_2$ significa che ci sono dati significativi in XIN
+	\end{multicols}
+	\item 2. UF$_2$ utilizza XIN e comunica che ha finito scrivendo nel proprio registro di OUT da 1 bit
+	\begin{multicols}{2}
+		\begin{center}
+		Situazione iniziale\\
+		\begin{tabular}{ c c c }
+			 0 & $\longleftarrow$ & 1 \\ 
+			 1 & $\longrightarrow$ & 0
+		\end{tabular}
+		\end{center}
+		\columnbreak
+		\begin{center}
+		Situazione finale\\
+		\begin{tabular}{ c c c }
+			 1 & $\longleftarrow$ & 1 \\ 
+			 1 & $\longrightarrow$ & 1
+		\end{tabular}
+		\end{center}
+	\end{multicols}
+	\item 3/4. Ritorno alla situazione iniziale con tutti i registri da un bit a 0
+	\begin{multicols}{4}
+		\begin{center}
+		\begin{tabular}{ c c c }
+			 1 & $\longleftarrow$ & 1 \\ 
+			 0 & $\longrightarrow$ & 1
+		\end{tabular}
+		\end{center}
+		\columnbreak
+		\begin{center}
+		\begin{tabular}{ c c c }
+			 1 & $\longleftarrow$ & 1 \\ 
+			 0 & $\longrightarrow$ & 0
+		\end{tabular}
+		\end{center}
+		\columnbreak
+		\begin{center}
+		\begin{tabular}{ c c c }
+			 1 & $\longleftarrow$ & 0 \\ 
+			 0 & $\longrightarrow$ & 0
+		\end{tabular}
+		\end{center}
+		\columnbreak
+		\begin{center}
+		\begin{tabular}{ c c c }
+			 0 & $\longleftarrow$ & 0 \\ 
+			 0 & $\longrightarrow$ & 0
+		\end{tabular}\\
+		Si può riniziare
+		\end{center}
+	\end{multicols}
+\end{list}
+Vediamo i cicli di clock necessari per usare questo protocollo:
+\begin{enumerate}
+	\item UF$_1$ scrive 1
+	\item UF$_2$ vede 1 $\rightarrow$ \ldots UF$_2$ agisce\ldots $\rightarrow$ UF$_2$ scrive 1
+	\item UF$_1$ vede 1 di ritorno $\rightarrow$ UF$_1$ scrive 0
+	\item UF$_2$ vede 0 $\rightarrow$ UF$_2$ scrive 0\\
+	$\Rightarrow$ Condizioni iniziali: \textbf{4 cicli di clock}
+\end{enumerate}
+Se le due UF hanno clock sfasati uso lo stesso ragionamento, probabilmente finendo per dover usare più cicli di clock.
+\paragraph{Nel programma} Come rendere questo meccanismo nel $\mu$-codice? Proviamo a scriverlo per UF$_2$:
+\begin{verbatim}
+0.  (RDY = 0) nop, 0
+    (= 1)     A -> TEMPA, B -> TEMPB, 1 -> ACK, 1
+1.  (RDY = 1) nop, 0
+    (= 0)     0 -> ACK, <proseguo con altro>
+\end{verbatim}
+\pagebreak
+Questo protocollo è particolarmente semplice e necessita \textbf{pochissimo hardware}, ma \textbf{richiede troppi cicli di clock per comunicare}. Vediamo un'alternativa migliore.
+\subsection{Protocollo a Transizione di Livello}
+\textbf{Simmetrico e asincrono}, simile al protocollo a livelli ma \textbf{usa degli indicatori di transizione di livello}.
+\begin{center}
+\includegraphics[scale=0.7]{uftransliv.png}
+\end{center}
+\subparagraph{ACK} \textbf{Contatore in modulo 2}, quindi cambia stato (0 $\leftrightarrow$ 1) ogni volta che ci scrivo.
+\begin{multicols}{2}
+\includegraphics[scale=1]{ack.png}
+\begin{center}
+\begin{tabular}{ c c | c }
+			 S & $\beta$ & S' \\
+			 \hline
+			 0 & 0 & 0 \\
+			 0 & 1 & 1 \\
+			 1 & 0 & 1 \\
+			 1 & 1 & 0
+\end{tabular}
+\end{center}
+\end{multicols}
+\subparagraph{RDY} Risultato di un confrontatore fra un contatore modulo 2 e un registro in ingresso.
+\begin{multicols}{2}
+\includegraphics[scale=1]{rdy.png}
+\end{multicols}
+\paragraph{Funzionamento} Dal punto di vista di UF$_2$.\\
+Quando arriva un segnale da UF$_1$, la rete RDY diventa 1, quindi si può lavorare con i dati ricevuti.\\
+Per comunicare a UF$_1$ che l'operazione è conclusa, mando un $\beta_{ACK}$ = 1 al mio ACK, che diventerà 1 anche in uscita.\\\\
+Questo procedimento è il medesimo del protocollo a livelli visto in precedenza. Quello che cambia è come mi riporto nelle condizioni iniziali.\\
+Dopo aver lavorato con XIN, chiamo \texttt{reset RDY} che \textbf{riporta la rete RDY a 0}, quindi pronta ad accogliere un nuovo messaggio.\\
+In poche parole, torno alle impostazioni iniziali nello stesso momento in cui ricevo il messaggio.
+\pagebreak
+\subsubsection{Esempio}
+Per capire meglio vediamo come esempio quello in esame, la divisione fra A e B interi con risultati Q, R.
+\begin{multicols}{2}
+\includegraphics[scale=1]{transliv_es.png}
+\columnbreak
+\begin{center}
+\begin{verbatim}
+0.  (RDYIN = 0) nop, 0
+    (= 1)       A -> TA, B -> TB, set ACKIN,
+                reset RDYIN, 1
+1.  0 -> TQ, 2
+2.  (segno(TA - TB), ACKOUT = 0-) TQ + 1 -> TQ,
+                                  TA - TB -> TA, 2
+    (= 11) TA -> R, TQ -> Q, set RDYOUT, reset ACKOUT ...
+\end{verbatim}
+\end{center}
+Possiamo notare che UF$_1$ manda i segnali A e B e \textbf{non ha altre operazioni mentre attende la risposta Q, R da UF$_2$}. Questa situazione si chiama \textbf{protocollo domanda/risposta} e solo in questo caso basta una coppia di indicatori di transizione.
+\begin{center}
+\begin{verbatim}
+UF1
+0.  ... -> A, set RDY, 1
+1.  (ACK = 0) nop, 1
+    (= 1)     B -> ..., reset ACK
+
+    
+UF2
+0.  (RDY = 0) nop, 0
+    (= 1) A -> ..., 1
+... elaborazione di UF2 ...
+n.  ... -> B, set ACK, reset RDY, 0
+\end{verbatim}
+\end{center}
+\end{multicols}
 \end{document}
