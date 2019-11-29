@@ -802,4 +802,22 @@ n.  ... -> B, set ACK, reset RDY, 0
 \end{verbatim}
 \end{center}
 \end{multicols}
+\pagebreak
+\subsection{Comunicazioni asincrone a n posizioni}
+In questo caso \textbf{non esiste una soluzione basata su semplici interfacce nelle due unità comunicati}, ma è \textbf{necessario introdurre una terza unità} (chiamata \textbf{unità buffer}) che \textbf{implementi una coda FIFO a n posizioni}.\\
+Il \textbf{mittente può spedire al più n messaggi senza che il destinatario effettui ricezioni}.
+\begin{center}
+\includegraphics[scale=0.7]{asynnpos.png}
+\end{center}
+\paragraph{1} Se ci sono messaggi in memoria M, manda un messaggio a UF$_2$
+\paragraph{2} Se c'è posto in memoria M, riceve un messaggio da UF$_1$ e lo memorizza in M
+\paragraph{} Se valgono entrambe ed M è vuota, allora il messaggio in ingresso da UF$_1$ viene passato direttamente ad UF$_2$
+\paragraph{U$_{buffer}$} Il codice di U$_{buffer}$ avrà come \textbf{variabili di condizionamento RDY da UF$_1$}, \textbf{ACK da UF$_2$}, \textbf{condizione di memoria piena} e \textbf{condizione di memoria vuota}.\\
+Le due condizioni di memoria piena/vuota possono essere gestite tramite un semplice contatore. SE per esempio abbiamo una memoria M con 2$^k$ posizioni, useremo un contatore da k + 1 bit:
+\begin{list}{}{}
+	\item Memoria vuota \texttt{OR(CONT) = 0}
+	\item Memoria piena \texttt{CONT$_0$ = 1}
+\end{list}
+$\Rightarrow$ \texttt{0. (RDY, ACK, OR(CONT), CONT$_0$, \ldots}\\\\
+Il buffer implementa una politica \textbf{FIFO}: \textbf{il primo messaggio inviato} da UF$_1$ \textbf{deve essere il primo messaggio letto} da UF$_2$
 \end{document}
