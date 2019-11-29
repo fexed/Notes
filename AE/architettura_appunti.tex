@@ -820,4 +820,45 @@ Le due condizioni di memoria piena/vuota possono essere gestite tramite un sempl
 \end{list}
 $\Rightarrow$ \texttt{0. (RDY, ACK, OR(CONT), CONT$_0$, \ldots}\\\\
 Il buffer implementa una politica \textbf{FIFO}: \textbf{il primo messaggio inviato} da UF$_1$ \textbf{deve essere il primo messaggio letto} da UF$_2$
+\subsection{Comunicazioni asimmetriche}
+\paragraph{BUS} Per poter parlare delle comunicazioni asimmetriche è necessario introdurre il concetto di BUS. Un \textbf{BUS è un insieme di linee per trasportare dati} (es. da 32 bit), \textbf{l'indirizzo} (es. log$_2$ n bit) \textbf{e una linea da 1 bit che indica l'operazione da svolgere}.
+\begin{center}
+\includegraphics[scale=0.9]{bus.png}
+\end{center}
+\pagebreak
+Il grosso svantaggio di questo tipo di comunicazione è che \textbf{le unità possono comunicare solamente una alla volta}. Ho bisogno quindi di un \textbf{meccanismo di arbitraggio} che regola l'ordine di comunicazione delle varie unità.\\
+Vedremo due tipi di arbitraggio: \textbf{centralizzato} e \textbf{distribuito}.\\
+Inoltre avremo a disposizione anche un protocollo d'interazione Unità --- BUS:\\richiesta da U$_i$ di uso del BUS $\rightarrow$ comunicazione (uso del BUS) $\rightarrow$ rilascio della risorsa.\\\\
+Rimane da sottolineare il \textbf{problema della sincronizzazione}. Abbiamo bisogno di indicatori a livello per poter comunicare in maniera asimmetrica con un BUS.
+\subsubsection{Arbitri Centralizzati}
+\paragraph{Arbitro Centralizzato a Richieste Indipendenti} La unità hanno un \textbf{collegamento diretto con l'arbitro}
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=0.5]{arcentrrichind.png}
+\end{center}
+\columnbreak
+L'arbitro AR \textbf{considera le richieste}, fra di esse \textbf{individura l'unità} U$_i$ vincitrice \textbf{secondo una certa politica} P e \textbf{assegna la richiesta} all'unità individuata. Dopodiché, attende il rilascio della risorsa assegnata.
+\end{multicols}
+\paragraph{Arbitro Centralizzato Daisy Chaining} Abbiamo un numero minore di ingressi ma la stessa politica del caso precedente.
+\begin{center}
+\includegraphics[scale=0.5]{arcentrdaisy.png}
+\end{center}
+Il vantaggio di questo arbitro è la sua semplicità: due ingressi ed una uscita.\\
+L'arbitro, se c'è richiesta, manda il segnale di disponibilità alla prima unità. Il segnale viene passato da unità ad unità, finché non viene trovata l'unità che ne ha fatto richiesta. A tal punto, tale unità manda all'arbitro il bit di occupato, ed inizia ad utilizzare la risorsa. Infine, l'arbitro attende che il bit di occupato torni a 0.
+\paragraph{Arbitro Centralizzato Polling} L'arbitro interroga le varie unità per sapere se hanno bisogno della risorsa BUS, ed assegna le risorse secondo una certa politica.
+\paragraph{Aribtro Centralizzato a Divisione di Tempo} Questa soluzione consiste nell'assegnare l'accesso alla risorsa comune ad ogni unità U$_i$ per \textbf{istanti di tempo ben determinati}.
+\pagebreak
+\subsubsection{Arbitri Decentralizzati}
+\paragraph{Arbitro Decentralizzato a Disciplina Circolare (Token Ring)}
+\begin{center}
+\includegraphics[scale=0.7]{ardectoken.png}
+\end{center}
+Se U$_i$ riceve 1 (token) in ingresso e deve utilizzare la risorsa allora la usa. In ogni caso, sia che debba utilizzarla sia che non debba farlo, passa il token in uscita alla prossima unità.
+\paragraph{Non Deterministici} Usati soprattutto nelle reti wireless.
+\begin{center}
+\includegraphics[scale=0.65]{arnondet.png}
+\end{center}
+In questa tipologia di arbitro può succedere che due o più unità rilevino la disponibilità e inizino a trasmettere \textbf{contemporaneamente}.\\
+Tale problema viene risolto con \textbf{un sistema per rilevare le collisioni}: ogni unità che trasmette ascolta ciò che l'arbitro trasmette. Se ciò che ascolta è il medesimo segnale che ha inviato allora l'invio del messaggio è andato a buon fine, altrimenti se ascolta un messaggio differente allora aspetta un lasso di tempo casuale per poi ritentare la trasmissione.
+\section{Memoria Modulare}
 \end{document}
