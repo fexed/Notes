@@ -4,17 +4,22 @@
 \usepackage{multicol}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{textcomp}
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \lstdefinestyle{customasm}{
   belowcaptionskip=1\baselineskip,
-  frame=L,
+  frame=line,
   xleftmargin=\parindent,
   language=[x86masm]Assembler,
-  basicstyle=\footnotesize\ttfamily,
+  basicstyle=\ttfamily,
   commentstyle=\itshape\color{purple!40!black},
 }
 \lstset{escapechar=@,style=customasm}
+\lstnewenvironment{C}
+  {\lstset{language=C++,frame=none}}
+  {}
 \begin{document}
 \title{Architettura degli Elaboratori}
 \author{Appunti: Simone Pepi\\Stesura in \LaTeX: Federico Matteoni}
@@ -886,12 +891,12 @@ In questa parte andremo a vedere alcuni moduli che sono \textbf{unità firmware 
 \paragraph{Logicamente} Dal punto di vista logico, un \textbf{processore P fa un ciclo infinito in cui legge l'istruzione all'indirizzo IC} (Instruction Counter) \textbf{o PC} (Program Counter), \textbf{la decodifica} e \textbf{la esegue}, poi \textbf{aggiorna IC e gestisce le interruzioni} (eventi \textbf{generati dal sottosistema I/O})
 \begin{center}
 \begin{lstlisting}
-P:: while(true) {
-	FETCH	//legge istruzione a indirizzo IC/PC
-	DECODE	//decodifica istruzione
-	EXECUTE	//esegue istruzione
-		//aggiorna IC/PC
-	INT	//gestisci interruzioni/eccezioni
+while(true) {
+	FETCH	;legge istruzione a indirizzo IC/PC
+	DECODE	;decodifica istruzione
+	EXECUTE	;esegue istruzione
+		;aggiorna IC/PC
+	INT	;gestisci interruzioni/eccezioni
 }
 \end{lstlisting}
 \end{center}
@@ -1105,5 +1110,194 @@ Semantica: \texttt{IC + R[i] $\rightarrow$ IC}\\
 Semantica: \texttt{R[F] $\rightarrow$ IC, IC + 1 $\rightarrow$ R[RET]}, operazioni fatte in contemporanea.\\
 Solo per procedure non ricorsive!
 \pagebreak
-
+\section{Compilazione}
+Vediamo una serie di esempi su come si compilano alcuni comandi presi dal linguaggio C.
+\paragraph{Assegnamento}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	int x;
+	x = 0;
+	x = 123;
+	x = z;
+	\end{C}
+	\begin{C}
+	int y[16];
+	y[8] = 0;
+	x = y[8];
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+	Rx
+	ADD R0, R0, Rx
+	ADDI R0, #123, Rx
+	;Possibile, 123 < 2^12
+	ADD Rz, R0, Rx
+	\end{lstlisting}
+	\begin{lstlisting}
+	Rby
+	;Indirizzo di partenza del vettore
+	STORE Rby, #8, R0
+	LOAD Rby, #8, Rx
+	\end{lstlisting}
+\end{center}
+\end{multicols}
+\paragraph{Diramazione Condizionale}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	if (e) {
+		//body
+	}
+	\end{C}
+	\begin{C}
+	if (x == 0) {
+		y = y + 1;
+	}
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+		IF not(e), cont
+		;compilazione body
+	cont:	;resto del programma
+	\end{lstlisting}
+	\begin{lstlisting}
+		IF!=0 Rx, cont
+		ADDI Rx, #1, Ry
+	cont:	;resto del programma
+	\end{lstlisting}
+\end{center}
+\end{multicols}
+\paragraph{Diramazione Condizionale con else}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	if (e) {
+		//body then
+	} else {
+		//body else
+	}
+	\end{C}
+	\begin{C}
+	if (x == 0) {
+		y = y + 1;
+	} else {
+		y = x - 1;
+	}
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+		IF e, then
+		;compilazione body else
+		GOTO cont
+	then:	;compilazione body then
+	cont:	;resto del programma
+	\end{lstlisting}
+	\begin{lstlisting}
+		IF=0 Rx, then
+		SUB Rx, #1, Ry
+		GOTO cont
+	then:	ADD Rx, #1, Ry
+	cont:	;resto del programma
+	\end{lstlisting}
+\end{center}
+\end{multicols}
+\pagebreak
+\paragraph{Ciclo Indeterminato}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	while (e) {
+		//body
+	}
+	\end{C}
+	\begin{C}
+	while (x < n) {
+		y = y + x;
+		x = x * 2;
+	}
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+	while:	IF not(e), cont
+		;compilazione body
+		GOTO while
+	cont:	;resto del programma
+	\end{lstlisting}
+	\begin{lstlisting}
+	while:	IF>= Rx, Rn, cont
+		ADD Ry, Rx, Ry
+		MUL Rx, #2, Rx
+		GOTO while
+	cont:	;resto del programma
+	\end{lstlisting}
+\end{center}
+\end{multicols}
+\paragraph{Ciclo Determinato}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	for (iniz; cond; incr) {
+		//body
+	}
+	\end{C}
+	\begin{C}
+	for (i = 0; i < n; i++) {
+		x[i] = 0;
+	}
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+	;assumo di fare almeno un'iterazione
+		;compilazione iniz
+	for:	;compilazione body
+		;compilazione incr
+		IF cond, for
+	cont:	;resto del programma
+	\end{lstlisting}
+	\begin{lstlisting}
+	for:	STORE Rbx, Ri, R0
+		ADD Ri, #1, Ri
+		IF< Ri, Rn, for
+	cont:	;resto del programma
+	\end{lstlisting}
+	Si può ottimizzare con la \textbf{tecnica dell'unrolling}: se n è pari, posso fare cicli con \texttt{i += 2}, se è multiplo di 10 con \texttt{i += 10}\ldots
+\end{center}
+\end{multicols}
+\paragraph{Prodotto fra vettori}
+\begin{multicols}{2}
+\begin{center}
+	\begin{C}
+	sum = 0;
+	for (i = 0; i < n; i++) {
+		sum += x[i] * y[i]
+	}
+	\end{C}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{lstlisting}
+		ADD R0, R0, Rsum
+		ADD R0, R0, Ri
+	for:	LOAD Rbx, Ri, Rxi
+		LOAD Rby, Ri, Ryi
+		MUL Rxi, Ryi, Rmul
+		ADD Rsum, Rmul, Rsum
+		ADD Ri, #1, Ri
+		IF< Ri, Rn, for
+	\end{lstlisting}
+\end{center}
+\end{multicols}
+\pagebreak
+\section{Processore come UF}
 \end{document}
