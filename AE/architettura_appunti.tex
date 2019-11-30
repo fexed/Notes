@@ -22,7 +22,9 @@
 \renewcommand*\contentsname{Indice}
 
 \maketitle
+\begin{multicols}{2}
 \tableofcontents
+\end{multicols}
 \pagebreak
 \section{Introduzione}
 Appunti del corso di \textbf{Architettura degli Elaboratori} presi a lezione da \textbf{Federico Matteoni}.\\\\
@@ -917,4 +919,41 @@ Lo spazio viene organizzato secondo lo schema a fianco.
 \includegraphics[scale=0.6]{progproc.png}
 \end{center}
 \end{multicols}
+\paragraph{Da programma a processo} Quando un \textbf{programma entra in esecuzione diventa un processo}. Di seguito uno schema che racconta le fasi di un programma C che diventa un processo.
+\begin{center}
+\includegraphics[scale=0.6]{prog2proc.png}
+\end{center}
+\pagebreak
+\section{Spazio di Indirizzamento Logico e Memoria Virtuale}
+\paragraph{Indirizzi} Gli \textbf{indirizzi generati} dal processore, durante l'esecuzione di un processo, \textbf{non sono indirizzi della memoria principale} -- cioè \textbf{indirizzi fisici} -- ma \textbf{indirizzi logici} cioè \textbf{riferiti ad un'astrazione della memoria del processo detta Memoria Virtuale} (MV).\\
+L'\textbf{insieme degli indirizzi logici di un processo è detto Spazio Logico di Indirizzamento}.\\
+Il codice eseguibile del processo/programma, generato dal compilatore, è quindi riferito alla MV, ed il processore genera \textbf{indirizzi logici sia per il codice che per i dati}.
+\paragraph{Rilocazione} Quando un processo viene \textbf{creato e caricato}, ad esso viene \textbf{allocata una porzione della memoria principale} la cui \textbf{ampiezza} e i cui \textbf{indirizzi non coincidono con quelli della MV} del processo, ma viene \textbf{stabilita una corrispondenza tra indirizzi logici} della MV \textbf{e indirizzi fisici} della M. Questa funzione, detta \textbf{funzione di rilocazione o traduzione} dell'indirizzo, è \textbf{implementata come una tabella associata al processo della Tabella di Rilocazione}.\\
+Il processo di traduzione deve essere \textbf{molto veloce} ed è eseguito dalla \textbf{MMU} (Memory Management Unit).
+\subsection{Modalità di Indirizzamento}
+Vediamo come esprimere la locazione di un certo operando di un'istruzione ASM. Supponiamo di avere l'istruzione \texttt{INC X}, che incrementa un valore intero. Vediamo la \texttt{X} prima come un RG e poi come una M.
+\begin{multicols}{2}
+\paragraph{Registro} \texttt{RG[4]}, \texttt{R4}
+\begin{center}
+\includegraphics[scale=1]{indiriz_rg.png}
+\end{center}
+\columnbreak
+\paragraph{Locazione di memoria} Ci sono diversi modi per esprimerlo:
+\begin{list}{}{}
+	\item \textbf{Assoluto}\\R$_i$ $\Rightarrow$ \texttt{M[RG[i]]}
+	\item \textbf{Base + indice}\\R$_i$(R$_s$) $\Rightarrow$ \texttt{M[RG[i] + RG[s]]}
+	\item \textbf{Relativo} ad IC/PC\\R$_i$ $\Rightarrow$ \texttt{M[IC + RG[i]]}
+\end{list}
+\end{multicols}
+Le modalità di indirizzamento \textbf{registro} e \textbf{locazione assoluta} sono \textbf{molto simili}: la differenza sta in come si usa il registro, nel primo caso direttamente come dato e nel secondo come indirizzo di memoria.
+\begin{center}
+\begin{tabular}{c | c}
+\textbf{Istruzioni ASM} & \textbf{Operandi} \\
+\hline
+Operative & Registro \\
+Memoria & Base + Indice \\
+Stato & Assoluto/Relativo
+\end{tabular}
+\end{center}
+
 \end{document}
