@@ -5,6 +5,16 @@
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
 \graphicspath{ {./img/} }
+\usepackage{listings}
+\lstdefinestyle{customasm}{
+  belowcaptionskip=1\baselineskip,
+  frame=L,
+  xleftmargin=\parindent,
+  language=[x86masm]Assembler,
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\itshape\color{purple!40!black},
+}
+\lstset{escapechar=@,style=customasm}
 \begin{document}
 \title{Architettura degli Elaboratori}
 \author{Appunti: Simone Pepi\\Stesura in \LaTeX: Federico Matteoni}
@@ -498,14 +508,14 @@ R = A
 \columnbreak
 \begin{center}
 \textbf{$\mu$-linguaggio}
-\begin{verbatim}
+\begin{lstlisting}
 0.  0 -> Q, 1
 1.  (segno(A - B) = 0) nop, 2
     (= 1)              nop, 4
 2.  Q + 1 -> Q, 3
 3.  A - B -> A, 1
 4.  A -> R, 0
-\end{verbatim}
+\end{lstlisting}
 \end{center}
 \end{multicols}
 Ogni $\mu$-istruzione è \textbf{eseguita esattamente in un ciclo di clock}. Nell'esempio, per eseguire il programma avrò bisogno di almeno 5 cicli di clock, a meno di iterazioni interne.
@@ -516,23 +526,23 @@ Un'ottimizzazione possibile dell'esempio precedente è la seguente.
 \begin{multicols}{2}
 \begin{center}
 Prima
-\begin{verbatim}
+\begin{lstlisting}
 0.  0 -> Q, 1
 1.  (segno(A - B) = 0) nop, 2
     (= 1)              nop, 4
 2.  Q + 1 -> Q, 3
 3.  A - B -> A, 1
 4.  A -> R, 0
-\end{verbatim}
+\end{lstlisting}
 \end{center}
 \columnbreak
 \begin{center}
 Dopo
-\begin{verbatim}
+\begin{lstlisting}
 0.  0 -> Q, A - B -> T, A - B -> A, 1
 1.  (T0 = 0) Q + 1 -> Q, A - B -> A, A - B -> T, 1
     (= 1)    A -> R, 0
-\end{verbatim}
+\end{lstlisting}
 \end{center}
 \end{multicols}
 Considero un registro T dove memorizzo il risultato di A - B. Di quel registro T, considero T$_0$ -- cioè il bit più significativo -- per il segno.\\
@@ -731,12 +741,12 @@ Vediamo i cicli di clock necessari per usare questo protocollo:
 \end{enumerate}
 Se le due UF hanno clock sfasati uso lo stesso ragionamento, probabilmente finendo per dover usare più cicli di clock.
 \paragraph{Nel programma} Come rendere questo meccanismo nel $\mu$-codice? Proviamo a scriverlo per UF$_2$:
-\begin{verbatim}
+\begin{lstlisting}
 0.  (RDY = 0) nop, 0
     (= 1)     A -> TEMPA, B -> TEMPB, 1 -> ACK, 1
 1.  (RDY = 1) nop, 0
     (= 0)     0 -> ACK, <proseguo con altro>
-\end{verbatim}
+\end{lstlisting}
 \pagebreak
 Questo protocollo è particolarmente semplice e necessita \textbf{pochissimo hardware}, ma \textbf{richiede troppi cicli di clock per comunicare}. Vediamo un'alternativa migliore.
 \subsection{Protocollo a Transizione di Livello}
@@ -775,7 +785,7 @@ Per capire meglio vediamo come esempio quello in esame, la divisione fra A e B i
 \includegraphics[scale=1]{transliv_es.png}
 \columnbreak
 \begin{center}
-\begin{verbatim}
+\begin{lstlisting}
 0.  (RDYIN = 0) nop, 0
     (= 1)       A -> TA, B -> TB, set ACKIN,
                 reset RDYIN, 1
@@ -783,11 +793,11 @@ Per capire meglio vediamo come esempio quello in esame, la divisione fra A e B i
 2.  (segno(TA - TB), ACKOUT = 0-) TQ + 1 -> TQ,
                                   TA - TB -> TA, 2
     (= 11) TA -> R, TQ -> Q, set RDYOUT, reset ACKOUT ...
-\end{verbatim}
+\end{lstlisting}
 \end{center}
 Possiamo notare che UF$_1$ manda i segnali A e B e \textbf{non ha altre operazioni mentre attende la risposta Q, R da UF$_2$}. Questa situazione si chiama \textbf{protocollo domanda/risposta} e solo in questo caso basta una coppia di indicatori di transizione.
 \begin{center}
-\begin{verbatim}
+\begin{lstlisting}
 UF1
 0.  ... -> A, set RDY, 1
 1.  (ACK = 0) nop, 1
@@ -799,7 +809,7 @@ UF2
     (= 1) A -> ..., 1
 ... elaborazione di UF2 ...
 n.  ... -> B, set ACK, reset RDY, 0
-\end{verbatim}
+\end{lstlisting}
 \end{center}
 \end{multicols}
 \pagebreak
@@ -861,4 +871,26 @@ Se U$_i$ riceve 1 (token) in ingresso e deve utilizzare la risorsa allora la usa
 In questa tipologia di arbitro può succedere che due o più unità rilevino la disponibilità e inizino a trasmettere \textbf{contemporaneamente}.\\
 Tale problema viene risolto con \textbf{un sistema per rilevare le collisioni}: ogni unità che trasmette ascolta ciò che l'arbitro trasmette. Se ciò che ascolta è il medesimo segnale che ha inviato allora l'invio del messaggio è andato a buon fine, altrimenti se ascolta un messaggio differente allora aspetta un lasso di tempo casuale per poi ritentare la trasmissione.
 \section{Memoria Modulare}
+\pagebreak
+\chapter{Macchina Assembler}
+In questa parte andremo a vedere alcuni moduli che sono \textbf{unità firmware a tutti gli effetti}, con una \textbf{certa struttura di interconnessione} e che \textbf{riescono ad eseguire istruzioni assembler ASM}. In sostanza, \textbf{i processori}.
+\begin{center}
+\includegraphics[scale=0.7]{macchinaassemblerschema.png}
+\end{center}
+\section{CPU}
+\paragraph{Processore} Una \textbf{unità firmware in grado di eseguire operazioni esterne che sono istruzioni del linguaggio ASM}.
+\paragraph{Cache} Una \textbf{memoria piccola ma molto veloce}, che \textbf{contiene il sottoinsieme della memoria principale M che permette di eseguire un certo programma}.
+\paragraph{MMU} La \textbf{Memory Management Unit} è il \textbf{componente che permette di tradurre gli indirizzi logici} generati dal processore \textbf{in indirizzi fisici}
+\paragraph{Logicamente} Dal punto di vista logico, un \textbf{processore P fa un ciclo infinito in cui legge l'istruzione all'indirizzo IC} (Instruction Counter) \textbf{o PC} (Program Counter), \textbf{la decodifica} e \textbf{la esegue}, poi \textbf{aggiorna IC e gestisce le interruzioni} (eventi \textbf{generati dal sottosistema I/O})
+\begin{center}
+\begin{lstlisting}
+P:: while(true) {
+	FETCH	//legge istruzione a indirizzo IC/PC
+	DECODE	//decodifica istruzione
+	EXECUTE	//esegue istruzione
+		//aggiorna IC/PC
+	INT	//gestisci interruzioni/eccezioni
+}
+\end{lstlisting}
+\end{center}
 \end{document}
