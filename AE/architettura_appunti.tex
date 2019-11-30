@@ -963,5 +963,147 @@ In linea di principio, l'approccio CISC dovrebbe \textbf{comportare un aumento d
 \paragraph{Vantaggi e Svantaggi} Molti dei vantaggi potenziali ottenibili con l'approccio CISC si sono rilevati meno ovvi di quanto sembri a prima vista, talvolta addirittura tramutandosi in svantaggi. Infatti \textbf{la complessità delle istruzioni e dei modi di indirizzamento può aumentare la lunghezza delle parole dell'istruzione e il numero di accessi in memoria}.\\
 Stabilire il migliore è impossibile, ma a livello didattico conviene studiare l'approccio RISC, in particolare il D-RISC.
 \pagebreak
+\chapter{D-RISC}
+Il \textbf{Didactic-Reduced Instruction Set Computer} è un \textbf{assembler didattico di tipo RISC}. Le sue caratteristiche sono le seguenti.
+\subparagraph{Registri Generali} Sono presenti \textbf{64 registri general purpose} (\texttt{RG[0 .. 63]}), cioè in cui posso scrivere qualsiasi cosa, \textbf{da 32 bit}.\\
+Il registro R$_0$ è \textbf{particolare} e \textbf{contiene sempre 0 al proprio interno}.
+\subparagraph{Parole} Le parole all'interno dei registri \textbf{sono da 32 bit}.\\
+Questa caratteristica non è vincolante, anche avendo parole da 64 bit la struttura della macchina non cambia.
+\subparagraph{Istruzioni D-RISC} In generale il D-RISC contiene \textbf{questo set di istruzioni}:
+\begin{list}{}{}
+	\item \textbf{Operative}: operazioni artimetico-logiche fra registri
+	\item \textbf{Load/Store}: caricano dati da/in memoria
+	\item \textbf{Salto} condizionato/incondizionato
+\end{list}
+Delle istruzioni si vedranno sintassi e formato in memoria, cioè come vengono rappresentate mediante parole da 32 bit.
+\subparagraph{Memoria} La \textbf{memoria principale è indirizzabile alla parola}.
+\section{Istruzioni}
+\subsection{Operative}
+Comprendono le istruzioni aritmetiche su interi e logiche più comuni. Sono \textbf{tutte registro--registro}.
+\subparagraph{Con Operandi e risultato in RG} \texttt{ADD op1, op2, op3}\\
+Es. \texttt{ADD R$_5$, R$_{27}$, R$_3$}, semantica: \texttt{R[5] + R[27] $\rightarrow$ R[3]}.\\
+In memoria: \begin{tabular}{| c | c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 6 bit & 6 bit \\
+\hline
+ADD & R$_5$ & R$_{27}$ & R$_3$ & \\
+\texttt{CODOP} & \texttt{op1} & \texttt{op2} & \texttt{op3} & \\
+\hline
+\end{tabular}
+\subparagraph{Con uno dei due operandi immediato} \texttt{ADDI op1, op2, op3}\\
+Es. \texttt{ADDI R$_5$, \#8, R$_{27}$}, semantica: \texttt{R[5] + 8 $\rightarrow$ R[27]}\\
+In memoria: \begin{tabular}{| c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 12 bit \\
+\hline
+ADD & R$_5$ & R$_{27}$ & \textit{costante in comp. a 2} \\
+\hline
+\end{tabular}
+\paragraph{} Questi tipi di operazioni posso farle con \texttt{ADD}, \texttt{SUB}, \texttt{MUL}, \texttt{DIV}, \texttt{SHR}, \texttt{SHL}.
+\subparagraph{Istruzioni logiche} \texttt{AND}, \texttt{OR} e \texttt{NOT}\\
+Esempio: \texttt{AND R$_1$, R$_2$, R$_3$}, semantica \texttt{R[1] AND R[2] $\rightarrow$ R[3]}\\
+In memoria: \begin{tabular}{| c | c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 6 bit & 6 bit\\
+\hline
+AND & R$_1$ & R$_2$ & R$_3$  & \\
+\hline
+\end{tabular}
+\pagebreak
+\subsection{Load/Store}
+Non sono singole $\mu$-istruzioni perchè c'è una comunicazione tra UF (processore--memoria). Sono le \textbf{uniche istruzioni memoria--registro del D-RISC}. Come visto in precedenza, l'\textbf{indirizzo logico in memoria è calcolato come somma del contenuto di due registri generali}, uno che funge da \textbf{base} e uno da \textbf{indice}.
+\begin{multicols}{2}
+\begin{center}
+\textbf{Sintassi}\\
+\texttt{LOAD R$_B$, R$_i$, R$_X$}\\
+\texttt{STORE R$_B$, R$_i$, R$_X$}
+\end{center}
+\columnbreak
+\begin{center}
+\textbf{Semantica}\\
+\texttt{M[R[B] + R[i]] $\rightarrow$ R[X]}\\
+\texttt{R[X] $\rightarrow$ M[R[B] + R[i]]}
+\end{center}
+\end{multicols}
+\begin{center}
+\textbf{In memoria} (analogo per entrambe):  
+\begin{tabular}{| c | c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 6 bit & 6 bit\\
+\hline
+LOAD/STORE & R$_B$ & R$_i$ & R$_X$  & \\
+\hline
+\end{tabular}
+\end{center}
+Inoltre, possiamo avere un'\textbf{ulteriore istruzione che realizza lo scambio del contenuto tra una locazione di memoria e un RG}.
+
+\begin{multicols}{2}
+\begin{center}
+\textbf{Sintassi}\\
+\texttt{EXCHANGE R$_B$, R$_i$, R$_X$}
+\end{center}
+\columnbreak
+\begin{center}
+\textbf{Semantica}\\
+\texttt{M[R[B] + R[i]] $\leftrightarrow$ R[X]}
+\end{center}
+\end{multicols}
+\begin{center}
+\textbf{In memoria}:  
+\begin{tabular}{| c | c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 6 bit & 6 bit\\
+\hline
+EXCHANGE & R$_B$ & R$_i$ & R$_X$  & \\
+\hline
+\end{tabular}
+\end{center}
+\subsection{Salto Condizionato}
+Permettono di \textbf{saltare un numero preciso di istruzioni} a seconda della condizione imposta.
+\subparagraph{Confronto fra due RG} Usando gli operatori logici $>$, $<$, $=$, $\neq$, $\leq$, $\geq$\\
+Sintassi, esempio con $>$: \texttt{IF$_>$, R$_i$, R$_s$, offset}\\
+Semantica: se \texttt{R[i] $>$ R[s]} allora \texttt{IC + offset $\rightarrow$ IC}, altrimenti \texttt{IC + 1 $\rightarrow$ IC}.\\
+\textbf{In memoria}:  
+\begin{tabular}{| c | c | c | c |}
+\hline
+8 bit & 6 bit & 6 bit & 12 bit \\
+\hline
+IF$_>$ & R$_i$ & R$_s$ & offset \\
+\hline
+\end{tabular}
+\subparagraph{Confronto fra un RG e una costante} Sempre usando gli operatori logici.\\
+Sintassi, esempio con $>$: \texttt{IF$_{> 0}$, R$_i$, offset}\\
+Semantica: se \texttt{R[i] $>$ 0} allora \texttt{IC + offset $\rightarrow$ IC}, altrimenti \texttt{IC + 1 $\rightarrow$ IC}.\\
+\textbf{In memoria}:  
+\begin{tabular}{| c | c | c |}
+\hline
+8 bit & 6 bit & 18 bit \\
+\hline
+IF$_{> 0}$ & R$_i$ & offset \\
+\hline
+\end{tabular}
+\subsection{Salto Incodizionato}
+Permettono di \textbf{saltare un numero preciso di istruzioni} senza valutare nessuna condizione.
+\subparagraph{Salto con offset} \texttt{GOTO offset}\\
+Semantica: \texttt{IC + offset $\rightarrow$ IC}\\
+\textbf{In memoria}:  
+\begin{tabular}{| c | c |}
+\hline
+8 bit & 24 bit \\
+\hline
+GOTO & offset \\
+\hline
+\end{tabular}
+\subparagraph{Salto con RG} \texttt{GOTO R$_i$}\\
+Semantica: \texttt{IC + R[i] $\rightarrow$ IC}\\
+\textbf{Non c'è lo stack}, quindi è impossibile la ricorsione.
+\subparagraph{Chiamata a procedura} \texttt{CALL R$_F$, R$_{RET}$}
+\begin{list}{}{}
+	\item R$_F$: indirizzo della funzione/procedura
+	\item R$_{RET}$: indirizzo di ritorno all'uscita
+\end{list}
+Semantica: \texttt{R[F] $\rightarrow$ IC, IC + 1 $\rightarrow$ R[RET]}, operazioni fatte in contemporanea.\\
+Solo per procedure non ricorsive!
+\pagebreak
 
 \end{document}
