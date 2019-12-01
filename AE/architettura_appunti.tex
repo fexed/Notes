@@ -111,8 +111,7 @@ Vedremo nel dettaglio il processore e la memoria, non i dispositivi di I/O perch
 	\item \textbf{Struttura di Interconnessione}, \textbf{con la quale i moduli} di elaborazione del livello \textbf{cooperano e comunicano tra loro}.\\
 	Essa può essere di due tipi:
 \end{list}
-\begin{center}
-\includegraphics[scale=0.6]{strutturainterna.png}
+	(\begin{center}\includegraphics[scale=0.6]{strutturainterna.png}
 \end{center}
 \paragraph{Moduli di Elaborazione} Un modulo di elaborazione è definito come \textbf{un'entità autonoma e sequenziale}.
 \subparagraph{Autonomia} L'autonomia è \textbf{data dal fatto che ogni modulo} di elaborazione \textbf{esegue un proprio controllo in maniera indipendente da altri moduli}.\\
@@ -1300,4 +1299,103 @@ Vediamo una serie di esempi su come si compilano alcuni comandi presi dal lingua
 \end{multicols}
 \pagebreak
 \section{Processore come UF}
+Vediamo come \textbf{schematizzare un processore} (P) \textbf{come una generica Unità Firmware}.
+\paragraph{DMA} \textbf{Direct Memory Access}, BUS che consente alle unità di I/O di \textbf{comunicare direttamente con la memoria M}.
+\begin{center}
+\includegraphics[scale=1]{procuf.png}
+\end{center}
+\paragraph{Processore} Possiamo definire un processore come un'\textbf{unità firmware che esegue un ciclo infinito in cui si eseguono le operazioni esterne}. Le operazioni del processore possono essere descritte, in un linguaggio più "informatico", come segue:
+\begin{C}
+while(true) {
+	fetch ISTR (IC/PC) //LOAD di una istr, ricordiamo che PC=IC stessa cosa
+	decode ISTR
+	exec ISTR
+	trattamento interruzioni
+}
+\end{C}
+Che diventa l'\textbf{interprete ASM in $\mu$-codice a livello firmware}.\\
+Un processore può essere semplicisticamente schematizzato come segue:
+\begin{center}
+\includegraphics[scale=1]{procschema.png}
+\end{center}
+\pagebreak
+\subsection{Interfaccia verso la memoria}
+Di seguito lo schema dell'\textbf{interfaccia a transizione di livello del processore verso la memoria} su collegamenti dedicati.
+\begin{center}
+\includegraphics[scale=1.2]{interfaccia_pm.png}
+\end{center}
+Su altre fonti possiamo trovare due coppie di sincronizzatori (ACK e RDY), ma si assume che l'interfaccia sia a domanda/risposta, quindi possiamo usare una coppia sola.
+\subsection{Interfaccia verso UNINT}
+Di seguito lo schema dell'\textbf{interfaccia del processore verso l'unità UNINT}.
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=1.2]{interfaccia_punint.png}
+\end{center}
+\columnbreak
+Se \textbf{durante l'esecuzione} del ciclo infinito \textbf{si riceve\\INT = 1}, allora \textbf{il processore deve trattare l'interruzione}: \textbf{manda ACK$_{INT}$} e \textbf{fa due LOAD} per ottenere il numero di unità I/O che ha richiesto l'interruzione e il motivo. Successivamente \textbf{invoca il driver corretto per il dispositivo}.
+\end{multicols}
+\pagebreak
+\section{Interprete Firmware}
+Scriviamo una prima versione dell'interprete firmware con il $\mu$-linguaggio, un estratto:
+\begin{lstlisting}
+0.	fetch -> OP, IC -> IND, set RDYM, 1
+
+1.	(ACKM, OR(ESITO) = 0-) nop, 1
+	(= 10) DATAIN -> IR, reset ACKM, 2
+	;                ^^ IR = Instruction Register
+	(= 11) ..., trattecc
+	;           ^^^^^^^^ Trattamento eccezioni
+
+2.	(IR.CODOP, INT = "ADD", 0) R[IR.RA] + R[IR.RB] -> R[IR.RC], IC + 1 -> IC, 0
+	(= "ADD", 1) R[IR.RA] + R[IR.RB] -> R[IR.RC], IC + 1 -> IC, trattint
+	;                                  Trattamento interruzioni ^^^^^^^^
+	(= "LOAD", 0) read -> OP, R[IR.RA] + R[IR.RB] -> IND, set RDYM, reset ACKM, 3
+	(= "IF<", 0) segno(R[IR.RA] - R[IR.RB]) -> S, 4
+	...
+
+3.	(ACKM, OR(ESITO), INT = 0--) nop, 3
+	(= 100) DATAIN -> R[IR.RC], reset ACKM, IC + 1 -> IC, 0
+	(= 101) DATAIN -> R[IR.RC], reset ACKM, IC + 1 -> IC, trattint
+	(= 110) ..., trattecc
+	
+4.	(S, INT = 10) IC + IR.offset -> IC, 0
+	(= 11) IC + IR.offset -> IC, trattint
+	(= 00) IC + 1 -> IC, 0
+	(= 01) IC + 1 -> IC, trattint
+...
+\end{lstlisting}
+\paragraph{IR} L'\textbf{Instruction Register} è da intendersi come un \textbf{registro interno}, cioè non d'interfaccia. In questo registro andiamo a \textbf{memorizzare tutti i bit che ci indicano l'istruzione da eseguire}.\\
+Con \texttt{IR.CODOP} o \texttt{IR.RB} si intendono \textbf{i soli bit che indicano il codice operativo} (operazione), i \textbf{registri} o l'\textbf{etichetta per i salti}.
+\paragraph{Problema} Il problema di questa prima versione dell'interprete firmware \textbf{riguarda la decodifica del Codice Operativo} che ogni volta viene mandato alla PC del processore per gestire i vari $\alpha$, $\beta$ della PO in modo da eseguire le operazioni corrette.\\
+Essendo il codice operativo un \textbf{frammento di 8 bit}, possiamo avere \textbf{una $\mu$-istruzione con ben 256 frasi alternative} che comporta un \textbf{esponenziale aumento di complessità di progettazione}.
+\paragraph{Soluzione} La soluzione al problema è quella di \textbf{avere una $\mu$-istruzione che usa il codice operativo per dire al processore di andare ad eseguire quella istruzione} di $mu$-codice \textbf{che ha come indirizzo il valore del codice operativo}.\\
+Quindi il codice operativo viene mandato alla PC, che \textbf{decide quale sarà il suo stato interno} (e quindi \textbf{la prossima $\mu$-istruzione}) durante il prossimo ciclo di clock. Questa tecnica si chiama \textbf{Salto Forzato}, simile per principio al controllo residuo.\\\\
+A pagina seguente il codice che sfrutta questa tecnica. Notare l'evidente ottimizzazione.
+\pagebreak
+\begin{lstlisting}
+fch0.	fetch -> OP, IC -> IND, set RDYM, fch1
+
+fch1.	(ACKM, OR(ESITO) = 0-) nop, fch1
+	(= 10) DATAIN -> IR, DATAIN.COP -> RC ;decido la prossima istruzione
+	
+add0.	(INT = 0) R[IR.RA] + R[IR.RB] -> R[IR.RC], IC + 1 -> IC, fch0
+	(= 1) R[IR.RA] + R[IR.RB] -> R[IR.RC], IC + 1 -> IC, trattint
+
+load0.	read -> OP, R[IR.RA] + R[IR.RB] -> IND, set RDYM, load1
+
+load1.	(ACKM, OR(ESITO), INT = 0--) nop, load1
+	(= 100) DATAIN -> R[IR.RC], IC + 1 -> IC, fch0
+	(= 101) DATAIN -> R[IR.RC], IC + 1 -> IC, trattint
+	(= 110) ..., trattecc
+	
+if<0.	segno(R[IR.RA] - R[IR.RB]) -> S, if<1
+
+if<1.	(S, INT = 10) IC + IR.offset -> IC, fch0
+	(= 11) IC + IR.offset -> IC, trattint
+	(= 00) IC + 1 -> IC, fch0
+	(= 01) IC + 1 -> IC, trattint
+\end{lstlisting}
+In questa versione abbiamo almeno \textbf{una istruzione in $\mu$-codice per ogni istruzione ASM}.\\
+Si può notare che la decisione di quale $\mu$-istruzione eseguire è \textbf{determininata da \texttt{DATAIN.COP -> RC}}, \textbf{dove andiamo a scrivere gli 8 bit che determinano il codice operativo} dell'istruzione ASM \textbf{direttamente nel registro di stato della PC (RC)}, in modo da determinare quale $\mu$-istruzione eseguire immediatamente dopo.
+\subsection{Valutazione delle prestazioni}
 \end{document}
