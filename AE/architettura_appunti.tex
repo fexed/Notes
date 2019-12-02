@@ -1427,4 +1427,107 @@ Le probabilità come seguono:
 Inoltre le prestazioni variano anche in relazione al tipo di RAM: l'accesso a memorie dinamiche costa 60--100$\tau$, mentre a quelle statiche costa 20--40$\tau$
 \end{multicols}
 \pagebreak
+\chapter{Superamento dei Limiti del Processore Monolitico}
+Nel processore visto fin'ora come un'\textbf{unica struttura firmware} troviamo \textbf{due problemi essenziali}: il lungo tempo di accesso alla memoria e il lungo tempo di esecuzione delle istruzioni.
+\paragraph{Tempo di Accesso alla Memoria} Una soluzione al problema consiste nell'\textbf{introdurre un ulteriore livello di gerarchia di memoria} tra la memoria principale ed i registri generali.\\
+Tale memoria, detta \textbf{memoria cache}, è \textbf{molto piccola}, \textbf{molto veloce} ma anche \textbf{molto costosa} da realizzare. La cache \textbf{conterrà un sottoinsieme delle locazioni della memoria principale}.
+\paragraph{Tempo di Esecuzione delle Istruzioni} Nel processore monolitico le varie operazioni da compiere (fetch, decode, operandi, execute, int) vengono \textbf{eseguite sequenzialmente una alla volta}. Possiamo \textbf{ottimizzare} questo comportamento \textbf{in due modi}:
+\begin{list}{}{}
+	\item \textbf{Processori Pipeline} o \textbf{a catena di montaggio}. Si caratterizzano per il \textbf{parallelismo nell'interprete firmware}, cioè \textbf{avere più UF che lavorano in parallelo}, ognuna con un particolare compito.
+	\begin{multicols}{2}
+	Spenderò tempo inizialmente per \textbf{riempire la catena di montaggio} (2$\tau$ per comunicare tra le UF), ma dopo un certo tempo \textbf{produrrà risultati in un tempo sicuramente inferiore} rispetto al processore monolitico.
+	\begin{center}
+		\includegraphics[scale=1]{pipeline.png}
+	\end{center}
+	\end{multicols}
+	\item \textbf{Processori Superscalari}. Il concetto alla base è di \textbf{avere più processori che lavorano in simultanea} avendo una \textbf{memoria di registri in comune}.
+\end{list}
+\section{Gerarchie di Memoria}
+\paragraph{Idea} Il concetto di gerarchie di memoria è \textbf{centrale alla strutturazione dei sistemi} ad un qualunque livello di astrazione.\\
+All'interno di uno stesso elaboratore esistono vari tipi di memoria con caratteristiche molto diverse tra loro, quindi esiste una \textbf{gerarchia di memoria} nella quale al \textbf{livello più alto} stanno i \textbf{dispositivi di memoria più capaci}, più \textbf{lenti} e \textbf{meno costosi}, mentre man mano che \textbf{si scende di livello} i supporti hanno \textbf{capacità sempre più piccola}, \textbf{tempo di accesso inferiore} e \textbf{costo per bit maggiore}.\\\\
+In termini di ottimizzazione del rapporto prestazioni/costo, l'obiettivo è di raggiungere \textbf{prestazioni paragonabili} (appena inferiori) a quelle che avremo se \textbf{tutta la massa di informazioni del sistema fosse concentrata nel solo livello inferiore}, e ad un \textbf{costo paragonabile} (appena superiore) a quello che avremmo se \textbf{tutta la massa di informazioni del sistema fosse concentrata nel solo livello più alto}.
+\pagebreak
+\subsection{Paginazione}
+\paragraph{Memoria Virtuale -- Memoria Principale} Ritorniamo al concetto di memoria virtuale di un processo mandato in esecuzione ed ampliamo i concetti usati.
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=1]{paging.png}
+\end{center}
+Ogni \textbf{indirizzo logico} è \textbf{diviso in due parti}:
+\begin{list}{}{}
+	\item pochi bit indicano l'\textbf{offset}
+	\item i restanti indicano il numero di pagina logica
+\end{list}
+In questo modo \textbf{suddividiamo la MV in pagine tutte della medesima dimensione}, indirizzate dall'offset.\\
+Tale meccanismo è \textbf{molto utile per la traduzione} di indirizzi logici in fisici. In particolar modo quando in memoria principale vengono caricati più processi con dimensioni differenti e con tempi di esecuzione differenti. Spesso accade che un processo viene \textbf{caricato in memoria in maniera frammentaria} (cioè non è detto che gli indirizzi i e i+1 corrispondano agli indirizzi fisici s e s+1). Quindi avere un ulteriore metodo per raggruppare gli indirizzi è molto comodo.
+\end{multicols}
+\paragraph{Tabella di rilocazione} Ogni processo ha quindi una \textbf{tabella di rilocazione} che \textbf{associa ad ogni numero di pagina logica il numero di pagina fisica corrispondente}.\\
+Ogni riga della tabella è una parola di 32 bit, usati per indicare la pagina fisica, ed 1 bit per indicare se è stata caricata o no.
+\paragraph{Tipologie} La paginazione può essere:
+\begin{list}{}{}
+	\item \textbf{Statica}: carico tutte le pagine del processo in memoria e \textbf{ogni posizione rimane tale finché il processo è in esecuzione}
+	\item \textbf{Dinamica}: carico tutte le pagine del processo in memoria, ma \textbf{può capitare che alcune pagine vengano scaricate} -- cioè messe in memoria secondaria -- \textbf{e ricaricate successivamente}. Questo metodo permette di caricare \textbf{solo le pagine utili all'esecuzione} del processo, quindi di \textbf{ottimizzare l'uso della memoria principale}.\\
+	La paginazione dinamica ha due proprietà su cui basa la propria efficacia:
+	\begin{list}{}{}
+		\item \textbf{Località}: se al tempo t accedo a indx è molto probabile che al tempo t' non lontano da t acceda anche a indx+k con k piccolo.
+		\item \textbf{Riuso}: se al tempo t accedo a indx è probabile che in un istante t' non lontano da t acceda nuovamente a indx.
+	\end{list}
+\end{list}
+\subsubsection{Working Set}
+Con \textbf{working set} si intende l'\textbf{insieme delle pagine che permettono l'esecuzione del programma in un certo istante alla massima velocità minimizzando il numero di fault}, ovvero senza dover portare in memoria principale altre pagine che si trovano in memoria secondaria.
+\pagebreak
+\subsubsection{Dimensione della pagina}
+Adesso non resta che da capire quanto devono essere grandi le pagine. Partiamo da alcune semplici osservazioni:
+\subparagraph{Pagine Piccole} $\Rightarrow$ Tante pagine
+\subparagraph{Dimensione pagina}
+\begin{list}{}{}
+	\item \textbf{cresce} $\Rightarrow$ diminuisce la probabilità di informazioni che probabilmente accederò fra un po' in memoria
+	\item \textbf{decresce} $\Rightarrow$ aumenta la probabilità che fra un po' mi serva un altra pagina
+\end{list}
+\paragraph{Fault di pagina} Il \textbf{pagefault} è il \textbf{tentativo di accedere ad un indirizzo non presente in memoria principale}.
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=0.65]{pagefaultplot.png}
+\end{center}
+Dopo un certo limite le probabilità di fault tornano a crescere poiché con \textbf{pagine troppo grandi può accadere che per caricare nuove pagine vada a scartare pagine in memoria più utili di quella caricata}.\\\\
+Il grafico è valido per capacità di memoria principale limitate.
+\end{multicols}
+Nella \textbf{paginazione dinamica}, quando ho un pagefault e quindi ho bisogno di caricare una nuova pagina in memoria principale, \textbf{se la memoria è satura} e quindi devo liberare spazio \textbf{viene scelta la pagina da scartare secondo regole euristiche LRU} (Least Recently Used).\\
+Se si tiene un \textbf{contatore} sui \textbf{secondi dopo l'ultimo accesso di una pagina per stabilire la pagina vittima} si ha un \textbf{costo molto grande sia di tempo che di spazio} (i confronti).\\
+Un approccio più pratico è quello di \textbf{marchaire con un bit le pagine ogni volta che le carichiamo in memoria e azzerare il contatore dopo un certo tempo prestabilito} (pochi istanti). Quando dobbiamo trovare la pagina da scartare non si fa altro che scorrere la memoria e cercare la prima pagina con il contatore da un bit a 0.
+\pagebreak
+\subsection{MMU}
+La \textbf{traduzione dell'indirizzo} da logico a fisico e il \textbf{controllo della protezione} -- e l'eventuale generazione dei pagefault -- sono implementate ad hardware--firmware nella \textbf{Memory Management Unit}, facente parte della CPU.\\
+\textbf{Al processore} P \textbf{non è visibile come avviene la traduzione} degli indirizzi, ma deve ovviamente aver noto l'esito di ogni accesso in memoria. Come già visto, tale \textbf{esito viene esplicitamente inviato a P dalla MMU per ogni richiesta} di accesso.\\
+Non è realistico pensare che, viste le dimensioni, l'intera tabella di rilocazione del processo venga copiata all'interno della MMU. Occorre realizzare in hardware una \textbf{tabella accedibile per contenuto}: questo componente è chiamato \textbf{memoria associativa}
+\begin{center}
+\includegraphics[scale=1]{mmu.png}
+\end{center}
+\subsection{Memoria Cache}
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=1]{memhierarchy.png}
+\end{center}
+Per rendere i calcolatori più veloci, quindi rendere l'accesso in memoria principale più rapido, usiamo delle \textbf{memorie cache} che sono \textbf{molto più piccole della memoria principale ma anche molto più veloci}.\\
+L'idea è quella di \textbf{memorizzare nella cache} C \textbf{solo il working set} di un programma per rendere la traduzione degli indirizzi molto veloce.\\\\
+dim(M) $>>$ dim (C)\\
+t$_{aM}$ $>>$ t$_{aC}$\\
+M = O(Gb), t$_a$ = O(100$\tau$)\\
+C = O(Kb)/O(Mb\\\\
+\textbf{Livelli di cache}\\
+C$_2$ = 2--16 Mb, t$_a$ = O(10$\tau$)\\
+C$_1$ = 16--32 Kb, t$_a$ = O(2--3$\tau$)
+\end{multicols}
+\pagebreak
+Nella cache memorizziamo parole da 32 bit della memoria principale facenti parte del working set del processo in uso.
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=0.9]{cacheline.png}
+\end{center}
+Quando il processo mi chiede di usare una parola non ancora caricata in cache, non solo viene memorizzata in cache tale parola ma anche le parole contigue che \textbf{probabilmente verranno usate negli istanti successivi} (principio di località).\\
+Tale tecnica funziona poiché la memoria principale è una memoria interlacciata e mi consente in un solo ciclo di accedere a più indirizzi.
+\end{multicols}
+\subsection{Indirizzamento diretto}
+\subsection{Indirizzamento completamente associativo}
+\subsection{Indirizzamento associativo su insiemi}
 \end{document}
