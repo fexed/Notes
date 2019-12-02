@@ -1398,4 +1398,33 @@ if<1.	(S, INT = 10) IC + IR.offset -> IC, fch0
 In questa versione abbiamo almeno \textbf{una istruzione in $\mu$-codice per ogni istruzione ASM}.\\
 Si può notare che la decisione di quale $\mu$-istruzione eseguire è \textbf{determininata da \texttt{DATAIN.COP -> RC}}, \textbf{dove andiamo a scrivere gli 8 bit che determinano il codice operativo} dell'istruzione ASM \textbf{direttamente nel registro di stato della PC (RC)}, in modo da determinare quale $\mu$-istruzione eseguire immediatamente dopo.
 \subsection{Valutazione delle prestazioni}
+Il \textbf{tempo effettivo di accesso in memoria t$_a$} è \textbf{maggiore del ciclo di clock del processore}: per questo è uno dei principali problemi da risolvere per il raggiungimento di prestazioni elevate.
+\begin{center}
+\includegraphics[scale=1]{valprest.png}
+\end{center}
+\begin{multicols}{2}
+Con il $\mu$-programma visto prima, siamo in grado di dare una valutazione del tempo di elaborazione per le istruzioni che caratterizzano il processore:
+\begin{list}{}{}
+	\item t$_{fch0}$ + t$_{fch1}$ = 2$\tau$ + t$_a$ \textbf{chiamata e decodifica}
+	\item t$_{add}$ = t$_{sub}$ = 1$\tau$
+	\item t$_{saltocond}$ = 2$\tau$
+	\item t$_{saltoincd}$ = 1$\tau$
+	\item t$_{load}$ = 2$\tau$ + t$_a$
+	\item t$_{store}$ = 3$\tau$ + t$_a$
+	\item t$_{mul}$ = t$_{div}$ = 50$\tau$ per convenzione
+\end{list}
+t$_a$ = 2($\tau$ + t$_{tr}$) + $\tau_m$ = 72$\tau$ accesso alla memoria molto lento.\\
+
+\columnbreak
+Tempo medio di elaborazione T, con formula vista in precedenza \texttt{$T = \tau * \sum_{i = 0}^{n - 1}(p_i * k_i) $}\\
+Le probabilità come seguono:
+\begin{list}{}{}
+	\item Aritm-Logiche corte 40\%
+	\item Aritm-Logiche lunghe 10\%
+	\item Load/Store 30\%
+	\item Salto 20\%
+\end{list}
+Inoltre le prestazioni variano anche in relazione al tipo di RAM: l'accesso a memorie dinamiche costa 60--100$\tau$, mentre a quelle statiche costa 20--40$\tau$
+\end{multicols}
+\pagebreak
 \end{document}
