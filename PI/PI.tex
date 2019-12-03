@@ -908,9 +908,33 @@ librerie : java(awt, swing, gdt), obj-c, c++ ne hanno n. Qt, Cocoa su linux. W3c
 \textbf{programmazione ad eventi} paradigma di programmazione distinto da a oggetti, imperativa, funzionale, logica, dichiarativa. Senza multithreading, ognuno degli event loop è un thread, non mi preoccupo di deadlock, race, fairness ecc\ldots perché tutto cade nell'accesso lettura/scrittura nella coda eventi\\
 hw -- so -- app (chrome) -- tab -- dom -- javascript -- element (button, img, link\ldots) -- event handler (onClick = "\ldots")\\
 Dalla grafica si scopre che coda a messaggi e gestione asincrona funziona bene in altri contesti (Es. I/O asincrono in Java NIO)\\\\
-Publish--subscribe\\
-In origine ogni applicazione sviluppava internamente le strutture necessarie per la UI: righe di testo, liste, strutture dati. Ciò creava metodi da decine di migliaia di righe di codice ed era un \textbf{problema}, inoltre spesso ogni programmatore finiva per programmare cose già viste (pulsanti, tabelle e controlli vari) che potevano essere riutilizzati invece che riscritti copia-incollando.\\
+Publish--subscribe
+\paragraph{} In origine ogni applicazione sviluppava internamente le strutture necessarie per la UI: righe di testo, liste, strutture dati. Ciò creava metodi da decine di migliaia di righe di codice ed era un \textbf{problema}, inoltre spesso ogni programmatore finiva per programmare cose già viste (pulsanti, tabelle e controlli vari) che potevano essere riutilizzati invece che riscritti copia-incollando.\\
 Così invece di scrivere decine di migliaia di righe di codice ogni volta, si passa a scrivere qualche migliaio di \textbf{chiamate di libreria} a toolkit che, ad esempio, creano il pulsante o il controllo.
+\paragraph{Trainability} L'uso di \textbf{metodi comuni} favorisce l'\textbf{uniformità} e la \textbf{familiarità dell'interfaccia utente}: questo perché lo stesso metodo dello stesso toolkit disegnerà tale componente sempre nel solito modo, e ciò vale solitamente anche per toolkit diversi poiché tendono ad uniformarsi tra loro. La \textbf{trainability} è l'\textbf{addestrare l'utente ad aspettarsi dei comportamenti specifici}. Nel momento in cui \textbf{qualcosa di familiare non si comporta "come dovrebbe" causa irritazione}.
+\paragraph{} Tutto è quindi stato ridotto ad una semplice serie di chiamate di sistema che, \textbf{astraendo}, può essere indicata con \texttt{initUI(nomefile)}. Posso fare questo perché \textbf{tutta la sequenza di istruzioni per scrivere l'interfaccia può essere sostituita da un interprete}. Come passare dall'assembler al C, sostituisco le mie righe di codice con delle istruzioni a più alto livello che verranno interpretate.\\
+In pratica, per costruire una UI si: istanziano degli oggetti, li si piazzano sullo schermo in qualche modo (coordinate, algoritmi\ldots) e dopodiché si \textbf{esegue l'event loop} -- estrazione messaggi dalla coda degli eventi e a seconda del messaggio si fa qualcosa.\\
+L'interprete ovviamente cambia a seconda dell'ambiente: per esempio sul web è il browser, sul S.O. è una parte dello stesso.
+\subsection{Il file che descrive l'interfaccia utente}
+\paragraph{Tipi} I vari componenti sono strutturati in una gerarchia di classi, di solito abbastanza profonde -- storicamente la OOP è nata dalle gerarchie dei componenti UI.\\
+La gerarchia parte da una qualche classe "madre" -- ad esempio \texttt{View} -- da cui si specializzano i componenti -- \texttt{Button}, \texttt{List}\ldots\\
+Sono anche ottimi esempi di scomposizione di comportamenti complessi, ed un ottimo esempio di strutturazione delle gerarchie di classe.\\
+Fissati da chi scrive il framework.
+\paragraph{Posizioni} Ogni componente sta nella gerarchia, con relazione di ereditarietà, ma anche \textbf{all'interno della UI in una gerarchia di contenimento}: avremo un contenitore \textbf{parent} -- ad esempio il box della finestra -- che \textbf{conterrà al suo interno altri componenti}, anch'essi conterranno a loro volta altri componenti\ldots\\
+Definiti dal programmatore in relazione alle scelte del framework.
+\paragraph{Comportamenti} Valori, eventi e azioni. Per esempio una lista deve contenere del testo, dei \textbf{valori}. Anche gli \textbf{eventi}, come lo scrolling che permette di vedere parti dell'UI nascoste. Infine le \textbf{azioni}: click, doppio click\ldots\\
+Definiti liberamente dal programmatore.
+\subsection{DOM}
+\paragraph{Document Object Model} Modello dei documenti che sono pagine web. Una pagina web è un albero di oggetti in relazione di contenimento. Il linguaggio ovviamente è l'HTML, una specializzazione dell'XML.\\
+Gli oggetti sono specificati con i propri attributi, che è un modo per indicare valori, eventi (specifici del framework, es. \texttt{onClick}) ed azioni (spesso con un trucco cioè dando l'azione da eseguire come valore di un attributo che ha come nome l'evento associato) dei singoli oggetti.\\
+L'interprete deve quindi navigare l'albero e, in caso di evento, cercare l'azione da eseguire (che spesso è il nome di un metodo js scritto in un tag script) ed eseguirlo.\\
+Ma anche questo è tanto lavoro, per questo sono nati i \textbf{framework}.
+\subsection{Flutter}
+Framework recente, sistema in cui sviluppare applicazioni mobile e web native partendo da unica base. \texttt{flutterbyexample.com}
+\begin{center}
+\includegraphics[scale=1]{flutter.png}
+\end{center}
+
 \pagebreak
 \section{Antonio Cisternino, Realizzazione di una GUI}
 grafica retantion o immediata\\
