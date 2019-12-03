@@ -2626,6 +2626,61 @@ I due attributi più importanti sono:
 	\texttt{RFC 1163}: l'attributo \texttt{NEXT\_HOP} definisce l'indirizzo IP del router di bordo che dovrebbe essere usato come next hop verso le reti elencate nel messaggio \texttt{UPDATE}. Questo router di bordo deve appartenere alla stessa AS di chi emette l'advertisement.
 \end{list}
 \pagebreak
+\section{Livello Data Link}
+\paragraph{Introduzione} Introduciamo il \textbf{livello link} con alcuni termini utili:
+\begin{list}{}{}
+	\item Host e router $\rightarrow$ \textbf{nodi}
+	\item Canali di comunicazione, che collegano nodi adiacenti lungo un cammino $\rightarrow$ \textbf{collegamenti} (\textbf{link})
+	\begin{list}{}{}
+		\item Collegamenti \textbf{cablati}
+		\item Collegamenti \textbf{wireless}
+		\item \textbf{LAN}
+	\end{list}
+	\item Unità di dati scambiate dai protocolli a livello link $\rightarrow$ \textbf{frame}
+\end{list}
+I \textbf{protocolli} a livello link \textbf{si occupano del trasporto di datagrammi lungo un singolo canale di comunicazione}.
+\paragraph{Datagrammi} Il \textbf{livello data link} quindi \textbf{muove i datagrammi da un nodo al nodo adiacente su un singolo link di comunicazione}. Un \textbf{datagramma quindi può essere gestito da più protocolli su collegamenti diversi}.
+\subparagraph{Esempio} Un datagramma può essere gestito da Ethernet sul primo collegamento, WAN sul collegamento intermedio e da PPP sull'ultimo.
+\paragraph{Servizi} \textbf{Anche i servizi erogati dai protocolli} a livello data link \textbf{possono essere diversi}, ad esempio non tutti i protocolli forniscono un servizio di consegna affidabile.
+\paragraph{Analogia con un tour operator} Un viaggio da Princeton a Losanna:
+\begin{list}{}{}
+	\item Taxi: Princeton $\longrightarrow$ Aeroporto JFK
+	\item Aereo: JFK $\longrightarrow$ Ginevra
+	\item Treno: Ginevra $\longrightarrow$ Losanna
+	\item
+	\item \textbf{Turista} = \textbf{datagramma}
+	\item Ciascuna \textbf{tratta} = \textbf{collegamento}
+	\item \textbf{Tipologia del trasporto} = \textbf{protocollo} di link
+	\item \textbf{Agente di viaggio} = \textbf{protocollo di routing}
+\end{list}
+\subsection{Collegamenti}
+\begin{list}{}{\textbf{Tipologie}:}
+	\item \textbf{Punto-a-punto}: collegamento \textbf{dedicato a due soli dispositivi}
+	\item \textbf{Broadcast}: collegamento \textbf{condiviso tra più dispositivi}\\
+	Quando un nodo trasmette un frame, il canale lo \textbf{diffonde a tutti i nodi collegati} che ne ricevono una copia.
+\end{list}
+\begin{list}{}{Suddividibile in due \textbf{sottolivelli}:}
+	\item Datalink Control
+	\item Medium Access Control, accesso al mezzo (in canali broadcast a rischio collisione)
+\end{list}
+\pagebreak
+\subsection{Servizi}
+\paragraph{Framing} I \textbf{protocolli incapsulano i datagrammi} del livello di rete \textbf{all'interno di un frame} a livello di link. Il framing \textbf{separa i vari messaggi} durante la trasmissione sorgente--destinazione.\\
+Per \textbf{identificare} origine e destinatario \textbf{sono usati gli indirizzi MAC}, diversi rispetto agli IP.
+\subparagraph{Frame} Campo dati --- intestazione --- eventuale trailer
+\paragraph{Consegna Affidabile} Considerata \textbf{non necessaria sui collegamenti con un basso numero di errori sui bit} -- come fibra ottica, coassiale e doppino intrecciato -- viene \textbf{utilizzata sui collegamenti con alto tasso di errori} -- come i collegamenti wireless.
+\paragraph{Controllo del Flusso} Evita che il nodo trasmittente saturi il ricevente
+\paragraph{Rilevamento degli Errori} Gli errori sono \textbf{causati dall'attenuazione del segnale e dal rumore elettromagnetico}.\\
+Il nodo \textbf{ricevente individua la presenza degli errori} ed è \textbf{possibile}, \textbf{grazie all'inserimento di bit di controllo dell'errore} all'interno del frame da parte del mittente, rilevare l'errore quando avviene.
+\paragraph{Correzione degli Errori} Il nodo ricevente \textbf{può anche determinare il punto in cui si è verificato l'errore e correggerlo}.
+\subsection{Indirizzi}
+Un indirizzo a livello data link viene \textbf{associato alla scheda di rete} e non al nodo. Inoltre è \textbf{permanente}.\\
+Si chiama \textbf{indirizzo fisico} o indirizzo LAN o \textbf{indirizzo MAC} (\textbf{Media Access Control})\\
+	Per le LAN ethernet (IEEE 802) è \textbf{lungo 6 byte} (2$^{48}$ possibili indirizzi) ed è \textbf{espresso in notazione esadecimale}: ad esempio \texttt{1A-63-F9-BD-06-9B}.\\
+	La IEEE \textbf{definisce ed assegna i primi 24 bit} (OUI -- Organization Unique Identifier), mentre i \textbf{rimanenti 24 venngono gestiti dalle aziende} ed assegnati a livello locale.\\
+	$\rightarrow$ Quando una società vuole realizzare degli adattatori, compra un blocco di spazio di indirizzi (\textbf{univocità degli indirizzi})
+
+\pagebreak
 \section{Esercizi}
 \subsection{SMTP}
 \paragraph{Testo} L’utente mickey@disney.com invia dal suo PC una email a donald@disney.com.\\
