@@ -2679,7 +2679,53 @@ Si chiama \textbf{indirizzo fisico} o indirizzo LAN o \textbf{indirizzo MAC} (\t
 	Per le LAN ethernet (IEEE 802) è \textbf{lungo 6 byte} (2$^{48}$ possibili indirizzi) ed è \textbf{espresso in notazione esadecimale}: ad esempio \texttt{1A-63-F9-BD-06-9B}.\\
 	La IEEE \textbf{definisce ed assegna i primi 24 bit} (OUI -- Organization Unique Identifier), mentre i \textbf{rimanenti 24 venngono gestiti dalle aziende} ed assegnati a livello locale.\\
 	$\rightarrow$ Quando una società vuole realizzare degli adattatori, compra un blocco di spazio di indirizzi (\textbf{univocità degli indirizzi})
-
+\subsubsection{Indirizzi MAC}
+\paragraph{Indirizzo MAC} Anche noto come indirizzo LAN, indirizzo fisico o indirizzo Ethernet.\\
+Ha una \textbf{struttura piatta} ed è \textbf{analogo al codice fiscale} di una persona: la struttura piatta non varia a seconda del luogo in cui la persona si trasferisce.\\
+Ha una lunghezza di 48 bit.
+\subparagraph{Per confronto} L'\textbf{indirizzo IP} è di 32 bit ed è \textbf{analogo all'indirizzo postale} di una persona: struttura \textbf{gerarchica} e \textbf{devono essere aggiornati} quando una persona cambia residenza.
+\paragraph{Broadcast} \texttt{FF-FF-FF-FF-FF-FF}\\
+In LAN broadcast il frame viene ricevuto ed elaborato da tutti gli utenti della LAN\\\\
+Solitamente, invece, \textbf{ogni scheda di rete controlla se il MAC corrisponde al proprio}. In caso positivo estrae il datagramma e lo passa al livello superiore.\\
+In caso contrario scarta il frame.
+\subsubsection{Indirizzamento} Quando un adattatore spedisce un frame, \textbf{vi inserisce l'indirizzo MAC della scheda di destinazione}. Nel caso di reti broadcast, \textbf{tutti gli adattatori} sulla rete \textbf{controllano l'indirizzo di destinazione} e \textbf{passano i dati al livello superiore solo se lo riconoscono come proprio}.\\
+Se un adattatore vuole che tutte le schede di rete passino i dati agli strati superiori, immette nel campo l'indirizzo fisico broadcast.
+\subsubsection{ARP}
+\paragraph{Risoluzione degli indirizzi: problema} Normalmente all'accensione una macchina conosce: il proprio MAC, il proprio IP (e la rete locale) ed il suo indirizzo alfanumerico.\\
+\textbf{Non sa chi ha attorno}, le macchine direttamente visibili.
+\paragraph{ARP} \textbf{Address Resolution Protocol}. Le richieste ARP vengono \textbf{fatte in broadcast} -- perché non si conoscono i MAC vicini.\\
+L'ARP fornisce il MAC tramite l'IP.
+\paragraph{Come determinare MAC se si conosce l'IP} Ogni nodo IP (host, router\ldots) nella LAN ha una \textbf{tabella ARP} che \textbf{contiene la corrispondenza IP--MAC}.
+\begin{center}
+\texttt{<IP, MAC, TTL>}
+\end{center}
+Il \textbf{TTL} (Time To Live) è un valore che \textbf{indica quando bisogna eliminare una  voce dalla tabella}. Tipicamente è di 20 minuti.
+\paragraph{Tabella ARP} Poiché l'ARP risolve gli indirizzi IP \textbf{solo per i nodi della stessa LAN}, le tabelle ARP contengono la corrispondenza IP--MAC per i nodi della stessa sottorete e \textbf{non necessariamente la corrispondenza di tutti i nodi}.
+\paragraph{Funzionamento}
+\begin{center}
+\includegraphics[scale=0.7]{arpfunz.png}
+\end{center}
+\pagebreak
+\paragraph{Pacchetto ARP}
+\begin{center}
+\includegraphics[scale=0.7]{arppkt.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Hardware Type} Protocollo di livello data link (es. Ethernet 1)
+	\item \textbf{Protocol Type} Protocollo di livello superiore (es. IP)
+	\item \textbf{Source Hardware Address}\\
+	\textbf{Source Protocol Address} Indirizzi del nodo mittente a livello link e superiore. Lunghezza variabile.
+	\item \textbf{Destination Hardware Address} Vuoto nelle richieste\\
+	\textbf{Destination Protocol Address}
+\end{list}
+\begin{list}{}{\textbf{Caratteristiche}}
+	\item Il protocollo ARP \textbf{interagisce direttamente con il livello data link}.\\
+	Viene incapsulato in un frame e spedito in broadcast sulla rete.
+	\item L'\textbf{header del frame} di livello link \textbf{specifica che il frame contiene un pacchetto ARP}
+	\item Ogni nodo nella rete locale riceve ed elabora il pacchetto di richiesta ARP.\\
+	Il nodo che riconosce in proprio indirizzo IP restituisce un pacchetto di risposta ARP che contiene il proprio IP e MAC. Il \textbf{pacchetto di risposta viene inviato in modalità unicast} al nodo originario della richiesta.
+\end{list}
+% L14_LivelloLink_ARP_Ethernet_VLAN.pdf, 21 compresa da fare
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
