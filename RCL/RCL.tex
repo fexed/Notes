@@ -2785,10 +2785,76 @@ Fondamentalmente dei repeater multiporta.\\
 \subsection{Switch}
 Operano sia a livello fisico, rigenerando il segnale, \textbf{sia a livello link, verificando i MAC contenuti nei frame}. Hanno una \textbf{tabella di filtraggio} e \textbf{non modificano i MAC nell'intestazione dei frame}
 \begin{center}
-\includegraphics[scale=0.6]{switch.png}\\
-\includegraphics[scale=0.6]{switchtab.png}
+\includegraphics[scale=0.6]{switch.png}\includegraphics[scale=0.6]{switchtab.png}
 \end{center}
-% L14_LivelloLink_ARP_Ethernet_VLAN.pdf, 35 compresa da fare
+\subsubsection{Switch con auto apprendimento}
+\begin{center}
+	\includegraphics[scale=0.6]{switchautoapp.png}
+\end{center}
+\pagebreak
+\subsection{Router}
+\begin{list}{}{\textbf{Operano}:}
+	\item Livello fisico: rigenerano il segnale
+	\item Livello link: verificando gli indirizzi MAC
+	\item \textbf{Livello di rete}: \textbf{verificando gli IP}
+\end{list}
+\paragraph{Diversi} Un router è fondamentalmente diverso dai ripetitori, switch e hub.\\
+Ogni router ha \textbf{1 indirizzo MAC e 1 indirizzo IP per ogni interfaccia}.\\
+I router \textbf{operano solo sui frame il cui indirizzo di destinazione} (link) \textbf{è quello dell'interfaccia} (link) \textbf{su cui arrivano}. Inoltre cambiano gli indirizz link contenuti nei frame che inoltrano.
+\section{VLAN}
+\begin{multicols}{2}
+	\begin{center}
+		\includegraphics[scale=0.65]{vlanesempio.png}
+	\end{center}
+		Esempio di una LAN gerarchica. I dispositivi sono organizzati in 4 segmenti, ognuno servito da un LAN switch.\\
+		I tre gruppi inferiori potrebbero corrispondere a diversi dipartimenti, fisicamente separati, e il gruppo superiore può corrispondere ad una server farm centralizzata usata da tutti i dipartimenti.
+	\columnbreak
+	\paragraph{Esempio di una configurazione LAN} Un LAN switch è un dispositivo store-and-forward che si occupa di inoltrare pacchetti ad un numero di sistemi terminali interconnessi che formano un \textbf{LAN segment}.\\
+	Lo switch può inoltrare un frame MAC da un dispositivo collegato alla sorgente ad un dispositivo collegato alla destinazione.\\
+	Vari switch possono essere interconnessi così che più segmenti LAN formino una LAN più grande.\\
+	Un LAN switch è anche connesso ad un link di trasmissione o ad un router o ad altri dispositivi di rete che forniscono connettività ad internet o ad altre WAN.
+	\paragraph{Indirizzamento Unicast} Il MAC di destinazione designa un unico destinatario.\\
+	Es.: trasmissione di un singolo frame MAC da X a Y. Viene trasmesso da X allo switch locale che lo spedisce a Y.\\
+	Es.: trasmissione di un singolo frame MAC da X a Z. Viene trasmesso da X allo switch locale, che lo trasmette agli switch appropriati verso la destinazione voluta.
+	\paragraph{Indirizzamento Broadcast} Tutti i dispositivi sulla LAN \textbf{devono ricevere una copia del frame}. Quindi se X trasmette un frame con destinazione broadcast, \textbf{tutti i dispositivi collegati a tutti gli switch devono riceverne una copia}.
+	\paragraph{Dominio Broadcast} Il \textbf{broadcast domain} è l'\textbf{insieme di tutti i dispositivi che ricevono frame broadcast gli uni dagli altri}.\\
+	In molte situazioni, un frame broadcast è usato per trasportare informazione significativa a livello locale, come per network management o qualche tipo di avviso.\\
+	Se un frame broadcast è utile solo per un dipartimento si spreca capacità di trasmissione sulle altre porzioni di rete.
+\end{multicols}
+\paragraph{Subnet IP} Partizioni della rete in diverse subnet. Un approccio semplice per migliorare l'efficienza è di \textbf{partizionare fisicamente la LAN in diversi broadcast domains}, ad esempio collegando i 4 LAN switch ad un router centrale ottengo 4 LAN separate e un broadcast da X è trasmesso solo alla sottorete di X.
+\pagebreak
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.6]{vlan.png}
+\end{center}
+Una configurazione VLAN
+\columnbreak
+\paragraph{VLAN} Le \textbf{Virtual Local Area Network}, VLAN, \textbf{consentono di disperdere fisicamente le varie porzioni di rete a piacere senza perdere l'identità di gruppo}.\\\\
+Una trasmissione da X a Z avviene \textbf{all'interno della solita VLAN A}, quindi anche un broadcast MAC da X è \textbf{trasmesso a tutti i dispositivi in tutte le porzioni della solita VLAN}.\\
+Però una trasmissione da X alla stampante Y attraversa due VLAN, quindi è richiesto dell'instradamento a livello IP per spostare il pacchetto IP da X a Y.\\
+Lo switch determina se il frame MAC in arrivo è destinato alla solita VLAN o meno. In caso non lo sia, lo switch instrada il pacchetto IP contenuto a livello IP.
+\end{multicols}
+\subsection{Definire le VLAN}
+Una \textbf{VLAN è un dominio broadcast che consiste in un gruppo di dispositivi terminali che non sono vincolati alla loro posizione fisica e possono comunicare come se si trovassero sulla stessa LAN}. Una VLAN non è limitata ad uno switch ma \textbf{può attraversare più switch interconnessi}. Bisogna quindi \textbf{definire chi appartiene ad una VLAN}
+\subsubsection{Appartenenza per gruppo di porta}
+Ogni switch nella configurazione LAN contiene due tipi di porta: una porta \textbf{trunk che connette due switch} ed una \textbf{porta end che connette switch e terminale}.\\
+Una \textbf{VLAN} può essere \textbf{definita assegnando ad ogni porta una specifica VLAN}. Ha il \textbf{vantaggio} che è relativamente \textbf{facile da configurare}.\\
+Lo \textbf{svantaggio principale} è che \textbf{l'amministratore di rete deve riconfigurare le appartenenze alle VLAN quando un sistema terminale cambia porta}.
+\subsubsection{Appartenenza per indirizzo MAC}
+Le VLAN basate sui MAC consentono agli amministratori di rete di spostare fisicamente un terminale e far sì che quel terminale mantenga automaticamente la configurazione VLAN.\\
+Il problema principale con questo metodo è che \textbf{l'appartenenza deve essere assegnata inizialmente}.
+\subsubsection{Appartenenza per informazioni sul protocollo}
+Le appartenenze possono essere assegnate anche in base all'indirizzo IP, alle informazioni del protocollo di trasporto o di protocolli a più alto livello.\\
+Questo è un \textbf{approccio flessibile}, ma \textbf{richiede che lo switch esamini porzioni del frame MAC a livelli superiori di quello link}, che potrebbe comportare un impatto sulle prestazioni.
+\pagebreak
+\subsection{Comunicare l'appartenenza}
+Gli switch \textbf{devono possedere un modo per comprendere le appartenenze alle VLAN} quando il traffico di rete arriva da altri switch.
+\paragraph{Frame Tagging} Un approccio più comune è il \textbf{frame tagging}, dove viene \textbf{inclusa un'intestazione ad ogni frame} che \textbf{identifica univocamente a quale VLAN appartiene un particolare frame MAC}.\\
+IEEE 802 ha sviluppato uno standard per il frame tagging, l'\texttt{IEEE 802.1Q}:
+\begin{list}{}{}
+	\item Ad ogni VLAN in una configurazione LAN è \textbf{assegnato un VID globalmente univoco}, tra 1 e 4094.
+	\item Assegnando il solito VID a sistemi terminali su switch diversi, uno o più domini di broadcast VLAN possono essere estesi attraverso una rete più grande.
+\end{list}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
