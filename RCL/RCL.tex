@@ -2725,7 +2725,70 @@ Il \textbf{TTL} (Time To Live) è un valore che \textbf{indica quando bisogna el
 	\item Ogni nodo nella rete locale riceve ed elabora il pacchetto di richiesta ARP.\\
 	Il nodo che riconosce in proprio indirizzo IP restituisce un pacchetto di risposta ARP che contiene il proprio IP e MAC. Il \textbf{pacchetto di risposta viene inviato in modalità unicast} al nodo originario della richiesta.
 \end{list}
-% L14_LivelloLink_ARP_Ethernet_VLAN.pdf, 21 compresa da fare
+\paragraph{Esempio, con forwarding diretto} A vuole inviare un datagramma a B, ma il MAC di B non è nella tabella ARP di A.\\
+A trasmette in un pacchetto \textbf{broadcast} il messaggio di richiesta ARP, contenente l'IP di B: in questo pacchetto il "MAC Destinatario" è il broadcast \texttt{FF-FF-FF-FF-FF-FF}.\\
+\textbf{Tutte le macchine} in LAN \textbf{ricevono la richiesta ARP}, ma \textbf{solo B risponde} riconoscendo il proprio indirizzo e comunicando ad A il proprio MAC.\\
+\pagebreak
+Invio di un datagramma da A a B attravaerso R, ipotizzando che A conosca l'indirizzo di B.\\Due tabelle ARP nel router R, una per ciascuna rete IP (LAN).
+\begin{center}
+	\includegraphics[scale=0.7]{esarpfordiretto.png}
+\end{center}
+\begin{list}{}{}
+	\item A crea una datagramma con origine A e destinazione B
+	\item A usa ARP per ottenere l'indirizzo MAC di R
+	\item A richiede all'adattatore di inviare un datagramma all'indirizzo MAC di destinazione di R. Il frame contiene il datagramma IP da A a B
+	\item L'adattatore di A invia il datagramma
+	\item L'adattatore di R riceve il datagramma
+	\item R estrae il datagramma IP dal frame ethernet e vede che la sua destinazione è B
+	\item R usa ARP per ottenere l'indirizzo MAC di B
+	\item R crea un frame contenente il datagramma IP da A a B e lo invia a B
+\end{list}
+ARP è "\textbf{plug-and-play}". La tabella ARP di un nodo si costituisce automaticamente e non deve essere configurata dall'amministratore di sistema.
+\pagebreak
+\subsection{Ethernet}
+L'ethernet detiene una \textbf{posizione dominante nel mercato} delle LAN cablate, essendo stata la prima LAN ad alta velocità con vasta diffusione. Risulta più semplice e meno costosa di token ring, FDDI e ATM ed è \textbf{sempre al passo con i tempi con la velocità di trasmissione} (10 Mbps, 100 Mbps, 1 Gbps, 10 Gbps\ldots)
+\subsubsection{Topologia a Stella}
+\begin{center}
+	\includegraphics[scale=0.7]{topologia_stella.png}
+\end{center}
+Quasi tutte le reti ethernet odierne sono progettate con topologia a stella. Al centro vi è collegato un hub o \textbf{switch}.
+\subsubsection{Pacchetti}
+\begin{center}
+	\includegraphics[scale=0.7]{ethernetpkt.png}
+\end{center}
+I datagrammi IP vengono incapsulati, dall'adattatore di rete, in pacchetti ethernet.
+\begin{list}{}{}
+	\item \textbf{Preambolo}: i pacchetti ethernet iniziano con un campo di 8 byte.\\
+	7 byte hanno i bit \texttt{10101010}.\\
+	L'ultimo byte ha \texttt{10101011}.\\
+	\textbf{Servono per "attivare" gli adattatori riceventi e sincronizzare gli orologi con il mittente}.
+	\item \textbf{Dati}: l'MTU varia da 46 byte ad un massimo di 1500 byte.\\
+	Se il datagramma è più grande allora deve essere frammentato, mentre se è più piccolo deve essere riempito (\textbf{stuffed})
+	\item \textbf{Indirizzo di destinazione}, 6 byte\\
+	Quando un adattatore riceve un pacchetto con indirizzo di destinazione \textbf{corrispondente al proprio MAC} o broadcast, \textbf{trasferisce il contenuto del campo dati del pacchetto a livello di rete}.\\
+	I pacchetti con altri indirizzi MAC vengono ignorati.
+	\item \textbf{Tipo}, 2 byte\\
+	Consente ad ethernet di supportare vari protocolli di rete (IP, ARP, OSP\ldots)\\
+	Qua si multiplexano i protocolli.
+	\item \textbf{CRC}: consente all'adattatore ricevente di rilevare la presenza di un errore nei bit del pacchetto.
+\end{list}
+\pagebreak
+\section{Dispositivi di interconnessione}
+\subsection{Repeater}
+Operano solo a livello fisico, rigenerando il segnale che ricevono. In passato erano usati per collegare segmenti di ethernet con topologia a bus.
+\subsection{Hub}
+Fondamentalmente dei repeater multiporta.\\
+\textbf{Entrambi non hanno capacità di filtraggio}: ciò che ricevono lo mandano a tutti i dispositivi collegati.
+\begin{center}
+\includegraphics[scale=0.7]{hub.png}
+\end{center}
+\subsection{Switch}
+Operano sia a livello fisico, rigenerando il segnale, \textbf{sia a livello link, verificando i MAC contenuti nei frame}. Hanno una \textbf{tabella di filtraggio} e \textbf{non modificano i MAC nell'intestazione dei frame}
+\begin{center}
+\includegraphics[scale=0.6]{switch.png}\\
+\includegraphics[scale=0.6]{switchtab.png}
+\end{center}
+% L14_LivelloLink_ARP_Ethernet_VLAN.pdf, 35 compresa da fare
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
