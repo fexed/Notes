@@ -1527,7 +1527,75 @@ Nella cache memorizziamo parole da 32 bit della memoria principale facenti parte
 Quando il processo mi chiede di usare una parola non ancora caricata in cache, non solo viene memorizzata in cache tale parola ma anche le parole contigue che \textbf{probabilmente verranno usate negli istanti successivi} (principio di località).\\
 Tale tecnica funziona poiché la memoria principale è una memoria interlacciata e mi consente in un solo ciclo di accedere a più indirizzi.
 \end{multicols}
-\subsection{Indirizzamento diretto}
-\subsection{Indirizzamento completamente associativo}
-\subsection{Indirizzamento associativo su insiemi}
+\subsubsection{Indirizzamento diretto}
+In questo caso \textbf{ogni blocco di memoria principale può essere trasferito solo in un determinato blocco della cache}: esiste \textbf{uno ed un solo blocco} della cache in cui una certa informazioni \textbf{può risiedere}.
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.7]{ind.png}
+\end{center}
+\begin{list}{}{\textbf{Procedura logica per leggere nella cache la parola di IND}}
+	\item Vado nella linea di indirizzo \texttt{\# linee}
+	\item Controllo che \texttt{IND.TAG = C[\# linee]}
+	\item Se è vero $\rightarrow$ uso \texttt{IND.offset} per prendere la parola cercata
+	\item Se è falso $\rightarrow$ \textbf{fault di cache}
+\end{list}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=1]{indirzz_dir.png}
+\end{center}
+\end{multicols}
+\paragraph{Bit di modifica} In ogni \textbf{linea di cache} è presente anche un \textbf{bit di modifica} che \textbf{indica se una delle $\sigma$ parole è stata modificata}, così da sapere che devo salvare in memoria la linea aggiornata prima di cancellarla. Vediamo com'è implementata a livello firmware.
+\begin{center}
+%TODO immagine
+immagine da fare
+\end{center}
+\paragraph{Vantaggi e svantaggi} i vantaggi di questo metodo sono \textbf{la velocità} e \textbf{la semplicità}.\\
+Presenta uno svantaggio che può essere molto \textbf{gravoso} e deriva dalla \textbf{rigidità della legge di corrispondenza}: quando devo accedere più volte a coppie di informazioni che stanno in blocchi della memoria principale corrispondenti alo stesso blocco della cache (quindi con \texttt{\# linee} uguali), il numero di fault è molto elevato (\textbf{trashing})
+\subsubsection{Indirizzamento completamente associativo}
+Questo metodo \textbf{offre la massima flessibilità circa la corrispondenza tra le linee di M e quelle di C}: ogni blocco o linea di M può risiedere in qualsiasi blocco di C.
+\begin{multicols}{2}
+\begin{center}
+%TODO immagine
+immagine da fare
+\end{center}
+\columnbreak
+Per vedere se ho l'indirizzo memorizzato enlla cache, considero l'\textbf{AND tra il risultato dei confronti}, se è 0 allora esiste il tag giusto, sennò \textbf{fault di cache}.
+\end{multicols}
+\begin{center}
+%TODO immagine
+immagine da fare
+\end{center}
+Offre la massima flessibilità al prezzo di un maggiore tempo di accesso e di un aumento di costo dovuto alla memoria associativa
+\subsubsection{Indirizzamento associativo su insiemi}
+Questo metodo \textbf{approssima} in maniera soddisfacente sia \textbf{la flessibilità} del metodo completamente associati, sia che \textbf{la semplicità} del metodo diretto. Ogni linea di memoria viene fatta \textbf{corrispondere ad un insieme determinato di linee cache, potendo essere allocato in una qualsiasi linea di tale insieme}.\\\\
+\texttt{insieme = \{gruppo di linee/blocchi di cache di dimensione k\}}
+\begin{center}
+%TODO immagine
+immagine da fare
+\end{center}
+Dall'indirizzo fisico, prendo i bit che mi indicano il \texttt{\# ins} e decido quale insieme andare a guardare. Dopo prendo i \texttt{TAG} dalle linee dell'insieme in esame e li confronto con \texttt{IND.TAG}, decidendo quale linea parendere o se c'è un \textbf{fault di cache}.\\
+Successivamente con \texttt{IND.offset} decido quale delle $\sigma$ parole prendere.\\\\
+Di seguito l'implementazione a livello firmware con k = 2, per questioni di semplicità dello schema.
+\begin{center}
+%TODO immagine
+immagine da fare
+\end{center}
+\subsubsection{Livelli di Cache}
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=1]{lvcache.png}
+\end{center}
+\columnbreak
+\begin{list}{}{}
+	\item \textbf{3° Livello di cache} -- 10 Mb -- Dati e istruzioni in una sola cache
+	\item \textbf{2° Livello di cache} -- 1 Mb -- Dati e istruzioni in una sola cache
+	\item \textbf{1° Livello di cache} -- 10 Kb -- Una cache per istruzioni, una cache per dati 
+\end{list}
+\end{multicols}
+Tutte le cache che lavorano su dati (CD, C$_2$, C$_3$) usano un \textbf{metodo associativo su insiemi}, mentre la cache istruzioni può essere ad indirizzamento diretto o associativo su insiemi.\\\\
+Nel 1° livello ci sono \textbf{solo i dati del processo in esecuzione} (cache molto piccola), al cambio di contesto si cancella il contenuto della cache (logicamente, la rimozione fisica richiedete tantissimo tempo, cioè \textbf{i bit di presenza vengono settati a 0}).\\
+A questo livello ho una \textbf{politica on-demand}: quando ho un fault rimpiazzo una linea di cache con la linea richiesta.\\\\
+Nel 2° livello si potrebbe avere una politica di \textbf{pre-fetch}: se accedo ad un indirizzo tento di portare in cache anche la linea che contiene tale indirizzo + $\sigma$ se non è già presente (\textbf{precaricamento}).\\
+Quindi abbiamo dati e codice di processi diversi con politica ondemand e prefetching.\\\\
+Il 3° livello è analogo al secondo, ma più capiente.
 \end{document}
