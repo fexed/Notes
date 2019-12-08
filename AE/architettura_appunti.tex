@@ -1632,4 +1632,130 @@ for (i = 0; i < n; i++) x[i] = 1;
 \end{list}
 \paragraph{Write Through} Per il metodo write through, perché funzioni devo \textbf{verificare che la banda della \texttt{STORE} sia minore o uguale della banda del livello successivo della gerarchia di memoria}.
 \paragraph{Write Back} Nel caso del write back \textbf{non ho bisogno di fare questa verifica} poiché \textbf{vado a scrivere nel livello successivo della gerarchia di memoria solo quando ho un fault} e quindi finché non è stato copiato il tutto il processore non riceve le istruzioni, quindi non genera ulteriori modifiche.
+\subsubsection{Modello di costo}
+\paragraph{Dal file ASM} \texttt{\# istruzioni * durata}\\
+$\Rightarrow$ Tempo di completamento ideale (accessi in cache) = T$_{cid}$\\
+$\Rightarrow$ Tempo di completamento reale T$_c$ = T$_{cid}$ + \#Fault * T$_{tranf}$.
+\paragraph{Dove} T$_{tranf}$: tempo di trattamento del singolo fault, dipende unicamente dall'hardware.\\
+\#Fault: dipende dal codice (working set) e in parte dall'hardware (capacità della cache).\\\
+T$_{tranf}$ = 2(T$_{tr} + \tau$) + $\frac{\sigma}{m}\tau_m$ ( oppure, se T$_{tr}$ > $\tau_m$, = 2(T$_{tr} + \tau$) + $\frac{\sigma}{m}T_{tr}$ )\\
+\textbf{Sempre proporzionale a $\frac{\sigma}{m}$}, con T$_{tr}$ tempo di trasferimento da cache a memoria e m le parole lette alla volta.
+\section{I/O}
+\begin{center}
+	\includegraphics[scale=1]{procuf.png}
+\end{center}
+\pagebreak
+Ogni unità I/O svolge il compito di interfacciare, nei confronti dell'Unità Centrale, un certo tipo di dispositivo perficerico come: hard disk, stampanti, interfacce di rete\ldots.\\
+\paragraph{Categorie} Possiamo dividere le unità I/O in due categorie:
+\begin{list}{}{}
+	\item \textbf{Carattere}: unità che trasferiscono \textbf{pochi byte} per ogni operazione effettuata, ad esempio il mouse
+	\item \textbf{Blocchi}: unità che lavorano con una \textbf{grossa quantità di dati}, ad esempio hard disk o interfacce di rete.\\
+	Per queste unità è previsto un \textbf{bus DMA} che gli \textbf{permette di lavorare con i dati della memoria principale indipendentemente dal lavoro che sta svolgendo il processore} in quel momento.
+\end{list}
+L'\textbf{interazione} tra processore e il \textbf{sottosistema I/O} avviene \textbf{mediante i segnali di interruzione}. Questo è dovuto al fatto che i tempi di reazione delle unità periferiche sono molto maggiori rispetto al tempo di reazione del processore P, quindi non vale la pena fare attendere P o fare polling di ogni dispositivo.
+\subsection{Trasferimento dati}
+Esistono due modelli principali che descrivono il trasferimento dei dati tra processore/memoria e le periferiche I/O: \textbf{Memory Mapped I/O} e \textbf{uso di istruzioni speciali}.\\\\
+Nello spazio di memoria virtuale, una certa porzione viene dichiarata come "riservata" e la \textbf{mappo sull'I/O}.\\
+Se questa mappatura avviene in maniera per cui io \textbf{posso direttamente usare l'indirizzo della MMU}, che interpeta l'indirizzo del sottosistema I/O allora \textbf{parliamo di Memory Mapped I/O}.\\
+Se invece \textbf{uso delle istruzioni speciali} allora parliamo di istruzioni speciali, meccanismi di comunicazione tra processore le periferiche, che usano quindi\textbf{interfacce dedicate}.
+\paragraph{Memory Mapped I/O} Per il MMI/O il meccanismo di comunicazione/esecuzione con I/O è il seguente.\\
+Si inizia con delle \texttt{STORE} con \textbf{il comando da eseguire sulla periferica} con i suoi parametri, nella memoria virtuale che rappresenta la memoria dell'unità I/O.\\
+Dopo il processore deve \textbf{ordinare il comando alla periferica}: questo avviene come una \texttt{STORE \#1} sul registo \texttt{RDY} della periferica.\\
+Successivamente il processore attende una interruzione, nel mentre può eseguire altri processi. Quando avviene l'interruzione, si eseguono delle \texttt{LOAD} sulla memoria mappata dell'I/O per leggere i risultati.
+\section{Trattamento delle Interruzioni}
+Quando una periferica I/O richiede una interruzione, manda una \textbf{richiesta di interruzione all'unità \texttt{UNINT}}. Se l'\textbf{unità di arbitraggio} \texttt{UNINT} \textbf{accetta la richiesta}, manda il segnale \texttt{INT} (interruzione) al processore che provvede a mandare un \texttt{ACK}.\\
+\texttt{UNINT} manda anche un segnale all'unità I/O che ha vinto l'arbitraggio, che è libera di mandare alla MMU due parole: \textbf{numero dell'unità} -- per capire quale unità ha richiesto l'interruzione -- e \textbf{la ragione dell'interruzione}.\\
+La MMU, a questo punto, manda le due parole ricevute al processore come se fossero due LOAD.
+\paragraph{Nell'interprete}
+\begin{lstlisting}
+trattint.	reset INT, set ACKINT, trattint1
+trattint1.	(ACKM, OR(ESITO) = 00) nop, trattint1
+		(= 10) DATAIN -> R[61], reset ACKM, SET RDYM, trattint2		*
+trattint2.	(ACKM, OR(ESITO) = 00) nop, trattint2
+		(= 10) DATAIN -> R[62], IC -> R[63], set RDYM, reset ACKM,
+		R[60] -> IC, fch0 ** ;da qui fase ASM
+\end{lstlisting}
+\begin{list}{}{}
+	\item \textbf{*} Ricevuto il codice dell'evento, questo viene passato alla Routine d'Interfacciamento Interruzioni via R[61].
+	\item \textbf{**} Ricevuta la seconda parola del messaggio di I/O, questa viene passata alla Routine d'Interfacciamento Interruzioni via R[62]. Viene poi salvato l'indirizzo di ritorno dalla routine ed effettuato il salto alla routine stessa.
+\end{list}
+Quando ho una interruzione, \textbf{smetto di fare ciò che sto facendo} e vado ad eseguire il codice che tratta questa interruzione \textbf{eseguendo solo quel codice} che deve essere molto veloce.
+\pagebreak
+\subsection{DMA I/O}
+\paragraph{Direct Memory Access} La memoria principale ha due interfacce: una che comunica con il processore e una che comunica con il bus DMA. Quindi M è un'unità attiva che \textbf{contiene un arbitro} per stabilire se comunicare con P o il Bus.\\
+Un esempio con una periferica I/O come un hard disk. Come primo passo vengono memorizzati operazioni e parametri via MM I/O sulla periferica, dopo di memorizza "GO" in RDY della periferica.\\
+Adesso la periferica I/O completa l'operazione, accede al bus DMA ed esegue il ciclo di trasferimento da M a M I/O. A questo punto richiede una interruzione ed attende che sia accolta.
+\pagebreak
+\chapter{Livello dei processi}
+Un processo può essere immaginato \textbf{come l'esecuzione di un programma}. Una tipica situazione è quella in cui si \textbf{distinguono due sottoinsiemi} di processi:
+\begin{list}{}{}
+	\item \textbf{Processi di Sistema}\\
+	Sono processi che \textbf{esistono permanentemente nel sistema} e sono \textbf{delegati alla gestione di risorse e servizi} nei confronti di richieste dalle applicazioni. Possono anche cooperare tra loro oltre che con le applicazioni.
+	\item \textbf{Processi Applicativi}\\
+	Derivano dalla \textbf{compilazione} e dalla \textbf{richiesta di esecuzione di programmi applicativi}. In generale \textbf{nascono e muoiono}.
+\end{list}
+L'interazione fra processi può avvenire in due modi distinti e molto differenti tra loro: a \textbf{scambio di messaggi} -- cooperano spedendo informazioni -- o a \textbf{memoria condivisa} -- più processi con accesso alle medesime locazioni di memoria, con opportune tecniche di traduzione degli indirizzi.
+\section{Supporto a tempo di esecuzione}
+Tale supporto definisce la macchina virtuale che, rispetto alla macchina sottostante (assembler, firmware, hardware) possiede in più il concetto di processo e di meccanismi di concorrenza e di cooperazione tra processi.
+\paragraph{Descrittore di processo} Il \textbf{Process Control Block} (\textbf{PCB}) è l'insieme delle informazioni che permette al sistema di gestire il processo. All'interno troviamo i seguenti campi:
+\begin{list}{}{}
+	\item \textbf{Stato del processo}: indica se il processo è in esecuzione, attesa di una periferica o potrebbe essere in esecuzione ma in quel momento non può usare il processore.
+	\item \textbf{Area Salvataggio dei registri}: area di memoria dove ci sono le struttura dati in cui, dal momento in cui decidiamo che un processo non ha più il controllo della CPU, copiamo il contenuto dei registri e dell'IC. Questo in modo da poter rimandare in esecuzione il processo dal punto dove è stato sospeso.
+	\item \textbf{Puntatore alla tabella di rilocazione}: così che quando il processo è in esecuzione la MMU possa tradurre correttamente gli indirizzi logici del processo.
+	\item \textbf{Riferimento alla lista dei processi "pronti"}
+	\item \textbf{Riferimento al processo in esecuzione}
+	\item \textbf{Riferimenti alle strutture condivise}: per interazioni fra processi a memoria condivisa.
+\end{list}
+\pagebreak
+\section{Schedulazione a basso livello}
+Con tali informazioni si organizza la \textbf{schedulazione a basso livello}, ovvero il \textbf{complesso di funzionalità per la gestione degli stati di avanzamento dei processi} e quindi la gestione della risorse processore.\\
+Un tipico schema di avanzamento è il seguente:
+\begin{center}
+\includegraphics[scale=0.8]{processistati.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Creazione}\\
+	Crea un PCB\\
+	Carica almeno la prima pagina di codice in memoria principale, modificando la tabella di rilocazione del processo\\
+	Mette il PCB nella lista dei processi pronti
+	\item \textbf{Ready} $\longrightarrow$ \textbf{Exec}\\
+	Copia di registri e IC da PCB nei registri firmware\\
+	Istruzione particolare per caricare IC\\
+	Istruzione particolare che passa l'indirizzo della tabella di rilocazione alla MMU
+	\item \textbf{Exec} $\longrightarrow$ \textbf{Ready}\\
+	Terminazione attivata da un timer\\
+	Salvataggio dei registri e IC nel PCB\\
+	PCB viene messo in coda alla lista dei processi pronti
+	\item \textbf{Exec} $\longrightarrow$ \textbf{Wait}\\
+	Terminazione attivata da una richiesta I/O\\
+	Salvataggio dei registri e IC nel PCB\\
+	Registro il PCB come in attesa
+	\item \textbf{Wait} $\longrightarrow$ \textbf{Ready}\\
+	Transizione su completamento dell'operazione I/O\\
+	Inserimento in fondo alla lista dei processi pronti
+	\item \textbf{Terminazione}\\
+	Cancellazione del PCB
+	\item \textbf{Wait} $\longrightarrow$ \textbf{Exec} (\textbf{Priorità})\\
+	Transizione attivata dal completamento dell'operazione I/O per un processo a priorità maggiore di quello in esecuzione.\\
+	Copia dei registri e IC nei registri firmware e passaggio dell'indirizzo della tabella di rilocazione ad MMU
+	\item \textbf{Exec} $\longrightarrow$ \textbf{Ready} (\textbf{Prerilascio})\\
+	Mette il PCB \textbf{in testa} alla coda dei processi pronti.\\
+	Salvataggio dei registri e IC nel PCB
+\end{list}
+\pagebreak
+\section{Istruzione speciale Start-Process (D-RISC}
+Questa istruzione \textbf{conclude la fase di commutazione di contesto}: prende due parametri:
+\begin{list}{}{}
+	\item R$_{IC}$, che contiene l'indirizzo della prima istruzione da eseguire quando il processo andrà in esecuzione
+	\item R$_{tabRil}$ che contiene l'indirizzo della tabella di rilocazione del processo da inviare alla MMU
+\end{list}
+\begin{lstlisting}
+startp0.	"startprocess" -> OP, R[IR.Rtabril] -> IND, set RDYM, startp1
+startp1.	(ACKM, OR(ESITO) = 0-) nop, startp1.
+		(= 10) R[IR.Ric] -> IC, fch0
+		(= 11) R[IR.Ric] -> IC, trattint
+\end{lstlisting}
+Invio alla MMU le informazioni necessarie a riferire la tabella di rilocazione del processo che entra in esecuzione. Contemporaneamente ripristino il contenuto di IC all'indirizzo logico della prima istruzione da cui il processo deve riprendere o iniziare l'esecuzione.\\
+Ciò permette di effettuare in maniera atomica tutte le azioni necessarie a iniziare l'esecuzione di un processo una volta che i registri generali sono stati ripristinati.
+\section{Commutazione di contesto}
 \end{document}
