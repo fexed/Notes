@@ -1598,4 +1598,38 @@ A questo livello ho una \textbf{politica on-demand}: quando ho un fault rimpiazz
 Nel 2° livello si potrebbe avere una politica di \textbf{pre-fetch}: se accedo ad un indirizzo tento di portare in cache anche la linea che contiene tale indirizzo + $\sigma$ se non è già presente (\textbf{precaricamento}).\\
 Quindi abbiamo dati e codice di processi diversi con politica ondemand e prefetching.\\\\
 Il 3° livello è analogo al secondo, ma più capiente.
+\subsubsection{Modifiche in Cache}
+Abbiamo \textbf{due strategie} per effettuare le modifiche in cache:
+\begin{list}{}{}
+	\item \textbf{Write Back}\\
+	Ogni \texttt{STORE} \textbf{modifica l'indirizzo solo in cache}, \textbf{successivamente} -- quando dobbiamo liberare la linea modificata -- \textbf{la copiamo in memoria principale} o nel livello superiore della gerarchia di memoria.
+	\item \textbf{Write Through}\\
+	Ogni \texttt{STORE} \textbf{modifica il dato in cache e immediatamente in memoria principale} (o nel livello superiore della gerarchia).\\
+	La \textbf{scrittura in cache} è \textbf{sincorna}, mentre nel livello superiore è asincrona.
+\end{list}
+\pagebreak
+\paragraph{Un esempio} Vediamo come esempio l'inizializzazione di un array, per valutare le prestazioni dei due metodi.
+\begin{multicols}{2}
+\begin{C}
+for (i = 0; i < n; i++) x[i] = 1;
+\end{C}
+\begin{lstlisting}
+1. loop:	STORE Rbx, Ri, R1
+2.		INC Ri
+3.		IF< Ri, Rn, loop
+4.		END...
+\end{lstlisting}
+\columnbreak
+\textbf{Costo}\\
+	1. 5$\tau$ + 2t$_a$\\
+	2. 3$\tau$ + t$_a$\\
+	3. 4$\tau$ + t$_a$\\
+	= 12$\tau$ + t$_a$ = 20$\tau$
+\end{multicols}
+\begin{list}{}{Facendo l'ipotesi che laboriamo su cache di primo livello C$_1$:}
+	\item CD (Associativo su insiemi): 2$\tau$
+	\item CI (Diretto): 2$\tau$
+\end{list}
+\paragraph{Write Through} Per il metodo write through, perché funzioni devo \textbf{verificare che la banda della \texttt{STORE} sia minore o uguale della banda del livello successivo della gerarchia di memoria}.
+\paragraph{Write Back} Nel caso del write back \textbf{non ho bisogno di fare questa verifica} poiché \textbf{vado a scrivere nel livello successivo della gerarchia di memoria solo quando ho un fault} e quindi finché non è stato copiato il tutto il processore non riceve le istruzioni, quindi non genera ulteriori modifiche.
 \end{document}
