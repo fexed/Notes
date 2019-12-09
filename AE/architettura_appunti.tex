@@ -1758,4 +1758,52 @@ startp1.	(ACKM, OR(ESITO) = 0-) nop, startp1.
 Invio alla MMU le informazioni necessarie a riferire la tabella di rilocazione del processo che entra in esecuzione. Contemporaneamente ripristino il contenuto di IC all'indirizzo logico della prima istruzione da cui il processo deve riprendere o iniziare l'esecuzione.\\
 Ciò permette di effettuare in maniera atomica tutte le azioni necessarie a iniziare l'esecuzione di un processo una volta che i registri generali sono stati ripristinati.
 \section{Commutazione di contesto}
+Trattiamo la \textbf{commutazione di contesto} che avviene alla \textbf{fine del quanto di tempo}.
+\paragraph{Situazione} Abbiamo un processo ProcA \textbf{in esecuzione}. Quando il tempo di esecuzione finisce, il registro \textbf{INT diventerà 1} quindi si salterà al \textbf{trattamento dell'interruzione} (\texttt{trattint}): l'\textbf{IC corrente verrà salvato in R[63]} (fase firmware) ecc\ldots\\
+Successivamente si passa alla \textbf{fase assembler} ASM, dove vengono eseguiti i seguenti passaggi:
+\begin{list}{}{}
+	\item \textbf{Salvare lo stato} di ProcA in esecuzione (una serie di \texttt{STORE} per da PCB+posizione\ldots)
+	\item \textbf{Posizionare PCB$_A$ in coda} alla lista dei processi pronti
+	\item \textbf{Ripristino lo stato del primo processo nella lista pronti} nei registri del processore (una serie di \texttt{LOAD})
+	\item \textbf{Rimuovere il puntatore al processo nella lista pronti} e \textbf{aggiorno lo stato della EXEC}
+	\item \textbf{Start-Process}, quindi passo IC e l'indirizzo della tabella di rilocazione del nuovo processo in esecuzione
+\end{list}
+\paragraph{Commuta Contesto} Tutti i passaggi prendono il nome di \textbf{commuta contesto}. Tale codice viene eseguito quando è sempre attiva la tabella di rilocazione di A, quindi il codice di commuta contensto deve esserer \textbf{presente nella memoria virtuale di A} -- e in tutti gli altri processi. Inoltre, \textbf{tutti i PCB devono essere accessibili a tutti i processi} per completare la commutazione di contesto.\\\\
+Tutti i passaggi fin'ora descritti vengono \textbf{effettuati con la MMU che lavora mediante la tabella di rilocazione di A}. Sarà la \textbf{start-process ad occuparsi di cambiare la tabella di rilocazione con quella del nuovo processo}, da cui sorge un problema: \textbf{che tipo di indirizzo} (logico o fisico) \textbf{devo mandare come parametro alla start-process per la nuova tabella di rilocazione}?\\
+Quando inizia a lavorare, la start-process deve \textbf{liberare la cache della MMU} (settando tutti i bit P a 0) per poter caricare i valori della nuova tabella di rilocazione. Quindi l'\textbf{indirizzo passato come parametro non può essere logico} perché in tale situazione \textbf{non c'è modo di tradurlo in indirizzo fisico dato che la cache della MMU è "vuota"}.\\
+Quindi il parametro della start-process \textbf{deve essere un indirizzo fisico}.\\\\
+Nella PCB è memorizzato l'indirizzo logico della tabella di rilocazione del processo, quindi \textbf{serve un meccanismo che traduca molto velocemente tale indirizzo in fisico}: prendo la pagina logica e con essa vado a chiedere dove si trova in memoria quella pagina, ci metto l'indirizzo di pagina fisica e rimando il tutto come indirizzo fisico alla start-process.
+\pagebreak
+\begin{center}
+	\includegraphics[scale=0.7]{commconttabril.png}
+\end{center}
+\paragraph{Problema} Il problema di questo meccanismo è che \textbf{per capire dove sia l'indirizzo fisico} della tabella di rilocazione del nuovo processo, \textbf{devo convertire l'indirizzo logico con la tabella di rilocazione del nuovo processo} e \textbf{non con quella del vecchio processo}.\\
+Quindi \textbf{da ogni processo deve essere accessibile l'indirizzo logico delle tabelle di rilocazione di ogni alto processo}.
+\section{Condivisione indirizzi tra processi}
+Vediamo come due o più processi possono \textbf{usare indirizzi in comune}.\\
+I vari indirizzi logici dei vari processi devono essere tradotti nell'unico indirizzo fisico dove risiede realmente il dato in comune. Abbiamo \textbf{tre soluzioni} per ottenere quei dati:
+\begin{list}{}{}
+	\item \textbf{Gli indirizzi logici in A e B sono gli stessi} e corrispondono alla stessa locazione di memoria fisica. Come se \textit{TabRil(x)$_A$ = TabRil(x)$_B$}.
+	\item \textbf{Gli indirizzi logici di x in A e B} sono diversi ma \textbf{puntano alla stessa locazione di memoria}.
+	\item \textbf{Capability}: il \textbf{processo A comunica l'indirizzo fisico della variabile condivisa al processo B} in modo che possa accedere a tale variabile.\\
+	Il processo A deve calcolare quindi l'indirizzo fisico di X e conosce R$_{baseX}$ (cioè pagina indirizzo di pagina logica ed offset), R$_{TabRil}$, R$_{PCB}$
+\end{list}
+\begin{lstlisting}
+					;Rbasex = [IPL | offset]
+SHR	Rbasex, # bit offset, R1	;[0000 | IPL]
+LOAD	Rtabril, R1, R2			;[IPF | ////]
+AND	Rbasex, #00..011..1, R3		;[0000 | offset] Tanti 1 quanti i bit offset
+AND	R2, #11..100..0, R4		;[IPF | 0000]
+ADD	R3m R4, Rindfis			;[IPF | offset]
+;IPF = indirizzo pagina fisica
+;IPL = indirizzo pagina logica
+\end{lstlisting}
+Con R$_{indfis}$ non posso fare nè \texttt{LOAD} nè \texttt{STORE} perché la MMU interpreterebbe tale indirizzo come logico, quindi lo andrebbe a tradurre, ma posso mandare tale indirizzo al processo B.\\
+Il processo B \textbf{deve trattare R$_{indfis}$ come dato e non come indirizzo}, quindi dobbiamo trovare un modo per \textbf{convertire tale indirizzo fisico in logico seguendo la tabella di rilocazione del processo B}. La soluzione è quella di \textbf{scrivere i bit IPF di R$_{indfis}$ nella prima posizione libera della tabella di rilocazione di B}, in modo tale che accedendo a quella posizione la MMU possa correttamente tradurre l'indirizzo logico in fisico e accedere alla variabile condivisa.
+\begin{center}
+	\includegraphics[scale=0.75]{indcondivisi.png}
+\end{center}
+\pagebreak
+\chapter{Elaborazione in parallelo}
+
 \end{document}
