@@ -1980,4 +1980,93 @@ ADD	R3, R4, R5
 	\hline
 \end{tabular}
 \end{multicols}
+\pagebreak
+\subsection{Dipendenze Logiche}
+Una \textbf{istruzione I induce una dipendenza logica su una istruzione J quando I produce x sull'unità U$_a$ che è letta da J sull'unità U$_b$}, quindi scrittura e lettura avvengono su unità diverse. Un po' come la prima condizione di Bernstein ma su unità diverse.
+\paragraph{Esempio} Decodifico una LOAD/STORE su IU usando un registro che sta per essere modificato nella EU.
+
+\begin{multicols}{2}
+\begin{lstlisting}
+INC	Ri
+LOAD	Rbase, Ri, R1
+\end{lstlisting}
+\texttt{INC} induce una dipendenza logica sulla \texttt{LOAD}: scrivo R$_i$ e lo leggo dopo, \texttt{INC} opera su EU e \texttt{LOAD} su IU.
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 \\
+	\hline
+	\textbf{IM} & \texttt{INC} & \texttt{LOAD} & & & & \\
+	\hline
+	\textbf{IU} & & \texttt{INC}* & \texttt{LOAD}** & \texttt{LOAD} & & \\
+	\hline
+	\textbf{DM} & & & & & \texttt{LOAD} & \\
+	\hline
+	\textbf{EU} & & & \texttt{INC} & & & \texttt{LOAD} \\
+	\hline
+\end{tabular}\\
+
+$*$: il contatore del registro R$_i$ va a 1\\
+
+$**$: \texttt{LOAD} tenta di leggere R$_i$ con contatore = 1, quindi il sistema si blocca.
+\end{multicols}
+\paragraph{Esempio} Decodifico un salto condizionato o incondizionato su un registro
+
+\begin{multicols}{2}
+\begin{lstlisting}
+INC	Ri
+IF<	Ri, Rn, loop
+\end{lstlisting}
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 \\
+	\hline
+	\textbf{IM} & \texttt{INV} & \texttt{IF<} & & & & \\
+	\hline
+	\textbf{IU} & & \texttt{INC}* &\texttt{IF<}** & \texttt{IF<} & & \\
+	\hline
+	\textbf{DM} & & & & & & \\
+	\hline
+	\textbf{EU} & & & \texttt{INC} & & & \\
+	\hline
+\end{tabular}\\
+
+$*$: il contatore del registro R$_i$ va a 1\\
+
+$**$: \texttt{IF<} tenta di leggere R$_i$ con contatore = 1 per la valutazione della guardia, quindi il sistema si blocca.
+\end{multicols}
+Per tali dipendenze teniamo conto anche della ditanza k, cioè quanto distano due istruzioni con dipendenza logica -- negli esempi precedenti la distanza era pari a 1, quindi k = 1.\\
+Solo le dipendenze logiche con k $\leq$ 2 possono avere un peso, e il peso può aumentare se c'è una \texttt{LOAD} nella sequenza di istruzioni che porta alla dipendenza.
+\subsubsection{Effetti dei salti}
+Partiamo da un semplice esempio per capire che effetto fatto i salti condizionati.
+\begin{multicols}{2}
+\begin{lstlisting}
+	ADD	R1, R2, R3
+	GOTO	eti
+	SUB	R4, R5, R6
+	INC ...
+	...
+eti:	LOAD Rp, Ri, R7
+	MUL ...
+\end{lstlisting}
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 \\
+	\hline
+	\textbf{IM} & \texttt{ADD} & \texttt{GOTO} & \texttt{SUB} & \texttt{LOAD} & \texttt{MUL} & \\
+	\hline
+	\textbf{IU} & & \texttt{ADD} & \texttt{GOTO}$\nearrow$ & X\texttt{SUB}X & \texttt{LOAD} & \\
+	\hline
+	\textbf{DM} & & & & & & \\
+	\hline
+	\textbf{EU} & & & \texttt{ADD} & & & \\
+	\hline
+\end{tabular}
+\end{multicols}
+Cerchiamo di capire il meccanismo firmware che permette questo tipo di comportamento:\\
+IM manda a IU \texttt{<istr, IC'>}\\
+IU va nella copia dei registri e accede al contenuto del registro dove è indicato il nuovo valore di IC e invia alla IM un messaggio dicendo che il nuovo IC deve essere il contenuto di quel registro. Dopodiché aggiorna il proprio IC.\\
+IU scarterà tutte le istruzioni che non hanno il valore di IC' uguale al proprio IC.
 \end{document}
