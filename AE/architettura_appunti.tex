@@ -1879,4 +1879,105 @@ Un sistema a coda modella il comportamento di un \textbf{servente S} (\textbf{ce
 \includegraphics[scale=1]{clientimulti.png}
 \end{center}
 \end{multicols}
+\pagebreak
+\section{Processore}
+\subsection{Processore Pipeline}
+Il concetto alla base di questa architettura è la \textbf{parallelizzazione della CPU mediante la parallelizzazione dell'interprete firmware}, eseguito dal processore con la collaborazione delle altre unità della CPU stessa.\\
+Per scopo didattico, useremo una visione semplificata dell'architettura composta da soli \textbf{quattro stadi}.
+\begin{center}
+\includegraphics[scale=1]{procpipeline.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Instruction Memory} -- IM\\
+	Unità memoria dedicata a \textbf{memorizzare solo istruzioni} e quindi a \textbf{compiere operazioni di fetch}.\\
+	Dotata di MMU propria.
+	\item \textbf{Instruction Unit} -- IU\\
+	\textbf{Cuore vero e proprio} del processore, dove le \textbf{istruzioni che provengono da IM vengono decodificate ed eseguite}. Si collega alla IM per le istruzioni di salto.
+	\item \textbf{Data Memory} -- DM\\
+	Unità memoria dedicata a \textbf{memorizzare solo dati}. Il collegamento dalla IU è dato dalla decodifica di istruzioni di \texttt{LOAD} e \texttt{STORE}.
+	\item \textbf{Execution Unit} -- EU\\
+	Unità che si occupa di \textbf{eseguire istruzioni aritmetico-logiche}. Il collegamento dalla DM è dato per concludere le istruzioni di \texttt{LOAD}.
+\end{list}
+\pagebreak
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=0.8]{procpipelineint.png}
+\end{center}
+La IM ha al suo interno la propria MMU$_I$, per la traduzione degli indirizzi delle istruzioni, e la cache istruzioni CI. Tale unità è collegata tramite la MMU$_I$ alla IU, per prelevare IC nel caso di istruzioni di salto, e alla \textbf{memory interface MINF} per dialogare con il sottosistema di memoria.\\
+Analogamente la DM avrà una propria MMU$_D$ e una propria cache dati CD. Anch'essa è collegata tramite MMU$_D$ alla IU e a MINF.\\
+La EU ha una copia dei registri per effettuare le operazioni aritmetico-logiche.\\
+Anche IU ha una copia dei registri di EU (il più aggiornati possibile) per alcune operazioni di decodifica.
+\end{multicols}
+\subsubsection{Istruzioni operative}
+Le \textbf{istruzioni operative compieranno sempre il giro IM $\rightarrow$ IU $\rightarrow$ EU}.\\
+IM, usando la copia che ha di IC, manda una coppia \texttt{<istr, IC'>} -- dove \texttt{istr} è l'istruzione da eseguire e \texttt{IC'} indica da dove è stata presa e che serve per trattare le interruzioni di salto.\\
+IU invia alla EU una \textbf{istruzione decodificata}, cioè una \textbf{tupla di valori} -- per esempio \texttt{ADD R$_1$, R$_2$, R$_3$} $\rightarrow$ \texttt{<+, 1, 2, 3>} dove 1, 2, 3 corrispondono a indirizzi di registri.\\
+EU esegue l'istruzione e manda il risultato alla IU "avvertendola" che una copia di registri deve essere aggiornata con il risultato appena calcolato.
+\subsubsection{Istruzioni di salto}
+Le istruzioni di \textbf{salto incondizionato compieranno il giro IM $\rightarrow$ IU}.\\
+IM manda \texttt{<istr, IC'>} -- per esemptio \texttt{GOTO R$_4$}.\\
+IU và nella propria copia dei registri, accede al contenuto del registro R$_4$ e invia alla IM un messaggio dicendo che il nuovo IC deve essere il contenuto del registro, quindi la IM aggiorna IC.
+\subsubsection{Meccanismi per sincronizzazione}
+Partiamo da un esempio per capire il problema. Consideriamo il seguente set d'istruzioni:
+\begin{center}
+\includegraphics[scale=0.7]{pipelinesincprobl.png}
+\end{center}
+Si può notare che al passo 3 è presente un problema di sincronizzazione poiché, benché nel codice abbiamo una istruzione di salto, la IM manda alla IU l'istruzione successiva "quasi" ignorando il salto, mentre la IU manda alla IM il valore nuovo di IC.
+\pagebreak
+
+Per ogni registro affianchiamo un contatore C, il quale funge da indicatore della correttezza del contenuto del registro.\\
+Inizialmente C = 0, quando dalla IU alla EU mando un'istruzione che scriverà in quel registro, incremento il contatore. Quando dalla EU si riceverà il risultato aggiornato lo decremento.\\
+La IU leggerà il registro $\Leftrightarrow$ C == 0, altrimenti si blocca.
+\subsubsection{Meccanismi di gestione della copia IC e IC'}
+IU aggiorna costantemente il suo Instruction Counter, invia IC a IM ogni volta che questo viene aggiornato e scarta le istruzioni che arrivano da IM e che non hanno IC' della tupla uguale al proprio valore IC.
+\subsubsection{Istruzioni LOAD}
+Le istruzioni \texttt{LOAD} compiono il giro IM $\rightarrow$ IU $\rightarrow$ DM $\rightarrow$ EU $\rightarrow$ IU.\\
+IM compie la fetch dell'istruzione di \texttt{LOAD} e la manda alla IU\\IU manda un ordine di caricamento alla DM \texttt{<load, ind>} -- dove \texttt{ind} è calcolato dalla IU con \texttt{R$_{base}$ + R$_{ind}$}. Contemporaneamente manda a EU un messaggio che indica di aver ordinato una \texttt{LOAD} sul registro R$_x$ \texttt{<load, R$_x$>}. Infine \textbf{aggiorna il contatore di R$_x$}.\\
+DM compie la \texttt{LOAD} e la manda alla EU.\\
+EU prende il valore mandato da DM e lo mette nel registro R$_x$. Manda il nuovo valore R$_x$ a IU e aggiorna il contatore di R$_x$.
+\begin{multicols}{2}
+\begin{lstlisting}
+LOAD	R1, R2, R3
+ADD	R3, R4, R5
+\end{lstlisting}
+Posso eseguire subito l'istruzione perché il contenuto di R$_3$ è preso dalla EU, quindi già aggiornato
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & \\
+	\hline
+	\textbf{IM} & \texttt{LOAD} & \texttt{ADD} & & & & \\
+	\hline
+	\textbf{IU} & & \texttt{LOAD} & \texttt{ADD} & & & \\
+	\hline
+	\textbf{DM} & & & \texttt{LOAD} & $\searrow$ & & \\
+	\hline
+	\textbf{EU} & & & &\texttt{LOAD} & \texttt{ADD}  & \\
+	\hline
+\end{tabular}
+\end{multicols}
+\subsubsection{Istruzioni STORE}
+Le istruzioni di \texttt{STORE} compiono il giro IM $\rightarrow$ IU $\rightarrow$ DM.\\
+IM compie la fetch dell'istruzione di \texttt{STORE} e la manda alla IU.\\
+IU manda un messggio \texttt{<STORE, ind, val>} alla DM che si occupa di concludere l'istruzione.
+\begin{multicols}{2}
+\begin{lstlisting}
+STORE	R1, R2, R3
+ADD	R3, R4, R5
+\end{lstlisting}
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & \\
+	\hline
+	\textbf{IM} & \texttt{STORE} & \texttt{ADD} & & & & \\
+	\hline
+	\textbf{IU} & & \texttt{STORE} & \texttt{ADD} & & & \\
+	\hline
+	\textbf{DM} & & & \texttt{STORE} & & & \\
+	\hline
+	\textbf{EU} & & & &\texttt{STORE} & \texttt{ADD}  & \\
+	\hline
+\end{tabular}
+\end{multicols}
 \end{document}
