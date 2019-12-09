@@ -1805,5 +1805,78 @@ Il processo B \textbf{deve trattare R$_{indfis}$ come dato e non come indirizzo}
 \end{center}
 \pagebreak
 \chapter{Elaborazione in parallelo}
-
+Fin'ora abbiamo studiato il comportamento, costo e prestazioni di un \textbf{processore monolitico} che \textbf{esegue le istruzioni una dopo l'altra}.\\
+Abbiamo anche detto che le prestazioni di un processore cono calcolate secondo la funzione P = f(K, $\tau$, t$_a$) dove K è il numero di cicli di clock necessari per eseguire una istruzione, $\tau$ è la lunghezza del ciclo di clock e t$_a$ è il tempo di accesso alla memoria principale.\\
+Il tempo di accesso alla memoria è già stato "ottimizzato" introducendo la cache e la gerarchia di memoria. Cerchiamo adesso di \textbf{diminuire il K e in misura minore il $\tau$}, introducendo nuovi tipi di processore che riescono ad \textbf{operare in parallelo}.
+\section{Forme di parallelismo}
+\subsection{Pipeline}
+La forma di parallelismo \textbf{pipeline} è definita come \textbf{una catena di Stadi Interconnessi fra loro}, che \textbf{lavorano ognuno producendo qualcosa che verrà preso in ingresso dallo stadio successivo}.\\
+\textbf{Ogni stadio} del processore \textbf{ha un compito ben preciso} per arrivare ad un risultato.\\
+\begin{list}{}{Definiamo alcune \textbf{metriche} per capire quali sono le prestazioni di questa tecnica:}
+	\item \textbf{Latenza} -- L\\
+	\textbf{Tempo per completare un calcolo} da quando inizia a quando finisce. Ogni stadio i ha una latenza L$_i$.
+	\item \textbf{Tempo di servizio} -- T$_S$\\
+	\textbf{Tempo che intercorre fra l'invio di due risultati successivi}. Nel processore monolitico L = T$_S$
+	\item \textbf{Throughput} -- B = $\frac{1}{T_S}$
+	\item L$_{pipe}$ = $\sum_{i=1}^{n stadi} (L_i + t_{comm})$, dove:
+	\begin{list}{}{}
+		\item L$_i$ è la latenza del singolo stadio
+		\item t$_{comm}$ è la latenza di comunicazione
+	\end{list}
+	\item T$_{Spipe}$ = max\{T$_{Si}$\}
+	\item \textbf{Tempo di completamento} -- T$_C$\\
+	\textbf{Tempo fra l'arrivo del primo input e l'uscita dell'ultimo output}.
+	\item T$_{Cpipe}$ $\simeq$ m * T$_S$, con m numero di task
+\end{list}
+La migliore condizione per una pipeline è \textbf{quando tutti gli stadi hanno lo stesso tempo di servizio}.
+\paragraph{Efficienza} Su tutte queste metriche andiamo a misurare l'\textbf{efficienza}, ovvero il \textbf{rapporto tra il tempo ideale T$_{id}$ e il tempo misurato T(n)}.\\
+$\varepsilon$(n) = $\frac{T_{id}(n)}{T(n)}$ --- Quando m $>>$ n allora $\varepsilon \rightarrow$ 1 ( $\varepsilon$ = 1 è ideale) --- T$_{id}$ = $\frac{T_{seq}}{n}$
+\pagebreak
+Se supponiamo di trasformare un modulo (sistema) sequenziale in una struttura parallela equivalente con grado di parallelismo n, ha senso parlare di \textbf{scalabilità} o \textbf{speed-up}: lo speed-up usa al numeratore il miglior tempo sequenziale, mentre la scalabilità usa il tempo di un gradi di parallelismo pari a 1.
+\begin{center}
+sp(n) = $\frac{T_{seq}}{T(n)}$ --- sc(n) = $\frac{T(1)}{T(n)}$\\
+\includegraphics[scale=0.8]{spscefficienzaplots.png}\\
+T$_{id}$ = $\frac{T_{seq}}{n}$\\$\varepsilon(n)$ = $\frac{T_{id}}{T(n)}$ = $\frac{T_{seq}}{n * T(n)}$ = $\frac{sp(n)}{n}$ $\Rightarrow$ sp(n) = $\varepsilon$(n) $*$ n
+\end{center}
+\subsection{Farm}
+\paragraph{Replicazione Funzionale} Questa forma di parallelistmo lavora \textbf{dividendo i dati in ingresso su vari stadi in modo che essi lavorino parallelamente}.
+\begin{center}
+	\includegraphics[scale=1]{farm.png}
+\end{center}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item t$_f$ = latenza calcolo di f
+	\item L$_{farm}$ = t$_{sched}$ + t$_f$ + t$_{collez}$
+	\item T$_{Sfarm}$ = max\{t$_{sched}$, $\frac{t_f}{n}$, t$_{collez}$\}
+	\item T$_{Cfarm}$ = (n - 1)$\frac{t_f}{n}$ + $\frac{m}{n} * t_f$
+	\item $\Rightarrow$ T$_{Cfarm}$ = (n - 1)$T_S$ + $\frac{m}{n} * T_S$
+\end{list}
+	\includegraphics[scale=0.43]{farmgraph.png}
+\end{multicols}
+\paragraph{Rimozione di colli di bottiglia} Se nella pipeline ho uno stadio che impiega molto più tempo dei restati, posso dividere quello stadio in K worker usando una replicazione funzionale (farm) per abbassare il suo T$_S$ in modo da renderlo simile agli altri.
+\pagebreak
+\subsubsection{Teoria delle Code}
+Un sistema a coda modella il comportamento di un \textbf{servente S} (\textbf{centro di servizio}) al quale \textbf{uno o più clienti C$_1$, \ldots, C$_n$ si rivolgono} attendendo in una \textbf{fila di attesa Q} di ricevere il servizio erogato.
+\begin{center}
+\includegraphics[scale=1]{coda.png}
+\end{center}
+\begin{list}{}{}
+	\item t$_a$ \textbf{tempo di interarrivo}
+	\item t$_S$ \textbf{tempo di servizio}
+	\item 1 task ogni t$_a$ dalla coda\\
+	1 task ogni t$_S$ dal sistema
+	\item \textbf{Fattore di utilizzo} $p = \frac{t_S}{t_a}$\\
+	L'obiettivo è avere questo valore $< 1$, altrimenti arriverebbero in cosa più task di quanti se ne riescano ad elaborare (\textbf{collo di bottiglia}).\\
+	Chiaramente si intende un valore \textbf{molto vicino a 1}, altrimenti avrei \textbf{tempi dove non arrivano task ed il servente non processerebbe nulla} quindi uno spreco di risorse.
+\end{list}
+\begin{multicols}{2}
+\begin{center}
+\textbf{Serventi multipli}\\
+\includegraphics[scale=1]{servmult.png}
+\end{center}
+\begin{center}
+\textbf{Clienti multipli}\\
+\includegraphics[scale=1]{clientimulti.png}
+\end{center}
+\end{multicols}
 \end{document}
