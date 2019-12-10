@@ -2047,7 +2047,7 @@ Partiamo da un semplice esempio per capire che effetto fatto i salti condizionat
 	SUB	R4, R5, R6
 	INC ...
 	...
-eti:	LOAD Rp, Ri, R7
+eti:	LOAD	Rp, Ri, R7
 	MUL ...
 \end{lstlisting}
 \columnbreak
@@ -2069,4 +2069,53 @@ Cerchiamo di capire il meccanismo firmware che permette questo tipo di comportam
 IM manda a IU \texttt{<istr, IC'>}\\
 IU va nella copia dei registri e accede al contenuto del registro dove è indicato il nuovo valore di IC e invia alla IM un messaggio dicendo che il nuovo IC deve essere il contenuto di quel registro. Dopodiché aggiorna il proprio IC.\\
 IU scarterà tutte le istruzioni che non hanno il valore di IC' uguale al proprio IC.
+\pagebreak
+\section{Ottimizzazione del codice D-RISC}
+Nel caso del processore monolitico abbiamo visto in sostanza due tipi di ottimizzazioni, entrambe nella LOAD: il prefetch e la non-deallocazione. Questo perché il degrado delle prestazioni avveniva esclusivamente a causa dell'accesso alla memoria.\\
+Nel processore pipeline possiamo operare in due modi: sui \textbf{salti} o sulle \textbf{dipendenze logiche} -- \textbf{principale causa} del degrado delle prestazioni.
+\subsection{Inlining}
+Questa tecnica cerca di \textbf{eliminare i salti relativi alle chiamate di procedura} o funzione. Ad esempio
+\begin{multicols}{2}
+\begin{C}
+int inc(int x) {return x+1;}
+int main() {... y[i] = inc(z); ...}
+\end{C}
+\columnbreak
+\begin{lstlisting}
+inc:	INC 	Rx
+	GOTO	Rret
+	
+	ADD	Rz, R0, Rx
+	CALL	Rinc, Rret
+	STORE	Ry, Ri, Rx
+\end{lstlisting}
+\end{multicols}
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+	\hline
+	\textbf{IM} & \texttt{CALL} & \texttt{STORE} & \texttt{INC} & \texttt{GOTO} & xxx & \texttt{STORE} & & & & \\
+	\hline
+	\textbf{IU} & \texttt{ADD} & \texttt{CALL}$\nearrow$ & X\texttt{STORE}X & \texttt{INC} & \texttt{GOTO}$\nearrow$ & XxxxX & \texttt{STORE} & & & \\
+	\hline
+	\textbf{DM} & & & & & & & & \texttt{STORE} & & \\
+	\hline
+	\textbf{EU} & & \texttt{ADD} & & & \texttt{INC} & & & & & \\
+	\hline
+\end{tabular}\\
+5 istruzioni $\Rightarrow$ 7$\tau$
+\end{center}
+Usando la parola chiave \texttt{inline} davanti ad una procedura o funzione in fase di programmazione, il compilatore va a \textbf{sostituire la chiamata di funzione con il codice stesso della funzione}.
+\begin{multicols}{2}
+\begin{C}
+inline int inc(int x) {return x+1;}
+int main() {... y[i] = inc(z); ...}
+\end{C}
+\columnbreak
+\begin{lstlisting}
+	INC 	Rz
+	STORE	Ry, Ri, Rz
+\end{lstlisting}
+\end{multicols}
+Si scarta così il salto di chiamata a procedura ed il salto di ritorno, evitando due bolle sicure.
 \end{document}
