@@ -8,6 +8,7 @@
 \usepackage{textcomp}
 \graphicspath{ {./img/} }
 \usepackage{listings}
+\usepackage{makecell}
 \lstdefinestyle{customasm}{
   belowcaptionskip=1\baselineskip,
   frame=line,
@@ -2172,4 +2173,35 @@ W(\texttt{SUB}) = \{\textbf{R$_i$}\}\\
 In questo esempio, per implementare out of order, dovrei \textbf{avere un registro che mantenga la copia del valore vecchio di R$_i$} poiché l'intersezione tra l'insieme dei registri scritti da \texttt{SUB} e l'insieme dei registri letti da \texttt{LOAD} \textbf{non è vuota}.\\
 Se, in questo caso, la \texttt{SUB} fosse andata a scrivere in un altro registro che non fosse R$_i$, allora avrei potuto implementare tale schema out of order senza problemi e senza copie momentanee di registri.\\
 Questo modo permette di evitare bolle o blocchi e quindi rendere più performante il processore.
+\subsection{Artimetiche lunghe con EU Master e Slave}
+Per questo tipo di istruzioni, nel processore pipeline abbiamo una soluzione molto \textbf{semplice}: \textbf{espandere le EU con delle ALU specializzate che calcolano in pipeline i risultati delle artimetico-logiche lunghe}
+\begin{center}
+	\includegraphics[scale=0.88]{eumasterslave.png}
+\end{center}
+Quando la EU$_m$ riceve una istruzione aritmetico-logica lunga, \textbf{delega tale compito alla EU$*/$} (EU slave che fa moltiplicazioni e divisioni intere), mandando all'unità una istruzione del tipo \texttt{<$*$, R[a], R[b]>}.\\
+Vediamo un esempio:
+\begin{lstlisting}
+ADD	R1, R2, R3
+MUL	R4, R5, R6
+MUL	R7, R8, R9
+ADD	R6, R9, R10
+\end{lstlisting}
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+	\hline
+	\textbf{IM} & A & M$_1$ & M$_2$ & A$_2$ & & & & & & \\
+	\hline
+	\textbf{IU} & & A & M$_1$ & M$_2$ & A$_2$ & & & & & \\
+	\hline
+	\textbf{DM} & & & & & & & & & & \\
+	\hline
+	\textbf{EU$_m$} & & & A & M$_1$ & M$_2$ & A$_2*$ & $*$ & $*$ & $*$ & A$_2$ \\
+	\hline
+	\textbf{EU$_{*/}$} & & & & & M$_1$ & \makecell{M$_1^a$ \\ M$_2$} & \makecell{M$_1$ \\ M$_2$}& \makecell{M$_1\nearrow$ \\ M$_2$} & M$_2\nearrow$ & \\
+	\hline
+\end{tabular}\\
+$^a$: lo stadio S$_1$ ha finito di calcolare M$_1$, quindi inizia M$_2$
+\end{center}
+Considereremo una EU$_m$ e 3 EU slave: una per $*/$ intere, una per $+-$ in virgola mobile e una per $*/$ in virgola mobile
 \end{document}
