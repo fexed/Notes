@@ -2118,4 +2118,58 @@ int main() {... y[i] = inc(z); ...}
 \end{lstlisting}
 \end{multicols}
 Si scarta così il salto di chiamata a procedura ed il salto di ritorno, evitando due bolle sicure.
+\subsection{Out Of Order}
+La compilazione di un programma è un \textbf{processo statico} durante il quale \textbf{possiamo fare molte ottimizzazioni ma ci è impossibile prevedere il comportamento durante l'esecuzione} -- se i salti vengono fatti o meno\ldots\\
+Molti processori adottano uno schema di implementazione chiamato \textbf{Out Of Order Execution/Decode}. Vediamo un esempio:
+\begin{multicols}{2}
+\begin{lstlisting}
+INC	Ri
+LOAD	Rp, Ri, R1
+SUB	Ri, R2, Ri
+\end{lstlisting}
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+	\hline
+	\textbf{IM} & \texttt{INC} & \texttt{LOAD} & & \texttt{SUB} & & & \\
+	\hline
+	\textbf{IU} & & \texttt{INC} & \texttt{LOAD}* & \texttt{LOAD} & \texttt{SUB} & & \\
+	\hline
+	\textbf{DM} & & & & & \texttt{LOAD} & $\searrow$ & \\
+	\hline
+	\textbf{EU} & & & \texttt{INC}$\nearrow$ & & & \texttt{LOAD} & \texttt{SUB} \\
+	\hline
+\end{tabular}\\
+$*$ = bolla, attesa
+\end{multicols}
+Se avessi una IU che lavora \textbf{out of order} potrei \textbf{"accantonare" momentaneamente} l'istruzione che mi provoca il blocco/bolla e \textbf{tentare di eseguire l'istruzione successiva}.
+\begin{multicols}{2}
+\begin{lstlisting}
+INC	Ri
+LOAD	Rp, Ri, R1
+SUB	Ri, R2, Ri
+\end{lstlisting}
+R(\texttt{LOAD}) = \{R$_p$, \textbf{R$_i$}\}\\
+W(\texttt{LOAD}) = \{R$_i$\}\\
+R(\texttt{SUB}) = \{R$_i$, R$_2$\}\\
+W(\texttt{SUB}) = \{\textbf{R$_i$}\}\\
+\columnbreak
+
+\begin{tabular}{c|c|c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+	\hline
+	\textbf{IM} & \texttt{INC} & \texttt{LOAD} & \texttt{SUB} & & & & \\
+	\hline
+	\textbf{IU} & & \texttt{INC} & \texttt{LOAD} & \texttt{SUB} & \texttt{LOAD} & & \\
+	\hline
+	\textbf{DM} & & & & & & \texttt{LOAD} & \\
+	\hline
+	\textbf{EU} & & & \texttt{INC}$\nearrow$ & & \texttt{SUB} & & \texttt{LOAD} \\
+	\hline
+\end{tabular}
+\end{multicols}
+In questo esempio, per implementare out of order, dovrei \textbf{avere un registro che mantenga la copia del valore vecchio di R$_i$} poiché l'intersezione tra l'insieme dei registri scritti da \texttt{SUB} e l'insieme dei registri letti da \texttt{LOAD} \textbf{non è vuota}.\\
+Se, in questo caso, la \texttt{SUB} fosse andata a scrivere in un altro registro che non fosse R$_i$, allora avrei potuto implementare tale schema out of order senza problemi e senza copie momentanee di registri.\\
+Questo modo permette di evitare bolle o blocchi e quindi rendere più performante il processore.
 \end{document}
