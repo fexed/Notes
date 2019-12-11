@@ -2204,4 +2204,73 @@ ADD	R6, R9, R10
 $^a$: lo stadio S$_1$ ha finito di calcolare M$_1$, quindi inizia M$_2$
 \end{center}
 Considereremo una EU$_m$ e 3 EU slave: una per $*/$ intere, una per $+-$ in virgola mobile e una per $*/$ in virgola mobile
+\subsection{Loop Unrolling}
+Questa tecnica cerca di \textbf{eliminare i salti relativi dovuti ai cicli} -- cioè ai loop.
+\begin{multicols}{2}
+\begin{C}
+for (i = 0; i < n; i++)
+	x[i] = a[i] + b[i];
+\end{C}
+\columnbreak
+\begin{lstlisting}
+loop:	LOAD
+	LOAD
+	ADD
+	STORE
+	IF<	loop
+	...
+\end{lstlisting}
+\end{multicols}
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|}
+	 & 1 & 2 & 3 & 4 & 5 \\
+	\hline
+	\textbf{IM} & \texttt{IF$<$} & ... & \texttt{LOAD} & & \\
+	\hline
+	\textbf{IU} & & \texttt{IF$<$}$\nearrow$ & X...X & \texttt{LOAD} & \\
+	\hline
+\end{tabular}
+\end{center}
+\pagebreak
+Ad ogni iterazione del ciclo ho sicuramente una bolla dovuta ad un salto. \textbf{Sapendo il numero di iterazioni compiute} -- essendo un ciclo determinato -- \textbf{possiamo cercare di operare in questo modo}: \textbf{sapendo che n è pari}
+\begin{C}
+for (i = 0; i < n; i += 2) {
+	x[i] = a[i] + b[i];
+	x[i + 1] = a[i + 1] + b[i + 1];
+}
+\end{C}
+In questa maniera ho \textbf{dimezzato il numero di salti dovuti al ciclo} e quindi ho ottimizzato le prestazioni.\\
+\textbf{Molti compilatori utilizzano questa tecnica}.
+\subsection{Delayed Branch}
+Un'interessante \textbf{tecnica a tempo di compilazione} è quella chiamata \textbf{delayed branch}, che può essere considerata come un \textbf{caso particolare di spostamento del codice} cioè \textbf{basata sul concetto di sfruttare i tempi morti} introdotti dalle bolle \textbf{per effettuare del lavoro utile}.\\
+Per capire come funziona vediamo un esempio:
+\begin{lstlisting}
+IF<	Ri, Rn, loop, delayed	;se il salto viene preso esegui comunque la ADD
+ADD	R1, R2, R3		;e poi salta
+\end{lstlisting}
+Ovviamente posso fare questa operazione \textbf{solo se lo spostamento non cambia la semantica del programma}: \textbf{se scrive qualcosa nessuna delle istruzioni successive deve leggerlo} e \textbf{se legge qualcosa nessuna delle istruzioni successive deve scriverlo}. Valido sopratutto in casi di salti con i cicli.
+\begin{multicols}{2}
+\begin{lstlisting}
+loop:	LOAD	Ra, Ri, R1
+	LOAD	Rb, Ri, R2
+	ADD	R1, R2, R3
+	STORE	Rc, Ri, R3
+	INC	Ri
+	IF<	Ri, Rn, loop
+\end{lstlisting}
+\begin{center}
+Diventa $\Rightarrow$
+\end{center}
+\columnbreak
+\begin{lstlisting}
+	LOAD	Ra, Ri, R1
+loop:	LOAD	Rb, Ri, R2
+	ADD	R1, R2, R3
+	STORE	Rc, Ri, R3
+	INC	Ri
+	IF<	Ri, Rn, loop, delayed
+	LOAD	Ra, Ri, R1
+\end{lstlisting}
+\end{multicols}
+\textbf{Questa tecnica richiede una modifica firmware, in particolare sulla IU}.
 \end{document}
