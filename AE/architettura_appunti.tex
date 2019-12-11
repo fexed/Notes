@@ -2273,4 +2273,132 @@ loop:	LOAD	Rb, Ri, R2
 \end{lstlisting}
 \end{multicols}
 \textbf{Questa tecnica richiede una modifica firmware, in particolare sulla IU}.
+\subsection{Dipendenze Logiche con Data-Flow}
+Partiamo da un semplice esempio:
+\begin{multicols}{2}
+\begin{lstlisting}
+1.loop:	LOAD Ra, Ri, R1
+2.	LOAD Rb, Ri, R2
+3.	ADD R1, R2, R3
+4.	STORE Rx, Ri, R3
+5.	INC Ri
+6.	IF< Ri, Rn, loop
+\end{lstlisting}
+\columnbreak
+\begin{center}
+\includegraphics[scale=1]{dataflow_1.png}\\
+\textbf{Grafo Data-Flow}\\
+Fornisce un ordinamento sulle istruzioni
+\end{center}
+\end{multicols}
+Il \textbf{grafo data-flow mette in evidenzia il flusso di dati}, quindi \textbf{fornisce il minimo ordinamento dei dati per ottenere un risultato corretto nel programma}. Se si viola una qualunque delle frecce del grafo otterremo un risultato errato.\\
+Questo grafo \textbf{risulta molto utile per cercare di allontanare le dipendenze logiche tra istruzioni mantenendo un corretto ordinamento}.
+\pagebreak
+\subsection{Utilizzo del registro modificato}
+Nell'esempio precedente possiamo notare, \textbf{anche grazie al grafo}, che \textbf{non possiamo spostare le istruzioni per aumentare l'efficienza}. Possiamo anche notare che c'è una \textbf{dipendenza logica con k $=$ 1 tra la ADD e la STORE} che comporta una bolla nell'esecuzione del programma.\\
+Possiamo pensare di invertire l'istruzione INC e STORE in modo da allontanare la dipendenza logica pensando R$_x$ come un registro modificato che punta sempre a i - 1.
+\begin{lstlisting}
+loop:	LOAD Ra, Ri, R1
+	LOAD Rb, Ri, R2
+	ADD R1, R2, R3
+	STORE Rx, Ri, R3
+	INC Ri
+	IF< Ri, Rn, loop
+\end{lstlisting}
+6 istruzioni $\Rightarrow$ 10$\tau$ --- $\varepsilon$ = $\frac{6}{10}$
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|}
+ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+\textbf{IM} & L & L & A & S & & & I & IF$<$ & & x & L & \\
+\hline
+\textbf{IU} & & L & L & A & S$*$ & S$*$ & S & I & IF$<*$ & IF$<\nearrow$ & x & L \\
+\hline
+\textbf{DM} & & & L & L & & & & S & & & & \\
+\hline
+\textbf{EU} & & & & L & L & A$\nearrow$ & & & I$\nearrow$ & & & \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+loop:	LOAD Ra, Ri, R1
+	LOAD Rb, Ri, R2
+	ADD R1, R2, R3
+	INC Ri
+	IF< Ri, Rn, loop, delayed
+	STORE Rx, Ri, R3
+\end{lstlisting}
+6 istruzioni $\Rightarrow$ 8$\tau$ --- $\varepsilon$ = $\frac{3}{4}$\\
+Miglioro l'efficienza dal 60\% al 75\%
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|}
+ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+\hline
+\textbf{IM} & L & L & A & I & IF$<$ & & & S & L & & & \\
+\hline
+\textbf{IU} & & L & L & A & I & IF$<*$ & IF$<*$ & IF$<*\nearrow$ & S & L & & \\
+\hline
+\textbf{DM} & & & L & L & $\searrow$ & $\searrow$ & & & & S & L & \\
+\hline
+\textbf{EU} & & & & L & L & A & I$\nearrow$ & & & & & L \\
+\hline
+\end{tabular}
+\end{center}
+\pagebreak
+\subsection{Rimozione Invarianti}
+Se in un ciclo ho una istruzione che calcola qualcosa che viene consumato nelle istruzioni successive \textbf{senza che nessuno vada a modificare quel registro} e \textbf{se tale istruzione non dipende dalla variabile di iterazione}, allora tale istruzione \textbf{la posso anticipare prima di entrare nel ciclo}.\\
+Vediamo un esempio: moltiplicazione fra matrici
+\begin{multicols}{2}
+\begin{C}
+for (i = 0; i < n; i++) {
+  for (j = 0; j < n; j++) {
+    c[i][j] = 0;
+    for (k = 0; k < n; k++) {
+      c[i][j] = a[i][k] * b[k][j];
+    }
+  }
+}
+\end{C}
+\columnbreak
+\begin{center}
+In memoria:\\
+\includegraphics[scale=1]{matinmem.png}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{lstlisting}
+1.loop:	MUL R1, Rn, Rai ;INVARIANTE
+2.	ADD Rai, Rbasea, Rai ;INVARIANTE
+3.	LOAD Rai, Rk, R1
+4.	MUL Rk, Rn, Rbk
+5.	ADD Rbk, Rbaseb, Rbk
+6.	LOAD Rbk, Rj, R2
+7.	MUL R1, R2, R3
+8.	MUL Ri, Rn, Rc ;INVARIANTE
+9.	ADD Rci, Rbasec, Rci ;INVARIANTE
+10.	LOAD Rci, Rj, R4
+11.	ADD R4, R3, R4
+12.	STORE Rci, R5, R4
+13.	INC Rk
+14.	IF< Rk, Rn, loop
+\end{lstlisting}
+\columnbreak
+\begin{center}
+\includegraphics[scale=1]{dataflow_2.png}
+\end{center}
+\end{multicols}
+Oltre a portare fuori le invarianti, possiamo anche spostare istruzioni per evitare grandi bolle causate dalle MUL e LOAD seguendo sempre lo schema data-flow.
+\begin{lstlisting}
+4.	MUL Rk, Rn, Rbk
+3.	LOAD Rai, Rk, R1
+10.	LOAD Rci, Rj, R4
+5.	ADD Rbk, Rbaseb, Rbk
+6.	LOAD Rbk, Rj, R2
+7.	MUL R1, R2, R3
+11.	ADD R4, R3, R4
+12.	STORE Rci, R5, R4
+13.	INC Rk
+14.	IF< Rk, Rn, loop
+\end{lstlisting}
+Se simulo questo codice noterò che riduce di molto le bolle.
 \end{document}
