@@ -5,6 +5,7 @@
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{listings}
 \usepackage{graphicx}
+\usepackage{makecell}
 \graphicspath{ {./img/} }
 \usepackage{color}
 
@@ -2966,7 +2967,111 @@ Es.: Chord, Pastry, CAN\ldots
 Ad \textbf{ogni risorsa condivisa} (pubblicata) \textbf{viene assegnato un ID basato su una certa funzione hash applicata al contenuto della risorsa ed al nome}.
 \pagebreak
 \section{Sicurezza}
-
+\begin{center}
+	\begin{tabular}{c c}
+	\textbf{Obiettivi} & \textbf{Attacchi} \\
+	 & \\
+	 & \\
+	\makecell{\textbf{Riservatezza/Segretezza}\\Solo mittente e destinatario dovrebbero\\ essere in grado di comprendere\\il contenuto del messaggio trasmesso} & \textbf{Intercettazione} \\
+	 & \\
+	\makecell{\textbf{Integrità}\\Il contenuto della comunicazione\\non deve subire alterazioni\\durante la trasmissione} & \makecell{\textbf{Modifica}\\\textbf{Spoofing}\\\textbf{Play-Back}\\\textbf{Repudiation}} \\
+	 & \\
+	\makecell{\textbf{Disponibilità/Accessibilità}\\Deve essere garantita\\disponibilità/operatività di\\informazioni e servizi} & \makecell{\textbf{DoS}\\\textbf{DDoS}} \\
+	\end{tabular}
+\end{center}
+\subsection{Cifratura a Chiave Simmetrica}
+\paragraph{Idea} Una stessa chiave (segreta) usata per cifrare e decifrare.\\
+La chiave può essere utilizzata per la comunicazione bidirezionale.
+\begin{center}
+\includegraphics[scale=0.8]{cifrchiavesimm.png}\\
+\includegraphics[scale=0.75]{cifrchiavesimm2.png}
+\end{center}
+\begin{list}{}{}
+	\item Cifrari monoalfabetici\\
+	Cifrario di Cesare (k-shift)\ldots
+	\item Cifrari polialfabetici
+	\item \textbf{Data Encryption Standard}\\
+	Cifrario a blocchi con chiave di cifratura di 56 bit
+	\item \textbf{Advanced Encryption Standard}\\
+	Sostituisce il DES, è del 2001.\\
+	Elabora i dati in \textbf{blocchi da 128 bit} con \textbf{chiave di 128/192/256 bit}.
+\end{list}
+\pagebreak
+\paragraph{Problemi} \textbf{Come concordare la chiave da usare} tra A e B? Soprattutto se non si incontrano mai?\\
+La \textbf{segretezza della chiave è inversamente proporzionale a quanto viene usata}.
+\subsection{Cifratura a Chiave Asimmetrica}
+\paragraph{Idea} \textbf{Nessuna chiave segreta condivisa}. Ognuno possiede 
+\begin{list}{}{}
+	\item \textbf{una propria chiave \textit{pubblica} nota a tutti}
+	\item \textbf{una propria chiave \textit{privata} segreta}
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.7]{cifrchiaveasimm2.png}\\
+	\includegraphics[scale=0.7]{cifrchiaveasimm.png}
+\end{center}
+\begin{list}{}{\textbf{Requisiti}:}
+	\item K$_B^+$ e K$_B^-$ tali che: $D(K_B^-,E(K_B^+, m)) = m$
+	\item \textbf{Non deve essere possibile determinare K$_B^-$ a partire da K$_B^+$}
+	\item Nota bene: $D(K_B^-,E(K_B^+, m)) = D(K_B^+,E(K_B^-, m)$\\
+	\textbf{Problema}: \textbf{efficienza}
+\end{list}
+\paragraph{Esempio} RSA
+\pagebreak
+\subsection{Message Digest}
+Vi sono casi in cui, pur non essendo richiesta la riservatezza, risulta di \textbf{fondamentale importanza l'integrità}: \textbf{il messaggio originale non deve poter essere modificato}. \textbf{Funzione hash}\\
+\textbf{Problema}: \textbf{confidenzialità}
+\begin{center}
+\includegraphics[scale=0.7]{msgdigest.png}
+\end{center}
+\subsection{Message Authentication Code}
+\begin{center}
+\includegraphics[scale=0.7]{msgauthcode.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Integrità e autenticazione} con funzione hash e chiave segreta
+	\item Gaia e Gabriele \textbf{condividono la chiave K}
+	\item Mittente:
+		\begin{list}{}{}
+		\item $MAC = H(M + K)$
+		\item Invia M e MAC su canale non sicuro
+		\end{list}
+	\item Destinatario:
+		\begin{list}{}{}
+		\item Ricalcola $MAC = H(M + K)$
+		\item Confronta MAC calcolato con quello ricevuto
+		\end{list}
+	\item \textbf{Problema}: \textbf{ripudiabilità}
+\end{list}
+\pagebreak
+\subsection{Firma Digitale}
+\paragraph{Idea} Utilizzare una \textbf{chiave privata per firmare il digest}.
+\begin{center}
+\includegraphics[scale=0.7]{firamdigitale.png}
+\end{center}
+\textbf{Problema}: \textbf{ripudiabilità} (A potrebbe cambiare le chiavi).
+\subsection{IPsec}
+\paragraph{Modalità trasporto} Protegge i dati passati dal livello trasporto al livello rete.
+\begin{center}
+\includegraphics[scale=0.7]{ipsectrasporto.png}\\
+Livello IPsec posto tra trasporto e rete.
+\end{center}
+\paragraph{Modalità tunnel} Protegge l'intero pacchetto IP
+\begin{center}
+\includegraphics[scale=0.7]{ipsecrouter.png}\\
+Livello IPsec posto in mezzo al livello di rete.
+\end{center}
+\pagebreak
+\subsubsection{ESP}
+\paragraph{Encapsulating Security Payload} Obiettivi: autenticazione della sorgente, integrità e riservatezza
+\begin{list}{}{}
+	\item Viene aggiunto un trailer ESP
+	\item Payload e ESP vengono \textbf{crittografati}
+	\item Intestazione ESP, payload e trailer ESP vengono usati per generare i dati di autenticazione, aggiunti dopo il trailer ESP
+	\item Viene aggiunta l'intestazione IP, con campo protocollo = 50
+\end{list}
+\begin{center}
+\includegraphics[scale=0.7]{ipsecesp.png}
+\end{center}
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
