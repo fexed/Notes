@@ -2855,6 +2855,91 @@ IEEE 802 ha sviluppato uno standard per il frame tagging, l'\texttt{IEEE 802.1Q}
 	\item Ad ogni VLAN in una configurazione LAN è \textbf{assegnato un VID globalmente univoco}, tra 1 e 4094.
 	\item Assegnando il solito VID a sistemi terminali su switch diversi, uno o più domini di broadcast VLAN possono essere estesi attraverso una rete più grande.
 \end{list}
+\section{Cenni di applicazioni P2P}
+Fin'ora abbiamo trattato di \textbf{applicazioni client-server}: il \textbf{server offre un servizio} ed il \textbf{client chiede di utilizzarlo} (HTTP, FTP, Telnet, SMTP, DNS\ldots)
+\subsection{Paradigma Peer-to-Peer}
+\paragraph{P2P} Nel \textbf{paradigma peer-to-peer} \textbf{tutti gli host sono peer e agiscono sia da client che da server}. Vari esempi includono: Freenet, Napster, Gnutella, FastTrack (KaZaA), eMule, BitTorrent, \ldots
+\paragraph{Peer} In linea di principio, \textbf{tutti i peer} (nodi) \textbf{hanno la stessa importanza}. I nodi sono \textbf{indpendenti}, \textbf{autonomi} e \textbf{localizzati ai bordi} (edge) \textbf{di Internet}.\\
+\textbf{Non c'è controllo centralizzato}: ogni peer ha funzione di client e server e \textbf{condivide delle risorse}.\\
+Sono \textbf{sistemi altamente distribuiti} in cui i nodi possono essere dell'ordine delle centinaia di migliaia. Ma \textbf{tutti i nodi sono dinamici e autonomi}: un nodo \textbf{può entrare e uscire dalla rete P2P in ogni momento}. Le \textbf{opzioni di ingresso e uscita dalla rete sono anche sofisticate} con ad esempio ridondanza delle informazioni.
+\subparagraph{Servent} Server + Client
+\subparagraph{Nella realtà} All'atto pratico possono \textbf{essere presenti server centralizzati o nodi con funzionalità diverse rispetto agli altri} -- i \textbf{supernodi}.
+\begin{list}{}{Esempi di applicazioni:}
+	\item \textbf{Distribuzione e memorizzazione di contenuti}\\
+	Es. file sharing: Gnutella, BitTorrent, eMule\ldots\\
+	Es. file storage: Freenet
+	\item \textbf{Condivisione delle risorse di calcolo} (elaborazione distribuita)\\
+	Es. SETI@home\ldots
+	\item \textbf{Collaborazione e comunicazione}\\
+	Es. chat, IRC, Jabber\ldots
+	\item \textbf{Telefonia}\\
+	Es. Skype\ldots
+	\item \textbf{Content Delivery Network}\\
+	Es. CoralCDN\ldots
+	\item \textbf{Piattaforme}\\
+	Es. JXTA (\texttt{sun.com/software/jxta})
+\end{list}
+\pagebreak
+\paragraph{Problema} Coppie di peer comunicano direttamente tra loro. Ogni peer però \textbf{non è necessariamente sempre attivo} e \textbf{può cambiare IP} ogni volta che si connette. Quindi \textbf{come trovare i peer}? \textbf{Come tenere traccia dei file disponibili nei vari peer}?
+\subsection{Directory Centralizzata}
+Directory client-server, file transfer P2P (es. Napster)
+\begin{multicols}{2}
+\begin{center}
+\includegraphics[scale=0.7]{p2pdircentr.png}
+\end{center}
+\paragraph{Problemi} Unico punto di fallimento.\\
+Collo di bottiglia per performance\\
+Facile da "oscurare".
+\end{multicols}
+\subsection{Reti Decentralizzate}
+\textbf{Non c'è un servizio di directory centralizzato}, i peer \textbf{si organizzano in una overlay network} (\textbf{rete logica}). Ci sono due categorie.
+\subsubsection{Reti Strutturate}
+\subsubsection{Reti Non Strutturate}
+I \textbf{nodi} sono \textbf{organizzati come un grafo casuale}: l'organizzazione della rete segue principi molto semplici.\\
+\textbf{Non ci sono vincoli sul posizionamento delle risorse rispetto alla topologia} del grafo: la \textbf{localizzazione delle risorse} è \textbf{resa difficoltosa dalla mancanza di organizzazione}.\\
+L'aggiunta e rimozione dei nodi è un'operazione semplice e poco costosa. Obiettivo: gestire i nodi con comportamento fortemente transiente (tassi di join/leave elevati).\\\\
+Esempi: Gnutella, FastTrack, eDonkey, Overnet\ldots
+\paragraph{Query Flooding} Completamente distribuita (\textbf{no server centralizzato})\\
+Esempio: Gnutella
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Peer formano una \textbf{overlay network}\\
+	Archi = connessioni TCP\\
+	Ogni nodo tipicamente connesso a 10 vicini
+	\item \textbf{Peer invia query a tutti i suoi vicini}
+	\item Se un \textbf{peer riceve una query e ha il file richiesto}, allora \textbf{invia il messaggio QueryHit sul reverse path}, \textbf{altrimenti inoltra la query a tutti i suoi vicini}.
+\end{list}
+\begin{list}{}{Problemi:}
+	\item Flooding
+	\item Incompletezza con raggio limitato
+\end{list}
+\begin{center}
+\includegraphics[scale=0.7]{p2pnonstruttqueryflooding.png}
+\end{center}
+\end{multicols}
+\pagebreak
+\subsubsection{Copertura Gerarchica}
+Cerca di \textbf{combinare} "il meglio" \textbf{dei due approcci} precedenti.
+\begin{list}{}{}
+	\item \textbf{No server con tutti i contenuti}, solo \textbf{bootstrap servers}
+	\item \textbf{I peer non sono tutti uguali}, ma esistono \textbf{group leader}
+\end{list}
+{Ogni peer \textbf{è group leader} se è "potente" in banda o risorse, oppure viene \textbf{assegnato ad un group leader}.\\
+Le \textbf{connessioni TCP} sono stabilite \textbf{tra peer e group leader} e \textbf{tra alcune coppie di group leader}.\\\\
+Ogni \textbf{group leader tiene traccia del contenuto dei propri figli}.\\
+Un group leader è un mini-server tipo Napster. Le connessioni leader-leader sono overlay network stile Gnutella.
+\begin{multicols}{2}
+Ad \textbf{ogni file} viene \textbf{associato un suo hash ed un suo descrittore}.\\
+Il client \textbf{invia una query con una keyword al suo group leader}.\\
+Il \textbf{group leader risponde con dei "match"} del tipo \texttt{<hash del file, IP>}.\\
+Se il leader \textbf{inoltra la query ad altri leader}, questi \textbf{rispondono con altri match}.\\
+Il client sceglie quindi il file da scaricare.
+\columnbreak
+\begin{center}
+\includegraphics[scale=1]{p2pcopger.png}
+\end{center}
+\end{multicols}
+
 \pagebreak
 \section{Esercizi}
 \subsection{SMTP}
