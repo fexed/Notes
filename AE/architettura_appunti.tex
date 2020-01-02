@@ -985,7 +985,7 @@ Delle istruzioni si vedranno sintassi e formato in memoria, cioè come vengono r
 \subparagraph{Memoria} La \textbf{memoria principale è indirizzabile alla parola}.
 \section{Istruzioni}
 \subsection{Operative}
-Comprendono le istruzioni aritmetiche su interi e logiche più comuni. Sono \textbf{tutte registro--registro}.
+Comprendono le istruzioni aritmetiche su interi e logiche più comuni. Sono \textbf{tutte registro--registro}. Durano 1$\tau$
 \subparagraph{Con Operandi e risultato in RG} \texttt{ADD op1, op2, op3}\\
 Es. \texttt{ADD R$_5$, R$_{27}$, R$_3$}, semantica: \texttt{R[5] + R[27] $\rightarrow$ R[3]}.\\
 In memoria: \begin{tabular}{| c | c | c | c | c |}
@@ -1017,7 +1017,8 @@ AND & R$_1$ & R$_2$ & R$_3$  & \\
 \end{tabular}
 \pagebreak
 \subsection{Load/Store}
-Non sono singole $\mu$-istruzioni perchè c'è una comunicazione tra UF (processore--memoria). Sono le \textbf{uniche istruzioni memoria--registro del D-RISC}. Come visto in precedenza, l'\textbf{indirizzo logico in memoria è calcolato come somma del contenuto di due registri generali}, uno che funge da \textbf{base} e uno da \textbf{indice}.
+Non sono singole $\mu$-istruzioni perchè c'è una comunicazione tra UF (processore--memoria). Sono le \textbf{uniche istruzioni memoria--registro del D-RISC}. Come visto in precedenza, l'\textbf{indirizzo logico in memoria è calcolato come somma del contenuto di due registri generali}, uno che funge da \textbf{base} e uno da \textbf{indice}.\\
+Una \texttt{LOAD} dura 2$\tau$, mentre una \texttt{STORE} dura 3$\tau$.
 \begin{multicols}{2}
 \begin{center}
 \textbf{Sintassi}\\
@@ -1065,7 +1066,7 @@ EXCHANGE & R$_B$ & R$_i$ & R$_X$  & \\
 \end{tabular}
 \end{center}
 \subsection{Salto Condizionato}
-Permettono di \textbf{saltare un numero preciso di istruzioni} a seconda della condizione imposta.
+Permettono di \textbf{saltare un numero preciso di istruzioni} a seconda della condizione imposta. Solitamente prende 2$\tau$.
 \subparagraph{Confronto fra due RG} Usando gli operatori logici $>$, $<$, $=$, $\neq$, $\leq$, $\geq$\\
 Sintassi, esempio con $>$: \texttt{IF$_>$, R$_i$, R$_s$, offset}\\
 Semantica: se \texttt{R[i] $>$ R[s]} allora \texttt{IC + offset $\rightarrow$ IC}, altrimenti \texttt{IC + 1 $\rightarrow$ IC}.\\
@@ -1089,7 +1090,7 @@ IF$_{> 0}$ & R$_i$ & offset \\
 \hline
 \end{tabular}
 \subsection{Salto Incodizionato}
-Permettono di \textbf{saltare un numero preciso di istruzioni} senza valutare nessuna condizione.
+Permettono di \textbf{saltare un numero preciso di istruzioni} senza valutare nessuna condizione. Solitamente prende 1$\tau$.
 \subparagraph{Salto con offset} \texttt{GOTO offset}\\
 Semantica: \texttt{IC + offset $\rightarrow$ IC}\\
 \textbf{In memoria}:  
