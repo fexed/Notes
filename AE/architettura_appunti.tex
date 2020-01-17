@@ -1580,8 +1580,7 @@ Dall'indirizzo fisico, prendo i bit che mi indicano il \texttt{\#ins} e decido q
 Successivamente con \texttt{IND.offset} decido quale delle $\sigma$ parole prendere.\\\\
 Di seguito l'implementazione a livello firmware con k = 2, per questioni di semplicità dello schema.
 \begin{center}
-%TODO immagine
-immagine da fare
+\includegraphics[scale=0.68]{associnsk2.png}
 \end{center}
 \subsubsection{Livelli di Cache}
 \begin{multicols}{2}
@@ -1610,7 +1609,6 @@ Abbiamo \textbf{due strategie} per effettuare le modifiche in cache:
 	Ogni \texttt{STORE} \textbf{modifica il dato in cache e immediatamente in memoria principale} (o nel livello superiore della gerarchia).\\
 	La \textbf{scrittura in cache} è \textbf{sincrona}, mentre nel livello superiore è asincrona.
 \end{list}
-\pagebreak
 \paragraph{Un esempio} Vediamo come esempio l'inizializzazione di un array, per valutare le prestazioni dei due metodi.
 \begin{multicols}{2}
 \begin{C}
@@ -1647,7 +1645,6 @@ T$_{tranf}$ = 2(T$_{tr} + \tau$) + $\frac{\sigma}{m}\tau_m$ ( oppure, se T$_{tr}
 \begin{center}
 	\includegraphics[scale=1]{procuf.png}
 \end{center}
-\pagebreak
 Ogni unità I/O svolge il compito di interfacciare, nei confronti dell'Unità Centrale, un certo tipo di dispositivo periferico come: hard disk, stampanti, interfacce di rete\ldots.\\
 \paragraph{Categorie} Possiamo dividere le unità I/O in due categorie:
 \begin{list}{}{}
@@ -1665,6 +1662,7 @@ Se invece \textbf{uso delle istruzioni speciali} allora parliamo di istruzioni s
 Si inizia con delle \texttt{STORE} con \textbf{il comando da eseguire sulla periferica} con i suoi parametri, nella memoria virtuale che rappresenta la memoria dell'unità I/O.\\
 Dopo il processore deve \textbf{ordinare il comando alla periferica}: questo avviene come una \texttt{STORE \#1} sul registo \texttt{RDY} della periferica.\\
 Successivamente il processore attende una interruzione, nel mentre può eseguire altri processi. Quando avviene l'interruzione, si eseguono delle \texttt{LOAD} sulla memoria mappata dell'I/O per leggere i risultati.
+\pagebreak
 \section{Trattamento delle Interruzioni}
 Quando una periferica I/O richiede una interruzione, manda una \textbf{richiesta di interruzione all'unità \texttt{UNINT}}. Se l'\textbf{unità di arbitraggio} \texttt{UNINT} \textbf{accetta la richiesta}, manda il segnale \texttt{INT} (interruzione) al processore che provvede a mandare un \texttt{ACK}.\\
 \texttt{UNINT} manda anche un segnale all'unità I/O che ha vinto l'arbitraggio, che è libera di mandare alla MMU due parole: \textbf{numero dell'unità} -- per capire quale unità ha richiesto l'interruzione -- e \textbf{la ragione dell'interruzione}.\\
@@ -1683,7 +1681,6 @@ trattint2.	(ACKM, OR(ESITO) = 00) nop, trattint2
 	\item \textbf{**} Ricevuta la seconda parola del messaggio di I/O, questa viene passata alla Routine d'Interfacciamento Interruzioni via R[62]. Viene poi salvato l'indirizzo di ritorno dalla routine ed effettuato il salto alla routine stessa.
 \end{list}
 Quando ho una interruzione, \textbf{smetto di fare ciò che sto facendo} e vado ad eseguire il codice che tratta questa interruzione \textbf{eseguendo solo quel codice} che deve essere molto veloce.
-\pagebreak
 \subsection{DMA I/O}
 \paragraph{Direct Memory Access} La memoria principale ha due interfacce: una che comunica con il processore e una che comunica con il bus DMA. Quindi M è un'unità attiva che \textbf{contiene un arbitro} per stabilire se comunicare con P o il Bus.\\
 Un esempio con una periferica I/O come un hard disk. Come primo passo vengono memorizzati operazioni e parametri via MM I/O sulla periferica, dopo di memorizza "GO" in RDY della periferica.\\
