@@ -4,7 +4,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 #### Contributors
 [Simone Pepi](https://github.com/sipemopo92), Architettura degli Elaboratori
 
-##### Analisi Matematica: [cheatsheet](https://github.com/fexed/Notes/blob/master/AM/AM.pdf)
+##### Analisi Matematica: [cheatsheet](https://github.com/fexed/Notes/blob/master/AM/AM.pdf), [eserciziario (WIP)](https://github.com/fexed/Notes/blob/master/AM/AM_eserciziario.pdf)
 
 ##### Architettura degli Elaboratori: [appunti](https://github.com/fexed/Notes/blob/master/AE/architettura_appunti.pdf)
 
