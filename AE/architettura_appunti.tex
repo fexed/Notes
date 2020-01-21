@@ -1542,39 +1542,27 @@ In questo caso \textbf{ogni blocco di memoria principale può essere trasferito 
 \end{center}
 \end{multicols}
 \paragraph{Bit di modifica} In ogni \textbf{linea di cache} è presente anche un \textbf{bit di modifica} che \textbf{indica se una delle $\sigma$ parole è stata modificata}, così da sapere che devo salvare in memoria la linea aggiornata prima di cancellarla. Vediamo com'è implementata a livello firmware.
-\begin{center}
-%TODO immagine
-immagine da fare
-\end{center}
 \paragraph{Vantaggi e svantaggi} i vantaggi di questo metodo sono \textbf{la velocità} e \textbf{la semplicità}.\\
 Presenta uno svantaggio che può essere molto \textbf{gravoso} e deriva dalla \textbf{rigidità della legge di corrispondenza}: quando devo accedere più volte a coppie di informazioni che stanno in blocchi della memoria principale corrispondenti alo stesso blocco della cache (quindi con \texttt{\# linee} uguali), il numero di fault è molto elevato (\textbf{trashing})
+\begin{center}
+\includegraphics[scale=0.7]{cachediretta.png}
+\end{center}
+\pagebreak
 \subsubsection{Indirizzamento completamente associativo}
 Questo metodo \textbf{offre la massima flessibilità circa la corrispondenza tra le linee di M e quelle di C}: ogni blocco o linea di M può risiedere in qualsiasi blocco di C.
-\begin{multicols}{2}
-\begin{center}
-%TODO immagine
-immagine da fare
-\end{center}
-\columnbreak
 Per vedere se ho l'indirizzo memorizzato enlla cache, considero l'\textbf{AND tra il risultato dei confronti}, se è 0 allora esiste il tag giusto, sennò \textbf{fault di cache}.
-\end{multicols}
 \begin{center}
-%TODO immagine
-immagine da fare
+\includegraphics[scale=0.7]{cachecomplassociativa.png}
 \end{center}
 Offre la massima flessibilità al prezzo di un maggiore tempo di accesso e di un aumento di costo dovuto alla memoria associativa
 \subsubsection{Indirizzamento associativo su insiemi}
 Questo metodo \textbf{approssima} in maniera soddisfacente sia \textbf{la flessibilità} del metodo completamente associativo, sia \textbf{la semplicità} del metodo diretto. Ogni linea di memoria viene fatta \textbf{corrispondere ad un insieme determinato di linee cache, potendo essere allocato in una qualsiasi linea di tale insieme}.\\\\
 \texttt{insieme = \{gruppo di linee/blocchi di cache di dimensione k\}}
-\begin{center}
-%TODO immagine
-immagine da fare
-\end{center}
 Dall'indirizzo fisico, prendo i bit che mi indicano il \texttt{\#ins} e decido quale insieme andare a guardare. Dopo prendo i \texttt{TAG} dalle linee dell'insieme in esame e li confronto con \texttt{IND.TAG}, decidendo quale linea parendere o se c'è un \textbf{fault di cache}.\\
 Successivamente con \texttt{IND.offset} decido quale delle $\sigma$ parole prendere.\\\\
 Di seguito l'implementazione a livello firmware con k = 2, per questioni di semplicità dello schema.
 \begin{center}
-\includegraphics[scale=0.68]{associnsk2.png}
+\includegraphics[scale=0.65]{associnsk2.png}
 \end{center}
 \subsubsection{Livelli di Cache}
 \begin{multicols}{2}
