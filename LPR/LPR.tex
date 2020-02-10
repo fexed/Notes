@@ -16,7 +16,7 @@
 \renewcommand*\contentsname{Indice}
 
 \maketitle
-\section{Threads}
+\section{Thread}
 \paragraph{Processo} Istanza di un programma in esecuzione
 \paragraph{Thread} \textbf{Flusso di esecuzione} all'interno di un processo $\Rightarrow$ Ogni processo ha almeno un thread.\\I \textbf{thread condividono le risorse di un processo}.\\
 Possono essere eseguiti sia su single-core (es. interleaving, time-sharing\ldots) che su multicore (più flussi di esecuzione in parallelo)
@@ -41,4 +41,17 @@ Un thread è un oggetto. Per creare un thread si definisce un task che implement
 	\item \textbf{Not Runnable} (\textbf{Blocked}/\textbf{Waiting}): thread non può essere messo in esecuzione, può accadere quando attende un'operazione I/O o ha invocato metodi come \texttt{sleep()} oppure \texttt{wait()}.
 	\item \textbf{Dead}: termine naturale o dopo l'invocazione di \texttt{stop()} da parte di altri thread (deprecato).
 \end{list}
+\subsection{Threadpool}
+\paragraph{Perché?} In caso di task leggeri molto frequenti risulta impraticabile attivare ulteriori thread. Diventa quindi utile definire un limite massimo di thread che possono essere attivati contemporaneamente, così da sfruttare meglio i processori, evitare troppi thread in competizione e diminuire i costi di attivazione/terminazione dei thread.
+\paragraph{Threadpool} Struttura dati la cui dimensione massima può essere prefissata, contenente riferimenti ad un insieme di thread. I thread possono essere riutilizzati: la sottomissione di un task al threadpool è \textbf{disaccoppiata} dall'esecuzione del thread. L'esecuzione può essere ritardata se non vi sono risorse disponibili.\\
+La \textbf{politica di gestione dei thread} stabilisce quando i thread vengono attivati (al momento della creazione del pool, on demand, all'arrivo di un nuovo task\ldots) e quando è opportuno terminare l'esecuzione di un thread.\\
+Il threadpool, quindi, al momento della sottomissione di un task può:
+\begin{list}{}{}
+	\item Usare un thread attivato in precedenza e al momento inattivo
+	\item Creare un nuovo thread
+	\item Memorizzare il task in una coda, in attesa
+	\item Respingere la richiesta
+\end{list}
+\paragraph{Callable} Classe per definire un task che può restituire un risultato e sollevare eccezioni
+\paragraph{Future} Rappresenta il risultato di una computazione asincrona. Definisce metodi per controllare se la computazione è terminata, attendere la terminazione oppure cancellarla. Viene implementata nella classe \texttt{FutureTask}.
 \end{document}
