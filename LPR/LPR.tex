@@ -54,4 +54,20 @@ Il threadpool, quindi, al momento della sottomissione di un task può:
 \end{list}
 \paragraph{Callable} Classe per definire un task che può restituire un risultato e sollevare eccezioni
 \paragraph{Future} Rappresenta il risultato di una computazione asincrona. Definisce metodi per controllare se la computazione è terminata, attendere la terminazione oppure cancellarla. Viene implementata nella classe \texttt{FutureTask}.
+\section{Monitor}
+\paragraph{Lock Implicite} Ogni oggetto ha associate una lock implicita ed una coda. La lock si acquisisce mediante metodi o blocchi di codice \texttt{synchronized}. Quando questo viene invocato:\begin{list}{}{}
+	\item Se nessun metodo \texttt{synchronized} della classe è in esecuzione, l'oggetto viene bloccato (la lock viene acquisita ed il metodo viene eseguito.
+	\item Se l'oggetto è già bloccato, il thread viene sospeso nella coda associata finché la lock non viene rilasciata.
+\end{list}
+Notare che la lock è \textbf{associata all'istanza della classe}, non alla classe. Metodi su istanze (oggetti) diverse della stessa classe possono essere eseguiti concorrentemente.\\
+I costruttori non possono essere dichiarati \texttt{synchronized} (errore di compilazione), perché solo il thread che crea l'oggetto deve poterci accedere mentre l'oggetto viene creato.\\
+Non ha senso specificare \texttt{synchronized} nelle interfacce poiché è riferito all'implementazione.\\
+Inoltre il \texttt{synchronized} non viene ereditato.
+\paragraph{Monitor} Meccanismo linguistico ad alto livello per la sincronizzazione. classe di oggetti utilizzabili concorrentemente in modo safe. La risorsa è un oggetto passivo, le sue operazioni vengono invocate da entità attive (thread). La sincronizzazione sullo stato della risorsa è garantita esplicitamente: mutua esclusione sulla struttura garantita dalla lock implicita (un solo thread per volta è all'interno del monitor), meccanismi per sospensione/risveglio sullo stato dell'oggetto condiviso simili a variabili di condizione (\texttt{wait}/\texttt{notify})\\
+Il monitor è quindi un \textbf{oggetto} con un insieme di metodi \texttt{synchronized} che incapsula lo stato di una risorsa condivisa. Ha due code gestite implicitamente: entry set (thread in attesa di acquisire la lock) e wait set (thread che hanno eseguito una wait e attendono una notify)
+\paragraph{Wait} Sospende il thread in attesa che si verifichi una condizione (opzionalmente per un tempo massimo). Rilascia la lock (a differenza di \texttt{sleep} e \texttt{yield}).
+\paragraph{Notify} Sveglia ad un thread in attesa il verificarsi di una certa condizione (\texttt{notifyAll} sveglia tutti i thread in attesa)
+\paragraph{Deadlock} Due o più thread bloccati per sempre in attesa uno dell'altro
+\paragraph{Starvation} Thread ha difficoltà ad accedere ad una risorsa condivisa e quindi difficoltà a procedere. In generale task "greedy" che invocano spesso metodi lunghi obbligando gli altri ad aspettare
+\paragraph{Livelock} Programma che genera una sequenza ciclica di operazioni inutili ai fini dell'effettivo avanzamento della computazione.
 \end{document}
