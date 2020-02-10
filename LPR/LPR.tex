@@ -16,4 +16,29 @@
 \renewcommand*\contentsname{Indice}
 
 \maketitle
+\section{Threads}
+\paragraph{Processo} Istanza di un programma in esecuzione
+\paragraph{Thread} \textbf{Flusso di esecuzione} all'interno di un processo $\Rightarrow$ Ogni processo ha almeno un thread.\\I \textbf{thread condividono le risorse di un processo}.\\
+Possono essere eseguiti sia su single-core (es. interleaving, time-sharing\ldots) che su multicore (più flussi di esecuzione in parallelo)
+\paragraph{Multitasking} \begin{list}{}{Si può riferire a}
+	\item Processi, controllato esclusivamente dal S.O.
+	\item Thread, controllato in parte dal programmatore
+\end{list}
+\paragraph{Contesto di un processo} Insieme delle informazioni necessarie per ristabilire esattamente lo stato in cui si trova il S.O. nel momento in cui si interrompe l'esecuzione di un processo per passare ad un altro: registri del processore, memoria del processo\ldots
+\paragraph{Perché?} Per gestire più funzionalità contemporaneamente, come gestire input, visualizzare a schermo, monitorare la rete ed eseguire calcoli.\\
+Esempi noti: browser web, videogame multiplayer. Si creano \textbf{più componenti interagenti} in modo da:\begin{list}{}{}
+	\item Usare meglio le risorse
+	\item Migliorare le performance per applicazioni che richiedono grossi calcoli: si dividono i task per eseguirli in parallelo.
+	\item Anche problemi: difficile debugging e manutenzione, sincronizzazione, deadlocks\ldots
+\end{list}
+\paragraph{In Java} Il main thread, invocato dalla JVM all'esecuzione del programma, può attivare altri thread. La JVM attiva automaticamente altri thread come il garbage collector.\\
+Un thread è un oggetto. Per creare un thread si definisce un task che implementi l'interfaccia \texttt{Runnable} e si crea un thread passandogli l'istanza del task creato. Altrimenti si può estendere la classe \texttt{java.lang.Thread}.
+\paragraph{Runnable} Appartiene a \texttt{java.language}, contiene solo la firma del metodo \texttt{void run()}. Un oggetto che la implementa è un frammento di codice che può essere eseguito in un thread.
+\paragraph{Stati}
+\begin{list}{}{}
+	\item \textbf{Created}/\textbf{New}: subito dopo l'istruzione \texttt{new}, variabili allocate ed inizializzate. Thread in attesa di passare in esecuzione
+	\item \textbf{Runnable}/\textbf{Running}: thread in esecuzione o in attesa per ottenere la CPU (Java non separa i due stati).
+	\item \textbf{Not Runnable} (\textbf{Blocked}/\textbf{Waiting}): thread non può essere messo in esecuzione, può accadere quando attende un'operazione I/O o ha invocato metodi come \texttt{sleep()} oppure \texttt{wait()}.
+	\item \textbf{Dead}: termine naturale o dopo l'invocazione di \texttt{stop()} da parte di altri thread (deprecato).
+\end{list}
 \end{document}
