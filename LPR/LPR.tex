@@ -102,7 +102,8 @@ Per risolvere questo problema si mettono a disposizione operazioni eseguite atom
 \subparagraph{Canali e buffer} Invece dell'I/O standard Java che opera su stream di byte o caratteri. I dati sono trasferiti da canali a buffer o viceversa, ed i buffer vengono gestiti esplicitamente dal programmatore.\\
 Un \textbf{channel} è simile ad uno stream. I dati possono essere letti dal channel in un buffer e viceversa scritti dal buffer in un channel.
 \subparagraph{Buffer} Contenitori di dati di dimensione fissa. Contengono dati appena letti o da scrivere.\\
-Sono oggetti della classe \texttt{java.nio.Buffer} \textbf{non thread-safe}.
+Sono oggetti della classe \texttt{java.nio.Buffer} \textbf{non thread-safe}.\\
+\textbf{Direct Buffers}: buffer allocati fuori dalla JVM, nella memoria gestita dal S.O.
 \subparagraph{Selector} Oggetto in grado di monitorare un insieme di canali. Itercetta eventi provenienti dai canali monitorati: dati arrivati, connessione aperta\ldots\\
 Sono simili agli stream, ma \textbf{bidirezionali}, con \textbf{scattered read} (distribuisce i dati letti da un canale in uno o più buffer), \textbf{gathering write} (scrive su un canale i dati recuperati da più buffer) e supporta \textbf{trasferimenti diretti tra canali}.
 \subparagraph{Channel} Rappresentano connessioni con entità capaci di eseguire operazioni I/O. \texttt{Channel} è un'interfaccia radice di una gerarchia di interfacce:
@@ -113,4 +114,19 @@ Sono simili agli stream, ma \textbf{bidirezionali}, con \textbf{scattered read} 
 	\item \texttt{ServerSocketChannel}: attende richieste di connessioni \texttt{TCP} e crea un \texttt{SocketChannel} per ogni connessione creata
 \end{list}
 Sono \textbf{bidirezionali}. Tutti i dati sono gestiti tramite oggetti di tipo \texttt{Buffer}, quindi senza leggere/scrivere direttamente sul canale. Inoltre possono essere \textbf{bloccanti o meno}, non bloccati utili soprattutto per le comunicazioni in cui i dati arrivano in modo incrementale come i collegamenti di rete.
+\section{Serializzazione}
+\paragraph{Oggetti} Caratterizzati da stato (vive con l'istanza) e comportamento (specificato dalla classe).
+\paragraph{Serialization} Scrittura e lettura di oggetti. Si basa sulla possibilità di scrivere lo stato di un oggetto in una forma sequenziale, sufficiente per ricostrutire l'oggetto quando viene riletto.\\
+Il flattening/salvataggio dell'oggetto riguarda lo stato e può avvenire in diversi modi:
+\begin{list}{}{}
+	\item Accedendo ai singoli campi, salvando i valori per esempio su un file di testo in un formato opportuno
+	\item Trasformando automaticamente l'oggetto in uno stream di byte mediante il \textbf{meccanismo della object serialization} di Java
+\end{list}
+La serializzazione consente di persistere degli oggetti al di fuori del ciclo di vita della JVM. Si crea una rappresentazione dell'oggetto indipendente dalla JVM che ha generato l'oggetto stesso. Un'altra JVM, se ha accesso alla classe ed all'oggetto serializzato, può ricostruirlo.
+\paragraph{Persistenza} Fornisce un meccanismo di persistenza dei programmi, consentendo l'archiviazione di un oggetto su un file. Ad esempio, per memorizzare lo stato di una sessione.
+\paragraph{Interoperabilità} Meccanismo di interoperabilità mediante oggetti condivisi tra diverse applicazioni.
+\paragraph{Approcci}
+\subparagraph{Java Object Serialization} Utilizzabile solo se chi serializza e chi deserializza è scritto in Java.
+\subparagraph{Testo} Come \texttt{XML} e \texttt{JSON} (JavaScript Object Notation), formati dalla sintassi semplice e facilmente riproducibile. Interpretabile da qualsiasi linguaggio.
+
 \end{document}
