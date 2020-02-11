@@ -70,4 +70,29 @@ Il monitor è quindi un \textbf{oggetto} con un insieme di metodi \texttt{synchr
 \paragraph{Deadlock} Due o più thread bloccati per sempre in attesa uno dell'altro
 \paragraph{Starvation} Thread ha difficoltà ad accedere ad una risorsa condivisa e quindi difficoltà a procedere. In generale task "greedy" che invocano spesso metodi lunghi obbligando gli altri ad aspettare
 \paragraph{Livelock} Programma che genera una sequenza ciclica di operazioni inutili ai fini dell'effettivo avanzamento della computazione.
+\section{Concurrent collections}
+\paragraph{Collezioni di oggetti} Insieme di classi che consentono di lavorare con gruppi di oggetti. L'essere o meno thread-safe varia da classe a classe. In generale, tre tipi di collezioni: \textbf{senza supporto} per multithreading, \textbf{synchronized} collections e \textbf{concurrent} collections (introdotte in \texttt{java.util.concurrent}).
+\paragraph{Vector} Contenitore elastico (dimensione variabile) e non generico. Thread-safe conservative locking.
+\paragraph{ArrayList} Elastico come \texttt{Vector}. Prima di JDK5 poteva contenere solo elementi di tipo \texttt{Object}, adesso è parametrico (generic) rispetto al tipo di oggetti contenuti.\\Elementi possono essere acceduti in modo diretto tramite l'indice. \textbf{Non thread-safe} di default: nessuna sincronizzazione per maggiore efficienza.
+\paragraph{Unsynchronized Collections} Come \texttt{ArrayList}, un loro uso incontrollato in un programma multithread può portare a risultati scorretti.
+\subsection{Synchronized Collections}
+\texttt{Collections} contiene metodi statici per l'elaborazione delle collezioni, \textbf{factory methods} per creare versioni sincronizzate di \texttt{list}/\texttt{set}/\texttt{map}.\begin{list}{}{}
+	\item Input: una collezione
+	\item Output: la stessa collezione con le operazioni sincronizzate.
+\end{list}
+La collection risultante è protetta da \textbf{lock sull'intera collezione} $\rightarrow$ degradazione di performance
+\paragraph{Nota bene} Nessun thread deve accedere all'oggetto originale, requisito ottenibile con istruzioni del tipo\\\texttt{List<String> synchList = Collections.synchronizedList(new ArrayList<String>());}
+\paragraph{Svantaggi} Garantiscono la thread-safety a scapito della scalabilità del programma.
+\subsection{Concurrent Collections}
+\paragraph{Idea} Accettare un compromesso sulla semantica delle operazioni, così da rendere possibile il mantenimento di un livello di concorrenza tale da garantire una buona scalabilità.\\
+Invece di sincronizzare l'intera struttura, si sincronizza solo la parte interessata. Esempio: una hash table ha diversi buckets, quindi sincronizzo solo il bucket a cui accedo.
+\paragraph{Concurrent Collections} Implementate in \texttt{java.util.concurrent}, superano l'approccio "\textit{sincronizza l'intera struttura dati}" garantendo quindi un supporto più sofisticato per la sincronizzazione permettendo l'overlapping di operazioni sugli elementi della struttura.
+\paragraph{Vantaggio} Maggior livello di concorrenza e quindi migliori performance
+\paragraph{Prezzo} Modifica della semantica di alcune operazioni.
+\paragraph{Lock Striping} Invece di una sola lock per tutta la struttura, mantengo lock per sezioni. Ad esempio, una hash table suddivisa in sezioni rende possibili write simultanee se modificano sezioni diverse.\\
+Posso usare 16 lock per controllare l'accesso alla struttura, un numero arbitrario di lettori ed un numero fisso massimo di scrittori (16) che lavorano simultaneamente. Così lettori e scrittori possono convivere.
+\subparagraph{Vantaggi} Maggiore parallelismo e scalabilità
+\subparagraph{Svantaggi} Non si può eseguire la lock sull'intera struttura. Si approssima la semantica di alcune operazioni, ad esempio \texttt{size()} e \texttt{isEmpty()}, che restituiscono un valore approssimato.\\
+Diventa impossibile sincronizzare funzioni composte da operazioni elementari a livello utente (nelle \texttt{synchronized} si usavano blochi \texttt{synchronized} che lockavano l'intera collezione).\\
+Per risolvere questo problema si mettono a disposizione operazioni eseguite atomicamente, come \texttt{putIfAbsent(K key, V val)}, \texttt{removeIfEqual(K key, V val)}, \texttt{replaceIfEqual(K key, V oldVal, V newVal)}
 \end{document}
