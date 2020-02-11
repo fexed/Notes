@@ -10,4 +10,4 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Programmazione d'Interfacce: [appunti](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
 
-##### Reti di Calcolatori: [appunti](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf)
+##### Reti di Calcolatori: [appunti teoria](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf)
