@@ -95,4 +95,22 @@ Posso usare 16 lock per controllare l'accesso alla struttura, un numero arbitrar
 \subparagraph{Svantaggi} Non si può eseguire la lock sull'intera struttura. Si approssima la semantica di alcune operazioni, ad esempio \texttt{size()} e \texttt{isEmpty()}, che restituiscono un valore approssimato.\\
 Diventa impossibile sincronizzare funzioni composte da operazioni elementari a livello utente (nelle \texttt{synchronized} si usavano blochi \texttt{synchronized} che lockavano l'intera collezione).\\
 Per risolvere questo problema si mettono a disposizione operazioni eseguite atomicamente, come \texttt{putIfAbsent(K key, V val)}, \texttt{removeIfEqual(K key, V val)}, \texttt{replaceIfEqual(K key, V oldVal, V newVal)}
+\section{Java NIO}
+\paragraph{Obiettivi} Incrementare la performance dell'I/O, fornire un insieme eterogeneo di funzionalità per l'I/O e aumentare l'espressività delle applicazioni.
+\paragraph{Non semplice} Per migliorare le performance è necessario definire le primitive a livelli di astrazione più bassi. Inoltre i risultati dipendono dalla piattaforma di esecuzione. Si rende necessario uno sforzo di progettazione maggiore.
+\paragraph{Costrutti base}
+\subparagraph{Canali e buffer} Invece dell'I/O standard Java che opera su stream di byte o caratteri. I dati sono trasferiti da canali a buffer o viceversa, ed i buffer vengono gestiti esplicitamente dal programmatore.\\
+Un \textbf{channel} è simile ad uno stream. I dati possono essere letti dal channel in un buffer e viceversa scritti dal buffer in un channel.
+\subparagraph{Buffer} Contenitori di dati di dimensione fissa. Contengono dati appena letti o da scrivere.\\
+Sono oggetti della classe \texttt{java.nio.Buffer} \textbf{non thread-safe}.
+\subparagraph{Selector} Oggetto in grado di monitorare un insieme di canali. Itercetta eventi provenienti dai canali monitorati: dati arrivati, connessione aperta\ldots\\
+Sono simili agli stream, ma \textbf{bidirezionali}, con \textbf{scattered read} (distribuisce i dati letti da un canale in uno o più buffer), \textbf{gathering write} (scrive su un canale i dati recuperati da più buffer) e supporta \textbf{trasferimenti diretti tra canali}.
+\subparagraph{Channel} Rappresentano connessioni con entità capaci di eseguire operazioni I/O. \texttt{Channel} è un'interfaccia radice di una gerarchia di interfacce:
+\begin{list}{}{}
+	\item \texttt{FileChannel}: legge/scrive dati su file
+	\item \texttt{DatagramChannel}: legge/scrive dati su rete via \texttt{UDP}
+	\item \texttt{SocketChannel}: legge/scrive dati su rete via \texttt{TCP}
+	\item \texttt{ServerSocketChannel}: attende richieste di connessioni \texttt{TCP} e crea un \texttt{SocketChannel} per ogni connessione creata
+\end{list}
+Sono \textbf{bidirezionali}. Tutti i dati sono gestiti tramite oggetti di tipo \texttt{Buffer}, quindi senza leggere/scrivere direttamente sul canale. Inoltre possono essere \textbf{bloccanti o meno}, non bloccati utili soprattutto per le comunicazioni in cui i dati arrivano in modo incrementale come i collegamenti di rete.
 \end{document}
