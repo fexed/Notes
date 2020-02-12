@@ -131,4 +131,55 @@ La serializzazione consente di persistere degli oggetti al di fuori del ciclo di
 \section{JSON}
 Formato leggero per interscambio di dati, indipendente dalla piattaforma poiché è semplice testo. Non dipende dal linguaggio di programmazione ed è self-describing.
 \paragraph{Strutture} Coppie \texttt{chiave:valore} e liste ordinate di valori. Una risorsa JSON ha una struttura ad albero.
+\section{RMI}
+\paragraph{Remote Method Invocation} Un'applicazione RMI è composta da due programmi: server e client. L'obiettivo è di \textbf{permettere al programmatore di sviluppare applicazioni distribuite} usando la \textbf{stessa sintassi} e semantica \textbf{dei programmi non distribuiti}.\\
+Viene raggiunto solo in parte, ha una buona trasparenza ma non totale.
+\subparagraph{Server} \textbf{Crea} un oggetto remoto e \textbf{pubblica} un riferimento all'oggetto. Dopodiché, \textbf{attende} che i client invochino metodi sull'oggetto remoto.
+\subparagraph{Client} \textbf{Ottiene} un riferimento all'oggetto remoto e \textbf{invoca} i suoi metodi.
+\paragraph{Applicazione distribuita} Un'applicazione JAVA distribuita è composta da computazioni eseguite su JVM differenti, possibilmente in esecuzione su host differenti comunicanti tra loro. Un'applicazione multithread non è distribuita, perché è eseguita sulla solita JVM.
+\subparagraph{Socket} Richiedono la progettazione di protocolli di comunicazione e la verifica delle loro funzionalità. Sono meccanismi flessibili ma di basso livello. La \textbf{serializzazione} consente di ridurre la complessità dei protocolli inviando dati strutturati.
+\paragraph{RPC} Un'alternativa è una tecnologica di più alto livello originariamente chiamata \textbf{Remote Procedure Call}, la cui interfaccia di comunicazione è rappresentata dall'invocazione di una procedura remota invece che dall'utilizzo diretto di un socket.\\
+Sfrutta il paradigma \textbf{domanda}/\textbf{risposta}:
+\begin{enumerate}
+	\item Client invoca procedura del server remoto
+	\item Server esegue la procedura con i parametri passati dal client e restituisce al client il risultato
+\end{enumerate}
+La connessione remota è trasparente rispetto a client e server, prevede meccanismi di affidabilità a livello sottostante.
+\paragraph{Funzionamento} Il programmatore non si preoccupa di sviluppare i protocolli per lo scambio di dati, la verifica, la codifica e decodifica. Le \textbf{operazioni} sono \textbf{interamente gestite dal supporto} tramite \textbf{stub}/proxy presenti sul client.
+\subparagraph{Marshalling} Preparazione e impacchettamento dell'informazione per la trasmissione. Ad esempio, traduce formati non portabili in formati portabili o canonici. Viene spesso \textbf{implementato con stub generati automaticamente}: il programmatore si limita a sviluppare l'interfaccia per la RPC e lo stub generator prende la definizione dell'interfaccia e crea gli stub per il server e il client.\\
+Gli stub si occupano di fare il marshalling/unmarshalling dei parametri, oltre che della comunicazione e dell'invocazione delle procedure. Questo è possibile perché queste azioni sono facilmente definibile dati i parametri e l'identità della procedura.
+\paragraph{Limiti della RPC} La programmazione è essenzialmente procedurale, inoltra la locazione del server non è trasparente (il client deve conoscere IP e porta del server). Quindi vengono proposte diverse tecnologie per superarli, tra cui l'RMI.
+\paragraph{RMI} Permette di usare veri e propri \textbf{oggetti remoti} come se fossero oggetti come tutti gli altri, senza preoccuparsi della realizzazione di protocolli, connessione ecc\ldots\\
+Il loro utilizzo è largamente trasparente: una volta che viene localizzato si possono usare i metodi dell'oggetto come se fosse un oggetto locale. La codifica, decodifica, verifica e trasmissione dei dati sono effettuati dal supporto RMI in maniera trasparente.
+\subparagraph{Problemi da gestire} Il client deve in qualche modo trovare il riferimento all'oggetto remoto, e l'oggetto remoto deve esplicitamente rendere i suoi servizi invocabili e rendersi reperibile.
+\paragraph{Funzionamento} RMI permette di costruire riferimento remoti.\\
+Due \textbf{proxy}: \begin{list}{}{}
+	\item Proxy locale: \textbf{stub} nel client, su cui vengono fatte le invocazioni destinate all'oggetto remoto
+	\item Entità remota: \textbf{skeleton} nel server, che riceve le invocazioni fatte sullo stub e le realizza effettuando le corrispondenti chiamate sul server.
+\end{list}
+\textbf{Pattern proxy}: questi componenti nascondono al livello applicativo la natura distribuita dell'applicazione. Non è possibile riferire direttamente l'oggetto remoto, si una una \textbf{variabile d'interfaccia} per contenere il riferimento al proxy, che permette di controllare e preparare il passaggio da client a server.
+\paragraph{Remote Reference Layer} RRL, responsabile della gestione dei riferimenti agli oggetti remoti, dei parametri e delle astrazioni stream-oriented connection.
+\paragraph{Registry} Servizio di naming che agisce da "pagine gialle":
+\begin{list}{}{}
+	\item Registra i nomi e i riferimenti agli oggetti i cui metodi possono essere invocati da remoto
+	\item Gli oggetti devono essere registrati (\textbf{bind}) con un nome pubblico
+	\item I client possono richiedere (\textbf{lookup}) gli oggetti chiedendone un riferimento a partire dal nome pubblico
+\end{list}
+\paragraph{Operazioni} Le principali operazioni necessarie rispetto all'uso di un oggetto locale sono:
+\begin{list}{}{}
+	\item Server deve \textbf{esportare} gli oggetti remoti e registrarli tramite la \textbf{bind}
+	\item Client deve \textbf{individuare} un riferimento all'oggetto remoto, cercandoli tramite la \textbf{lookup} nel registry
+	\item Il client invoca il servizio mediante le chiamate di metodi che sono gli stessi delle invocazioni dei metodi locali.
+	\item \textbf{Livello logico} identico all'invocazione di metodi locali
+	\item \textbf{Livello di supporto}: gestita dall'RMI che provvede a trasformare i parametri della chiamata remota in dati da spedire in rete. Il network support provvede all'invio vero e proprio.
+\end{list}
+\paragraph{Considerazioni pratiche}
+\begin{list}{}{}
+	\item Separazione tra definizione del comportamento (\textbf{interfaccia}) e sua implementazione (\textbf{classe})
+	\item Componenti remoti riferiti tramite variabili d'interfaccia.
+	\item Le interfacce devono estendere \texttt{java.rmi.Remote} ed ogni metodo deve propagare \texttt{java.rmi.RemoteException}.
+	\item Le classi devono implementare l'interfaccia definita ed estendere \texttt{java.rmi.UnicastRemoteObject}.
+\end{list}
+\paragraph{Interfaccia} L'interfaccia è remota solo se estende \texttt{java.rmi.Remote}.
+\texttt{Remote} non definisce metodi ma identifica gli oggetti che possono essere usati in remoto.
 \end{document}
