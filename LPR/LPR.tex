@@ -206,6 +206,17 @@ Due \textbf{proxy}: \begin{list}{}{}
 	Ciò non significa applicazioni stateless: l'idea è di evitare transazioni di lunga durata nelle applicazioni. Lo \textbf{stato della risorsa è gestito sul server}, è lo stesso per ogni client quindi se uno lo cambia gli altri devono vedere il cambio. Lo \textbf{stato del client è gestito sul client}, specifico per ognuno e potrebbe avere effetto sulle richieste mandate al server ma non sulle risorse stesse.\\
 	Ad esempio è il client a comunicare che mi trovo in una data directory o che ho visualizzato la figura n. 3.
 \end{list}
+\subsection{Interfaccia Uniforme}
+\paragraph{POST} Consente di creare risorse \textbf{suboordinate} ad una esistente, in pratica una append. Spesso il server risponde con \texttt{201 Created}, e nell'header \texttt{Location} è indicato l'URI della risorsa creata utilizzabile per future \texttt{GET}, \texttt{PUT} e \texttt{DELETE}.\\
+Utilizzato quando il server decide l'URI.\\
+Operazione di lettura e scrittura, può modificare lo stato della risorsa e provocare effetti collaterali sul server.
+\paragraph{GET} Operazione di sola lettura, quindi \textbf{idempotente} (può essere ripetuta senza generare effetti sullo stato della risorsa, ma ciò non significa che restituisca ogni volta la stessa rappresentazione).
+\paragraph{PUT} Usato per aggiungere una risorsa quando il client decide l'URI.
+\paragraph{Idempotente} Un metodo HTTP idempotante genera sul server lo stesso effetto quando applicato 1 o \textit{n} volte. Cioè la seconda richiesta e tutte le successive lasciano lo stato della risorsa nello stesso stato in cui lo ha lasciato la prima richiesta.\\
+Le richieste idempotenti possono essere processate molte volte senza effetti collaterali.\\
+\texttt{GET}, \texttt{PUT}, \texttt{DELETE}.
+\paragraph{Safe} Un metodo HTTP safe non genera effetti collaterali sul server, e possono essere ripetuti \textit{n} volte senza effetti collaterali \textbf{evidenti} (quindi a meno di contatori di accesso, log ecc\ldots)\\
+\texttt{GET}, \texttt{HEAD}
 \section{URI}
 \paragraph{URI} Essenziali per implementare la resource identification. Gli URI sono identificatori \textbf{universali} per le cose, generalmente leggibili dagli umani. Struttura:\begin{center}
 \texttt{<scheme>://<authority><path>?<query>\#<fragment>}
