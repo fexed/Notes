@@ -114,6 +114,34 @@ Sono simili agli stream, ma \textbf{bidirezionali}, con \textbf{scattered read} 
 	\item \texttt{ServerSocketChannel}: attende richieste di connessioni \texttt{TCP} e crea un \texttt{SocketChannel} per ogni connessione creata
 \end{list}
 Sono \textbf{bidirezionali}. Tutti i dati sono gestiti tramite oggetti di tipo \texttt{Buffer}, quindi senza leggere/scrivere direttamente sul canale. Inoltre possono essere \textbf{bloccanti o meno}, non bloccati utili soprattutto per le comunicazioni in cui i dati arrivano in modo incrementale come i collegamenti di rete.
+\section{Network}
+\paragraph{Applicazione di rete} In un'applicazione di rete due o più processi (\textbf{non thread}) in \textbf{esecuzione su host diversi} comunicano e cooperano per realizzare una funzionalità globale.
+\subparagraph{Cooperazione} Scambio di informazioni utile per perseguire l'obiettivo globale (implica la comunicazione)
+\subparagraph{Comunicazione} Utilizza protocolli (insieme di regole da seguire per comunicare correttamente).\\\textbf{Connection-Oriented} oppure \textbf{Connectionless}.
+\paragraph{Socket} Uno standard per connettere dispositivi distribuiti, diversi ed eterogenei. È un modo per standardizzare la comunicazione: una "presa" a cui un processo può collegarsi per spedire dati.\\
+Viene creato su richiesta dell'applicazione e controllato dal S.O.. Sono associati ad una porta locale, ed un processo applicativo può spedire/ricevere messaggi a/da un altro processo applicativo mediante il proprio socket.
+\paragraph{Comunicazione connection-oriented} Come una chiamata telefonica.\\
+Viene creata una \textbf{connessione logica end-to-end} tra mittente e destinatario. Si comunica in tre fasi: apertura della connessione, invio dei dati e chiusura.\\
+Indirizzo del destinatario specificato all'apertura della connessione.\\
+Ordinamento dei messaggi garantito dal protocollo di trasporto\\
+Trasmissione affidabile.
+\paragraph{Comunicazione connectionless} Come una lettera.\\
+Non viene stabilito un canale di comunicazione logico dedicato. Ogni messaggio viene instradato indipendentemente dagli altri (\textbf{one-way message}).\\
+Indirizzo del destinatario specificato per ogni pacchetto.\\
+Nessuna garanzia sull'ordinamento dei messaggi.\\
+Poiché si inviano pochi dati, non è necessario che l'invio sia affidabile.
+\subsection{Multicast}
+Un indirizzo IP multicast si basa sul concetto di gruppo: tutti i membri di un gruppo multicast ricevono i messaggi spediti su quel gruppo, ma non occorre essere membri del gruppo per spedire i messaggi.\\
+Primitive per: unirsi/lasciare il gruppo, spedire/riceve i messaggi. Il supporto deve fornire anche uno schema di indirizzamento, per identificare univocamente il gruppo, oltre ad un meccanismo che registri gli appartenenti al gruppo e che ottimizzi l'uso della rete nel caso di pacchetti multicast.
+\paragraph{Indirizzi} Si riserva un certo insieme di indirizzi IP per il multicast: in IPv6 tutti quelli che iniziano per \texttt{FF}, in IPv4 quelli di classe D (\texttt{224.0.0.0} -- \texttt{239.255.255.255})
+\paragraph{Addressing} Come scegliere un indirizzo multicast? Deve essere noto collettivamente a tutti i partecipanti del gruppo, e su internet è una procedura complessa con tanti casi da tenere conto. Possono essere
+\begin{list}{}{}
+	\item \textbf{Statici} se assegnati da un'autorità. Usati da particolari protocolli e applicazioni: indirizzo rimane assegnato a quel gruppo anche se in un dato istante non ha partecipanti.
+	\item \textbf{Dinamici} se si usano protocolli particolari che consentono di evitare doppioni: esistono solo fintanto che c'è almeno un partecipante e richiedono un protocollo per l'assegnazione.\\
+	Protocolli: \texttt{MADCAP} per una sottorete, \texttt{MASC} per reti generiche.
+\end{list}
+\paragraph{Scoping} Come limitare la diffusione del pacchetto? \texttt{TTL} oppure \textbf{administrative scoping}: a seconda dell'indirizzo multicast scelto, la diffusione è limitata ad una parte della rete i cui confini sono definiti da un amministratore di rete.
+\subparagraph{TTL} Poco usato, il valore è tra 0 -- 255 e indica il numero massimo di router attraversabili
 \section{Serializzazione}
 \paragraph{Oggetti} Caratterizzati da stato (vive con l'istanza) e comportamento (specificato dalla classe).
 \paragraph{Serialization} Scrittura e lettura di oggetti. Si basa sulla possibilità di scrivere lo stato di un oggetto in una forma sequenziale, sufficiente per ricostrutire l'oggetto quando viene riletto.\\
