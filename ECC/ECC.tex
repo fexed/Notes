@@ -93,5 +93,55 @@ Una computazione è una transizione $(q, x) \longrightarrow (q', \omega)$. Una m
 Ogni computazione può esprimere il numero di passi necessari, ad esempio $\gamma \longrightarrow^n \gamma'$.\\
 $\forall \:\:computazione\:\: \gamma \Rightarrow \gamma \longrightarrow^0 \gamma$. Inoltre se $\gamma \longrightarrow \gamma' \wedge \gamma' \longrightarrow^n \gamma''$ allora $\gamma \longrightarrow^{n+1} \gamma''$
 
+\pagebreak
+
+\paragraph{Esempio} Macchina di Turing che esegue la semplice somma di due semplici numeri romani.
+\begin{multicols}{2}
+\begin{center}
+	\begin{tabular}{c | c | c}
+		$q$ & $\sigma$ & $\delta(q, \sigma)$\\
+		\hline
+		$q_0$ & $\triangleright$ & $(q_0, \triangleright, R)$ \\
+		$q_0$ & I & $(q_0, I, R)$ \\
+		$q_0$ & $+$ & $(q_1, I, R)$ \\
+		\hline
+		$q_1$ & I & $(q_1, I, R)$ \\
+		$q_1$ & \# & $(q_2, \#, L)$ \\
+		\hline
+		$q_2$ & I & $(h, \#, -)$ \\
+	\end{tabular}
+\end{center}
+\columnbreak
+$(q_0, \underline{\triangleright}II+III) \longrightarrow (q_0, \triangleright \underline{I}I+III) \longrightarrow (q_0, \triangleright I \underline{I}+III) \longrightarrow (q_0, \triangleright II \:\underline{+}\: III) \longrightarrow (q_1, \triangleright III\underline{I}II) \longrightarrow (q_1, \triangleright IIII \underline{I}I) \longrightarrow (q_1, \triangleright IIIII\underline{I}) \longrightarrow (q_1, \triangleright IIIIII\underline{\#}) \longrightarrow (q_2, \triangleright IIIII\underline{I}) \longrightarrow (h, \triangleright IIIII)$
+\end{multicols}
+
+\paragraph{Esempio} Macchina di Turing che verifica se una stringa di lettere $a, b$ è palindroma o no.
+\begin{multicols}{2}
+\begin{center}
+	\begin{tabular}{c | c | c}
+		$q$ & $\sigma$ & $\delta(q, \sigma)$\\
+		\hline
+		$q_0$ & $\triangleright$ & $(q_0, \triangleright, R)$ \\
+		$q_0$ & $a$ & $(q_A, \triangleright, R)$ \\
+		$q_0$ & $b$ & $(q_B, \triangleright, R)$ \\
+		$q_0$ & $\#$ & $(h, \#, -)$ \\
+		\hline
+		$q_A$ & $a/b$ & $(q_A, a/b, R)$ \\
+		$q_A$ & \# & $(q_{A'}, \#, L)$ \\
+		\hline
+		$q_{A'}$ & $a$ & $(q_R, \#, L)$ \\
+		\hline
+		$q_B$ & $a/b$ & $(q_B, a/b, R)$ \\
+		$q_B$ & \# & $(q_{B'}, \#, L)$ \\
+		\hline
+		$q_{B'}$ & $a$ & $(q_R, \#, L)$ \\
+		\hline
+		$q_R$ & $a/b$ & $(q_R, a/b, R)$ \\
+		$q_R$ & $\triangleright$ & $(q_0, \triangleright, R)$ \\
+	\end{tabular}
+\end{center}
+\columnbreak
+$(q_0, \underline{\triangleright}abba) \longrightarrow (q_0, \triangleright \underline{a}bba) \longrightarrow (q_A, \triangleright\triangleright \underline{b}ba) \longrightarrow \\ (q_A, \triangleright \triangleright b\underline{b}a) \longrightarrow (q_A, \triangleright \triangleright bb\underline{a}) \longrightarrow (q_A, \triangleright  \triangleright bba\underline{\#}) \longrightarrow \\ (q_{A'}, \triangleright \triangleright bb\underline{a}) \longrightarrow (q_R, \triangleright \triangleright b\underline{b}) \longrightarrow (q_R, \triangleright \triangleright \underline{b}b) \longrightarrow (q_R, \triangleright \underline{\triangleright} bb) \\ \longrightarrow (q_0, \triangleright \triangleright \underline{b}b) \longrightarrow (q_B, \triangleright \triangleright \triangleright \underline{b}) \longrightarrow (q_B, \triangleright \triangleright \triangleright b\underline{\#}) \longrightarrow \\ (q_{B'}, \triangleright \triangleright \triangleright \underline{b}) \longrightarrow (q_R, \triangleright \triangleright \underline{\triangleright})  \longrightarrow (h, \triangleright \triangleright \triangleright)$
+\end{multicols}
 
 \end{document}
