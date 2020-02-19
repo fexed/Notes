@@ -19,5 +19,50 @@
 \tableofcontents
 \pagebreak
 \section*{Introduzione}
-
+Prof.: Luca Gemignani
+\paragraph{Calcolo Numerico} Metodi numerici per risolvere problemi matematici con il calcolatore. In questo corso ce ne occuperemo dal punto di vista numerico, perché metodi di risoluzione diversi performano in maniera diversa sulla macchina. Cerchiamo di capire quali sono i metodi di interesse e cosa aspettarci dalla loro implementazione.\\
+Il \textbf{metodi numerici approssimano la soluzione di problemi matematici}.\\
+Inoltre, il computer \textbf{impatta} sul calcolo perché lavora con approssimazioni dei numeri, che su moli elevate di dati e di elaborazioni finiscono per perturbare il risultato ottenuto.
+\paragraph{Tipici problemi} $$Ax = b$$ $$Ax = \lambda x$$ $$f(x) = 0$$ $$\int_a^bf(x) dx$$
+\paragraph{Matlab} Matrix Laboratory, strumento di implementazione per verificare e constatare i risultati teorici.
+\paragraph{Informazioni d'esame} Compitini, che se complessivamente passati rendono l'orale facoltativo. In alternativa, appelli scritti + orale.
+\pagebreak
+\chapter{Aritmetica di macchina}
+Modello per capire cosa aspettarci dal punto di vista degli errori dell'esecuzione.
+\paragraph{Esempio} Per calcolare il limite $$\lim_{x\to\infty} \sqrt{x + 1} - \sqrt{x}$$ ottengo un caso indeterminato ($\infty - \infty$). Posso semplificare l'espressione ad esempio razionalizzando, e con pochi passaggi ottengo la seguente uguaglianza $$\sqrt{x + 1} - \sqrt{x} = \frac{1}{\sqrt{x + 1} + \sqrt{x}}$$ Quindi dal punto di vista matematico, le due espressioni sono equivalenti. Ciò \textbf{non è sempre vero per la rappresentazione ed il calcolo in macchina}: le due espressioni forniranno risultati completamente diversi. Si rende \textbf{necessario}, quindi, \textbf{capire quale metodo si comporta meglio} rispetto agli altri.
+\section{Rappresentazione in base dei numeri in maniera univoca}
+\paragraph{Rappresentare i numeri} Siamo comunemente abituati a rappresentare un numero in diverse forme.\\
+Ad esempio, $0.1 = \frac{1}{10} = 10 \cdot 0.01$. In generale, per ogni numero ho diversi metodi di rappresentazione $\Rightarrow$ In macchina dobbiamo poter \textbf{rappresentare i numeri in maniera univoca}.
+\paragraph{Base di numerazione} $B \in N, B > 1$, poiché in base 1 non si può contare.\\Una base $B$ ha cifre nell'insieme $\{0, 1, \ldots, B - 1\}$
+\paragraph{Teorema} Dato $x \in R$, con $x \neq 0$\\$\exists!\:\:(\{d_i\}_{i \geq 1}$ con $d_1 \neq 0$ e $d_i$ non definitivamente uguali a $B - 1) \wedge (p \in Z) \:\:\vline\:\: x = segno(x)\:\cdot\:B^p\:\cdot\:\sum_{i=1}^\infty d_i \cdot B^{-i}$
+\begin{list}{}{Considerazioni}
+	\item Se $x \in C$ allora viene rappresentato come coppia di numeri reali, quindi il problema si riconduce sempre alla loro rappresentazione
+	\item Lo $0$ viene rappresentato in modo speciale, poiché non esiste una sua rappresentazione normalizzata
+	\item ${d_i}_{i \geq 1}$ è una \textbf{successione} di cifre
+	\item La rappresentazione è \textbf{normalizzata} se $d_1 \neq 0$, cioè se la prima cifra è diversa da 0
+	\item Non può avere tutte cifre uguali a $B-1$ da un certo punto in poi, la rappresentazione "collassa" al numero successivo
+	\item $p$ è detto \textbf{esponente}
+	\item $\sum_{i=1}^\infty d_i \cdot B^{-i}$ è detta \textbf{mantissa}
+	\item Questa rappresentazione si chiama \textbf{in virgola mobile} o \textbf{floating point}
+\end{list}
+\pagebreak
+\paragraph{Esempi} Ponendo $B = 10$
+\begin{list}{}{}
+	\item $x = 0.01 \Rightarrow x = +10^{-1}\cdot(0.1)$
+	\item $x = 1.35 \Rightarrow x = +10^1\cdot(0.135)$
+	\item $x = 0.0023 \Rightarrow x = +10^{-2}\cdot(0.23)$
+\end{list}
+\paragraph{Computer} Nei computer ho \textbf{registri di lunghezza finita}, quindi essi vengono partizionati: una parte viene riservata alla rappresentazione dell'\textbf{esponente} e il resto alla rappresentazione della \textbf{mantissa}. L'insieme dei numeri di macchina F è quindi così definito
+$$F(B, t, m, M) = \{\pm B^p \cdot \sum_{i=1}^t d_i \cdot b^{-i}\:\:\vline\:\: d_1 \neq 0 \wedge -m \leq p \leq M\} \cup \{0\}$$
+\begin{list}{}{dove}
+	\item $t$ sono le \textbf{cifre della mantissa}
+	\item L'esponente p è compreso tra i valori $-m$ e $M$
+	\item Lo 0 è incluso ma rappresentato a parte
+\end{list}
+\paragraph{Esempio} Ipotizzando di usare registri da 32 bit, posso stanziare 8 bit per l'esponente $p$ (quindi 1 bit per il segno e 7 bit per il valore) e i restanti 24 bit per la mantissa (1 per il segno, 23 per il valore). Quanti numeri posso rappresentare?
+\begin{list}{}{}
+	\item $p$ di 7 bit $\Rightarrow 2^7 - 1 = 127 \Rightarrow -127 \leq p \leq 127$ ma lo 0 è rappresentato due volte
+	\item $x = \pm2^p \sum_{i=1}^23 d_i \cdot 2^{-1}$, con $d_i \in \{0, 1\}$, $d_1 \neq 0 \Rightarrow d_1 = 1$ sempre
+\end{list}
+Vedremo che con una serie di accorgimenti è possibile aumentare i numeri esattamente rappresentabili.
 \end{document}
