@@ -5,7 +5,13 @@
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{tikz}
+\usepackage{color}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
+\lstset{
+	language=Matlab,
+	commentstyle=\color{mygray}
+}
 \usepackage{graphicx}
 \usepackage{makecell}
 \graphicspath{ {./img/} }
@@ -97,5 +103,26 @@ Nel secondo caso abbiamo quattro tecniche di approssimazione:
 	\item \textit{Round toward $-\infty$}: $x$ approssimato al più grande numero rappresentabile minore del dato
 \end{enumerate}
 Per semplicità considereremo una macchina che opera per troncamento sull'insieme $F(B, t, m, M)$.\\
-Indicheremo con $trn(x) = \overline{x}$ il risultato dell'approssimazione di $x$ con troncamento e più in generale $fl(x)$ l'\textbf{approssimazione in macchina del dato $x$} nel sistema floating point cosiderato.
+Indicheremo con $trn(x) = \overline{x}$ il risultato dell'approssimazione di $x$ con troncamento e più in generale $fl(x)$ l'\textbf{approssimazione in macchina del dato $x$} nel sistema floating point considerato.
+\paragraph{Teorema} Sia $x \in R$ con $\omega \leq |x| \leq \Omega$. Si ha $$|\epsilon_x| = |\frac{trn(x) - x}{x}| \leq u = B^{1-t}$$
+Si osserva che:
+\begin{list}{}{}
+	\item $u = B^{1-t}$ è detta \textbf{precisione di macchina} ed è \textbf{indipendente dalla grandezza del numero}, ma è caratteristica dell'aritmetica floating point, dell'insieme dei numeri rappresentabili e dalla tecnica di approssimazione. Se ad esempio si opera con arrotondamento, $u$ si dimezza.
+	\item Per valutare la precisione di macchina possiamo determinare il più piccolo numero di macchina maggiore di 1. Dato $x$ tale numero, abbiamo $x - 1 = |x - 1| = B^{1-t}$ essendo $1 = B^1 \cdot B^{-1}$ rappresentato con esponente $p = 1$. Il seguente script MatLab fornisce il valore richiesto:
+	\begin{lstlisting}
+		eps = 0.5;
+		eps1 = eps + 1;
+		while(eps > 1)
+			eps = 0.5 * eps;
+			eps1 = eps + 1;
+		end
+		eps = 2 * eps;
+	\end{lstlisting}
+	\item Dal teorema si ricava che dato $x \in R$, in assenza di overflow/underflow, vale $fl(x) = x(1 + \epsilon_x)$ con $|\epsilon_x| \leq u$.\\
+	Questa relazione esprime il modo in cui viene descritto generalmente il legame tra numero reale e sua rappresentazione in macchina.
+\end{list}
+\subsection{Operazioni di Macchina}
+Per le \textbf{operazioni aritmetiche} in un sistema floating point si pone un analogo problema di approssimazione, in quanto \textbf{il risultato di un'operazione eseguita tra due numeri di macchina in generale non sarà un numero di macchina}.
+\paragraph{Operazioni} Indichiamo con $\oplus$, $\ominus$, $\otimes$, $\oslash$ le \textbf{operazioni aritmetiche di macchina} corrispondenti relativamente all'addizione, sottrazione, prodotto e divisione. Si richiede che le operazioni siano interne all'insieme dei numeri di macchina. Una ragionevole definizione, derivata dal teorema precedente e in assenza di overflow/underflow, risulta: $$\forall a, b \in F(B, t, m, M), a \oplus b = fl(a + b) = (a + b)(1 + \epsilon_1), |\epsilon_1| \leq u$$ con $\epsilon_1$ detto  \textbf{errore locale dell'operazione}. Sempre in assenza di overflow/underflow, se $a, b \in R$ si ha $$fl(a + b) = fl(a)\oplus fl(b) = (a(1 + \epsilon_a) + b(1 + \epsilon_b))(1 + \epsilon_1) \doteq (a + b) + a\epsilon_a + b\epsilon_b + (a + b)\epsilon_1$$ dove con $\doteq$ si indica che l'eguaglianza vale \textbf{considerando le sole componenti lineari negli errori} e trascurando le componenti di ordine superiore (\textbf{analisi al primo ordine dell'errore}), in virtù del fatto che gli $\epsilon$ sono quantità piccole $0 < \epsilon < 1$, quindi trascurabili negli ordini superiori al primo.\\
+Si ottiene che, in assenza di overflow/underflow, se $a, b \in R, a + b \neq 0$, allora $$\frac{fl(a + b) - (a + b)}{a + b} \doteq \frac{a}{a + b}\epsilon_a + \frac{b}{a + b}\epsilon_b + \epsilon_1$$ che esprime la dipendenza dell'errore totale commesso nel calcolo della somma tra due numeri reali rispetto agli errori generati dall'approssimazione dei dati iniziali (\textbf{errore inerente}) e agli errori generati dall'algoritmo di calcolo (\textbf{errore algoritmico}) visto come sequenza di operazioni artimetiche.
 \end{document}
