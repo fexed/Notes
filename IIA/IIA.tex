@@ -94,18 +94,171 @@ Serve quindi una \textbf{misura di prestazione}, di \textit{come vogliamo che il
 \paragraph{Definizione} Un \textbf{agente razionale}, quindi, \textbf{esegue l'azione che massimizza il valore atteso della misura delle prestazioni per ogni sequenza di percezioni}, considerando le sue percezioni passate e la sua conoscenza pregressa.\\
 Non si pretende perfezione e conoscenza del futuro, ma massimizzare il risultato \textit{atteso}. Potrebbero essere necessarie azioni di acquisizione di informazioni o esplorative (\textbf{non onniscenza}).\\
 Le capacità dell'agente possono essere limitate (\textbf{non onnipotenza}).
-%https://elearning.di.unipi.it/pluginfile.php/30315/mod_resource/content/0/2-2020-agents.pdf, 22 da fare raz e apprendimento
-\paragraph{Agenti autonomi} nella misura in cui il suo comportamento dipende dalla sua esperienza
-\paragraph{PEAS} Prestazioni, Environment, Attuatori, Sensori.
-\paragraph{Esempio guidatore di taxi} \ldots
-\paragraph{Proprietà Ambiente-Problema} Completamenteo/parzialmente osservabile, agente/multi agente, deterministico/stocastico, episodico/sequenziale, statico/dinamico, discreto/continuo, noto/ignoto
-\paragraph{Simulatore di ambienti}
-\paragraph{Proprietà degli ambienti}
-\paragraph{Strutture di agenti caratteristici}
-\paragraph{Architettura} Architettura, un corpo e il \textbf{programma}. Ag: P $\longrightarrow$ ...
-\paragraph{Agente reattivo semplice} Programma contiene le condizioni azioni. in base a stato interno e regola fornisce la regola da prendere e con la sua azione agisco.
-\paragraph{Agenti con obiettivo}
+\paragraph{Razionalità e apprendimento} Raramente il programmatore può fornire a priori tutta la conoscenza sull'ambiente. L'agente razionale, quindi, \textbf{deve essere in grado di modificare il proprio comportamento con l'esperienza}, cioè con le percezioni passate.\\
+Può migliorarsi esplorando, \textbf{apprendendo}, aumentando la propria autonomia per operare in ambienti differenti o mutevoli.
+\subsection{Agenti Autonomi} Un agente è \textbf{autonomo quando il suo comportamento dipende dalla sua esperienza}. Se il suo comportamento fosse determinato solo dalla propria conoscenza \textit{built-int} allora sarebbe \textbf{non autonomo} e poco flessibile.
+\pagebreak
+\section{Ambienti}
+Definire un problema per un agente significa \textbf{caratterizzare l'ambiente in cui lavora}, cioè l'\textbf{ambiente operativo}. L'agente razionale è la soluzione del problema.
+\subsection{PEAS}
+\begin{list}{}{}
+	\item \textbf{Performance}, prestazioni
+	\item \textbf{Environment}, ambiente
+	\item \textbf{Actuators}, attuatori
+	\item \textbf{Sensors}, sensori
+\end{list}
+\paragraph{Esempio} Autista di taxi
+\begin{center}
+	\begin{tabular}{p{4cm} | p{4cm} | p{4cm} | p{4cm}}
+		\textbf{Prestazione} & \textbf{Ambiente} & \textbf{Attuatori} & \textbf{Sensori} \\
+		\hline
+		Arrivare alla destinazione, sicuro, veloce, ligio alla legge, confortevole, consumo minimo di benzina, profitti massimi & Strada, altri veicoli, clienti & Sterzo, acceleratore, freni, frecce, clacson & Telecamere, sensori, GPS, contachilometri, accelerometro, sensori del motore\ldots
+	\end{tabular}
+\end{center}
+\paragraph{Formulazione PEAS dei problemi}
+\begin{center}
+	\begin{tabular}{p{3cm} | p{3cm} | p{3cm} | p{3cm} | p{3cm}}
+		\textbf{Problema} & \textbf{P} & \textbf{E} & \textbf{A} & \textbf{S} \\
+		\hline
+		Diagnosi medica & Diagnosi corretta & Pazienti, ospedale & Domande, suggerimenti, test, diagnosi & Sintomi, test clinici, risposte del paziente \\
+		\hline
+		Analisi immagini & Numero di immagini/zone correttamente classificate & Collezione di fotografie & Etichettatore di zone nell'immagine & Array di pixel \\
+		\hline
+		Robot "selezionatore" & Numero delle parti correttamente classificate & Nastro trasportatore & Raccogliere le parti e metterle nei cestini & Telecamera (pixel di varia intensità) \\
+		\hline
+		Giocatore di calcio & Fare più goal dell'avversario & Altri giocatore, campo di calcio, porte & Dare calci al pallone, correre & Locazione del pallone, dei giocatori e delle porte
+	\end{tabular}
+\end{center}
+\subsection{Proprietà dell'Ambiente-Problema}
+\begin{list}{-}{}
+	\item \textbf{Osservabilità}\\\textbf{Completamente osservabile}: l'apparato percettivo è in grado di dare una conoscenza completa dell'ambiente o almeno tutto quello che serve a decidere l'azione.\\
+	\textbf{Parzialmente osservabile}: sono presenti limiti o inaccuratezze nell'apparato sensoriale. (Es. la videocamera di un rover vede solo parte dell'ambiente in un dato istante).
+	\item \textbf{Singolo/Multi-Agente}\\
+	Distinzione tra agente e non agente: il mondo può cambiare anche attraverso \textbf{eventi}, non necessariamente per le azioni di agenti.\\
+	\textbf{Multi-Agente Competitivo}, come gli scacchi: comportamento randomizzato ma razionale.\\
+	\textbf{Multi-Agente Cooperativo}, o benigno: stesso obiettivo e comunicazione.
+	\item \textbf{Predicibilità}\\
+	\textbf{Deterministico}: lo stato successivo è completamente determinato dallo stato corrente e dall'azione.\\
+	\textbf{Stocastico}: esistono elementi di incertezza con probabilità associata. Es: guida, tiro in porta.\\
+	\textbf{Non deterministico}: si tiene traccia di più stati possibili che sono risultato dell'azione, ma non in base ad una probabilità.
+	\item \textbf{Episodico}: l'esperienza dell'agente è divisa in episodi atomici indipendenti. In ambienti episodici non c'è bisogno di pianificare.\\
+	\textbf{Sequenziale}: ogni decisione influenza le succesive.
+	\pagebreak
+	\item \textbf{Statico}: il mondo non cambia mentre l'agente decide l'azione.\\
+	\textbf{Dinamico}: l'ambiente cambia nel tempo, va osservata la contingenza. Tardare equivale a non agire.\\
+	\textbf{Semi-dinamico}: l'ambiente non cambia ma la valutazione dell'agente si. Es: scacchi con timer, se non agisco prima dello scadere perdo.
+	\item \textbf{Discreto/Continuo}\\
+	Lo stato, il tempo, le percezioni e le azioni sono tutti elementi che possono assumere valori discreti o continui.\\
+	Combinatoriale (nel discreto) \textit{vs} infinito (nel continuo).
+	\item \textbf{Noto/Ignoto}\\
+	Distinzione riferita allo stato di conoscenza dell'agente sulle leggi fisiche dell'ambiente. L'\textbf{agente conosce l'ambiente o deve compiere azioni esplorative}?\\
+	\textbf{Noto $\neq$ osservabile}: posso giocare a carte coperte, ma con regole note.
+\end{list}
+\paragraph{Ambienti reali} Parzialmente osservabili, stocastici, sequenziali, dinamici, continui, multi-agente e ignoti.
+\subsection{Simulatore di Ambienti}
+Uno \textbf{strumento software} con il compito di:
+\begin{list}{}{}
+	\item Generare gli stimoli per gli agenti
+	\item Raccogliere le azioni in risposta
+	\item Aggiornare lo stato dell'ambiente
+	\item Opzionalmente, attivare altri processi che influenzano l'ambiente
+	\item Valutare le prestazioni degli agenti
+\end{list}
+Gli esperimenti su classi di ambienti (variando le condizioni) sono essenziali per valutare la capacità di generalizzare. La valutazione delle prestazioni è fatta tramite la media su più istanze.
+\section{Struttura di un Agente}
+\begin{center}
+\textbf{Agente $=$ Architettura $+$ Programma}\\
+Ag: P $\longrightarrow$ Az
+\end{center}
+L'\textbf{Ag}ente associa \textbf{Az}ioni alle \textbf{P}ercezioni. Il \textbf{programma dell'agente} implementa la funzione \textbf{Ag}.
+\paragraph{Programma Agente} Pseudocodice del programma agente.
+\begin{center}
+\begin{lstlisting}
+function Skeleton-Agent(percept) returns action
+	static: memory #la memoria del mondo posseduta dall'agente
+	memory <- UpdateMemory(memory, percept)
+	action <- Choose-Best-Action(memory) #Cuore dell'IA
+	memory <- UpdateMemory(memory, action)
+	return action
+\end{lstlisting}
+\end{center}
+\subsection{Strutture di Agenti Caratteristici}
+\paragraph{Agente basato su tabella} La scelta dell'azione è un accesso ad una tabella che \textbf{associa un'azione ad ogni possibile sequenza di percezioni}.\\
+Vari \textbf{problemi}:
+\begin{list}{}{}
+	\item Le \textbf{dimensioni} possono essere proibitive: per giocare a scacchi, la tabella dovrebbe contenere un numero di righe nell'ordine di $10^{120} >> 10^{80}$ numero di atomi nell'universo osservabile.
+	\item \textbf{Difficile da costruire}
+	\item \textbf{Nessuna autonomia}
+	\item \textbf{Difficile da aggiornare}, apprendimento complesso.
+\end{list}
+Con le IA vogliamo realizzare \textbf{automi razionali con un programma \textit{compatto}}.
+\pagebreak
+\paragraph{Agente Reattivo Semplice}
+\begin{center}
+	\includegraphics[scale=0.5]{agreattsemplice.png}
+\end{center}
+\begin{lstlisting}
+function Agente-Reattivo-Semplice(percezione) returns azione
+	persistent: regole #insieme di regole condizione-azione (if-then)
+	stato <- Interpreta-Input(percezione)
+	regola <- Regola-Corrispondente(stato, regole)
+	azione <- regola.Azione
+	return azione
+\end{lstlisting}
+\paragraph{Agenti basati su modello}
+\begin{center}
+	\includegraphics[scale=0.5]{agmodello.png}
+\end{center}
+\begin{lstlisting}
+function Agente-Basato-su-Modello(percezione) returns azione
+	persistent:	stato #descrizione dello stato corrente
+			modello #conoscenza del mondo
+			regole #insieme di regole condizione-azione
+			azione #azione piu recente
+	stato <- Aggiorna-Stato(stato, azione, percezione, modello)
+	regola <- Regola-Corrispondente(stato, regole)
+	azione <- regola.Azione
+	return azione
+\end{lstlisting}
+\pagebreak
+\paragraph{Agenti con obiettivo} Bisogna pianificare una sequenza di azioni per raggiungere l'obiettivo. (In rosso sono indicate le parti aggiunte)
+\begin{center}
+	\includegraphics[scale=0.5]{agobiettivo.png}
+\end{center}
+Sono \textbf{guidati da un obiettivo nella scelta che intraprendono}, è stato fornito un \textbf{goal esplicito}: per esempio una città da raggiungere.\\
+A volte l'azione migliore dipende dall'obiettivo da raggiungere (\textit{da che parte devo girare?})\\
+Devo \textbf{pianificare una sequenza di azioni} per raggiungere l'obiettivo. Sono meno efficienti ma \textbf{più flessibili} rispetto ad un agente reattivo. L'obiettivo può cambiare, non è codificato nelle regole.\\
+Esempio classico: ricerca della sequenza di azioni per raggiungere una data destinazione.
+\paragraph{Agenti con valutazione di utilità}
+\begin{center}
+	\includegraphics[scale=0.5]{agvalutazutilita.png}
+\end{center}
+\textbf{Obiettivi alternativi}, o più modi per raggiungerlo: l'agente deve decidere verso quali muoversi, quindi è \textbf{necessaria una funzione di utilità} che associa ad uno stato obiettivo un numero reale.\\
+\textbf{Obiettivi più facilmente raggiungibili di altri}: la funzione di utilità \textbf{tiene conto della probabilità di successo} e/o di ciascun risultato (\textbf{utilità attesa} o media)
+\pagebreak
 \paragraph{Agenti che apprendono}
+\begin{center}
+	\includegraphics[scale=0.5]{agappr.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Componente di apprendimento}: produce cambiamenti al programma agente. Migliora le prestazioni, adattando i suoi componenti ed apprendendo dall'ambiente
+	\item \textbf{Elemento esecutivo}: il programma agente
+	\item \textbf{Elemento critico}: osserva e dà feedback sul comportamento
+	\item \textbf{Generatore di problemi}: suggerisce nuove situazioni da esplorare
+\end{list}
+\subsection{Tipi di rappresentazione}
+\paragraph{Stati e transizioni}
+\begin{center}
+	\includegraphics[scale=0.75]{rapprstatitransizioni.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Rappresentazione atomica} (stati)
+	\item \textbf{Rappresntazione fattorizzata} ($+$ variabili e attributi)
+	\item \textbf{Rappresentazione strutturata} ($+$ relazioni)
+\end{list}
+\pagebreak
+%https://elearning.di.unipi.it/pluginfile.php/30330/mod_resource/content/0/3-2020-problem_solving.pdf
+
 \ldots\\
 \ldots\\
 determinare obiettio e formulare il problema è tanta intelligenza, spostata sull'umano in fase di design. Gli algoritmi sono ancora stupidi.\\
