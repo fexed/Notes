@@ -20,7 +20,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Introduzione all'Intelligenza Artificiale: [appunti](https://github.com/fexed/Notes/blob/master/IIA/IIA.pdf)
 
-##### Programmazione d'Interfacce: [appunti](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
+##### Programmazione d'Interfacce: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
 
 ##### Reti di Calcolatori: [appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf). [WordQuizzle (progetto) :white_check_mark:](https://github.com/fexed/WordQuizzle)
 
