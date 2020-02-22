@@ -129,6 +129,17 @@ Definire un problema per un agente significa \textbf{caratterizzare l'ambiente i
 		Giocatore di calcio & Fare più goal dell'avversario & Altri giocatore, campo di calcio, porte & Dare calci al pallone, correre & Locazione del pallone, dei giocatori e delle porte
 	\end{tabular}
 \end{center}
+\subsection{Simulatore di Ambienti}
+Uno \textbf{strumento software} con il compito di:
+\begin{list}{}{}
+	\item Generare gli stimoli per gli agenti
+	\item Raccogliere le azioni in risposta
+	\item Aggiornare lo stato dell'ambiente
+	\item Opzionalmente, attivare altri processi che influenzano l'ambiente
+	\item Valutare le prestazioni degli agenti
+\end{list}
+Gli esperimenti su classi di ambienti (variando le condizioni) sono essenziali per valutare la capacità di generalizzare. La valutazione delle prestazioni è fatta tramite la media su più istanze.
+\pagebreak
 \subsection{Proprietà dell'Ambiente-Problema}
 \begin{list}{-}{}
 	\item \textbf{Osservabilità}\\\textbf{Completamente osservabile}: l'apparato percettivo è in grado di dare una conoscenza completa dell'ambiente o almeno tutto quello che serve a decidere l'azione.\\
@@ -143,7 +154,6 @@ Definire un problema per un agente significa \textbf{caratterizzare l'ambiente i
 	\textbf{Non deterministico}: si tiene traccia di più stati possibili che sono risultato dell'azione, ma non in base ad una probabilità.
 	\item \textbf{Episodico}: l'esperienza dell'agente è divisa in episodi atomici indipendenti. In ambienti episodici non c'è bisogno di pianificare.\\
 	\textbf{Sequenziale}: ogni decisione influenza le succesive.
-	\pagebreak
 	\item \textbf{Statico}: il mondo non cambia mentre l'agente decide l'azione.\\
 	\textbf{Dinamico}: l'ambiente cambia nel tempo, va osservata la contingenza. Tardare equivale a non agire.\\
 	\textbf{Semi-dinamico}: l'ambiente non cambia ma la valutazione dell'agente si. Es: scacchi con timer, se non agisco prima dello scadere perdo.
@@ -155,16 +165,8 @@ Definire un problema per un agente significa \textbf{caratterizzare l'ambiente i
 	\textbf{Noto $\neq$ osservabile}: posso giocare a carte coperte, ma con regole note.
 \end{list}
 \paragraph{Ambienti reali} Parzialmente osservabili, stocastici, sequenziali, dinamici, continui, multi-agente e ignoti.
-\subsection{Simulatore di Ambienti}
-Uno \textbf{strumento software} con il compito di:
-\begin{list}{}{}
-	\item Generare gli stimoli per gli agenti
-	\item Raccogliere le azioni in risposta
-	\item Aggiornare lo stato dell'ambiente
-	\item Opzionalmente, attivare altri processi che influenzano l'ambiente
-	\item Valutare le prestazioni degli agenti
-\end{list}
-Gli esperimenti su classi di ambienti (variando le condizioni) sono essenziali per valutare la capacità di generalizzare. La valutazione delle prestazioni è fatta tramite la media su più istanze.
+\pagebreak
+
 \section{Struttura di un Agente}
 \begin{center}
 \textbf{Agente $=$ Architettura $+$ Programma}\\
@@ -192,7 +194,7 @@ Vari \textbf{problemi}:
 	\item \textbf{Difficile da aggiornare}, apprendimento complesso.
 \end{list}
 Con le IA vogliamo realizzare \textbf{automi razionali con un programma \textit{compatto}}.
-\pagebreak
+
 \paragraph{Agente Reattivo Semplice}
 \begin{center}
 	\includegraphics[scale=0.5]{agreattsemplice.png}
@@ -220,7 +222,6 @@ function Agente-Basato-su-Modello(percezione) returns azione
 	azione <- regola.Azione
 	return azione
 \end{lstlisting}
-\pagebreak
 \paragraph{Agenti con obiettivo} Bisogna pianificare una sequenza di azioni per raggiungere l'obiettivo. (In rosso sono indicate le parti aggiunte)
 \begin{center}
 	\includegraphics[scale=0.5]{agobiettivo.png}
@@ -235,7 +236,6 @@ Esempio classico: ricerca della sequenza di azioni per raggiungere una data dest
 \end{center}
 \textbf{Obiettivi alternativi}, o più modi per raggiungerlo: l'agente deve decidere verso quali muoversi, quindi è \textbf{necessaria una funzione di utilità} che associa ad uno stato obiettivo un numero reale.\\
 \textbf{Obiettivi più facilmente raggiungibili di altri}: la funzione di utilità \textbf{tiene conto della probabilità di successo} e/o di ciascun risultato (\textbf{utilità attesa} o media)
-\pagebreak
 \paragraph{Agenti che apprendono}
 \begin{center}
 	\includegraphics[scale=0.5]{agappr.png}
@@ -246,6 +246,7 @@ Esempio classico: ricerca della sequenza di azioni per raggiungere una data dest
 	\item \textbf{Elemento critico}: osserva e dà feedback sul comportamento
 	\item \textbf{Generatore di problemi}: suggerisce nuove situazioni da esplorare
 \end{list}
+\pagebreak
 \subsection{Tipi di rappresentazione}
 \paragraph{Stati e transizioni}
 \begin{center}
@@ -256,13 +257,43 @@ Esempio classico: ricerca della sequenza di azioni per raggiungere una data dest
 	\item \textbf{Rappresntazione fattorizzata} ($+$ variabili e attributi)
 	\item \textbf{Rappresentazione strutturata} ($+$ relazioni)
 \end{list}
+
+\chapter{Problem Solving}
+\section{Agenti Risolutori di Problemi}
+\paragraph{Paradigma} Questi agenti adottano il paradigma della \textbf{risoluzione di problemi come ricerca in uno spazio di stati} (\textbf{problemi solving}). Sono \textbf{agenti con modello} (storia, percezioni) che \textbf{adottano una rappresentazione atomica dello stato}. Sono \textbf{particolari agenti con obiettivo} che \textbf{pianificano l'intera sequenza di azioni} prima di agire.
+\subsection{Processo di risoluzione}
+\paragraph{Passi da seguire}
+\begin{enumerate}
+	\item \textbf{Determinazioni dell'obiettivo}: un insieme di stati dove l'obiettivo è soddisfatto.
+	\item \textbf{Formulazione del problema}: rappresentazione degli stati e delle azioni.\\
+	\textit{Fa parte del design "umano"}.
+	\item \textbf{Determinazione della soluzione} mediante ricerca: un piano d'azione
+	\item \textbf{Esecuzione del piano}\\
+	\textit{Soluzione algoritmica}.
+\end{enumerate}
+La determinazione dell'obiettivo e la formulazione del problema richiede \textbf{tanta intelligenza}, che in fase di design è \textbf{spostata sull'umano}. Gli algoritmi sono ancora "\textit{stupidi}".
+\paragraph{Assunzioni sull'ambiente} \textbf{Statico}, \textbf{osservabile} (so dove sono, es: \textit{viaggio con la mappa}), \textbf{discreto} (insieme finito di azioni possibili), \textbf{deterministico} (una azione $\Rightarrow$ un risultato. L'agente può eseguire il piano "\textit{ad occhi chiusi}", niente può andare storto)
+\paragraph{Formulazione del problema} Un problema può essere \textbf{definito formalmente} mediante cinque componenti:
+\begin{enumerate}
+	\item \textbf{Stato iniziale}
+	\item \textbf{Azioni possibili} nello stato \texttt{s}: \texttt{Azioni(s)}
+	\item \textbf{Modello di transizione}\\
+	\texttt{Risultato}: stato $\times$ azione $\longrightarrow$ stato\\
+	\texttt{Risultato(s, a)}: \texttt{s'}, uno stato \textbf{successore}
+	\item \textbf{Test obiettivo}: un insieme di stati obiettivo\\
+	\texttt{Goal-Test}: stato $\longrightarrow$ \{\texttt{true}, \texttt{false}\}
+	\item \textbf{Costo del cammino}: somma dei costi delle azioni (costo dei passi).\\
+	Costo di un passo: \texttt{c(s, a, s')}, mai negativo.
+\end{enumerate}
+1, 2 e 3 \textbf{definiscono \textit{implicitamente} lo spazio degli stati}. Definirlo esplicitamente può essere molto oneroso, come in quasi tutti i problemi di IA.
 \pagebreak
-%https://elearning.di.unipi.it/pluginfile.php/30330/mod_resource/content/0/3-2020-problem_solving.pdf
-
-\ldots\\
-\ldots\\
-determinare obiettio e formulare il problema è tanta intelligenza, spostata sull'umano in fase di design. Gli algoritmi sono ancora stupidi.\\
-assunzioni\\
-stati impliciti perché tanti, quindi vengono fuori in fase di elaborazione e di sviluppo delle decisioni.\\
-
+\section{Algoritmi di Ricerca}
+\textit{Il processo che cerca una sequenza di azioni che raggiunge l'obiettivo è detto \textbf{ricerca}}.
+\paragraph{Algoritmi} Gli algoritmi di ricerca prendono in \textbf{input un problema} e \textbf{restituiscono un cammino soluzione}, un cammino che porta dallo stato iniziale allo stato goal.
+\paragraph{Misura delle prestazioni} Trova una soluzione? Quanto costa trovarla? Quanto è efficiente la soluzione?
+\begin{center}
+Costo Totale = Costo della Ricerca $+$ Costo del Cammino Soluzione
+\end{center}
+Valuteremo algoritmi sul primo, ottimizzando il secondo.
+%https://elearning.di.unipi.it/pluginfile.php/30330/mod_resource/content/0/3-2020-problem_solving.pdf, 21
 \end{document}
