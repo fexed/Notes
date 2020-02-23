@@ -66,11 +66,17 @@ Si appoggia all'android SDK e a Gradle (tool separato, con plugin android e anch
 Inoltre c'è il progetto, con \texttt{.properties} con config per l'ambiente di sviluppo (come dove si trova il compilatore ecc.) e \texttt{build.gradle}.
 
 \chapter{Architettura Android}
+\begin{center}
+	\includegraphics[scale=0.7]{arch_thebigpicture.png}
+\end{center}
+Studieremo a fondo le \textbf{applicazioni} e parte dell'\textbf{Android Runtime}. Le \textbf{libraries} sono largamente invisibili e il \textbf{linux kernel} è utile da sapere.
 \section{Struttura}
-\paragraph{Kernel Linux} Kernel Linux standard, senza fare dei derivati. Adattamenti per telefono eseguiti tramite moduli del kernel. Come display driver, driver per la tastiera keypad, driver camera, wifi, flash, audio, driver binder (IPC) che cura inter-process communication (diversamente da socket e FIFO, che non andavano bene per Android. Su android non ci sono solo file, ma oggetti con metodi, e FIFO/socket adatte per trasferire flussi di byte. Binder fa comunicare processi in termini object-oriented). Power management driver.
-\paragraph{Librerie} Librerie \texttt{.so}, che fanno tantissime cose. Tra cui surface manager (equivalente dei window system X o wayland), OpenGL ES per la grafica 3D, FreeType, SSL (HTTPS e Secure Socket Layer), WebKit, SQLite, libc (scanf, strlen\ldots).
-\subparagraph{Android Runtime} In aggiunta alle librerie, Macchina Virtuale che esegue codice applicazioni Android (Dalvik), insieme alle core librearies (garbage collector, heap, memoria\ldots)
-\paragraph{Separazione tra mondo Java e mondo del codice eseguibile ARM} Da qui in giù c'è Java, sopra è C.
+\textit{Bottom -- Up}
+\paragraph{Kernel Linux} Alla base di tutto c'è il \textbf{kernel Linux standard, senza personalizzazioni}. Gli \textbf{adattamenti} per la parte telefonica sono \textbf{eseguiti tramite moduli del kernel}. Come display driver, driver per la tastiera keypad, driver camera, wifi, memoria flash, audio, driver binder (IPC) che cura Inter-Process Communication (diversamente da socket e FIFO, che non andavano bene per Android. \textbf{Su Android non ci sono solo file, ma oggetti con metodi}, e FIFO/socket adatte per trasferire flussi di byte. Il \textbf{binder fa comunicare processi in termini object-oriented}). Per ultimo c'è il power management driver.\\
+Per il resto è il kernel linux tanto conosciuto e amato: utenti, diritti, shell, librerie, thread e comandi.
+\paragraph{Librerie} Librerie \texttt{.so}, che fanno tantissime cose. Tra esse ci sono: surface manager (equivalente dei window system X o wayland), OpenGL ES per la grafica 3D, FreeType, SSL (HTTPS e Secure Socket Layer), WebKit, SQLite, libc (scanf, strlen\ldots).
+\subparagraph{Android Runtime} In aggiunta alle librerie, c'è anche la \textbf{Macchina Virtuale che esegue il codice delle applicazioni Android} (\textbf{Dalvik}/\textbf{ART}), insieme alle core libraries (garbage collector, heap, memoria\ldots)
+\paragraph{Separazione tra mondo Java e mondo del codice eseguibile ARM} Da qui in poi c'è il linguaggio Java, fin'ora il linguaggio (del kernel linux) è il C.
 \paragraph{Application Framework} S.O. rappresentato da oggetti nello heap. Librerie: package manager, telefony manager, activity manager, window manager, location manager (GPS), notification manager
 \paragraph{Applicazioni} Tra cui servizi interni: home, contatti, telefono, browser\ldots Firmate a chiave asimmetrica. Platform key per applicazioni che usano funzioni critiche, chiave che firma il kernel.
 \section{Dalvik}
