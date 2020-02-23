@@ -79,7 +79,46 @@ Per il resto è il kernel linux tanto conosciuto e amato: utenti, diritti, shell
 \paragraph{Separazione tra mondo Java e mondo del codice eseguibile ARM} Da qui in poi c'è il linguaggio Java, fin'ora il linguaggio (del kernel linux) è il C.
 \paragraph{Application Framework} S.O. rappresentato da oggetti nello heap. Librerie: package manager, telefony manager, activity manager, window manager, location manager (GPS), notification manager
 \paragraph{Applicazioni} Tra cui servizi interni: home, contatti, telefono, browser\ldots Firmate a chiave asimmetrica. Platform key per applicazioni che usano funzioni critiche, chiave che firma il kernel.
-\section{Dalvik}
-\section{ART}
-Android RunTime
+\section{Dalvik \& ART}
+\paragraph{Dalvik} La stragrande maggioranza delle applicazioni gira su una macchina virtuale: \textbf{Dalvik}. Funziona in maniera analoga alla JVM con importanti differenze:
+\begin{list}{}{}
+	\item Basata su \textbf{registri} e non su stack
+	\item \textbf{Set di istruzioni ottimizzato} per risparmiare memoria e aumentare la velocità d'esecuzione
+	\item \textbf{Formato dei file eseguibili ottimizzato} per risparmiare memoria
+	\item \textbf{Eseguibile da più processi con una sola istanza}: tutto \textbf{codice rientrante} e sharing del codice di Dalvik via \texttt{mmap()}.
+	\item \textbf{Non} sotto il controllo di Oracle (storica causa legale)
+\end{list}
+\paragraph{Due meccanismi} Fino ad Andorid 4.3 l'unico meccanismo di esecuzione era Dalvik. Durante Android 4.4 si è aggiunta l'opzione per eseguire su ART, con Dalvik come opzione default.\\
+Da Android 5 in poi si esegue su ART.
+\paragraph{Android Runtime} ART ha delle differenze importanti rispetto ha Dalvik:
+\begin{list}{}{}
+	\item ART \textbf{pre-compila a install-time}, non interpreta\\
+	Questo rende l'installazione più lenta, ma l'\textbf{esecuzione più veloce}
+	\item Processo largamente \textbf{invisibile} a programmatore e utente
+	\item Però utilizzano lo stesso bytecode, producendo però \textbf{codice nativo} invece che bytecode: ulteriore assicurazione contro le cause di Oracle
+\end{list}
+\paragraph{Entrambi rilevanti} Dalvik e ART sono entrambi rilevanti perché
+\begin{list}{}{}
+	\item Dalvik perché è il target della toolchain di compilazione del 99\% delle app
+	\item ART perché Google da tempo sviluppa e supporta soltanto questa:
+	\begin{list}{}{}
+		\item Più veloce in esecuzione
+		\item Miglior gestione della garbage collection
+		\item Maggiore integrazione con profiling e debugging
+		\item Minor consumo di energia
+	\end{list}
+\end{list}
+\begin{center}
+	\begin{tabular}{ p{4 cm} | p{5 cm} | p{5 cm}}
+	\textbf{Fase} & \makecell{\textbf{Dalvik}} & \makecell{\textbf{ART}} \\
+	\hline
+	Compile-Time & \makecell{\textbf{javac}: \texttt{.java} $\rightarrow$ \texttt{.class}\\\textbf{dx}: \texttt{.class} $\rightarrow$ \texttt{.dex}} & \makecell{\textbf{javac}: \texttt{.java} $\rightarrow$ \texttt{.class}\\\textbf{dx}: \texttt{.class} $\rightarrow$ \texttt{.dex}} \\
+	\hline
+	Install-Time & \makecell{\textbf{dexopt}: \texttt{.dex} $\rightarrow$ \texttt{.odex}} & \makecell{\textbf{dex2oat}: \texttt{.dex} $\rightarrow$ \texttt{ELF}} \\
+	\hline
+	Run-Time & \makecell{\textbf{libdvm.so}: \texttt{.odex} $\rightarrow$ run\\Interpretato + JIT} & \makecell{\textbf{libart.so}: \texttt{ELF} $\rightarrow$ run\\Esecuzione nativa con un po' di\\runtime}
+	\end{tabular}
+\end{center}
+\textbf{JIT} $=$ \textbf{Just-In-Time} compilation, compila pezzi di codice che interpreta più volte
+%http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2002-03.pdf, 12
 \end{document}
