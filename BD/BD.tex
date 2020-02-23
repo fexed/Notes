@@ -9,6 +9,16 @@
 \usepackage{makecell}
 \graphicspath{ {./img/} }
 \usepackage{color}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+\lstset{
+	language=SQL,
+	breaklines=true,
+	keywordstyle=\bfseries,
+	identifierstyle=\ttfamily,
+	commentstyle=\color{mygray},
+	morekeywords={database}	
+}
 
 \begin{document}
 \renewcommand*\contentsname{Indice}
@@ -168,4 +178,121 @@ Sistemi Informatici Operativi $\longrightarrow$ Sistemi Informatici Direzionali
 \paragraph{Ampio} Big data è un termine ampio riferito a situazioni in cui l'approccio "schema-first" tipico di DB e DW risulta troppo restrittivo o troppo lento.
 \paragraph{3 V} Volume, Varietà, Velocità
 \paragraph{} I Big Data sono in genere associati a sistemi NoSQL, machine learning e approcci Data Lake.
+\section{DBMS}
+Un \textbf{DBMS} è un sistema (\textbf{software}) in grado di \textbf{gestire collezioni di dati} che siano, tra le altre cose:
+\begin{list}{}{}
+	\item \textbf{Grandi}
+	\item \textbf{Persistenti}, con un periodo di vita indipendente dalle singole esecuzioni dei programmi che le utilizzano
+	\item \textbf{Condivise}, usate da applicazioni diverse
+\end{list}
+garantendo \textbf{affidabilità} (resistenza a malfunzionamenti hardware e software-recovery) e \textbf{privacy} (con una disciplina e un controllo degli accessi.\\
+Come ogni altro software, un DBMS deve essere \textbf{efficiente} (usare al meglio le risorse di spazio e tempo del sistema) ed \textbf{efficace} (rendere produttive le attività degli utilizzatori).\\
+Un DBMS offre opportuni linguaggi per:
+\begin{list}{}{}
+	\item \textbf{Definire lo schema} di un DB, che va definito prima di creare dati
+	\item \textbf{Scegliere le strutture dati} per la memorizzazione
+	\item Memorizzare i dati \textbf{rispettando i vincoli} definiti nello schema
+	\item Recuperare e modificare i dati, interattivamente (\textbf{query language}, linguaggio di interrogazione) o da programmi
+\end{list}
+\subsection{Dati}
+I dati permanenti contenuti in un DB sono divisi in due categorie:
+\begin{list}{}{}
+	\item \textbf{Metadati}\\
+	Descrivono datti sullo schema dei dati, utenti autorizzati, applicazioni, parametri quantitativi\ldots\\
+	I metadati sono descritti da uno schema usando il modello dei dati usato dal DBMS e sono interrogabili con le stesse modalità previste dai dati
+	\item \textbf{Dati}\\
+	Rappresentazioni di certi fatti conformi alle definizioni dello schema. Hanno le seguenti caratteristiche:
+	\begin{list}{}{}
+		\item Organizzati in \textbf{insiemi strutturati e omogenei}, fra i quali sono definite delle \textbf{relazioni}. La struttura dei dati e le relazioni sono \textbf{descritte nello schema} usando i meccanismi di astrazione del modello dei dati del DBMS.
+		\item Sono \textbf{molti}, sia in assoluto che rispetto ai metadati, e non possono essere gestiti in memoria temporanea
+		\item Sono \textbf{accessibili mediante transazioni}, \textbf{unità di lavoro atomiche} che \textbf{non possono avere effetti parziali}
+		\item Sono \textbf{protetti} sa \textbf{da accesso da parte di utenti non autorizzati}, sia da \textbf{corruzione} dovuta a malfunzionamenti hardware o software
+		\item Sono \textbf{utilizzabili contemporaneamente da utenti diversi}
+	\end{list}
+\end{list}
+Il \textbf{modello relazionale dei dati} è il più diffuso fra i DBMS commerciali. Il \textbf{meccanismo di astrazione} fondamentale è la \textbf{relazione} (\textbf{tabella}), sostanzialmente un insieme di record dai campi elementari.\\
+Lo schema di una relazione ne definisce il nome e ne descrive la struttura dei possibili elementi della relazione (insieme di attributi con il loro tipo)
+\paragraph{Esempio}
+\begin{list}{}{}
+	\item \textbf{Definizione del DB}
+	\begin{lstlisting}
+create database EsempioEsame
+	\end{lstlisting}
+	\item \textbf{Definizione schema}
+	\begin{lstlisting}
+create table Esami(Materia char(5), Candidato char(8), Voto int, Lode char(1),
+Data char(6))
+	\end{lstlisting}
+	\item \textbf{Inserzione dati}
+	\begin{lstlisting}
+insert into Esami values ('BDSI1', '080709', 30 'S', '070900')
+	\end{lstlisting}
+	\item \textbf{Interrogazione}
+	\begin{lstlisting}
+select Candidato from Esami where Materia = "BDSI1" and Voto = 30
+	> Candidato
+	> 080709
+	\end{lstlisting}
+\end{list}
+\pagebreak
+\subsection{DDL}
+\paragraph{Data Definition Language} Linguaggio per la definizione della base di dati.\\
+Utile distinguere tre diversi livelli di descrizione dei dati (\textbf{schemi}):
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Livello di \textbf{vista logica}
+	\item Livello \textbf{logico}
+	\item Livello \textbf{fisico}
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{livellidescrdati.png}
+\end{center}
+\end{multicols}
+\paragraph{Livello Logico} Descrive la struttura degli insiemi di dati e delle relazioni fra loro, secondo un erto modello dei dati, senza nessun riferimento alla loro organizzazione fisica nella memoria permanente.\\
+Esempi:
+\begin{lstlisting}
+Studenti(Matricola char(8), Nome char(20), Login char(8), AnnoNascita int, Reddito float)
+Corsi(IdeC char(8), Titolo char(20), Credito int)
+Esami(Matricola char(8), IdeC char(8), Voto int)
+\end{lstlisting}
+\paragraph{Livello Fisico} Descrive come vanno organizzati fisicamente i dati nelle memorie permanenti e quali strutture dati ausiliarie prevedere per facilitarne l'uso (schema fisico o interno).\\
+Esempi: relazioni Studenti e Esami organizzate in modo seriale, Corsi organizzata sequenziale con indice, indice su Matricola.
+\paragraph{Vista Logica} Descrive come deve \textbf{apparire la struttura} del DB ad una certa applicazione (\textbf{schema esterno} o \textbf{vista}). Esempio:
+\begin{lstlisting}
+InfCorsi (IdeC char(8), Titolo char(20), NumEsami int)
+\end{lstlisting}
+Nell'organizzazione di una banca, lo \textbf{schema logico} conterrà tutte le tabelle e i dati relativi ai conti correnti, ma anche al personale. Lo schema logico conserva \textbf{tutte le informazioni} della banca. Nello \textbf{schema esterno} ogni correntista potrà \textbf{accedere solo ad alcune informazioni} di suo interesse: quelle del proprio conto corrente.
+\paragraph{Indipendenza} L'approccio con tre livelli è stato proposto per garantire le proprietà di indipendenza logica e fisica dei dati, fra gli obiettivi più importanti dei DBMS.
+\begin{list}{}{}
+	\item \textbf{Indipendenza fisica}: i programmi applicativi non devono essere modificati in seguito a modifiche dell'organizzazione fisica dei dati
+	\item \textbf{Indipendenza logica}: i programmi applicativi non devono essere modificati in seguito a modifiche dello schema logico
+\end{list}
+\subsection{DML}
+\paragraph{Data Manipulation Language} Linguaggio per l'uso dei dati.\\
+Un DBMS deve prevedere più modalità d'uso per soddisfare esigenze di diverse categorie d'utenti: GUI per accedere ai dati, linguaggio di interrogazione per i non programmatori, linguaggio di programmazione per chi sviluppa le applicazioni, linguaggio di sviluppo per le interfacce delle applicazioni.\\
+Linguaggi vari e interfacce diverse:
+\begin{list}{}{}
+	\item Linguaggi testuali interattivi, SQL
+	\item Comandi (come quelli del linguaggi interattivo) immersi in un linguaggio ospite, come il C
+	\item Comandi (come quelli del linguaggi interattivo) immersi in un linguaggio ad hoc (come PL/SQL) con anche altre funzionalità (come grafici e stampe strutturate)
+	\item Interfacce amichevoli
+\end{list}
+\subsection{Schemi e Istanze}
+\paragraph{Schema} Descrive la \textbf{struttura dei dati}, sostanzialmente invariante nel tempo: le "classi", intestazione delle tabelle
+\paragraph{Istanza} \textbf{Valori attuali} dei dati che possono cambiare anche molto rapidamente: gli "oggetti", il corpo di ciascuna tabella
+\subsection{Meccanismi per il controllo dei dati}
+Caratteristica molto importante dei DBMS è il tipo di meccanismi usati per garantire le seguenti proprietà
+\begin{list}{}{}
+	\item \textbf{Integrità}: mantenimento delle proprietà specificate nello schema
+	\item \textbf{Sicurezza}: protezione da usi non autorizzati
+	\item \textbf{Affidabilità}: protezione da malfunzionamenti e interferenze dovute all'accesso concorrente di più utenti
+\end{list}
+\subsection{Transazioni}
+\paragraph{Definizione} Una \textbf{transazione} è una \textbf{sequenza di azioni di lettura/scrittura in memoria permanente e di elaborazione dati in memoria temporanea}, con le seguenti proprietà:
+\begin{list}{}{}
+	\item \textbf{Atomicità}: le transazioni che terminano prematuramente (\textbf{aborted transactions}) sono \textbf{trattate dal sistema come se non fossero mai iniziate}. Eventuali effetti sul DB sono \textbf{annullati}.
+	\item \textbf{Serializzabilità}: esecuzioni concorrenti di più transazioni danno come effetto quello di una esecuzione seriale
+	\item \textbf{Persistenza}: le \textbf{modifiche} sul DB di una transazione terminata normalmente sono \textbf{permanenti}, cioè \textbf{non alterabili da malfunzionamenti}
+\end{list}
+%https://elearning.di.unipi.it/pluginfile.php/30238/mod_resource/content/1/2e3.ModelliProgettazione_CorsoB_1920_ParteA.pdf
 \end{document}
