@@ -14,13 +14,44 @@
 \renewcommand*\contentsname{Indice}
 \title{Gestione di Reti}
 \author{Federico Matteoni}
-\date{ }
+\date{A.A. 2019/20}
 \maketitle
 \tableofcontents
 \pagebreak
 \section*{Introduzione}
-...
-\chapter{lezione 2}
+\paragraph{Perché bisogna studiare la gestione?} La situazione corrente comprende: un aumento delle risorse strategiche informative, le reti di computer che da strumento di supporto sono diventate elemento chiave delle organizzazioni, l'aumento esponenziale dei dispositivi interconnessi e aumento anche della complessità e delle funzionalità.\\
+C'è quindi richiesta di servizi di rete permanenti e di qualità ottimale, oltre alla necessità di ridurre i costi per le infrastrutture di rete di un'azienda.
+\paragraph{Necessità} Gestione di reti eterogenee con l'aiuto dei computer.
+\section*{Terminologia e concetti fondamentali}
+\paragraph{Managed Objects} Il controllo, la coordinazione e il monitoraggio delle risorse avviene tramite la manipolazione dei cosiddetti \textbf{managed objects}: un MO è una visione astratta di una risorsa che presenta le proprietà dal punto di vista della gestione. Sono \textbf{rappresentazioni astratte di risorse reali}.\\
+I confini di un MO specificano quali dettagli sono accessibili ai sistemi di monitoraggio e quali sono schermati (\textbf{black box})
+
+\begin{center}
+Management-System $\leftrightarrow$ Managed Object $\leftrightarrow$ Real Object
+\end{center}
+\begin{list}{}{\textbf{Caratteristiche}}
+	\item \textbf{Attributi}: descrivono lo stato/condizione dell'MO, possono cambiare quando cambia lo stato dell'oggetto reale e possono essere manipolati attraverso operazioni di management
+	\item \textbf{Operazioni}: consentono l'accesso all'MO. Operazioni tipiche sono get, set, create e delete, ma il numero e tipo delle operazioni influenzano perfomance e complessità dell'oggetto
+	\item \textbf{Comportamento}: determina la semantica e l'interazione con la risorsa reale. Normalmente definito in linguaggio naturale
+	\item \textbf{Notifiche}: quantità e tipologia dei messaggi, che possono essere generati da situazioni pre-definite da un MO quando avviene una specifica situazione
+\end{list}
+\paragraph{Management Information Base} L'unione di tutti i MO contenuti in un sistema forma la MIB del sistema. La \textbf{Management Information Base} è la collezione di tutti i management object all'interno del sistema, con i loro attributi.\\
+Una MIB deve essere conosciuta sia da chi la implementa che da chi la gestisce.
+\subparagraph{Modularità} Gli MO di un sistema sono solitamente definiti in più MIB. Nelle MIB sono introdotti i moduli per consentire un design modulare: moduli diversi possono essere definiti da team diversi, le funzionalità di gestione possono essere estese e modificate\ldots
+\paragraph{Paradigma Gestore/Agente}
+\begin{list}{}{Agent}
+	\item Implementa i MIB delle MO accedendo alle risorse reali
+	\item Riceve le richieste da un gestore, le processa e trasmette le risposte appropriate
+	\item Smista le notifica riguardanti cambiamenti di stato importanti nel MIB
+	\item Protegge gli MO da accessi non autorizzati usando regole di controllo degli accessi e autenticazione della comunicazione
+\end{list}
+\begin{list}{}{Manager}
+	\item Esercita il controllo delle funzioni
+	\item Avvia operazioni di gestione tramite opportune operazioni del protocollo per la manipolazione degli MO
+	\item Riceve messaggi dagli agenti e li inoltra alle applicazioni interessate per la gestione
+\end{list}
+\paragraph{Management Protocol} Un protocollo di gestione implementa l'accesso a MO distanti attraverso la codifica di dati di gestione (management data)
+\section{lezione 2}
 Livello 2 consente di identificare un device sulla rete. In tutte le reti c'è la necessità di identificare la porta di rete. Ogni dispositivo ha almeno un'interfaccia di rete: loopback, che consente di far comunicare processi di rete sulla stessa macchina. \texttt{127.0.0.1} consente di parlare su stessa macchina senza trasmettere sul filo, fondamentalmente un cortocircuito.\\
 \texttt{ifconfig} consente di vedere le interfacce di rete disponibili su unix.\\
 Se si vuole gestire una rete è fondamentale la standardizzazione.\\\\
@@ -34,7 +65,7 @@ Quindi per spedire pacchetto necessito di indirizzi (chi voglio e chi sono) e co
 Alla connessione del cavo, se DHCP manda fuori pacchetto per richiesta quindi switch lo impara, se IP statico manda pacchetto ARP quindi switch lo impara.\\
 MAC address randomizzato per privacy, spesso e volentieri sui dispositivi mobili.\\
 Possibile più di un utente sulla stessa rete con soliti indirizzi, apparati avanzati se ne accorgono.
-\chapter{lezione 3}
+\section{lezione 3}
 un pacchetto è interamente creato dal computer, quindi "non ci si può fidare"\\
 Bisogna andare a livello fisico e autenticare, un po' come chiedere la carta d'identità. Metter in atto meccanismi che impediscano di inibire riconoscimento della sorgente.\\
 802.1x permette di entrare in rete. Se configurato, il device prima di entrare in rete espone delle credenziali (utente, password, protocollo autenticazione\ldots)\\
@@ -44,31 +75,42 @@ Su router MAC cambia ad ogni hop (ethernet comunicazione punto-punto), IP cambia
 Robustezza delle reti si fa tramite la ridondanza. Tipico mettere più strade per spedire il traffico: load balancing.\\
 Vale sia per corrente elettrica che per traffico di rete.\\\\
 \subsection{Aree funzionali}
-FCAPS per gestire qualsiasi sistema, da giochi a sistemi di rete\\
+FCAPS per gestire \textbf{qualsiasi sistema}, da giochi a sistemi di rete. Non sono mutualmente indipendenti.
 \begin{list}{}{}
-	\item Fault Management: error detection, isolation and repair\\
+	\item \textbf{Fault Management}: error detection, isolation and repair\\
 	Se qualcuno rileva malfunzionamento (riempito disco, ram, sovraccarico CPU\ldots) lo deve notificare
-	\item Configuration management: devo sapere com'è configurato il sistema. leggere conig importante così che le app si basano sulle API comuni e funzionerà. Fondamnetale capire configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "questo filo qui va su questa porta qua". che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete
-	\item Account management: rilevare il consumo di risorse
-	\item Performance management: efficenze e statistiche, performance di sistema sia lato utente sia lato fornitore. Per l'utente è riuscire ad usare la rete, per l'operatore è il giusto compromesso tra investimento sul mezzo e contentezza utente.
-	\item Security management: assicurarsi che ciò che uno fa è effettivamente possibile farlo, autoproteggendosi perché con le reti odierne posso intasare rete (volente o no) e quindi intasare internet, provocando danni
+	\item \textbf{Configuration Management}: devo sapere com'è configurato il sistema. Leggere la configurazione è importante, così che le app si possano basare sulle API comuni e funzionare correttamente. Fondamentale capire la configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "questo filo qui va su questa porta qua". che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete
+	\item \textbf{Account Management}: rilevare il consumo di risorse
+	\item \textbf{Performance Management}: efficenze e statistiche, performance di sistema sia lato utente sia lato fornitore. Per l'utente è riuscire ad usare la rete, per l'operatore è il giusto compromesso tra investimento sul mezzo e contentezza utente.
+	\item \textbf{Security Management}: assicurarsi che ciò che uno fa è effettivamente possibile farlo, autoproteggendosi perché con le reti odierne posso intasare rete (volente o no) e quindi intasare internet, provocando danni
 \end{list}
 \subsection{Interagire con management object}
-primitive\\
-Quando faccio richiesta protocollo: richiesta -- risposta\\
-Contenuto richieste varia durante il transito aggiungendo determinate informazioni. Es. SMS durante il transito aggiunge numero mittente per poter comunicare a destinatario chi inviava.\\
+Primitive: get, set, create, delete\\
+Quando faccio richiesta ad un protocollo mi aspetto una risposta: richiesta -- risposta\\
+Contenuto richieste varia durante il transito aggiungendo determinate informazioni. Es: SMS durante il transito aggiunge numero mittente per poter comunicare a destinatario chi inviava.
 \subsection{Servizi}
-Confermati: faccio richiesta mi aspetto risposta. Telegram/Whatsapp\\
-Non confermati: faccio richiesta e fine. SMS\\
-schema\\
-differenza tra iso/osi e internet è standardizzazione. Standzzion iso tutti si accordano su come fare la rete: gruppi di lavoro che si riuniscono (es. ICANN) e fanno documento di lavoro, poi comitati (fino a qui ad alto livello). Se si mettono d'accordo, reano international standard (senza implementazione ancora) poi creano technical report (non si combina niente) o full standard.\\
-Parte importante è no implementazione fino a standard creato.
-Standzzion internet: seguito da comitato IETF, aree d'interresse (aree dove si pensa ci sarà bisogno di sviluppo). Sottomissione idea ad area d'interesse o mandare mail per idee completamente nuove. Da working document a draft passa poco e i draft dopo pochi mesi scadono. Dopo massimo due anni o si rifiuta o si fa il draft standard (draft rfc) che o rifiuta o standard in max 4 anni. Necessita di più implementazioni interoperabili.\\
-RFC request for comment.\\
-Request, indication, response, confirm.
+\paragraph{Confermati} Faccio richiesta $\rightarrow$ mi aspetto risposta.\\Es: Telegram/Whatsapp
+\paragraph{Non confermati} Faccio richiesta e fine.\\Es: SMS
+\begin{center}
+	\includegraphics[scale=0.7]{timediag.png}
+\end{center}
+\subsection{Standardizzazione}
+La grande differenza tra ISO/OSI e Internet è il processo di standardizzazione.
+\pagebreak
+\paragraph{ISO} Nella standardizzazione ISO tutte le varie aziende si accordano su come fare la rete: si creano gruppi di lavoro che si riuniscono (es. ICANN) e producono un documento di lavoro, poi vari comitati lo discutono (fino a qui \textbf{ad alto livello}).\\
+Se si mettono d'accordo, pubblicano un \textbf{Draft International Standard} (\textbf{senza implementazione}). Dopodiché, se non viene accettato, creano technical report oppure un \textbf{full standard}.\\
+La parte importante è l'assenza di implementazione fino ad avere la creazione dello standard.
+
+\begin{center}
+	\includegraphics[scale=0.7]{stdiso.png}
+\end{center}
+\paragraph{Internet} Nella standardizzazione internet è tutto seguito dal comitato IETF, che pubblica aree d'interesse in cui ritiene ci sia possibilità di sviluppo. La sottomissione di un'idea ad un'area d'interesse è libera, oppure si può mandare una mail per idee completamente nuove. Dal working document a draft passa poco e i draft dopo pochi mesi scadono. Dopo massimo due anni o si rifiuta o si fa il draft standard (draft RFC) che o lo si rifiuta o diventa standard in max 4 anni. Necessita di più implementazioni interoperabili.
+\begin{center}
+	\includegraphics[scale=0.7]{stdietf.png}
+\end{center}
 \section{Abstract syntax notation one}
-SN1\\
-Come spostare le informazioni. Vari costruttori all'inizio facevano "in casa" senza interoperabilità. Costruire qualcosa per scambiare info in maniera interoperabile. 8/16/32/64 bit e litte/big endian.
+\paragraph{ASN1} Sintassi per la definizione di strutture dati e formato di messaggi. Ha l'obiettivo di consentire a macchine dalle differenti architetture hardware di scambiare dati, essere language neutral e consentire la negoziazione della codifica di trasmissione.\\
+Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
 \paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
 Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.
 \end{document}
