@@ -120,5 +120,109 @@ Da Android 5 in poi si esegue su ART.
 	\end{tabular}
 \end{center}
 \textbf{JIT} $=$ \textbf{Just-In-Time} compilation, compila pezzi di codice che interpreta più volte
-%http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2002-03.pdf, 12
+\pagebreak
+\subsubsection{Esecuzione}
+Ogni app viene eseguita dal kernel Linux
+\begin{list}{}{}
+	\item \textbf{In un processo separato}, che esegue Dalvik che esegue il bytecode dell'app: \textbf{controllo i permessi d'accesso alle risorse logiche fatto dalla VM} (permessi concessi dall'utente)
+	\item \textbf{Con uno user ID distinto}: tutti i file creati dall'applicazione appartengono al proprio user ID, quindi altre applicazioni \textbf{non possono accedere} alla sua directory né \textbf{leggere i suoi file}. Applicazioni "\textit{amiche}" (specificato nel \texttt{Manifest}) possono condividere processo e user ID, ma devono avere la stessa firma.\\
+	Il \textbf{controllo dei diritti di accesso alle risorse fisiche è fatto dal kernel} (i diritti \textbf{non} sono controllati dall'utente)\\
+	Riferisce la singola installazione sulla singola macchina.
+\end{list}
+\textbf{Disaccoppiamento fra processo e programma}. Il processo è un flusso di esecuzione dell'applicazione, ma \textbf{essa esiste indipendentemente dal processo}. Lo stesso processo può eseguire applicazioni diverse, la stessa applicazione può essere eseguita da processi diversi in momenti diversi.
+\paragraph{Risultato} Si ha un notevole grado di \textbf{separazione} e \textbf{isolamento} delle app, anche se ci possono essere sempre bug non scoperti all'interno del kernel Linux.\\
+Android è un sistema piuttosto \textbf{sicuro agli attacchi}, eccezione fatta per quelli di ingegneria sociale: un utente può concedere dei permessi ad un'app malevola che li usa per scopi diversi da quelli pubblicizzati.
+\paragraph{Utente} L'utente non fa niente, se non tramite le app: non ha un user ID, non è proprietario di nessun file né titolare di nessun processo, non ha nemmeno delle credenziali di login.
+\chapter{Struttura di un'App Android}
+\paragraph{Diverse forme} Durante la sua vita un'applicazione assume diverse forme:
+\begin{list}{}{}
+	\item \textbf{Sviluppo}, layout su disco sottoforma di \textbf{progetto}
+	\item \textbf{Deployment}, formato dei file \texttt{.apk}
+	\item \textbf{Esecuzione}, struttura in \textbf{memoria}
+\end{list}
+Le varie forme sono legate da tre processi:
+\begin{list}{}{}
+	\item \textbf{Build}: sorgente $\rightarrow$ \texttt{.apk}
+	\item \textbf{Deploy}: \texttt{.apk} su un canale di distribuzione (market\ldots) $\rightarrow$ \texttt{.apk} sul device
+	\item \textbf{Run}: \texttt{.apk} $\rightarrow$ processo \textbf{in memoria}
+\end{list}
+\section{Progetto}
+Un'applicazione in sviluppo è un \textbf{progetto}: lo scheletro viene creato automaticamente dal wizard di creazione di un nuovo progetto e \textbf{solo alcune directory sono interessanti per lo sviluppatore} mentre altre sono generate automaticamente.
+\subsection{Android Studio}
+\begin{list}{}{}
+	\item \textbf{manifests}
+	\begin{list}{}{}
+		\item \texttt{AndroidManifest.xml}: metadati dell'applicazione
+	\end{list}
+	\item \textbf{java}: sorgenti (\texttt{.java}, \texttt{.kt} e unit test associati)
+	\item \textbf{assets}: file arbitrari aggiunti all'\texttt{.apk}
+	\item \textbf{bin}: risultato della compilazione (risorse, \texttt{.dex}, \texttt{.apk}\ldots)
+	\item \textbf{res}: risorse note al runtime Android
+	\begin{list}{}{}
+		\item \textbf{animator}: animazioni basate su proprietà
+		\item \textbf{anim}: animazioni basate sull'intercalazione
+		\item \textbf{color}: colori
+		\item \textbf{drawable}: immagini raster o vettoriali
+		\item \textbf{layout}: descrizioni dei layout della UI
+		\item \textbf{menu}: menù usati dall'app
+		\item \textbf{raw}: file arbitrari, alternativa ad \textbf{assets}
+		\item \textbf{values}: costanti (stringhe, interi, array\ldots)
+		\item \textbf{xml}: file XML arbitrari, incluse le configurazioni
+	\end{list}
+	\item \textbf{libs}: librerie native custom
+	\item \textbf{Gradle Scripts}: configurazioni di build
+	\item \textbf{Altri} come \texttt{*.properties}, \texttt{*.cfg}, \texttt{*.xml}\ldots: configurazioni varie
+\end{list}
+\subsection{Struttura di un progetto}
+La struttura vista è quella tipica di un'applicazione. Esistono altre due forme di progetto Android:
+\begin{list}{}{}
+	\item \textbf{Libreria}, contenente componenti destinati ad essere usati da altre app. In questo modo i membri di una famiglia di app correlate possono condividere componenti. Ogni libreria può essere usata da varie app e ogni app può usare varie libreria.
+	\item \textbf{Progetto test}, contenente codice usato per fare il testing di un'altra app.
+\end{list}
+\section{APK}
+\subsection{Contenuti di un APK}
+Il \textbf{build} di un'app Android produce un file in formato \texttt{.apk}, che non è altro che una \textbf{specializzazione di uno \texttt{.jar}} (che a sua volta è una specializzazione di uno \texttt{.zip}).
+\begin{list}{}{Contenuti:}
+	\item \texttt{resources.arsc}, file binario contenente la tabella che mappa ID a risorse
+	\item \texttt{classes.dex}: tutti i \texttt{.class} dell'app, convertiti in DEX e unificati in un unico file
+	\item \texttt{AndroidManifest.xml}, il manifesto
+	\item \textbf{res/*}, file delle risorse
+	\item \textbf{META-INF/*}, contenente i certificati pubblici (chiavi), solo per le app firmate
+	\begin{list}{}{}
+		\item \texttt{META-INF/MANIFEST.MF} che contiene \textbf{informazioni di versionamento} e un \textbf{checksum di ciascun file}
+		\item \texttt{META-INF/CERT.*}, certificati RSA\\
+		Per il deploy è \textbf{necessario creare un proprio certificato}, quello di debug è generato da ADT
+	\end{list}
+\end{list}
+Un \texttt{.apk} è dunque un \textbf{archivio contenente tutti i componenti di un app}:
+\begin{list}{}{}
+	\item \textbf{Auto-descrittivo} grazie ai manifesti
+	\item \textbf{Compatto} grazie alla compressione
+	\item \textbf{Affidabile} grazie alla firma digitale: non è possibile aprire un \texttt{.apk}, sostituire alcuni componenti e re-impacchettarlo perché \textbf{la firma sarebbe invalidata}
+	\item Facilmente \textbf{distribuibile} perché è un file unico
+	\item Facilmente \textbf{installabile}, niente wizard di installazione\\
+	In \textbf{/sys/app} se preinstallata o in \textbf{/data/app} se installata dall'utente
+\end{list}
+\pagebreak
+\section{Memoria}
+\subsection{Struttura in memoria}
+Una volta caricata in memoria un'app si distingue in \textbf{componenti}. Solitamente 1 app $=$ 1 processo $=$ 1 VM $=$ 1 thread, ma possibili variazioni: multithread, app amiche sullo stesso processo\ldots\\
+Il flusso di lavoro dell'utente (\textbf{task}) è spesso fatto di componenti appartenenti ad app diverse, su processi diversi. Android \textbf{incoraggia la condivisione sicura fra app} sia di dati che di componenti $=$ funzionalità.
+\begin{center}
+	\includegraphics[scale=0.7]{strutturamem.png}
+\end{center}
+L'app a sinistra, per esempio, è formata da 5 componenti.
+\begin{list}{}{I componenti che vedremo durante il corso possono essere dei seguenti \textbf{tipi}:}
+	\item \textbf{Activity}: una "schermata" dell'app
+	\item \textbf{Content Provider}: un fornitore di dati condivisi
+	\item \textbf{Service}: un fornitore di servizi condivisi (senza UI)
+\end{list}
+Un \textbf{task}, cioè quello che vede l'utente, può essere formato da un'activity dell'app a sinistra e le due activity dell'app a destra. C'è quindi una \textbf{importante distinzione} tra le visioni di programmatori e utenti:
+\begin{list}{}{}
+	\item un programmatore percepisce come "app" un \texttt{.apk}
+	\item un utente percepisce come "app" un \textbf{task}.
+\end{list}
+Quindi per garantire una UX gradevole occorre che l'integrazione sia \textbf{seamless}: uso di stili, temi e icone simili (\textbf{style guide}), \textbf{consistenza fra le app} più importante della consistenza dentro le app o fra piattaforme
+\chapter{Risorse}
+%http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2002-03.pdf, 39 [25/02 1h 02]
 \end{document}
