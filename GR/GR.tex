@@ -113,4 +113,18 @@ La parte importante è l'assenza di implementazione fino ad avere la creazione d
 Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
 \paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
 Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.
+\section{lezione 4}
+Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va visto.\\
+\subsection{Common problems with packet capture}
+\ldots\\
+Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere root.\\
+Container condivide kernel con host, macchina virtuale emula il kernel.\\
+Necessità vedere traffico. Non vorrei mettere mano sulla macchina, perché devo avere so che permette, utente, installare software\ldots\\
+Quindi lo faccio da fuori, prelevandolo dallo switch.\\
+Metodi software: ho switch, che ha delle porte:
+port mirror: tutto traffico diretto verso tale macchina oltre a mandarglielo lo mandi anche a me su questa porta. 1:1 una porta verso una porta, 1:N tot porte switch le mandi qua.
+VLAN mirror: simile al port mirror: dammi tutto traffico tale VLAN e mandalo qua
+traffic filter/mirroring: dammi solamente traffico di tale porta tale ip\ldots\\\\\\
+Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, che posso scaricare al massimo a 1gbps, ho efficacia se traffico sta solo a 1gbps. Dovrei avere scheda di rete da 10gbps per reggere comodamente traffico e non perderlo. Scheda direte più veloce della somma delle due direzioni.\\
+Hardware: Network Tap prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende la direzione in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
 \end{document}
