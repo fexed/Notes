@@ -126,7 +126,44 @@ Per le \textbf{operazioni aritmetiche} in un sistema floating point si pone un a
 \paragraph{Operazioni} Indichiamo con $\oplus$, $\ominus$, $\otimes$, $\oslash$ le \textbf{operazioni aritmetiche di macchina} corrispondenti relativamente all'addizione, sottrazione, prodotto e divisione. Si richiede che le operazioni siano interne all'insieme dei numeri di macchina. Una ragionevole definizione, derivata dal teorema precedente e in assenza di overflow/underflow, risulta: $$\forall a, b \in F(B, t, m, M), a \oplus b = fl(a + b) = (a + b)(1 + \epsilon_1), |\epsilon_1| \leq u$$ con $\epsilon_1$ detto  \textbf{errore locale dell'operazione}. Sempre in assenza di overflow/underflow, se $a, b \in R$ si ha $$fl(a + b) = fl(a)\oplus fl(b) = (a(1 + \epsilon_a) + b(1 + \epsilon_b))(1 + \epsilon_1) \doteq (a + b) + a\epsilon_a + b\epsilon_b + (a + b)\epsilon_1$$ dove con $\doteq$ si indica che l'eguaglianza vale \textbf{considerando le sole componenti lineari negli errori} e trascurando le componenti di ordine superiore (\textbf{analisi al primo ordine dell'errore}), in virtù del fatto che gli $\epsilon$ sono quantità piccole $0 < \epsilon < 1$, quindi trascurabili negli ordini superiori al primo.\\
 Si ottiene che, in assenza di overflow/underflow, se $a, b \in R, a + b \neq 0$, allora $$\frac{fl(a + b) - (a + b)}{a + b} \doteq \frac{a}{a + b}\epsilon_a + \frac{b}{a + b}\epsilon_b + \epsilon_1$$ che esprime la dipendenza dell'errore totale commesso nel calcolo della somma tra due numeri reali rispetto agli errori generati dall'approssimazione dei dati iniziali (\textbf{errore inerente}) e agli errori generati dall'algoritmo di calcolo (\textbf{errore algoritmico}) visto come sequenza di operazioni artimetiche.\\
 \pagebreak
+\paragraph{Esempio}
+Analizziamo cosa succede in macchina quando proviamo a calcolare $f(x) = x^2 - 1 = (x - 1)(x + 1)$. La \textbf{prima situazione di errore} sia ha sulla rappresentazione di $x$ che, \textbf{in generale}, \textbf{non è un numero di macchina}.$$x \rightarrow \tilde{x} = x(1 + \epsilon_x)$$ con $|\epsilon_x| \leq u$. Inoltre, sempre in generale, \textbf{le operazioni aritmetiche non sono operazioni di macchina} $$f(x) = (\tilde{x} \otimes \tilde{x}) \ominus 1 = (\tilde{x} \ominus 1)\otimes(\tilde{x} \oplus 1)$$Poniamo $g_1(x) = (\tilde{x} \otimes \tilde{x}) \ominus 1$ e $g_2(x) = (\tilde{x} \ominus 1)\otimes(\tilde{x} \oplus 1)$. La formula per l'\textbf{errore totale} dell'operazione è $$\epsilon_{tot1} = \frac{g_1(x) - f(x)}{f(x)}$$ $$\epsilon_{tot2} = \frac{g_2(x) - f(x)}{f(x)}$$ Sviluppiamo $g_1(x)$
 
+$$g_1(x) = ((x(1+\epsilon_x)\cdot x(1 + \epsilon_x))(1 + \epsilon_1) - 1)(1 + \epsilon_2) \doteq$$
+$$\doteq (x^2(1 + 2\epsilon_x)(1 + \epsilon_1) - 1)(1 + \epsilon_2) \doteq$$
+$$\doteq (x^2 ((1 + 2\epsilon_x + \epsilon_1) - 1)(1 + \epsilon_2) \doteq$$
+$$\doteq x^2(1 + 2\epsilon_x + \epsilon_1 + \epsilon_2) - (1 + \epsilon_2) =$$
+$$= (x^2 - 1) + 2x^2\epsilon_x + x^2\epsilon_1 + (x^2 - 1)\epsilon_2 = g_1(x)$$
+$$|\epsilon_i| \leq u$$ Quindi, portando al primo membro dell'uguaglianza $\epsilon_{tot1} = \frac{g_1(x) - f(x)}{f(x)}$ tutti i fattori $(x^2 - 1) = f(x)$ si ottiene $$\epsilon_{tot1} = \frac{2x^2}{x^2 - 1}\epsilon_x + \frac{x^2}{x^2 - 1}\epsilon_1 + \epsilon_2$$ Si evince che \textbf{l'errore totale è la somma di due componenti}:
+\begin{list}{}{}
+	\item \textbf{Errore inerente} o inevitabile: l'\textbf{errore di rappresentazione di $x$}, che vale 0 se $x$ è numero di macchina ed è \textbf{proprietà della funzione}. Nell'esempio, $\epsilon_{in} = \frac{2x^2}{x^2 - 1}\epsilon_x$.\\
+	Se l'errore inerente è piccolo si dice che \textbf{la funzione è numericamente stabile}, viceversa è \textbf{numericamente instabile}.
+	\item \textbf{Errore algoritmico}, locale all'operazione e \textbf{proprietà dell'algoritmo}. Nell'esempio, $\epsilon_{alg} = \frac{x^2}{x^2 - 1}\epsilon_1 + \epsilon_2$.\\
+	Se è piccolo, si dice che l'\textbf{espressione è ben condizionata} e \textbf{poco sensibile rispetto alla perturbazione}. Viceversa, è \textbf{mal condizionata}.
+\end{list}
+Sviluppiamo ora $g_2(x)$ (gli errori $\delta_i$ sono analoghi agli $\epsilon_i$, si usa una notazione differente per evidenziare che hanno valori diversi, esseno propri del calcolo e dei valori usati in esso)
+$$g_2(x) = ((x(1 + \epsilon_x) - 1)(1 + \delta_1))((x(1 + \epsilon_x) + 1)(1 + \delta_2))(1 + \delta_3) \doteq$$
+$$\doteq (x^2(1 + \epsilon_x)^2 - 1)(1 + \delta_1 + \delta_2 + \delta_3) \doteq$$
+$$\doteq (x^2(1 + 2\epsilon_x) - 1)(1 + \delta_1 + \delta_2 + \delta_3) =$$
+$$= x^2(1 + 2\epsilon_x + \delta_1 + \delta_2 + \delta_3) - (1 + \delta_1 + \delta_2 + \delta_3) =$$
+$$= (x^2 - 1) + 2x^2\epsilon_x + (x^2 - 1)(\delta_1 + \delta_2 + \delta_3) = g_2(x)$$
+$$|\epsilon_x| \leq u, |\delta_i| \leq u$$
+Come prima, porto gli $f(x)$ al primo membro dell'uguaglianza $\epsilon_{tot2} = \frac{g_2(x) - f(x)}{f(x)}$ e ottengo
+$$\epsilon_{tot2} = \frac{2x^2}{x^2 - 1}\epsilon_x + \delta_1 + \delta_2 + \delta_3$$
+Notiamo come
+\begin{list}{}{}
+	\item $\epsilon_{in} = \frac{2x^2}{x^2 - 1}\epsilon_x$, come il calcolo precedente. Infatti, ripetiamo, l'errore inerente è una proprietà della funzione e non di come essa viene calcolata
+	\item $\epsilon_{alg} = \delta_1 + \delta_2 + \delta_3$, diverso poiché abbiamo seguito un calcolo differente
+\end{list}
+Per poter comparare i due algoritmi e scegliere il migliore, analizziamo gli errori algoritmici. L'analisi \textbf{va eseguita in valore assoluto}, poiché non si ha alcuna informazione sul segno degli errori, seguendo quindi le regole di comparazione dei valori assoluti:
+\begin{list}{}{}
+	\item $|a + b| \leq |a|\:+\:|b|$
+	\item $|a\cdot b| = |a|\cdot|b|$
+\end{list}
+$$\epsilon_{alg1} = |\frac{x^2}{x^2 - 1}\epsilon_1 + \epsilon_2| \leq |\frac{x^2}{x^2 - 1}\epsilon_1| + |\epsilon_2| = |\frac{x^2}{x^2 - 1}|\cdot|\epsilon_1| + |\epsilon_2| \leq \frac{x^2}{|x^2 - 1|}u + u = (\frac{x^2}{|x^2 - 1|} + 1)u$$
+$$\epsilon_{alg2} = |\delta_1 + \delta_2 + \delta_3| \leq |\delta_1| + |\delta_2| + |\delta_3| \leq 3u$$
+In $\epsilon_{alg1}$, quindi, l'errore algoritmo è minore o uguale a $(\frac{x^2}{|x^2 - 1|} + 1)u$, che però diventa arbitrariamente grande quando $x$ si avvicina ad 1. Il secondo algoritmo è dunque \textbf{preferibile}, poiché l'\textbf{errore algoritmico è limitato}.
 
+\section{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentaili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
 \end{document}
