@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{makecell}
+\usepackage{mathrsfs}
 \graphicspath{ {./img/} }
 \usepackage{color}
 
@@ -143,5 +144,57 @@ $(q_0, \underline{\triangleright}II+III) \longrightarrow (q_0, \triangleright \u
 \columnbreak
 $(q_0, \underline{\triangleright}abba) \longrightarrow (q_0, \triangleright \underline{a}bba) \longrightarrow (q_A, \triangleright\triangleright \underline{b}ba) \longrightarrow \\ (q_A, \triangleright \triangleright b\underline{b}a) \longrightarrow (q_A, \triangleright \triangleright bb\underline{a}) \longrightarrow (q_A, \triangleright  \triangleright bba\underline{\#}) \longrightarrow \\ (q_{A'}, \triangleright \triangleright bb\underline{a}) \longrightarrow (q_R, \triangleright \triangleright b\underline{b}) \longrightarrow (q_R, \triangleright \triangleright \underline{b}b) \longrightarrow (q_R, \triangleright \underline{\triangleright} bb) \\ \longrightarrow (q_0, \triangleright \triangleright \underline{b}b) \longrightarrow (q_B, \triangleright \triangleright \triangleright \underline{b}) \longrightarrow (q_B, \triangleright \triangleright \triangleright b\underline{\#}) \longrightarrow \\ (q_{B'}, \triangleright \triangleright \triangleright \underline{b}) \longrightarrow (q_R, \triangleright \triangleright \underline{\triangleright})  \longrightarrow (h, \triangleright \triangleright \triangleright)$
 \end{multicols}
-
+\section{Linguaggi di Programmazione}
+Un primo formalismo di algoritmo, come abbiamo visto, è la \textbf{macchina di Turing}: attenendosi alle richieste di tempo e spazio arbitrariamente grandi ma finiti, risolve un \textbf{problema}.\\
+Un secondo formalismo sono i \textbf{linguaggi di programmazione}.
+\subsection{Sintassi}
+\paragraph{Sintassi astratta} Definiamo la \textbf{sintassi} dello scheletro di un semplice linguaggio di programmazione imperativo.\\
+Una \textbf{sintassi astratta} è una sintassi non concreta, cioè che non tiene conto di alcune cose come la procedenza tra gli operatori.\\
+\begin{list}{}{\textbf{Sintassi}}
+	\item Expr $\rightarrow$ E ::= x $\vline\:$ n $\vline\:$ E + E $\vline\:$ E $\cdot$ E $\vline\:$ E - E
+	\item Bexpr $\rightarrow$ B ::= tt $\vline\:$ ff $\vline\:$ E $<$ E $\vline\:$ $\neg$B $\vline\:$ B $\vee$ B
+	\item Comm $\rightarrow$ C ::= skip $\vline\:$ x $=$ E $\vline\:$ C;C $\vline\:$ if B then C else C $\vline\:$ for i = E to E do C $\vline\:$ while B do C
+\end{list}
+\begin{list}{}{Abbiamo una serie di insiemi da definire ulteriormente}
+	\item x $\in$ Var, l'insieme delle \textbf{variabili}
+	\item n $\in$ $N$, \textbf{numeri naturali}.
+\end{list}
+\begin{list}{}{Abbiamo anche la \textbf{memoria} per poter \textbf{assegnare ad una variabile il suo significato}}
+	\item $\sigma$ : Var $\rightarrow_{fin} N$\\
+	Si dice "a dominio finito", indicata dal $fin$ sotto la freccia, per indicare che il dominio Var ha cardinalità finita. Var dominio è quindi un sottoinsieme di Var insieme delle variabili che sarebbe infinito.
+\end{list}
+\pagebreak
+\subsection{Funzioni di Valutazione}
+\begin{list}{}{Inoltre, per valutare le espressioni generate dalla grammatica, servono delle \textbf{funzioni di valutazione}.}
+	\item $\mathscr{E}$ : Expr $\times$ (Var $\rightarrow N$) $\rightarrow N$\\La sua \textbf{semantica denotazionale} è la seguente
+	\begin{multicols}{2}
+	\begin{list}{}{}
+		\item $\mathscr{E}[$x$]_\sigma$ = $\sigma$(x)
+		\item $\mathscr{E}[$n$]_\sigma$ = n
+		\item $\mathscr{E}[$E$_1$ $\pm$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ $\pm$ $\mathscr{E}[$E$_2]_\sigma$
+	\end{list}
+	\end{multicols}
+	Importante notare come gli operatori $+$, $-$, $\cdot$ \textit{dentro} le espressioni siano dei \textbf{semplici token denotazionali}, mentre sono gli operatori \textit{valutati} ad eseguire il vero e proprio calcolo. Per chiarire questo aspetto, facciamo un esempio. Valutiamo con la nostra funzione $\mathscr{E}[$E$_1$ $+$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ \textit{più} $\mathscr{E}[$E$_2]_\sigma$. Se non definiamo l'operatore "\textit{più}", allora se poniamo $\sigma$(x) = 25 la valutazione
+	\begin{list}{}{}
+		\item $\mathscr{E}[$3 + x$]_\sigma$ = $\mathscr{E}[$3$]_\sigma$ \textit{più} $\mathscr{E}[$x$]_\sigma$ = 3 \textit{più} 25 = 42
+	\end{list}
+	è corretta quanto
+	\begin{list}{}{}
+		\item $\mathscr{E}[$3 + x$]_\sigma$ = $\mathscr{E}[$3$]_\sigma$ \textit{più} $\mathscr{E}[$x$]_\sigma$ = 3 \textit{più} 25 = 28
+	\end{list}
+	Ovviamente utilizzeremo la valutazione specificata in precedenza e gli operatori aritmetici assumeranno il loro significato standard.\\
+	L'unica eccezione è l'operatore $-$, che nel nostro caso sarà il \textbf{meno limitato} dal simbolo $\dot{-}$, la cui unica differenza è che non può dare un risultato inferiore a 0. Ad esempio, 5 $\dot{-}$ 7 = 0
+	\item $\mathscr{B}$ : Bexpr $\times$ (Var $\rightarrow N$) $\rightarrow$ \{tt, ff\}\\
+	La cui \textbf{semantica denotazionale} è la seguente
+	\begin{multicols}{2}
+	\begin{list}{}{}
+		\item $\mathscr{B}[$tt$]_\sigma$ = tt
+		\item $\mathscr{B}[$ff$]_\sigma$ = ff
+		\item $\mathscr{B}[$E$_1 <$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ $<$ $\mathscr{E}[$E$_2]_\sigma$
+		\item $\mathscr{B}[\neg$B$]_\sigma$ = $\neg\mathscr{B}[$B$]_\sigma$
+		\item $\mathscr{B}[$B$_1 \vee$ B$_2]_\sigma$ = $\mathscr{B}[$B$_1]_\sigma$ $\vee$ $\mathscr{B}[$B$_2]_\sigma$
+	\end{list}
+	\end{multicols}
+	Anche qua vale il medesimo discorso sulla definizione sugli effettivi operatori.
+\end{list}
 \end{document}
