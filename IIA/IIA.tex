@@ -260,7 +260,7 @@ Esempio classico: ricerca della sequenza di azioni per raggiungere una data dest
 
 \chapter{Problem Solving}
 \section{Agenti Risolutori di Problemi}
-\paragraph{Paradigma} Questi agenti adottano il paradigma della \textbf{risoluzione di problemi come ricerca in uno spazio di stati} (\textbf{problemi solving}). Sono \textbf{agenti con modello} (storia, percezioni) che \textbf{adottano una rappresentazione atomica dello stato}. Sono \textbf{particolari agenti con obiettivo} che \textbf{pianificano l'intera sequenza di azioni} prima di agire.
+\paragraph{Problem Solving} Questi agenti adottano il paradigma della \textbf{risoluzione di problemi come ricerca in uno spazio di stati} (\textbf{problemi solving}). Sono \textbf{agenti con modello} (storia, percezioni) che \textbf{adottano una rappresentazione atomica dello stato}. Sono \textbf{particolari agenti con obiettivo} che \textbf{pianificano l'intera sequenza di azioni} prima di agire.
 \subsection{Processo di risoluzione}
 \paragraph{Passi da seguire}
 \begin{enumerate}
@@ -295,5 +295,133 @@ La determinazione dell'obiettivo e la formulazione del problema richiede \textbf
 Costo Totale = Costo della Ricerca $+$ Costo del Cammino Soluzione
 \end{center}
 Valuteremo algoritmi sul primo, ottimizzando il secondo.
-%https://elearning.di.unipi.it/pluginfile.php/30330/mod_resource/content/0/3-2020-problem_solving.pdf, 21
+\subsection{Ricerca ad Albero}
+Generazione di un \textbf{albero di ricerca sovrapposto allo spazio degli stati}. Ricerca significa \textbf{approfondire l'opzione}, mettendo da parte le altre che verranno riprese se non trovo la soluzione.\\
+Quindi l'albero viene generato esplorando i vari nodi partendo dallo stato iniziale. Il nodo è diverso dallo stato: per esempio, in un grafo rappresentante le città, se parto da città A ed esploro l'opzione nodo B, il nodo B avrà come figlio anche città A perché posso tornarci.
+\begin{center}
+	\includegraphics[scale=0.7]{ricercaalbero.png}
+\end{center}
+\paragraph{Algoritmo} \textbf{Ricerca ad albero}, ossia senza controllare se i nodi (\textbf{stati}) siano già stati esplorati.
+
+\begin{lstlisting}
+function Ricerca-Albero(problema) returns soluzione oppure fallimento
+	#Inizializza la frontiera con stato iniziale del problema
+	loop do
+	if (frontiera vuota) 
+		return fallimento
+	#Scegli* un nodo foglia da espandere e rimuovilo dalla frontiera
+	if (nodo contiene uno stato obiettivo)
+		return soluzione corrispondente
+	#Espandi il nodo e aggiungi i successori alla frontiera
+\end{lstlisting}
+$*$ $=$ \textbf{strategia}: quale scegliere? I vari algoritmi si differenziano per la strategia di scelta.\\
+\begin{list}{}{Un \textbf{nodo} n è una \textbf{struttura dati con quattro componenti}}
+	\item \textbf{Stato}, n.stato
+	\item \textbf{Padre}, n.padre
+	\item \textbf{Azione} effettuata per generarlo, n.azione
+	\item \textbf{Costo} del cammino dal nodo iniziale al nodo, n.costo-cammino\\
+	Indicata come g(b) = padre.costo-cammino + costo-passo ultimo)
+\end{list}
+\paragraph{Frontiera} Lista dei \textbf{nodi in attesa di essere espansi}, cioè \textbf{le foglie} dell'albero di ricerca. Implementata come una coda con operazioni:
+\begin{list}{}{}
+	\item Vuota(coda)
+	\item Pop(coda) estrae l'ultimo elemento (implementa la strategia)
+	\item Inserisci(elemento, coda)
+\end{list}
+Diversi tipi di coda hanno differenti funzioni di inserimento e \textbf{implementano strategie diverse}.
+\begin{list}{}{}
+	\item \textbf{FIFO} $\rightarrow$ BF\\
+	Viene estratto l'elemento più vecchio, cioè in attesa da più tempo. Nuovi nodi aggiunti alla fine
+	\item \textbf{LIFO} $\rightarrow$ DF\\
+	Viene estratto l'ultimo elemento inserito. Nuovi nodi aggiunti all'inizio
+	\item \textbf{Con priorità} $\rightarrow$ UC, altri\ldots\\
+	Viene estratto l'elemento con priorità più alta in base ad una funzione di ordinamento. All'aggiunta di un nuovo nodo si riordina.
+\end{list}
+\paragraph{Strategie non informate}
+\begin{list}{}{}
+	\item Ricerca in \textbf{ampiezza} (BF)
+	\item Ricerca in \textbf{profondità} (DF)
+	\item Ricerca in \textbf{profondità limitata} (DL)
+	\item Ricerca con \textbf{apprendimento iterativo} (ID)
+	\item Ricerca di \textbf{costo uniforme} (UC)
+\end{list}
+\paragraph{Strategie informate} Anche dette di \textbf{ricerca euristica}: fanno uso di informazioni riguardo la distanza stimata della soluzione.
+\paragraph{Valutazione di una strategia}
+\begin{list}{}{}
+	\item \textbf{Completezza}: se la soluzione esiste viene trovata
+	\item \textbf{Ottimalità} (ammissibilità): trova la soluzione migliore, con costo minore
+	\item \textbf{Complessità in tempo}: tempo richiesto per trovare la soluzione
+	\item \textbf{Complessità in spazio}: memoria richiesta
+\end{list}
+\subsection{Breadth-First}
+\paragraph{Ricerca in ampiezza} Esplorare il grafo dello spazio degli stati a livelli progressivi di stessa profondità. Implementata con una coda FIFO. \textbf{Algoritmo su albero}:
+\begin{lstlisting}
+function RicercaAmpiezzaA(problema)	returns soluzione oppure fallimento
+	nodo = un nodo con stato = problema.stato-iniziale e costo-di-cammino = 0
+	#Stati goal-tested alla generazione: maggior efficienza si ferma appena trova goal
+	if (problema.TestObiettivo(nodo.Stato)) return Soluzione(nodo)
+	frontiera = una coda FIFO con nodo come unico elemento
+	loop do
+	if (Vuota(frontiera)) return fallimento
+	nodo = Pop(frontiera)
+	for each azione in problema.Azioni(nodo.Stato) do #Espansione
+		figlio = Nodo-Figlio(problema, nodo, azione) #costruttore: vedi AIMA
+		if (Problema.TestObiettivo(figlio.Stato)) return Soluzione(figlio)
+		frontiera = Inserisci(figlio, frontiera) #frontiera coda FIFO
+\end{lstlisting}
+\pagebreak
+\textbf{Algoritmo su grafo} evitando di espandere stati già esplorati:
+\begin{lstlisting}
+function RicercaAmpiezzaG(problema) returns soluzione oppure fallimento
+	nodo = un nodo con stato = problema.stato-iniziale e costo-di-cammino = 0
+	if (problema.TestObiettivo(nodo.Stato)) return Soluzione(nodo)
+	frontiera = una coda FIFO con nodo come unico elemento
+	esplorati = insieme vuoto #gestisco stati ripetuti
+	loop do
+	if (Vuota(frontiera)) return fallimento
+	nodo = POP(frontiera) #aggiungi nodo.Stato a esplorati
+	for each azione in problema.Azioni(nodo.Stato) do
+		figlio = Nodo-Figlio(problema, nodo, azione)
+		if (figlio.Stato non in esplorati e non in frontiera)
+			if (Problema.TestObiettivo(figlio.Stato)) return Soluzione(figlio)
+			frontiera = Inserisci(figlio, frontiera) #in coda
+\end{lstlisting}
+
+\textbf{Python}
+\begin{lstlisting}
+def breadth_first_search(problem): """Ricerca-grafo in ampiezza"""
+  explored = [] # insieme degli stati gia' visitati (implementato come una lista)
+  node = Node(problem.initial_state) #il costo del cammino e' inizializzato nel costruttore del nodo
+  if problem.goal_test(node.state):
+    return node.solution(explored_set = explored)
+  frontier = FIFOQueue() # la frontiera e' una coda FIFO
+  frontier.insert(node)
+  while not frontier.isempty(): # seleziona il nodo per l'espansione
+    node = frontier.pop()
+    explored.append(node.state) # inserisce il nodo nell'insieme dei nodi esplorati
+    for action in problem.actions(node.state):
+      child_node = node.child_node(problem,action)
+      if (child_node.state not in explored) and
+      (not frontier.contains_state(child_node.state)):
+        if problem.goal_test(child_node.state):
+        return child_node.solution(explored_set = explored)
+      # se lo stato non e' uno stato obiettivo allora inserisci il nodo nella frontiera
+      frontier.insert(child_node)
+  return None # in questo caso ritorna con fallimento
+\end{lstlisting}
+\paragraph{Analisi della complessità spazio-temporale} Assumiamo:
+\begin{list}{}{}
+	\item \textbf{b} = fattore di ramificazione (\textbf{b}ranching)
+	\item \textbf{d} = profondità del nodo obiettivo più superficiale (\textbf{d}epth)\\
+	Più vicino all'iniziale
+	\item \textbf{m} = lunghezza massima dei cammini nello spazio degli stati (\textbf{m}ax)
+\end{list}
+Analisi:
+\begin{list}{}{}
+	\item Strategia \textbf{completa}
+	\item Strategia \textbf{ottimale} \textit{se gli operatori hanno tutti lo stesso costo k} cioè g(n) = k $\cdot$ depth(n), dove g(n) è il costo del cammino per arrivare ad n.
+	\item Complessità nel tempo (nodi generati)\\
+	T(b, d) = b + b$^2$ + \ldots + b$^d$ = O(b$^d$), con b figli per ogni nodo.
+	\item Complessità nello spazio (nodi in memoria): O(b$^d$)
+\end{list}
 \end{document}
