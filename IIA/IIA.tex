@@ -424,4 +424,177 @@ Analisi:
 	T(b, d) = b + b$^2$ + \ldots + b$^d$ = O(b$^d$), con b figli per ogni nodo.
 	\item Complessità nello spazio (nodi in memoria): O(b$^d$)
 \end{list}
+\pagebreak
+\subsection{Depth-First}
+\paragraph{Ricerca in profondità} Implementata da una coda che mette i successori in testa alla lista (LIFO, pila o stack). Algoritmo generale visto all'inizio, su grafo o albero.
+\paragraph{Analisi (su albero)} Poniamo \textbf{m} lunghezza massima dei cammini nello spazio degli stati e \textbf{b} fattore di diramazione\\
+Tempo: O(b$^m$) che può essere anche $>$ O(b$^d$)\\
+Spazio: b$\cdot$m, frontiera sul cammino perché vengono cancellati i rami completamente esplorati ma mantenuti i fratelli del path corrente.\\
+\textbf{Non completa} (loop) e \textbf{non ottimale}, ma drastico risparmio di memoria.
+\begin{list}{}{}
+	\item BF, d = 16 $\rightarrow$ 10 Esabyte
+	\item DF, d = 16 $\rightarrow$ 156 Kilobyte
+\end{list}
+\paragraph{Analisi (su grafo)} In caso di DF su grafo si perdono i vantaggi di memoria: torna a tutti i possibili stati (al caso pessimo diventa esponenziale come BF) per mantenere la lista dei visitati, ma così DF diventa \textbf{completa} in spazi degli stati finiti (al caso pessimo tutti i nodi vengono espansi).\\
+Rimane non completa in spazi infiniti.\\
+Possibile controllare anche solo i nuovi stati rispetto al cammino radice-nodo corrente senza aggravio di memoria. Si evitano i cicli finiti in spazi finiti ma non i cammini ridondanti.
+\subsection{Depth-First ricorsiva}
+Ancora più efficiente in occupazione di memoria perché mantiene solo il cammino corrente (m nodi al caso pessimo).\\
+Realizzata da un algoritmo ricorsivo "con backtracking" che non necessita di tenere in memoria b nodi per ogni livello, ma salva lo stato su uno stack a cui torna in caso di fallimento per fare altri tentativi. \textbf{Algoritmo su albero}:
+\begin{lstlisting}
+function Ricerca-DF-A (problema) returns soluzione oppure fallimento
+	return Ricerca-DF-ricorsiva(CreaNodo(problema.Stato-iniziale), problema)
+	
+function Ricerca-DF-ricorsiva(nodo, problema) returns soluzione oppure fallimento
+	if problema.TestObiettivo(nodo.Stato) return Soluzione(nodo)
+	else
+		for each azione in problema.Azioni(nodo.Stato) do
+			figlio = Nodo-Figlio(problema, nodo, azione)
+			risultato = Ricerca-DF-ricorsiva(figlio, problema)
+			if risultato != fallimento then return risultato
+		return fallimento
+\end{lstlisting}
+\textbf{Python}
+\begin{lstlisting}
+def recursive_depth_first_search(problem, node):  """Ricerca in profondita' ricorsiva """
+  #controlla se lo stato del nodo e' uno stato obiettivo
+   if problem.goal_test(node.state):
+    return node.solution()
+  #in caso contrario continua
+  for action in problem.actions(node.state):
+    child_node = node.child_node(problem, action)
+    result = recursive_depth_first_search(problem, child_node)
+    if result is not None: return result
+  return None #con fallimento
+\end{lstlisting}
+\subsection{Depth-Limited}
+\paragraph{Ricerca in profondità limitata} Si va in profondità fino ad un certo livello predefinito \textbf{l}.\\
+\textbf{Completa} per poblemi di cui si conosce un limite superiore per la profondità della soluzione: ad esempio route-finding limitata dal numero di città - 1\\
+\textbf{Completo} se d $<$ l\\
+\textbf{Non ottimale}\\
+Complessità in tempo: O(b$^l$)\\
+Complessità in spazio: O(b$\cdot$l)
+\pagebreak
+\subsection{Iterative-Deepening}
+\begin{center}
+	\includegraphics[scale=0.7]{id.png}
+\end{center}
+\paragraph{Analisi} Miglior compromesso tra BF e DF. Nell'ID, i nodi dell'ultimo livello sono generati una volta, quelli del penultimo 2, del terzultimo 3\ldots quelli del primo d volte.\\ID: (d)b + (d-1)b$^2$ + \ldots + 3b$^{d-2}$ + 2b$^{d-1}$ + b$^d$\\
+Complessità in tempo: O(b$^d$)\\
+Complessità in spazio: O(b$\cdot$d), vs O(b$^d$) del BF.
+\section{Direzione della Ricerca}
+Altro aspetto usato per ottimizzare la risoluzione di problemi, la \textbf{direzione della ricerca} è un \textbf{problema ortogonale alla strategia di ricerca}. La ricerca si può fare
+\begin{list}{}{}
+	\item \textbf{In avanti}, guidata dai dati come fatto fin'ora: si \textbf{esplora lo spazio di ricerca dallo stato iniziale allo stato obiettivo}
+	\item \textbf{All'indietro} o \textbf{guidata dall'obiettivo}: si \textbf{esplora lo spazio di ricerca a partire da un goal e riconducendosi a sotto-goal fino a trovare uno stato iniziale}.
+\end{list}
+Conviene \textbf{procedere nella direzione in cui il fattore di diramazione è minore}.\\
+Si preferisce la \textbf{ricerca all'indietro} quando
+\begin{list}{}{}
+	\item l'\textbf{obiettivo è chiaramente definito} (es. theorem proving) o si possono \textbf{formulare una serie limitata di ipotesi}
+	\item i \textbf{dati del problema non sono noti} e la loro \textbf{acquisizione può essere guidata dall'obiettivo}
+\end{list}
+mentre si preferisce la \textbf{ricerca in avanti} quando
+\begin{list}{}{}
+	\item gli \textbf{obiettivi possibili sono molti} (es. design)
+	\item abbiamo una \textbf{serie di dati da cui partire}
+\end{list}
+\pagebreak
+\paragraph{Ricerca bidirezionale} Si procede nelle due direzioni fino ad incontrarsi
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item \textbf{Complessità in tempo}: O(b$^{d/2}$) = O($\sqrt{b^d}$)\\Test intersezione in tempo costante, esempio: hash table
+	\item \textbf{Complessità in spazio}: O(b$^{d/2}$) = O($\sqrt{b^d}$)\\Almeno tutti i nodi in una direzione in memoria, esempio: usando BF
+\end{list}
+Non è sempre applicabile, ad esempio in casi di predecessori non definiti, troppi stati obiettivo\ldots
+\begin{center}
+	\includegraphics[scale=0.5]{ricbidirez.png}
+\end{center}
+\end{multicols}
+\section{Problematiche}
+\paragraph{Cammini Ciclici}
+I \textbf{cammini ciclici} potenzialmente rendono gli alberi di ricerca infiniti, anche se con stati finiti.
+\begin{center}
+	\includegraphics[scale=0.7]{camminiciclici.png}
+\end{center}
+\paragraph{Ridondanze}
+Su spazi di stati a grafo si generano più volte nodi con lo stesso stato nella ricerca, anche in assenza di cicli.
+\begin{center}
+	\includegraphics[scale=0.7]{ridondanze.png}
+\end{center}
+\pagebreak
+Un caso è la \textbf{ricerca nelle griglie} Visitare stati già visitati fa compiere lavoro inutile. Costo 4$^d$ ma circa 2d$^2$ stati distinti.
+\begin{center}
+	\includegraphics[scale=0.7]{griglie.png}
+\end{center}
+\textbf{Come evitarlo?}
+\paragraph{Compromesso tra spazio e tempo} \textbf{Ricordare} gli stati visitati \textbf{occupa spazio} ma ci \textbf{consente di evitare di visitarli di nuovo}. \textit{Gli algoritmi che dimenticano la propria storia sono destinati a ripeterla}.
+\subsection{Tre soluzioni} In ordine crescente di costo ed efficacia:
+\begin{list}{}{}
+	\item Non tornare nello stato da cui si proviene: si elimina il genitore dai nodi successori.\\
+	Non evita i cammini ridondanti.
+	\item Non creare cammini con cicli: si controlla che i successori non siano antenati del nodo corrente.
+	\item Non generare nodi con stati già visitati/esplorati: ogni nodo visitato deve essere tenuto in memoria per una complessità O(s) dove s è il numero di stati possibili (esempio: hash table per accesso efficiente
+\end{list}
+\paragraph{Repetita} Il costo può essere alto: in caso di DF la memoria torna da b$\cdot$m a tutti gli stati, ma diventa una ricerca \textbf{completa} per spazi finiti. Ma \textbf{in molti casi gli stati crescono esponenzialmente} (scacchi\ldots)
+\subsection{Uniform-Cost} \textbf{Generalizzazione della ricerca in ampiezza} (costi diversi tra passi): \textbf{si sceglie il nodo di costo g(n) del cammino minore sulla frontiera}, si espande sui contorni di uguale costo (e.g. in km) invece che sui contorni di uguale profondità (BF). Implementata da una \textbf{coda ordinata per costo cammino crescente}. \textbf{Algoritmo su albero}:
+\begin{lstlisting}
+function Ricerca-UC-A(problema) returns soluzione oppure fallimento
+	nodo = un nodo con stato il problema.stato-iniziale e costo-di-cammino=0
+	frontiera = una coda con priorita con nodo come unico elemento
+	loop do
+		if Vuota?(frontiera) then return fallimento
+		nodo = POP(frontiera)
+		#Esame post-generaz e vedere costo minore, tipico per coda con priorita
+		if problema.TestObiettivo(nodo.Stato) then return Soluzione(nodo)
+		for each azione in problema.Azioni(nodo.Stato) do
+			figlio = Nodo-Figlio(problema, nodo, azione)
+			frontiera = Inserisci(figlio, frontiera) #in coda con priorita
+	end
+\end{lstlisting}
+\pagebreak
+\textbf{Algoritmo su grafo}:
+\begin{lstlisting}
+function Ricerca-UC-G(problema) returns soluzione oppure fallimento
+	nodo = un nodo con stato il problema.stato-iniziale e costo-di-cammino=0
+	frontiera = una coda con priorita con nodo come unico elemento
+	esplorati = insieme vuoto
+	loop do
+		if Vuota?(frontiera) then return fallimento
+		nodo = POP(frontiera);
+		if problema.TestObiettivo(nodo.Stato) then return Soluzione(nodo)
+		aggiungi nodo.Stato a esplorati
+		for each azione in problema.Azioni(nodo.Stato) do
+			figlio = Nodo-Figlio(problema, nodo, azione)
+			if figlio.Stato non in esplorati e non in frontiera then
+				frontiera = Inserisci(figlio, frontiera) #in coda con priorita
+			else if figlio.Stato in frontiera con Costo-cammino piu alto then
+				sostituisci quel nodo frontiera con figlio 
+\end{lstlisting}
+\paragraph{Analisi} Ottimalità e completezza garantite purché il costo degli archi sia maggiore di $\epsilon > 0$. Assunto C$^*$ come il costo della soluzione ottima, allora $\lfloor$C$^*$/$\epsilon\rfloor$ \textbf{numero di mosse al caso peggiore}, arrotondato per difetto. Tendo ad andare verso tante mosse di costo $\epsilon$ prima di una che parta più alta ma poi abbia un path a costo più basso.\\
+Complessità: O(b$^{1 + \lfloor C^*/\epsilon\rfloor}$).\\
+Quando ogni azione ha lo stesso costo somiglia a BF ma con complessità O(b$^{1 + d}$) perché esame e arresto solo dopo aver espanso anche l'ultima frontiera.
+\section{Confronto delle Strategie (albero)}
+\begin{center}
+\begin{tabular}{c | c | c | c | c | c | c}
+Criterio & \textbf{BF} & \textbf{UC} & \textbf{DF} & \textbf{DL} & \textbf{ID} & Bidirez. \\
+\hline
+Completa? & Si & Si$^1$ & No & Si$^3$ & Si & Si \\
+Tempo & O(b$^d$) & O(b$^{1 + \lfloor C^*/\epsilon\rfloor}$) & O(b$^m$) & O(b$^l$) & O(b$^d$) & O(b$^{d/2}$) \\
+Spazio & O(b$^d$) & O(b$^{1 + \lfloor C^*/\epsilon\rfloor}$) & O(b$\cdot$m) & O(b$\cdot$l) & O(b$\cdot$d) & O(b$^{d/2}$)\\
+Ottimale? & Si$^2$ & Si$^1$ & No & No & Si$^2$ & Si
+\end{tabular}
+\end{center}
+\begin{list}{}{}
+	\item $^1$ Per costi degli archi $\geq\epsilon > 0$
+	\item $^2$ Se gli operatori hanno tutti lo stesso costo
+	\item $^3$ Per problemi di cui si conosce un limite alla profondità della soluzione (se l $>$ d)
+\end{list}
+\section{Conclusioni}
+Un \textbf{agente per "problem solving"} adotta un paradigma generale di risoluzione dei problemi:
+\begin{list}{}{}
+	\item Formula il problema, non automatico
+	\item Ricerca la soluzione nello spazio degli stati, automatico
+\end{list}
+%da fare: lez. ven 28/02
 \end{document}
