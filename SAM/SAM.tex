@@ -223,6 +223,20 @@ Un \textbf{task}, cioè quello che vede l'utente, può essere formato da un'acti
 	\item un utente percepisce come "app" un \textbf{task}.
 \end{list}
 Quindi per garantire una UX gradevole occorre che l'integrazione sia \textbf{seamless}: uso di stili, temi e icone simili (\textbf{style guide}), \textbf{consistenza fra le app} più importante della consistenza dentro le app o fra piattaforme
+\section{Navigazione}
+Navigazione: utente passa da un contesto all'altro. Navigazione gerarchica, posso dal task leggere una mail e tornare indietro o andare a leggere il resto delle mail.\\
+Originariamente solo tasto back, stack push e pop. Per lungo tempo ha asservito agli scopi, ispirato al paradgima navigaz web. Poi non era più sufficiente. Porta a sistemi nato per esser epiù logico ma confonde di più. Attualmente almeno due diverse: tasto back risale stack attività dove sono stato (Schermata in cui ero prima) e tasto up torna a livello logico superiore di dove  sono (non è detto che ci sia già stato, solitamente implementato come icona nella actionbar).\\
+Caso tipico è navigazione con pattern master-detail. Classico pattern di progettazione app. Pattern: soluzione adattabile per problemi frequenti. Nel master detail problema generale è: ho lista di cose e poi ho dettagli su quelle cose. Elenco mail ma posso leggerle, elenco chat ma posso entrare nella chat.
 \chapter{Risorse}
 %http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2002-03.pdf, 39 [25/02 1h 02]
+\section{Accesso alle Risorse}
+Ho risorse nella cartella res organizzate. Produce classe R.java che dà nomi usabili tipati. Efficienza perché uso interi per riferire oggetti di vari tipi (layout, stringhe\ldots) che non vengono creati sullo heap. Al tempo stesso controllo staticamente tipi a seconda di R.layout, R.string\ldots Così alloco gli oggetti solamente quando servono, all'ultimo momento.\\
+Accesso alle risorse metodi della classe \texttt{Context}, superclasse dei \texttt{Component}. Ogni pezzo dell'app è un context, da un thread, in una classe, in un'app, eseguita forse da un processo. \texttt{Context.getResources().get}\ldots\texttt{(int id)}. Ci sono anche metodi per accedere alle risorse \texttt{raw} (risorse di tipo non interpretabile dal sistema): \texttt{InputStream openRawResource(int id)}\\
+\texttt{AssetManager getAssets()} l'asset manager sola letture legge file: list lista file, assetfiledescriptor: file da usare in contesto più posix, magari per passarlo a metodo nativo scritto in C o a decoder assembler e inputstream: file da leggere ancora nel mondo java wrapper decode\ldots\\
+\subsection{Risorse alternative} Per un certo numero di condizioni dell'ambiente si può indicare quali risorsi usare in che contesto: lingua, dimensioni schermo\ldots\\
+ID risorse è identificatore logico. Alcuni esempi\ldots\\
+Questo è fatto tramite qualificatori che descrivono aspetti dell'ambiente, si affiancano alle sottodirectory di res: \texttt{res/tipo-qualificatori}. Es \texttt{res/drawable-ja} icone da usare su dispositivi in lingua giapponese. \texttt{drawable-ldpi}, \texttt{drawable-hdpi}\\
+\ldots carellata qualificatori\ldots
+Runtime processo di scelta.
+processo di scarto rimango con più opzioni scelgo quella per priorità, rimango con una ad un certo punto scelgo quella, rimango con 0. Se nessuna matcha tutti validi, se ne matcha una o più scarto i non validi. Inoltre c'è directory di default.
 \end{document}
