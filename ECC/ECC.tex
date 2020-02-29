@@ -218,5 +218,85 @@ Definiamo quindi un \textbf{insieme di transizioni ($\Gamma$, $\rightarrow$)} tr
 \end{multicols}
 	$$\frac{-}{(for\:\: i = E_1\:\: to\:\: E_2\:\: do\:\: C, \sigma) \rightarrow (i = n_1;\:\:C;\:\:for\:\: i = n_1 + 1\:\:to\:\:n_2\:\:do\:\:C, \sigma)}\mathscr{B}[E_2 < E_1]_\sigma = ff\: \wedge\: \mathscr[E_1]_\sigma = n_1 \wedge\: \mathscr[E_2]_\sigma = n_2$$
 	$$\frac{-}{(while\:\:B\:\:do\:\:C, \sigma) \rightarrow (if\:\:B\:\:then\:\:C;\:\:while\:\:B\:\:do\:\:C,\sigma)} $$
-	
+\section{Calcolabilità}
+\subsection{T-Calcolabile}
+Dati $\Sigma$ alfabeto della macchina, $\Sigma_0$ alfabeto di input e $\Sigma_1$ alfabeto di output, con \#, $\triangleright \not\in \Sigma_0 \cup \Sigma_1 \subset \Sigma$
+\begin{center}
+M=(Q, $\Sigma$, $\delta$, q$_0$) calcola $f$ : $\Sigma_0^* \longrightarrow \Sigma_1^*$ $\Leftrightarrow$ ($\forall w \in \Sigma_0^* \wedge f(w) = x \Rightarrow M(w) \rightarrow_{fin}$ (h, $\triangleright$z)$)$
+\end{center}
+Si dice che la \textbf{funzione} $f$ è \textbf{T-Calcolabile}.\\
+Cioè, esiste una macchina di Turing che per ogni stringa finita in input arriva, con un numero finito di passi, all'arresto lasciando sul nastro la stringa di output corretta. Notare come non viene data nessuna interpretazione al risultato della $f$.
+\subsection{\texttt{while}-Calcolabile}
+\begin{center}
+C calcola $f$ : Var $\rightarrow$ $N$ $\Leftrightarrow$ ($\forall\:\: \sigma$ : Var $\rightarrow$ $N$ $\wedge$ $f(x) = n$ $\Rightarrow$ C($\sigma$) $\rightarrow_{fin}$ $\sigma'$ $\wedge$ $\sigma'(x) = n$)
+\end{center}
+Si dice che la funzione $f$ è \textbf{\texttt{while}-Calcolabile}.\\
+Cioè esiste un programma C che calcola il risultato corretto in un numero finito di passi.
+\paragraph{Invariante} Tutti i risultati visti fin'ora \textbf{sono invarianti rispetto al modello dei dati}, e questo vale anche per la T-Calcolabilità e la \texttt{while}-Calcolabilità.\\
+In particolare, se ho i dati in un formato A allora posso codificarli nel formato B in cui opera la macchina, calcolare il risultato in formato B e decoficarlo nel formato A di partenza. Questo vale se \textbf{le codifiche sono funzioni biunivoche e "\textit{facili}"}. Vedremo cosa significa essere "facili", ma per adesso basti pensare ad un numero finito di passi e che terminano sempre.
+\subsection{Esempio di codifica}
+\begin{multicols}{2}
+\begin{center}
+	\begin{tabular}{c || c | c | c | c | c | c}
+	 & 0 & 1 & 2 & 3 & 4 & 5 \\
+	 \hline
+	 \hline
+	 0 & 0 & 2 & 5 & 9 & 14 & \\
+	 \hline
+	 1 & 1 & 4 & 8 & 13 & & \\
+	 \hline
+	 2 & 3 & 7 & 12 & & & \\
+	 \hline
+	 3 & 6 & 11 & \ldots & & & \\
+	 \hline
+	 4 & 10 & 16 & & & & \\
+	 \hline
+	 5 & 15 & & & & & 
+	\end{tabular}\\
+	Codifica a coda di rondine
+\end{center}
+\columnbreak
+\paragraph{Codifica} ($x$, $y$) $\mapsto$ $\frac{1}{2}$($x^2 + 2xy + y^2 + 3x + y$)\\
+Es. (3, 1) $\mapsto$ $\frac{1}{2}$($9 + 6 + 1 + 9 + 1$) = $\frac{26}{2}$ = 13
+\paragraph{Decodifica} $n$ $\mapsto$ ($n - \frac{1}{2}k(k + 1)$, $k - (n - \frac{1}{2}k(k+1))$) con $k = \lfloor\frac{1}{2}(\sqrt{1 + 8n} -1)\rfloor$\\\\
+Es 8 $\mapsto$ ($8 - 6$, $6 - 8 + 3$) = ($2$, $1$)\\
+$k = \lfloor\frac{1}{2}\sqrt{1 + 8\cdot 8} - 1\rfloor = 3$\\
+$\frac{k(k+1)}{2} = 6$
+\end{multicols}
+\pagebreak
+\section{Notazione}
+Una \textbf{funzione} $f$ è $\subset$ A $\times$ B, con A spazio di partenza e B codominio. Quindi $f$(a) = b si può esprimere anche con (a, b) $\in$ $f$, con a $\in$ A e b $\in$ B.
+\begin{list}{}{}
+	\item $f$(a) = b $\wedge$ $f$(a) = c $\Rightarrow$ b = c
+	\item Considereremo \textbf{funzioni parziali}, cioè funzioni con A contenente punti dove $f$ non è definita. Non è quindi detto che $\forall$ a $\in$ A $\exists$ b $\in$ B \vline $\:\:f$(a) = b
+	\item $f$ \textbf{converge} su a, cioè $f$(a)$\downarrow$ $\Leftrightarrow$ $\exists$ b $\vline\:$ $f$(a) = b
+	\item $f$ \textbf{diverge} su a, cioè $f$(a)$\uparrow$ $\Leftrightarrow$ $\not\exists$ b $\vline\:$ $f$(a) = b
+	\item \textbf{Dominio} di $f$: $dom(f)$ = \{a \vline$\:\: f$(a)$\downarrow$\}
+	\item \textbf{Immagine} di $f$: $imm(f)$ = \{b \vline$\:\: \exists$ a $\in$ A $\Rightarrow$ $f$(a) = b\}
+\end{list}
+\paragraph{Rapporto tra algoritmi A e funzioni $f$} $f$ è un \textbf{insieme potenzialmente infinito di coppie}, ma non posso assegnare due $f$ diverse allo stesso insieme, mentre esistono tanti algoritmi diversi che calcolano la stessa funzione.\\
+Ad esempio, $f$ = $\emptyset$ è calcolata da \texttt{while(true) do skip} ma anche da \texttt{while(true) do skip;skip}.
+\begin{enumerate}
+	\item Quali sono le funzioni calcolabili?\\
+	Nelle ipotesi iniziali di definizione di algoritmo, per adesso conosciamo le T-Calcolabili e le \texttt{while}-Calcolabili.
+	\item Quali proprietà hanno?\\
+	Posso combinarle?
+	\item Esistono funzioni non calcolabili?
+	\item Sono interessanti?\\
+	Esistono a prescindere dalla macchina?
+\end{enumerate}
+\paragraph{Algoritmi e calcolabilità} Per ora abbiamo definito gli algoritmi in base al loro comportamento, sotto forma di \textbf{configurazioni che si susseguono} del tipo (istr. corrente + \ldots, memoria). Abbiamo anche diversi modi di affrontare la calcolabilità:
+\begin{enumerate}
+	\item \textbf{Hardware}, con la macchina di Turing\\
+	Questo è uno dei primi esempio di calcolo, è semplice da capire e si descrivono direttamente macchina che eseguono gli algoritmi. Uno dei primi approcci allo studio della complessità.\\
+	\textbf{Cambio programma $\rightarrow$ Cambio macchina}
+	\item \textbf{Software}\\
+	Ho l'interprete, cioè la semantica, fissi. Se cambio il programma non devo cambiare la macchina
+	\begin{enumerate}
+		\item Programmi \texttt{while}\\
+		Base della programmazione iterativa, dalla semantica operazionale e anch'essi usati per lo studio della complessità
+		\item Funzioni ricorsive\\
+		Base della programmazione funzionale
+	\end{enumerate}
+\end{enumerate}
 \end{document}
