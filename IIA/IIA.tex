@@ -537,7 +537,7 @@ Un caso è la \textbf{ricerca nelle griglie} Visitare stati già visitati fa com
 	\item Non generare nodi con stati già visitati/esplorati: ogni nodo visitato deve essere tenuto in memoria per una complessità O(s) dove s è il numero di stati possibili (esempio: hash table per accesso efficiente
 \end{list}
 \paragraph{Repetita} Il costo può essere alto: in caso di DF la memoria torna da b$\cdot$m a tutti gli stati, ma diventa una ricerca \textbf{completa} per spazi finiti. Ma \textbf{in molti casi gli stati crescono esponenzialmente} (scacchi\ldots)
-\subsection{Uniform-Cost} \textbf{Generalizzazione della ricerca in ampiezza} (costi diversi tra passi): \textbf{si sceglie il nodo di costo g(n) del cammino minore sulla frontiera}, si espande sui contorni di uguale costo (e.g. in km) invece che sui contorni di uguale profondità (BF). Implementata da una \textbf{coda ordinata per costo cammino crescente}. \textbf{Algoritmo su albero}:
+\section{Uniform-Cost} \textbf{Generalizzazione della ricerca in ampiezza} (costi diversi tra passi): \textbf{si sceglie il nodo di costo g(n) del cammino minore sulla frontiera}, si espande sui contorni di uguale costo (e.g. in km) invece che sui contorni di uguale profondità (BF). Implementata da una \textbf{coda ordinata per costo cammino crescente}. \textbf{Algoritmo su albero}:
 \begin{lstlisting}
 function Ricerca-UC-A(problema) returns soluzione oppure fallimento
 	nodo = un nodo con stato il problema.stato-iniziale e costo-di-cammino=0
@@ -596,5 +596,133 @@ Un \textbf{agente per "problem solving"} adotta un paradigma generale di risoluz
 	\item Formula il problema, non automatico
 	\item Ricerca la soluzione nello spazio degli stati, automatico
 \end{list}
-%da fare: lez. ven 28/02
+\chapter{Ricerca Euristica}
+In problemi di complessità esponenziale, come ad es. gli scacchi ($10^{120}$ configurazioni) non è praticabile la ricerca esaustiva. Diventa quindi fondamentale \textbf{usare la conoscenza del problema e l'esperienza per riconoscere i cammini più promettenti}, evitando di generare gli altri (\textbf{pruning}).
+\paragraph{Conoscenza Euristica} La \textbf{conoscenza euristica} aiuta a fare scelte oculate:
+\begin{list}{}{}
+	\item Non evita la ricerca, ma la riduce
+	\item Consente, in genere, di trovare una \textbf{buona} soluzione in tempi accettabili
+	\item Sotto certe condizioni garantisce completezza e ottimalità
+\end{list}
+\section{Funzione di Valutazione Euristica}
+La \textbf{conoscenza} del problema è data tramite una \textbf{funzione di valutazione} $f$, che include $h$ detta \textbf{funzione di valutazione euristica}: $$h : n \rightarrow R$$
+R = insieme numeri reali. La funzione si applica al nodo, ma dipende solo dallo stato (n.Stato). Per confronto, $g$ dipendeva anche dal cammino fino al nodo.
+Quindi, la funzione di valutazione $$f(n) = g(n) + h(n)$$ dove g(n) è il costo del cammino visto con UC.
+\paragraph{Esempio di euristica h} Per procedere preferibilmente verso il percorso migliore, seguendo il "problem-specific information", nel problema del percorso più breve da città a città posso includere nel mio algoritmo le distanze in linea d'aria, oppure il vantaggio in pezzi nella dama o negli scacchi.
+\section{Best-First}
+\paragraph{Algoritmo di ricerca} Best-First Heuristic utilizza lo \textbf{stesso algoritmo di Uniform-Cost} ma utilizzando f (stima di costo) per la coda con priorità. La \textbf{scelta di f determina la strategia di ricerca}: ad ogni passo si sceglie il nodo sulla frontiera per con valore di f migliore (\textbf{nodo più promettente}).
+\subparagraph{Nota} Migliore significa "minore" in caso di un'euristica che stima la distanza della soluzione
+\pagebreak
+\subparagraph{Caso Speciale} Greedy Best-First, si usa solo h (f = h)
+\begin{center}
+	\includegraphics[scale=0.7]{greedybf.png}
+\end{center}
+\subsection{Algoritmo A}
+Si può dire qualcosa di $f$ per avere garanzie di completezza e ottimalità?
+\paragraph{Definizione} Un algoritmo A è un algoritmo Best-First con una funzione di valutazione dello stato del tipo $$f(n) = g(n) + h(n)$$ con $h(n) \geq 0$ e $h(goal) = 0$. $g(n)$ è il \textbf{costo del cammino percorso per raggiungere $n$} e $h(n)$ è \textbf{una stima del costo per raggiungere da $n$ un nodo $goal$}.
+Vedremo \textbf{casi particolari} dell'algoritmo A:
+\begin{list}{}{}
+	\item se $h(n) = 0$, cioè $f(n) = g(n)$, si ha \textbf{Ricerca Uniforme} (UC)
+	\item se $g(n) = 0$, cioè $f(n) = h(n)$, si ha \textbf{Greedy Best First}
+\end{list}
+\paragraph{Esempio} Il \textbf{gioco dell'otto}
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.5]{8game.png}
+\end{center}
+\begin{list}{}{}
+	\item $f(n) = $ \#mosseFatte $+$ \#caselleFuoriPosto
+	\item $f(start)$ = 0 + 7\\Dopo $\leftarrow$, $\downarrow$, $\uparrow$, $\rightarrow$ si ha $f$ = 4 + 7: stesso stato ma $g$ è cambiata.
+	\item $f(goal)$ = ? + 0
+\end{list}
+\end{multicols}
+\pagebreak
+\subsubsection{Algoritmo A è completo}
+\paragraph{Teorema} L'algoritmo A con la condizione $g(n) \geq d(n)\cdot\epsilon$, con $d(n)$ profondità e $\epsilon > 0$ costo minimo dell'arco, è \textbf{completo}.\\
+La condizione ci garantisce che non si verifichino condizioni del tipo
+\begin{center}
+	\includegraphics[scale=0.5]{complA.png}
+\end{center}
+e che il costo lungo un cammino non cresca "abbastanza", così da fermarsi per costi alti di $g$.
+\paragraph{Dimostrazione} Sia $[n_0\:n_1\:n_2 \ldots\:n'\:\ldots\:n_k = goal]$ un cammino soluzione. Sia $n'$ un nodo della frontiera su un cammino soluzione $\rightarrow$ $n'$ prima o poi \textbf{verrà espanso}. Infatti, esistono solo un numero finito di nodi $x$ che possono essere aggiunti alla frontiera con $f(x) \leq f(n')$ (condizione su $g$).\\
+Quindi, se non si trova una soluzione prima, $n'$ verrà espanso e i suoi successori aggiunti alla frontiera. Tra questi, \textbf{anche il suo successore sul cammino soluzione}.\\
+Il ragionamento si può ripetere fino a dimostrare che anche il nostro $goal$ sarà selezionato per l'espansione.
+\subsection{Algoritmo A*: La Stima Ideale}
+Una \textbf{funzione di valutazione ideale} (\textbf{oracolo}) $f^*(n) = g^*(n) + h^*(n)$
+\begin{list}{}{}
+	\item $g^*(n)$ costo del \textbf{cammino minimo} da radice a $n$
+	\item $h^*(n)$ costo del \textbf{cammino minimo} da $n$ a $goal$
+	\item $f^*(n)$ costo del \textbf{cammino minimo} da radice a $goal$, attraverso $n$
+\end{list}
+Normalmente $g(n) \geq g^*(n)$ (costo del cammino $\geq$ cammino minimo) e $h(n)$ è una \textbf{stima} di $h^*(n)$: si può sotto o sovrastimare la distanza dalla soluzione.
+\paragraph{Definizione} \textbf{Euristica ammissibile} $\forall n \:\:\vline\:\:h(n) \leq h^*(n)$, $h$ è una \textbf{sottostima}, ad esempio l'euristica della distanza in linea d'aria.
+\paragraph{Definizione} Algoritmo A*: un algortimo A in cui $h$ è una funzione euristica ammissibile.
+\paragraph{Teorema} Gli algoritmi A* sono \textbf{ottimali}.
+\paragraph{Corollario} BF con passi a costo costante e UC sono \textbf{ottimali} ($h(n) = 0$)
+\begin{center}
+	\includegraphics[scale=0.5]{itAstar.png}
+\end{center}
+\pagebreak
+\paragraph{Osservazioni} La componente $g$ fa sì che si abbandonino cammini che vanno troppo in profondità.\\
+\textbf{$h$ sotto o sovra stima}? Una sottostima può farci compiere lavoro inutile, ma \textbf{non fa perdere il cammino migliore}: quando trovo il nodo $goal$ è il cammino migliore. Invece, una funzione che a volte sovrastima può \textbf{farci perdere la soluzione ottimale a causa di tagli per sovrastima}.
+\paragraph{Ottimalità} Nel caso di ricerca su ablero, l'\textbf{uso di un'euristica ammissibile è sufficiente a garantire l'ammissibilità} $\Rightarrow$ \textbf{ottimalità di A*}.\\
+Nel caso di ricerca su grafo, serve una proprietà più forte: la \textbf{consistenza}, anche detta \textbf{monotonicità}, perché rischio di scartare candidati ottimi (stato già incontrato) a meno che il primo espanso sia il migliore.
+\paragraph{Definizione} \textbf{Euristica consistente} se
+\begin{list}{}{}
+	\item $h(goal) = 0$
+	\item \textbf{Consistenza locale}: $\forall n\:\:\vline\:\:h(b) \leq c(n, a, n') + h(n')$ dove $n'$ è un successore di $n$ e $c(n, a, n')$ è il costo del cammino $n\rightarrow n'$ sull'arco $a$.
+	\item $\Rightarrow$ $f(b) \leq f(n')$
+\end{list}
+Quindi se $h$ è consistente, allora \textbf{$f$ non decresce mai lungo i cammini}: da qui il termine monotonia.\\
+Esistono euristiche ammissibili che non sono monotone, ma sono rare.
+\paragraph{Teorema} Un'\textbf{euristica monotona è ammissibile}.\\
+Le euristiche monotone garantiscono che la \textbf{soluzione meno costosa venga trovata per prima} e quindi \textbf{sono ottimali anche nel caso di ricerca su grafo}.
+\begin{list}{}{}
+	\item Non si devono recuperare, tra gli antenati, nodi con costo minore
+	\item \textbf{Lista degli esplorati}, stato già esplorato è sul cammino ottimo $\Rightarrow$ posso evitare di inserire il corrente ripetuto senza perdere l'ottimalità
+	\begin{lstlisting}
+	if (figlio.Stato non in Esplorati and non in Frontiera)
+		Frontiera = Inserisci(figlio, Frontiera)
+	\end{lstlisting}
+	\item Per la frontiera, volendo evitare stati ripetuti, resta l'\texttt{if} finale di UC
+	\begin{lstlisting}
+	if (figlio.Stato in Frontiera con costoCammino piu alto)
+		sostituisci quel nodo frontiera con il figlio
+	\end{lstlisting}
+\end{list}
+\paragraph{Ottimalità di A*} \textbf{Dimostrazione}\\
+\textbf{1.} $h(n)$ consistente $\Rightarrow$ i valori di $f(n)$ lungo un cammino sono non decrescenti:
+\begin{list}{}{}
+	\item Se $h(n) \leq c(n, a, n’) + h(n’)$ (def. consistenza)
+	\item $g(n) + h(n) \leq g(n) + c(n, a, n’) + h(n’)$ sommando g(n)
+	\item ma siccome $g(n) + c(n, a, n’) = g(n’)$, allora $g(n) + h(n) \leq g(n’) + h(n’)$
+	\item quindi $f(n) \leq f(n’)$
+\end{list}
+\textbf{2.} Ogni volta che A* seleziona un nodo $n$ per l’espansione, il
+cammino ottimo a tale nodo è stato trovato.\\
+Se così non fosse, ci sarebbe un altro nodo $n’$ della frontiera sul cammino ottimo (a $n$, ancora da trovare), con $f(n’)$ minore (per la monotonia e n successivo di $n’$).\\
+Ma ciò non è possibile perché tale nodo sarebbe già stato espanso.\\\\
+\textbf{3.} Quando seleziona nodo $goal$ è cammino ottimo $[h=0, f=C^*]$
+\subsection{Perché A* è vantaggioso?}
+\begin{list}{}{}
+	\item A* espande tutti i nodi con $f(n) < C^*$
+	\item A* espande \textit{alcuni} nodi con $f(n) = C^*$
+	\item \textbf{A* non espande alcun nodo con $f(b) > C^*$}
+\end{list}
+Quindi alcuni nodi (e suoi sottoalberi) non verranno considerati per l'espansione, ma restiamo ottimali: \textbf{pruning}, un'$h$ opportuna, \textbf{più alta possibile fra le ammissibili}, fa tagliare molto.
+\pagebreak
+\begin{center}
+	\includegraphics[scale=0.7]{astarcontorni.png}
+\end{center}
+Più $f$ è aderente, più taglio ottenendo ovali più stretti. Cercheremo quindi un'$h$ \textbf{più alta possibile tra le ammissibili}. Se molto bassa, molti (sino a tutti) nodi restano $< C^*$ $\Rightarrow$ espando tutti (a cerchi).
+\paragraph{Pruning} Il \textbf{pruning dei sotto-alberi è il punto focale}: non li abbiamo già in memoria ed \textbf{evitiamo di generarli}, e ciò è \textbf{decisivo per i problemi di AI a spazio stati esponenziali}.
+\subsection{Conslusioni su A*}
+\paragraph{Algoritmo} Lo stesso usato per UC
+\paragraph{Funzioni} Usa $f = g + h$ per la coda di priorità, dove $h$ e $g$ soddisfano le condizioni per algoritmo A e $h$ è una funzione euristica ammissibile per A*.\\
+Sui grafi necessità di un'euristica monotona.
+\paragraph{Completo} Discende dalla completezza di A, perché A* è un A particolare
+\paragraph{Ottimale} Con euristica monotona
+\paragraph{Ottimamente efficiente} A parità di euristica nessun'altro algoritmo espande meno nodi senza rinunciare ad ottimalità
+\paragraph{Problemi} Quale euristica?\\
+Occupazione in memoria: O(b$^{d+1}$)
 \end{document}
