@@ -8,6 +8,7 @@
 \usepackage{color}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
+\usepackage{mathrsfs}
 \lstset{
 	language=Matlab,
 	commentstyle=\color{mygray}
@@ -37,7 +38,7 @@ Inoltre, il computer \textbf{impatta} sul calcolo perché lavora con approssimaz
 \chapter{Aritmetica di macchina}
 Modello per capire cosa aspettarci dal punto di vista degli errori dell'esecuzione.
 \paragraph{Esempio} Per calcolare il limite $$\lim_{x\to\infty} \sqrt{x + 1} - \sqrt{x}$$ ottengo un caso indeterminato ($\infty - \infty$). Posso semplificare l'espressione ad esempio razionalizzando, e con pochi passaggi ottengo la seguente uguaglianza $$\sqrt{x + 1} - \sqrt{x} = \frac{1}{\sqrt{x + 1} + \sqrt{x}}$$ Quindi dal punto di vista matematico, le due espressioni sono equivalenti. Ciò \textbf{non è sempre vero per la rappresentazione ed il calcolo in macchina}: le due espressioni forniranno risultati completamente diversi. Si rende \textbf{necessario}, quindi, \textbf{capire quale metodo si comporta meglio} rispetto agli altri.
-\section{Rappresentazione in base dei numeri in maniera univoca}
+\section{Rappresentazione in macchina}
 \paragraph{Rappresentare i numeri} Siamo comunemente abituati a rappresentare un numero in diverse forme.\\
 Ad esempio, $0.1 = \frac{1}{10} = 10 \cdot 0.01$. In generale, per ogni numero ho diversi metodi di rappresentazione $\Rightarrow$ In macchina dobbiamo poter \textbf{rappresentare i numeri in maniera univoca}.
 \paragraph{Base di numerazione} $B \in N, B > 1$, poiché in base 1 non si può contare.\\Una base $B$ ha cifre nell'insieme $\{0, 1, \ldots, B - 1\}$
@@ -170,7 +171,42 @@ $$\epsilon_{tot} = \frac{g(x) - f(x)}{f(x)} = \frac{2x^2}{x^2 + 1}\epsilon_x + \
 $$|\epsilon_{in} = |\frac{2x^2}{x^2 + 1}\epsilon_x| = |\frac{2x^2}{x^2 + 1}|\cdot|\epsilon_x| \leq \frac{2x^2}{x^2 + 1}u \leq 2u$$ perché $\frac{x^2}{x^2 + 1} \leq 1$. La funzione quindi \textbf{non è suscettibile rispetto alle perturbazioni dei dati in ingresso} ed è \textbf{ben condizionata}.
 $$\epsilon_{alg} = |\frac{x^2}{x^2 + 1}\epsilon_1 + \epsilon_2| \leq |\frac{x^2}{x^2 + 1}\epsilon_1| + |\epsilon_2| = \frac{x^2}{x^2 + 1}|\epsilon_1| + |\epsilon_2| \leq |\epsilon_1| + |\epsilon_2| \leq 2u$$ Quindi l'algoritmo è \textbf{numericamente stabile} perché la componente dell'errore algoritmo è piccola ($\leq 2u$). Questo è il caso migliore che può capitare: \textbf{funzione ben condizionata} e \textbf{algoritmo numericamente stabile}.\\\\
 Succede perché non vi è la sottrazione al numeratore. La sottrazione, in macchina, lavora usando molte delle cifre "sporche" della mantissa, cioè quelle che fanno parte del rumore e dell'errore di rappresentazione. Si chiama \textbf{errore di cancellazione}.
+\subsection{Errore Inerente}
+\paragraph{Definizione} Si dice \textbf{errore inerente} o \textbf{inevitabile} generato nel calcolo di $f(x) \neq 0$ la quantità $$\epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)}$$
+Osserviamo che l'errore inerente è una \textbf{proprietà della funzione}, ovvero del problema matematico, e misura la \textbf{sensibilità rispetto alla perturbazione del dato iniziale}. Quindi, è indipendente dall'algoritmo di calcolo.\\
+Se l'errore inerente è qualitativamente elevato in valore assoluto, diciamo che \textbf{il problema matematico è mal condizionato}, altrimenti si dice che è \textbf{ben condizionato}.
+\subsection{Errore Algoritmico}
+\paragraph{Definizione} Si dice \textbf{errore algoritmico} generato nel calcolo di $f(x) \neq 0$ la quantità $$\epsilon_{alg} = \frac{g(\tilde{x}) - f(\tilde{x})}{f(\tilde{x})}$$
+Osserviamo che l'errore algoritmico è \textbf{dipendente dall'algoritmo utilizzato}: la funzione $g$ dipende dall'algoritmo usato per calcolare $f(x)$. In generale, \textbf{differenti algoritmi conducono a differenti errori algoritmici}.\\
+Se l'errore algoritmico è qualitativamente elevato in valore assoluto si dice che \textbf{l'algoritmo è numericamente instabile}, altrimenti si dice che è \textbf{numericamente stabile}.
+\pagebreak
+\subsection{Errore Totale}
+\paragraph{Definizione} Si dice \textbf{errore totale} generato nel calcolo di $f(x) \neq 0$ mediante l'algoritmo specificato da $g$ la quantità $$\epsilon_{tot} \frac{g(\tilde{x}) - f(x)}{f(x)}$$ L'errore totale misura la \textbf{differenza relativa tra l'output atteso e l'output effettivamente calcolato}.
+\paragraph{Teorema} In un analisi al primo ordine, vale $$\epsilon_{tot} = \epsilon_{in} + \epsilon_{alg}$$
+\subparagraph{Dim} $$\epsilon_{tot} = \frac{g(\tilde{x}) - f(x)}{f(x)} = \frac{f(\tilde{x}) - f(\tilde{x})}{f(\tilde{x})}\cdot\frac{f(\tilde{x})}{f(x)} + \frac{f(\tilde{x}) - f(x)}{f(x)} = \epsilon_{alg}(1 + \epsilon_{in}) + \epsilon_{in} \doteq \epsilon_{alg} + \epsilon_{in}$$
+Viene espresso il fatto che nel calcolo di una funzione razione, in un'analisi al primo ordine, le due fonti di generazione d'errore forniscono contributi separati che possono essere analizzati indipendentemente.\\
+L'obiettivo dell'analisi numerica è \textbf{trovare algoritmi numericamente stabili per problemi ben condizionati}.
+\section{Tecniche per l'Analisi degli Errori}
+\subsection{Coefficiente di Amplificazione}
+Dalla seguente relazione $$\epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} = \frac{f(\tilde{x}) - f(x)}{\tilde{x} - x}\cdot\frac{x}{f(x)}\cdot\frac{\tilde{x} - x}{x}$$ si ricava che la \textbf{differenziabilità di $f(x)$ è essenziale} per il controllo dell'errore inerente. Se assumiamo che $f(x)$ è derivabile due volte e continua in $(a, b)$, allora vale lo sviluppo di Taylor $$f(\tilde{x}) = f(x) + f'(x)(\tilde{x} - x) + \frac{f''(\xi)}{2}(\tilde{x} - x)^2,\:\:\:\:\:\:|\xi - x| \leq |\tilde{x} - x| $$ da cui si ottiene $$ \epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} \doteq \frac{f'(x)}{f(x)}x\epsilon_x = c_x\epsilon_x,\:\:\:\:\:\:c_x = \frac{f'(x)}{f(x)}x $$
+La quantità $c_x = c_x(f) = \frac{f'(x)}{f(x)}x$ è detta \textbf{coefficiente di amplificazione} e fornisce una \textbf{misura del condizionamento del problema}.\\
+In generale, se $f$ : $\Omega \rightarrow R$ è definita su un insieme aperto di $R^n$, differenziabile due volte su $\Omega$ ed il segmento di estremi $\tilde{\textbf{x}}$ e $\textbf{x}$ è contenuto in $\Omega$ allora vale
+$$ \epsilon_{in} = \frac{f(\tilde{\textbf{x}}) - f(\textbf{x})}{f(\textbf{x})} \doteq \frac{1}{f(\textbf{x})}\sum_{i=1}^n \frac{\partial f}{\partial x_i}(\textbf{x})x_i\epsilon_{x_i} = \sum_{i=1}^n c_{x_i}(f)\epsilon_{x_i}$$
+con $$c_{x_i}(f) = \frac{1}{f(\textbf{x})}\frac{\partial f}{\partial x_i}(\textbf{x})x_i,\:\:\:\:\:\:1 \leq i \leq n$$
+detti \textbf{coefficienti di amplificazione della funzione $f$ rispetto alla variabile $x_i$}.
+\subparagraph{Esempio} per $f(x) = (x^2 + 1)/x$ si ha $$c_x = \frac{2 - (x^2 + 1)}{x^2}\cdot \frac{x}{x^2 + 1}\cdot x = \frac{x^2 - 1}{x^2 + 1}$$ e poiché $|c_x| \leq 1$ il problema risulta ben condizionato.
+\subsubsection{Coefficienti}
+Per le operazioni aritmetiche si ottiene
+$$f(x, y) = x + y\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsilon_y\:\:\:\:\:\:c_x=\frac{x}{x + y}\:\:\:\:c_y = \frac{y}{x + y}$$
 
+$$f(x, y) = x - y\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsilon_y\:\:\:\:\:\:c_x=\frac{x}{x - y}\:\:\:\:c_y = -\frac{y}{x - y}$$
+
+$$f(x, y) = x \cdot y\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsilon_y\:\:\:\:\:\:c_x= 1\:\:\:\:c_y = 1$$
+
+$$f(x, y) = \frac{x}{y}\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsilon_y\:\:\:\:\:\:c_x= 1\:\:\:\:c_y = -1$$
+Ne segue, come visto in precedenza, che la sottrazione di due numeri vicini tra loro è potenziale causa di elevata amplificazione degli errori relativi (\textbf{cancellazione numerica}). Si nota anche come le operazioni moltiplicative siano ben condizionate.
+\paragraph{Esempio} Siano $x = 0.2178\cdot10^2$ e $y = 0.218\cdot10^2$, supponendo di operare con troncamento in base B = 10 e t = 3 cifre di rappresentazione ($u = 10^{1 - t} = 10^{-2}$). Si ha $\tilde{x} = 0.217\cdot10^2$ e $\tilde{y} = y$.\\
+Pertanto $\tilde{x}\:\oplus\:\tilde{y} = -0.001\cdot10^2 = -0.1$ mentre $x - y = -0.0002\cdot10^2 = -0.2\cdot10^{-1}$ e quindi $|\epsilon_{in}| = \frac{0.8}{0.2} = 0.4$.
 \section{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentaili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
 \end{document}
