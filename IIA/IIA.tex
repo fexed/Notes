@@ -725,4 +725,119 @@ Sui grafi necessità di un'euristica monotona.
 \paragraph{Ottimamente efficiente} A parità di euristica nessun'altro algoritmo espande meno nodi senza rinunciare ad ottimalità
 \paragraph{Problemi} Quale euristica?\\
 Occupazione in memoria: O(b$^{d+1}$)
+\subsection{Casi speciali di A}
+\begin{list}{}{}
+	\item $h(n) = 0$ si ha Uniform Cost, cioè $f(n) = g(n)$\\
+	Cioè $g$ non basta
+	\item $g(n) = 0$ si ha Greedy Best First, cioè $f(n) = h(n)$\\
+	Ossia $h$ non basta
+\end{list}
+\pagebreak
+\section{Costruire le Euristiche di A*}
+\subsection{Valutazione di funzioni euristiche}
+A parità di ammissibilità, \textbf{una euristica può essere più efficiente di un'altra} nel trovare il cammino soluzione migliore. Questo \textbf{dipende da quanto \textit{informata} è l'euristica}, cioè dal \textbf{grado di informazione posseduto}.
+\begin{list}{}{}
+	\item $h(n) = 0$ \textbf{minimo} di informazione (BF, o UC)
+	\item $h^*(n)$ \textbf{massimo} di informazione (oracolo)
+\end{list}
+In generale, per le euristiche ammissibili, $$0 \leq h(n) \leq h^*(n)$$
+\paragraph{Teorema} Se $h_1 \leq h_2$, i nodi espansi da A* con $h_2$ sono un \textbf{sottoinsieme} di quelli espansi da A* con $h_1$.\\
+Questo perché A* espande tutti i nodi con $f(n) < C^*$ e sono meno per $h$ maggiore (fa andare più nodi oltre $C^*$).\\
+$\Rightarrow$ Se $h_1 \leq h_2$, allora A* con $h_2$ è \textbf{almeno efficiente} quanto A* con $h_1$.\\\\
+Un'euristica più informata (accurata) riduce lo spazio di ricerca (più efficiente) ma è tipicamente \textbf{più costosa da calcolare}.
+\subsection{Confronto di euristiche ammissibili}
+\paragraph{Esempio} Due euristiche ammissibili per il gioco dell'otto
+\begin{list}{}{}
+	\item $h_1$ conta il numero di caselle fuori posto
+	\item $h_2$ somma delle distanze Manhattan (orizz/vert) delle caselle fuori posto dalla posizione finale\\
+	Manhattan Distance: $h(x, y) = MD((x, y), (x_g, y_g)) = |x - x_g| + |y - y_g|$
+\end{list}
+$\Rightarrow$ $h_2$ è \textbf{più informata} di $h_1$, infatti $\forall n \Rightarrow h_1(n) \leq h_2(n)$. Si dice che \textbf{$h_2$ domina $h_1$}.
+\begin{center}
+	\includegraphics[scale=0.7]{confrh.png}
+\end{center}
+\subsection{Misura del potere euristico}
+Come valutare gli algoritmi di ricerca euristica
+\paragraph{Fattore di diramazione effettivo} Dato N numero di nodi generati, d profondità della soluzione, allora b* è il \textbf{fattore di diramazione di un albero uniforme con N+1 nodi}, soluzione dell'equazione $$N + 1 = b^* + (b^*)^2 + \ldots + (b^*)^d$$ Sperimentalmente, una buona euristica ha un b* abbastanza vicino ad 1 ($<$ 1.5)
+\paragraph{Esempio} $d = 5,\:\: N = 52 \Rightarrow b^* = 1.92$
+\pagebreak
+\subsection{Capacità di esplorazione} Influenza di b*
+\begin{multicols}{2}
+	\begin{list}{}{Con $b = 2$}
+		\item $d = 6\:\:\:\:N = 100$
+		\item $d = 12\:\:N = 10000$
+	\end{list}
+		\begin{list}{}{Con $b = 1.5$}
+		\item $d = 12\:\:N = 100$
+		\item $d = 24\:\:N = 10000$
+	\end{list}
+\end{multicols}
+Quindi \textbf{migliorando di poco l'euristica si riesce, a parità di nodi espansi, a raggiungere una profondità doppia}.
+\subsection*{Quindi}
+Tutti i problemi dell'IA, o quasi, sono di complessità esponenziale nel generare nodi (ad es. configurazioni possibili), ma c'è esponenziale ed esponenziale. L'euristica può migliorare di molto la capacità di esplorazione dello spazio degli stati rispetto alla ricerca cieca: \textbf{migliorando anche di poco l'euristica si riesce ad esplorare uno spazio molto più grande}.
+\section{Come si inventa un'euristica?}
+Alcune strategie per ottenere euristiche ammissibili, da vedere man mano:
+\begin{list}{}{}
+	\item \textbf{Rilassamento} del problema
+	\item \textbf{Massimizzazione di euristiche}
+	\item \textbf{Database di pattern disgiunti}
+	\item \textbf{Combinazione lineare}
+	\item \textbf{Apprendere} dall'esperienza
+\end{list}
+\subsection{Rilassamento del problema}
+\textbf{Spazio degli stati con archi aggiunti}.
+\paragraph{Gioco dell'otto} Nel gioco dell'otto, mossa da A a B possibile se \textbf{B adiacente ad A} e \textbf{B libera}.\\
+$h_1$ e $h_2$ sono \textbf{calcoli della distanza esatta della soluzione} in \textbf{versioni semplificate} del puzzle: uno \textbf{spazio degli stati con archi aggiunti}
+\begin{list}{}{}
+	\item $h_1$ nessuna restrizione: sono sempre ammessi scambi tra caselle, si muove ovunque $\rightarrow$ numero di caselle fuori posto
+	\item $h_2$ solo prima restrizione: sono ammessi spostamenti anche su caselle occupate purché adiacenti $\rightarrow$ somma delle distanze Manhattan
+\end{list}
+\subsection{Massimizzazione di euristiche}
+Si hanno una serie di euristiche ammissibili $h_1$, $h_2$, \ldots, $h_k$, \textbf{senza che nessuna domini un'altra}. Allora conviene \textbf{prendere il massimo dei loro valori} $$h(n) = max\{h_1(n),\:\:h_2(n),\:\:\ldots,\:\:h_k(n)\}$$ Se le $h_i$ sono ammissibili, anche la $h$ lo è e \textbf{domina tutte le altre}.
+\pagebreak
+\paragraph{Euristiche da sottoproblemi}
+\begin{center}
+	\includegraphics[scale=0.7]{eursottoprob.png}
+\end{center}
+Il \textbf{costo della soluzione ottima del sottoproblema} (sistemare 1, 2, 3, 4) è una \textbf{sottostima del costo del problema nel suo complesso} e più accurata della Manhattan.\\
+\textbf{Database di pattern}: si \textbf{memorizza ogni istanza del sottoproblema con relativo costo} della soluzione. Si usa il \textbf{database per calcolare $h_{DB}$}, estraendo dal DB la configurazione corrispondente allo stato completo corrente.
+\paragraph{Sottoproblemi multipli} Potremmo poi fare la stessa cosa per altri sottoproblemi: 5-6-7-8, 2-4-6-8\ldots ottenendo altre euristiche ammissibili.\\
+Poi si può prendere il valore massimo: altra euristica ammissibile.\\
+Ma potremmo sommarle ed ottenere un'euristica ancora più accurata?
+\subsection{Pattern Disgiunti} In generale no, perché le \textbf{soluzioni ai sottoproblemi interferiscono}: nel caso del gioco dell'otto, condividono alcune mosse perché se sposto 1-2-3-4 sposto anche 4-5-6-7.\\
+La \textbf{somma delle euristiche in generale non è ammissibile} perché potremmo sovrastimare, avendo avuto aiuti mutui.\\
+Si deve \textbf{eliminare il costo delle mosse che contribuiscono all'altro sottoproblema}: \textbf{databse di \textit{pattern disgiunti}} consentono di sommare i costi (\textbf{euristiche additive}).\\
+Sono molto efficaci: gioco del 15 in pochi ms. Ma difficile scomporre per il cubo di Rubik.
+\subsection{Apprendere dall'esperienza}
+Si fa girare il programma e si raccolgono i dati sottoforma di \textbf{coppie} \texttt{<stato, h*>}. Si usano i dati per apprendere come predire la $h$ con \textbf{algoritmi di apprendimento induttivo}: da istanze note stimiamo $h$ \textbf{in generale}.\\
+Gli algoritmi di apprendimento si concentrano su caratteristiche salienti dello stato (\textit{feature}, $x_i$). Esempio: numero tasselli fuori posto 5 $\rightarrow$ costo 14.
+\subsubsection{Combinazione di euristiche}
+Quando diverse caratteristiche influenzano la bontà di uno stato, si può usare una combinazione lineare $$h(n)= c_1 x_1(n) + c_2 x_2(n) + \ldots + c_k x_k(n)$$
+Gioco dell'otto $h(n) = c_1 \#fuoriPosto + c_2 \#coppieScambiate$\\
+Scacchi $h(n) = c_1 vantaggioPezzi + c_2 pezziAttaccante + c_3 regina + \ldots$\\
+Il \textbf{peso dei coefficienti può essere aggiustato con l'esperienza}, anche qui \textbf{apprendendo automaticamente da esempi di gioco}. $h(goal) = 0$ ma ammissibilità e consistenza \textbf{non} automatiche.
+
+\chapter{Algoritmi Evolutivi Basati su A*}
+\section{Beam Search}
+Nel \textbf{best first} viene mantenuta tutta la frontiera. Se l'occupazione di memoria è eccessiva, si può ricorrere ad una variante: la \textbf{beam search}.
+\paragraph{Beam Search} La beam search \textbf{tiene ad ogni passo solo i $k$ nodi più promettenti}, dove $k$ è detto \textbf{ampiezza del raggio} (beam).\\
+\textbf{Non è completa}.
+\section{IDA*}
+A* con approfondimento iterativo. IDA* combina A* con ID: ad ogni iterazione si ricerca in profondità con un limite (cut-off) dato dal valore della funzione $f$ (e non dalla profondità).\\
+Il limite \textbf{f-limit} viene aumentato ad ogni iterazione, fino a trovare la soluzione.
+\paragraph{Punto Critico} Di quanto viene aumentato f-limit.
+\paragraph{Quale incremento?} Cruciale la scelta dell'incremento per garantire l'ottimalità. In caso di azioni dal costo fisso, il limite viene incrementato dal costo delle azioni.\\
+Ma in caso di costi variabili? Costo minimo? Si potrebbe, ad ogni passo, fissare il limite successivo al valore minimo delle $f$ scartate (in quanto superavano il limite) all'interazione precedente.
+\paragraph{Analisi} \textbf{Completo} e \textbf{ottimale}. Occupazione in memoria O(bd).
+\section{RBFS}
+Best-First Ricorsivo: simile a DF ricorsivo ma cerca di usare meno memoria, facendo del lavoro in più.\\
+Tiene traccia del migliore percorso alternativo ad ogni livello. Invece di fare backtracking in caso di fallimento, interrompe l’esplorazione quando trova un nodo meno promettente secondo $f$. Nel tornare indietro \textbf{si ricorda il miglior nodo che ha
+trovato nel sottoalbero esplorato}, per poterci eventualmente tornare\\
+Memoria: lineare nella profondità della soluzione ottima.
+\section{A* con memoria limitata}
+L'idea è quella di utilizzare al meglio la memoria disponibile.\\
+SMA* procede come A* fino ad esaurimento della memoria disponibile. A questo punto “dimentica” il nodo peggiore, dopo avere aggiornato il valore del padre.\\
+A parità di $f$ \textbf{si sceglie il nodo migliore più recente e si dimentica il nodo peggiore più vecchio}.\\
+\textbf{Ottimale se il cammino soluzione sta in memoria}.
+
 \end{document}
