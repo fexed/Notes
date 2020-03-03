@@ -239,7 +239,20 @@ Questo è fatto tramite qualificatori che descrivono aspetti dell'ambiente, si a
 \ldots carellata qualificatori\ldots
 Runtime processo di scelta.
 processo di scarto rimango con più opzioni scelgo quella per priorità, rimango con una ad un certo punto scelgo quella, rimango con 0. Se nessuna matcha tutti validi, se ne matcha una o più scarto i non validi. Inoltre c'è directory di default.
-\chapter{Componenti di un'app Android}
+\chapter{Componenti di un'app Android}\section{Ciclo di Vita}
+Tipicamente un'app Android esegue così
+\begin{list}{}{}
+	\item Il launcher (che è esso stesso un'Activity) avvia la prima Activity dell'app \textbf{inviandole un'Intent} che indica l'intenzione di lanciarla. L'activity chiama \texttt{setLayout()} per impostare la propria UI
+	\item Il sistema chiama certi metodi dell'Activity (\textbf{callback}) in risposta alle azioni dell'utente\\
+	A seconda dei casi, questi metodi potranno
+	\begin{list}{}{}
+		\item Lanciare altre Activity (inviando opportuni Intent), sia dell'app che di altre app
+		\item Inviare Intent ad Activity già in esecuzione o in broadcast a tutti gli interessati
+		\item Interagire con Services in background
+		\item Recuperare o salvare dati tramite un Content Provider
+		\item Terminare l'Activity, tornando alla precedente
+	\end{list}
+\end{list}
 \section{Componenti}
 \paragraph{Cooperazione} Abbiamo visto che le applicazioni Android non sono un blocco monolitico ma un insieme di componenti cooperanti:
 \begin{list}{}{}
@@ -258,20 +271,7 @@ I vari componenti \textbf{dialogano attraverso un sistema di messaggistica} che 
 Ci sono numerosissimi intent di sistema, ma ogni app può definirne altri. Una \textbf{parte della struttura} del messaggio \textbf{è fissata}, ma possono \textbf{includere dati "extra" a piacere}.\\
 Gli intent possono essere \textbf{indirizzati ad uno specifico componente} oppure \textbf{emessi in broadcast}.\\
 Ogni app definisce un \textbf{filtro} che \textbf{dichiara a quali intent è interessata} e può eventualmente rispondere.
-\section{Ciclo di Vita}
-Tipicamente un'app Android esegue così
-\begin{list}{}{}
-	\item Il launcher (che è esso stesso un'Activity) avvia la prima Activity dell'app \textbf{inviandole un'Intent} che indica l'intenzione di lanciarla. L'activity chiama \texttt{setLayout()} per impostare la propria UI
-	\item Il sistema chiama certi metodi dell'Activity (\textbf{callback}) in risposta alle azioni dell'utente\\
-	A seconda dei casi, questi metodi potranno
-	\begin{list}{}{}
-		\item Lanciare altre Activity (inviando opportuni Intent), sia dell'app che di altre app
-		\item Inviare Intent ad Activity già in esecuzione o in broadcast a tutti gli interessati
-		\item Interagire con Services in background
-		\item Recuperare o salvare dati tramite un Content Provider
-		\item Terminare l'Activity, tornando alla precedente
-	\end{list}
-\end{list}
+
 \pagebreak
 Per \textbf{avviare un'Activity} ci sono due modi
 \begin{multicols}{2}
@@ -288,5 +288,17 @@ Per \textbf{avviare un'Activity} ci sono due modi
 \end{list}
 \end{multicols}
 \paragraph{Esempio di Implicit Intent} \texttt{ACTION\_SEND}. L'app crea un Intent implicito con \texttt{ACTION\_SEND}, ci mette dentro i dati da inviare e lo affida al sistema che cercherà le app installate che supportano \texttt{ACTION\_SEND} e chiederà all'utente quale usare.
-%http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2004-05.pdf p.13, h 16:13 
+\subsection{Contenuti di un Intent}
+\begin{list}{}{}
+	\item \textbf{Action}: quale azione si vuole ottenere (\texttt{String})
+	\item \textbf{Data}: su quale dato operare (\texttt{URI})
+	\item \textbf{Type}: tipo MIME di Data (\texttt{String})\\
+	Se non è fornito viene ricavato da Data, se è fornito fa override su quello di Data.
+	\item \textbf{Component}: componente a cui è indirizzato il messaggio.\\
+	Solo per Intent espliciti
+	\item \textbf{Extras}: un \texttt{Bundle} (mappa chiave $\rightarrow$ valore) di ulteriori campi
+	\item \textbf{Flag}: \ldots
+\end{list}
+\subsection{Intent Filter}
+%http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2004-05.pdf p.14, h 16:13 
 \end{document}
