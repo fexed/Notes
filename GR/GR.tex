@@ -127,5 +127,49 @@ VLAN mirror: simile al port mirror: dammi tutto traffico tale VLAN e mandalo qua
 traffic filter/mirroring: dammi solamente traffico di tale porta tale ip\ldots\\\\\\
 Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, che posso scaricare al massimo a 1gbps, ho efficacia se traffico sta solo a 1gbps. Dovrei avere scheda di rete da 10gbps per reggere comodamente traffico e non perderlo. Scheda direte più veloce della somma delle due direzioni.\\
 Hardware: Network Tap prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende la direzione in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
-
+\section{Lezione}
+Software di switch e infrastruttura di rete devono essere duraturi, perché infrastruttura di rete si cambia quando c'è veramente necessità. Altrimenti infrastruttura rimane lì. 
+\paragraph{Problema} Gestire le cose nel tempo, che rimangano interoperabili negli anni. Siccome informatica va avanti per mode, si sono posti come problema (fatta negli anni '80) dover gestire qualche sistema non attraverso la url come si fa ora, perché è un modo di fare molto volatile che cambia spesso. Allora hanno fatto standard con negoziazione alto livello: oggetto ha attributi ad alto livello, funzionali al suo funzionamento (macchinettà caffè: c'è acqua, quanti caffè fatti, se ha bicchierini\ldots).\\
+Attributi, cosa ti mostro io che sia rilevante per te (non quante viti ha, ma lo stato), operazioni che si possono fare su quegli attributi (accendi, spegni\ldots), comportamento. Software si occupa dell'accensione, non so com'è fatto internamente, io mi limito a chiamare l'operazione. Standardizzazione di funzionamento.
+\paragraph{Manager} Comanda l'operazione, impone politica di gestione.
+\paragraph{Agent} Gira dentro la macchina gestita e fa cosa chiede manager e solo quello.
+\paragraph{Paradigma} Agent gira nella macchina monitorata, e un solo manager raccoglie dati e visualizza.
+\paragraph{Come realizzarlo} Bisogna negoziare rappresentazione dati. Per lavorare col web hanno risolto problema scambio dati convertendo tutto a stringhe. Questo modo di fare non ha grandi problemi, ma è inefficiente. Grande quantità di dati per poche informazioni (\texttt{true} scritto invece di un bit). Poco efficiente per tanti dati, chiaro ma non compatto. La URL è breve. Tra due macchine posso scambiarmi dati in maniera binaria, ma bisogna mettersi d'accordo. Se io a 16 bit parlo con una a 64 bit non ci capiamo, quindi bisogna accordarci (Little Endian e Big Endian).
+\paragraph{ASN1} Sintassi astratta, implementata dai linguaggi. Quando iniziano a parlare due macchine negoziano rappresentazione e codifica.
+\begin{center}
+	\includegraphics[scale=0.7]{asn1.png}
+\end{center}
+La sintassi locale (\textbf{local syntax}) è diversa e tipicamente dipendente dal linguaggio utilizzato: ad esempio una in GO l'altra in C, ma anche per sistema A Arduino Nano e sistema B workstation Windows.\\
+L'ASN1 quindi definisce una sintassi astratta standardizzata. Permette diverse regole di codifica che trasformano la sintassi astratta in un flusso di byte adatto al trasferimento: \textbf{BER} (Basic Encoding Rules) definisce il mapping tra sintassi astratta e sintassi di trasferimento.\\
+ASN1 rimane architettura, idea. La sintassi di trasferimento può essere JSON, GO o qualsiasi altra cosa: l'\textbf{importante è che le due applicazioni si capiscano}.
+\begin{list}{}{I \textbf{tipi di dato} (datatypes) primitivi dell'ASN1 sono:}
+	\item \texttt{BOOLEAN}
+	\item \texttt{INTEGER}
+	\item \texttt{BIT STRING}
+	\item \texttt{OCTET STRING}
+	\item \texttt{OBJECT IDENTIFIER}\\
+	Quando trasferisco dati da applicazione ad applicazione, devo poter indicare un campo chiave. Questo tipo di dato identifica univocamente l'oggetto che sto trasferendo all'interno dell'albero ISO
+	\item \ldots
+\end{list}
+\pagebreak
+\paragraph{ISO Registration Tree} Usato per identificare univocamente definizioni, documenti, oggetti\ldots Ha una struttura gerarchica, simile ai file system gerarchici. Tutti i nodi di un livello sono univocamente identificati da un numero. Il \textbf{percorso dalla radice al nodo} fornisce una \textbf{sequenza numerica} chiamata \textbf{Object Identifier}.\\
+Per esempio, Internet è 1.3.6.1
+\begin{center}
+	\includegraphics[scale=0.7]{isotree.png}
+\end{center}
+\textbf{Internet} si trova sotto il \textbf{Dipartimento della Difesa}, che è una \textbf{Organizzazione Identificata} facente parte dell'\textbf{ISO}. Noi parleremo della \textbf{Gestione} (\textbf{m}ana\textbf{g}e\textbf{m}en\textbf{t}) di Internet.\\
+L'\textbf{object identifier} quindi, ovvero la sequenza di numeri, risolve il problema dell'identificazione univoca della tipologia dell'oggetto trasmesso sulla rete.
+\paragraph{Tipi Complessi} ASN1 ha anche tipi complessi, come \texttt{SEQUENCE OF} che specifica una lista di dati omogenei, o \texttt{REAL} che specifica i numeri reali con mantissa ed esponente dagli \texttt{INTEGER}.
+\paragraph{Basic Encoding Rules} Regole di codifica, compattano i dati in una stringa di byte da spedire sul filo. Basato su un algoritmo tag/length/value (TLV), dove ogni variabile è identificata da un tag, la lunghezza del valore in byte e il valore di quei byte. Questo permette al ricevente di ricostruire il tipo del messaggio a partire dal flusso di byte ricevuto.
+\chapter{Gestione di Rete}
+\section{Nascita}
+Gestione di rete nacque, storicamente, nel mondo della telefonia. Necessità di codificare numero, connettersi al centralino, riconoscere il numero\ldots. Standardizzazione necessaria per poter far telefonare a distanze elevate, attraverso le nazioni.
+\paragraph{Dati} Poi arrivò internet. Prima bisognava instradare la voce, ora vanno istradati i dati (anche voce, \texttt{VoIP}, ma pur sempre dati). Eredità di tutte le tecnologie e teorie dei tempi della telefonia (es. 5G) ma anche innovazione (es. Browser Web) ma mantenendo il paradigma che era tutto sommato efficiente.
+\section{Gestione di Rete Internet}
+\paragraph{Cos'è} Sistema di protocolli e tecnologie che permettono di mettere in funzione e controllare un'infrastruttura di rete, per far sì che sia efficiente e che faccia ciò che voglio e che segnali eventuali problemi e comportamenti non previsti.
+\paragraph{Reti Geografiche} Questo discorso si applica a reti geografiche, ampie e complesse, che interconnettono un elevatissimo numero di device. Serve anche per far sì che la connessione/disconnessione di dispositivi non crei problemi, e che un utente della rete non possa creare disservizi e potenzialmente tirarla giù.
+\paragraph{Anni '90} Il problema principale era mantenere bassi i costi, perché doveva essere pervasivo e poter mettere router in ogni casa. Centraline telefoniche, al contrario, non devono stare in ogni casa.\\
+Gli apparati di rete quindi devono costare poco, perciò la gestione di rete non deve costare tanto (nella telefonia costa tanto ed è complicata, quindi "\textit{non facciamo lo stesso errore}": se è semplice anche il costo computazionale è basso, quindi il dispositivo è più economico). Il protocollo, quindi doveva essere \textbf{semplice} e \textbf{efficiente}.\\
+Altra cosa importante era \textbf{l'ubiquità} del protocollo: doveva essere disponibile su tutti i dispositivi, così da poterli gestire tutti.\\
+Inoltre il protocollo doveva essere \textbf{estensibile}. Almeno \textbf{retrocompatibile}.
 \end{document}
