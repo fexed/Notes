@@ -239,4 +239,37 @@ Questo è fatto tramite qualificatori che descrivono aspetti dell'ambiente, si a
 \ldots carellata qualificatori\ldots
 Runtime processo di scelta.
 processo di scarto rimango con più opzioni scelgo quella per priorità, rimango con una ad un certo punto scelgo quella, rimango con 0. Se nessuna matcha tutti validi, se ne matcha una o più scarto i non validi. Inoltre c'è directory di default.
+\chapter{Componenti di un'app Android}
+\section{Componenti}
+\paragraph{Cooperazione} Abbiamo visto che le applicazioni Android non sono un blocco monolitico ma un insieme di componenti cooperanti:
+\begin{list}{}{}
+	\item \textbf{Activity}\\
+	Compone un'attività atomica dell'utente, concretizzata in una "\textbf{schermata}". Può essere \textbf{composta} da vari \textbf{Fragment}
+	\item \textbf{Service}\\
+	Attività di sistema o dell'app \textbf{invisibile all'utente}, eseguita in background. \textbf{Non interagisce con l'utente} ma \textbf{può interagire con le applicazioni} in vari modi.
+	\item \textbf{Content Provider}\\
+	Un componente che \textbf{pubblica "contenuti"}, con un'interfaccia programmatica che viene utilizzata da altre app.
+	\item \textbf{Broadcast Receiver}\\
+	"\textbf{Ascolta}" i messaggi \textbf{globali}. Quando riceve un messaggio di suo interesse, esegue del codice specifico (ad esempio, lancia un'attività).
+\end{list}
+\subsection{Intent}
+I vari componenti \textbf{dialogano attraverso un sistema di messaggistica} che è alla base di Android
+\paragraph{Intent} Un Intent è un \textbf{messaggio} che \textbf{esprime un'intenzione di un utente o un'app affinché avvenga qualcosa}.\\
+Ci sono numerosissimi intent di sistema, ma ogni app può definirne altri. Una \textbf{parte della struttura} del messaggio \textbf{è fissata}, ma possono \textbf{includere dati "extra" a piacere}.\\
+Gli intent possono essere \textbf{indirizzati ad uno specifico componente} oppure \textbf{emessi in broadcast}.\\
+Ogni app definisce un \textbf{filtro} che \textbf{dichiara a quali intent è interessata} e può eventualmente rispondere.
+\section{Ciclo di Vita}
+Tipicamente un'app Android esegue così
+\begin{list}{}{}
+	\item Il launcher (che è esso stesso un'Activity) avvia la prima Activity dell'app \textbf{inviandole un'Intent} che indica l'intenzione di lanciarla. L'activity chiama \texttt{setLayout()} per impostare la propria UI
+	\item Il sistema chiama certi metodi dell'Activity (\textbf{callback}) in risposta alle azioni dell'utente\\
+	A seconda dei casi, questi metodi potranno
+	\begin{list}{}{}
+		\item Lanciare altre Activity (inviando opportuni Intent), sia dell'app che di altre app
+		\item Inviare Intent ad Activity già in esecuzione o in broadcast a tutti gli interessati
+		\item Interagire con Services in background
+		\item Recuperare o salvare dati tramite un Content Provider
+		\item Terminare l'Activity, tornando alla precedente
+	\end{list}
+\end{list}
 \end{document}
