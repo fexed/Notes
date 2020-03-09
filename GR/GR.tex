@@ -201,13 +201,48 @@ L'SNMP \textbf{non distingue i dispositivi}, ma \textbf{prende le info dalla MIB
 L'SNMP è altamente centralizzato, quindi è compito del manager implementare tutta la funzionalità di monitori e la responsabilità, sicurezza ecc\ldots
 \paragraph{Traps} Una volta configurata, sta alla \textbf{periferica avverte il manager se qualcosa non sta funzionando come previsto}. Non informa il manager ogni volta che succede qualcosa (stampo un foglio, prendo un caffè, mi connetto all'Access Point\ldots) perché il manager verrebbe inondato di informazioni, ma \textbf{l'apparato informa il manager se ci sono cose che non funzionano}. Segue la filosofia del "\textit{Se non mandi niente va tutto bene}".\\
 Questo può non essere sufficiente, per esempio in caso di problema di rete la comunicazione può non andare a buon fine. In tal caso il polling può risolvere questa cosa, anche se ciò significa apprendere il verificarsi del problema in maniera non tempestiva.
-\paragraph{SMI} Si basa su un sottoinsieme dei datatype ASN.1 più altri sottotipi: \texttt{Integer32} interi con il segno, \texttt{Unsigned32}\ldots \texttt{Gauge32} per misure tra min e max, \texttt{Counter32} e \texttt{Counter64} indica che il numero letto non è bello e pronto ma per sapere il valore devo fare una differenza tra due valori letti in istanti diversi.\\
-\texttt{IpAddress} per IPv4. \texttt{TimeTicks}. \texttt{Opaque} che è come il \texttt{void}.\\\\
-\textbf{Scalari} esistono una sola volta per agent. Es: nome di un host.\\
-\textbf{Concettuali} esistono in una tabella concettuale, con valori che cambiano nel tempo.\\\textbf{Read} e \textbf{write}: lette o scritte. Non incrementi, o resettare a valore iniziale.
-\paragraph{SMIv2} Definita tramite macro di ASN.1
-\paragraph{Use Case} \ldots
-\paragraph{Instance Identifier} Concatenazione Object Identifier con identificativo dell'istanza. Prendo object identifier\textbf{.0} per identificare scalare. il .0 identifica che quell'object identifier c'è una volta sola in tutto l'agent.\\
-Come si crea l'instance identifier? Object identifier + . + valore colonna indice.\\
-Es. 1.3.1.2.9 $\rightarrow$ 5
+\paragraph{SMI} La struttura delle informazioni di gestione (\textbf{Structure of Management Informativo}, la seconda versione) si basa su un sottoinsieme dei datatype ASN.1 più altri sottotipi:
+\begin{list}{}{}
+	\item  \texttt{Integer32} interi con il segno
+	\item \texttt{Unsigned32} interi senza segno
+	\item \texttt{Gauge32} per misure pronte comprese tra min e max
+	\item \texttt{Counter32} e \texttt{Counter64} per i contatori: per conoscere la misura effettiva devo fare la differenza tra il valore assunto in due istanti separati.
+	\item \texttt{IpAddress} per IPv4
+	\item \texttt{TimeTicks} per i centesimi di secondo passati
+	\item \texttt{Opaque} che è come il \texttt{void}, non consigliato
+\end{list}
+Le variabili, inoltre, possono essere
+\begin{list}{}{}
+	\item \textbf{Scalari}: esistono una sola volta per agent. Es: il nome di un host.
+	\item \textbf{Concettuali}: esistono in una tabella concettuale, con valori che cambiano nel tempo.
+	\item \textbf{Read} o \textbf{write}, lette o scritte. Non esistono incrementi o reset a valori iniziali, questo per semplicità di protocollo
+\end{list}
+\paragraph{MIB} Le MIB di SMIv2 sono \textbf{definite tramite speciali macro ASN.1}
+\paragraph{Use Case} 
+\begin{center}
+	\includegraphics[scale=0.7]{mibusecase.png}
+\end{center}
+Le variabili sono definite nell'ISO Registration Tree. Una foglia dell'albero rappresente on managed object.
+\begin{center}
+	\includegraphics[scale=0.7]{mibusecasetree.png}
+\end{center}
+\paragraph{Instance Identifier} Ogni managed object è identificato dall'object identifier. Ma tale oggetto ha istanze con determinati valori che cambiano nel tempo: tale istanza è identificata univocamente da un \textbf{Instance Identifier}. La singola istanza di un managed object è \textbf{univocamente identificata concatenando l'Instance Identifier all'Object Identifier}.\\
+Gli scalari hanno una sola istanza, e l'istance identifier è \texttt{.0}. Negli altri casi (non identifier) si parte da \texttt{.1}.\\
+L'istance identifier è il valore della colonna indice.
+\begin{center}
+	\includegraphics[scale=0.7]{mibusecasetable.png}
+\end{center}
+In questo caso, per prendere il valore della terza istanza di \texttt{mask}: \texttt{1.3.1.2.9} $\rightarrow$ \texttt{5}.
+\begin{multicols}{2}
+\begin{list}{}{Altri esempi:}
+	\item \texttt{1.3.1.1.1} $\rightarrow$ \texttt{1}
+	\item \texttt{1.3.1.2.1} $\rightarrow$ \texttt{2}
+	\item \texttt{1.3.1.3.1} $\rightarrow$ \texttt{2}
+	\item 
+	\item \texttt{1.3.1.1.4} $\rightarrow$ \texttt{4}
+	\item \texttt{1.3.1.2.4} $\rightarrow$ \texttt{7}
+	\item \texttt{1.3.1.2.7} $\rightarrow$ $\not\exists$
+\end{list}
+\end{multicols}
+%http://luca.ntop.org/sgr2018/slides/nm2017.pdf, p. 55
 \end{document}
