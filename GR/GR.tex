@@ -172,4 +172,34 @@ Gestione di rete nacque, storicamente, nel mondo della telefonia. Necessità di 
 Gli apparati di rete quindi devono costare poco, perciò la gestione di rete non deve costare tanto (nella telefonia costa tanto ed è complicata, quindi "\textit{non facciamo lo stesso errore}": se è semplice anche il costo computazionale è basso, quindi il dispositivo è più economico). Il protocollo, quindi doveva essere \textbf{semplice} e \textbf{efficiente}.\\
 Altra cosa importante era \textbf{l'ubiquità} del protocollo: doveva essere disponibile su tutti i dispositivi, così da poterli gestire tutti.\\
 Inoltre il protocollo doveva essere \textbf{estensibile}. Almeno \textbf{retrocompatibile}.
+\section{SNMP}
+\paragraph{SNMP} Protocollo raggiunto "piano piano" con il diffondersi di internet, prima a livello universitario e poi industriale.\\
+Non ci siamo arrivati tardi, perché è importante che l'infrastruttura stia in piedi. SNMP monitora lo stato della rete. Bisogna far si che la rete risponda alle esigenze.\\
+Ci sono più standard, con primi standard nel 1990. Doveva essere \textbf{semplice}, poiché i sistemi erano semplici, non potenti, a volte anche non multitasking. SNMP non poteva girare in hardware, ma necessita di un computer perché necessita di elaborazione dati. Necessita di stack IP per comunicare. Negli anni '90 lo stack IP non era necessariamente presente sui computer. Stack IP basato sul'UDP.\\
+SNMP è separata dallo switching, non fa parte della parte di comunicazione anche se aiuta all'instradamento. Non interferisce, come il cruscotto della macchina (SNMP) col motore.\\
+Trasparente, fuori dalla comunicazione, ma deve poterla controllare e monitorare senza interferire. Idea è che se SNMP viene compromesso lo switch continua a funzionare.\\
+\paragraph{Evoluzione} 1990 versione molto semplice (SNMPv1), 1991 Management Information Base (oggetti manipolati tramite gli SNMP).\\
+Anni successivi evoluzioni protocollo, perché fu fatto "di fretta" per avere qualcosa di pronto per il mercato che stava esplodendo. Furono privilegiate funzionalità base rispetto ad altre funzionalità.\\
+SNMPv1 supportata da tutti, v2 aggiunge poco in più e usata soprattutto perché in v1 contatori nelle interfacce erano a 32 bit quindi sono stati aggiornati.\\
+SNMPv3 ha perso il "Simple", quindi non è stata presa molto in considerazione dall'utenza.
+\paragraph{Semplice} Parte importante è che sia semplice e funzionare sotto UDP.
+\paragraph{Utile} Utile per monitoring centralizzato su reti importanti. è importante che questi protocolli siano in funzione in ogni momento, per riconoscere problemi in anticipo e avere uno storico della rete. Anche solo contare il traffico in byte è un'informazione importante.\\
+\paragraph{Agent} Apparato di rete, ad es. nella rete del Fibonacci ci sono diversi agent: access point, computer, stampanti\ldots\\
+Oggetti da gestire e possono cambiare nel tempo (aggiungo/tolgo, ma anche tipologia)
+\paragraph{Trap Directed Polling} Gli agent rispondon ad un manager: $n$ agent per un manager. Tipicamente di manager ce ne sono due per ridondanza.\\
+Con lo stesso protocollo e stessa funzionalità devo poter controllare computer, stampanti ma anche i badge, schermi\ldots SNMP non distingue dispositivi, ma prende info dal MIB dell'agent.\\
+La differenza tra S.O. sta nel MIB.
+\paragraph{Polling} Controllo. Manager non può continuamente comunicare con gli agent, ma ogni tanto va a contattare l'agent. Periodicamente.\\
+Ogni agent ha proprio IP. Ma la prima versione non pensava alla sicurezza.
+\paragraph{Traps} Informazione. Una volta configurata la periferica avverte il manager se qualcosa non sta andando. Non informa il manager ogni volta che succede qualcosa (stampo un foglio, prendo un caffè, mi connetto all'Access Point) perché il manager verrebbe inondato di informazioni. Ma l'apparato informa il manager se ci sono cose che non funzionano. Se non mandi niente va tutto bene.\\
+Può non essere sufficiente, in caso di problema di rete ad esempio. Quindi polling può risolvere questa cosa, anche se non tempestivamente.
+\paragraph{SMI} Si basa su un sottoinsieme dei datatype ASN.1 più altri sottotipi: \texttt{Integer32} interi con il segno, \texttt{Unsigned32}\ldots \texttt{Gauge32} per misure tra min e max, \texttt{Counter32} e \texttt{Counter64} indica che il numero letto non è bello e pronto ma per sapere il valore devo fare una differenza tra due valori letti in istanti diversi.\\
+\texttt{IpAddress} per IPv4. \texttt{TimeTicks}. \texttt{Opaque} che è come il \texttt{void}.\\\\
+\textbf{Scalari} esistono una sola volta per agent. Es: nome di un host.\\
+\textbf{Concettuali} esistono in una tabella concettuale, con valori che cambiano nel tempo.\\\textbf{Read} e \textbf{write}: lette o scritte. Non incrementi, o resettare a valore iniziale.
+\paragraph{SMIv2} Definita tramite macro di ASN.1
+\paragraph{Use Case} \ldots
+\paragraph{Instance Identifier} Concatenazione Object Identifier con identificativo dell'istanza. Prendo object identifier\textbf{.0} per identificare scalare. il .0 identifica che quell'object identifier c'è una volta sola in tutto l'agent.\\
+Come si crea l'instance identifier? Object identifier + . + valore colonna indice.\\
+Es. 1.3.1.2.9 $\rightarrow$ 5
 \end{document}
