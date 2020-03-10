@@ -348,7 +348,7 @@ Quindi bisogna essere pronti a salvare stato e ripristinarlo, con metodi apposta
 \end{list}
 Qua l'activity è in top stack, visibile e interagente con l'utente.
 \begin{list}{}{}
-	\item \texttt{onPause}: stai per diventare non interagente con l'utente, ad es.: altra activity và sopra di te (salvare dati!)
+	\item \texttt{onPause}: stai per diventare non interagente con l'utente, ad es.: altra activity và sopra di te (siamo già a rischio, bisogna salvare dati!)
 	\item \texttt{onStop}: non sono più visibile (posso interrompere animazioni, ad esempio), non occorre tenere UI aggiornata
 	\item \texttt{onRestart}: torni visibile
 	\item \texttt{onDestroy}: l'activity non esiste più, abbiamo finito o stanno per ucciderci (salvare dati!)
@@ -373,4 +373,19 @@ protected void onStart() {
 }
 \end{verbatim}
 Perché super fa tanto lavoro che deve per forza fare anche se viene fatto Override
+\subsection{Salvare lo stato}
+Callback \texttt{onSaveInstanceState()} chiamato dal sistema quando sta chiedendo di salvare istanza. Prima di \texttt{onStop()} e \texttt{onPause()}. Se vi chiama, è arrivato il momento di salvare, ma è possibile che non venga chiamato (se sistema sa che non può tornare a chiamarvi, come quando utente chiude task da lista task recenti).\\
+Activity is running $\rightarrow$ altra attività viene in sovraimpressione quindi \texttt{onSaveIstanceState()} $\rightarrow$ activity non più visibile $\rightarrow$ \ldots $\rightarrow$ resume dell'activity. Non viene ripristinato stato perché processo non è stato ucciso\\\\
+Activity is running $\rightarrow$ altra attività viene in sovraimpressione quindi \texttt{onSaveIstanceState()} $\rightarrow$ activity non più visibile $\rightarrow$ \ldots $\rightarrow$ processo ucciso $\rightarrow$ utente torna all'activity (che non è stata distrutta) $\rightarrow$ sistema \textbf{ricrea l'activity} $\rightarrow$ \texttt{onCreate()} ripristinando stato salvato
+\subsection{Bundle}
+Bundle: coppie chiave-valore.\\
+Metodo \texttt{onSaveInstanceState()} dovrebbe salvare tutto quello che può servire: \texttt{putString}, \texttt{putInt}\ldots anche \texttt{putBundle}! Activity distrutta ma bundle sopravvive, verrà poi passato a \texttt{onCreate()}, e anche a \texttt{onRestoreInstanceState()} chiamata dopo \texttt{onStart()}.\\
+\subsection{Default}
+Classe activity ha implementazione di default di salvataggio e ripristino stato: scorre il suo layout e salva nel bundle tutte le view chiamando il loro \texttt{onSaveInstanceState()}, ma solo quelle che hanno un \texttt{id}. Se l'activity ha solo UI basta così, ma conviene praticamente sempre chiamare \texttt{super.onSaveInstanceState()} anche se non si devono salvare ulteriori pezzi di stato (non-UI).\\
+Questo consente di ritrovare il campo riempito precedentemente se si torna all'activity.
+\section{Layout}
+UI Android è un albero con foglie di classe View e nodi intermedi di classe ViewGroup.\\
+Ogni View è una classe Java con nome uguale al tag XML relativo.\\
+Quando si verifica un evento significativo sulla View viene chiamato un \textbf{handler} della View.
+
 \end{document}
