@@ -301,4 +301,76 @@ Per \textbf{avviare un'Activity} ci sono due modi
 \end{list}
 \subsection{Intent Filter}
 %http://circe.di.unipi.it/~gervasi/SAM19/Lezione%2004-05.pdf p.14, h 16:13 
+
+\subsection{Activity Stack}
+Utente interagisce solo con la top ma può vedere le altre parti se la top ha parti trasparenti.\\
+Ci sono tanti stack. In un dato momento sono in uno stack. Se scelgo di cambiare schermata vado sull'activity precedente a questa in ordine cronologico sempre sul suo stack.\\
+Politica con cui vengono avviate activity\ldots (p.36)\\
+Comportamento dipende da due flag: uno deciso da chi manda l'activity e altri flag decisi dall'activity.\\
+\begin{list}{}{\texttt{launchMode} (manifest)}
+	\item \texttt{Standard} crea sempre nuova istanza
+	\item \textbf{SingleTop} riavvia istanza se activity top altrimenti nuova istanza che diventa top
+	\item \textbf{SingleTask} Una sola istanza, se ce n'è una in qualche stack viene riavviata quella altrimenti nuovo stack
+	\item \textbf{SingleInstance} Si crea nuobo task che non consente altre activity (es.: Home)
+\end{list}
+Con i \texttt{FLAG\_ACTIVITY\_*} ci sono ulteriori opzioni per essere più specifici
+\begin{list}{}{}
+	\item Disattivare l'animazione di transizione
+	\item Lanciare senza che appaia nella history
+	\item Decidere se spostare l'activity in cima allo stack o lasciata al suo posto
+	\item \ldots
+\end{list}
+\begin{list}{}{Flag più comuni (intent)}
+	\item new\_task
+	\item 
+\end{list}
+\subsection{Lanciare activity}
+Mai usare \texttt{on<qualcosa>} nel codice scritto da noi, sono chiamate fatte dal sistema.
+\subsection{Layout}
+Il layout è impostato con \texttt{setLayout()}, ma può cambiare dinamicamente: alterando il layout o manipolando i fragment che compongono l'activity.\\
+Nel secondo caso i cambiamenti ai fragment vengono messi nel back stack.
+\subsection{Terminazione}
+Activity può finire \textit{suicidandosi} con il metodo \texttt{finish()}, con \texttt{setResult()} chiamato prima per pubblicare l'eventuale risultato.\\
+Si può chiudere un'altra activity chiamata con \texttt{startActivityForResult(intent, codr)} tramite \texttt{finishActivity(codr)}.\\
+\textbf{Il sistema può uccidere activity in qualunque momento} per liberare risorse o quando cambia la configurazione (landscape, cambio lingua, modalità notte\ldots).\\
+Il sistema avvisa prima di uccidere, ha un protocollo il sistema basato su tre classi di priorità (dei componenti)
+\begin{list}{}{}
+	\item \textbf{Priorità Critica}, mai uccisi. Activity in cima allo stack corrente (quindi, in uso). Di solito una sola, ma in caso di Picture-In-Picture o schermo diviso possono essere di più.
+	\item \textbf{Priorità Alta}, uccisi alla disperata. Activity visibili attraverso le aree trasparenti dell'activity top.
+	\item \textbf{Priorità Bassa}, uccisi in ordine LRU se serve. Activity non visibili in fondo allo stack corrente o in altri stack.
+\end{list}
+Quindi bisogna essere pronti a salvare stato e ripristinarlo, con metodi apposta.
+\section{Ciclo di Vita di un'Activity}
+\begin{list}{}{Fase di avvio}
+	\item \texttt{onCreate}: codice in fase di creazione, inizializza stato
+	\item \texttt{onStart}: codice subito prima di essere visibile, UI pronta
+	\item \texttt{onResume}: stai per passare da potenzialmente visibile a responsive, stato in cui prendi input da utente
+\end{list}
+Qua l'activity è in top stack, visibile e interagente con l'utente.
+\begin{list}{}{}
+	\item \texttt{onPause}: stai per diventare non interagente con l'utente, ad es.: altra activity và sopra di te (salvare dati!)
+	\item \texttt{onStop}: non sono più visibile (posso interrompere animazioni, ad esempio), non occorre tenere UI aggiornata
+	\item \texttt{onRestart}: torni visibile
+	\item \texttt{onDestroy}: l'activity non esiste più, abbiamo finito o stanno per ucciderci (salvare dati!)
+\end{list}
+Se il processo è ucciso
+\begin{list}{}{}
+	\item Ritorno alla \texttt{onCreate}
+\end{list}
+\begin{list}{}{Da A a B}
+	\item A pause
+	\item B create
+	\item B start
+	\item B resume
+	\item A stop, se B non ha parti trasparenti
+\end{list}
+L'implementazione \textbf{deve} chiamare il metodo corrispondente della superclasse
+\begin{verbatim}
+@Override
+protected void onStart() {
+	super.OnStart();
+	//codice
+}
+\end{verbatim}
+Perché super fa tanto lavoro che deve per forza fare anche se viene fatto Override
 \end{document}
