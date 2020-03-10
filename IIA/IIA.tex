@@ -839,5 +839,84 @@ L'idea è quella di utilizzare al meglio la memoria disponibile.\\
 SMA* procede come A* fino ad esaurimento della memoria disponibile. A questo punto “dimentica” il nodo peggiore, dopo avere aggiornato il valore del padre.\\
 A parità di $f$ \textbf{si sceglie il nodo migliore più recente e si dimentica il nodo peggiore più vecchio}.\\
 \textbf{Ottimale se il cammino soluzione sta in memoria}.
+%TODO
+\chapter{I Giochi con Avversario}
+\section{Premessa}
+Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
+Da adesso rilassamento delle assunzioni di base: ambiente multi agente e rappresentazioni degli stati più complesse.\\
+Ci occuperemo di \textbf{specializzazioni} del paradigma: giochi con avversario. I piani quindi devono tenere conto dell'avversario.\\
+Vedremo \textbf{problemi di soddisfacimento di vincoli}, sempre come ricerca in spazio di soluzioni, con stato a struttura \textbf{fattorizzata}.\\
+Questo ci porterà a considerare sistemi basati su conoscenza: lo stato è una "base di conoscenza" a cui rivolgere domande rappresentato in linguaggio espressivo. Tecniche di "ragionamento" con inferenze: logica del prim'ordine e calcolo proposizionale.
+\section{Giochi con Avversario}
+\begin{list}{}{}
+	\item Regole semplici e formalizzabili
+	\item Ambiente accessibile e deterministico
+	\item Due giocatori, a turni alterni, a \textbf{somma zero} (se uno vince, l'altro perde: sommare i punteggi dà 0 o risultato costante), a informazione perfetta (tutti i gioc conoscono stato gioco)
+	\item Ambiente multi-agente competitivo: presenza avversario rende ambiente strategio, più difficile rispetto a visto fin'ora
+	\item Complessità e vincoli di tempo reale: mossa migliore nel tempo disponbile
+\end{list}
+$\Rightarrow$ giochi più simili a prob reali
+\section{Ciclo \textit{pianifica-agisci-percepisci}}
+\paragraph{Due agenti a turno} Si può pianificare considerando le possibili risposte dell'avversario e le possibili risposte a quelle risposte\ldots\\
+Una volta decisa la mossa
+\begin{list}{}{}
+	\item Si esegue la mossa
+	\item ...
+\end{list}
+\section{Giochi come problemi di ricerca}
+\begin{list}{}{}
+	\item Stati: config gioco\\
+	Player(s) a chi tocca muovere nello stato s
+	\item Stato iniziale: config iniziale gioco
+	\item Actions(s) mosse legali in s
+	\item Result(s, a) stato risultatne da una mossa
+	\item Terminal-Test(s) determina se stato è fine del gioco
+	\item Utility(s, p) utilità (o pay-off) valore numerico degli stati terminali del gioco per p\\
+	Es: 1, -1, 0, conteggio punti\ldots
+\end{list}
+\section{Algoritmo Min-Max}
+Valuto stati terminali in base a punteggio/vittoria e valuto stati preterminali valutandoli in base a se mi portano a vittoria o meno a ritroso. Valuto stati intermedi con valore minimo tra gli stati risultanti.
+\begin{center}
+	Immagine tic-tac-toe
+\end{center}
+\paragraph{Valore minmax}
+minimax(s) = 
+\begin{list}{}{}
+	\item se Terminal-Test(s) , allora Utility(s, MAX)
+	\item se Player(s) = MAX , allora max$_{a \in Action(s)}$ Minimax(Result(s, a))
+	\item se Player(s) = MIN , allora min$_{a \in Action(s)}$ Minimax(Result(s, a))
+\end{list}
+\paragraph{Come conviene esplorare l'albero di gioco?} In profondità, perché hanno ampiezza esponenziale.
+\paragraph{Algoritmo ricorsivo}\ldots
+\section{Algoritmo Min-Max Euristico (con orizzonte)}
+Casi complessi in cui esplorare stati è troppo costoso (es. scacchi): occorre \textbf{funzione di valutazione euristica}.\\
+Strategia: guardare avanti $d$ livelli\ldots
 
+\section{Funzione di Valutazione}
+Stima dell'utilità attesa a partire da una certa posizione. La qualità della funzione è determinante.
+\begin{list}{}{}
+	\item deve esser consistente con l'utilità se applicata a steati terminali del gioco (indurre lo stesso ordinamento)
+	\item dev'essere efficiente da calcolare
+	\item deve riflettere le probabilità effettive di vtitoria (A valutato meglio di B se da A ho più probabilità di vittoria rispetto a B)
+	\item \ldots
+\end{list}
+Esempio scacchi
+\paragraph{Problemi Noti}
+\begin{list}{}{}
+	\item \textbf{Stati Non Quiescienti}: esplorazione fino ad un livello può mostrare situaz. molto vantaggiosa, ma a mossa successiva es. regina mangiata dalla torre. Si possono riconoscere-\\
+	\textbf{Soluzione}: non fermarsi a stati quiescienti ma esplorare un po' di più fino ad arrivare a stati in cui funz. valutazione non attende variazioni repentine (stati quiescienti)
+	\item \textbf{Effetto Orizzonte}: si privilegiano mosse diversive che hanno solo l'effetto di spingere il problema oltre, per evitare mosse disastrose che alla fine devono accadere
+\end{list}
+\subsection{Ottimizzazione}
+Dobbiamo esplorare ogni cammino? No esistono tecniche di potatura che dimezzano la ricerca pur mantenendo decisione min-max corretta (potatura alfa-beta)
+\paragraph{Potatura Alfa-Beta} ridurre spazi ricerca algoritmi min-max
+\subsection{Algoritmo Alfa-Beta}
+\paragraph{Algoritmo}\ldots
+\paragraph{Ordinamento delle mosse}
+\paragraph{Giochi Multiplayer} Invece di aver due valori ho un vettore di valori per nodo. Per propagare all'indietro prendo vettore che migliora la valutazione.
+\section{Problemi di Soddisfacimento di Vincoli}
+\paragraph{CSP}
+caso particolare dei problemi di ricerca, grazie alla struttura si cerca meglio la soluzione.\\
+Classe ampia, esistono euristiche generali da applicare che consentono risoluzioni di dimensioni significative.\\
+\paragraph{Tre componenti}
 \end{document}
