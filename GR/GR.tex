@@ -244,5 +244,22 @@ In questo caso, per prendere il valore della terza istanza di \texttt{mask}: \te
 	\item \texttt{1.3.1.2.7} $\rightarrow$ $\not\exists$
 \end{list}
 \end{multicols}
-%http://luca.ntop.org/sgr2018/slides/nm2017.pdf, p. 55
+\subsection{MIB}
+Come si definisce un MIB
+\begin{verbatim}
+nome DEFINITIONS ::= BEGIN
+
+IMPORT	MODULE-IDENTITY, OBJECT-TYPE, enterprises, IpAddress, TimeTicks	FROM SNMPv2-SMI;
+...
+
+END
+\end{verbatim}
+I nomi servono solo per gli umani, perché sulla rete passano gli object identifier.
+\paragraph{Module Identity} Non aggiunge informazione ma indica la versione, questo perché negli anni le reti cambiano ma l'infrastruttura rimane fissa almeno in parte. I device a lungo termine (ad esempio lettori di badge) devono convivere con i nuovi: eterogeneità nelle velocità di elaborazione, protocolli\ldots\\
+Non posso togliere oggetto, perché magari versioni precedenti lo usano. Se voglio eliminarlo posso indicarne lo \texttt{STATUS}: obsolete, current o deprecated.
+\paragraph{Object Type} \texttt{nome OBJECT-TYPE, SYNTAX, UNITS}\ldots
+\paragraph{Notification Type} Invio anche oggetti interessati alle trap\\
+linkDown per segnalare se ha perso il link, linkUp per collegamento preso
+\paragraph{Utilità dei MIB} Compilatore non è detto che generi linguaggio macchina ma trasforma semplicemente. I \textbf{frontend compilers} SNMP prendono i MIB e producono warning/errori e conversioni di formato SMI
+%http://luca.ntop.org/sgr2018/slides/nm2017.pdf
 \end{document}
