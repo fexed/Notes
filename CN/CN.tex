@@ -207,6 +207,39 @@ $$f(x, y) = \frac{x}{y}\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsi
 Ne segue, come visto in precedenza, che la sottrazione di due numeri vicini tra loro è potenziale causa di elevata amplificazione degli errori relativi (\textbf{cancellazione numerica}). Si nota anche come le operazioni moltiplicative siano ben condizionate.
 \paragraph{Esempio} Siano $x = 0.2178\cdot10^2$ e $y = 0.218\cdot10^2$, supponendo di operare con troncamento in base B = 10 e t = 3 cifre di rappresentazione ($u = 10^{1 - t} = 10^{-2}$). Si ha $\tilde{x} = 0.217\cdot10^2$ e $\tilde{y} = y$.\\
 Pertanto $\tilde{x}\:\oplus\:\tilde{y} = -0.001\cdot10^2 = -0.1$ mentre $x - y = -0.0002\cdot10^2 = -0.2\cdot10^{-1}$ e quindi $|\epsilon_{in}| = \frac{0.8}{0.2} = 0.4$.
+\pagebreak
+\section{Esercitazioni}
+\subsection{Esercitazione 2}
+Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
+\paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
+Dato che $C_x = n$ possiamo dire che il problema è \textbf{ben condizionato}
+\paragraph{Stabilità} Dobbiamo considerare i due algoritmi, perché algoritmi differenti producono errore algoritmico diverso. $$f(x) = x^n = (((x\cdot x)\cdot x)\cdot x) \ldots)\cdot x$$ Non possiamo calcolare $x \cdot x$ ma calcoleremo $x \otimes x = x^2(1 + \epsilon_1)$, assumendo $x \in$ F(B, t, m, M) per il calcolo dell'errore algoritmico.\\
+Successivamente calcoliamo $x\cdot x\cdot x$, cioè $(x \otimes x) \otimes x = x^3 \cdot (1 + \epsilon_1) \cdot (1 + \epsilon_2)$.\\
+Quindi $x\cdot \ldots \cdot x$ $n$ volte diventerà $x^n \prod_{i = 1}^{n-1}(1 + \epsilon_i)$. Quindi $$g(x) =  x^n \prod_{i = 1}^{n-1}(1 + \epsilon_i) = x^n(1 + \sum_{i = 1}^{n - 1}\epsilon_i)$$
+$$\epsilon_{alg} = \frac{g(x) - f(x)}{f(x)} \doteq \frac{x^n(1 + \sum_{i = 1}^{n - 1}\epsilon_i) - x^n}{x^n} = \frac{x^n\sum_{i = 1}^{n - 1}\epsilon_i}{x^n} = \sum_{i = 1}^{n - 1}\epsilon_i$$
+Quindi $$|\epsilon_{alg} = |\sum_{i = 1}^{n - 1}\epsilon_i| \leq \sum_{i = 1}^{n - 1}|\epsilon_i| \leq (n - 1)u$$ Quindi l'algoritmo è \textbf{numericamente stabile}. In questo caso, $\epsilon_{in}$ è dello stesso ordine di $\epsilon_{alg}$
+\begin{center}
+	$<$grafo dell'errore$>$
+\end{center}
+L'errore accumulato è $\delta_k = \epsilon_k + \delta_{k - 1}$, si somma all'errore locale della moltiplicazione ($\epsilon_k$). $$|\delta_k| = |\epsilon_k + \delta_{k - 1}| \leq |\epsilon_k| + |\delta_{k - 1}| \leq |\delta_{k - 1}| + u \leq |\delta_{k - 2}| + 2u \leq |\delta_1| + (k - 1)u \leq |\delta_0| + ku = ku$$ Quindi possiamo dire $|\delta_n| \leq n\cdot u$. Notiamo che gli errori non si amplificano, perché è un operazione di moltiplicazione, ma vengono semplicemente sommati. La relazione trovata lo dimostra.\\\\\\\\
+Per quanto riguarda il secondo algoritmo $$f(x) = e^{n\cdot\log(x)}$$ Si osserva che \textbf{la funzione è razionale} ($f(x) = x^n$) ma \textbf{viene calcolata in macchina usando le funzioni non razionali} $h(x) = e^x$ e $g(x) = \log(x)$. In generale, quindi, non posso eseguire l'analisi dell'errore algoritmico con gli strumenti precedentemente usati. Questo \textbf{a meno che non si sappia com'è calcolata la funzione non razionale}.\\
+Aggiriamo il problema dicendo che $$Exp(x) = e^x\cdot(1 + \epsilon_1)$$ con $|\epsilon_1| \leq u$ e $$Log(x) = \log(x)\cdot(1 + \epsilon_2)$$ con $|\epsilon_2| \leq u$. Queste sono approssimazioni, in generale $|\epsilon_1|,\:\:|\epsilon_2| \leq k\cdot u$ con $k$ piccola che adesso trascuriamo perché l'analisi qualitativa è analoga.\\
+In questo caso, trattiamo le funzioni non razionali come razionali.
+\subparagraph{Analisi del grafo}
+\begin{center}
+	\includegraphics[scale=0.4]{es2_grafo2.png}
+\end{center}
+$|\epsilon_1| \leq u$, $|\epsilon_2| \leq u$, $|\epsilon_3| \leq u$\\
+Per $x \rightarrow \log(x)$ allora $C_x = \frac{\frac{1}{x}}{\log(x)} = \frac{1}{\log(x)}$ ma non amplifica errore su $x$, perché per il calcolo dell'errore algoritmi assumiamo numeri di macchina.\\
+Per $x \rightarrow e^x$ allora $C_x = \frac{e^x}{e^x}x = x$. Quindi $\epsilon_2$ ha come coefficiente di amplificazione pari a $n\cdot\log(x)$.\\
+Di conseguenza calcolo l'errore algoritmico partendo dalla cima dell'albero e verso le radici (destra verso sinistra) $$\epsilon_{alg} \doteq \epsilon_1 + (n\cdot\log(x))(\epsilon_2 + \epsilon_3)$$
+Concludiamo che $|\epsilon_{alg}| = |\epsilon_1 + n\log(x)(\epsilon_2 + \epsilon_3)| \leq |\epsilon_1| + |n\log(x)(\epsilon_2 + \epsilon_3)| \leq u + |n\log(x)|\cdot |\epsilon_2 + \epsilon_3| \leq u + n|\log(x)|(|\epsilon_2| + |\epsilon_3|) \leq u + 2un|\log(x)| = u\cdot(1 + 2\cdot n\cdot|\log(x)|)$ cioè $$|\epsilon_{alg}| \leq u\cdot(1 + 2\cdot n\cdot|\log(x)|)$$ Concludiamo che l'algoritmo è \textbf{numericamente instabile per $x$ piccolo o $x$ è grande}, ma è stabile in un intorno di $1$.\\\\\\\\
+L'analisi della stabilità ci dice che il primo algoritmo è preferibile.
+\paragraph{Costo computazionale} Il \textbf{primo algoritmo} $\Rightarrow$ $(n - 1)$ operazioni moltiplicative, quindi \textbf{O(n)}.\\
+Il \textbf{secondo algoritmo}, più complicato perché ci sono due operazioni non razionali oltre alla moltiplicazione.
+\paragraph{Esercizio} Supposto $n = 2^k$ e $f(x) = x^n = x^{2^k}$, determinare un algoritmo che calcola $f(x)$ con $k = \log_2(n)$ operazioni moltiplicative. Eseguire anche l'analisi dell'errore algoritmico per l'algoritmo trovato.
+\pagebreak
 \section{Matlab}
-11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentaili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
+11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
+
 \end{document}
