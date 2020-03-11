@@ -241,5 +241,35 @@ Il \textbf{secondo algoritmo}, più complicato perché ci sono due operazioni no
 \pagebreak
 \section{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
-
+\subsection{Esponenziale}
+$f(x) = e^x$ approssimato con Taylor $$e^x \simeq 1 + x + \frac{x^2}{2} + \frac{x^3}{3!} + \ldots + \frac{x^n}{n!}$$ Implementiamo un algoritmo che dati $x$, $n$ in input restituisce $y = 1 + x + \frac{x^2}{2} + \frac{x^3}{3!} + \ldots + \frac{x^n}{n!}$ in output.\\
+Potrebbe essere utile un programma del tipo
+\begin{lstlisting}
+y = 1;
+for k = 1 .. n
+	y = y + x^(k)/factorial(k)
+end
+\end{lstlisting}
+Dal punto di vista del costo computazionale, però, ci sono dei problemi. Al passo $k$ faccio $k$ prodotti per $x^k$ e $k$ prodotti per $k!$, quindi \textbf{circa $2k$ prodotti}.\\
+Il costo totale è del tipo $C = 2 + 2\cdot 2 + 2\cdot 3 + \ldots + 2\cdot n = 2(1 + 2 + 3 + \ldots + n)$.\\
+Ricordiamo $1 + 2 + \ldots + n = \frac{n(n + 1)}{2}$, quindi $C = \not 2\cdot\frac{n(n+1)}{\not 2} =$ O($n^2$) quindi costo quadratico.\\
+Una variazione più efficiente
+\begin{lstlisting}
+y = 1; p = 1; m = 1;
+for k = 1 .. n
+	p = p * x;	% accumula le potente
+	m = m * k;	% accumula il fattoriale
+	y = y + p/m	% accumula la somma
+end
+\end{lstlisting}
+Al passo $k$ ho 4 operazioni aritmetiche (o 3 operazioni moltiplicative, perché alcune volte si afferma che $t_* >> t_+$ in termini di operazioni tra bit (\textbf{costo booleano}))\\
+Il costo totale $C = 4n$ operazioni (o $3n$).\\
+I due algoritmi possono produrre numeri molto grandi. Una versione che argina questo problema è la seguente.
+\begin{lstlisting}
+y = 1; z = 1;
+for k = 1 .. n
+	z = z * x/k;	% controllare l'esplosione dei numeri
+	y = y + z;
+end
+\end{lstlisting}
 \end{document}
