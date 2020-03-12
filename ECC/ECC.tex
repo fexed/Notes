@@ -300,14 +300,20 @@ Ad esempio, $f$ = $\emptyset$ è calcolata da \texttt{while(true) do skip} ma an
 	\end{enumerate}
 \end{enumerate}
 \pagebreak
-\section{Ricorsive primitive}
-$$\lambda x.e$$
-$x$ è variabile (legata), $e$ è espressione\\
-Es: $\lambda y. x + y$, $\lambda x \lambda y.x + y$\\
-Useremo questa espressione per indicare le variabili che appaiono.\\
-Al posto di $\lambda x_1, x_2,\ldots, x_n$ scriverò $\lambda \overrightarrow{x}$\\\\
-\subsection{Funzione ricorsiva}
-Classe C delle funzioni ricorsive primitive è la \textbf{minima classe} di funzioni che obbediscono alle seguenti regole di inferenza, regole di sintassi per definire le funzioni.
+\section{Funzioni ricorsive primitive}
+Per formalizzare i vari modi con cui possiamo esprimere le funzioni, usiamo quella che si chiama \textbf{$\lambda$-notazione}. Queste espressioni individuano gli argomenti all'interno di un'espressione che descrive una funzione, scritta seguendo un'opportuna sintassi.
+$$\lambda <\textsl{variabili}>.<\textsl{espressione}>$$
+\paragraph{Esempio} $\lambda\,x,\,y.\textsl{expr}$\\
+Gli \textbf{argomenti} dell'espressione $\textsl{expr}$ sono $x$, $y$. Si dice anche che $x$, $y$ \textbf{appaiono legate da $\lambda$ in $\textsl{expr}$}.\\
+Invece un qualsiasi altro simbolo di variabile $w$ in \textsl{expr} \textbf{non è da considerarsi argomento} dell'espressione, e viene definito \textbf{libero} in \textsl{expr}.\\
+Altri \textbf{esempi} per evidenziare la \textbf{notazione}:
+\begin{list}{}{}
+	\item $\lambda\, y. x + y$
+	\item $\lambda\, x \lambda\, y.x + y$ che può essere riscritta come $\lambda\, x,\,y.x + y$ ed equivale a dire $somma(x, y) = x + y$ dando così il nome $somma$ alla funzione.
+	\item $\lambda\, x_1, x_2, \ldots, x_n.\textsl{expr}$ riscritta come $\lambda\, \overrightarrow{x}.\textsl{expr}$
+\end{list}
+\subsection{Classe C}
+La classe $C$ delle \textbf{funzioni ricorsive primitive} è la \textbf{minima classe} di funzioni che obbediscono alle seguenti regole di inferenza, regole di sintassi per definire le funzioni.\\
 \begin{list}{}{\textbf{Casi base}}
 	\item \textbf{Zero}: $\lambda \overrightarrow{x}.0$\\
 	Prende un vettore di argomenti e restituisce 0.
@@ -318,76 +324,160 @@ Classe C delle funzioni ricorsive primitive è la \textbf{minima classe} di funz
 \end{list}
 \begin{list}{}{\textbf{Casi iterativi}}
 	\item \textbf{Composizione}\\
-	Se $g_1,\ldots, g_n \in C$ con $k$ argomenti ("a $k$ posti")\\
-	e $h \in C$ a $n$ posti\\
-	$\Rightarrow \lambda x_1, \ldots, x_n.h(g_1(\overrightarrow{x},\ldots, g_n(\overrightarrow{x})) \in C$
+	$g_1,\ldots, g_n \in C$ con $k$ argomenti ("a $k$ posti") e\\
+	$h \in C$ a $n$ posti\\
+	$\Rightarrow \lambda x_1, \ldots, x_n.h(g_1(\overrightarrow{x}),\ldots, g_n(\overrightarrow{x})) \in C$
 	\item \textbf{Ricorsione primitiva}\\
-	Se $h \in C$ a $n + 1$ posti\\
-	e $g \in C$ a $n - 1$ posti\\
-	$\Rightarrow f(0, x_2, \ldots, x_n) = g(x_2, \ldots, x_n)$\\
-	$f(x_1 + 1, x_2, \ldots, x_n) = h(x_1, f(x_1, x_2, \ldots, x_n), x_2,\ldots, x_n)$
+	$h \in C$ a $n + 1$ posti e\\
+	$g \in C$ a $n - 1$ posti\\
+	$\Rightarrow$
+	\begin{math}
+		\left\{
+		\begin{array}{l}
+			f(0, x_2, \ldots, x_n) = g(x_2, \ldots, x_n)\\
+			f(x_1 + 1, x_2, \ldots, x_n) = h(x_1, f(x_1, x_2, \ldots, x_n), x_2,\ldots, x_n)
+		\end{array}
+		\right.
+	\end{math}
 \end{list}
-$f \in C \Leftrightarrow$ esiste una successione $f_0, \ldots f_n = f\:\:\vline\:\:\forall f_1$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
+$f \in C \Leftrightarrow$ esiste una successione $f_0,\ldots,\,f_n = f\:\:\vline\:\:\forall f_1$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
+\pagebreak
 \paragraph{Esempio} Esempio di funzioni ricorsive\\
 $f_1 = \lambda x.x$\\
 $f_2 = \lambda x.x+1$\\
 $f_3 = \lambda x_1, x_2, x_3. x_2$\\
 $f_4 = f_2(f_3(x_1, x_2, x_3))$\\
-$| f_5(0, x_2) = f_1(x_2)$\\
-$| f_5(x_1 + 1, x_2) = f_4(x_1, f_5(x_1, x_2), x_2)$\\\\
-Proviamo a calcolare $f_5(2, 3) =$ %TODO sistemare
-$$= f_5(1 + 1, 3) = f_4(1, \underline{f_5(1, 3)}, 3) = f_4(1, \underline{f_4(0, f_5(0, 3), 3)}, 3) = f_4(1, f_4(0, f_1(3), 3), 3) = $$
-$$ = f_4(1, f_4(0, 3, 3), 3) = f_4(1, f_2(f_3(0, 3, 3)), 3) = f_4(1, f_2(3), 3) = f_4(1, 4, 3) = f_2(f_3(1, 4, 3) = $$
-$$ = f_2(4) = 5$$
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			f_5(0, x_2) = f_1(x_2)\\
+			f_5(x_1 + 1, x_2) = f_4(x_1, f_5(x_1, x_2), x_2)
+		\end{array}
+		\right.
+\end{math}\\\\
+Proviamo a calcolare $f_5(2, 3) =$
+\begin{multicols}{2}
 \textbf{Regola di valutazione interna-sinistra}: valuto per primo quello che sta dentro i parametri partendo da sinistra.\\
-Vediamo cosa succede con una regola di valutazione esterna:
-$$f_5(2, 3) = f_4( 1, f_5(1, 3), 3) = f_2(f_3(1, f_5(1, 3), 3)) = f_3(1, f_5(1, 3), 3) + 1 = \underline{f_5(1, 3)} + 1 = f_4(0, f_5(0, 3), 3) + 1 =$$
-$$= f_2(f_3(0, f_5(0, 3), 3) + 1 =  $$ %TODO p. 32 dispense
-\subsubsection{Meno Limitato}
-$f_7(x, y) = y$\\
-$f_8(x, y) = x$\\
-$| pred(0) = 0$\\
-$| pred(x + 1) = f_8(x, pred(x))$\\
-$f_9(x, y, z) = pred(f_3(x, y, z)$\\
-$| f_{10}(0, y) = f_1(y)$\\
-$| f_{10}(x + 1, y) = f_9(x, f_{10}(x, y), y)$\\
+$= f_5(1 + 1, 3) =$\\
+$= f_4(1, \underline{f_5(1, 3)}, 3) =$\\
+$= f_4(1, f_4(0, \underline{f_5(0, 3)}, 3), 3) =$\\$= f_4(1, f_4(0, \underline{f_1(3)}, 3), 3) =$\\
+$= f_4(1,\underline{f_4(0, 3, 3)}, 3) =$\\
+$= f_4(1, f_2(\underline{f_3(0, 3, 3)}), 3) =$\\
+$= f_4(1, \underline{f_2(3)}, 3) =$\\
+$= \underline{f_4(1, 4, 3)} =$\\
+$= f_2(\underline{f_3(1, 4, 3)}) = $\\
+$= \underline{f_2(4)} =$\\
+$= 5$\\
+\columnbreak
+
+Vediamo cosa succede con una \textbf{regola di valutazione esterna}:
+$f_5(2, 3) =$\\
+$= \underline{f_4( 1, f_5(1, 3), 3)} =$\\
+$= \underline{f_2(f_3(1, f_5(1, 3), 3))} =$\\
+$= \underline{f_3(1, f_5(1, 3), 3)} + 1 =$\\
+$= \underline{f_5(1, 3)} + 1 =$\\
+$= \underline{f_4(0, f_5(0, 3), 3)} + 1 =$\\
+$= \underline{f_2(f_3(0, f_5(0, 3), 3)} + 1 = $\\
+$= \underline{f_3(0, f_5(0, 3), 3)} + 1 + 1 =$\\
+$= \underline{f_5(0, 3)} + 2 =$\\
+$= \underline{f_1(3)} + 2 =$\\
+$= 3 + 2 =$\\
+$= 5$
+\end{multicols}
+
+\begin{multicols}{2}
+\paragraph{Meno Limitato} Non ritorna mai numeri negativi, ma 0.\\
+$f_7(x, y) = y$\\\\
+$f_8(x, y) = x$\\\\
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			pred(0) = 0\\
+			pred(x + 1) = f_8(x, pred(x))
+		\end{array}
+		\right.
+\end{math}\\\\
+$f_9(x, y, z) = pred(f_3(x, y, z)$\\\\
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			f_{10}(0, y) = f_1(y)\\
+			f_{10}(x + 1, y) = f_9(x, f_{10}(x, y), y)
+		\end{array}
+		\right.
+\end{math}\\\\
 $\Rightarrow x \dot{-} y = f_{10}(f_7(x, y), f_8(x, y))$
-\subsubsection{Somma}
-Non è altro che generalizzazione del successore, applico il successore tante volte quante servono.\\
-$| 0 + y = y$\\
-$| (x + 1) + y = (x + y) + 1$
-\subsubsection{Prodotto}
-Sfrutto la somma\\
-$| 0 * y = 0$\\
-$| (x + 1) * y = (x * y) + y)$
-\subsubsection{Potenza}
-Generalizza il prodotto\\
-$| x^0 = 1$\\
-$| x^{y + 1} = (x^y) * x$\\
+\columnbreak
+\paragraph{Somma}
+Non è altro che generalizzazione del successore, applico il successore tante volte quante servono.\\\\
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			0 + y = y\\
+			(x + 1) + y = (x + y) + 1
+		\end{array}
+		\right.
+\end{math}
+\paragraph{Prodotto}
+Sfrutto la somma\\\\
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			0 * y = 0\\
+			(x + 1) * y = (x * y) + y)
+		\end{array}
+		\right.
+\end{math}
+\paragraph{Potenza}
+Generalizza il prodotto\\\\
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			x^0 = 1\\
+			x^{y + 1} = (x^y) * x\\
+		\end{array}
+		\right.
+\end{math}\\\\
 C'è un modo per generalizzare la potenza? $\Rightarrow$ \textbf{Ackerman}.
-\subsection{Relazione}
-$\chi_R(x_1,\ldots, x_n) = 1 se (x_1, \ldots, x_n) \in R, 0 se \not\in$\\
-Quindi se $\chi_R$ è ricorsiva primitiva allora anche $R$ è ricorsiva primitiva.\\\\
-$\chi$\\ %TODO
-$P =$ \{ $n$ è primo\} è ricorsiva primitiva cioè la sua funzione caratteristica è ricorsiva primitiva. Questo per il teorema di fattorizzazione unica.\\
+\end{multicols}
+
+\paragraph{Relazione} Diciamo che la relazione $R(x_1,\ldots,\,x_n) \subset N^n$ è \textbf{ricorsiva primitiva} se lo è la sua \textbf{funzione caratteristica} $\chi_R$ definita come\\
+\begin{math}
+\chi_R(x_1,\ldots, x_n) = 
+		\left\{
+		\begin{array}{l}
+			1 \:\:\:\:\textsl{se}\:\: (x_1, \ldots, x_n) \in R\\
+			0 \:\:\:\:\textsl{se}\:\: (x_1, \ldots, x_n) \not\in R
+		\end{array}
+		\right.
+\end{math}\\\\
+Quindi se $\chi_R$ è ricorsiva primitiva allora anche $R$ è ricorsiva primitiva.
+
+%TODO note1.pdf, p. 28
+\paragraph{Esempio} $P =$ \{ $n \in N\:\:\vline$ $n$ è un numero primo\} è ricorsiva primitiva. Questo per il teorema di fattorizzazione unica.\\
 $\forall x \in N\:\:\exists$ numero finito di esponenti $x_1 \neq 0\:\:\vline\:\: x = p_0^{x_1}\cdot p_1^{x_1}\cdot\ldots\cdot p_n^{x_n}$\\
 Come trovare tali esponenti con $f$ ricorsiva primitiva.\\
 M = (Q, $\Sigma$, $\delta$, q$_0$)\\
 Q = \{q$_0$, \ldots, q$_k$), $\Sigma$ = \{$\sigma_0$, \ldots, $\sigma_n$)\\
-%TODO quintuple
-\textbf{Kurt Godel}: rappresentare algoritmi come numeri\\\\
+
+\textbf{Kurt Godel}: rappresentare algoritmi come numeri
 \subsection{Funzione di Ackermann}
-$$A(0, 0, y) = y$$
-$$A(0, x + 1, y) = A(0, x, y) + 1$$
-$$A(1, 0, y) = 0$$
-$$A(z + 2, 0, y) = 1$$
-$$A(z + 1, x + 1, y) = A(z, A(z + 1, x, y), y)\:\:\:\:\textbf{doppia ricorsione}$$
-Cresce più rapidamente di ogni funzione ricorsiva primitiva.
+La funzione di Ackermann \textbf{non è definibile} mediante gli schemi di ricorsione primitiva definiti in precedenze, ma è totale ed ha una definizione intuitivamente accettabilissima.
+
+\begin{list}{}{}
+	\item $A(0, 0, y) = y$
+	\item $A(0, x + 1, y) = A(0, x, y) + 1$
+	\item $A(1, 0, y) = 0$
+	\item $A(z + 2, 0, y) = 1$
+	\item $A(z + 1, x + 1, y) = A(z, A(z + 1, x, y), y)$ \textbf{doppia ricorsione}
+
+\end{list}
+La \textbf{doppia ricorsione} presente non è un problema: tutti i valori su cui si ricorre decrescono, quindi i valori di $A(z, x, y)$ sono definiti in termini di un numero finito di valori della funzione $A$. Quindi intuitivamente $A$ è calcolabile. Inoltre cresce più rapidamente di ogni funzione ricorsiva primitiva.\\
+Ma cosa calcola? Una sorta di esponenziale generalizzato, infatti:
 \begin{list}{}{}
 	\item $A(0, x, y) = y + x$
 	\item $A(1, x, y) = y * x$
 	\item $A(2, x, y) = y^x$
-	\item $A(3, x, y) = y^{y^{\ldots^y}}$ per $x$ volte
+	\item $A(3, x, y) = y^{\left.y^{\ldots^y}\right\} \:x\:\textsl{volte}}$
 \end{list}
-
 \end{document}
