@@ -299,4 +299,95 @@ Ad esempio, $f$ = $\emptyset$ è calcolata da \texttt{while(true) do skip} ma an
 		Base della programmazione funzionale
 	\end{enumerate}
 \end{enumerate}
+\pagebreak
+\section{Ricorsive primitive}
+$$\lambda x.e$$
+$x$ è variabile (legata), $e$ è espressione\\
+Es: $\lambda y. x + y$, $\lambda x \lambda y.x + y$\\
+Useremo questa espressione per indicare le variabili che appaiono.\\
+Al posto di $\lambda x_1, x_2,\ldots, x_n$ scriverò $\lambda \overrightarrow{x}$\\\\
+\subsection{Funzione ricorsiva}
+Classe C delle funzioni ricorsive primitive è la \textbf{minima classe} di funzioni che obbediscono alle seguenti regole di inferenza, regole di sintassi per definire le funzioni.
+\begin{list}{}{\textbf{Casi base}}
+	\item \textbf{Zero}: $\lambda \overrightarrow{x}.0$\\
+	Prende un vettore di argomenti e restituisce 0.
+	\item \textbf{Successore}: $\lambda x.x+1$\\
+	Prende un valore e restituisce il suo successore.
+	\item \textbf{Proiezione}/\textbf{Identità}: $\lambda \overrightarrow{x}.x_i$\\
+	$\overrightarrow{x} = x_1,\ldots, x_n$, $1 \leq i \leq n$
+\end{list}
+\begin{list}{}{\textbf{Casi iterativi}}
+	\item \textbf{Composizione}\\
+	Se $g_1,\ldots, g_n \in C$ con $k$ argomenti ("a $k$ posti")\\
+	e $h \in C$ a $n$ posti\\
+	$\Rightarrow \lambda x_1, \ldots, x_n.h(g_1(\overrightarrow{x},\ldots, g_n(\overrightarrow{x})) \in C$
+	\item \textbf{Ricorsione primitiva}\\
+	Se $h \in C$ a $n + 1$ posti\\
+	e $g \in C$ a $n - 1$ posti\\
+	$\Rightarrow f(0, x_2, \ldots, x_n) = g(x_2, \ldots, x_n)$\\
+	$f(x_1 + 1, x_2, \ldots, x_n) = h(x_1, f(x_1, x_2, \ldots, x_n), x_2,\ldots, x_n)$
+\end{list}
+$f \in C \Leftrightarrow$ esiste una successione $f_0, \ldots f_n = f\:\:\vline\:\:\forall f_1$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
+\paragraph{Esempio} Esempio di funzioni ricorsive\\
+$f_1 = \lambda x.x$\\
+$f_2 = \lambda x.x+1$\\
+$f_3 = \lambda x_1, x_2, x_3. x_2$\\
+$f_4 = f_2(f_3(x_1, x_2, x_3))$\\
+$| f_5(0, x_2) = f_1(x_2)$\\
+$| f_5(x_1 + 1, x_2) = f_4(x_1, f_5(x_1, x_2), x_2)$\\\\
+Proviamo a calcolare $f_5(2, 3) =$ %TODO sistemare
+$$= f_5(1 + 1, 3) = f_4(1, \underline{f_5(1, 3)}, 3) = f_4(1, \underline{f_4(0, f_5(0, 3), 3)}, 3) = f_4(1, f_4(0, f_1(3), 3), 3) = $$
+$$ = f_4(1, f_4(0, 3, 3), 3) = f_4(1, f_2(f_3(0, 3, 3)), 3) = f_4(1, f_2(3), 3) = f_4(1, 4, 3) = f_2(f_3(1, 4, 3) = $$
+$$ = f_2(4) = 5$$
+\textbf{Regola di valutazione interna-sinistra}: valuto per primo quello che sta dentro i parametri partendo da sinistra.\\
+Vediamo cosa succede con una regola di valutazione esterna:
+$$f_5(2, 3) = f_4( 1, f_5(1, 3), 3) = f_2(f_3(1, f_5(1, 3), 3)) = f_3(1, f_5(1, 3), 3) + 1 = \underline{f_5(1, 3)} + 1 = f_4(0, f_5(0, 3), 3) + 1 =$$
+$$= f_2(f_3(0, f_5(0, 3), 3) + 1 =  $$ %TODO p. 32 dispense
+\subsubsection{Meno Limitato}
+$f_7(x, y) = y$\\
+$f_8(x, y) = x$\\
+$| pred(0) = 0$\\
+$| pred(x + 1) = f_8(x, pred(x))$\\
+$f_9(x, y, z) = pred(f_3(x, y, z)$\\
+$| f_{10}(0, y) = f_1(y)$\\
+$| f_{10}(x + 1, y) = f_9(x, f_{10}(x, y), y)$\\
+$\Rightarrow x \dot{-} y = f_{10}(f_7(x, y), f_8(x, y))$
+\subsubsection{Somma}
+Non è altro che generalizzazione del successore, applico il successore tante volte quante servono.\\
+$| 0 + y = y$\\
+$| (x + 1) + y = (x + y) + 1$
+\subsubsection{Prodotto}
+Sfrutto la somma\\
+$| 0 * y = 0$\\
+$| (x + 1) * y = (x * y) + y)$
+\subsubsection{Potenza}
+Generalizza il prodotto\\
+$| x^0 = 1$\\
+$| x^{y + 1} = (x^y) * x$\\
+C'è un modo per generalizzare la potenza? $\Rightarrow$ \textbf{Ackerman}.
+\subsection{Relazione}
+$\chi_R(x_1,\ldots, x_n) = 1 se (x_1, \ldots, x_n) \in R, 0 se \not\in$\\
+Quindi se $\chi_R$ è ricorsiva primitiva allora anche $R$ è ricorsiva primitiva.\\\\
+$\chi$\\ %TODO
+$P =$ \{ $n$ è primo\} è ricorsiva primitiva cioè la sua funzione caratteristica è ricorsiva primitiva. Questo per il teorema di fattorizzazione unica.\\
+$\forall x \in N\:\:\exists$ numero finito di esponenti $x_1 \neq 0\:\:\vline\:\: x = p_0^{x_1}\cdot p_1^{x_1}\cdot\ldots\cdot p_n^{x_n}$\\
+Come trovare tali esponenti con $f$ ricorsiva primitiva.\\
+M = (Q, $\Sigma$, $\delta$, q$_0$)\\
+Q = \{q$_0$, \ldots, q$_k$), $\Sigma$ = \{$\sigma_0$, \ldots, $\sigma_n$)\\
+%TODO quintuple
+\textbf{Kurt Godel}: rappresentare algoritmi come numeri\\\\
+\subsection{Funzione di Ackermann}
+$$A(0, 0, y) = y$$
+$$A(0, x + 1, y) = A(0, x, y) + 1$$
+$$A(1, 0, y) = 0$$
+$$A(z + 2, 0, y) = 1$$
+$$A(z + 1, x + 1, y) = A(z, A(z + 1, x, y), y)\:\:\:\:\textbf{doppia ricorsione}$$
+Cresce più rapidamente di ogni funzione ricorsiva primitiva.
+\begin{list}{}{}
+	\item $A(0, x, y) = y + x$
+	\item $A(1, x, y) = y * x$
+	\item $A(2, x, y) = y^x$
+	\item $A(3, x, y) = y^{y^{\ldots^y}}$ per $x$ volte
+\end{list}
+
 \end{document}
