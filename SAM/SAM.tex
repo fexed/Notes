@@ -383,9 +383,49 @@ Metodo \texttt{onSaveInstanceState()} dovrebbe salvare tutto quello che può ser
 \subsection{Default}
 Classe activity ha implementazione di default di salvataggio e ripristino stato: scorre il suo layout e salva nel bundle tutte le view chiamando il loro \texttt{onSaveInstanceState()}, ma solo quelle che hanno un \texttt{id}. Se l'activity ha solo UI basta così, ma conviene praticamente sempre chiamare \texttt{super.onSaveInstanceState()} anche se non si devono salvare ulteriori pezzi di stato (non-UI).\\
 Questo consente di ritrovare il campo riempito precedentemente se si torna all'activity.
+
+\chapter{Interfaccia Utente}
 \section{Layout}
 UI Android è un albero con foglie di classe View e nodi intermedi di classe ViewGroup.\\
 Ogni View è una classe Java con nome uguale al tag XML relativo.\\
-Quando si verifica un evento significativo sulla View viene chiamato un \textbf{handler} della View.
-
+Quando si verifica un evento significativo sulla View viene chiamato un \textbf{handler} della View. Il layout è definito in file XML, con oggetti \texttt{Inflater} che si occupano di parsare gli XML e istanziare le classi Java corrispondenti all'albero. Non regola la posizione, che è gestita da algoritmi che stanno in \texttt{ViewGroup} particolari chiamati \texttt{Layout}.\\
+Una View che gestisce input è tipicamente chiamata Widget, e un contenitore di Widget è detto Widget Host (come la Home).\\
+Il LayoutManager si occupa del posizionamento dei propri figli. Il layout avviene tramite una \textbf{negoziazione} tra posizionatore e posizionati (padre e figli). Il figlio non può sapere a priori dove viene agganciato, lo saprà solo a runtime. Ci sono tante strategie di negoziazione, quindi tanti layout manager.
+\begin{list}{}{Tra i più comuni, troviamo:}
+	\item \texttt{AbsoluteLayout}\\
+	Coordinate assolute \texttt{(x, y)}
+	\item \texttt{LinearLayout}\\
+	Serie verticale o orizzontale di componenti
+	\item \texttt{RelativeLayout}\\
+	Posizione di ogni componente relativa agli altri o al container
+	\item \texttt{GridLayout}\\
+	Griglia di celle di dimensione variabili, ma allineate. Componenti anche a cavallo di più celle
+	\item \texttt{FrameLayout}\\
+	Componenti uno sull'altro, una sorta di trasparenza: l'ultimo aggiunto sta in cima e tutti grandi quanto il container. Solitamente usato con un solo componente.
+	\item \texttt{TableLayout}\\
+	Alternativa a \texttt{GridLayout}. Ha come figli singole View (riga intera) o oggetti \texttt{TableRow} (che hanno come figli le view delle singole celle)
+\end{list}
+Sempre possibile comporre layout o scrivere i propri (vedremo come).\\
+Ci sono LayoutManager più specializzati:
+\begin{list}{}{}
+	\item \texttt{DrawerLayout}\\
+	Per i menu a scorrimento: un figlio è l'interfaccia principale, l'altro è il drawer
+	\item \texttt{SwypeRefreshLayout}\\
+	Se l'interfaccia è trascinata verso il basso spunta un'icona e si richiede il refresh
+	\item \ldots
+\end{list}
+Tante View sono \textit{anche} Layout
+\begin{list}{}{}
+	\item \texttt{Toolbar}
+	\item \texttt{TvView}
+	\item \texttt{Webview}
+	\item \texttt{CalendarView}
+	\item \texttt{Gallery}
+	\item Circa una cinquantina\ldots
+\end{list}
+Su Android Studio vengono proposti i layout più comuni, con editor grafico e testuale per scrivere l'interfaccia. Sempre possibile editare direttamente l'XML.
+\section{Interazione}
+A run-time, esiste un albero di oggetti Java che è stato creato a partire dall'albero XML del layout. Gli oggetti possono ricevere input dall'utente (si interfacciano col sistema touch).\\
+Quando si verifica un evento significativo, viene chiamato un \textbf{handler}: l'Activity può registrare propri handler.\\
+In Java, sono inner interfaces dentro la classe View. Ogni interfaccia definisce un metodo on\ldots Listener()
 \end{document}
