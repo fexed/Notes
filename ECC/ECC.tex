@@ -472,7 +472,7 @@ La funzione di Ackermann \textbf{non è definibile} mediante gli schemi di ricor
 	\item $A(z + 1, x + 1, y) = A(z, A(z + 1, x, y), y)$ \textbf{doppia ricorsione}
 
 \end{list}
-La \textbf{doppia ricorsione} presente non è un problema: tutti i valori su cui si ricorre decrescono, quindi i valori di $A(z, x, y)$ sono definiti in termini di un numero finito di valori della funzione $A$. Quindi intuitivamente $A$ è calcolabile. Inoltre cresce più rapidamente di ogni funzione ricorsiva primitiva.\\
+La \textbf{doppia ricorsione} presente non è un problema: tutti i valori su cui si ricorre decrescono, quindi i valori di $A(z, x, y)$ sono definiti in termini di un numero finito di valori della funzione $A$. Quindi intuitivamente $A$ è calcolabile. Inoltre \textbf{cresce più rapidamente di ogni funzione ricorsiva primitiva} ma \textbf{non è ricorsiva primitiva}.\\
 Ma cosa calcola? Una sorta di esponenziale generalizzato, infatti:
 \begin{list}{}{}
 	\item $A(0, x, y) = y + x$
@@ -480,4 +480,62 @@ Ma cosa calcola? Una sorta di esponenziale generalizzato, infatti:
 	\item $A(2, x, y) = y^x$
 	\item $A(3, x, y) = y^{\left.y^{\ldots^y}\right\} \:x\:\textsl{volte}}$
 \end{list}
+\subsection{Realizzazione}
+Con il linguaggio-\texttt{while} e il linugaggio-\texttt{for} posso riprodurre i casi base della ricorsione.
+%TODO
+$h(g_1(x, y, z), g_2(x, y, z))$, con programma $p_1$ associato a $g_1$, $p_2$ associato a $g_2$ e $p_3$ associato a $h$. Il programma che realizza la composizione sarà quindi $p_1$;$p_2$;$p_3$.\\Per la ricorsione primitiva
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			f(0, y) = g(y) \rightarrow p_1\\
+			f(x + 1, y) = h(x, f(x, y), y) \rightarrow p_2
+		\end{array}
+		\right.
+\end{math}
+dopo qualche passaggio abbiamo visto che\\$f(x + 1, y) =  h(x, f(x, y), y) = h(x, h(x + 1, f( x + 1, y)), y)$. Come realizzarlo in for?
+\begin{verbatim}
+t1 = g(y)
+for i = 1 to x + 1
+	t1 = g(i, t1, y)
+\end{verbatim}
+Per la \textbf{funzione caratteristica} $\chi_I(n) =$
+\begin{math}
+		\left\{
+		\begin{array}{l}
+			1\:\: n \in I\\
+			0\:\:\textsl{altrimenti}
+		\end{array}
+		\right.
+\end{math}\\\\
+La \textbf{Godelizzazione} data macchina di turing M trovo i che è il suo numero di godel.
+\section{Diagonalizzazione}
+\paragraph{Esiste un formalismo che esprime tutte e sole le funzioni totali calcolabili?} \textbf{No}\\
+Dobbiamo necessariamente avere a che fare con funzioni parziali, ma perché "no"? Qualunque formalismo o esprime solo funzioni totali ma non tutte, oppure esprime anche funzioni parziali. La dimostrazione è fondamentale per la teoria della calcolabilità: \textbf{diagonalizzazione}.\\
+Fissiamo il formalismo delle funzioni ricorsive primitive, posso prendere l'algoritmo di Godel per numerarle. Quindi avrò $f_0$, $f_1$, \ldots, $f_n$, \ldots\\
+Definisco $g(n) = f_n(n) + 1$ (\textit{diagonalizzazione} viene da usare lo stesso indice).\\
+Se $g$ è una ricorsiva primitiva, allora è numerabile. Diciamo che $g$ ha come numero $i$\ldots %TODO
+Se io prendo le funzioni parziali, posso applicare lo stesso ragionamento? $\phi(x) = \psi_x(x) + 1$\\
+Diciamo come prima che ha numero $i$, quindi $\psi_i(x) = \phi(x) = \psi_x(x) + 1$\ldots\\
+\pagebreak
+\section{$\mu$-ricorsive}
+Minima classe $\mathscr{R}$ che, allo schema fino alla ricorsione primitiva, si aggiunge:
+\paragraph{Minimizzazione} $\phi(\overrightarrow{x}, y) \in \mathscr{R}$\\
+$\psi(\overrightarrow{x}) = \mu y.[\phi(\overrightarrow{x}, y) = 0 \wedge \forall z < y\:\:\vline\:\: \phi(\overrightarrow{x}, z)\downarrow] $\\
+$\mu x.[I]$ è il minimo elemento di $I$ insieme.\\\\
+Quindi le $\mu$-ricorsive definiscono anche funzioni non totali, al contrario delle ricorsive primitive che definiscono solo funzioni totali.
+\paragraph{Esempio} $\phi(x, y) = 42$ è costante, quindi ricorsiva primitiva, quindi anche $\mu$-ricorsiva.\\
+$\psi(x) = \mu y.[\phi(x, y) = 42]$ ovunque indefinita perché non tornerà mai 0 quindi $\not\exists y$.\\\\
+Quindi \textbf{terminazione e non terminazione sono cruciali}.\\
+Se la definisco per casi? \ldots
+\subsection{Notazione}
+Per ragioni storiche, una relazione $I \subset N^n$ è \textbf{ricorsiva} (sinonimo di totale) $\Leftrightarrow$ la sua funzione caratteristica $\chi_I$ è \textbf{calcolabile totale}.\\
+Inoltre, come già detto, $I$ è ricorsiva primitiva $\Leftrightarrow$ $\chi_I$ è ricorsiva primitiva.
+\section{Tesi di Church-Turing}
+Le funzioni intuitivamente calcolabili sono tutte e sole le T-calcolabili.\\
+In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di dimenticarci il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa classe. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché un algoritmo è equivalente scritto in qualsiasi linguaggio.\\\\
+$\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo}. Per esempio da M$_i$, con M MdT.\\
+$\phi_i$ è funzione, quindi semantica.\\
+M$_i$ è algoritmo, quindi sintassi.\\
+Può succedere che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (\texttt{while(true) do skip} e \texttt{while(true) do skip;skip}, ad esempio)\\
+
 \end{document}
