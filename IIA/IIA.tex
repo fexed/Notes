@@ -841,7 +841,7 @@ A parità di $f$ \textbf{si sceglie il nodo migliore più recente e si dimentica
 \textbf{Ottimale se il cammino soluzione sta in memoria}.
 %TODO
 \chapter{I Giochi con Avversario}
-\section{Premessa}
+\paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
 Da adesso rilassamento delle assunzioni di base: ambiente multi agente e rappresentazioni degli stati più complesse.\\
 Ci occuperemo di \textbf{specializzazioni} del paradigma: giochi con avversario. I piani quindi devono tenere conto dell'avversario.\\
@@ -918,5 +918,101 @@ Dobbiamo esplorare ogni cammino? No esistono tecniche di potatura che dimezzano 
 \paragraph{CSP}
 caso particolare dei problemi di ricerca, grazie alla struttura si cerca meglio la soluzione.\\
 Classe ampia, esistono euristiche generali da applicare che consentono risoluzioni di dimensioni significative.\\
-\paragraph{Tre componenti}
+\paragraph{Tre componenti} \ldots
+%TODO
+\par\noindent\rule{\textwidth}{0.4pt}
+\paragraph{Backtracking ricorsivo per CSP}
+Soluzione: trovare assegnamento per le variabili con valori dal dominio per arrivare ad assegnamento completo (tt var con valori) e consistente (soddisfa vincoli)\\
+Scelta dei valori: scegliere il valore meno vincolante, quello che esclude meno valori possibili per le altre variabili. Meglio valutare prima assegnamento che ha più probabilità di successo.
+\paragraph{Propagazione dei vincoli}
+\begin{list}{}{}
+	\item \textbf{Verifica in avanti}, Forward Checking: meno costosa, una volta assegn valore vado a vedere variabili direttamente collegate nel grafo dei vincoli
+	\item \textbf{Consistenza di nodo e d'arco}: più costosa ma anche più efficace, restringono valori domini variabili tenendo conto vincoli unari e binari su tutto il grafo (itero finché tutti nodi e archi sono consistenti)
+\end{list}
+\paragraph{Esempio di FC} (Forward Check) Colorare mappa con Rosso, Verde, Blu.
+\begin{center}
+	\includegraphics[scale=0.7]{FC_es1.png}
+\end{center}
+%TODO
+\pagebreak
+\paragraph{Backtracking Cronologico}
+Suppongo di avere \{Q=R, NSW=G, V=B, T=R\}. Cerco di assegnare SA, il fallimento genera un backtracking cronologico: si provano tutti i valori alternativi per l'ultima variabile, T, continuando a fallire\ldots\\
+Questo perché non è la T responsabile del fallimento ma le altre variabili.\\
+Quindi si può fare un backtracking "intelligente" guidato dalle dipendenze.
+\paragraph{Backtracking guidato dalle dipendenze} Considero le alternative solo per le variabili che hanno causato il fallimento \{Q, NSW, V\}, l'\textbf{insieme dei conflitti}.
+\paragraph{Metodi CSP locali} I problemi CSP possono essere affrontati con metodi locali. Esempio: \textbf{le regine}.\\
+\textbf{Euristica dei conflitti minimi} (\textbf{min-conflicts}): si sceglie un valore che crea meno conflitti. Solitamente si sceglie a caso una delle regie che violano dei vincoli.\\
+Molto efficace: 1 milione di regine in 50 passi!
+\begin{center}
+	\includegraphics[scale=0.5]{minconflicts_es.png}
+\end{center}
+\paragraph{Conclusioni} Abbiamo visti due domini specifici per paradigma risoluzione problemi ricerca: giochi con avversario (complicazione: ambiente strategico e vincoli di tempo reale, non posso pianificiare azioni da eseguire "a occhi chiusi") e CSP (grazie a rappresenztazione stato più ricca tecniche problem solving specializzabili e usate per risolvere istanze di problemi di dimensioni maggori)\\
+Prossimamente: \textbf{sistemi basati su conoscenza}. Conoscenza implica capacità inferenziali, con rappresentazione stato ancora più ricco con linguaggio rappresentazione conoscenza. L'inferenza è anch'essa un problema di ricerca in uno spazio di stati.
+\chapter{Agenti Basati su Conoscenza}
+Come costruire agenti dotati di capacità inferenziali.\\
+Cerchiamo di migliorare capcità di ragionamento, dotando di rappresentazione del mondo più complessi non descrivibili semplicemente. Agenti basati su conoscenza, con all'interno una base di conoscenza KB con conoscenza espressa in forma esplicita e dichiarativa attraverso un linguaggio.
+\begin{center}
+	\includegraphics[scale=0.7]{ag_conosc.png}
+\end{center}
+La maggiorparte prob I.A. sono "\textit{knowledge-intensive}". Mondo tipicamente complesso: serve rappresentazione parziale e incompleta (astrazione) del mondo utile agli scopi dell'agente.\\
+Per ambienti parzialmente osservabili e complessi ci servono linguaggi di rappresentazione della conoscenza più espressivi e capacità inferenziali.\\
+La conoscenza può essere codificata a mano, acquisita o estratta da testi ed esperienza.
+\paragraph{Approccio dichiarativo vs procedurale}
+tipicamente conoscenza in KB in forma dichiarativa. Alternativa è codificare conoscenza in maniera procedurale con programma che implementa processo decisionale. Un agente KB (con conoscenza dichiarativa) è più flessibile: perché più semplice ricevere conoscenza in maniera incrementale e modificare il comportamento con l'esperienza.
+\pagebreak
+\section{Il mondo del Wumpus}
+\paragraph{Esempio} Agente in 1, 1: esplorare e trovare oro
+\begin{center}
+	\includegraphics[scale=0.7]{wumpus.png}\\
+	%TODO riscrivere
+	\includegraphics[scale=0.7]{wumpus2.png}
+\end{center}
+\paragraph{Uno scenario} \ldots
+\paragraph{KB} Insieme di enunciati espressi in un linguaggio di rappresentazione.\\
+L'agente interagisce con una KG con un'interfaccia funzionale \textbf{Tell-Ask}:
+\begin{list}{}{}
+	\item Tell
+	\item Ask
+	\item Retract
+\end{list}
+Enunciati in KG rappresentano conoscenza agente\ldots %TODO
+\paragraph{Problema} Il problema da risolvere: data conoscenza KB che contiene\ldots vorrei sapere se un certo fatto $\alpha$ è vero di conseguenza, cioè se KB $soddisfa \alpha$
+\paragraph{Programma di un agente KB} \ldots
+Una  \textbf{base di conoscenza} è rappresentazione esplicita, parziale e compatta in linguaggio simbolico: contiene sia fatti espliciti (es. Pozzo in [3, 3]) ma anche fatti generali o regole (es: brezza in caselle adiacenti a pozzi)\\
+Una base di dati invece solo base di dati e solo recupero.\\
+La differenza è che la KB ha capacità inferenziale: derivare nuovi fatti da quelli memorizzati esplicitamente.
+\paragraph{Trade-Off Fondamentale della Rappresentazione della Conoscenza} Trovare giusto compromesso tra linguaggio rappresentazione espressivo e la complessità del meccanismo inferenziale.\\
+Pià linguaggio è espressivo meno è efficiente il meccanismo inferenziale. Obiettivi in contrasto, bisogna mediare e trovare \textbf{compromesso}.\\
+\paragraph{Formalismi per la R.C.}
+\begin{list}{}{}
+	\item Sintassi
+	\item Semantica
+	\item Meccanismo inferenziale
+\end{list}
+\paragraph{Logica come linguaggio}
+Qual è la complessità computazionale del problema KB $soddisfa \alpha$ nei vari linguaggi logici? Quali algoritmi decisione e strategia ottimizzazione?\\
+Linguaggi logici: calcolo proposizionale (POP) e logica dei predicati (FOL). Sono adatti per la rappresentazione della conoscenza? Da una parte sono anche troppo complessi, in particolare il FOL. Dall'altra, ci sono meccanismi non posseduti da FOL e POP ma che sono utili nelle KB.\\
+Rivistazione di PROP e FOL per rappresentazione conoscenza, con attenzione ad algoritmi e complessità. \textbf{Contrazioni}: linguaggi a regole e \textbf{programmazione logica}.
+\section{Calcolo Proposizionale}
+\paragraph{Sintassi} %TODO Sintassi calcolo proposizionale
+
+\paragraph{Algoritmo TT-entails?}
+\begin{list}{}{}
+	\item KB $soddisfa \alpha$?
+	\item Enumera tutte possibili interpretazioni KB ($k$ simboli, $2^k$ possibili interpretazioni)
+	\item \ldots
+\end{list}
+\paragraph{Algoritmi per la soddisfacibilità (SAT)}
+Usano KB come insieme di clasusole.
+\paragraph{Algoritmo DPLL}
+Parte da una KB in forma a clausole. Enumerazione in profondità di tutte le possibili interpretazioni alla ricerca di un modello. Tre miglioramenti rispetto TTEntails:
+\begin{list}{}{}
+	\item Terminazione anticipata
+	\item Euristica dei simboli (o letterali) puri
+	\item Euristica delle clausole unitarie
+\end{list}
+\paragraph{Simboli puri} Simbolo con stesso segno in tutte le clausole. Es \{A, notB\}, \{notB, notC\}, \{C, A\} A puro e B anche.\\
+Nel determinare un simbolo se è puro possiamo trascurare occorrenze simbolo in clausole già rese vere. Se simbolo è puro può essere assegnato a T se positivo, F se negativo senza eliminare modelli.
+\paragraph{Clausole unitarie}
+%TODO
 \end{document}
