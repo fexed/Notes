@@ -922,6 +922,52 @@ function Hill-climbing(problema) returns stato-massimo-locale
 \end{lstlisting}
 Si prosegue solo se il vicino più alto è migliore dello stato corrente, se tutti i vicini sono peggiori, si ferma. Non c'è frontiera a cui tornare, si tiene solo uno stato.\\
 Tempo: numero di cicli variabile in base al punto di partenza.
+\pagebreak
+\paragraph{Problema delle 8 Regine} Con formulazione a stato completo
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Costo $h$ $=$ numero di coppie di regine che si attaccano a vicenda
+	\item I numeri sono i valori dei successori (7 $\times$ 8, 7 posizioni per ogni regina = su ogni colonna)
+	\item Tra i migliori (valore 12) si \textbf{sceglie a caso}
+	\item Minimo globale = 0
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.6]{8regstatcomp.png}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.6]{8regstatcomp2.png}
+\end{center}
+\begin{list}{}{\textbf{Un minimo locale}}
+		\item $h$ = 1
+		\item Tutti gli stati successori non migliorano la situazione (minimo locale)
+		\item \textbf{Per le 8 regine Hill-Climbing si blocca l'86\% delle volte}\\
+		Ma in media sono 4 passi per la soluzione, e 3 quando si blocca
+		\item Su $8^8$ = 17 milioni di stati
+\end{list}
+\end{multicols}
+\paragraph{Esempio} Successo in tre mosse\\
+$h$ qui è l'\textbf{euristica di costo della funzione obiettivo} da minimizzare
+\begin{center}
+	\includegraphics[scale=0.75]{8regine3passi.png}
+\end{center}
+\pagebreak
+\subsubsection{Problemi con Hill-Climbing}
+Se la funzione è da ottimizzare, i picchi sono massimi locali o soluzioni ottimali. Nel grafico si possono presentare: \textbf{massimi locali}, \textbf{plateu} (pianori), \textbf{spalle} e \textbf{crinali}/creste.
+\paragraph{Miglioramenti}
+\begin{enumerate}
+	\item Consentire un \textbf{numero limitato di mosse laterali}\\
+	Ossia ci si ferma per $<$ nell'algoritmo, anziché per $\leq$\\
+	$\Rightarrow$ L'algoritmo sulle 8 regine ha successo nel 94\% dei casi, ma impiega in media 21 passi
+	\item Hill-Climbing Stocastico: si \textbf{sceglie a caso tra le mosse in salita}, magari tenendo conto della pendenza.\\
+	Converge più lentamente ma a volte trova soluzioni migliori
+	\item Hill-Climbing con prima scelta: può generare le mosse a caso fino a trovarne una migliore dello stato corrente. Più \textbf{efficace quando i successori sono molti} (es: migliaia)
+	\item Hill-Climbing con riavvio casuale (\textbf{random restart}): ripartire da un punto scelto a caso.\\
+	Se la probabilità di successo è $p$, saranno necessarie in media $\frac{1}{p}$ ripartenze per trovare la soluzione (Es.: 8 regine, $p$ = 0.14, 7 iterazioni cioè 6 fallimenti e un successo).\\
+	\textbf{Tendenzialmente completo}: insistendo si generano tutte le possibilità.\\
+	Per le regine, 3 milioni di regine in meno di un minuto. Se funziona o no dipende molto dalla forma del panorama degli stati.
+\end{enumerate}
 \chapter{I Giochi con Avversario}
 \paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
