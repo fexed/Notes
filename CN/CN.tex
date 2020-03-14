@@ -207,9 +207,221 @@ $$f(x, y) = \frac{x}{y}\:\:\:\:\:\:\epsilon_{in} \doteq c_x\epsilon_x + c_y\epsi
 Ne segue, come visto in precedenza, che la sottrazione di due numeri vicini tra loro è potenziale causa di elevata amplificazione degli errori relativi (\textbf{cancellazione numerica}). Si nota anche come le operazioni moltiplicative siano ben condizionate.
 \paragraph{Esempio} Siano $x = 0.2178\cdot10^2$ e $y = 0.218\cdot10^2$, supponendo di operare con troncamento in base B = 10 e t = 3 cifre di rappresentazione ($u = 10^{1 - t} = 10^{-2}$). Si ha $\tilde{x} = 0.217\cdot10^2$ e $\tilde{y} = y$.\\
 Pertanto $\tilde{x}\:\oplus\:\tilde{y} = -0.001\cdot10^2 = -0.1$ mentre $x - y = -0.0002\cdot10^2 = -0.2\cdot10^{-1}$ e quindi $|\epsilon_{in}| = \frac{0.8}{0.2} = 0.4$.
+\chapter{Problemi dell'Algebra Lineare Numerica}
+\section{Norme Matriciali e Vettoriali}
+I principali problemi dell'algebra lineare concernono la \textbf{risoluzione di sistemi lineari} ed il \textbf{calcolo di autovalori/autovettori di matrici}. Per studiarne il condizionamento è fondamentale avere degli strumenti per valutare la distanza tra vettori e tra matrici.\\
+La risoluzione di sistemi lineari può essere eseguita in aritmetica reale, ma gli autovalori/autovettori possono essere complessi. Servono quindi \textbf{strumenti che operino su spazi vettoriali} $F^n$ e $F^{n \times n}$, con $n \geq 1$ e $F \in \{R, C\}$
+\paragraph{Condizionamento su problemi reali} $f:\:R^n \rightarrow R$, $G_m = \frac{f(\tilde{x}) - f(x)}{f(x)}$\\
+Problema: calcolo della soluzione di un sistema lineare
+\begin{list}{}{}
+	\item \textbf{Input} $A \in R^{2 \times 2}$, $b \in R^2$
+	\item \textbf{Output} $x \in R^2\:\:\vline\:\:Ax = b$
+\end{list}
+Condizionamento: $A$, $B$ $\rightarrow$ devono essere approssimati a valori di macchina
+\begin{list}{}{}
+	\item $A = $
+	\begin{math}
+		\left[
+		\begin{array}{c c}
+			a & b\\
+			c & d
+		\end{array}
+		\right]
+	\end{math}
+	$\rightarrow$ $\widehat{A} = $
+	\begin{math}
+		\left[
+		\begin{array}{c c}
+			\widehat{a} & \widehat{b}\\
+			\widehat{c} & \widehat{d}
+		\end{array}
+		\right]
+	\end{math}
+	con $\widehat{a} = a(1 + \epsilon_a)$ \ldots
+	\item $b = $
+	\begin{math}
+		\left[
+		\begin{array}{c}
+			b_1\\
+			b_2
+		\end{array}
+		\right]
+	\end{math}
+	$\rightarrow$ $\widehat{b} = $
+	\begin{math}
+		\left[
+		\begin{array}{c}
+			\widehat{b_1}\\
+			\widehat{b_2}
+		\end{array}
+		\right]
+	\end{math}
+	con $\widehat{b_i} = b_i(1 + \epsilon_{b_i})$ \ldots
+	\item $Ax = b \rightarrow \widehat{A}\widehat{x} = \widehat{b}$
+\end{list}
+Quando $\widehat{x}$ è vicino a $x$? Per valutare la distanza fra vettori, ho bisogno delle \textbf{norme vettoriali}
+\subsection{Norma Vettoriale}
+\paragraph{Definizione} $f: R^n \rightarrow R$ si dice \textbf{Norma Vettoriale} se soddisfa le seguenti proprietà
+\begin{enumerate}
+	\item $f(x) \geq 0 \wedge (f(x) = 0 \Leftrightarrow x = 0)$
+	\item $f(\alpha x) = |\alpha|f(x)\:\:\:\:\forall x \in R^n\:\:\forall\alpha\in R$
+	\item $f(x + y) \leq f(x) + f(y)\:\:\:\:\forall x$, $y \in R^n$
+\end{enumerate}
 \pagebreak
-\section{Esercitazioni}
-\subsection{Esercitazione 2}
+\paragraph{Norma Euclidea} $$f(x) = ||x||_2 = \sqrt{\sum_{i = 1}^n x_i^2}$$ con $x = \left[x_1, x_2, \ldots, x_n\right]$.
+\paragraph{Norma Infinito} $$f(x) = ||x||_\infty = max_{i = 1}^n |x_i|$$
+\textbf{Dimostrazione} che è una norma vettoriale
+\begin{enumerate}
+	\item $f(x) = max |x_i|$ è sempre $\geq 0$\\
+	$f(x) = max |x_i| = 0 \Leftrightarrow |x_i| = 0\:\:\:\forall i \Leftrightarrow x = 0$
+	\item $f(\alpha x) = max |\alpha x_i| = max |\alpha||x_i| = |\alpha|\cdot max |x_i| = |\alpha|f(x)$
+	\item $f(x + y) = max |x_i + y_i| \leq max(|x_i| + |y_i|) \leq max|x_1| + max|y_i| = f(x) + f(y)$
+\end{enumerate}
+\paragraph{Norma Uno} $$f(x) = ||x||_1 = \sum_{i = 1}^n |x_i|$$
+\paragraph{In generale le norme di uno stesso vettore hanno valori differenti}
+\paragraph{Esempio} $x = $
+\begin{math}
+	\left[
+	\begin{array}{c}
+		2\\3
+	\end{array}
+	\right]
+\end{math}
+\begin{list}{}{}
+	\item $||x||_1 = |2| + |3| = 5$
+	\item $||x||_2 = \sqrt{2^2 + 3^2} = \sqrt{4 + 9} = \sqrt{13}$
+	\item $||x||_\infty = 3$
+\end{list}
+\paragraph{Distanza} Data $f: R^n \rightarrow R$ \textbf{norma}, allora possiamo definire la \textbf{distanza su $R^n$} come $$dist(x, y) = ||x - y|| = f(x - y)$$
+\begin{enumerate}
+	\item $f(x) \geq 0$ e $f(y)\geq 0 \Rightarrow dist \geq 0$ e $(dist = 0 \Leftrightarrow x  = y)$
+	\item $f(\alpha x) = |\alpha|f(x)$
+	\item $f(x + y) \leq f(x) + f(y)$
+\end{enumerate}
+\paragraph{Anche la distanza assume valori differenti su norme differenti}
+\paragraph{Esempio} $x = $
+\begin{math}
+	\left[
+	\begin{array}{c}
+		1\\0
+	\end{array}
+	\right]
+\end{math}
+, $y = $
+\begin{math}
+	\left[
+	\begin{array}{c}
+		2\\3
+	\end{array}
+	\right]
+\end{math}
+\begin{list}{}{}
+	\item $dist(x, y) = ||x - y||_1 = ||$\begin{math}
+	\left[
+	\begin{array}{c}
+		-1\\-3
+	\end{array}
+	\right]
+	||_1 = 4
+\end{math}
+	\item $dist(x, y) = ||x - y||_2 = ||$\begin{math}
+	\left[
+	\begin{array}{c}
+		-1\\-3
+	\end{array}
+	\right]
+	||_2 = \sqrt{10}
+\end{math}
+	\item $dist(x, y) = ||x - y||_\infty = ||$\begin{math}
+	\left[
+	\begin{array}{c}
+		-1\\-3
+	\end{array}
+	\right]
+	||_\infty = 3
+\end{math}
+\end{list}
+\paragraph{Equivalenza topologica} Può succedere che $x$ e $y$ siano vicini in norma uno e lontani in norma 2? \textbf{No} per l'\textbf{equivalenza topologica delle norme}: quantitativamente differenti, ma qualitativamente danno gli stessi risultati.
+\begin{list}{}{}
+	\item $||x - y||_1$ è piccolo $\Rightarrow ||x - y||_2$ è piccolo
+	\item $||x - y||_\infty$ è grande $\Rightarrow ||x - y||_1$ è grande
+\end{list}
+\pagebreak
+\subsection{Norma Matriciale}
+\paragraph{Definizione} $f: R^{n \times n} \rightarrow R$ si dice \textbf{norma matriciale} se soddisfa le seguenti proprietà
+\begin{enumerate}
+	\item $f(A) \geq 0 \wedge (f(A) = 0 \Leftrightarrow A = 0 \Leftrightarrow a_{ij} = 0\:\:\forall i$, $j$
+	\item $f(\alpha A) = |\alpha| f(A)$
+	\item $f(A + B) \leq f(A) + f(B)$
+	\item $f(A\cdot B) \leq f(A)\cdot f(B)$
+\end{enumerate}
+Difficile definire le norme metriciali, quind \textbf{costruiamo le norme matriciali a partire dalle norme vettoriali}.
+\paragraph{Definizione} Data $f_V: R^n \rightarrow R$ norma vettoriale, si dice \textbf{norma matriciale indotta} (\textbf{compatibile}) la norma $f_M: R^{n \times n} \rightarrow R$ definita da
+$$f_M(A) = max_{\{x \in R^n\:\vline\:f_V(x) = 1\}}\:\:f_V(Ax)$$
+\begin{enumerate}
+	\item Prendo i vettori $x \in R^n\:\:\vline\:\:f_V(x) = 1$, in generale sono infiniti
+	\item Calcolare $Ax$, in generale infiniti vettori
+	\item Prendo $f_V(Ax)$, infiniti \textbf{valori}
+	\item Calcolo il \textbf{massimo} di questi valori
+\end{enumerate}
+\begin{list}{}{}
+	\item $||A||_1 = max_{||x||_1 = 1} ||Ax||_1$
+	\item $||A||_2 = max_{||x||_2 = 1} ||Ax||_2$
+	\item $||A||_\infty = max_{||x||_\infty = 1} ||Ax||_\infty$
+\end{list}
+\paragraph{Esempio} $A = $
+	\begin{math}
+		\left[
+		\begin{array}{c c}
+			1 & 2\\
+			3 & 4
+		\end{array}
+		\right]
+	\end{math}
+$\rightarrow ||A||_2 = max_{||x||_2 = 1} ||Ax||_2$.\\
+$||x||_2 = 1 \Leftrightarrow \sqrt{x_1^2 + x_2^2} = 1 \Leftrightarrow x_1^2 + x_2^2 = 1$ che è l'equazione per la circonferenza di centro 0 e raggio 1. Quindi tutti i vettori per cui $||x||_2 = 1$ sono tutti quelli la cui punta giace sulla circonferenza, quindi tanti quanti i punti della circonferenza \textbf{quindi infiniti}.
+\subsection{Teoremi di Caratterizzazione}
+La definizione quindi \textbf{non è pratica} (calcolabile) in generale, perché dovrei fare un massimo su infiniti termini. Quindi si introducono dei \textbf{teoremi di caratterizzazione}.
+\paragraph{Teorema 1} $||A||_2 = \sqrt{\rho (A^TA)}$\\Dove $\rho(B) = max |\lambda_i|$ e $\lambda_i \in $ spettro$(B)$\\
+$\rho(B)$ è il \textbf{raggio spettrale} di $B$, cioè il \textbf{modulo dell'autovalore di modulo massimo} (spettro$(B)$ è l'insieme degli autovalori).
+\paragraph{Teorema 2} $||A||_\infty = max_{i = 1}^n \sum_{j = 1}^n |a_{ij}|$ \textbf{somme per riga} poi \textbf{prendo il massimo}
+\paragraph{Teorema 2} $||A||_\infty = max_{j = 1}^n \sum_{i = 1}^n |a_{ij}|$ \textbf{somme per colonna} poi \textbf{prendo il massimo}\\\\
+Da questi teoremi, se ne deriva che \textbf{calcolare la norma uno e la norma infinito è più semplice che calcolare la norma euclidea}.\\\\
+\textbf{Vantaggi} delle norme matriciali $\rightarrow$ \textbf{ulteriorie proprietà} delle norme matriciali indotte
+\pagebreak
+\paragraph{Teorema} Sia $||$•$||$ una norma vettoriale e $||-||$ la norma matriciale indotta.\\
+Allora $\forall A \in R^{n \times n}$, $\forall v \in R^n$ si ha $||Av|| \leq ||A||\cdot||v||$
+\subparagraph{Dimostrazione} Due casi
+\begin{list}{}{}
+	\item[$v = 0$] $||Av|| = ||0|| = 0$\\
+	$||A||\cdot||v|| = ||A||\cdot 0 = 0$
+	\item[$v \neq 0$] $||Av|| = ||\:A\frac{v}{||v||}\cdot||v||\:||$ e chiamo il vettore $A\frac{v}{||v||} = z$. Quindi, per la seconda proprietà avrò\\
+	$= ||z||\cdot||v|| = ||A\frac{v}{||v||}||\cdot||v|| \leq ||A||\cdot||v||$
+\end{list}
+\subsection{Condizionamento della risoluzione di un sistema lineare}
+$$Ax = b \longrightarrow \widehat{A}\widehat{x} = \widehat{b}$$
+Per semplicità di analisi, $\widehat{A} = A$ e considero la perturbazione solo su $b$.
+$$Ax = b \longrightarrow A\widehat{x} = \widehat{b}$$
+Supponiamo anche A invertibile.\\
+Misurare il condizionamento significa misurare quanto $x$ e $\widehat{x}$ sono vicini, attraverso $$\epsilon_{in} = \frac{||x - \widehat{x}||}{||x||}$$
+Studiamo la quantità $$||x - \widehat{x}|| = ||A^{-1}b - A^{-1}\widehat{b}|| =$$
+$$\widehat{b} = b + f\:\:\:\:\:\:\:\:b = \left[\begin{array}{c} b_1\\b_2 \end{array}\right] \rightarrow \widehat{b} = \left[\begin{array}{c} \widehat{b_1}\\\widehat{b_2} \end{array}\right] = \left[\begin{array}{c} b_1(1 + \epsilon_1)\\b_2(1 + \epsilon_2) \end{array}\right] = \left[\begin{array}{c} b_1\\b_2 \end{array}\right] + \left[\begin{array}{c} b_1\epsilon_1\\b_2\epsilon_2 \end{array}\right] = b + f$$
+$$= ||A^{-1}b - A^{-1}(b + f)|| = ||-A^{-1}f|| = ||A^{-1}f|| \leq ||A^{-1}||\cdot||f||$$
+Quindi $||x - \widehat{x}|| \leq ||A^{-1}||\cdot||f||$\\
+Siccome $||x||$ sta al denominatore, maggiorazione a denominatore usa una quantità più piccola.
+$$Ax = b \Rightarrow ||Ax|| = ||b|| \Leftrightarrow ||b|| = ||Ax|| \leq ||A||\cdot||x|| $$
+Quindi $||x|| \geq \frac{||b||}{||A||}$\\
+Da questo ottengo $$\frac{||x - \widehat{x}||}{||x||} \leq \frac{||A^{-1}||\cdot||f||}{\frac{||b||}{||A||}} = ||A||\cdot||A^{-1}||\cdot\frac{||f||}{||b||}$$
+Quindi $$\epsilon_{in} = \frac{||x - \widehat{x}||}{||x||} \leq ||A||\cdot||A^{-1}||\cdot\frac{||\widehat{b} - b||}{||b||}$$
+$\frac{||\widehat{b} - b||}{||b||}$ \textbf{perturbazione relativa sul termine noto}\\
+$||A||\cdot||A^{-1}||$ \textbf{coefficiente di amplificazione}\\\\
+Quindi se $||A||\cdot||A^{-1}||$ è grande, allora il sistem è mal condizionato.\\
+Se $||A||\cdot||A^{-1}||$ è piccolo, allora è ben condizionato. Piccolo quanto?
+\paragraph{Osservazione} $||A\cdot A^{-1}|| = ||I|| \leq ||A||\cdot||A^{-1}||$, ma $||I|| = max_{||x|| = 1} ||Ix|| = max_{||x|| = 1} ||x|| = 1$\\
+Quindi $||A||\cdot||A^{-1}|| \geq 1$ che quindi è un coefficiente di amplificazione effettivo, con valore minimo pari a 1.
+%TODO esempio
+\chapter{Esercitazioni}
+\section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
 \paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
 Dato che $C_x = n$ possiamo dire che il problema è \textbf{ben condizionato}
@@ -239,9 +451,9 @@ L'analisi della stabilità ci dice che il primo algoritmo è preferibile.
 Il \textbf{secondo algoritmo}, più complicato perché ci sono due operazioni non razionali oltre alla moltiplicazione.
 \paragraph{Esercizio} Supposto $n = 2^k$ e $f(x) = x^n = x^{2^k}$, determinare un algoritmo che calcola $f(x)$ con $k = \log_2(n)$ operazioni moltiplicative. Eseguire anche l'analisi dell'errore algoritmico per l'algoritmo trovato.
 \pagebreak
-\section{Matlab}
+\chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
-\subsection{Esponenziale}
+\section{Esponenziale}
 $f(x) = e^x$ approssimato con Taylor $$e^x \simeq 1 + x + \frac{x^2}{2} + \frac{x^3}{3!} + \ldots + \frac{x^n}{n!}$$ Implementiamo un algoritmo che dati $x$, $n$ in input restituisce $y = 1 + x + \frac{x^2}{2} + \frac{x^3}{3!} + \ldots + \frac{x^n}{n!}$ in output.\\
 Potrebbe essere utile un programma del tipo
 \begin{lstlisting}
@@ -273,6 +485,7 @@ for k = 1 .. n
 end
 \end{lstlisting}
 \begin{center}
+\pagebreak
 \textbf{Codice MatLab} (file: \texttt{myexp.m})
 \begin{lstlisting}
 function [y] = myexp(x,n)
