@@ -853,6 +853,75 @@ In algoritmi a memoria limitata, le limitazioni della memoria possono portare a 
 		\item Identificazione della funzione di valutazione euristica più efficace
 	\end{list}
 \end{list}
+\chapter{Oltre la Ricerca Classica}
+\paragraph{Risolutori "classici"} Gli agenti risolutori di problemi \textit{classici} assumono le condizioni viste in precedenza:
+\begin{list}{}{}
+	\item Ambienti completamente osservabili
+	\item Ambienti deterministici
+	\item Si trovano nelle condizioni di produrre un piano d'azione eseguibile "ad occhi chiusi": possono studiare la sequenza d'azioni \textit{offline}, che può essere eseguita senza imprevisti per raggiungere l'obiettivo
+\end{list}
+\section{Verso ambienti più realistici} La \textbf{ricerca sistematica}, o euristica, nello spazio di stati è \textbf{troppo costosa} $\longrightarrow$ Metodi di ricerca locale\\
+Assunzioni sull'ambiente da considerare:
+\begin{list}{}{}
+	\item \textbf{Azioni non deterministiche}\\
+	\textbf{Ambiente parzialmente osservabile}\\
+	$\longrightarrow$ Piani condizionali, ricerca \texttt{AND-OR}, stati credenza
+	\item \textbf{Ambienti sconosciuti}\\
+	\textbf{Problemi di esplorazione} (percezioni forniscono nuove informazioni dopo l'azione)\\
+	$\longrightarrow$ Ricerca \textbf{online}
+\end{list}
+\section{Ricerca Locale}
+\paragraph{Assunzioni}
+Gli algoritmi visti fin'ora esplorano gli spazi degli stati alla ricerca di un goal e restituiscono un \textbf{cammino soluzione}, ma \textbf{a volte lo stato goal è la soluzione} del problema. Gli \textbf{algoritmi di ricerca locale} sono adatti per problemi in cui
+\begin{list}{}{}
+	\item La sequenza di azioni non è importante: quello che conta è lo stato goal
+	\item Tutti gli elementi della soluzione sono nello stato ma alcuni vincoli sono violati
+\end{list}
+\subsection{Algoritmi di ricerca locale}
+\begin{list}{}{}
+	\item \textbf{Non sono sistematici}
+	\item Tengono traccia solo del nodo corrente e si spostano su nodi adiacenti
+	\item Non tengono traccia dei cammini, poiché non servono a lavoro finito
+	\begin{list}{}{}
+		\item Efficienti in memoria
+		\item Possono trovare soluzioni ragionevoli anche in spazi molto grandi o infiniti, come nel caso di spazi continui
+	\end{list}
+	\item Utili per \textbf{risolvere problemi di ottimizzazione}
+	\begin{list}{}{}
+		\item \textbf{Stato migliore secondo una funzione obiettivo}
+		\item Stato di costo minore
+		\item Esempio: training di un modello di Machine Learning
+	\end{list}
+\end{list}
+\pagebreak
+\subsection{Panorama dello spazio degli stati}
+Esempio di una $f$ euristica di costo della funzione obiettivo (non del cammino)
+\begin{center}
+	\includegraphics[scale=1]{statesspace.png}
+\end{center}
+Uno \textbf{stato ha una posizione sulla superficie} e un'\textbf{altezza corrispondente al valore della sua funzione di valutazione}. Un \textbf{algoritmo provoca un movimento sulla superficie}.\\
+Trovare \textbf{avvallamento più basso} (es: costo minimo) \textbf{o il picco più alto} (es: massimo di un obiettivo)
+\subsection{Algoritmo Hill Climbing}
+Anche detto \textbf{ricerca in salita}, \textbf{steepest ascent/descent}.\\
+Ricerca locale \textbf{greedy}.\\
+Vengono generati i successori e valutati. Viene scelto un nodo che migliora la valutazione dello stato attuale (\textbf{non si tiene traccia degli altri}, quindi non ho l'albero di ricerca in memoria). La scelta del nodo dipende dall'algoritmo:
+\begin{list}{}{}
+	\item Migliore $\rightarrow$ \textbf{Hill Climbing a salita ripida}
+	\item Uno a caso tra quelli che migliorano $\rightarrow$ \textbf{Hill Climbing Stocastico}
+	\item Il primo $\rightarrow$ \textbf{Hill Climbing con prima scelta}
+\end{list}
+Se non ci sono stati migliori, l'algoritmo termina con \textbf{fallimento}.
+\begin{lstlisting}
+function Hill-climbing(problema) returns stato-massimo-locale
+  nodo-corrente = CreaNodo(problema.Stato-iniziale)
+  loop do
+    vicino = successore di nodo-corrente di valore piu alto
+    if (vicino.Valore <= nodo-corrente.Valore)
+      return nodo-corrente.Stato #interrompe la ricerca
+    nodo-corrente = vicino #altrimenti, se vicino migliore, continua
+\end{lstlisting}
+Si prosegue solo se il vicino più alto è migliore dello stato corrente, se tutti i vicini sono peggiori, si ferma. Non c'è frontiera a cui tornare, si tiene solo uno stato.\\
+Tempo: numero di cicli variabile in base al punto di partenza.
 \chapter{I Giochi con Avversario}
 \paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
