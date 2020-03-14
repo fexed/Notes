@@ -968,6 +968,59 @@ Se la funzione è da ottimizzare, i picchi sono massimi locali o soluzioni ottim
 	\textbf{Tendenzialmente completo}: insistendo si generano tutte le possibilità.\\
 	Per le regine, 3 milioni di regine in meno di un minuto. Se funziona o no dipende molto dalla forma del panorama degli stati.
 \end{enumerate}
+\subsection{Algoritmo di Tempra Simulata}
+\paragraph{Simulated Annealing} L'algoritmo di tempra simulata combina Hill-Climbing con una scelta stocastica ma \textbf{non del tutto casuale perché poco efficiente}. L'analogia è col processo di tempra dei metalli: portati a temperature molto elevate e raffreddati gradualmente consentendo di cristallizzare in uno stato a più bassa energia.
+\paragraph{Tempra Simulata} Ad ogni passo si \textbf{sceglie un successore a caso}:
+\begin{list}{}{}
+	\item Se migliora lo stato corrente, viene espanso
+	\item Se non lo migliora (caso in cui $\Delta E = f(n') - f(n) < 0$), quel nodo viene scelto con probabilità $p = e^{\Delta E/T}$, con $p$ ovviamente $0 \leq p \leq 1$\\
+	(Si genera un numero casuale tra 0 e 1, se questo è $<$ $p$ il successore viene scelto, altrimenti no)
+	\item $p$ è \textbf{inversamente proporzionale al peggioramento}
+	\item $T$ (\textbf{temperatura}) \textbf{decresce al progredire dell'algoritmo}, quindi anche $p$, \textbf{secondo un piano definito}.\\
+	Col progredire, rende improbabili le mosse peggiorative.
+\end{list}
+\paragraph{Analisi} La probabilità di una mossa in discesa diminuisce col tempo, e l'algoritmo si comporta sempre di più come Hill-Climbing.\\
+Se $T$ viene decrementato abbastanza lentamente, con probabilità tendente ad 1 si raggiunge la soluzione ottimale.\\
+\textbf{Analogia}: $T$ corrisponde alla temperatura e $\Delta E$ alla variazione di energia
+\paragraph{Parametri} \textbf{Valore iniziale} e \textbf{decremento di $T$} sono parametri.\\
+I valori per $T$ sono \textbf{determinati sperimentalmente}: il \textbf{valore iniziale di $T$} è \textbf{tale che per valori medi di $\Delta E$}, $p = e^{\Delta E/T}$ sia circa 0.5
+\subsection{Algoritmo Local Beam}
+Versione locale della beam search.\\
+Si tengono in memoria $k$ stati invece che uno solo. Ad ogni passo si generano i successori di tutti i $k$ stati.
+\begin{list}{}{}
+	\item Se si trova un goal, ci si ferma
+	\item Altrimenti si prosegue con i $k$ migliori tra questi
+\end{list}
+Note:
+\begin{list}{}{}
+	\item Diverso da K restart (che riparte da 0)
+	\item Diverso da beam search
+\end{list}
+\pagebreak
+\subsection{Algoritmo Beam Search Stocastico}
+Si introduce un elemento di casualità, come in un processo di selezione naturale: \textbf{diversificare la nuova generazione}.\\
+In questa variante stocastica, si scelgono $k$ successori ma \textbf{con probabilità maggiore per i migliori}. \textbf{Terminologia}:
+\begin{list}{}{}
+	\item \textbf{Organismo}, stato
+	\item \textbf{Progenie}, successori
+	\item \textbf{Fitness} (valore della $f$), idoneità
+\end{list}
+\section{Algoritmi Genetici}
+\paragraph{L'Idea} Sono \textbf{varianti della beam search stocastica} in cui gli \textbf{stati successori sono ottenuti \textit{combinando} due stati genitore} anziché per evoluzione. \textbf{Terminologia}:
+\begin{list}{}{}
+	\item \textbf{Popolazione} di \textbf{individui} (stati)
+	\item \textbf{Fitness}
+	\item \textbf{Accoppiamenti} e \textbf{mutazione genetica}
+	\item \textbf{Generazioni}
+\end{list}
+\paragraph{Funzionamento} \textbf{Popolazione iniziale}: $k$ stati/\textbf{individui} generati casualmente. Ogni \textbf{individuo è rappresentato come una stringa}: ad esempio 24 bit, o posizione nelle colonne ("\textit{24748552}") per le 8 regine.\\
+Gli \textbf{individui} sono \textbf{valutati da una funzione di fitness}: ad esempio numero di coppie di regine che \textit{non} si toccano.\\
+Si \textbf{selezionano gli individui per gli accoppiamenti}, con una probabilità proporzionale alla fitness. Le \textbf{coppie danno vita alla generazione successiva}: combinando materiale genetico (\textbf{crossover}) o con un meccanismo aggiuntivo di \textbf{mutazione genetica} (\textbf{casuale}).\\
+La popolazione ottenuta dovrebbe essere migliore e la cosa si \textbf{ripete fino ad ottenere stati abbastanza buoni} (\textbf{stati obiettivo}).
+\paragraph{Esempio}
+\begin{center}
+	\includegraphics[scale=0.7]{alggenetic.png}
+\end{center}
 \chapter{I Giochi con Avversario}
 \paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
