@@ -1207,17 +1207,55 @@ Ma anche combinazioni non lineari delle caratteristiche: alfiere vale di più a 
 \pagebreak
 \paragraph{Problemi Noti}
 \begin{list}{}{}
-	\item \textbf{Stati Non Quiescienti}: esplorazione fino ad un livello può mostrare situaz. molto vantaggiosa, ma a mossa successiva es. regina mangiata dalla torre. Si possono riconoscere-\\
-	\textbf{Soluzione}: non fermarsi a stati quiescienti ma esplorare un po' di più fino ad arrivare a stati in cui funz. valutazione non attende variazioni repentine (stati quiescienti)
-	\item \textbf{Effetto Orizzonte}: si privilegiano mosse diversive che hanno solo l'effetto di spingere il problema oltre, per evitare mosse disastrose che alla fine devono accadere
+	\item \textbf{Stati Non Quiescienti}: l'esplorazione fino ad un certo livello può mostrare una situazione molto vantaggiosa, ma la mossa successiva risulta estremamente svantaggiosa es. regina mangiata dalla torre. Si possono riconoscere.\\
+	\textbf{Soluzione}: \textbf{non fermarsi agli stati non quiescienti} ma esplorare un po' di più fino ad arrivare a stati in cui la funzione di valutazione non attende variazioni repentine (\textbf{stati quiescienti})
+	\item \textbf{Effetto Orizzonte}: si privilegiano \textbf{mosse diversive che hanno solo l'effetto di spingere il problema oltre}, per evitare mosse disastrose che alla fine devono per forza accadere
 \end{list}
-\subsection{Ottimizzazione}
-Dobbiamo esplorare ogni cammino? No esistono tecniche di potatura che dimezzano la ricerca pur mantenendo decisione min-max corretta (potatura alfa-beta)
+\paragraph{Ottimizzazione} Dobbiamo esplorare ogni cammino? No, \textbf{esistono tecniche di potatura} che dimezzano la ricerca pur mantenendo decisione min-max corretta (\textbf{potatura alfa-beta})
 \paragraph{Potatura Alfa-Beta} ridurre spazi ricerca algoritmi min-max
-\subsection{Algoritmo Alfa-Beta}
-\paragraph{Algoritmo}\ldots
-\paragraph{Ordinamento delle mosse}
+\subsection{Potatura Alfa-Beta}
+Tecnica di \textit{potatura} per ridurre l'esplorazione dello spazio di ricerca in algoritmi minmax
+\paragraph{Idea}
+\begin{center}
+	\includegraphics[scale=0.7]{minmaxidea.png}
+	$$minmax(radice) = max(min(3, 12, 8), min(2, x, y), min (14, 5, 2)) =$$ $$= max(3, min(2, x, y), 2) =$$ $$= max(3, z, 2) = 3)\:\:\:\:\:\:\textsl{con}\:z \leq 2$$
+\end{center}
+\paragraph{Algoritmo} Consideriamo un nodo $v$: se c'è una \textbf{scelta migliore sopra}, allora quel $v$ non sarà mai raggiunto.\\
+Max passerà da $\alpha$ piuttosto che finire a $v$.
+\paragraph{Implementazione} Si va avanti in profondità fino al livello desiderato e, propagando indietro i valori, si decide se si può abbandonare l'esplorazione nel sotto-albero.
+\begin{list}{}{}
+	\item \textbf{MaxValue} e \textbf{MinValue} vengono invocate con \textbf{due valori di riferimento iniziali}\\
+	$MaxValue = \alpha$ (inizialmente $-\infty$)\\
+	$MinValue = \beta$ (inizialmente $+\infty$)
+	\item Rappresentano \textbf{rispettivamente} la \textbf{migliore alternativa per Max e per Min} fino a quel momento
+	\item \textbf{I tagli avvengono quando}, nel propagare indietro, si verifica:\\
+	$v \geq \beta$ per i nodi Max (taglio $\beta$)\\
+	$v \leq \alpha$ per i nodi Min (taglio $\alpha$)
+\end{list}
+\pagebreak
+\begin{center}
+	\includegraphics[scale=0.5]{alphabetalag.png}
+\end{center}
+\paragraph{Ordinamento delle mosse} La \textbf{potatura ottimale} si ottiene quando ad ogni livello sono generate prima le mosse migliori per chi gioca:
+\begin{list}{}{}
+	\item Per i \textbf{nodi Max} sono generate prima le mosse con valore più \textbf{alto}
+	\item Per i \textbf{nodi Min} sono generate prima le mosse con valore più \textbf{basso}
+\end{list}
+\paragraph{Complessità} O(b$^{m/2}$)\\
+Alfa-Beta \textbf{può arrivare a profondità doppia rispetto a MinMax}, ma come avvicinarsi all'ordinamento ottimale?
+\paragraph{Ordinamento Dinamico} Usando un approfondimento iterativo si possono \textbf{scoprire ad una iterazione delle informazioni utili per l'ordinamento delle mosse}, da usare in una successiva iterazione (\textbf{mosse killer}).\\
+\textbf{Tabella delle trasposizioni}: per ogni stato incontrato si memorizza la sua valutazione: situazione tipica è quando $[a_1, b_1, a_2, b_2]$ e $[a_1, b_2, a_2, b_1]$ portano nello stesso stato.
+\paragraph{Altri miglioramenti}\begin{list}{}{}
+	\item \textbf{Potatura in avanti} Esplorare solo \textbf{alcune mosse ritenute promettenti} e tagliare le altre: beam search, tagli probabilistici basati su esperienza
+	\item \textbf{Database di mosse} di apertura e chiusura: nelle prime fasi ci sono poche mosse sensate e ben studiate, mentre per le fasi finali il computer può esplorare in maniera esaustiva e ricordarsi le chiusure migliori
+\end{list}
 \paragraph{Giochi Multiplayer} Invece di aver due valori ho un vettore di valori per nodo. Per propagare all'indietro prendo vettore che migliora la valutazione.
+\paragraph{Giochi più complessi}
+\begin{list}{}{}
+	\item \textbf{Giochi stocastici}, con un lancio di dadi
+	\item \textbf{Giochi parzialmente osservabili}: \textbf{deterministici} (mosse deterministiche ma non si conoscono gli effetti delle mosse dell'avversario, es: battaglia navale), \textbf{stocastici} (carte distribuite a caso come in molti giochi)
+\end{list}
+\pagebreak
 \section{Problemi di Soddisfacimento di Vincoli}
 \paragraph{CSP}
 caso particolare dei problemi di ricerca, grazie alla struttura si cerca meglio la soluzione.\\
