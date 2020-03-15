@@ -1256,31 +1256,74 @@ Alfa-Beta \textbf{può arrivare a profondità doppia rispetto a MinMax}, ma come
 	\item \textbf{Giochi parzialmente osservabili}: \textbf{deterministici} (mosse deterministiche ma non si conoscono gli effetti delle mosse dell'avversario, es: battaglia navale), \textbf{stocastici} (carte distribuite a caso come in molti giochi)
 \end{list}
 \pagebreak
-\section{Problemi di Soddisfacimento di Vincoli}
-\paragraph{CSP}
-caso particolare dei problemi di ricerca, grazie alla struttura si cerca meglio la soluzione.\\
-Classe ampia, esistono euristiche generali da applicare che consentono risoluzioni di dimensioni significative.\\
-\paragraph{Tre componenti} \ldots
-%TODO
-\par\noindent\rule{\textwidth}{0.4pt}
-\paragraph{Backtracking ricorsivo per CSP}
-Soluzione: trovare assegnamento per le variabili con valori dal dominio per arrivare ad assegnamento completo (tt var con valori) e consistente (soddisfa vincoli)\\
-Scelta dei valori: scegliere il valore meno vincolante, quello che esclude meno valori possibili per le altre variabili. Meglio valutare prima assegnamento che ha più probabilità di successo.
-\paragraph{Propagazione dei vincoli}
+\chapter{Problemi di Soddisfacimento di Vincoli}
+\paragraph{CSP} Sono problemi con una struttura particolare, che si prestano ad algoritmi di ricerca specializzati. Grazie alla struttura si cerca meglio la soluzione: rappresentazione \textbf{fattorizzata}, con la quale iniziamo a dire qualcosa sulla struttura dello stato.
+\paragraph{Classe ampia} Questa classe di problemi è molto ampia, esistono \textbf{euristiche generali} da applicare e che consentono la risoluzione di istanze con dimensioni significative.
+\section{Formulazione} 
 \begin{list}{}{}
-	\item \textbf{Verifica in avanti}, Forward Checking: meno costosa, una volta assegn valore vado a vedere variabili direttamente collegate nel grafo dei vincoli
-	\item \textbf{Consistenza di nodo e d'arco}: più costosa ma anche più efficace, restringono valori domini variabili tenendo conto vincoli unari e binari su tutto il grafo (itero finché tutti nodi e archi sono consistenti)
+	\item\textbf{Problema} descritto da \textbf{tre componenti}:
+		\begin{list}{}{}
+			\item \textbf{X}, insieme di \textbf{variabili}
+			\item \textbf{D}, insieme di \textbf{domini}\\
+			Dove D$_i$ è l'insieme dei valori possibili per X$_i$
+			\item \textbf{C}, insieme di \textbf{vincoli}, relazioni tra le variabili
+		\end{list}
+	\item\textbf{Stato}, un \textbf{assegnamento parziale/completo} di valori a variabili\\
+	\{X$_i$ = v$_i$, X$_j$ = v$_j$, \ldots\}\\
+	\textbf{Stato iniziale}: \{\}
+	\item \textbf{Azioni}: assegnamento di un valore ad una variabile, tra quelli leciti
+	\item \textbf{Soluzione} (goal test): \textbf{assegnamento completo} (tutte le variabili hanno un valore) e \textbf{consistente} (i vincoli sono tutti soddisfatti)
 \end{list}
+\paragraph{Esempio} Il problema delle 8 regine
+\begin{list}{}{}
+	\item X = \{Q$_1$, \ldots, Q$_8$\}
+	\item D$_i$ = \{1, 2, 3, 4, 5, 6, 7, 8\}
+	\item C$_i$ i vincoli di non attacco\\
+	Esempio di vincolo fra Q$_1$ e Q$_2$: $<$(Q$_1$, Q$_2$), \{(1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (2, 5), \ldots\}$>$
+	\item Formulazione incrementale o a stato completo
+\end{list}
+\section{Strategie per problemi CSP}
+Fin'ora potevamo solo ricercare la soluzione nel grafo degli stati, guidati da una metrica definita sullo stato. Adesso possiamo:
+\begin{list}{}{}
+	\item Usare delle euristiche specifiche per questa classe di problemi
+	\item Fare delle inferenze che ci portano a restringere i domini, quindi a \textbf{limitare la ricerca}: \textbf{propagazione di vincoli}
+	\item Fare \textbf{backtracking intelligente}
+\end{list}
+Tipicamente \textbf{un misto di queste strategie}.
+\pagebreak
+\subsection{Ricerca in problemi CSP}
+Ad ogni passo si assegna una variabile: la massima profondità della ricerca è fissata dal numero di variabili $n$.
+\paragraph{Versione \textit{ingenua}} L'ampiezza dello spazio di ricerca è $|D_1| \times |D_2| \times \ldots \times |D_n|$, dove $|D_i|$ è la cardinalità del dominio di X$_i$.\\
+Il fattore di diramazione è pari a $n\cdot d$ al primo passo, $(n-1)\cdot d$ al secondo\ldots le foglie sarebbero $n!\cdot d^n$\\
+C'è una drastica riduzione dello spazio di ricerca, dovuta al fatto che il \textbf{Goal-Test} è \textbf{commutativo}: l'ordine con cui si assegnano le variabili non è importante). In realtà, quindi, il fattore di diramazione è pari alla dimensione dei domini $d$ ($d^n$ foglie).
+\subsection{Backtracking}
+\paragraph{BT} Ricerca con backtracking a profondità limitata: \textbf{controllo anticipato} della violazione dei vincoli. Intuile andare avanti fino alla fine e poi controllare, si può \textbf{fare backtracking non appena si scopre che un vincolo è stato violato}.\\
+La ricerca è limitata naturalmente in profondità dal numero di variabili, quindi il metodo è completo.\\
+\textbf{Scelta delle variabili} 
+\begin{list}{}{}
+	\item\textbf{MRV} (minimum remaining values): scegliere la \textbf{variabile con meno valori legali residui}, cioè \textbf{quella più vincolata}. Si scoprono prima i fallimenti (\textbf{fail first})
+	\item\textbf{Euristica del grado}: scegliere la \textbf{variabile coinvolta in più vincoli} con le altre variabili (\textbf{quella più vincolante}, o di grado maggiore).\\
+	Da usare a parità di MRV
+\end{list}
+\textbf{Scelta dei valori}: scegliere il \textbf{valore meno vincolante}, quello che esclude meno valori possibili per le altre variabili. Meglio valutare prima assegnamento che ha più probabilità di successo.\\
+\textbf{Propagazione dei vincoli}
+\begin{list}{}{}
+	\item \textbf{Verifica in avanti}, Forward Checking: meno costosa, una volta assegnato il valore vado a vedere le variabili direttamente collegate nel grafo dei vincoli (non itero)
+	\item \textbf{Consistenza di nodo e d'arco}: più costosa ma anche più efficace, restringono i valori dei domini delle variabili tenendo conto dei vincoli unari e binari su tutto il grafo (itero finché tutti nodi e archi sono consistenti)
+\end{list}
+\paragraph{Backtracking ricorsivo per CSP}
+\begin{center}
+	\includegraphics[scale=0.7]{cspbtricorsivo.png}
+\end{center}
 \paragraph{Esempio di FC} (Forward Check) Colorare mappa con Rosso, Verde, Blu.
 \begin{center}
 	\includegraphics[scale=0.7]{FC_es1.png}
 \end{center}
-%TODO
-\pagebreak
 \paragraph{Backtracking Cronologico}
-Suppongo di avere \{Q=R, NSW=G, V=B, T=R\}. Cerco di assegnare SA, il fallimento genera un backtracking cronologico: si provano tutti i valori alternativi per l'ultima variabile, T, continuando a fallire\ldots\\
-Questo perché non è la T responsabile del fallimento ma le altre variabili.\\
-Quindi si può fare un backtracking "intelligente" guidato dalle dipendenze.
+Suppongo di avere \{Q=R, NSW=G, V=B, T=R\} e cerco di assegnare SA. Il fallimento genera un backtracking cronologico: \textbf{si provano tutti i valori alternativi per l'ultima variabile}, T, continuando a fallire\ldots\\
+Questo perché \textbf{non è la T responsabile del fallimento ma le altre variabili}.\\
+Quindi si può fare un \textbf{backtracking "intelligente" guidato dalle dipendenze}.
+%
 \paragraph{Backtracking guidato dalle dipendenze} Considero le alternative solo per le variabili che hanno causato il fallimento \{Q, NSW, V\}, l'\textbf{insieme dei conflitti}.
 \paragraph{Metodi CSP locali} I problemi CSP possono essere affrontati con metodi locali. Esempio: \textbf{le regine}.\\
 \textbf{Euristica dei conflitti minimi} (\textbf{min-conflicts}): si sceglie un valore che crea meno conflitti. Solitamente si sceglie a caso una delle regie che violano dei vincoli.\\
@@ -1290,6 +1333,8 @@ Molto efficace: 1 milione di regine in 50 passi!
 \end{center}
 \paragraph{Conclusioni} Abbiamo visti due domini specifici per paradigma risoluzione problemi ricerca: giochi con avversario (complicazione: ambiente strategico e vincoli di tempo reale, non posso pianificiare azioni da eseguire "a occhi chiusi") e CSP (grazie a rappresenztazione stato più ricca tecniche problem solving specializzabili e usate per risolvere istanze di problemi di dimensioni maggori)\\
 Prossimamente: \textbf{sistemi basati su conoscenza}. Conoscenza implica capacità inferenziali, con rappresentazione stato ancora più ricco con linguaggio rappresentazione conoscenza. L'inferenza è anch'essa un problema di ricerca in uno spazio di stati.
+%TODO da qua
+%https://elearning.di.unipi.it/pluginfile.php/30946/mod_resource/content/1/KRProp.pdf
 \chapter{Agenti Basati su Conoscenza}
 Come costruire agenti dotati di capacità inferenziali.\\
 Cerchiamo di migliorare capcità di ragionamento, dotando di rappresentazione del mondo più complessi non descrivibili semplicemente. Agenti basati su conoscenza, con all'interno una base di conoscenza KB con conoscenza espressa in forma esplicita e dichiarativa attraverso un linguaggio.
