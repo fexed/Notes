@@ -1042,8 +1042,63 @@ Data $f$ obiettivo $$\nabla f = \left( \frac{\partial f}{\partial x_1}, \frac{\p
 \textbf{Hill-Climbing iterativo}: $x_{new} = x_{old} + \eta\nabla f(x)$ con $\eta$ dimensione dello step.\\
 Quantifica lo spostamento, senza cercarlo tra gli infiniti possibili successori.\\
 \textbf{Nota}: in generale non è sempre necessario il min/max assoluto. Vedremo nel ML.
-%TODO
-%https://elearning.di.unipi.it/pluginfile.php/30593/mod_resource/content/0/5-2020-oltre_ricerca_classica.pdf, p. 31
+\begin{center}
+	\includegraphics[scale=1]{gradient.png}
+\end{center}
+\pagebreak
+\section{Ambienti più realistici}
+\paragraph{Problemi classici} Gli agenti risolutori di problemi "classici" assumono:
+\begin{list}{}{}
+	\item Ambienti \textbf{completamente osservabili}
+	\item Azioni e ambienti \textbf{deterministici}
+	\item Piano generato è sequenza di azioni \textbf{eseguibile ad occhi chiusi}, generato \textit{offline} ed eseguito senza imprevisti
+	\item Le \textbf{percezioni non servono}, se non nello stato iniziale
+\end{list}
+\paragraph{Soluzioni più complesse} In un ambiente \textbf{parzialmente osservabile} e \textbf{non deterministico} le \textbf{percezioni sono importanti}: \textbf{restringono gli stati} possibili e \textbf{informano} sull'effetto dell'\textbf{azione}.\\
+Più che un piano, l'\textbf{agente elabora una strategia} che \textbf{tiene conto delle diverse eventualità}: un \textbf{piano con contingenza}. Esempio: aspirapolvere con assunzioni diverse.
+\subsection{Azioni non deterministiche}
+\paragraph{Aspirapolvere imprevedibile} Ci sono più stati possibili come risultato dell'azione.\\
+\textbf{Comportamento}: se aspira in una stanza sporca la pulisce\ldots ma \textbf{a volte} pulisce anche una stanza adiacente. Se aspira in una stanza pulita, \textbf{a volte} rilascia sporco.
+\paragraph{Variazioni necessarie al modello} Il modello di transizione, quindi, \textbf{restituisce un insieme di stati}: l'agente non sa in quale si troverà. Il \textbf{piano di contingenza} sarà un piano condizionale e magari con cicli.
+\paragraph{Esempio}
+\begin{multicols}{2}
+Nell'esempio\\\texttt{Risultati(Aspira, 1) = \{5, 7\}}, cioè aspirando nello stato \texttt{1} posso finire nello stato \texttt{5} o \texttt{7}.\\
+Un possibile piano è
+\begin{lstlisting}
+[Aspira,
+	if (stato = 5):
+		[Destra, Aspira]
+	else:
+		[]
+]
+\end{lstlisting}
+Da sequenza di azioni a piano (albero)
+\begin{center}
+	\includegraphics[scale=0.7]{aspirapolvereimprevedibile.png}
+\end{center}
+\end{multicols}
+\subsection{Come si pianifica}
+\paragraph{Alberi di Ricerca \texttt{AND-OR}}
+\begin{list}{}{}
+	\item Nodi \texttt{OR}: scelte dell'agente (1 sola azione)
+	\item Nodi \texttt{AND}: le diverse contingenze (scelte dell'ambiente, più stati possibili), \textbf{da considerare tutte}
+\end{list}
+Una \textbf{soluzione ad un problema di ricerca \texttt{AND-OR}} è un \textbf{albero} che
+\begin{list}{}{}
+	\item Ha un nodo obiettivo in ogni foglia
+	\item Specifica un'unica azione nei nodi \texttt{OR}
+	\item Include tutti gli archi uscenti da nodi \texttt{AND}
+\end{list}
+\pagebreak
+\paragraph{Esempio}
+\begin{center}
+	\includegraphics[scale=0.7]{andortree.png}
+\end{center}
+\textbf{Archi in grassetto} = soluzione (sottoalbero), la seguente:
+\begin{lstlisting}
+	Piano: [Aspira: if (stato = 5): [Destra, Aspira] else: []]
+\end{lstlisting}
+%https://elearning.di.unipi.it/pluginfile.php/30593/mod_resource/content/0/5-2020-oltre_ricerca_classica.pdf, p.38
 \chapter{I Giochi con Avversario}
 \paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
