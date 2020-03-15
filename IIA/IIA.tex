@@ -1102,64 +1102,109 @@ Una \textbf{soluzione ad un problema di ricerca \texttt{AND-OR}} è un \textbf{a
 \chapter{I Giochi con Avversario}
 \paragraph{Premessa}
 Fin'ora abbiamo avuto \textit{Problemi Solving} come ricerca. Il paradigma di base era: ambiente osservabile, deterministico, utente singolo e stati atomici.\\
-Da adesso rilassamento delle assunzioni di base: ambiente multi agente e rappresentazioni degli stati più complesse.\\
-Ci occuperemo di \textbf{specializzazioni} del paradigma: giochi con avversario. I piani quindi devono tenere conto dell'avversario.\\
-Vedremo \textbf{problemi di soddisfacimento di vincoli}, sempre come ricerca in spazio di soluzioni, con stato a struttura \textbf{fattorizzata}.\\
-Questo ci porterà a considerare sistemi basati su conoscenza: lo stato è una "base di conoscenza" a cui rivolgere domande rappresentato in linguaggio espressivo. Tecniche di "ragionamento" con inferenze: logica del prim'ordine e calcolo proposizionale.
+Da adesso considereremo un \textbf{rilassamento delle assunzioni di base}: ambiente multi agente e rappresentazioni degli stati più complesse.\\
+Ci occuperemo di \textbf{specializzazioni} del paradigma nell'ambito dei giochi con avversario: quindi i piani d'azione devono tenere conto dell'avversario.\\
+Vedremo \textbf{problemi di soddisfacimento di vincoli}, sempre come ricerca in spazio di soluzioni, con stato a struttura \textbf{fattorizzata}.\\\\
+Questo ci porterà a considerare \textbf{sistemi basati su conoscenza}: lo stato è una "\textbf{base di conoscenza}" a cui rivolgere domande, con una rappresentazione in un linguaggio espressivo e \textbf{tecniche di "ragionamento" con inferenze}: logica del prim'ordine e calcolo proposizionale.
 \section{Giochi con Avversario}
-\begin{list}{}{}
+\begin{list}{-}{}
 	\item Regole semplici e formalizzabili
 	\item Ambiente accessibile e deterministico
-	\item Due giocatori, a turni alterni, a \textbf{somma zero} (se uno vince, l'altro perde: sommare i punteggi dà 0 o risultato costante), a informazione perfetta (tutti i gioc conoscono stato gioco)
-	\item Ambiente multi-agente competitivo: presenza avversario rende ambiente strategio, più difficile rispetto a visto fin'ora
-	\item Complessità e vincoli di tempo reale: mossa migliore nel tempo disponbile
+	\item Due giocatori, a turni alterni, a \textbf{somma zero} (se uno vince, l'altro perde: sommare i punteggi dà 0 o comunque un risultato costante), a informazione perfetta (tutti i giocatori conoscono lo stato attuale del gioco)
+	\item Ambiente multi-agente competitivo: la presenza dell'avversario rende l'\textbf{ambiente strategico}, più difficile rispetto a quanto visto fin'ora
+	\item Complessità e vincoli di tempo reale: mossa migliore nel tempo disponibile
 \end{list}
-$\Rightarrow$ giochi più simili a prob reali
-\section{Ciclo \textit{pianifica-agisci-percepisci}}
-\paragraph{Due agenti a turno} Si può pianificare considerando le possibili risposte dell'avversario e le possibili risposte a quelle risposte\ldots\\
+$\Rightarrow$ Questa tipologia di giochi sono un po' più simili ai problemi reali
+\subsection{Ciclo \textit{pianifica-agisci-percepisci}}
+\paragraph{Due agenti a turno} Si può pianificare considerando le possibili risposte dell'avversario e le possibili risposte a quelle risposte\ldots e così via.\\
 Una volta decisa la mossa
 \begin{list}{}{}
-	\item Si esegue la mossa
-	\item ...
+	\item Si \textbf{esegue} la mossa
+	\item Si \textbf{vede} cosa fa l'avversario
+	\item Si \textbf{pianifica} la prossima mossa
 \end{list}
+\pagebreak
 \section{Giochi come problemi di ricerca}
 \begin{list}{}{}
-	\item Stati: config gioco\\
-	Player(s) a chi tocca muovere nello stato s
-	\item Stato iniziale: config iniziale gioco
-	\item Actions(s) mosse legali in s
-	\item Result(s, a) stato risultatne da una mossa
-	\item Terminal-Test(s) determina se stato è fine del gioco
-	\item Utility(s, p) utilità (o pay-off) valore numerico degli stati terminali del gioco per p\\
+	\item \textbf{Stati}: configurazioni del gioco
+	\item \textbf{Player(s)}: a chi tocca muovere nello stato \textbf{s}
+	\item \textbf{Stato iniziale}: configurazione iniziale gioco
+	\item \textbf{Actions(s)}: mosse legali in \textbf{s}
+	\item \textbf{Result(s, a)}: stato risultante da una mossa
+	\item \textbf{Terminal-Test(s)}: determina se stato è fine del gioco
+	\item \textbf{Utility(s, p)}: utilità (o \textbf{pay-off}), cioè valore numerico degli stati terminali del gioco per il giocatore \textbf{p}\\
 	Es: 1, -1, 0, conteggio punti\ldots
 \end{list}
-\section{Algoritmo Min-Max}
-Valuto stati terminali in base a punteggio/vittoria e valuto stati preterminali valutandoli in base a se mi portano a vittoria o meno a ritroso. Valuto stati intermedi con valore minimo tra gli stati risultanti.
+\subsection{Algoritmo MinMax}
+Valuto gli stati terminali in base al punteggio/vittoria che ottengo, poi valuto gli stati preterminali in base allo stato terminale in cui mi portano (se mi portano a vittoria o meno a ritroso).\\
+Valuto gli stati intermedi con il valore \textbf{min}imo dei risultati se tocca all'avversario (minimo rischio) e col valore \textbf{ma}ssimo se tocca a me.
 \begin{center}
-	Immagine tic-tac-toe
+	\includegraphics[scale=0.45]{minmax_tictactoe.png}
 \end{center}
-\paragraph{Valore minmax}
-minimax(s) = 
-\begin{list}{}{}
-	\item se Terminal-Test(s) , allora Utility(s, MAX)
-	\item se Player(s) = MAX , allora max$_{a \in Action(s)}$ Minimax(Result(s, a))
-	\item se Player(s) = MIN , allora min$_{a \in Action(s)}$ Minimax(Result(s, a))
-\end{list}
+\paragraph{Valore MinMax} \textbf{Minimax(s)} = 
+\begin{math}
+\left\{
+\begin{array}{c c}
+	\textbf{Utility(s, Max)} & \textsl{se}\:\:\textbf{Terminal-Test(s)}\\
+	max_{a \in Action(s)} \textbf{Minimax(Result(s, a))} & \textsl{se}\:\: \textbf{Player(s) = MAX}\\
+	min_{a \in Action(s)} \textbf{Minimax(Result(s, a))} & \textsl{se}\:\: \textbf{Player(s) = min}
+\end{array}
+\right.
+\end{math}
 \paragraph{Come conviene esplorare l'albero di gioco?} In profondità, perché hanno ampiezza esponenziale.
-\paragraph{Algoritmo ricorsivo}\ldots
-\section{Algoritmo Min-Max Euristico (con orizzonte)}
-Casi complessi in cui esplorare stati è troppo costoso (es. scacchi): occorre \textbf{funzione di valutazione euristica}.\\
-Strategia: guardare avanti $d$ livelli\ldots
+\pagebreak
 
-\section{Funzione di Valutazione}
-Stima dell'utilità attesa a partire da una certa posizione. La qualità della funzione è determinante.
+\paragraph{Algoritmo ricorsivo} Di seguito
+\begin{center}
+	\includegraphics[scale=0.7]{minimaxricorsivo.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.7]{minimaxes.png}
+\end{center}
+\paragraph{Costo}
 \begin{list}{}{}
-	\item deve esser consistente con l'utilità se applicata a steati terminali del gioco (indurre lo stesso ordinamento)
-	\item dev'essere efficiente da calcolare
-	\item deve riflettere le probabilità effettive di vtitoria (A valutato meglio di B se da A ho più probabilità di vittoria rispetto a B)
-	\item \ldots
+	\item Tempo: come DF $\rightarrow$ O(b$^m$)
+	\item Spazio: O(m)
+	\item Per gli scacchi ($10^{40}$ nodi) più di $10^{22}$ secoli $\Rightarrow$ improponibile un'esplorazione sistematica del grafo, se non per giochi molto semplici
+	\item Necessarie \textbf{euristiche}
 \end{list}
-Esempio scacchi
+\pagebreak
+\subsection{Algoritmo Min-Max Euristico (con orizzonte)}
+In casi più complessi, dove esplorare stati è troppo costoso (es. scacchi), occorre una \textbf{funzione di valutazione euristica}.
+\paragraph{Strategia} Guardare avanti $d$ livelli
+\begin{list}{}{}
+	\item Si espande l'albero di ricerca un certo numero di livelli $d$, compatibile con il tempo e lo spazio disponibili
+	\item Si \textbf{valutano gli stati ottenuti} e si propaga indietro il risultato con la regola del Minimax
+\end{list}
+L'algoritmo è simile a prima ma\\
+\texttt{if Terminal-Test(s) then return Utility(s)} $\rightarrow$ \texttt{if Cutoff-Test(s, d) then return Eval(s)}\\\\
+Posto $d$ limite della profondità consentita\\
+\textbf{H-Minimax(s, d)} = 
+\begin{math}
+\left\{
+\begin{array}{c c}
+	\textbf{Eval(s)} & \textsl{se}\:\:\textbf{Cutoff-Test(s, d)}\\
+	max_{a \in Action(s)} \textbf{H-Minimax(Result(s, a), d + 1)} & \textsl{se}\:\: \textbf{Player(s) = MAX}\\
+	min_{a \in Action(s)} \textbf{H-Minimax(Result(s, a), d + 1)} & \textsl{se}\:\: \textbf{Player(s) = min}
+\end{array}
+\right.
+\end{math}
+\begin{center}
+	\includegraphics[scale=0.5]{hminmax_tictactoe.png}
+\end{center}
+\subsubsection{Funzione di Valutazione}
+La funzione di valutazione \textbf{Eval} è una \textbf{stima dell'utilità attesa} a partire da una certa posizione. La qualità della \textbf{funzione} è determinante.
+\begin{list}{}{}
+	\item deve essere \textbf{consistente} con l'utilità se applicata agli stati terminali del gioco (indurre lo stesso ordinamento)
+	\item deve essere \textbf{efficiente} da calcolare
+	\item deve \textbf{riflettere} le probabilità effettive di vittoria (A valutato meglio di B se da A ho più probabilità di vittoria rispetto a B)
+	\item combina probabilità con utilità dello stato terminale, può essere appreso con l'esperienza
+\end{list}
+\paragraph{Esempio} \textbf{Scacchi}\\
+Si potrebbe pensare di valutare caratteristiche diverse dello stato: valore del materiale (pedone 1, cavallo/alfiere 3, torre 5, regina 9\ldots), buona disposizione dei pedoni, protezione del re\ldots\\
+Funzione lineare pensata $Eval(s) = w_1f_1(s) + w_2f_2(s) + \ldots + w_nf_n(s)$\\
+Ma anche combinazioni non lineari delle caratteristiche: alfiere vale di più a fine partita, due alfieri valgono più del doppio di uno solo\ldots
+\pagebreak
 \paragraph{Problemi Noti}
 \begin{list}{}{}
 	\item \textbf{Stati Non Quiescienti}: esplorazione fino ad un livello può mostrare situaz. molto vantaggiosa, ma a mossa successiva es. regina mangiata dalla torre. Si possono riconoscere-\\
