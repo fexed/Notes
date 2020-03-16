@@ -16,6 +16,7 @@
 \usepackage{makecell}
 \graphicspath{ {./img/} }
 \usepackage{color}
+\usepackage{amssymb}
 
 \begin{document}
 \renewcommand*\contentsname{Indice}
@@ -1336,61 +1337,116 @@ Prossimamente: \textbf{sistemi basati su conoscenza}. Conoscenza implica capacit
 %TODO da qua
 %https://elearning.di.unipi.it/pluginfile.php/30946/mod_resource/content/1/KRProp.pdf
 \chapter{Agenti Basati su Conoscenza}
-Come costruire agenti dotati di capacità inferenziali.\\
-Cerchiamo di migliorare capcità di ragionamento, dotando di rappresentazione del mondo più complessi non descrivibili semplicemente. Agenti basati su conoscenza, con all'interno una base di conoscenza KB con conoscenza espressa in forma esplicita e dichiarativa attraverso un linguaggio.
+\paragraph{Fin'ora} Abbiamo trattato agenti con stato e con obiettivo, in mondi osservabili, con stati atomici e azioni descrivibili in maniera semplice, facendo \textbf{enfasi sul processo di ricerca}.\\
+Poi abbiamo trattato descrizioni \textbf{fattorizzate}, come nel CSP, che consentono di iniziare a \textit{guardare dentro} lo stato, descritto come un \textbf{insieme di caratteristiche rilevanti} (\textbf{feature})
+\paragraph{Adesso} Vedremo come costruire agenti dotati di capacità inferenziali. Cerchiamo di \textbf{migliorare la capacità di ragionamento}, dotando gli agenti di rappresentazioni del mondo più complesse non descrivibili semplicemente.\\
+\textbf{Agenti basati su conoscenza}, con all'interno una \textbf{base di conoscenza} (\textbf{knowledge base}, o \textbf{KB}) con conoscenza espressa in forma esplicita e dichiarativa attraverso un \textbf{linguaggio}.
+\section{Agenti Knowledge-Based}
 \begin{center}
 	\includegraphics[scale=0.7]{ag_conosc.png}
 \end{center}
-La maggiorparte prob I.A. sono "\textit{knowledge-intensive}". Mondo tipicamente complesso: serve rappresentazione parziale e incompleta (astrazione) del mondo utile agli scopi dell'agente.\\
-Per ambienti parzialmente osservabili e complessi ci servono linguaggi di rappresentazione della conoscenza più espressivi e capacità inferenziali.\\
+La maggior parte dei problemi di I.A. sono "\textit{knowledge-intensive}". Il mondo è tipicamente \textbf{complesso}: serve una rappresentazione parziale e incompleta (\textbf{astrazione}) del mondo utile agli scopi dell'agente.\\
+Per ambienti parzialmente osservabili e complessi ci servono linguaggi di rappresentazione della conoscenza più espressivi e \textbf{capacità inferenziali}.\\
 La conoscenza può essere codificata a mano, acquisita o estratta da testi ed esperienza.
-\paragraph{Approccio dichiarativo vs procedurale}
-tipicamente conoscenza in KB in forma dichiarativa. Alternativa è codificare conoscenza in maniera procedurale con programma che implementa processo decisionale. Un agente KB (con conoscenza dichiarativa) è più flessibile: perché più semplice ricevere conoscenza in maniera incrementale e modificare il comportamento con l'esperienza.
 \pagebreak
-\section{Il mondo del Wumpus}
+\paragraph{Approccio dichiarativo vs procedurale}
+Tipicamente la conoscenza in una KB viene espressa in \textbf{forma dichiarativa}. L'alternativa è \textbf{codificare la conoscenza in maniera procedurale}, attraverso un programma che implementa il processo decisionale. Un agente KB (con conoscenza dichiarativa) è più flessibile: perché è più semplice ricevere conoscenza in maniera incrementale e modificare il comportamento con l'esperienza.
+\subsection{Il mondo del Wumpus}
 \paragraph{Esempio} Agente in 1, 1: esplorare e trovare oro
-\begin{center}
-	\includegraphics[scale=0.7]{wumpus.png}\\
-	%TODO riscrivere
-	\includegraphics[scale=0.7]{wumpus2.png}
-\end{center}
-\paragraph{Uno scenario} \ldots
-\paragraph{KB} Insieme di enunciati espressi in un linguaggio di rappresentazione.\\
-L'agente interagisce con una KG con un'interfaccia funzionale \textbf{Tell-Ask}:
-\begin{list}{}{}
-	\item Tell
-	\item Ask
-	\item Retract
+\begin{multicols}{2}
+\begin{list}{}{\textbf{Misura delle prestazioni}}
+	\item \texttt{+1000} se trova l'oro, torna in \texttt{[1, 1]} ed esce
+	\item \texttt{-1000} se muore
+	\item \texttt{-1} per ogni azione
+	\item \texttt{-10} se usa la freccia
 \end{list}
-Enunciati in KG rappresentano conoscenza agente\ldots %TODO
-\paragraph{Problema} Il problema da risolvere: data conoscenza KB che contiene\ldots vorrei sapere se un certo fatto $\alpha$ è vero di conseguenza, cioè se KB $soddisfa \alpha$
-\paragraph{Programma di un agente KB} \ldots
-Una  \textbf{base di conoscenza} è rappresentazione esplicita, parziale e compatta in linguaggio simbolico: contiene sia fatti espliciti (es. Pozzo in [3, 3]) ma anche fatti generali o regole (es: brezza in caselle adiacenti a pozzi)\\
-Una base di dati invece solo base di dati e solo recupero.\\
-La differenza è che la KB ha capacità inferenziale: derivare nuovi fatti da quelli memorizzati esplicitamente.
-\paragraph{Trade-Off Fondamentale della Rappresentazione della Conoscenza} Trovare giusto compromesso tra linguaggio rappresentazione espressivo e la complessità del meccanismo inferenziale.\\
-Pià linguaggio è espressivo meno è efficiente il meccanismo inferenziale. Obiettivi in contrasto, bisogna mediare e trovare \textbf{compromesso}.\\
-\paragraph{Formalismi per la R.C.}
+\begin{list}{}{\textbf{Percezioni}}
+	\item \textit{puzzo} nelle caselle adiacenti al Wumpus
+	\item \textit{brezza} nelle caselle adiacenti alle buche
+	\item \textit{luccichio} nelle caselle con l'oro
+	\item \textit{bump} se batte in un muro
+	\item \textit{urlo} se il Wumpus viene ucciso
+	\item L'agente non percepisce la sua locazione
+\end{list}
+\begin{list}{}{\textbf{Azioni}}
+	\item \textbf{Avanti}
+	\item \textbf{A destra} di 90 gradi
+	\item \textbf{A sinistra} di 90 gradi
+	\item \textbf{Scaglia la freccia} (solo una)
+	\item \textbf{Esce}
+\end{list}
+\columnbreak
+
+Ambienti generati a caso, con \texttt{[1, 1]} \textit{safe}.
+\begin{center}
+	\includegraphics[scale=0.6]{wumpus.png}
+\end{center}
+\end{multicols}
+\subsection{Knowledge-Base}
+\paragraph{KB} Insieme di \textbf{enunciati} espressi in un linguaggio di rappresentazione.\\
+L'agente interagisce con una KB con un'interfaccia funzionale \textbf{Tell-Ask}:
 \begin{list}{}{}
-	\item Sintassi
-	\item Semantica
-	\item Meccanismo inferenziale
+	\item \textbf{Tell} per \textbf{aggiungere} nuovi enunciati alla KB
+	\item \textbf{Ask} per \textbf{interrogare} la KB
+	\item \textbf{Retract} per \textbf{eliminare} enunciati
+\end{list}
+\textbf{Enunciati} in KG \textbf{rappresentano la conoscenza} agente. Le \textbf{risposte $\alpha$} devono essere tali che $\alpha$ \textbf{è una conseguenza della KB}.
+\paragraph{Problema} Il problema da risolvere: data una base di conoscenza KB che contiene una rappresentazione dei fatti ritenuti veri, vorrei sapere se un certo fatto $\alpha$ è vero di conseguenza, cioè vorrei sapere se 
+\begin{center}
+KB $\vDash \alpha$ $\:\:\:\:\-:\:\:\:\:\:$ (\textbf{conseguenza logica})
+\end{center}
+\pagebreak
+
+\paragraph{Programma di un agente KB} Di seguito
+\begin{lstlisting}
+function Agente-KB (percezione) returns azione
+	persistent:	KB, una base di conoscenza
+			t, un contatore, inizialmente a 0, che indica il tempo
+	TELL(KB, Costruisci-Formula-Percezione(percezione, t ))
+	azione = ASK(KB, Costruisci-Query-Azione( t ))
+	TELL(KB, Costruisci-Formula-Azione(azione, t ))
+	t = t + 1
+	return azione
+\end{lstlisting}
+\paragraph{KB vs DB} Una \textbf{base di conoscenza} è una \textbf{rappresentazione esplicita}, \textbf{parziale} e compatta in un linguaggio simbolico: contiene sia fatti espliciti (es. \textit{Pozzo in \texttt{[3, 3]}}) ma anche fatti generali o regole (es: brezza in caselle adiacenti a pozzi)\\
+Una \textbf{base di dati} invece contiene solo fatti specifici e consente solo il recupero.\\
+La differenza è che \textbf{la KB ha capacità inferenziale}: si possono \textbf{derivare nuovi fatti} da quelli memorizzati esplicitamente.
+\paragraph{Trade-Off Fondamentale della Rappresentazione della Conoscenza} Trovare il \textbf{giusto compromesso tra l'espressibità} del linguaggio di rappresentazione \textbf{e la complessità} del meccanismo inferenziale.\\
+Più un linguaggio è espressivo meno è efficiente il meccanismo inferenziale. Questi due obiettivi sono in contrasto, bisogna mediare e trovare un \textbf{compromesso}.\\
+\subsubsection{Formalismi per la Rappresentazione della Conoscenza} Un formalismo per la rappresentazione della conoscenza ha tre componenti:
+\begin{list}{}{}
+	\item \textbf{Sintassi}: un linguaggio composto da un vocabolario e da regole per la formazione delle frasi (\textbf{enunciati})
+	\item \textbf{Semantica}: stabilisce la corrispondenza tra gli enunciati e fatti del mondo. Se un agente ha un enunciato $\alpha$ nella sua KB, allora crederà che il fatto corrispondente ad $\alpha$ sia vero nel mondo
+	\item \textbf{Meccanismo Inferenziale}: codificato o meno tramite regole di inferenza come nella logica, che ci consente di inferire nuovi fatti
 \end{list}
 \paragraph{Logica come linguaggio}
-Qual è la complessità computazionale del problema KB $soddisfa \alpha$ nei vari linguaggi logici? Quali algoritmi decisione e strategia ottimizzazione?\\
+Qual è la complessità computazionale del problema KB $\vDash \alpha$ nei vari linguaggi logici? Quali algoritmi decisione e strategia ottimizzazione?\\
 Linguaggi logici: calcolo proposizionale (POP) e logica dei predicati (FOL). Sono adatti per la rappresentazione della conoscenza? Da una parte sono anche troppo complessi, in particolare il FOL. Dall'altra, ci sono meccanismi non posseduti da FOL e POP ma che sono utili nelle KB.\\
 Rivistazione di PROP e FOL per rappresentazione conoscenza, con attenzione ad algoritmi e complessità. \textbf{Contrazioni}: linguaggi a regole e \textbf{programmazione logica}.
-\section{Calcolo Proposizionale}
-\paragraph{Sintassi} %TODO Sintassi calcolo proposizionale
 
-\paragraph{Algoritmo TT-entails?}
+\subsection{Algoritmo TT-entails}
+KB $\vDash \alpha$?
 \begin{list}{}{}
-	\item KB $soddisfa \alpha$?
 	\item Enumera tutte possibili interpretazioni KB ($k$ simboli, $2^k$ possibili interpretazioni)
-	\item \ldots
+	\item Per ciascuna interpretazione
+	\begin{list}{}{}
+		\item Se non soddisfa KB, OK
+		\item Se soddisfa KB, si controlla che soddisfi anche $\alpha$
+		\item Se si trova anche solo una interpretazione che soddisfa KB e non $\alpha$, la risposta sarà NO
+	\end{list}
 \end{list}
+\pagebreak
+\paragraph{Algoritmo} Di seguito
+\begin{center}
+	\includegraphics[scale=0.7]{ttentails.png}
+\end{center}
 \paragraph{Algoritmi per la soddisfacibilità (SAT)}
-Usano KB come insieme di clasusole.
+Usano una KB come \textbf{insieme di clausole}\\
+\{A, B\} \{$\neg$B, C, D\} \{$\neg$A, F\}\\
+La forma a clausole è la \textbf{forma normale congiuntiva} (\textbf{CNF}): una congiunzione di disgiunzioni letterali\\
+\{A $\vee$ B\} $\wedge$ \{$\neg$B $\vee$ C $\vee$ D\} $\wedge$ \{$\neg$A $\vee$ F\}\\
+\textbf{Non è restrittiva}: è sempre possibile ottenerla con trasformazioni che preservano l'equivalenza logica.
+%https://elearning.di.unipi.it/pluginfile.php/30946/mod_resource/content/1/KRProp.pdf, p. 35
 \paragraph{Algoritmo DPLL}
 Parte da una KB in forma a clausole. Enumerazione in profondità di tutte le possibili interpretazioni alla ricerca di un modello. Tre miglioramenti rispetto TTEntails:
 \begin{list}{}{}
