@@ -262,7 +262,6 @@ Non posso togliere oggetto, perché magari versioni precedenti lo usano. Se vogl
 linkDown per segnalare se ha perso il link, linkUp per collegamento preso
 \paragraph{Utilità dei MIB} Compilatore non è detto che generi linguaggio macchina ma trasforma semplicemente. I \textbf{frontend compilers} SNMP prendono i MIB e producono warning/errori e conversioni di formato SMI
 %http://luca.ntop.org/sgr2018/slides/nm2017.pdf
-\subsection{}
 Quando è nato snmp fatti due standard: snmp e mib iniziale (mib-ii, rfc 1213) dove vengono descritti object più importanti per gestione internet.\\
 Vogliono controllare stack TCP/IP per vedere cosa non funziona poi monitorare porta di rete. device espongono contatori per interfaccia tramite snmp. contatori byte pacchetti sono base del monitoraggio, ma nel tempo và superato perché contatori su byte sono poco utili: non si sa bene cosa succede però. \\
 Obiettivi mib-ii: info base su errori, pochi e semplici control objects (su/giù, errori, pacchett/byte ingresso/uscita), cerca il più possibile di evitare info ridondanti, \textbf{non deve assolutamente interferire con le operazioni} devono essere separati e non rallentare o inficiare in nessuna maniera prestazioni dei dispositivi. Sono circa 170 oggetti, negli anni alcune def sono troppo semplici, e presuppone IPv4 (IPv6 gestito in mib separati).\\
@@ -280,5 +279,32 @@ Statistiche su stessa rifa sono a livello diverso, repeater a livello 1. Fanno s
 Per navigare tabelle necessità meccanismo efficiente rispetto a fare tante richieste. Questo perché sistemi modulari, per vedere se valore/elemento esiste.
 \paragraph{Ordine lessicografico} Walk:lettura consecutiva di oggetti in mib.\\
 Leggo oggetti e metto ordinati per numero in ordine lessicografico. Con questo ordinamento si perde la struttura della tabella: \textbf{SNMP lavora solo su questo array ordinato}.
-\paragraph{Trap} Maniera asincrona per informare manager di qualche avvenimento, tipicamente un cambio di stato.
+\paragraph{Trap} Maniera asincrona per informare manager di qualche avvenimento, tipicamente un cambio di stato.\\
+\texttt{ifAdminStatus} su \texttt{linkDown} equivale proprio a scollegare fisicamente la scheda di rete. L'\textbf{administrative} è il ciclo di vita, l'\texttt{operational} è operativa. \texttt{ifOperStatus} su \texttt{linkDown} è lo stato e significa che la connessione è caduta.
+\subsection{Primitive}
+Due tipi di valori, scalari e tabellari.
+\paragraph{Get} Richiesta diretta e precisa di un object identifier\\
+Può essere usato per leggere una o più variabili. Basato su UDP, quindi dimensione massima pacchetto: nella risposta bisogna stare attenti alle info. Possibile errore (\textbf{errorStatus)}: tooBig, non entra la risposta nel pacchetto UDP. Altri errori: noSuchName (istanza non esiste o non è foglia, esempio chiedere bicchierini ad una stampante), genErr (qualsiasi altro errore: comunità sbagliata, agent sovraccarico\ldots).\\
+\textbf{errorIndex} indica quale delle variabili ha avuto problema. Es \texttt{noSuchName@1} indica che la prima variabile non esiste. Posso fare get con più richieste, quindi errore può essere su altra variabile (es \texttt{noSuchName@3} cioè non esiste il terzo object identifier richiesto ma indica il primo indice fallito, quindi le altre due precedenti esistono ma non vengono ritornati i valori).
+\paragraph{GetNext} Richiesta che ritorna l'object identifier successivo a quello chiesto.\\
+Non legge istance identifier richiesto ma ritorna il prossimo istance identifier rispetto all'ordine lessicografico. usata per fare discovery delle strutture e leggere le tabelle.\\Nella getNext, nosuchname significa che è finito il MIB (non esiste il successivo). Molto implementation depended, alcuni dopo l'ultimo ritornano il primo invece che noSuchName.
+
+\paragraph{Set} Scrivere un valore\\
+Equivalente in sostanza alla get ma scrivo. Atomica: più valori sono scritti contemporanemante, quindi o vanno bene tutti o non scrivo niente.\\
+Errore \textbf{badValue} quando valore scritto è del tipo sbagliato, fuori dal range o comunque non accettabile. Ma anche errore quando oggetto è \texttt{read-only}.\\
+noError quando tutto ok, noSuchName quando instance identifier non esiste. Anche qua stesso discorso della get con l'indice.
+\paragraph{Trap} Trap dall'agent\\
+\textbf{Unico messaggio non richiesto che va dall'agent verso il manager}.\\
+Può succedere trap storm, esempio dopo perdita alimentazione tutti dispositivi segnalano riavvio apparati tutti insieme. Se tolgo corrente non posso fisicamente mandare trap, per questo succede quando riavvio e torna su, non quando va giù tutto insieme.\\
+Non ci si può fidare totalmente della trap, bisogna fare polling.\\
+\texttt{ColdStart}/\texttt{WarmStart} inviate quando avvio un agent (cold da freddo, spento, caso tipico, invece warm è da riavvio)\\
+\texttt{LinkDown}/\texttt{LinkUp}\\
+\texttt{AuthenticationFailure} quando faccio richiesta posso non avere autorizzazioni, trap segnala al manager della situazione (tipicamente se provo tante password una dietro l'altra).\\
+\texttt{EnterpriseSpecific}, vedi valore enterprise e specific nel formato del pacchetto. ad esempio fine carta di una stampante. Specific=1 per dire che l'interpretazione è a seconda del mib.
+\begin{center}
+	Formato pacchetti
+\end{center}
+Community: una sorta di password, vedo se utente che richiede è abilitato a certa operazione. PDU payload data unity\\
+Get getnext e set ricevono getresponse tutte e tre.\\
+Importante sapere IP host che manda trap (potrebbe vederlo dal pacchetto UDP), perché l'ip nell'udp può essere mascherato o cambiato ad esempio dal nat
 \end{document}
