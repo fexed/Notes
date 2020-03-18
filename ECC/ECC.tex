@@ -459,8 +459,7 @@ $\forall x \in N\:\:\exists$ numero finito di esponenti $x_1 \neq 0\:\:\vline\:\
 Come trovare tali esponenti con $f$ ricorsiva primitiva.\\
 M = (Q, $\Sigma$, $\delta$, q$_0$)\\
 Q = \{q$_0$, \ldots, q$_k$), $\Sigma$ = \{$\sigma_0$, \ldots, $\sigma_n$)\\
-
-\textbf{Kurt Godel}: rappresentare algoritmi come numeri
+\textbf{Kurt G\"{o}del}: rappresentare algoritmi come numeri: \textbf{G\"{o}delizzazione} data macchina di turing M trovo $i$ che è il suo numero di G\"{o}del.
 \subsection{Funzione di Ackermann}
 La funzione di Ackermann \textbf{non è definibile} mediante gli schemi di ricorsione primitiva definiti in precedenze, ma è totale ed ha una definizione intuitivamente accettabilissima.
 
@@ -481,23 +480,30 @@ Ma cosa calcola? Una sorta di esponenziale generalizzato, infatti:
 	\item $A(3, x, y) = y^{\left.y^{\ldots^y}\right\} \:x\:\textsl{volte}}$
 \end{list}
 \subsection{Realizzazione}
-Con il linguaggio-\texttt{while} e il linugaggio-\texttt{for} posso riprodurre i casi base della ricorsione.
-%TODO
-$h(g_1(x, y, z), g_2(x, y, z))$, con programma $p_1$ associato a $g_1$, $p_2$ associato a $g_2$ e $p_3$ associato a $h$. Il programma che realizza la composizione sarà quindi $p_1$;$p_2$;$p_3$.\\Per la ricorsione primitiva
-\begin{math}
+Con il linguaggio-\texttt{while} e il linguaggio-\texttt{for} posso riprodurre i casi base della ricorsione. In particolare, per ogni programma \texttt{for} esiste una funzione ricorsiva primitiva e viceversa.\\
+\begin{list}{}{}
+	\item Un programma che calcola lo $0$ è un programma che legge gli ingressi e scrive $0$ in uscita.
+	\item Il successore lo realizzo con un assegnamento uscita $=$ ingresso $ + 1$
+	\item La proiezione consiste nel leggere in memoria la variabile $x_i$ cercata e metterla in uscita
+	\item Realizzo $h$ tale che $h(g_1(x, y, z), g_2(x, y, z))$, con programma $p_1$ associato a $g_1$, $p_2$ associato a $g_2$ e $p_3$ associato a $h$.\\
+Il programma che realizza la composizione sarà quindi $p_1$;$p_2$;$p_3$.\\
+	\item Per la ricorsione primitiva
+	\begin{math}
 		\left\{
 		\begin{array}{l}
 			f(0, y) = g(y) \rightarrow p_1\\
 			f(x + 1, y) = h(x, f(x, y), y) \rightarrow p_2
 		\end{array}
 		\right.
-\end{math}
-dopo qualche passaggio abbiamo visto che\\$f(x + 1, y) =  h(x, f(x, y), y) = h(x, h(x + 1, f( x + 1, y)), y)$. Come realizzarlo in for?
-\begin{verbatim}
-t1 = g(y)
-for i = 1 to x + 1
-	t1 = g(i, t1, y)
-\end{verbatim}
+	\end{math}
+	che dopo qualche passaggio abbiamo visto che\\$f(x + 1, y) =  h(x, f(x, y), y) = h(x, h(x + 1, f( x + 1, y)), y)$. Associando $p_1$ a $g$ e $p_2$ a $h$, lo realizzo con il programma-\texttt{for}
+	\begin{lstlisting}
+t1 = g(y);
+for (i = 1 to x + 1):
+	t1 = g(i, t1, y);
+end
+	\end{lstlisting}
+\end{list}
 Per la \textbf{funzione caratteristica} $\chi_I(n) =$
 \begin{math}
 		\left\{
@@ -506,36 +512,52 @@ Per la \textbf{funzione caratteristica} $\chi_I(n) =$
 			0\:\:\textsl{altrimenti}
 		\end{array}
 		\right.
-\end{math}\\\\
-La \textbf{Godelizzazione} data macchina di turing M trovo i che è il suo numero di godel.
+\end{math}
+\pagebreak
 \section{Diagonalizzazione}
 \paragraph{Esiste un formalismo che esprime tutte e sole le funzioni totali calcolabili?} \textbf{No}\\
-Dobbiamo necessariamente avere a che fare con funzioni parziali, ma perché "no"? Qualunque formalismo o esprime solo funzioni totali ma non tutte, oppure esprime anche funzioni parziali. La dimostrazione è fondamentale per la teoria della calcolabilità: \textbf{diagonalizzazione}.\\
-Fissiamo il formalismo delle funzioni ricorsive primitive, posso prendere l'algoritmo di Godel per numerarle. Quindi avrò $f_0$, $f_1$, \ldots, $f_n$, \ldots\\
-Definisco $g(n) = f_n(n) + 1$ (\textit{diagonalizzazione} viene da usare lo stesso indice).\\
-Se $g$ è una ricorsiva primitiva, allora è numerabile. Diciamo che $g$ ha come numero $i$\ldots %TODO
-Se io prendo le funzioni parziali, posso applicare lo stesso ragionamento? $\phi(x) = \psi_x(x) + 1$\\
-Diciamo come prima che ha numero $i$, quindi $\psi_i(x) = \phi(x) = \psi_x(x) + 1$\ldots\\
-\pagebreak
+Dobbiamo necessariamente avere a che fare con funzioni parziali, ma perché "no"?\\
+\textbf{Qualunque formalismo o esprime solo funzioni totali ma non tutte, oppure esprime anche funzioni parziali}. La dimostrazione è fondamentale per la teoria della calcolabilità: prende il nome di \textbf{diagonalizzazione}.
+\subparagraph{Dimostazione} Fissiamo il formalismo delle funzioni ricorsive primitive, posso prendere l'algoritmo di G\"{o}del per numerarle. Quindi avrò $f_0$, $f_1$, \ldots, $f_n$, \ldots\\
+Definisco $g(n) = f_n(n) + 1$ (\textit{diagonalizzazione} viene da usare lo stesso indice per indice e parametro).\\
+Se $g$ è una ricorsiva primitiva, allora è numerabile. Diciamo che $g$ ha come numero $i$: $f_i(n) = g(n) = f_n(n) + 1$\\
+Se diagonalizzo avrò $f_i(i) = g(i) = f_i(i) + 1$ ma \textbf{non può essere} che $f_i(i) = f_i(i) + 1$\\
+$\Rightarrow g$ non è ricorsiva primitiva.\\\\
+Se io prendo le funzioni parziali, posso applicare lo stesso ragionamento?\\
+$\phi(x) = \psi_x(x) + 1$\\
+Diciamo come prima che $\phi(x)$ ha indice $i$, quindi $\psi_i(x) = \phi(x) = \psi_x(x) + 1$\\
+Se $\psi_i(x)$ diverge, allora $\psi_x(x)$ diverge e anche $\psi_x(x) + 1$ diverge, quindi sono uguali. Non si applica il ragionamento della diagonalizzazione nel caso delle funzioni parziali.
 \section{$\mu$-ricorsive}
 Minima classe $\mathscr{R}$ che, allo schema fino alla ricorsione primitiva, si aggiunge:
 \paragraph{Minimizzazione} $\phi(\overrightarrow{x}, y) \in \mathscr{R}$\\
 $\psi(\overrightarrow{x}) = \mu y.[\phi(\overrightarrow{x}, y) = 0 \wedge \forall z < y\:\:\vline\:\: \phi(\overrightarrow{x}, z)\downarrow] $\\
 $\mu x.[I]$ è il minimo elemento di $I$ insieme.\\\\
+Cosa significa? Data una funzione appartenente a $\mathscr{R}$ (che ovviamente può essere una ricorsiva primitiva), la vado a calcolare sugli argomenti $\overrightarrow{x}$ della $\psi$ e su una certa $y$. Se vale 0, il risultato è $y$, altrimenti \textbf{deve} convergere e vado avanti incrementando $y$ di 1 e ricalcolando fino a che non trovo un risultato pari a 0.\\
 Quindi le $\mu$-ricorsive definiscono anche funzioni non totali, al contrario delle ricorsive primitive che definiscono solo funzioni totali.
-\paragraph{Esempio} $\phi(x, y) = 42$ è costante, quindi ricorsiva primitiva, quindi anche $\mu$-ricorsiva.\\
+\subparagraph{Esempio} $\phi(x, y) = 42$ è costante, quindi ricorsiva primitiva, quindi anche $\mu$-ricorsiva.\\
 $\psi(x) = \mu y.[\phi(x, y) = 42]$ ovunque indefinita perché non tornerà mai 0 quindi $\not\exists y$.\\\\
 Quindi \textbf{terminazione e non terminazione sono cruciali}.\\
-Se la definisco per casi? \ldots
+Se la definisco per casi? Ad esempio 
+\begin{math}
+	f(x) = \left\{
+	\begin{array}{c c}
+	\mu y.[y < g(x)\:\:\vline\:\: h(x, y) = 0] & \textsl{se}\:\exists\:\textsl{tale} y\\
+	0 & \textsl{altrimenti}
+	\end{array}
+	\right.
+\end{math}
+con $g$, $h$ ricorsive primitive.\\$f$ è ricorsiva primitiva, perché composizione di ricorsive primitive, ed è anche totale, perché converge sempre.\\
+Quindi \textbf{se pongo dei limiti al numero di tentativi}, dato da $y < g(x)$, si ricade nelle ricorsive primitive e non ci sono problemi di parzialità.
 \subsection{Notazione}
 Per ragioni storiche, una relazione $I \subset N^n$ è \textbf{ricorsiva} (sinonimo di totale) $\Leftrightarrow$ la sua funzione caratteristica $\chi_I$ è \textbf{calcolabile totale}.\\
 Inoltre, come già detto, $I$ è ricorsiva primitiva $\Leftrightarrow$ $\chi_I$ è ricorsiva primitiva.
+\pagebreak
 \section{Tesi di Church-Turing}
-Le funzioni intuitivamente calcolabili sono tutte e sole le T-calcolabili.\\
-In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di dimenticarci il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa classe. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché un algoritmo è equivalente scritto in qualsiasi linguaggio.\\\\
-$\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo}. Per esempio da M$_i$, con M MdT.\\
+\textbf{Le funzioni intuitivamente calcolabili sono tutte e sole le T-calcolabili}.\\
+In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di dimenticarci il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa \textit{classe}. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché un algoritmo è equivalente qualsiasi sia il linguaggio in cui è scritto.\\\\
+$\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo}. Per esempio da M$_i$ (con M Macchina di Turing).\\
 $\phi_i$ è funzione, quindi semantica.\\
 M$_i$ è algoritmo, quindi sintassi.\\
-Può succedere che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (\texttt{while(true) do skip} e \texttt{while(true) do skip;skip}, ad esempio)\\
+Può succedere che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (ad esempio \texttt{while(true) do skip} e \texttt{while(true) do skip;skip})
 
 \end{document}
