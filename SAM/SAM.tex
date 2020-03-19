@@ -445,6 +445,22 @@ Sistema decide \textbf{autonomamente} come, dove e quante voci mostrare.\\
 Da \textbf{Honeycomb} le voci del menu sono spostate nella actionbar. Per \textbf{retrocompatibilità}, le app senza actionbar su dispositivi senza tasto menu fisico hanno un pulsante aggiunto ai softkeys (tre puntini).\\
 \subsubsection{Creazione di un menu}
 \ldots
+\subsubsection{Ciclo di Vita di un Menu}
+Non ha senso allocare in memoria oggetti del menù finché non è aperto dall'utente. Nostra activity fornisce callback per crearlo (\texttt{onCreateOptionsMenu}), prepararlo (\texttt{onPrepareOptionsMenu}) e reagire alle azioni (\texttt{onOptionsItemSelected}).\\
+Da android 3.0 onCreate è chiamata una volta sola alla creazione dell'activity (alcune voci finiscono sull'action bar). Fino a 3.0 era chiamata una sola volta, sempre, ma all'apertura del menu.\\
+OnPrepare viene chiamta ad ogni apertura del menu prima di 3.0, da 3.0 solo se prima si chiama \texttt{invalidateOptionsMenu}.\\
+La onPrepare è dove si possono apportare modifiche al menù: abilitare/disabilitare voci\ldots\\
+Deve restituire true se è disponibile, o false se non c'è menù da mostrare.\\
+Evitare eccessiva variabilità del menù, altrimenti l'utente si perde. Usare menù contestuali, altri controlli UI\ldots\\
+Ricordare di invalidate se si vuole eseguire un'altra volda prepare.\\\\
+Posso associare ad un \texttt{menuItem} un intent, che viene lanciato quando l'item viene toccato. A chi arriva arriva.\\
+Si può configurare il \texttt{menuItem} per chiamare un listener.\\
+\subsection{Menu Contestuali}
+Equivalente del tasto destro. ConextMenu associati ad una particolare view. Dipendono dalla particolare view, mentre gli optionsMenu dipendono dall'activity essendo più globali.\\
+\subsection{Context Actions}
+Alternativa ai context menu, si sovrappone visivamente all'actionbar dell'activity, ma è un oggetto separato.\\
+Si implementa con l'interfaccia \texttt{ActionMode.Callback}, con metodi analoghi a quelli per gli \texttt{OptionsMenu}.\\
+\texttt{startActionMode()} per aprire l'action bar contestuale.
 \chapter{Kotlin}
 Preferenza per: modernità, comodità e diminuire ulteriormente dipendenza da tecnologie proprietarie (Java)\\
 \texttt{val} da errore se compilatore trova flusso d'esecuzione possibile con due assegnamenti.
