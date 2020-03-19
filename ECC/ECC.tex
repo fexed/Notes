@@ -560,4 +560,52 @@ $\phi_i$ è funzione, quindi semantica.\\
 M$_i$ è algoritmo, quindi sintassi.\\
 Può succedere che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (ad esempio \texttt{while(true) do skip} e \texttt{while(true) do skip;skip})
 
+\section{•}
+MdT $=_T$ \texttt{while} $=_T$ $\mu$-ricorsive\\
+Grazie all'\textbf{enumerazione} di G\"{o}del, scrivo $\phi_i$ come la funzione calcolata dall'algoritmo $M_i$\\
+D'ora in avanti parliamo solo di funzioni calcolabili, quindi $\phi_i$ \textit{è} calcolabile.\\
+$\exists$? funzione calcolabile totale $t(i, n)$ che maggiora il tempo di calcolo di M$_i$(n)? No. Vediamo come dimostrarlo, introducendo una diagonalizzazione.\\
+$t(i, n)$ = \begin{math}
+\left\{
+\begin{array}{c c}
+	k & \textsl{se} M_i(n)\downarrow converge in meno di i passi\\
+	0 & altrimenti
+\end{array}
+\right.
+\end{math}\\
+Sia T$_i$ la misura \textbf{esatta} del tempo di calcolo di M$_i$\\
+T$_i$(n) $\leq$ $t(i, n)$ è calcolabile totale.\\
+$T_x(x)$ tempo di calcolo effettivo, $t(x, x)$ tempo stimato\\
+$\psi(x) = $
+\begin{math}
+\left\{
+\begin{array}{c c}
+	\phi_x(x) + 1 & T_x(x) \leq t(x, x)\\
+	0 & altrimenti
+\end{array}
+\right.
+\end{math}\\
+Quindi $\psi$ è calcolabile totale.\\
+Applico church-turing, quindi $\phi_i(i) = \psi(i) =$ \begin{math}
+\left\{
+\begin{array}{c c}
+	\phi_i(i) + 1 & T_i(i) \leq t(i, i)\\
+	0 & altrimenti
+\end{array}
+\right.
+\end{math}\\
+Ma siccome $\phi_i$ calcolabile totale, non può essere che quando termina sia $\phi_i(i) = \phi_i(i) + 1$, \textbf{assurdo}.\\Quindi $t(i, n)$ non è calcolabile totale, non c'è modo di stimare il tempo di calcolo.\\\\
+Per lo stesso motivo non possiamo imporre limiti allo spazio.\\
+$\exists$? funzione calcolabile totale che dato M$_i$, $x$ dice quante celle di memoria uno specifico calcolatore C userà per calcolare M$_i(x)$?\\
+$h(i, x) = $\begin{math}
+\left\{
+\begin{array}{c c}
+	1 & se M_i(x)\uparrow (su C)\\
+	0 & altrimenti
+\end{array}
+\right.
+\end{math}\\
+Sia n la cardinalità di $\Sigma$ e m-1 cardinalità di Q e le celle di C sono $k$, posso scrivere $n^k$ stringhe diverse. Il cursore può stare su $k$ posizioni diverse e la macchina in $m$ stati diversi.\\
+Il numero massimo di configurazioni (stato con posizione cursore e stringa su nastro) diverse è  $l = n^k \cdot k \cdot m$, con $n^k$ nastro scritto, $k$ è posizione del cursore e $m$ stati ($m - 1$ + $1$ per lo stato $h$ di halt)\\
+Dopo $l$ passi la configurazione si ripete. Si può dire che la macchina è in ciclo. Quindi ho una contraddizione? Siccome la macchina attraversa un numero finito di config sup lim da $l$, se la macchina non si è arrestata prima di $l$ passi se ritrovo una config di prima la ritroverò, quindi non terminerà mai. Ho dimostrato che $h$ è calc tot, ma posso scrivere quindi $t$ della dim precedente, ma giungo all'assurdo. Quindi non posso mettere un limite al nastro.
 \end{document}
