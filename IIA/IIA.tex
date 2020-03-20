@@ -1458,6 +1458,64 @@ Parte da una KB in forma a clausole. Enumerazione in profondità di tutte le pos
 Nel determinare un simbolo se è puro possiamo trascurare occorrenze simbolo in clausole già rese vere. Se simbolo è puro può essere assegnato a T se positivo, F se negativo senza eliminare modelli.
 \paragraph{Clausole unitarie}
 %TODO
+\section{Metodi locali per SAT}
+Gli stati sono assegnamenti completi.\\
+L'obiettivo è un adssegnamento che soddisfa tuttel e lcausole (un modello). Si parte da assegnamento casuale\ldots\\ %TODO
+Algoritmi.\\
+Molti minimi locali per sfuggire ai quali serve introdurre perturbazioni casuali. Ad esempio, hill climbing con riavvio casuale, simulated annealing\ldots molta sperimentazione per trovare miglior compromesso tra grado di avidità e casualità.\\
+WALK-SAT è uno degli algoritmi più semplici ed efficaci.\\
+\subsection{Algoritmo WalkSAT}
+WalkSAT ad ongi poasso sceglie a caso clausola non soddisfatta. Poi sceglie simbolo da modificare (flip) scegliendo con probabilità p (di solito 0,5) tra una delle due possibilità seguenti: sceglie un simbolo a caso da flippare (passo casuale) o sceglie quello che rende più clausole soddisfatte (passo di ottimizzazione).\\
+Si arrende dopo un numero predefinito di flip.\\
+\begin{center}
+	Algoritmo
+\end{center}
+\paragraph{Un esempio}
+\paragraph{Analisi} Se maxflips è inf e insieme clausole è soddisfacibile prima o poi termina, ma non può essere usato per verificare insoddisfacibilità (è incompleto). Problema decidibile ma algoritmo incompleto.\\
+Va bene per cercare modello, sapendo che c'è. Ma se è insoddisfacibile, non termina.\\
+Lo si usa perché è efficiente in tempo e spazio.
+\paragraph{Problemi SAT difficili} se problema ha molte soluzioni (sotto-vincolato) è più probabile che walksat ne trovi una in tempi brevi. es 16 sol su 32, assegnamento 50\% prob di essere giusto: 2 passi in media\\
+Più grande è il rapporto più vincolato è il problerma. Regine è facile perché vincolato
+\paragraph{Probabilità di soddisfacibilità in funzione di $\frac{m}{n}$} $m$ clausole e $n$ simboli, media di 100 problemi generati a caso.
+\begin{center}
+	\includegraphics[scale=0.7]{sat_grafico.png}
+\end{center}
+\paragraph{Confronto dpll w walksat}
+\begin{center}
+	\includegraphics[scale=0.7]{dpllwalksat_confronto.png}
+\end{center}
+\section{Inferenza come Deduzione}
+Un altro modo per decidere se KB $\vDash$ A è usare un meccanismo di \textbf{dimostrazione} (\textbf{deduzione}). Se scrive KB $\vdash$ A (A è deducibile da KB) e la deduzione avviene specificando delle regole di inferenza: dovrebbero derivare solo le formule che sono conseguenza logica e \textbf{tutte} le formule che sono conseguenza logica.\\
+Sono le proprietà della \textbf{correttezza} e \textbf{completezza}.
+\paragraph{Correttezza} Se KB $\vdash$ A, allora KB $\vDash$ A\\
+Tutto ciò che è derivabile è conseguenza logica. Le regole preservano la verità
+\paragraph{Completezza} Se KB $\vDash$ A, allora KB $\vdash$ A\\
+Tutto ciò che è conseguenza logica è ottenibile tramite il meccanismo di inferenza.\\
+\paragraph{Dimostrazione come ricerca}
+Come decidere ad ogni passo quale regola di inferenza applicare? A quali premesse? Come evitare esplosione combinatoria? Problema esplorazione spazio di stati. Ci riguarda perché vogliamo progettare algoritmi di inferenza. Una \textbf{procedura di dimostrazione} definisce direzione e strategia di ricerca.
+\subparagraph{Direzione} Nella dimostrazione di teoremi conviene procedere all'indietro. Con un applicazione in avanti delle regole di inferenza non controllata. Da A, B, A anmd B, A and (A and B)\ldots\\
+All'indietro dimostro A, poi B, poi A and B.
+\subparagraph{Strategia} Anche assumendo insieme di regole di inferenza completo se l'algoritmo non è completo potrei non trovare soluzione
+\paragraph{Regola di risoluzione per PROP} Meno regole sono meglio è. Unica regola di inferenza è la regola di risoluzione.\\
+Con due clausole, una P e l'altra che contiene notP, possiamo considerare or degli altri elementi togliendo P e notP.
+\subparagraph{In generale}
+%TODO
+$$\frac{\{l_1, l_2,\ldots }{robe da sistemare}$$
+\paragraph{Grafo di risoluzione}
+\paragraph{Attenzione!} \{B, N\} \{notB, notN\} $\rightarrow$ \{\} NO!\\
+Diventa o \{N, notN\} o \{B, notB\}, \textbf{un passo alla volta}!
+\paragraph{Siamo sicuri che basti una regola?} Completezza se KB $\vDash \alpha$ allora KB $\vdash_{res} \alpha$? Non sempre. Es KB $\vDash$ \{A, notA\} ma non è vero che KN $\vdash_{res}$ \{A, notA\}\\
+Ma ho due strumenti
+\subparagraph{Teorema di risoluzione} KB insoddisfacibile $\Leftrightarrow$ KB $\vdash_{res}$ \{\} \textbf{completezza}
+\subparagraph{Teorema di refutazione} KB $\vDash \alpha \Leftrightarrow$ (KB $\bigcup$ \{not$\alpha$\} è insoddisfacibile
+\paragraph{Nell'esempio} KB $\bigcup$ FC(not(A or notA)) è insoddisfacibile? Si, perché\\
+KB $\bigcup$ \ldots in un passo
+\paragraph{Conclusioni}
+Abbiamo visto che agenti KB che usano PROP come ling rappresentazione possono devidere se KB $\vDash \alpha$. Decidibile ma intrattabile NP al caso peggiore. Esistono algoritmi efficienti e completi che consenton odi asffortnare probl di grosse dimensio, algoritmi locali particolamenre efficienti ma non completi.\\
+Oppure per via deduttiva.
+\subsection{Logica del Primo Ordine}
+
+\pagebreak
 \section{Definizione e Confronto di Euristiche Ammissibili}
 \paragraph{Mondo dei blocchi} Problema classico, parte dei micromondi usati soprattutto per la pianificazione. Serie di blocchi su un tavolo impilati e vogliamo raggiungere certa config. final. Mosse sono spostare blocco su tavolo o su altro blocco, a condizione che blocco sia libero senza blocchi sopra e blocco destinazione anche.
 \subparagraph{Euristica H1} Numero di blocchi appoggiati su blocco sbagliato (incluso tavolo)
@@ -1465,4 +1523,5 @@ Nel determinare un simbolo se è puro possiamo trascurare occorrenze simbolo in 
 \subparagraph{Sono ammissibili?} Sono ammissibili se servono almeno Hi mosse per giungere in stato goal. H2 è più accurata perché domina H1, valore più alto per ogni stato possibile. Questo perché H2 $\Rightarrow$ H1, i blocchi contati in H1 vengono contati anche in H2, ma H2 ha casi non contati da H1.\\
 Per trovare euristica bisogna contare quanto dista soluzione e usare questa come euristica.\\
 Euristica = n ammissibile se servono almeno n mosse per arrivare in stato finale, $\geq$ 0 ovunque ma $=$ 0 solo in stati goal.
+
 \end{document}
