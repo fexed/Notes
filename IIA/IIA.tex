@@ -1440,52 +1440,102 @@ KB $\vDash \alpha$?
 \begin{center}
 	\includegraphics[scale=0.7]{ttentails.png}
 \end{center}
-\paragraph{Algoritmi per la soddisfacibilità (SAT)}
-Usano una KB come \textbf{insieme di clausole}\\
-\{A, B\} \{$\neg$B, C, D\} \{$\neg$A, F\}\\
-La forma a clausole è la \textbf{forma normale congiuntiva} (\textbf{CNF}): una congiunzione di disgiunzioni letterali\\
+\paragraph{Esempio}
+\begin{list}{}{($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C) $\vDash$ (B $\vee$ C) ?}
+	\item \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [A, B, C], \{\} )
+	\begin{list}{}{}
+		\item \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [B, C], \{A = \textit{true}\} )
+		\begin{list}{}{}
+			\item \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [C], \{A = \textit{true}, B = \textit{true}\} )
+			\begin{list}{}{}
+				\item[OK] \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [], \{A = \textit{true}, B = \textit{true}, C = \textit{true}\} )
+				\item[OK] \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [], \{A = \textit{true}, B = \textit{true}, C = \textit{false}\} )
+			\end{list}
+			\item \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [C], \{A = \textit{true}, B = \textit{false}\} )
+			\begin{list}{}{}
+				\item[OK] \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [], \{A = \textit{true}, B = \textit{false}, C = \textit{true}\} )
+				\item[OK] \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [], \{A = \textit{true}, B = \textit{false}, C = \textit{false}\} )
+			\end{list}
+		\end{list}
+		\item \texttt{TT-CHECK-ALL}( ($\neg$A $\vee$ B) $\wedge$ (A $\vee$ C), (B $\vee$ C), [B, C], \{A = \textit{false}\} ) \ldots
+	\end{list}
+\end{list}
+Solo alla fine, \textbf{dopo aver provato tutti i possibili assegnamenti}, possiamo rispondere se (B $\vee$ C) è conseguenza logica.
+\section{Algoritmi per la soddisfacibilità (SAT)}
+Usano una KB come \textbf{insieme di clausole}, cioè insiemi di letterali:\\\{A, B\} \{$\neg$B, C, D\} \{$\neg$A, F\}\\
+La forma a clausole è la \textbf{forma normale congiuntiva} (\textbf{CNF}), cioè una congiunzione di disgiunzioni letterali:\\ 
 \{A $\vee$ B\} $\wedge$ \{$\neg$B $\vee$ C $\vee$ D\} $\wedge$ \{$\neg$A $\vee$ F\}\\
 \textbf{Non è restrittiva}: è sempre possibile ottenerla con trasformazioni che preservano l'equivalenza logica.
-%https://elearning.di.unipi.it/pluginfile.php/30946/mod_resource/content/1/KRProp.pdf, p. 35
-\paragraph{Algoritmo DPLL}
-Parte da una KB in forma a clausole. Enumerazione in profondità di tutte le possibili interpretazioni alla ricerca di un modello. Tre miglioramenti rispetto TTEntails:
-\begin{list}{}{}
-	\item Terminazione anticipata
-	\item Euristica dei simboli (o letterali) puri
-	\item Euristica delle clausole unitarie
+\paragraph{Trasformazione in forma a clausole}
+\begin{list}{-}{I passi sono:}
+	\item Eliminazione della $\Leftrightarrow$: (A $\Leftrightarrow$ B) $=$ (A $\Rightarrow$ B) $\wedge$ (B $\Rightarrow$ A)
+	\item Eliminazione dell'$\Rightarrow$: (A $\Rightarrow$ B) $=$ ($\neg$A $\vee$ B)
+	\item Negazioni all'interno (de Morgan):\\
+	$\neg$(A $\vee$ B) $=$ ($\neg$A $\wedge$ $\neg$B)\\
+	$\neg$(A $\wedge$ B) $=$ ($\neg$A $\vee$ $\neg$B)
+	\item Distribuzione di $\vee$ su $\wedge$: (A $\vee$ (B $\wedge$ C)) $=$ (A $\vee$ B) $\wedge$ (A $\vee$ C)
 \end{list}
-\paragraph{Simboli puri} Simbolo con stesso segno in tutte le clausole. Es \{A, notB\}, \{notB, notC\}, \{C, A\} A puro e B anche.\\
-Nel determinare un simbolo se è puro possiamo trascurare occorrenze simbolo in clausole già rese vere. Se simbolo è puro può essere assegnato a T se positivo, F se negativo senza eliminare modelli.
-\paragraph{Clausole unitarie}
-%TODO
-\section{Metodi locali per SAT}
-Gli stati sono assegnamenti completi.\\
-L'obiettivo è un adssegnamento che soddisfa tuttel e lcausole (un modello). Si parte da assegnamento casuale\ldots\\ %TODO
-Algoritmi.\\
-Molti minimi locali per sfuggire ai quali serve introdurre perturbazioni casuali. Ad esempio, hill climbing con riavvio casuale, simulated annealing\ldots molta sperimentazione per trovare miglior compromesso tra grado di avidità e casualità.\\
-WALK-SAT è uno degli algoritmi più semplici ed efficaci.\\
-\subsection{Algoritmo WalkSAT}
-WalkSAT ad ongi poasso sceglie a caso clausola non soddisfatta. Poi sceglie simbolo da modificare (flip) scegliendo con probabilità p (di solito 0,5) tra una delle due possibilità seguenti: sceglie un simbolo a caso da flippare (passo casuale) o sceglie quello che rende più clausole soddisfatte (passo di ottimizzazione).\\
-Si arrende dopo un numero predefinito di flip.\\
+\subsection{Algoritmo DPLL}
+\paragraph{DPLL} Davis, Putman, Lovemann, Loveland. Parte da una KB in forma a clausole. Enumerazione in profondità di tutte le possibili interpretazioni alla ricerca di un modello. Tre miglioramenti rispetto TTEntails:
+\begin{list}{}{}
+	\item \textbf{Terminazione anticipata}: si può decidere sulla verità di una clausola anche con interpretazioni parziali, basta che un letterale sia vero.\\
+	Se A è \textit{true}, lo sono anche \{A, B\} e \{A, C\} indipendentemente dai valori di B e di C.\\
+	Se anche una sola clausola è falsa, l'interpretazione non può essere un modello dell'insieme delle clausole.
+	\item Euristica dei \textbf{simboli} (o letterali) \textbf{puri}: un \textbf{simbolo puro} è un simbolo che \textbf{appare con lo stesso segno in tutte le clausole}. Ad esempio, nella KB \{A, $\neg$B\}, \{$\neg$B, $\neg$C\}, \{C, A\} i simboli A e B sono puri.\\
+Nel determinare un simbolo se è puro possiamo trascurare occorrenze simbolo in clausole già rese vere.\\
+	Se simbolo è puro può essere assegnato a \textit{true} se positivo e \textit{false} se negativo senza escludere modelli utili: se le clausole hanno un modello continueranno ad averlo anche dopo questo assegnamento. L'assegnamento è obbligato.
+	\item Euristica delle \textbf{clausole unitarie}: una \textbf{clausola unitaria} è una \textbf{clausola con un solo letterale non assegnato}. Ad esempio, \{B\} è unitaria, ma anche \{B, $\neg$C\} quando C = \textit{true}.\\
+	Conviene assegnare prima valori al letterale in clausole unitarie. L'assegnamento è univoco (\textit{true} se positivo, \textit{false} se negativo)
+\end{list}
 \begin{center}
-	Algoritmo
+	\includegraphics[scale=0.7]{dpllalgoritmo.png}
 \end{center}
-\paragraph{Un esempio}
-\paragraph{Analisi} Se maxflips è inf e insieme clausole è soddisfacibile prima o poi termina, ma non può essere usato per verificare insoddisfacibilità (è incompleto). Problema decidibile ma algoritmo incompleto.\\
-Va bene per cercare modello, sapendo che c'è. Ma se è insoddisfacibile, non termina.\\
+\paragraph{Miglioramenti di DPLL} DPLL è completo e termina sempre. Alcuni miglioramenti:
+\begin{list}{}{}
+	\item Analisi di componenti (sottoproblemi indipendenti): se le variabili possono essere suddivise in sottoinsiemi disgiunti
+	\item Ordinamento di variabili e valori: scegliere la variabile che compare in più clausole
+	\item Backtracking intelligente
+	\item Altre ottimizzazioni\ldots
+\end{list}
+\pagebreak
+\subsection{Metodi locali per SAT}
+\paragraph{Formulazione}
+\begin{list}{}{}
+	\item Gli stati sono assegnamenti completi
+	\item L'obiettivo è un assegnamento che soddisfa tutte le clausole (un \textbf{modello})
+	\item Si parte da un assegnamento casuale
+	\item Ad ogni passo \textbf{si cambia il valore di una proposizione} (\textbf{flip})
+	\item Gli stati sono valutati contando il numero di clausole non soddisfatte, meno sono meglio è (o soddisfatte)
+\end{list}
+\paragraph{Algoritmi} Ci sono molti minimi locali, per sfuggire ai quali bisogna introdurre delle perturbazioni casuali. Ad esempio, hill-climbing con riavvio casuale, simulated annealing\ldots\\
+C'è stata molta sperimentazione per trovare il miglior compromesso tra il grado di avidità e la casualità.\\
+\textbf{WalkSAT} è uno degli algoritmi più semplici ed efficaci.
+\subsection{Algoritmo WalkSAT}
+Ad ogni passo \textbf{sceglie a caso una clausola non ancora soddisfatta}. Poi \textbf{sceglie un simbolo da modificare} (flip), scegliendo con probabilità $p$ (di solito 0.5) tra una delle due seguenti possibilità:
+\begin{list}{}{}
+	\item \textbf{Passo casuale}: sceglie un simbolo a caso da flippare
+	\item \textbf{Passo di ottimizzazione}: sceglie quello che rende più clausole soddisfatte
+\end{list}
+Si arrende dopo un numero predefinito di flip.
+\begin{center}
+	\includegraphics[scale=0.6]{walksatalgoritmo.png}
+\end{center}
+\paragraph{Analisi} Se \texttt{maxflips} è $\infty$ e l'insieme clausole è soddisfacibile, prima o poi termina. Ma \textbf{non può essere usato per verificare l'insoddisfacibilità} (è \textbf{incompleto}). Il problema è decidibile ma l'algoritmo è incompleto.\\
+Va bene per cercare un modello, sapendo che c'è. Ma se è insoddisfacibile, non termina.\\
 Lo si usa perché è efficiente in tempo e spazio.
-\paragraph{Problemi SAT difficili} se problema ha molte soluzioni (sotto-vincolato) è più probabile che walksat ne trovi una in tempi brevi. es 16 sol su 32, assegnamento 50\% prob di essere giusto: 2 passi in media\\
-Più grande è il rapporto più vincolato è il problerma. Regine è facile perché vincolato
-\paragraph{Probabilità di soddisfacibilità in funzione di $\frac{m}{n}$} $m$ clausole e $n$ simboli, media di 100 problemi generati a caso.
+\paragraph{Problemi SAT difficili} Se un problema ha molte soluzioni (sotto-vincolato) è più probabile che WalkSAT ne trovi una in tempi brevi. Per esempio, se ha 16 soluzioni su 32, un assegnamento ha il 50\% di probabilità di essere giusto, quindi \textbf{2 passi in media}.\\
+\textbf{Più grande è il rapporto più vincolato è il problema}.
+\paragraph{Probabilità di soddisfacibilità in funzione di $\frac{m}{n}$}
 \begin{center}
 	\includegraphics[scale=0.7]{sat_grafico.png}
 \end{center}
-\paragraph{Confronto dpll w walksat}
+\paragraph{Confronto tra DPLL e WalkSAT}
 \begin{center}
 	\includegraphics[scale=0.7]{dpllwalksat_confronto.png}
 \end{center}
 \section{Inferenza come Deduzione}
-Un altro modo per decidere se KB $\vDash$ A è usare un meccanismo di \textbf{dimostrazione} (\textbf{deduzione}). Se scrive KB $\vdash$ A (A è deducibile da KB) e la deduzione avviene specificando delle regole di inferenza: dovrebbero derivare solo le formule che sono conseguenza logica e \textbf{tutte} le formule che sono conseguenza logica.\\
+Un altro modo per decidere se KB $\vDash$ A è usare un meccanismo di \textbf{dimostrazione} (\textbf{deduzione}).\\
+Si scrive KB $\vdash$ A (\textbf{A è deducibile da KB}) e la deduzione avviene specificando delle regole di inferenza: dovrebbero derivare solo le formule che sono conseguenza logica e \textbf{tutte} le formule che sono conseguenza logica.\\
 Sono le proprietà della \textbf{correttezza} e \textbf{completezza}.
 \paragraph{Correttezza} Se KB $\vdash$ A, allora KB $\vDash$ A\\
 Tutto ciò che è derivabile è conseguenza logica. Le regole preservano la verità
@@ -1493,14 +1543,14 @@ Tutto ciò che è derivabile è conseguenza logica. Le regole preservano la veri
 Tutto ciò che è conseguenza logica è ottenibile tramite il meccanismo di inferenza.\\
 \paragraph{Dimostrazione come ricerca}
 Come decidere ad ogni passo quale regola di inferenza applicare? A quali premesse? Come evitare esplosione combinatoria? Problema esplorazione spazio di stati. Ci riguarda perché vogliamo progettare algoritmi di inferenza. Una \textbf{procedura di dimostrazione} definisce direzione e strategia di ricerca.
-\subparagraph{Direzione} Nella dimostrazione di teoremi conviene procedere all'indietro. Con un applicazione in avanti delle regole di inferenza non controllata. Da A, B, A anmd B, A and (A and B)\ldots\\
-All'indietro dimostro A, poi B, poi A and B.
-\subparagraph{Strategia} Anche assumendo insieme di regole di inferenza completo se l'algoritmo non è completo potrei non trovare soluzione
-\paragraph{Regola di risoluzione per PROP} Meno regole sono meglio è. Unica regola di inferenza è la regola di risoluzione.\\
-Con due clausole, una P e l'altra che contiene notP, possiamo considerare or degli altri elementi togliendo P e notP.
-\subparagraph{In generale}
-%TODO
-$$\frac{\{l_1, l_2,\ldots }{robe da sistemare}$$
+\subparagraph{Direzione} Nella dimostrazione di teoremi \textbf{conviene procedere all'indietro}. Con un applicazione in avanti delle regole di inferenza non controllata posso ottenere, ad esempio da A, B: A $\wedge$ B, A $\wedge$ (A $\wedge$ B)\ldots\\
+All'indietro invece, se voglio dimostrare A $\wedge$ B, si cerca di dimostrare A e poi B. Se voglio dimostrare A $\Rightarrow$ B, assumo A e cerco di dimostrare B\ldots
+\subparagraph{Strategia} Anche assumendo insieme di regole di inferenza completo se l'algoritmo non è completo potrei non trovare soluzione. La complessità è alta: è un problema \textbf{decidibile ma NP-completo}.
+\subsection{Regola di risoluzione per PROP} Meno regole uso meglio è, senza rinunciare alla completezza. L'unica regola di inferenza è la regola di risoluzione, che presuppone la forma a clausole
+Con due clausole, una P e l'altra che contiene $\neg$P, possiamo considerare l'OR degli altri elementi togliendo P e $\neg$P. Cioè $$\frac{\{P, Q\}\:\:\{\neg P, R\}}{\{Q, R\}}$$ Corretta? Basta pensare ai modelli.
+\subparagraph{In generale} Con $l$, $m$ \textbf{letterali}, simboli di proposizione positivi o negativi. $l_i$ e $m_j$ sono \textbf{uguali ma di segno opposto}.
+$$\frac{\{l_1, l_2,\ldots, l_i, \ldots, l_k\}\:\:\{m_1, m_2, \ldots, m_j, \ldots, m_n\}}{\{l_1, l_2,\ldots, l_{i-1}, l_{i+1}, \ldots, l_k, m_1, m_2, \ldots, m_{j-1}, m_{j+1}, \ldots, m_n\}}$$
+Caso particolare $\frac{\{P\}\:\:\{\neg P\}}{\{\}}$: \textbf{clausola vuota} o \textbf{contraddizione}.
 \paragraph{Grafo di risoluzione}
 \paragraph{Attenzione!} \{B, N\} \{notB, notN\} $\rightarrow$ \{\} NO!\\
 Diventa o \{N, notN\} o \{B, notB\}, \textbf{un passo alla volta}!
