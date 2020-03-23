@@ -32,7 +32,7 @@ else:
     currtime = now.strftime("%H.%M.%S") #Timestamp
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0')) #SNMPv2-MIB::sysName.0
@@ -51,7 +51,7 @@ else:
 # hostdescr
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0')) #SNMPv2-MIB::sysDescr.0
@@ -70,7 +70,7 @@ else:
     print("\tUptime\t", end = '')
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.3.0')) #DISMAN-EVENT-MIB::sysUpTimeInstance
@@ -88,10 +88,11 @@ else:
         print("\t" + str(uptimestr) + " (" + str(ticks) + ")")
 
 # ssCpuIdle
+    ucdCpu = False
     print("\tCPU\t\t", end = '')
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))
@@ -103,14 +104,16 @@ else:
     elif errName:
         print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
+        ucdCpu = True
         cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
         print(cpuIdle + "%")
 
 # memTotalReal
+    ucdMemTot = False
     print("\tMem total\t", end = '')
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memTotalReal', 0))
@@ -122,14 +125,16 @@ else:
     elif errName:
         print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
+        ucdMemTot = True
         memTotal = varBinds[0].prettyPrint().split("=")[1].strip()
         print(memTotal + " KB")
     
 # memAvailReal
+    ucdMemAvail = False
     print("\tMem avail.\t", end = '')
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
-               CommunityData(community),
+               CommunityData(community, mpModel=0),
                UdpTransportTarget((hostname, port)),
                ContextData(),
                ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))
@@ -141,6 +146,7 @@ else:
     elif errName:
         print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
+        ucdMemAvail = True
         memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
         print(memAvail + " KB")
 
@@ -149,40 +155,47 @@ else:
         sleep(1)
         now = datetime.now()
         currtime = now.strftime("%H.%M.%S")
-        print("\n" + str(i+1) + " (" + currtime + ")\t######")
+        print("\n" + str(i+1) + " (" + currtime + ")")
         print("\tCPU\t\t", end = '');
-        errInd, errName, errIndex, varBinds = next(
-            getCmd(SnmpEngine(),
-                   CommunityData(community),
-                   UdpTransportTarget((hostname, port)),
-                   ContextData(),
-                   ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))
-                   )
-            )
+        if ucdCpu:
+            errInd, errName, errIndex, varBinds = next(
+                getCmd(SnmpEngine(),
+                       CommunityData(community, mpModel=0),
+                       UdpTransportTarget((hostname, port)),
+                       ContextData(),
+                       ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))
+                       )
+                )
 
-        if errInd:
-            print(errInd)
-        elif errName:
-            print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+            if errInd:
+                print(errInd)
+            elif errName:
+                print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+            else:
+                cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
+                print(cpuIdle + "%")
         else:
-            cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
-            print(cpuIdle + "%")
+            print("skip")
+
 
         print("\tMem\t\t", end = '')
-        errInd, errName, errIndex, varBinds = next(
-            getCmd(SnmpEngine(),
-                   CommunityData(community),
-                   UdpTransportTarget((hostname, port)),
-                   ContextData(),
-                   ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))
-                   )
-            )
-        
-        if errInd:
-            print(errInd)
-        elif errName:
-            print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        if ucdMemAvail:
+            errInd, errName, errIndex, varBinds = next(
+                getCmd(SnmpEngine(),
+                       CommunityData(community, mpModel=0),
+                       UdpTransportTarget((hostname, port)),
+                       ContextData(),
+                       ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))
+                       )
+                )
+            
+            if errInd:
+                print(errInd)
+            elif errName:
+                print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+            else:
+                memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
+                print(memAvail + "/" + memTotal + " KB")
         else:
-            memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
-            print(memAvail + "/" + memTotal + " KB")
+            print("skip")
 
