@@ -20,7 +20,28 @@ else:
     print("Requesting...")
     hostname = sys.argv[2]
     community = sys.argv[1]
-####
+
+# hostname
+    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, 161)), ContextData(), ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0'))))
+
+    if errInd:
+        print(errInd)
+    elif errName:
+        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+    else:
+        targetname = varBinds[0].prettyPrint().split("=")[1].strip()
+        print("Target =\t" + targetname)
+
+# hostname
+    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, 161)), ContextData(), ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0'))))
+
+    if errInd:
+        print(errInd)
+    elif errName:
+        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+    else:
+        target = varBinds[0].prettyPrint().split("=")[1].strip()
+        print("Host =\t\t" + target)
 
 # ssCpuIdle
     errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, 161)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))))
