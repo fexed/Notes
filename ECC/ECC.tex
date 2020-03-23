@@ -554,78 +554,130 @@ Inoltre, come già detto, $I$ è ricorsiva primitiva $\Leftrightarrow$ $\chi_I$ 
 \pagebreak
 \section{Tesi di Church-Turing}
 \textbf{Le funzioni intuitivamente calcolabili sono tutte e sole le T-calcolabili}.\\
-In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di dimenticarci il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa \textit{classe}. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché un algoritmo è equivalente qualsiasi sia il linguaggio in cui è scritto.\\\\
-$\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo}. Per esempio da M$_i$ (con M Macchina di Turing).\\
-$\phi_i$ è funzione, quindi semantica.\\
-M$_i$ è algoritmo, quindi sintassi.\\
-Può succedere che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (ad esempio \texttt{while(true) do skip} e \texttt{while(true) do skip;skip})
-
-\section{•}
-MdT $=_T$ \texttt{while} $=_T$ $\mu$-ricorsive\\
-Grazie all'\textbf{enumerazione} di G\"{o}del, scrivo $\phi_i$ come la funzione calcolata dall'algoritmo $M_i$\\
-D'ora in avanti parliamo solo di funzioni calcolabili, quindi $\phi_i$ \textit{è} calcolabile.\\
-$\exists$? funzione calcolabile totale $t(i, n)$ che maggiora il tempo di calcolo di M$_i$(n)? No. Vediamo come dimostrarlo, introducendo una diagonalizzazione.\\
+In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di non considerare il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa \textit{classe di elementi}. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché grazie a questa tesi possiamo dire che un algoritmo è equivalente qualsiasi sia il linguaggio in cui è scritto.
+\subsection{Risultati}
+Indichiamo con $\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo} M$_i$
+\begin{list}{}{}
+	\item $\phi_i$ è funzione $\rightarrow$ \textbf{semantica}
+	\item M$_i$ è algoritmo $\rightarrow$ \textbf{sintassi}
+\end{list}
+Può succedere per $i \neq j$ che $\phi_i = \phi_j$ ma M$_i \neq$ M$_j$ (ad esempio \texttt{while(true) do skip} e \texttt{while(true) do skip;skip}).
+\begin{center}
+T-calcolabili $=$ \texttt{while}-calcolabili $=$ $\mu$-calcolabili
+\end{center}
+D'ora in avanti parliamo solo di funzioni calcolabili, quindi $\phi_i$ \textit{è} calcolabile.
+\paragraph{Tempo di calcolo} $\exists$? una funzione calcolabile totale $t(i, n)$ che maggiora il tempo di calcolo di M$_i$(n)? No. Vediamo come dimostrarlo, introducendo una \textbf{diagonalizzazione}.\\
 $t(i, n)$ = \begin{math}
 \left\{
 \begin{array}{c c}
-	k & \textsl{se} M_i(n)\downarrow converge in meno di i passi\\
-	0 & altrimenti
+	k & \textsl{se }M_i(n)\downarrow \textsl{in meno di }i\textsl{ passi}\\
+	0 & \textsl{altrimenti}
 \end{array}
 \right.
 \end{math}\\
-Sia T$_i$ la misura \textbf{esatta} del tempo di calcolo di M$_i$\\
-T$_i$(n) $\leq$ $t(i, n)$ è calcolabile totale.\\
-$T_x(x)$ tempo di calcolo effettivo, $t(x, x)$ tempo stimato\\
+Sia T$_i$ la misura \textbf{esatta} del tempo di calcolo di M$_i$. T$_i$(n) $\leq$ $t(i, n)$ è calcolabile totale e $T_x(x)$ \textbf{tempo di calcolo effettivo}, $t(x, x)$ \textbf{tempo di calcolo stimato}\\
 $\psi(x) = $
 \begin{math}
 \left\{
 \begin{array}{c c}
-	\phi_x(x) + 1 & T_x(x) \leq t(x, x)\\
-	0 & altrimenti
+	\phi_x(x) + 1 & \textsl{se }T_x(x) \leq t(x, x)\\
+	0 & \textsl{altrimenti}
 \end{array}
 \right.
 \end{math}\\
-Quindi $\psi$ è calcolabile totale.\\
-Applico church-turing, quindi $\phi_i(i) = \psi(i) =$ \begin{math}
+Quindi anche $\psi$ è calcolabile totale. Applico Church-Turing, quindi $\phi_i(i) = \psi(i) =$ \begin{math}
 \left\{
 \begin{array}{c c}
-	\phi_i(i) + 1 & T_i(i) \leq t(i, i)\\
-	0 & altrimenti
+	\phi_i(i) + 1 & \textsl{se }T_i(i) \leq t(i, i)\\
+	0 & \textsl{altrimenti}
 \end{array}
 \right.
 \end{math}\\
-Ma siccome $\phi_i$ calcolabile totale, non può essere che quando termina sia $\phi_i(i) = \phi_i(i) + 1$, \textbf{assurdo}.\\Quindi $t(i, n)$ non è calcolabile totale, non c'è modo di stimare il tempo di calcolo.\\\\
-Per lo stesso motivo non possiamo imporre limiti allo spazio.\\
-$\exists$? funzione calcolabile totale che dato M$_i$, $x$ dice quante celle di memoria uno specifico calcolatore C userà per calcolare M$_i(x)$?\\
+Ma siccome $\phi_i$ è calcolabile totale, non può succedere che, quando termina, sia $\phi_i(i) = \phi_i(i) + 1$, \textbf{è un assurdo}. Quindi $t(i, n)$ non è calcolabile totale, di conseguenza \textbf{non c'è modo di stimare il tempo di calcolo}.\\
+Per lo stesso motivo non possiamo imporre limiti allo spazio.
+\paragraph{Spazio di calcolo} $\exists$? una funzione calcolabile totale che dato M$_i$, $x$ dice quante celle di memoria uno specifico calcolatore C userà per calcolare M$_i(x)$?\\
 $h(i, x) = $\begin{math}
 \left\{
 \begin{array}{c c}
-	1 & se M_i(x)\uparrow (su C)\\
-	0 & altrimenti
+	1 & \textsl{se }M_i(x)\uparrow (\textsl{su }C)\\
+	0 & \textsl{altrimenti}
 \end{array}
 \right.
 \end{math}\\
-Sia n la cardinalità di $\Sigma$ e m-1 cardinalità di Q e le celle di C sono $k$, posso scrivere $n^k$ stringhe diverse. Il cursore può stare su $k$ posizioni diverse e la macchina in $m$ stati diversi.\\
-Il numero massimo di configurazioni (stato con posizione cursore e stringa su nastro) diverse è  $l = n^k \cdot k \cdot m$, con $n^k$ nastro scritto, $k$ è posizione del cursore e $m$ stati ($m - 1$ + $1$ per lo stato $h$ di halt)\\
-Dopo $l$ passi la configurazione si ripete. Si può dire che la macchina è in ciclo. Quindi ho una contraddizione? Siccome la macchina attraversa un numero finito di config sup lim da $l$, se la macchina non si è arrestata prima di $l$ passi se ritrovo una config di prima la ritroverò, quindi non terminerà mai. Ho dimostrato che $h$ è calc tot, ma posso scrivere quindi $t$ della dim precedente, ma giungo all'assurdo. Quindi non posso mettere un limite al nastro.
+Sia $n$ la cardinalità di $\Sigma$, $m - 1$ cardinalità di $Q$ e $k$ il numero di celle di C.\\
+Posso quindi scrivere $n^k$ \textbf{stringhe diverse}: il cursore può stare su $k$ posizioni diverse e la macchina in $m$ stati diversi.\\
+Il \textbf{numero massimo di configurazioni diverse} (stato con posizione del cursore e stringa su nastro) è  $l = n^k \cdot k \cdot m$, con $n^k$ possibilità di nastro scritto, $k$ possibili posizioni del cursore e $m$ stati ($m - 1$ + $1$ per lo stato $h$ di \textbf{halt})\\
+Dopo $l$ passi, quindi, la configurazione si ripete necessariamente. Si può dire che \textbf{la macchina è in loop}.\\
+Siccome la macchina attraversa un \textbf{numero finito di configurazioni superiormente limitato da} $l$, se la macchina non si è arrestata prima di $l$ passi allora troverò per forza una configurazione già vista in precedenza, che mi porterà in una configurazione già vista e così via. \textbf{Quindi non terminerà mai}.\\
+Ho dimostrato che $h$ è calcolabile totale, ma posso scrivere quindi $t$ come nella dimostrazione precedente, ma giungo all'assurdo già visto. \textbf{Quindi non posso mettere un limite al nastro.}
+\pagebreak
+
+I seguenti risultati sono \textbf{invarianti rispetto all'enumerazione scelta}.
 \subsection{Teorema 1: Le Funzioni Calcolabili sono tante quante i numeri naturali}
 Le $f$ calcolabili sono \#$N$. Anche le $f$ calcolabili totali sono \#$N$.\\
 Esistono funzioni \textit{non} calcolabili, molte di più di quelle calcolabili.
-\paragraph{Dimostrazione} Non sono più di \#$N$ perché posso calcolare le macchine di Turing. Almeno \#$N$ perché posso costruire una macchina che per qualsiasi input lascia un numero naturale sul nastro, quindi di queste ce ne sono almeno quanti sono i numeri naturali.
-%TODO
-\subsection{Teorema 2: Ogni funzione calcolabile $\phi_i$ ha infiniti indici}
-Non solo, posso costruire A$_i$ tale che per ogni j in A$_i$ $\phi_j = \phi_i$ mediante una funzione ricorsiva primitiva\\
-\paragraph{Dimostrazione} Sia $M_i$ un programma P. Prendo P;skip, poi P;skip;skip\ldots metto tanti ;skip quanti voglio. Posso generare un numero infinito di programmi che calcolano tutti la stessa funzione.
+\paragraph{Dimostrazione} Non sono più di \#$N$ perché posso calcolare le macchine di Turing. Almeno \#$N$ perché posso costruire una macchina che per qualsiasi input lascia un numero naturale sul nastro, quindi di queste ce ne sono almeno quanti sono i numeri naturali.\\\\
+Quindi indichiamo con $\phi_i$ la funzione (in generale, parziale) calcolata dall'algoritmo M$_i$ e $i$ \textbf{indice della macchina}. Come detto prima, può darsi che per $i \neq j$ sia $\phi_i = \phi_j$ ma sicuramente M$_i \neq$ M$_j$.
+\subsection{Teorema 2: Ogni funzione calcolabile $\phi_i$ ha infiniti (numerabili) indici}
+Anche detto \textbf{padding lemma}.\\
+Non solo, posso costruire un insieme infinito di indici A$_i$ tale che $\forall\:j$ in A$_i$ $\phi_j = \phi_i$ mediante una funzione ricorsiva primitiva.
+\paragraph{Dimostrazione} Sia $M_i$ un programma \texttt{P}. Prendo \texttt{P;skip}, poi \texttt{P;skip;skip}\ldots metto tanti \texttt{;skip} quanti voglio. Posso generare un numero infinito di programmi che calcolano tutti la stessa funzione.
 \subsection{Teorema 3: Forma Normale}
-Prendendo algoritmo posso riscriverlo in una \textbf{forma canonica}/\textbf{normale}, che non è per forza migliore ma è una forma specifica.\\
-$\exists$ predicato $T(i, x, y)$ e una funzione $U(y)$ ricorsive primitive tali che ogni funzione calcolabile $i$, $x$ $\phi_i(x)$ = $\mu$y.[$U(T(i, x, y))$]\\
-\textbf{Corollario}: tutte le funzioni T-calcolabili sono anche $\mu$-calcolabili. Non solo, ma $\mu$y corrisponde al while, e T, U a due programmi \texttt{for}. Quindi ogni funzione calcolabile può essere ottenuta da due programmi scritti con il linguaggio \texttt{for} ed una sola applicazione del linguaggio \texttt{while}.
+Prendendo un qualsiasi algoritmo, posso riscriverlo in una \textbf{forma canonica}/\textbf{normale}, che non è per forza migliore ma è una forma specifica e da noi \textbf{privilegiata}.\\
+$\exists$ un predicato $T(i, x, y)$ e una funzione $U(y)$ ricorsive primitive calcolabili totali tali che $\forall$ funzione calcolabile $i$, $x$.$\phi_i(x)$ = $\mu$y.[$U(T(i, x, y))$]\\
+\textbf{Corollario}: tutte le funzioni T-calcolabili sono anche $\mu$-calcolabili. Non solo, ma $\mu$y corrisponde al \texttt{while}, e $T$, $U$ a due programmi \texttt{for}. Quindi ogni funzione calcolabile può essere ottenuta da due programmi scritti con il linguaggio \texttt{for} ed una sola applicazione del linguaggio \texttt{while}.
 \paragraph{Dimostrazione} Devo costruire il predicato T e la funzione U.\\
-%TODO
-T come predicato di Kleane: T(i, x, y) vero sse y è la codifica di una computazione di M$_i$(x) terminante\\
-Quando trovo tale y pongo U(y) = w. C'è un solo $y$ nelle macchine deterministiche, se c'è.
+$T = (i, x, y)$ è detto \textbf{predicato di Kleene} ed è \textbf{vero $\Leftrightarrow$ $y$ è la codifica di una computazione di M$_i$($x$) terminante}.\\
+Per calcolare, $T$ prende $i$ e recupera M$_i$. Comincia a scandire i valori $y$, li decodifica e, uno alla volta dato $x$ ingresso, controlla se il risultato è una computazione terminante. Definisce $U$ in modo che $U(y) = z$, con $z$ risultato della computazione (ciò che rimane sul nastro della MdT corrispondente).\\
+C'è un solo $y$ nelle macchine deterministiche, se c'è.
 \subsection{Teorema 4: Teorema di enumerazione}
-Esiste z tale che per ogni i, x $\phi_z(i, x) = \phi_i(x)$, z è MdT universale. z interprete, i è programma.\\
-Fra tutti gli algoritmi che ne sono infiniti numerabili in gradi di eseguire tutti gli altri algoritmi.
-\paragraph{Dimostrazione} $\phi_i(x) = \mu y.U(T(i, x, y)$ per th 3. Questo è algoritmo, avrà indice per church-turing, diciamo $\phi_z(i, x)$ senza y come argomento perché quantificata, non libera ma legata, \textit{variabile di lavoro}. Applico transitività dell'uguaglianza e ho finito  $\phi_i(x) = \phi_z(i, x)$.
+$\exists\: z$ tale che $\forall$ $i$, $x$ $\phi_z(i, x) = \phi_i(x)$. Quindi $z$ è \textbf{MdT universale}. $z$ interprete, $i$ è programma.\\
+Fra tutti gli algoritmi, ce ne sono infiniti numerabili in grado di eseguire tutti gli altri algoritmi.
+\paragraph{Dimostrazione} $\phi_i(x) = \mu y.U(T(i, x, y)$ per il terzo teorema. Quindi $\phi_i(x)$ è un algoritmo, avrà un indice per Church-Turing che indicheremo con $z$.\\
+Diciamo $\phi_i(x) = \phi_z(i, x) = \mu y.U(T(i, x, y))$ (senza $y$ come argomento perché quantificata, non libera ma legata, una sorta di \textit{variabile di lavoro}). Applico la transitività dell'uguaglianza e ho finito, $\phi_i(x) = \phi_z(i, x)$.
+\pagebreak
+\section{Macchina di Turing Universale}
+Ottimo modello per le macchine Von Neumann.
+\paragraph{Due insiemi} Utili per la rappresentazione\\
+$Q_* = \{q_0, q_1, \ldots\} \not\ni h$, insieme numerabile ma \textbf{non è l'insieme degli stati} della MdTU ma è un insieme ausiliario.\\
+$\Sigma_* = \{\sigma_0, \sigma_1, \ldots\} \not\ni L, R, -$ insieme di simboli
+\paragraph{Codifica K} $K : Q_* \cup \{h\} \cup \Sigma_* \cup \{L, R, -\} \longrightarrow \{\:\vline\:\}^*$\\
+Ognuno degli elementi $q_i$, $\sigma_i$ ecc. viene codificato in questo modo.\\
+$h \mapsto\:\:\vline$\\
+$q_i \mapsto\:\:\vline^{i + 2}$, con la barra verticale ripetuta $i + 2$ volte\\
+$L \mapsto\:\:\vline$, $R \mapsto\:\:\vline\:\vline$, $- \mapsto\:\:\vline\:\vline\:\vline$\\
+$\sigma_i \mapsto\:\:\vline^{i + 4}$\\
+C'è un problema: $\vline\:\vline\:\vline\:\vline\:\vline$ è uno stato ($\in Q_*$) o un simbolo ($\in \Sigma_*$)? Vedremo come disambiguare.\\
+$Q_*$ contiene \textbf{tutti i possibili stati delle MdT}, e $\Sigma_*$ contiene \textbf{tutti i possibili simboli delle MdT}. Quanto visto fin'ora è ausiliario alla costruzione della MdTU.
+\paragraph{Costruzione} Prendo una MdT qualunque $M = (Q, \Sigma, \delta, s)$. Ordiniamo gli stati ed i simboli.\\
+$Q = \{q_{i_1}, q_{i_2}, \ldots, q_{i_k}\}$, finito perché gli stati sono finiti.\\
+$\Sigma = \{\sigma_{j_1}, \sigma_{j_2}, \ldots, \sigma_{j_l}\}$.\\
+Con $i_1 < i_2 < \ldots < i_k$ e $j_1 < j_2 < \ldots < j_l$. Con questo abbiamo supposto $Q$ e $\Sigma$ \textbf{totalmente ordinate}.\\
+Considero questo alfabeto: $\{\:\vline\:, c, d, \#, \triangleright\}$ con $\vline\:, c, d \not\in Q_* \cup \Sigma_*$.\\
+Adesso possiamo codificare le quintuple $\in \delta$. $\delta(q_{i_p}, \sigma_{j_q}) = (q, \sigma, D)$ con $D$ un certo simbolo di direzione ($L, R, -$). Come codificarla? Attraverso la seguente stringa
+$$s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cK(q)cK(\sigma)cK(D)c$$
+con $c$ che funge da \textbf{separatore}, \textbf{tra la codifica di uno stato e la codifica di un simbolo}.\\
+$s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cdcdcd$ se $\delta(q_{i_p}, \sigma_{i_q})$ è indefinita
+\paragraph{Esempio} $\overline{M} = \{\{q_2\}, \{\sigma_1, \sigma_3, \sigma_5\}, \delta, q_2\}$, con $i_1 = 2$, $j_1 = 1$, $j_2 = 3$, $j_3 = 5$
+\begin{list}{}{}
+	\item $q_2 \rightarrow q_{i_1}$
+	\item $\sigma_1 \rightarrow \sigma_{j_1}$
+	\item $\sigma_3 \rightarrow \sigma_{j_2}$
+	\item $\sigma_5 \rightarrow \sigma_{j_3}$
+\end{list}
+$\delta(q_2, \sigma_1) = (h, \sigma_5, -) \mapsto s_{1, 1} = c|^4c|^5c|c|^9c|^3c$ perché $K(q_2) = |^{2 + 2}$, $K(\sigma_1) = |^{1 + 4}$, $K(h) = |$, $K(\sigma_5) = |^{5 + 4}$, $K(-) = |||$ \\
+$\delta(q_2, \sigma_3) = (q_2, \sigma_1, R) \mapsto s_{1, 2} = c|^4c|^7c|^4c|^5c|^2c$\\
+$\delta(q_2, \sigma_5)$ non definita $\mapsto s_{1, 3} = c|^4c|^9cdcdcdc$
+\paragraph{Codifica della macchina $\rho$} Possiamo ora definire una funzione di "\textit{codifica}" (in realtà iniettiva, perché in fase di decodifica possiamo non trovare una M corrispondente) della macchina in esame. ($s$ senza indici è lo stato iniziale)\\
+$\rho(M) = cK(s)cs_{1,1}s_{1_2}\ldots s_{1,l}c\ldots cs_{k,1}s_{k_2}\ldots s_{k,l}c$\\
+Praticamente si mettono "in coda" tutte le codifiche dei $\delta($stato$, $simbolo$) \rightarrow s_{stato, simbolo}$, separando con $c$ il "cambio" dello stato.\\
+$\rho(M) = c <$codifica di $s>c<$codifiche dello stato $1$ per simbolo$>c\ldots c<$codifiche dello stato $k$ per simbolo$>c$\\\\
+$\rho(M(w)) = \rho(M)\tau(w)$ con $\tau(\sigma_0', \ldots, \sigma_n') = cK(\sigma_0')cK(\sigma_1')c\ldots cK(\sigma_n')c$
+\paragraph{Esempio} $\rho(\overline{M}) = c|^4c\:\:c|^4c|^5c|c|^9c|^3c\:\:c|^4c|^7c|^4c|^5c|^2c\:\:c|^4c|^9cdcdcdc\:\:c$\\\\
+Dato che $\exists\:z\:\:\vline\:\:\forall\:i,x$ si ha $\phi_z(i, x) = \phi_i(x)$, allora vogliamo che la MdTU si comporta esattamente come $\overline{M}$ quando codifica $\overline{M}$. Quindi
+\begin{list}{}{}
+	\item $(s, \underline{\triangleright}w) \longrightarrow_n^M (h, u\underline{a}v) \Rightarrow (s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_m^U (h, \tau(uav)\underline{\#})$
+	\item $(s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_n^U (h, u'a'v')$ dovrebbe succedere che $a' = \#$ e $v' = \epsilon$, ma anche che $u' = \tau(uav)$. Se succede\\$\Rightarrow (s, \underline{\triangleright}w) \longrightarrow_m^M (h, uav)$
+\end{list}
+
 \end{document}
