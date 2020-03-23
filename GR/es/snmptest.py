@@ -30,7 +30,14 @@ else:
 
 # hostname
     currtime = now.strftime("%H.%M.%S")
-    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0'))))
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0'))
+               )
+        )
 
     print(currtime + "\n")
     if errInd:
@@ -41,8 +48,15 @@ else:
         targetname = varBinds[0].prettyPrint().split("=")[1].strip()
         print(targetname)
 
-# hostname
-    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0'))))
+# hostdescr
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0'))
+               )
+        )
 
     if errInd:
         print(errInd)
@@ -54,7 +68,14 @@ else:
 
 # ssCpuIdle
     print("\tCPU\t\t", end = '')
-    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))))
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))
+               )
+        )
 
     if errInd:
         print(errInd)
@@ -66,7 +87,14 @@ else:
 
 # memTotalReal
     print("\tMem total\t", end = '')
-    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memTotalReal', 0))))
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memTotalReal', 0))
+               )
+        )
     
     if errInd:
         print(errInd)
@@ -78,7 +106,14 @@ else:
     
 # memAvailReal
     print("\tMem avail.\t", end = '')
-    errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))))
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))
+               )
+        )
     
     if errInd:
         print(errInd)
@@ -95,7 +130,14 @@ else:
         currtime = now.strftime("%H.%M.%S")
         print("\n" + str(i+1) + " (" + currtime + ")\t######")
         print("\tCPU\t\t", end = '');
-        errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))))
+        errInd, errName, errIndex, varBinds = next(
+            getCmd(SnmpEngine(),
+                   CommunityData(community),
+                   UdpTransportTarget((hostname, port)),
+                   ContextData(),
+                   ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))
+                   )
+            )
 
         if errInd:
             print(errInd)
@@ -106,7 +148,14 @@ else:
             print(cpuIdle + "%")
 
         print("\tMem\t\t", end = '')
-        errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))))
+        errInd, errName, errIndex, varBinds = next(
+            getCmd(SnmpEngine(),
+                   CommunityData(community),
+                   UdpTransportTarget((hostname, port)),
+                   ContextData(),
+                   ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'memAvailReal', 0))
+                   )
+            )
         
         if errInd:
             print(errInd)
