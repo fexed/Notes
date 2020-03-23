@@ -11,6 +11,7 @@
 # Imports
 import sys
 from time import sleep
+from datetime import datetime
 from pysnmp.hlapi import *
 
 # Params check
@@ -25,10 +26,13 @@ else:
     else:
         port = 161    
     print("Requesting " + hostname + ":" + str(port) + "\n")
+    now = datetime.now()
 
 # hostname
+    currtime = now.strftime("%H.%M.%S")
     errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0'))))
 
+    print(currtime + "\n")
     if errInd:
         print(errInd)
     elif errName:
@@ -87,7 +91,9 @@ else:
 # loop
     for i in range(5):
         sleep(1)
-        print("\n" + str(i+1) + "\t######")
+        now = datetime.now()
+        currtime = now.strftime("%H.%M.%S")
+        print("\n" + str(i+1) + " (" + currtime + ")\t######")
         print("\tCPU\t\t", end = '');
         errInd, errName, errIndex, varBinds = next(getCmd(SnmpEngine(), CommunityData(community, mpModel=0), UdpTransportTarget((hostname, port)), ContextData(), ObjectType(ObjectIdentity('UCD-SNMP-MIB', 'ssCpuIdle', 0))))
 
