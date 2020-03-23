@@ -1,12 +1,23 @@
 #!/usr/bin/python3
 
+# #####
+#
 # Documentation
 # Author: Federico Matteoni
+# This is a simple script that queries a SNMP server and
+# reads some simple informations.
 #
 # Installation
-# pip install pysnmp
+# sudo apt install python3 python3-pip
+# pip3 install pysnmp
+# 
+# Usage
+# python3 snmptest.py community hostname [port]
 #
-# Example: python snmptest.py public demo.snmplabs.com
+# Example
+# python3 snmptest.py public demo.snmplabs.com
+#
+# #####
 
 # Imports
 import sys
