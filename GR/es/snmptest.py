@@ -11,7 +11,7 @@
 # Imports
 import sys
 from time import sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 from pysnmp.hlapi import *
 
 # Params check
@@ -21,7 +21,7 @@ if len(sys.argv) < 3:
 else:
     hostname = sys.argv[2]
     community = sys.argv[1]
-    if len(sys.argv) >= 4:
+    if len(sys.argv) >= 4: #If no port is given, use the default one
         port = int(sys.argv[3])
     else:
         port = 161    
@@ -29,13 +29,13 @@ else:
     now = datetime.now()
 
 # hostname
-    currtime = now.strftime("%H.%M.%S")
+    currtime = now.strftime("%H.%M.%S") #Timestamp
     errInd, errName, errIndex, varBinds = next(
         getCmd(SnmpEngine(),
                CommunityData(community),
                UdpTransportTarget((hostname, port)),
                ContextData(),
-               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0'))
+               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.5.0')) #SNMPv2-MIB::sysName.0
                )
         )
 
@@ -54,7 +54,7 @@ else:
                CommunityData(community),
                UdpTransportTarget((hostname, port)),
                ContextData(),
-               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0'))
+               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.1.0')) #SNMPv2-MIB::sysDescr.0
                )
         )
 
@@ -65,6 +65,27 @@ else:
     else:
         target = varBinds[0].prettyPrint().split("=")[1].strip()
         print("\t" + target)
+
+# uptime
+    print("\tUptime\t", end = '')
+    errInd, errName, errIndex, varBinds = next(
+        getCmd(SnmpEngine(),
+               CommunityData(community),
+               UdpTransportTarget((hostname, port)),
+               ContextData(),
+               ObjectType(ObjectIdentity('iso.3.6.1.2.1.1.3.0')) #DISMAN-EVENT-MIB::sysUpTimeInstance
+               )
+        )
+
+    if errInd:
+        print(errInd)
+    elif errName:
+        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+    else:
+        ticks = int(varBinds[0].prettyPrint().split("=")[1].strip())
+        secs = ticks/100
+        uptimestr = timedelta(seconds=secs)
+        print("\t" + str(uptimestr) + " (" + str(ticks) + ")")
 
 # ssCpuIdle
     print("\tCPU\t\t", end = '')
