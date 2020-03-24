@@ -1566,7 +1566,55 @@ KB $\bigcup$ \{A\} $\bigcup$ \{$\neg$A\} $\vdash_{res}$ \{\} in un passo
 \paragraph{Conclusioni}
 Abbiamo visto che gli agenti KB che usano il calcolo proposizionale come linguaggio di rappresentazione possono decidere se KB $\vDash \alpha$. Il problema è decidibile ma intrattabile (NP al caso peggiore). Esistono algoritmi efficienti e completi che consentono di affrontare problemi di grosse dimensioni, ed esistono algoritmi locali particolarmente efficienti ma non completi. Oppure per via deduttiva.
 \subsection{Logica del Primo Ordine}
+%TODO ma è roba saltabile
+\subsection{Inferenza nella Logica del Prim'Ordine}
+Regole d'inferenza per $\forall$: istanziazione dell'Universale
+$$\frac{\forall\:x\:\:A[x]}{A[g]}$$
+Da $\forall\:x\:\:King(x) \wedge Greedy(x) \Rightarrow Evil(x)$ si possono ottenere
+\begin{list}{}{}
+	\item King(john) $\wedge$ Greedy (john) $\Rightarrow$ Evil(john)
+	\item King(father(john)) $\wedge$ Greedy (father(john)) $\Rightarrow$ Evil(father(john))
+\end{list}
 
+Regola per $\exists$: Istanziazione dell'Esistenziale
+$$\frac{\exists\:x\:\:A[x]}{A[K]}$$
+Se $\exists$ non compare nell'ambito di $\forall$, K è una costante nuova (costante di Skolem)\\
+Altrimenti va introdotta una funzione (di Skolem) nelle variabili quantificate universalmente
+\begin{list}{}{}
+	\item $\exists x$ Padre(x, G
+\end{list}
+\textbf{Grounding} o \textbf{proposizionalizzazione}\\
+Creao tante istanze delle formule quantif univers quanti sono oggetti menzionati\\
+Eliminare quantificatori esistenziali skolemizzando. KB diventa proposizionale e applicare algoritmi visti, ma problemi: costanti in numeri finito, ma se ci sono funzioni il numero di istanze da creare è infinito john, padre(john), padre(padre(john))\ldots
+\subsection{Teorema di Herbrand}
+Se KB soddisfa A allora c'è dim che coinvolge solo sottins finito della KB proposizionalizzata.\\
+Si può procedere incrementalmente
+\begin{list}{}{}
+	\item creo istanze co costanti
+	\item creo quelel con un solo livello di annidamento Padre(john)
+	\item creo quelle con due livelli padre(padre(j))
+\end{list}
+Se KB non soddsifa A, il processo non termina. \textbf{Semidecidibile}.
+\paragraph{Forma a clausole}
+costanti, funz, pred come definiti, escludiamo formule atomiche del tipo (t1 = t2)\\
+Una clausola è insieme di letterali (formula atomica eventualmente negata) che rappresenta la loro \textbf{disgiunzione}.
+\paragraph{Trasformazione in forma a clausole}
+th: per ogni formula chiusa alfa del FOL è possibile torvare in maniera effettiva un insieme di clasuole FC(alfa) soddisfacibile sse alfa lo era (insoddisfacibile sse alfa lo era)
+\paragraph{Esempio trasformazione}
+\textbf{skolemizzazione non preserva l'equivalenza}
+\paragraph{Unificazione} operazione con la quale si determina se due espressioni possono essere rese identiche mediante una sostituzione di temrini a variabili.\\
+riosultato è la sostituzione che rende le due espressioni dientifce, detta \textbf{unificatore}, o \textbf{FAIL} se le espressioni non sono unificabili
+\paragraph{Sostituzione} insieme finito di associazioni tra var e termini in cui ogni var compare una sola volta sulla sx. Es \{x1/A, x2/f(x3), x3/B\} significa che A va sostituita a x1, f(x3) sost a x2\ldots\\
+A sx var a dx costanti e var, con la restriz che la var sulla sx non può comparire anche sulla dx della stessa "coppia".
+\paragraph{Applicazione} Sia $\sigma$ sost e A espressione, Asigma istanza generala dalla sost (delle var con corrisp espress)\\
+In AIMA \texttt{SUBST($\sigma$, A)}. Var sostituite simultaneamente e eseguo un solo passo di sostituzione
+\paragraph{Espressioni unificabili} se esiuste sostituz che le rende identiche (unificatore).  In genere l'unificatore $\tau$ non è unico. Vorremmo l'unificatore più generale di tutti (MGU). \textbf{Teorema}: l'\textbf{unificatore più generale è unico} a meno dei nomi delle variabili (l'ordine non conta)
+\paragraph{Algoritmo di unificazione} input p,q espressioni, restituisce MGU $\Theta$ se esiste, \texttt{unify(p,q) = theta} tale che \texttt{subst(theta, p) = subst(theta, q)}, altrimenti \textbf{fail}.\\
+Esplora in parallelo le due espressioni e costruisce l'unificatore strada facendo. Fallisce non appena trova espressioni non unificabili. Una causa del fallimento sono sost del tipo x=f(x), questo controllo si chiama \textbf{occur-check}.
+\begin{center}
+	Algoritmo
+\end{center}
+\paragraph{Esempi}
 \pagebreak
 \section{Definizione e Confronto di Euristiche Ammissibili}
 \paragraph{Mondo dei blocchi} Problema classico, parte dei micromondi usati soprattutto per la pianificazione. Serie di blocchi su un tavolo impilati e vogliamo raggiungere certa config. final. Mosse sono spostare blocco su tavolo o su altro blocco, a condizione che blocco sia libero senza blocchi sopra e blocco destinazione anche.
