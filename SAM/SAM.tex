@@ -461,6 +461,49 @@ Equivalente del tasto destro. ConextMenu associati ad una particolare view. Dipe
 Alternativa ai context menu, si sovrappone visivamente all'actionbar dell'activity, ma è un oggetto separato.\\
 Si implementa con l'interfaccia \texttt{ActionMode.Callback}, con metodi analoghi a quelli per gli \texttt{OptionsMenu}.\\
 \texttt{startActionMode()} per aprire l'action bar contestuale.
+\section{Scrivere le proprie View}
+Elementi UI sono sottoclassi di view: view, viewgroup, layput, widget. organizzazione spaziale è scritta in un file xml che crea il layout, o comunque dal layoumanager.\\
+Per creare un widget è sufficiente estendere view o una delle sottoclassi. Override di due metodi pressoché essenziali:\\
+\texttt{onMeasure(in widthSpec, int heightSpec)} chiamato per negoziare le dimensioni: parametri passati sono i requisiti (dimensioni massime che può assumere) che il contenitore vuole inestigare. il metodo onmeasure \textbf{deve} fornire risposta chiamando il metodo \texttt{setMeasuredDimension(int width, int height)}\\
+\texttt{onDraw()} chiamato per disegnare l'effettiva UI\\
+Altri per gestire l'input: \texttt{onKeyDown()}, \texttt{onTouchEvent()}\ldots\\
+
+\paragraph{\texttt{widthSpec} e \texttt{heightSpec}} Hanno due componenti: modo e dimensione. 2 bit per il modo, 30 bit per la dimensione. Per estrarre valori, \texttt{getMode()} e \texttt{getSize()} di \texttt{View.MeasureSpec}.\\
+Il modo può essere \texttt{UNSPECIFIED} no vincolo, \texttt{EXACTLY} contenitore impone esattamente la dimensione data o \texttt{AT\_MOST} contenitore impone un massimo\\\\
+Quindi onmeasure guarda vincoli e risponde specificando la propria dimensione preferita. Possiamo non rispettare i vincoli, ma poi il disegno è fatto dal contenitore, quindi clipperà. \textit{Il sistema vince sempre}.\\
+Solitamente i minimi sono suggeriti, indicati dai metodi \texttt{getSuggestedMinimumHeight()} e \texttt{getSuggestedMinimumWidth()}, utili ad esempio per evitare di fare una view da toccare più piccola del dito.
+
+\paragraph{\texttt{onDraw(Canvas)}} Il Canvas è una superficie di disegno, molto più sofisticata di una bitmap: insieme di operazioni con cui disegnare. Per disegnare sul canvas si usa la Paint.\\
+Canvas include anche tutti i metodi con cui disegnare: primitive di disegno (linee, cerchi, testo\ldots), primitive per il clipping (limitare l'area e ignorare disegno fuori di essa) e matrici di trasformazione\\
+Canvas permette di indicare disegno, per poi realizzarlo successivamente
+\subparagraph{Pipeline di rendering}
+\begin{list}{}{}
+	\item Rendering di path, trasformazione secondo PathEffect (arrotondamento, tratteggio\ldots)
+	\item Rasterizzazione: alpha-channel, aliasing, filling, blurring\ldots)
+	\item Shading: trasformazione colori, gamma\ldots
+	\item Trasferimento: disegno parziale combinato con precedenti contenuti della bitmap con vari operatori
+\end{list}
+\begin{center}
+	Diagramma di flusso
+\end{center}
+\paragraph{Metodi di \texttt{Canvas}}
+\begin{list}{}{}
+	\item \textbf{Clipping}: \texttt{clipPath()}, \texttt{clipRect()}, \texttt{clipRegio()}
+	\item \textbf{Trasformazioni affini}: rotazione, scala, traslazione\ldots
+	\item \textbf{Primitive di disegno}: \texttt{drawBitmap()}, \texttt{drawLine()}\ldots
+	\item \textbf{Informative}: \texttt{getWidth()}, \texttt{isOpaque()}, \texttt{getDensity()}\ldots
+\end{list}
+Di ogni metodo ci sono tantissime varianti.
+\paragraph{\texttt{Paint}} Specifica completa di come disegnare una primitiva di Canvas: colore, dithering (se voglio colore non disponibile es: schermo e-ink, lo disegno in qualche modo con quello che ho), font, alpha, tratteggio, dimensione delle linee\ldots
+\subsection{Costruttori}
+Bisogna implementarli tutti e tre
+\begin{list}{}{}
+	\item \texttt{View(Context c)}
+	\item \texttt{View(Context c, AttributSet attr)} con attr codifica di ciò che c'è nel file xml
+	\item \texttt{View(Context c, AttributeSet attr, int stile)} applica uno \textbf{stile}
+\end{list}
+Non c'è \texttt{View()}: non è possibile istanziare View senza contesto.\\\\
+Una view ha delle proprietà grafiche e di contenuto. Serve un mezzo per ottenere il refresh della vista quando cambia la proprietà: \texttt{invalidate()}. Alla prima occasione il sistema richiama \texttt{onDraw()} e ridisegna la view.
 \chapter{Kotlin}
 Preferenza per: modernità, comodità e diminuire ulteriormente dipendenza da tecnologie proprietarie (Java)\\
 \texttt{val} da errore se compilatore trova flusso d'esecuzione possibile con due assegnamenti.
