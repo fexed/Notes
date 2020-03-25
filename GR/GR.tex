@@ -310,4 +310,30 @@ Importante sapere IP host che manda trap (potrebbe vederlo dal pacchetto UDP), p
 \texttt{sysDescr}(1) breve descrizione del sistema (stringa, \textbf{arbitraria})\\\\
 \texttt{sysObjectID}(2) identifica sia modello che costruttore, per riconoscerlo e andare nel relativo MIB o, ad esempio, mettere l'icona giusta.\\\\
 \texttt{sysUptIme}(3) da quanto è attivo l'\textbf{agent} (non è per forza identico a quello di sistema). Serve anche per poter leggere correttamente le variabili \texttt{gauge} per esempio, per fare la differenza per sapere quanto è cambiato il valore nell'ultimo minuto (ad esempio). Ma non posso aspettarmi che il nuovo valore sia maggiore (es: è saltata la corrente, oppure se il contatore ha fatto wrap (fine dei bit e ripartito da 0)) Quindi devo distinguere riavvio agent da wrap, non posso fare semplice differenza perché potrei tirare fuori numero sbagliato (es negativo, ma valore \texttt{unsigned} fa diventare grandissimo). Per sapere se si è riavviato agent o se contatore ha fatto wrap uso \texttt{sysUpTime}.
+\chapter{Rete Cellulare}
+GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella.\\
+Create session crea la connessione e la stabilisce.\\
+Protocollo GTP inoltre negozia i \textbf{tunnel}: permettono che cambiando cella cambiano i parametri della connessione ma la comunicazione rimane. Pacchetti incapsulati in tunnel GTP, io continuo a vedere il mio ip verso l'esterno e percepisco come se fosse rete fissa.\\\\
+Traffico è incapsulato dentro il pacchetto GTP.
+\chapter{RRDtool}
+\section{RRDtool Database}
+I db relaz hanno tabelle connesse con relazioni\ldots con inserimento, cancellazione e aggiornamento. Questo non è abbastanza. Inoltre su uso questo modo la tabella cresce all'infinito, durante il monitoraggio\\
+Poi DB relaz non efficienti nel fare aggregazione nel tempo dei valori. Inoltre, i dati più vecchi diventano via via meno importanti.
+\paragraph{RRDtool} Padre di tanti DB a sede temporale. RR=Round Robin. RRD è un \textbf{file}, in un formato particolare:
+\begin{list}{}{}
+	\item \textbf{Static Header} che indica cosa contiene, ultimo timestamp di aggiunta e ultimo dato aggiunto\ldots
+	\item \textbf{Live Header}
+	\item \textbf{Round Robin Archive}
+	\item \textbf{Round Robin Archive}
+	\item \ldots altri RRA
+\end{list}
+\paragraph{RRD} Array circolare con numero fisso di slot di storage.
+\begin{center}
+	\includegraphics[scale=0.7]{rrdtool_rr.png}
+\end{center}
+\paragraph{Data Source} Qualsiasi cosa con numeri.
+\paragraph{Sconosciuto} Come gestire \texttt{UNKNOWN}? Unknown non è 0, è contagioso (1+unknown = unknown). RRDtool gestisce gli unknown, configurabile quanto unknown ignorare (default: 50\%)
+\paragraph{Archivi multipli} Tieni i dati pronti alle giuste risoluzioni\\
+Media su 5 minuti per un giorno.
+Massimo su 1h per un mese
 \end{document}
