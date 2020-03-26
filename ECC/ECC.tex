@@ -679,5 +679,68 @@ Dato che $\exists\:z\:\:\vline\:\:\forall\:i,x$ si ha $\phi_z(i, x) = \phi_i(x)$
 	\item $(s, \underline{\triangleright}w) \longrightarrow_n^M (h, u\underline{a}v) \Rightarrow (s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_m^U (h, \tau(uav)\underline{\#})$
 	\item $(s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_n^U (h, u'a'v')$ dovrebbe succedere che $a' = \#$ e $v' = \epsilon$, ma anche che $u' = \tau(uav)$. Se succede\\$\Rightarrow (s, \underline{\triangleright}w) \longrightarrow_m^M (h, uav)$
 \end{list}
-
+\subsection{Teorema del parametro}
+$\exists$ $s$ calcolabile, totale, iniettiva $\vline$ $\forall$ $i$, $x$, $y$ $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$\\
+Ottimo strumento per dimostrare diversi risultati. Ma l'utilizzo più importante è un altro. Quando scriviamo un programma che deve ordinare un vettore %TODO
+\paragraph{Dimostrazione} Dato $i$ trova M$_i$, attraverso una funzione ricorsiva primitiva grazie al teorema di codifica.\\
+Scrivi $x$ sul nastro di M$_i$ cioè prepara la configurazione iniziale (q$_0$, $\underline{\triangleright}x$).\\
+Questo è un algoritmo, quindi ha indice per C-T. Diciamo che l'indice è $n = s(i, x)$. $s$ è calcolabile totale, e $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$ è vera.\\
+Per l'iniettività? Da $n$ genero diversi indici $i$ di macchine che calcolano la stessa funzione. Appena trovo un indice che non avevo già visto e maggiore di quelli già visti, lo uso per porlo come indice della funzione che sto costruendo.
+%TODO formulazione a vettore
+\subsection{Teorema di Espressività}
+Un formalismo F è Turing-Equivalente $\Leftrightarrow$ 
+\begin{list}{}{}
+	\item ha un algoritmo universale (Teorema di Enumerazione)
+	\item e ha il teorema del parametro
+\end{list}
+%TODO esempio
+Supponiamo programma che calcola prodotto con somme successive
+\begin{verbatim}
+P := 0;
+while y > 0
+	P := P + w;
+	y := y - 1;
+end
+\end{verbatim}
+Abbiamo sicuramente bisogno della semantica del linguaggio, perché definisce perfettamente l'interprete.\\
+Primo passo dell'interprete: scopre \texttt{;} e legge ciò che sta prima e dopo.\\
+\texttt{P} non è parametro, quindi scrive sul nastro d'uscita \texttt{P := 0;}. Valuta il \texttt{while}. \texttt{y} è parametro, lo legge e verifica che è maggiore di 0, quindi legge
+\begin{verbatim}
+P := P + w;
+y := y - 1;
+while ...
+\end{verbatim}
+Per valutare dove va il while deve valutare il resto, per valutare il resto (le prime due istr) deve valutare la prima. Scrive in uscita \texttt{P := P + w;} e rimane
+\begin{verbatim}
+y = y - 1;
+while ...
+\end{verbatim}
+Quindi $\sigma(y) = 2$ adesso vale $\sigma'(y) = 1$ quindi diventa
+\begin{verbatim}
+while y > 0
+P := P + w;
+y := y - 1;
+\end{verbatim}
+che valutata la guardia diventa
+\begin{verbatim}
+P := P + w;
+y := y - 1;
+while ...
+\end{verbatim}
+Scrive sul nastro \texttt{P := P + w;}\\
+\ldots\\
+%TODO
+Sul nastro c'è \texttt{P := 0; P := P + w; P := P + w;}, che è il programma specializzato.
+\subsection{Teorema di Ricorsione/Kleene 2}
+Operazioni che si possono fare sugli algoritmi che ci lasciano all'interno delle funz calc.\\
+$\forall$ $f$ calcolabile totale $\exists$ $n$ $\vline$ $\phi_n = \phi_{f(n)}$. Posso trasformare il mio programma in maniera da ottenerne uno perfettamente equivalente.\\\\\\
+$\psi(u, z) = \left\{
+\begin{array}{c c}
+	\phi_{\phi_u(u)}(z) & \textsl{se } \phi_u(u)\downarrow\\
+	\textsl{indefinita} & \textsl{altrimenti}
+\end{array}
+\right.$
+$\psi$ è calcolabile, quindi per C-T ha un indice $\psi(u, z) = \phi_{s(i, u)}(z) = \phi_i(u, z)$ e posso applicare il teorema del parametro $= \phi_{d(u)}(z)$ con $d(u) = \lambda u.s(i, u)$ calcolabile totale e iniettiva e indipendente da $f$. Ma $f$ è calcolabile totale, quindi anche $f(d(x))$ è calcolabile totale. Quindi ha indice per C-T $= \phi_v(x)$.\\
+Quindi $\phi_{d(v)} = \phi_{\phi_v(v)}$\\
+$d(v) = n$ e $d$ è iniettiva quindi $\phi_n = \phi_{d(v)} = \phi_{\phi_v(v)} = \phi_{f(d(v))} = \phi_{f(n)}$ quindi $n$ è punto fisso.
 \end{document}
