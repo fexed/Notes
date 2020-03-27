@@ -1615,7 +1615,6 @@ Esplora in parallelo le due espressioni e costruisce l'unificatore strada facend
 	Algoritmo
 \end{center}
 \paragraph{Esempi}
-\pagebreak
 \section{Definizione e Confronto di Euristiche Ammissibili}
 \paragraph{Mondo dei blocchi} Problema classico, parte dei micromondi usati soprattutto per la pianificazione. Serie di blocchi su un tavolo impilati e vogliamo raggiungere certa config. final. Mosse sono spostare blocco su tavolo o su altro blocco, a condizione che blocco sia libero senza blocchi sopra e blocco destinazione anche.
 \subparagraph{Euristica H1} Numero di blocchi appoggiati su blocco sbagliato (incluso tavolo)
@@ -1623,5 +1622,89 @@ Esplora in parallelo le due espressioni e costruisce l'unificatore strada facend
 \subparagraph{Sono ammissibili?} Sono ammissibili se servono almeno Hi mosse per giungere in stato goal. H2 è più accurata perché domina H1, valore più alto per ogni stato possibile. Questo perché H2 $\Rightarrow$ H1, i blocchi contati in H1 vengono contati anche in H2, ma H2 ha casi non contati da H1.\\
 Per trovare euristica bisogna contare quanto dista soluzione e usare questa come euristica.\\
 Euristica = n ammissibile se servono almeno n mosse per arrivare in stato finale, $\geq$ 0 ovunque ma $=$ 0 solo in stati goal.
+
+\chapter{Strategie di risoluzione}
+Abbiamo visto metodi di risoluzione KB in forma clausole unificazione e regola srisoluzione (estensioen rispetto regola PROP)\\
+\textbf{Come rendere più efficiente il meccanismo di risoluzione}? Strategie di risoluzione: tecniche per esplorare in maneira efficiente grafo di risoluzione, possibili,ente senza perderee completezza.\\
+Un percorso che ci proterà a giustificare i sistemi a regole e le restrizionei del FOL associate.
+\section{Strategia di risoluzione}
+Distinzione tra 
+	\begin{list}{}{}
+		\item strategia di cancellazione: ci sono clausole da eliminare?
+		\item strategia di restrizione: posso usare ad ogni passo solo alcune clausole?
+		\item strategia di ordinamento: posso risolvere i letterali in un ordine specifico?
+	\end{list}
+Tutto possibilmente senza perdere completezza
+\subsection{Strategie di Cancellazione}
+Rimuovere dalla KB clausole che non saranno mai utili nel processo di risoluzione
+\begin{list}{}{}
+	\item \textbf{Clausole con Letterali Puri}\\
+	Letterali che non hanno il loro negato nella KB\\
+	%TODO esempio
+	Non potranno mai essere risolte con altre clausole per ottenere \{\}, tanto vale eliminarle\\
+	Non si perdono soluz
+	\item \textbf{Tautologie}\\
+	Clausole con due letterali identici e complementari\\
+	%TODO esempio
+	Non basta che siano unificabili e di segno opposto\\
+	%TODO esempio
+	Tautologie possono essere generate quindi controllo da fare ad ogni passo
+	\item \textbf{Clausole Sussunte}\\
+	Sussunte (implicate)\\ %TODO esempio
+	In generale a sussume b se esiste sigma asigma in b\\
+	Se un'istanta di a con la sostituzione sigma è un sottoninsieme di b\\
+	b può essere ricavata da a, quindi b può essere eliminata senza perdere soluzioni. Clausole sussunte possono essere generate.
+\end{list}
+\pagebreak
+\subsection{Strategie di Restrizione}
+Ad ogni passo si sceglei tra un sottoinsieme di possibili clausole
+\begin{list}{}{}
+	\item \textbf{Risoluzione unitaria}\\
+	Almeno una delle due clasuole è unitaria (un solo letterale)\\
+	%TODO esempio
+	Converge molto rapidamente, perché ad ogni passo si elimina una clausola\\
+	Facile da implementare\\
+	Ma non è completa\\ %TODO esempio
+	Completa per \textbf{clausole di Horn}: clausole con \textbf{al più} un letterale positivo
+	\item \textbf{Risoluzione lineare}\\
+	Prendo ultima clausola generata con una clausola da input (della KB iniziale), oppure una clausola antenata\\
+	%TODO esempio
+	\item \textbf{Risoluzione guidata dal goal}/da insieme di supporto (sottonsieme della KB responsabile dell'insoddisfacibilità)\\
+	ALmeno una delle due clausole appartiene a questo insieme o a suoi discendenti\\
+	Tipicamente, assumendo la KB iniziale consistente, si csceglie come insieme di supporto iniziale il negato del goal. È come procedere all'indietro dal goal. Strategia completa, per la refutazione.\\
+	%TODO esempio
+\end{list}
+%TODO
+\subsection{Sottoinsieme a regole del FOL}
+\paragraph{Clausole di Horn \textit{definite}} Clausole con \textbf{esattamente} un letterale positivo.\\
+Possno essere riscritte come fatti e regole\\ %TODO esempio
+Una \textbf{KB a regole} %TODO esempio
+\subsection{Sistemi a regole logici}
+Se la kb contiene solo clausole horn dfefiniti i meccanismi inferenziali sono più semplici, processo moltop iù guiodato senza rincuniare alla compeltezza: risolutori in tempo lineare per il caso proposizionale. Nota: è restrittivo e non coincide né con PROP né con FOL.
+\paragraph{Uso delel regole in avanti e indietro} %TODO scrivere
+\begin{list}{}{}
+	\item \textbf{Backward Chaining}\\
+	PROLOG ha kb a regole e procede applicando regole in avanti o indietro
+	\item \textbf{Forward Chaining}
+\end{list}
+\subsection{Programmazione Logica}
+programmi logici sono kb costituiti di clausole horn definite, espressi come fatti e regole con sintassi alternativa %TODO esempio
+\\
+altre convenzioni: in PL le variabili sono indicate con le letterel amisucole e le costanti con le lettere minuscole\\
+Rappresentazione del goal
+\begin{list}{}{}
+	\item %TODO
+\end{list}
+\begin{list}{}{}
+	\item Interpretazione dichiarativa
+	\item Interpretazione procedurale
+\end{list}
+\subsection{Risoluzione SLD}
+\paragraph{Selection Linear Definit-Clauses} strat lienare ordinata basata su un insieme di supporto (clausola goal), lineare nell'input. SLD è completa per clausole di horn.
+\paragraph{Alberi di Risoluzione SLD}
+Albero SLD per il goal \texttt{antenato(lia, mark)}\\ %TODO
+\paragraph{Strategia di visita dell'albero sld e prolog}
+Prolog genera albero di risoluzione con ricerca in profondità e backtracking su fallimento quindi non è una strat completa. PRogrammatore ha possibile di controlalre ordine di generazione perché regole applicate nell'ordine in cui sono scritte nel file.\\
+%TODO esempio
 
 \end{document}
