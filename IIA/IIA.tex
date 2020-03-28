@@ -1568,53 +1568,138 @@ Abbiamo visto che gli agenti KB che usano il calcolo proposizionale come linguag
 \subsection{Logica del Primo Ordine}
 %TODO ma è roba saltabile
 \subsection{Inferenza nella Logica del Prim'Ordine}
-Regole d'inferenza per $\forall$: istanziazione dell'Universale
+\paragraph{Regole d'inferenza per $\forall$} Istanziazione dell'Universale
 $$\frac{\forall\:x\:\:A[x]}{A[g]}$$
-Da $\forall\:x\:\:King(x) \wedge Greedy(x) \Rightarrow Evil(x)$ si possono ottenere
+Da $\forall\:x\:\:\textsl{King}(x) \wedge \textsl{Greedy}(x) \Rightarrow \textsl{Evil}(x)$ si possono ottenere
 \begin{list}{}{}
-	\item King(john) $\wedge$ Greedy (john) $\Rightarrow$ Evil(john)
-	\item King(father(john)) $\wedge$ Greedy (father(john)) $\Rightarrow$ Evil(father(john))
+	\item King(John) $\wedge$ Greedy (John) $\Rightarrow$ Evil(John)
+	\item King(Father(John)) $\wedge$ Greedy(Father(John)) $\Rightarrow$ Evil(Father(John))
 \end{list}
 
-Regola per $\exists$: Istanziazione dell'Esistenziale
-$$\frac{\exists\:x\:\:A[x]}{A[K]}$$
-Se $\exists$ non compare nell'ambito di $\forall$, K è una costante nuova (costante di Skolem)\\
-Altrimenti va introdotta una funzione (di Skolem) nelle variabili quantificate universalmente
+\paragraph{Regola d'inferenza per $\exists$} Istanziazione dell'Esistenziale
+$$\frac{\exists\:x\:\:A[x]}{A[k]}$$
+Se $\exists$ non compare nell'ambito di $\forall$, K è una costante nuova (\textbf{costante di Skolem}). Altrimenti va introdotta una funzione (\textbf{di Skolem}) nelle variabili quantificate universalmente
 \begin{list}{}{}
-	\item $\exists x$ Padre(x, G
+	\item $\exists\: x\:\:\textsl{Padre}(x, G)$ diventa $\textsl{Padre(k, G)}$
+	\item $\forall\: x\:\:\exists\: y\:\:\textsl{Padre}(x, y)$ diventa $\forall\: x\:\:\textsl{Padre(x, p(x))}$ \textbf{e non} $\forall\: x\:\:\textsl{Padre}(x, k)$ altrimenti tutti avrebbero lo stesso padre
 \end{list}
-\textbf{Grounding} o \textbf{proposizionalizzazione}\\
-Creao tante istanze delle formule quantif univers quanti sono oggetti menzionati\\
-Eliminare quantificatori esistenziali skolemizzando. KB diventa proposizionale e applicare algoritmi visti, ma problemi: costanti in numeri finito, ma se ci sono funzioni il numero di istanze da creare è infinito john, padre(john), padre(padre(john))\ldots
+\paragraph{Grounding} Anche detto \textbf{proposizionalizzazione}: creo tante istanze delle formule quantificate universalmente quanti sono gli oggetti menzionati ed elimino i quantificatori esistenziali \textbf{skolemizzando}.\\
+La KB diventa proposizionale e possiamo applicare gli algoritmi visti. Sorgono dei problemi: le costanti sono in numero finito, ma \textbf{se ci sono delle funzioni il numero delle istanze da creare diventa infinito} (John, Padre(John), Padre(Padre(John)),\ldots)
 \subsection{Teorema di Herbrand}
-Se KB soddisfa A allora c'è dim che coinvolge solo sottins finito della KB proposizionalizzata.\\
-Si può procedere incrementalmente
+Se KB $\vDash$ A $\Rightarrow$ \textbf{c'è una dimostrazione che coinvolge solo un sottoinsieme finito della KB proposizionalizzata}.\\
+Si può procedere in modo incrementale
 \begin{list}{}{}
-	\item creo istanze co costanti
-	\item creo quelel con un solo livello di annidamento Padre(john)
-	\item creo quelle con due livelli padre(padre(j))
+	\item Creo le istanze con le costanti
+	\item Creo quelle con un solo livello di annidamento: Padre(John), Madre(John)
+	\item Creo quelle con due livelli di annidamento: Padre(Padre(John)), Padre(Madre(John)), Madre(Padre(John)), Madre(Madre(John))
 \end{list}
-Se KB non soddsifa A, il processo non termina. \textbf{Semidecidibile}.
+Se KB $\not\vDash$ A, il processo non termina $\Rightarrow$ \textbf{semidecidibile}.
+\subsection{Regola di risoluzione per il FOL}
+Abbiamo visto la regola di risoluzione per il PROP, un metodo deduttivo corretto e completo con un'unica regola. Possiamo estenderla al FOL? Si, ma per definirla dobbiamo estendere al FOL la trasformazione in forma a clausole e introdurre il concetto di unificazione.
+\pagebreak
 \paragraph{Forma a clausole}
-costanti, funz, pred come definiti, escludiamo formule atomiche del tipo (t1 = t2)\\
-Una clausola è insieme di letterali (formula atomica eventualmente negata) che rappresenta la loro \textbf{disgiunzione}.
-\paragraph{Trasformazione in forma a clausole}
-th: per ogni formula chiusa alfa del FOL è possibile torvare in maniera effettiva un insieme di clasuole FC(alfa) soddisfacibile sse alfa lo era (insoddisfacibile sse alfa lo era)
-\paragraph{Esempio trasformazione}
-\textbf{skolemizzazione non preserva l'equivalenza}
-\paragraph{Unificazione} operazione con la quale si determina se due espressioni possono essere rese identiche mediante una sostituzione di temrini a variabili.\\
-riosultato è la sostituzione che rende le due espressioni dientifce, detta \textbf{unificatore}, o \textbf{FAIL} se le espressioni non sono unificabili
-\paragraph{Sostituzione} insieme finito di associazioni tra var e termini in cui ogni var compare una sola volta sulla sx. Es \{x1/A, x2/f(x3), x3/B\} significa che A va sostituita a x1, f(x3) sost a x2\ldots\\
-A sx var a dx costanti e var, con la restriz che la var sulla sx non può comparire anche sulla dx della stessa "coppia".
-\paragraph{Applicazione} Sia $\sigma$ sost e A espressione, Asigma istanza generala dalla sost (delle var con corrisp espress)\\
-In AIMA \texttt{SUBST($\sigma$, A)}. Var sostituite simultaneamente e eseguo un solo passo di sostituzione
-\paragraph{Espressioni unificabili} se esiuste sostituz che le rende identiche (unificatore).  In genere l'unificatore $\tau$ non è unico. Vorremmo l'unificatore più generale di tutti (MGU). \textbf{Teorema}: l'\textbf{unificatore più generale è unico} a meno dei nomi delle variabili (l'ordine non conta)
-\paragraph{Algoritmo di unificazione} input p,q espressioni, restituisce MGU $\Theta$ se esiste, \texttt{unify(p,q) = theta} tale che \texttt{subst(theta, p) = subst(theta, q)}, altrimenti \textbf{fail}.\\
-Esplora in parallelo le due espressioni e costruisce l'unificatore strada facendo. Fallisce non appena trova espressioni non unificabili. Una causa del fallimento sono sost del tipo x=f(x), questo controllo si chiama \textbf{occur-check}.
+Costanti, funzioni e predicati sono come definiti prima, ma \textbf{escludiamo la formule atomiche del tipo ($t_1$ = $t_2$)}.
+\paragraph{Clausola} \textbf{Una clausola è insieme di letterali} (formula atomica eventualmente negata) \textbf{che rappresenta la loro disgiunzione}.\\
+Una KB è un insieme di clausole.
+\begin{list}{}{}
+	\item Clausola $\Rightarrow$ \{Letterale, \ldots, Letterale\}
+	\item Letterale $\Rightarrow$ FormulaAtomica $|$ $\neg$FormulaAtomica
+\end{list}
+\subsubsection{Trasformazione in forma a clausole}
+\paragraph{Teorema} $\forall$ formula chiusa $\alpha$ del FOL, è possibile trovare in maniera \textbf{effettiva} un insieme di clausole FC($\alpha$) soddisfacibile $\Leftrightarrow \alpha$ era soddisfacibile (viceversa, insoddisfacibile $\Leftrightarrow \alpha$ era insoddisfacibile)
+\paragraph{Esempio trasformazione} Vediamo un esempio per la frase "\textit{tutti coloro che amano tutti gli animali sono amati da qualcuno}".
+$$\forall\: x (\forall\: y\:\:\textsl{Animale}(y) \Rightarrow Ama(x, y)) \Rightarrow (\exists\: y\:\:Ama(y, x))$$
+\begin{enumerate}
+	\item \textbf{Eliminazione delle implicazioni} $\Rightarrow$ e $\Leftrightarrow$:\\
+	$A \Rightarrow B$ diventa $\neg A \vee B$, 	$A \Leftrightarrow B$ diventa $(\neg A \vee B) \wedge (\neg B \vee A)$.
+	\begin{list}{}{}
+		\item $\forall\: x (\forall\: y\:\:\textsl{Animale}(y) \Rightarrow Ama(x, y)) \underline{\Rightarrow} (\exists\: y\:\:Ama(y, x))$
+		\item $\forall\: x \neg(\forall\: y\:\:\textsl{Animale}(y) \underline{\Rightarrow} Ama(x, y)) \vee (\exists\: y\:\:Ama(y, x))$
+		\item $\forall\: x \neg(\forall\: y\:\:\neg\textsl{Animale}(y) \vee Ama(x, y)) \vee (\exists\: y\:\:Ama(y, x))$
+	\end{list}
+	\item \textbf{Negazioni all'interno}:
+	$\neg\neg A$ diventa $A$\\
+	$\neg(A \wedge B)$ diventa $\neg A \vee \neg B$ (De Morgan)\\
+	$\neg(A \vee B)$ diventa $\neg A \wedge \neg B$ (De Morgan)\\
+	$\neg\forall x\:A$ diventa $\exists x\:\neg A$, $\neg\exists x\:A$ diventa $\forall x\:\neg A$
+	\begin{list}{}{}
+		\item $\forall\: x \underline{\neg}(\forall\: y\:\:\neg\textsl{Animale}(y) \vee Ama(x, y)) \vee (\exists\: y\:\:Ama(y, x))$
+		\item $\forall\: x (\exists\: y\:\:\underline{\neg}(\neg\textsl{Animale}(y) \vee Ama(x, y))) \vee (\exists\: y\:\:Ama(y, x))$
+		\item $\forall\: x (\exists\: y\:\:(\textsl{Animale}(y) \wedge \neg Ama(x, y))) \vee (\exists\: y\:\:Ama(y, x))$
+	\end{list}
+	\item \textbf{Standardizzazione delle variabili}: ogni quantificatore una variabile diversa
+	\begin{list}{}{}
+		\item $\forall\: x (\exists\: y\:\:(\textsl{Animale}(y) \wedge \neg Ama(x, y))) \vee (\exists\: z\:\:Ama(z, x))$
+	\end{list}
+	\item \textbf{Skolemizzazione}: eliminazione di quantificatori esistenziali.\\
+	Ci sono due quantificatori esistenziali nell'ambito di uno universale, dobbiamo introdurre due funzioni di Skolem
+	\begin{list}{}{}
+		\item $\forall\: x (\textsl{Animale}(F(x)) \wedge \neg Ama(x, F(x))) \vee (Ama(G(x), x))$
+	\end{list}
+	\item \textbf{Eliminazione di quantificatori universali}\\
+	Possiamo portarli tutti davanti (forma premessa) ed eliminarli usando la convenzione che le variabili libere sono quantificate universalmente.\\
+	Se B non contiene $x$\\
+	$(\forall x\:A) \vee B$ diventa $\forall x\:(A \vee B)$, $(\forall x\:A) \wedge B$ diventa $\forall x\:(A \wedge B)$
+	\begin{list}{}{}
+		\item $\underline{\forall\: x} (\textsl{Animale}(F(x)) \wedge \neg Ama(x, F(x))) \vee (Ama(G(x), x))$
+		\item $(\textsl{Animale}(F(x)) \wedge \neg Ama(x, F(x))) \vee (Ama(G(x), x))$
+	\end{list}
+	\item \textbf{Forma normale congiuntiva}: congiunzioni di disgiunzioni letterali\\
+	$A \vee (B \wedge C)$ diventa $(A \vee B) \wedge (A \vee C)$
+	Quindi
+	\begin{list}{}{}
+		\item $(\textsl{Animale}(F(x)) \underline{\wedge} \neg Ama(x, F(x))) \underline{\vee} (Ama(G(x), x))$
+		\item $(\textsl{Animale}(F(x)) \vee \neg Ama(G(x), x)) \wedge ((\neg Ama(x, F(x)) \vee Ama(G(x), x)))$
+	\end{list}
+	\pagebreak
+	\item \textbf{Notazione a clausole}
+	\begin{list}{}{}
+		\item \{Animale$(F(x))$, Ama$(G(x), x)$\}
+		\item \{$\neg$Ama$(x, F(x))$, Ama$(G(x), x)$\}
+	\end{list}
+	\item \textbf{Separazione delle variabili}: clausole diverse, variabili diverse\\
+	$\forall x\: (P(x) \wedge Q(x)) \Leftrightarrow \forall x_1\: P(x_1) \wedge \forall x_2\:Q(x_2)$
+	\begin{list}{}{}
+		\item \{Animale$(F(x))$, Ama$(G(x), x)$\} $\longrightarrow$ \{Animale$(F(x_1))$, Ama$(G(x_1), x_1)$\}
+		\item \{$\neg$Ama$(x, F(x))$, Ama$(G(x), x)$\} $\longrightarrow$ \{$\neg$Ama$(x_2, F(x_2))$, Ama$(G(x_2), x_2)$\}
+	\end{list}
+\end{enumerate}
+\textbf{La Skolemizzazione non preserva l'equivalenza}: $P(a) \vDash \exists x\:P(x)$ ma $\exists x\:P(x) \not\vDash P(x)$
+\paragraph{Unificazione} Operazione con la quale si determina se due espressioni possono essere rese identiche mediante una sostituzione di termini a variabili.\\
+Il risultato è la sostituzione che rende le due espressioni identiche, detta \textbf{unificatore}, o \textbf{FAIL} se le espressioni non sono unificabili.
+\paragraph{Sostituzione} Insieme finito di associazioni tra variabili e termini in cui ogni variabile compare una sola volta sulla sinistra. Es \{x$_1$/A, x$_2$/f(x$_3$), x$_3$/B\} significa che A va sostituita a x$_1$, f(x$_3$) sostituita a x$_2$\ldots\\
+A sinistra vanno le variabili e a destra costanti e variabili, con la restrizione che la variabile sulla sinistra non può comparire anche sulla destra della stessa "coppia".
+\paragraph{Applicazione} Sia $\sigma$ una sostituzione e A espressione, A$\sigma$ è l'istanza generala dalla sostituzione (delle variabili con l'espressione corrispondente)\\
+In AIMA \texttt{SUBST($\sigma$, A)}. Le variabili sono \textbf{sostituite simultaneamente} e si esegue un solo passo di sostituzione
+\paragraph{Espressioni unificabili} Se esiste una sostituzione che le rende identiche, cioè se esiste un unificatore.\\
+In genere l'unificatore $\tau$ non è unico, quindi vorremmo l'unificatore più generale di tutti (MGU). \textbf{Teorema}: l'\textbf{unificatore più generale è unico} a meno dei nomi delle variabili (l'ordine non conta).
+\paragraph{Algoritmo di unificazione} Input: p, q espressioni.\\
+Output: MGU $\theta$ se esiste (\texttt{unify(p,q) = $\theta$} tale che \texttt{subst($\theta$, p) = subst($\theta$, q)}) altrimenti \textbf{FAIL}.\\
+Esplora in parallelo le due espressioni e costruisce l'unificatore strada facendo. Fallisce non appena trova due espressioni non unificabili. Una causa del fallimento sono le sostituzioni del tipo $x = f(x)$: questo controllo si chiama \textbf{occurr-check}.
 \begin{center}
-	Algoritmo
+	\begin{lstlisting}
+function UNIFY(x, y, theta) returns una sostituzione
+	# theta, la sostituzione costruita fin'ora (opzionale, vuota di default)
+	if theta = FAIL then return FAIL
+	else if x = y: return theta
+	else if VARIABLE?(x): return UNIFY-VAR(x, y, theta)
+	else if VARIABLE?(y): return UNIFY-VAR(y, x, theta)
+	else if COMPOUND?(x) and COMPOUND?(y):
+		return UNIFY(x.ARGS, y.ARGS, UNIFY(x.OP, y.OP, theta))
+	else if LIST?(x) and LIST?(y):
+		return UNIFY(x.REST, y.REST, UNIFY(x.FIRST, y.FIRST, theta))
+	else return FAIL
+
+function UNIFY-VAR(var, x, theta) returns una sostituzione
+	if {var/val} in theta: return UNIFY(val, x, theta) # var ha gia un valore
+	else if {x/val} in theta: return UNIFY(var, val , theta) # x ha gia un valore
+	else if OCCUR-CHECK?(var, x): return FAIL # controllo di occorrenza
+	else return EXTEND({var/x} , theta)
+	\end{lstlisting}
 \end{center}
-\paragraph{Esempi}
+\texttt{OCCURR-CHECK} controlla se \texttt{var} occorre all'interno dell'espressione $x$. In tal caso, fallisce. Controllo di complessità quadratica.\\
+\textbf{Attenzione}: \texttt{EXTEND} non aggiunge semplicemente ma applica la sostituzione in $\theta$.
+%TODO esempi
 \section{Definizione e Confronto di Euristiche Ammissibili}
 \paragraph{Mondo dei blocchi} Problema classico, parte dei micromondi usati soprattutto per la pianificazione. Serie di blocchi su un tavolo impilati e vogliamo raggiungere certa config. final. Mosse sono spostare blocco su tavolo o su altro blocco, a condizione che blocco sia libero senza blocchi sopra e blocco destinazione anche.
 \subparagraph{Euristica H1} Numero di blocchi appoggiati su blocco sbagliato (incluso tavolo)
