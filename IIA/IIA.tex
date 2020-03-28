@@ -1709,81 +1709,103 @@ Per trovare euristica bisogna contare quanto dista soluzione e usare questa come
 Euristica = n ammissibile se servono almeno n mosse per arrivare in stato finale, $\geq$ 0 ovunque ma $=$ 0 solo in stati goal.
 
 \chapter{Strategie di risoluzione}
-Abbiamo visto metodi di risoluzione KB in forma clausole unificazione e regola srisoluzione (estensioen rispetto regola PROP)\\
-\textbf{Come rendere più efficiente il meccanismo di risoluzione}? Strategie di risoluzione: tecniche per esplorare in maneira efficiente grafo di risoluzione, possibili,ente senza perderee completezza.\\
-Un percorso che ci proterà a giustificare i sistemi a regole e le restrizionei del FOL associate.
+\paragraph{Fin'ora} Abbiamo visto metodi di risoluzione per le KB in forma a clausole: l'unificazione e la regola di risoluzione per FOL (estensione rispetto alla regola PROP).\\
+\textbf{Come rendere più efficiente il meccanismo di risoluzione}? Bisogna adottare strategie di risoluzione: tecniche per esplorare in maniera efficiente il grafo di risoluzione, possibilmente senza perdere la completezza.\\
+Un percorso che ci porterà a giustificare i sistemi a regole e le restrizioni del FOL associate.
 \section{Strategia di risoluzione}
 Distinzione tra 
 	\begin{list}{}{}
-		\item strategia di cancellazione: ci sono clausole da eliminare?
-		\item strategia di restrizione: posso usare ad ogni passo solo alcune clausole?
-		\item strategia di ordinamento: posso risolvere i letterali in un ordine specifico?
+		\item \textbf{Strategie di cancellazione}: \textit{ci sono clausole che possiamo eliminare}?
+		\item \textbf{Strategie di restrizione}: \textit{posso usare ad ogni passo solo alcune clausole}?
+		\item \textbf{Strategie di ordinamento}: \textit{posso "risolvere" i letterali in un ordine specifico}?
 	\end{list}
-Tutto possibilmente senza perdere completezza
+Tutto possibilmente \textbf{senza perdere completezza}
 \subsection{Strategie di Cancellazione}
-Rimuovere dalla KB clausole che non saranno mai utili nel processo di risoluzione
+Consiste nel \textbf{rimuovere} dalla KB, ai fini della dimostrazione, \textbf{le clausole che non saranno mai utili nel processo di risoluzione}.
 \begin{list}{}{}
 	\item \textbf{Clausole con Letterali Puri}\\
 	Letterali che non hanno il loro negato nella KB\\
-	%TODO esempio
-	Non potranno mai essere risolte con altre clausole per ottenere \{\}, tanto vale eliminarle\\
-	Non si perdono soluz
+	$\{\neg P, \neg Q, R\}\:\{\neg P, \underline{S}\}\:\{\neg Q, \underline{S}\}\:\{P\}\:\{Q\}\:\{\neg R\}$\\
+	Non potranno mai essere risolte con altre clausole per ottenere \{\}, tanto vale eliminarle. Non si perdono soluzioni
 	\item \textbf{Tautologie}\\
 	Clausole con due letterali identici e complementari\\
-	%TODO esempio
-	Non basta che siano unificabili e di segno opposto\\
-	%TODO esempio
-	Tautologie possono essere generate quindi controllo da fare ad ogni passo
-	\item \textbf{Clausole Sussunte}\\
-	Sussunte (implicate)\\ %TODO esempio
-	In generale a sussume b se esiste sigma asigma in b\\
-	Se un'istanta di a con la sostituzione sigma è un sottoninsieme di b\\
-	b può essere ricavata da a, quindi b può essere eliminata senza perdere soluzioni. Clausole sussunte possono essere generate.
+	$\{\underline{P(A)}, \underline{\neg P(A)}, \ldots\}\:\{P(x), \underline{Q(y)}, \underline{\neg Q(y)}\}$\\
+	\textbf{Nota}: non basta che siano unificabili e di segno opposto\\
+	$\{\underline{\neg P(A)}, \underline{P(x)}\}\:\{P(A)\}\:\{\neg P(B)\}$ è insoddisfacibile\\
+	$\{P(A)\}\:\{\neg P(B)\}$ è soddisfacibile\\	
+	Le tautologie \textbf{possono essere generate}, quindi questo controllo deve essere eseguito ad ogni passo
+	\item \textbf{Clausole Sussunte} (implicate)\\
+	$P(x)$ \textit{sussume} $P(A)$, $P(A)$ \textit{sussume} $\{P(A), P(B)\}$\\
+	In generale $\alpha$ \textbf{sussume} $\beta \Leftrightarrow \exists\:\sigma$ con $\alpha\sigma \subset \beta$, cioè se un'istanza di $\alpha$ con la sostituzione $\sigma$ è un sottoinsieme di $\beta$. Ad esempio\\
+	$\{P(x), Q(y)\}$ sussume $\{P(A), Q(v), R(w)\}$ infatti $\{P(x), Q(y)\}\{x/A, y/v\}=\{P(A), Q(v)\}\:\subset\:\{P(A), Q(v), R(w)\}$\\
+	$\beta$ può essere ricavata da $\alpha$, quindi $\beta$ può essere eliminata senza perdere soluzioni. Anche le clausole sussunte possono essere generate.
 \end{list}
 \pagebreak
 \subsection{Strategie di Restrizione}
-Ad ogni passo si sceglei tra un sottoinsieme di possibili clausole
+Ad ogni passo si sceglie tra un sottoinsieme di possibili clausole
 \begin{list}{}{}
 	\item \textbf{Risoluzione unitaria}\\
-	Almeno una delle due clasuole è unitaria (un solo letterale)\\
-	%TODO esempio
-	Converge molto rapidamente, perché ad ogni passo si elimina una clausola\\
-	Facile da implementare\\
-	Ma non è completa\\ %TODO esempio
-	Completa per \textbf{clausole di Horn}: clausole con \textbf{al più} un letterale positivo
+	\textbf{Almeno una delle due clausole} utilizzate nel passaggio \textbf{è unitaria} (un solo letterale)
+	\begin{center}
+		\includegraphics[scale=0.5]{risunit.png}
+	\end{center}
+	\textbf{Converge molto rapidamente}, perché ad ogni passo si elimina una clausola, ed è facile da implementare. Ma non è completa, esempio: $\{P, Q\}\:\{\neg P, Q\}\:\{P, \neg Q\}\:\{\neg P, \neg Q\} \vdash_{RES} \{\}$ non con risoluzione unitaria.\\
+	Completa per \textbf{Clausole di Horn}: clausole con \textbf{al più} un letterale positivo
 	\item \textbf{Risoluzione lineare}\\
-	Prendo ultima clausola generata con una clausola da input (della KB iniziale), oppure una clausola antenata\\
-	%TODO esempio
-	\item \textbf{Risoluzione guidata dal goal}/da insieme di supporto (sottonsieme della KB responsabile dell'insoddisfacibilità)\\
-	ALmeno una delle due clausole appartiene a questo insieme o a suoi discendenti\\
-	Tipicamente, assumendo la KB iniziale consistente, si csceglie come insieme di supporto iniziale il negato del goal. È come procedere all'indietro dal goal. Strategia completa, per la refutazione.\\
-	%TODO esempio
+	Prendo l'ultima clausola generata con una clausola da input (della KB iniziale), oppure una clausola antenata nella sequenza. Completa per la risoluzione per refutazione.
+	\begin{center}
+		\includegraphics[scale=0.5]{rislin.png}
+	\end{center}
+	\item \textbf{Risoluzione guidata dal goal}/da insieme di supporto (sottoinsieme della KB responsabile dell'insoddisfacibilità)\\
+	Almeno una delle due clausole appartiene a questo insieme o a suoi discendenti\\
+	Tipicamente, assumendo la KB iniziale consistente, \textbf{si sceglie come insieme di supporto iniziale il negato della clausola goal}. Il risultato è che è come procedere all'indietro dal goal. Strategia completa, per la refutazione.\\
+	\begin{center}
+		\includegraphics[scale=0.5]{risgoal.png}
+	\end{center}
 \end{list}
-%TODO
+\pagebreak
+\subsection{Strategie di Ordinamento}
+\begin{list}{}{}
+	\item \textbf{Risoluzione ordinata}\\
+	Ogni clausola è un \textbf{insieme ordinato} di letterali e \textbf{si possono unificare solo i primi letterali} delle clausole. L'ordinamento deve essere rispettato nel risolvente.
+	\begin{multicols}{2}
+	\begin{center}
+		\includegraphics[scale=0.5]{risord.png}
+	\end{center}
+	\begin{center}
+		\includegraphics[scale=0.4]{risordes.png}
+	\end{center}
+	\end{multicols}
+	La risoluzione ordinata è completa per le clausole Horn
+\end{list}
 \subsection{Sottoinsieme a regole del FOL}
 \paragraph{Clausole di Horn \textit{definite}} Clausole con \textbf{esattamente} un letterale positivo.\\
-Possno essere riscritte come fatti e regole\\ %TODO esempio
-Una \textbf{KB a regole} %TODO esempio
-\subsection{Sistemi a regole logici}
-Se la kb contiene solo clausole horn dfefiniti i meccanismi inferenziali sono più semplici, processo moltop iù guiodato senza rincuniare alla compeltezza: risolutori in tempo lineare per il caso proposizionale. Nota: è restrittivo e non coincide né con PROP né con FOL.
-\paragraph{Uso delel regole in avanti e indietro} %TODO scrivere
+Possno essere riscritte come fatti e regole:
 \begin{list}{}{}
-	\item \textbf{Backward Chaining}\\
-	PROLOG ha kb a regole e procede applicando regole in avanti o indietro
-	\item \textbf{Forward Chaining}
+	\item $\neg P_1 \vee \ldots \vee \neg P_k \vee Q$
+	\item $\neg (P_1 \wedge \ldots \wedge P_k) \vee Q$
+\end{list}
+Una \textbf{KB a regole}
+\begin{list}{}{}
+	\item \textbf{Regola}: $P_1 \wedge \ldots \wedge P_k \Rightarrow Q$
+	\item \textbf{Fatto}: $Q$
+\end{list}
+\subsection{Sistemi a regole logici}
+Se la KB contiene solo clausole Horn definite, i meccanismi inferenziali sono molto più semplici ed il processo è molto più guidato, senza rinunciare alla completezza: risolutori in tempo lineare per il caso proposizionale. \textbf{Nota}: è restrittivo e non coincide né con il PROP né con il FOL.
+\paragraph{Uso delle regole in avanti e indietro}
+\begin{list}{}{}
+	\item \textbf{Backward Chaining}: un'istanza di ragionamento \textbf{guidato dall'obiettivo}.\\
+	Le regole sono applicate alla rovescia: \textbf{programmazione logica} (PROLOG ha le KB a regole e procede applicando le regole in avanti o all'indietro)
+	\item \textbf{Forward Chaining}: un'istanza di ragionamento o ricerca \textbf{guidato dai dati}\\
+	Le regole sono applicate nel senso "antecedente-conseguente". Basi di dati deduttive e sistemi di produzione.
 \end{list}
 \subsection{Programmazione Logica}
-programmi logici sono kb costituiti di clausole horn definite, espressi come fatti e regole con sintassi alternativa %TODO esempio
-\\
-altre convenzioni: in PL le variabili sono indicate con le letterel amisucole e le costanti con le lettere minuscole\\
-Rappresentazione del goal
-\begin{list}{}{}
-	\item %TODO
-\end{list}
-\begin{list}{}{}
-	\item Interpretazione dichiarativa
-	\item Interpretazione procedurale
-\end{list}
+I \textbf{programmi logici} sono KB costituite di clausole Horn definite, espressi come fatti e regole con sintassi alternativa:\\
+$A :- B_1, B_2, \ldots, B_n$ ($A$ \textbf{testa}, $B_1, \ldots, B_n$ \textbf{corpo})\\
+$A$ \textbf{vero} se sono veri $B_1, \ldots, B_n$, in accordo al significato logico di implicazione. Questa è la \textbf{interpretazione dichiarativa}.\\
+\textbf{Interpretazione procedurale}: la testa può essere vista come una \textbf{chiamata di procedura} e il corpo come una serie di procedure da eseguire in sequenza.\\
+Altre convenzioni: in PL le variabili sono indicate con le lettere maiuscole e le costanti con le lettere minuscole
+%TODO https://elearning.di.unipi.it/pluginfile.php/31082/mod_resource/content/3/KR-Rules2020.pdf, p. 21
 \subsection{Risoluzione SLD}
 \paragraph{Selection Linear Definit-Clauses} strat lienare ordinata basata su un insieme di supporto (clausola goal), lineare nell'input. SLD è completa per clausole di horn.
 \paragraph{Alberi di Risoluzione SLD}
