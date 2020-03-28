@@ -490,6 +490,338 @@ A = \left[
 $K_1 = \left\{ z \in C \:\:\vline\:\: |z - 3| \leq 1\right\}$\\
 $K_2 = \left\{ z \in C \:\:\vline\:\: |z - 3| \leq 2\right\}$\\
 $K_3 = \left\{ z \in C \:\:\vline\:\: |z - 3| \leq 2\right\} = K_1$
+\section{Fattorizzazione LU}
+\paragraph{Problema} Dato $A \in R^{n \times n}, b \in R^n$, determinare $x \in R^n\:\:\vline\:\: Ax = b$. Assunzione: $A$ invertibile.\\
+Quindi, convenzionalmente, $A$ è la \textbf{matrice dei coefficienti}, $b$ è il \textbf{termine noto} e $x$ il \textbf{vettore delle incognite}.\\
+$x$ è \textbf{univocamente determinato} $x = A^{-1}b$ (rappresentazione teorica)\\
+La \textbf{difficoltà è determinata dalla struttura di $A$}. Ci sono \textbf{alcuni casi più semplici}:
+\begin{list}{}{}
+	\item $A$ matrice \textbf{diagonale}: $A = a_{ij}$ con $a_{ij} = 0$ se $i \neq j$\\
+	Quindi
+	\begin{math}
+		A = \left[
+		\begin{array}{c c c}
+			d_1 & 0\ddots & 0\\
+			0 & \ddots & \ddots 0\\
+			0 & \ddots 0 & d_n
+		\end{array}
+		\right]
+	\end{math}
+	$A$ invertibile $\Leftrightarrow d_j \neq 0$ per $j = 1\ldots n$, questo perché $\textsl{det}(A) = \prod_{i = 1}^n d_i$\\
+	\begin{math}
+		\left[
+		\begin{array}{c c c}
+			d_1\\
+			& \ddots\\
+			& & d_n
+		\end{array}
+		\right]
+		\cdot
+		\left[
+		\begin{array}{c}
+		x_1\\
+		\vdots\\
+		x_n
+		\end{array}
+		\right]
+		=
+		\left[
+		\begin{array}{c}
+		b_1\\
+		\vdots\\
+		b_n
+		\end{array}
+		\right]
+		\Leftrightarrow
+		\left\{
+		\begin{array}{c}
+		d_1 x_1 = b_1\\
+		\vdots\\
+		d_n x_n = b_n
+		\end{array}
+		\right.
+		\Leftrightarrow
+		\left\{
+		\begin{array}{c}
+		x_1 = \frac{b_1}{d_1}\\
+		\vdots\\
+		x_n = \frac{b_n}{d_n}
+		\end{array}
+		\right.
+	\end{math}\\
+	Calcolabile in O(n) operazioni
+	\begin{lstlisting}
+	for k = 1:n
+		x(k) = b(k)/a(k, k);
+	end
+	\end{lstlisting}
+	\item $A$ \textbf{triangolare} superiore
+	\begin{math}
+	= \left[ \begin{array}{c c c}
+		n & n & n\\
+		0 & n & n\\
+		0 & 0 & n
+	\end{array} \right]
+	\end{math}
+	o \textbf{triangolare} inferiore
+	\begin{math}
+	= \left[ \begin{array}{c c c}
+		n & 0 & 0\\
+		n & n & 0\\
+		n & n & n
+	\end{array} \right]
+	\end{math}\\
+	\textbf{Triangolare superiore} se $a_{ij} = 0$ per $i > j$\\
+	\textbf{Triangolare inferiore} se $a_{ij} = 0$ per $i < j$\\
+	$A$ invertibile $\Leftrightarrow$ gli elementi sulla diagonale sono $\neq 0$\\
+	$\textsl{det}(A) = \prod_{i = 1}^n a_{ii}$, quindi $\textsl{det}(A) \neq 0 \Leftrightarrow a_{ii} \neq 0$ per $i = 1\ldots n$
+\end{list}
+\pagebreak
+\paragraph{Backward Substitution}
+Usato per risolvere un sistema triangolare superiore\\
+	\begin{math}
+	A = \left[
+	\begin{array}{c c c}
+	a_{11} & \ldots & a_{1n}\\
+	 & \ddots & \vdots \\
+	 0 & & a_{nn}
+	\end{array}
+	\right]
+	\end{math}
+	con $a_{ij} = 0$ se $i > j \rightarrow$
+	\begin{math}
+	Ax = b \Leftrightarrow \left\{
+	\begin{array}{c}
+		\sum_{j = 1}^n a_{1j}x_j = b_1\\
+		\sum_{j = 2}^n a_{2j}x_j = b_2\\
+		\vdots\\
+		a_{nn}x_n = b_n
+	\end{array}
+	\right.
+	\end{math}
+$$\sum_{j = k}^n a_{kj}x_j = b_k$$
+$x_{k+1} \ldots x_n \longrightarrow x_k$, quindi $a_{kk}x_k = b_k - \sum_{j = k + 1}^n a_{kj}x_j$, da cui ricavo $$x_k = \frac{1}{a_{kk}}(b_k - \sum_{j = k + 1}^n a_{kj}x_j)$$ Di conseguenza $k$ lo scorriamo "\textbf{all'indietro}": \texttt{k = n:-1:1}
+\begin{lstlisting}
+x(n) = b(n)/a(n, n)
+for k = n - 1:-1:1
+	s = 0
+	for j = k + 1:n
+		s = s + a(k, j)*x(j)
+	end
+	x(k) = (b(k) - s)/a(k, k)
+end
+\end{lstlisting}
+\subparagraph{Costo computazionale} $$\sum_{k = 1}^{n - 1} (n - k) = (n - 1) + (n - 2) + \ldots + 1 = \frac{n(n - 1)}{2} = \frac{n^2}{2} + O(n)$$
+Quindi ha un costo di O($n^2$) operazioni
+\paragraph{Forward Substitution}
+Usato per risolvere un sistema triangolare inferiore\\
+	\begin{math}
+	A = \left[
+	\begin{array}{c c c}
+	a_{11} & & 0\\
+	\vdots & \ddots\\
+	a_{n1} & \ldots & a_{nn}
+	\end{array}
+	\right]
+	\end{math}
+	con $a_{ij} = 0$ se $i < j \rightarrow$
+	\begin{math}
+	Ax = b \Leftrightarrow \left\{
+	\begin{array}{c}
+		a_{11}x_1 = b_1\\
+		a_{21}x_1 + a_{22}x_2 = b_2\\
+		\vdots\\
+		\sum_{j = 1}^n a_{nj}x_j = b_n\\
+	\end{array}
+	\right.
+	\end{math}
+\paragraph{Matrice generica} Per una matrice generica $A \in R^{n \times n}$, l'\textbf{idea} è di \textbf{cercare di ridurre $A$ in una forma più semplice}, \textbf{mantenendo l'equivalenza dei sistemi lineari}.
+$$Ax = b \longrightarrow Fx = g$$ con \textbf{sistemi equivalenti} e \textbf{$F$ più semplice di $A$}: ad esempio $F$ triangolare.\\
+Cominciamo domandandoci se $A$ può essere riscritta come \textbf{prodotto di matrici triangolari}.
+\subsection{Fattorizzazione LU}
+$A = L\cdot U$ con $L$, $U$ triangolari
+$$Ax = b \Leftrightarrow L\cdot Ux = b \Leftrightarrow \left\{ \begin{array}{c}
+	Ly = b\\
+	Ux = y
+\end{array}
+\right.$$
+\paragraph{Definizione} $A \in R^{n \times n}$ si dice \textbf{fattorizzabile $LU$} se $\exists L$ matrice triangolare inferiore con elementi $= 1$ sulla diagonale principale e $U$ triangolare superiore tale che $A = L\cdot U$
+\subparagraph{Esempio} \begin{math}
+A = \left[
+\begin{array}{c c}
+	0 & 1\\
+	1 & 0
+\end{array}
+\right]
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	l & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	u_1 & u_2\\
+	0 & u_3
+\end{array}
+\right]
+= \left\{
+\begin{array}{c}
+	0 = u_1\\
+	1 = u_3\\
+	1 = l\cdot u_1\\
+	0 = l\cdot u_3 + u_2
+\end{array}
+\right.
+\end{math}
+\ldots non ci sono soluzioni\\
+$\Rightarrow$ A non ammette fattorizzazione LU
+\pagebreak
+\paragraph{Esempio} \begin{math}
+A = \left[
+\begin{array}{c c}
+	0 & 1\\
+	0 & 0
+\end{array}
+\right]
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	l & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	u_1 & u_3\\
+	0 & u_2
+\end{array}
+\right]
+= \left\{
+\begin{array}{c}
+	0 = u_1\\
+	1 = u_3\\
+	0 = l\cdot u_1\\
+	0 = l\cdot u_3 + u_2
+\end{array}
+\right.
+= \left\{
+\begin{array}{c}
+	u_1 = 0\\
+	u_3 = 1\\
+	0 = 0\\
+	l + u_2 = 0\\
+	u_2 = -l
+\end{array}
+\right.
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	l & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	0 & 1\\
+	0 & -l
+\end{array}
+\right]
+\end{math}\\
+$\Rightarrow$ \textbf{infinite} fattorizzazioni $LU$, perché $l \in R$
+\paragraph{Esempio} \begin{math}
+A = \left[
+\begin{array}{c c}
+	1 & 1\\
+	1 & 1
+\end{array}
+\right]
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	l & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	u_1 & u_3\\
+	0 & u_2
+\end{array}
+\right]
+= \left\{
+\begin{array}{c}
+	1 = u_1\\
+	1 = u_3\\
+	1 = l\cdot u_1 \Rightarrow l = 1\\
+	1 = l\cdot u_3 + u_2 \Rightarrow u_2 = 0
+\end{array}
+\right.
+\end{math}\\
+$\Rightarrow$ fattorizzazione $LU$ \textbf{unica}
+\paragraph{Teorema} Esistenza ed unicità della fattorizzazione\\
+Sia $A \in R^{n \times n}$ e siano $A_k = A(1:k, 1:k)$ con $k = 1\ldots n$ le \textbf{sottomatrici principali di testa}.\\
+Se $A_1, \ldots, A_{n-1}$ sono invertibili $\Rightarrow\exists !\: LU$ di $A$
+\subparagraph{Dim} Per induzione sulla dimensione della matrice\\
+$n = 1$, $A = [a] \Rightarrow a = 1\cdot a$
+$$* = \left[ 
+\begin{array}{c c | c}
+	A_{n-1} & & z\\
+	& &\\
+	\hline
+	v^T & & \alpha
+\end{array}
+\right]
+= \left[ 
+\begin{array}{c c | c}
+	L_{n-1} & & 0\\
+	& &\\
+	\hline
+	x^T & & 1
+\end{array}
+\right]
+\left[ 
+\begin{array}{c c | c}
+	U_{n-1} & & y\\
+	& &\\
+	\hline
+	0^T & & \beta
+\end{array}
+\right]
+\Leftrightarrow
+\left\{
+\begin{array}{c}
+A_{n-1} = L_{n-1}U_{n-1}\\
+z = L_{n-1}y\\
+v^T = x^T U_{n-1}\\
+\alpha = x^T y + \beta
+\end{array}
+\right.
+\Leftrightarrow
+\left\{
+\begin{array}{c}
+\\
+y = L_{n-1}^{-1}z\\
+x^T = v^T U_{n-1}^{-1}\\
+\\
+\end{array}
+\right.
+$$
+Con $A_{n-1}$ matrice di ordine $n - 1$\\
+Le sue sottomatrici principali di testa di ordine $1\ldots n-2$ sono quelle di A e quindi, per ipotesi, invertibili\\
+$\Rightarrow$ per ipotesi $\exists !$ fattorizzazione LU di $A_{n-1}$\\
+Per ipotesi, $A_{n-1}$ invertibile, quindi
+$$0 \neq \textsl{det}(A_{n-1}) = \textsl{det}(L_{n-1}U_{n-1}) =$$
+Per Binet
+$$ = \textsl{det}(L_{n-1})\textsl{det}(U_{n-1}) = \textsl{det}(U_{n-1})$$
+Fine
+\paragraph{Matrice Freccia} ($\searrow$) Anche detta \textbf{arrow matrix} o \textbf{arrowhead matrix} \begin{math}
+A = \left[
+\begin{array}{c c c c}
+	1 & & & x_1\\
+	& \ddots & & \vdots\\
+	& & 1 & \vdots\\
+	x_1 & \ldots & \ldots & x_n
+\end{array}
+\right]
+\end{math}
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
