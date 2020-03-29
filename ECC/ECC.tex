@@ -681,20 +681,18 @@ Dato che $\exists\:z\:\:\vline\:\:\forall\:i,x$ si ha $\phi_z(i, x) = \phi_i(x)$
 \end{list}
 \subsection{Teorema del parametro}
 $\exists$ $s$ calcolabile, totale, iniettiva $\vline$ $\forall$ $i$, $x$, $y$ $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$\\
-Ottimo strumento per dimostrare diversi risultati. Ma l'utilizzo più importante è un altro. Quando scriviamo un programma che deve ordinare un vettore %TODO
-\paragraph{Dimostrazione} Dato $i$ trova M$_i$, attraverso una funzione ricorsiva primitiva grazie al teorema di codifica.\\
+Ottimo strumento per dimostrare diversi risultati. Intuitivamente, il programma $P_{s(x, y)}$ opera su $z$ soltanto mentre $P_x$ opera su $y$ e su $z$. Quindi $y$ è un \textbf{parametro} di $P_x$.
+\subparagraph{Dimostrazione} Dato $i$ trova M$_i$, attraverso una funzione ricorsiva primitiva grazie al teorema di codifica.\\
 Scrivi $x$ sul nastro di M$_i$ cioè prepara la configurazione iniziale (q$_0$, $\underline{\triangleright}x$).\\
 Questo è un algoritmo, quindi ha indice per C-T. Diciamo che l'indice è $n = s(i, x)$. $s$ è calcolabile totale, e $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$ è vera.\\
 Per l'iniettività? Da $n$ genero diversi indici $i$ di macchine che calcolano la stessa funzione. Appena trovo un indice che non avevo già visto e maggiore di quelli già visti, lo uso per porlo come indice della funzione che sto costruendo.
-%TODO formulazione a vettore
 \subsection{Teorema di Espressività}
 Un formalismo F è Turing-Equivalente $\Leftrightarrow$ 
-\begin{list}{}{}
-	\item ha un algoritmo universale (Teorema di Enumerazione)
-	\item e ha il teorema del parametro
+\begin{list}{-}{}
+	\item Ha un algoritmo universale (Teorema di Enumerazione)
+	\item Ha il teorema del parametro
 \end{list}
-%TODO esempio
-Supponiamo programma che calcola prodotto con somme successive
+Supponiamo un programma che calcola prodotto con somme successive
 \begin{verbatim}
 P := 0;
 while y > 0
@@ -729,11 +727,12 @@ while ...
 \end{verbatim}
 Scrive sul nastro \texttt{P := P + w;}\\
 \ldots\\
-%TODO
 Sul nastro c'è \texttt{P := 0; P := P + w; P := P + w;}, che è il programma specializzato.
+\pagebreak
 \subsection{Teorema di Ricorsione/Kleene 2}
-Operazioni che si possono fare sugli algoritmi che ci lasciano all'interno delle funz calc.\\
-$\forall$ $f$ calcolabile totale $\exists$ $n$ $\vline$ $\phi_n = \phi_{f(n)}$. Posso trasformare il mio programma in maniera da ottenerne uno perfettamente equivalente.\\\\\\
+Operazioni che si possono fare sugli algoritmi che ci lasciano all'interno delle funzioni calcolabili\\
+$\forall$ $f$ calcolabile totale $\exists$ $n$ $\vline$ $\phi_n = \phi_{f(n)}$. Posso trasformare il mio programma in maniera da ottenerne uno perfettamente equivalente. $n$ si dice \textbf{punto fisso}.
+\subparagraph{Dimostrazione} Definiamo la seguente funzione calcolabile "diagonale"\\
 $\psi(u, z) = \left\{
 \begin{array}{c c}
 	\phi_{\phi_u(u)}(z) & \textsl{se } \phi_u(u)\downarrow\\
@@ -742,85 +741,116 @@ $\psi(u, z) = \left\{
 \right.$
 $\psi$ è calcolabile, quindi per C-T ha un indice $\psi(u, z) = \phi_{s(i, u)}(z) = \phi_i(u, z)$ e posso applicare il teorema del parametro $= \phi_{d(u)}(z)$ con $d(u) = \lambda u.s(i, u)$ calcolabile totale e iniettiva e indipendente da $f$. Ma $f$ è calcolabile totale, quindi anche $f(d(x))$ è calcolabile totale. Quindi ha indice per C-T $= \phi_v(x)$.\\
 Quindi $\phi_{d(v)} = \phi_{\phi_v(v)}$\\
-$d(v) = n$ e $d$ è iniettiva quindi $\phi_n = \phi_{d(v)} = \phi_{\phi_v(v)} = \phi_{f(d(v))} = \phi_{f(n)}$ quindi $n$ è punto fisso.
-\subsection{•}
+$d(v) = n$ e $d$ è iniettiva quindi $\phi_n = \phi_{d(v)} = \phi_{\phi_v(v)} = \phi_{f(d(v))} = \phi_{f(n)}$ quindi $n$ è punto fisso.\\
 \begin{tabular}{c c c}
 	\textbf{Dom} & $f$ & \textbf{Imm}\\
 	$N$ & $\lambda x.2x$ & \{$2n\:\:|\:\: n \in N$\}\\
-	? & $\lambda x.\frac{x}{2}$ & $N$
+	\{$2n\:\:|\:\: n \in N$\} & $\lambda x.\frac{x}{2}$ & $N$
 \end{tabular}\\
 I è ricorsiva primitiva $\Leftrightarrow \chi_i(x) = 1$ se $x \in I$, 0 altriementi è calcolabile totale\\
-$\{(i, x, k)$ $|$ $\exists\: y,n$ con $(y, n, x < k) \wedge \phi_i(x)\downarrow$ in $n$ passi\}. Limita spazio e tempo\\
-$\{(i, x, k, z)$ $|$ $\exists\: n < k \wedge \phi_i(x) = z$ in $n$ passi\}\\
-$f(i, x)$ %TODO
-$k$? calcolabile totale\\\\
-I è \textbf{ricorsivamente enumerabile} $\Leftrightarrow$ è dominio di una funzione calcolabile, cioè $\exists\: i\:\:|\:\: I = \textsl{dom}(\phi_i)$
+A = $\{(i, x, k)$ $|$ $\exists\: y,n$ con $(y, n, x < k) \wedge \phi_i(x)\downarrow$ in $n$ passi\}. Limita spazio e tempo\\
+B = $\{(i, x, k, z)$ $|$ $\exists\: n < k \wedge \phi_i(x) = z$ in $n$ passi\}. Anche qua limito il numero di passi, ma non la memoria\\
+$f(i, x)$ rimpiazza $k$, con $f$ calcolabile totale
+\subsection{Ricorsivamente Enumerabile}
+I è \textbf{ricorsivamente enumerabile} $\Leftrightarrow$ è \textbf{dominio di una funzione calcolabile}, cioè $\exists\: i\:\:|\:\: I = \textsl{dom}(\phi_i)$
 \begin{list}{}{}
 	\item $I$ è ricorsivo $\Rightarrow$ $I$ è ricorsivamente enumerabile
-	\item $I$, $\overline{I}$ sono ricorsivamente enumerabili, con $\overline{I}$ insieme degli elementi $\not\in I$, $\Leftrightarrow$ $I$, $\overline{I}$ sono ricorsivi\\
-	\textbf{Dim}: se I ric enum esiste $\phi_i$ con domino $I$, e $\overline{I}$ ric enum allora esiste $\phi_{\overline{i}}$. Per sapere se $x$ sta o non sta in $I$, faccio un passo in $i$ se termina sta in $I$, altrimenti un passo nella $\overline{i}$ se termina non sta in $I$ quindi sta in $\overline{I}$. Se non terminano, ripeto, finché non termino.
+	\item $I$, $\overline{I}$ sono ricorsivamente enumerabili, con $\overline{I}$ insieme degli elementi $\not\in I$, $\Leftrightarrow$ $I$, $\overline{I}$ sono ricorsivi\\\\
+	\textbf{Dim}: se I è ricorsivamente enumerabile, allora esiste $\phi_i$ con domino $I$, e $\overline{I}$ ricorsivamente enumerabile allora esiste $\phi_{\overline{i}}$.\\
+	Per sapere se $x$ sta o non sta in $I$, faccio un passo di calcolo nella macchina $i$: se termina allora $x \in I$, altrimenti faccio un passo un passo nella macchina $\overline{i}$ e se termina $x \in \overline{I} \Rightarrow x \not\in I$.\\
+	Se non terminano, ripeto: faccio un passo in $i$\ldots finché non termino in una delle due macchine.
 \end{list}
-Ric enum percHé vogliamo enumerare i suoi elementi, tirandone fuori uno alla volta.
+Ricorsivamente enumerabile perché vogliamo enumerare i suoi elementi, tirandone fuori uno alla volta.
 \paragraph{Teorema di equivalenza fra caratterizzazioni}
-$I$ è ric enm sse I è vuoto oppure I = imm(f), f calc tot.\\
-\subparagraph{Dim} Primo caso banale (funz caratt dà sempre 0, ric per per vedi sopra\\
-$I \neq \emptyset$, $I = \textsl{dom}(\phi_i)$ costruisco la $f$
-%TODO coda di rondine
-Indice di riga tiene traccia del numero di passi\\ %TODO
-Indice di colonna tiene traccia dell'argomento\\\\ %TODO
+$I$ è ricorsivamente enumerabile $\Leftrightarrow$ $I = \emptyset \vee I = \textsl{imm}(f)$, con $f$ calcolabile totale.
+\begin{multicols}{2}
+\subparagraph{Dim} Il primo caso è banale (la funzione caratteristica dà sempre 0, ricorsiva)\\
+$I \neq \emptyset$, $I = \textsl{dom}(\phi_i)$ costruisco la $f$\\
+Indice di riga tiene traccia del numero di passi\\
+Indice di colonna tiene traccia dell'argomento\\
 \begin{tabular}{c || c | c | c | c | c | c}
 	 & 0 & 1 & 2 & 3 & 4 & 5 \\
 	 \hline
 	 \hline
 	 1 & 0 & 2 & 5 & 9 & 14 & \\
 	 \hline
-	 2 & 1 & 4 & 8 & 13 & 19 & \\
+	 2 & 1 & 4 & 8 & 13 & 18 & \\
 	 \hline
-	 3 & 3 & 7 & 12 & 18 & & \\
+	 3 & 3 & 7 & 12 & 17 & & \\
 	 \hline
-	 4 & 6 & 11 & 17 & & & \\
+	 4 & 6 & 11 & 16 & & & \\
 	 \hline
-	 5 & 10 & 16 & & & &
+	 5 & 10 & 15 & & & &
 	\end{tabular}\\\\
+\end{multicols}
 \textbf{Passi}:
 \begin{enumerate}
 	\item Calcola $\phi_i$ con la tabella sopra\\
-	 Trovo $(m, n)$ per cui $\phi_i(<m, n>)\downarrow$ con $<m, n>$ codifica di $(m, n)$. Chiamo $<m, n> = \overline{n} \in I$ perché appartiene al dominio.
+	1 passo su 0, 2 passi su 0\ldots finché non si arresta.\\
+	Trovo $(m, n)$ per cui $\phi_i(<m, n>)\downarrow$ con $<m, n>$ codifica di $(m, n)$. Chiamo $<m, n> = \overline{n} \in I$ perché appartiene al dominio.
 	 \item Calcola $\phi_i(n)$ per $m$ passi. Termina? Allora $<m, n> \in I$ e $f(<m, n>) = n$.\\
 	 Se non termina, $f(<m, n>) = \overline{n}$.\\
 	 Per esempio $\phi_i(2)$ per 4 passi. Converge? Se non converge, allora $f(<4, 2>) = \overline{n}$. Se converge, pongo $f(<4, 2>) = 2$
 \end{enumerate}
 \subsection{Insieme K}
 \textbf{K} = \{$x$ $|$ $\phi_x(x)\downarrow$\} insieme degli algoritmi applicati a sé stessi e convergenti.\\
-\paragraph{}\textbf{K} ricorsivamente enumerabile? Si. %TODO dim
-\subparagraph{Dimostrazione}
-\paragraph{}\textbf{K} ricorsivo? No.
-\subparagraph{Dimostrazione} Per assurdo, \textbf{K} ricorsivo. Allora $\chi_K(x) =$ 1 se x in K, 0 altrimenti è calcolabile totale.\\
-Prendiamo $f(x) = \phi_x(x) + 1$ se $\chi_K(x) = 1$, 0 altriemnti. poiché $\chi$ calc tot, anche $f$ calc tot.\\
-Cerchiamo il numero di $f$, ma non lo troviamo. Perché poniamo $i$ l'indice di $f$, allora $\phi_i(i) = f(i) = \phi_(i) + 1$ se $i \in K$, ma non può essere. Se $i \not\in K$ non può essere $\phi_i(i) = f(i) = 0$ perché $\phi_i(i)\uparrow$
-\paragraph{Osservazione} \textbf{Ricorsivi} $\subset$ \textbf{ricorisivi enumerabili} $\subset$ non \textbf{ricorsivi enumerabili}\\\\
-\textbf{Bootstrapping} $C_L^{L\rightarrow A} (C_L^{L\rightarrow A})= C_A^{L\rightarrow A}$\\
-K$_0$ = \{$(x, y)$ $|$ $\phi_y(x)\downarrow$\} problema della fermata (halting). Dato $x$ e $y$, il programma $P_y(x)$ termina? K$_h$ non è ricorsivo. Perché $x \in K \Leftrightarrow (x, x) \in K_0$
-\paragraph{Riduzione} $f$ è una \textbf{riduzione} da A a B, si scrive $A \leq_f B$ $\Leftrightarrow (\forall x \in A \Leftarrow f(x) \in B)$\\
+\paragraph{}\textbf{K} ricorsivamente enumerabile? Si.\\
+Prendo l'$x$-esima macchina, la applico a $x$ e converge $\Rightarrow$ $x \in K$. Quindi $K$ è dominio di una funzione.
+\paragraph{}\textbf{K} ricorsivo? No.\\
+\textbf{Dimostrazione} Per assurdo, \textbf{K} ricorsivo. Allora \begin{math} \chi_K(x) = 
+\left\{
+	\begin{array}{c c}
+		1 & \textsl{se }x \in K\\
+		0 & \textsl{altrimenti}
+	\end{array}
+\right.
+\end{math}
+è calcolabile totale.\\
+Prendiamo \begin{math}
+f(x) = 
+	\left\{
+	\begin{array}{c c}
+		\phi_x(x) + 1 & \textsl{se }\chi_K(x) = 1\\
+		0 & \textsl{altrimenti}
+	\end{array}
+	\right.
+\end{math}
+Poiché $\chi$ è calcolabile totale, anche $f$ lo è.\\
+Proviamo quindi a cercare il numero di $f$, ma \textbf{non lo troviamo}. Perché poniamo $i$ come indice di $f$, allora\\$\phi_i(i) = f(i) = \phi_(i) + 1$ se $i \in K$, ma non può essere. Se $i \not\in K$ non può essere $\phi_i(i) = f(i) = 0$ perché $\phi_i(i)\uparrow$
+\paragraph{Osservazione} \textbf{Ricorsivi} $\subset$ \textbf{ricorsivi enumerabili} $\subset$ non \textbf{ricorsivi enumerabili}
+\paragraph{Bootstrapping} Cross-compiler: un compilatore scritto in un certo linguaggio $L$, che compila $L \rightarrow A$, con $A$ altro linguaggio. Se $L$ non gira su una determinata macchina, posso applicarlo a sé stesso: produrrà qualcosa scritto in $A$ che prende $L$ e produce $A$.\\
+$$C_L^{L\rightarrow A} (C_L^{L\rightarrow A})= C_A^{L\rightarrow A}$$
+Qeusto assomiglia alla nostra K.\\
+K$_0$ = \{$(x, y)$ $|$ $\phi_y(x)\downarrow$\}: scrivo un programma che prende un altro programma in input e testa per verificare se termina su un input. Questo è il \textbf{problema della fermata} (\textbf{halting}), che detto in altri termini: dato $x$ e $y$, il programma $P_y(x)$ termina?\\
+K$_0$ non è ricorsivo. Perché $x \in K \Leftrightarrow (x, x) \in K_0$, quindi se $K_0$ fosse ricorsivo lo sarebbe anche $K$.
+\subsection{Riduzioni}
+\paragraph{Riduzione} $f$ è una \textbf{riduzione} da A a B, si scrive $A \leq_f B$ $\Leftrightarrow (\forall x \in A \Leftrightarrow f(x) \in B)$\\
 Proprietà: $A \leq_f B \Leftrightarrow \overline{A} \leq_f \overline{B}$
-\paragraph{Famiglia di riduzioni} $A \leq_F B \Leftrightarrow \exists\:f \in F$ $|$ $A \leq_F B$. Di queste ci interessano quelle che mantengono determinate proprietà.\\
-\paragraph{Classi di problemi} $D, E$ \textbf{classi di problemi} $D \subseteq E (\subseteq$ ricorsivi$)$, allora $\leq_F$ \textbf{classifica} $D$, $E$ $\Leftrightarrow \forall A, B, C$
+\paragraph{Famiglia di riduzioni} $A \leq_F B \Leftrightarrow \exists\:f \in F$ $|$ $A \leq_F B$. Di queste ci interessano quelle che mantengono determinate proprietà.
+\paragraph{Classi di problemi} $\mathscr{D}, \mathscr{E}$ \textbf{classi di problemi} $\mathscr{D} \subseteq \mathscr{E} (\subseteq$ ricorsivi$)$, allora $\leq_F$ \textbf{classifica} $\mathscr{D}$, $\mathscr{E}$ $\Leftrightarrow \forall A, B, C$ problemi:
+\begin{multicols}{2}
 \begin{enumerate}
-	\item $A \leq_F A$\\ Cioè $id \in F$
-	\item $A \leq_F B$, $B \leq_F C$ $\Rightarrow A \leq_F C$\\ Cioè $f, g \in F \Rightarrow f(g) \in F$
-	\item $A \leq_F B$, $B \in D \Rightarrow A \in D$\\
-	\textbf{Preordine parziale}, perché non vale la simmetria. Potrebe A min B, B min A ma non coincidere\\
-	D è ideale, o chiuso all'ingiù per riduzione.
-	\item $A \leq_F B$, $B \in E \Rightarrow A \in E$\\
-	E è ideale, o chiuso all'ingiù per riduzione.
+	\item $A \leq_F A$\\ Cioè l'identità $\in F$
+	\item $A \leq_F B$, $B \leq_F C$ $\Rightarrow A \leq_F C$\\ Cioè $f, g \in F \Rightarrow f(g) \in F$, $f$ chiusa rispetto alla composizione.
+	\item $A \leq_F B$, $B \in \mathscr{D} \Rightarrow A \in \mathscr{D}$\\
+	\textbf{Preordine parziale}, perché non vale la simmetria. Potrebbe $A \leq_F B$, $B \leq_F A$ ma non coincidere\\
+	D è \textbf{ideale}, o \textbf{chiuso all'ingiù per la riduzione}.
+	\item $A \leq_F B$, $B \in \mathscr{E} \Rightarrow A \in \mathscr{E}$\\
+	E è \textbf{ideale}, o \textbf{chiuso all'ingiù per riduzione}.
 \end{enumerate}
+\begin{center}
+	\includegraphics[scale=1]{1.png}
+\end{center}
+\end{multicols}
+\pagebreak
 \subsection{Problema Arduo}
-H è $\leq_F$-arduo per E $\Leftrightarrow \forall A \in E A \leq_F H$
+H è $\leq_F$-arduo per $\mathscr{E} \Leftrightarrow \forall A \in \mathscr{E}\:\:\:\: A \leq_F H$
 \subsection{Problema Completo}
-C è $\leq_F$-completo per E $\Leftrightarrow C \leq_F$-arduo e $C \in E$
-\paragraph{Dim} Sia $\leq_F$ classifica D ed E, allora
-\begin{list}{}{}
-	\item C $\leq_F$-completo per E, C $\subset$ D $\Leftrightarrow$ D = E
-\end{list}
-Per ipotesi, $C \in D, A in E$
+C è $\leq_F$-completo per $\mathscr{E} \Leftrightarrow C \leq_F$-arduo e $C \in \mathscr{E}$\\
+Sia $\leq_F$ classifica $\mathscr{D}$ ed $\mathscr{E}$, allora C $\leq_F$-completo per $\mathscr{E}$, C $\subset \mathscr{D} \Leftrightarrow \mathscr{D} = \mathscr{E}$\\\\
+Per ipotesi, $C \in \mathscr{D}, A \in \mathscr{E}$ allora $A \leq_F C$. Allora, per 3, anche $A \in \mathscr{D}$\\
+Se $A \leq_F$-completo per $\mathscr{E}$, $B \in \mathscr{E}$ e $A \leq_F B \Leftrightarrow B \leq_F$-completo per $\mathscr{E}$. Quindi se un problema completo si riduce ad un altro problema della stessa classe, allora anche quest'altro problema è completo.\\
+Questo perché $\forall D \in \mathscr{E} \Rightarrow D \leq_F A, A \leq_F B$ e per 2 $D \leq_F B$\\\\
+Se $A \leq_F B$ allora, se la riduzione misura in qualche modo la difficoltà di un problema, $A$ \textbf{è al massimo difficile quanto} $B$ e $B$ \textbf{è più difficile (o uguale) di} $A$.\\
+Quindi dovremmo cercare una famiglia di riduzioni che classificano $\mathscr{R}$ (ricorsive) e $\mathscr{RE}$ (ricorsive enumerabili).
 \end{document}
