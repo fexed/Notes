@@ -21,6 +21,7 @@
 
 # Imports
 import sys
+import rrdtool as rrd
 from time import sleep
 from datetime import datetime, timedelta
 from pysnmp.hlapi import *
@@ -35,7 +36,18 @@ else:
     if len(sys.argv) >= 4: #If no port is given, use the default one
         port = int(sys.argv[3])
     else:
-        port = 161    
+        port = 161
+    rrdname = "cpu_" + hostname + ".rrd"
+    try: f = open(rrdname)
+    except FileNotFoundError:
+        print("Creating rrd \"" + rrdname + "\"")
+        rrd.create(
+            rrdname,
+            "--start", "now",
+            "--step", "1",
+            "RRA:AVERAGE:0.5:1:3600",
+            "DS:cpu:GAUGE:5:0:100")
+    finally: f.close()
     print("Requesting " + hostname + ":" + str(port) + "\n")
     now = datetime.now()
 
@@ -117,7 +129,8 @@ else:
     else:
         ucdCpu = True
         cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
-        print(cpuIdle + "%")
+        rrd.update([rrdname, "--template", "cpu", "N:" + str(100 - int(cpuIdle))])
+        print(str(100 - int(cpuIdle)) + "%")
 
 # memTotalReal
     ucdMemTot = False
@@ -162,7 +175,7 @@ else:
         print(memAvail + " KB")
 
 # loop
-    for i in range(5):
+    for i in range(60):
         sleep(1)
         now = datetime.now()
         currtime = now.strftime("%H.%M.%S")
@@ -184,7 +197,8 @@ else:
                 print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
             else:
                 cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
-                print(cpuIdle + "%")
+                rrd.update([rrdname, "--template", "cpu", "N:" + str(100 - int(cpuIdle))])
+                print(str(100 - int(cpuIdle)) + "%")
         else:
             print("skip")
 
@@ -209,4 +223,17 @@ else:
                 print(memAvail + "/" + memTotal + " KB")
         else:
             print("skip")
+    graphv_args = [
+        rrdname + '.png',
+        '--title', hostname + " CPU",
+        '--start', 'now-1h',
+        '--end', 'now',
+        '--slope-mode',
+        '--font', 'DEFAULT:7:',
+        'DEF:CPU=cpu_localhost.rrd:cpu:MAX',
+        'LINE1:CPU#0000FF:CPU',
+        'GPRINT:CPU:LAST:CPU\: %5.2lf'
+    ]
+    
+    rrd.graphv(*graphv_args)
 
