@@ -8,8 +8,9 @@
 # reads some simple informations.
 #
 # Installation
-# sudo apt install python3 python3-pip
+# sudo apt install python3 python3-pip rrdtool librrd8 librrd-dev
 # pip3 install pysnmp
+# pip3 install rrdtool
 # 
 # Usage
 # python3 snmptest.py community hostname [port]
@@ -232,7 +233,7 @@ else:
         '--font', 'DEFAULT:7:',
         'DEF:CPU=cpu_localhost.rrd:cpu:MAX',
         'LINE1:CPU#0000FF:CPU',
-        'GPRINT:CPU:LAST:CPU\: %5.2lf'
+        'GPRINT:CPU:LAST:Last value\: %5.2lf'
     ]
     
     rrd.graphv(*graphv_args)
