@@ -231,7 +231,7 @@ else:
         '--end', 'now',
         '--slope-mode',
         '--font', 'DEFAULT:7:',
-        'DEF:CPU=cpu_localhost.rrd:cpu:MAX',
+        'DEF:CPU=' + rrdname + ':cpu:MAX',
         'LINE1:CPU#0000FF:CPU',
         'GPRINT:CPU:LAST:Last value\: %5.2lf'
     ]
