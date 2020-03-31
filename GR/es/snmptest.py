@@ -178,8 +178,9 @@ else:
         print(memAvail + " KB")
 
 # loop
+    sleep(1)
     for i in range(60):
-        sleep(1)
+        start = datetime.now().timestamp()
         now = datetime.now()
         currtime = now.strftime("%H.%M.%S")
         print("\n" + str(i+1) + " (" + currtime + ")")
@@ -226,6 +227,9 @@ else:
                 print(memAvail + "/" + memTotal + " KB")
         else:
             print("skip")
+        end = datetime.now().timestamp()
+        slptm = 1 - (end - start)/1000
+        sleep(slptm)
 
     # RRD Graph
     graphv_args = [
@@ -241,4 +245,5 @@ else:
     ]
     
     rrd.graphv(*graphv_args)
+    print("CPU graph: " + rrdname + ".png")
 
