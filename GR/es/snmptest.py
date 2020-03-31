@@ -179,11 +179,12 @@ else:
 
 # loop
     sleep(1)
+    print("\n\n\n")
     for i in range(60):
         start = datetime.now().timestamp()
         now = datetime.now()
         currtime = now.strftime("%H.%M.%S")
-        print("\n" + str(i+1) + " (" + currtime + ")")
+        print("\r\033[F\033[K\033[F\033[K\033[F" + str(i+1) + " (" + currtime + ")")
         print("\tCPU\t\t", end = '');
         if ucdCpu:
             errInd, errName, errIndex, varBinds = next(
