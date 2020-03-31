@@ -5,7 +5,8 @@
 # Documentation
 # Author: Federico Matteoni
 # This is a simple script that queries a SNMP server and
-# reads some simple informations.
+# reads some simple informations. The script populates a RRD database
+# and plots a graph
 #
 # Installation
 # sudo apt install python3 python3-pip rrdtool librrd8 librrd-dev
@@ -39,7 +40,9 @@ else:
     else:
         port = 161
     rrdname = "cpu_" + hostname + ".rrd"
-    try: f = open(rrdname)
+    try:
+        f = open(rrdname)
+        f.close()
     except FileNotFoundError:
         print("Creating rrd \"" + rrdname + "\"")
         rrd.create(
@@ -48,7 +51,6 @@ else:
             "--step", "1",
             "RRA:AVERAGE:0.5:1:3600",
             "DS:cpu:GAUGE:5:0:100")
-    finally: f.close()
     print("Requesting " + hostname + ":" + str(port) + "\n")
     now = datetime.now()
 
@@ -224,6 +226,8 @@ else:
                 print(memAvail + "/" + memTotal + " KB")
         else:
             print("skip")
+
+    # RRD Graph
     graphv_args = [
         rrdname + '.png',
         '--title', hostname + " CPU",
