@@ -69,7 +69,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         targetname = varBinds[0].prettyPrint().split("=")[1].strip()
         print(targetname)
@@ -87,7 +87,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         target = varBinds[0].prettyPrint().split("=")[1].strip()
         print("\t" + target)
@@ -106,7 +106,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         ticks = int(varBinds[0].prettyPrint().split("=")[1].strip())
         secs = ticks/100
@@ -128,7 +128,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         ucdCpu = True
         cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
@@ -150,7 +150,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         ucdMemTot = True
         memTotal = varBinds[0].prettyPrint().split("=")[1].strip()
@@ -171,7 +171,7 @@ else:
     if errInd:
         print(errInd)
     elif errName:
-        print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+        print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
     else:
         ucdMemAvail = True
         memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
@@ -179,11 +179,13 @@ else:
 
 # loop
     sleep(1)
-    print("\n\n\n")
+    print("\n\n\n") # Moving down to not erase previous output
     for i in range(60):
         start = datetime.now().timestamp()
         now = datetime.now()
         currtime = now.strftime("%H.%M.%S")
+        # "\033[K" clear to the end of the line
+        # "\033[F" moves cursor up one line
         print("\r\033[F\033[K\033[F\033[K\033[F" + str(i+1) + " (" + currtime + ")")
         print("\tCPU\t\t", end = '');
         if ucdCpu:
@@ -199,7 +201,7 @@ else:
             if errInd:
                 print(errInd)
             elif errName:
-                print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+                print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
             else:
                 cpuIdle = varBinds[0].prettyPrint().split("=")[1].strip()
                 rrd.update([rrdname, "--template", "cpu", "N:" + str(100 - int(cpuIdle))])
@@ -222,7 +224,7 @@ else:
             if errInd:
                 print(errInd)
             elif errName:
-                print('Errore %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
+                print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
             else:
                 memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
                 print(memAvail + "/" + memTotal + " KB")
@@ -240,6 +242,8 @@ else:
         '--end', 'now',
         '--slope-mode',
         '--font', 'DEFAULT:7:',
+        '--upper-limit', '100',
+        '--lower-limit', '0',
         'DEF:CPU=' + rrdname + ':cpu:MAX',
         'LINE1:CPU#0000FF:CPU',
         'GPRINT:CPU:LAST:Last value\: %5.2lf'
