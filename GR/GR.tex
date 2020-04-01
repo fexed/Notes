@@ -341,5 +341,37 @@ Altrimenti in base ai valori storici: vedo qual'è la media nel passato e se mi 
 Una cosa interessante che fa RRDtool. La derivata da indicazione di quanto mi discosto dall'osservazione precedente. Quindi la prima domanda è quanto tempo osservare. Anche dalla natura della metrica: una derivata violenta significa problemi al sensore.\\
 Inoltre la derivata su altre misure possono anche essere molto ampie senza che sia allarmante: download/upload, ad esempio.\\
 Però il color-coding: verde ok, giallo mh e rosso male male, è ottimo. Keep it simple\\
-Holt-Winters.
+Holt-Winters.\\\\
+\begin{list}{}{tutti valori letti dalla scheda di rete}
+	\item ifindex: identifica l'interfaccia
+	\item ifdescr: descrizione interfaccia (ad es: eth0 ma anche descrizioni significative)
+	\item iftype: tipo interfaccia (ethernet, \ldots)
+	\item ifmtu: maximum transfer unit, indicata per poter evitare cattive configurazioni nell'mtu. MTU deve essere la stessa perché se uno trasmette a $>$ mtu di uno dei due non comunicano più
+	\item ifspeed: 
+	\item ifphysaddress: indirizzo fisico della porta di rete, mac address della porta dello switch
+	\item ifadminstatus: se scheda è fisicamente presente sullo switch
+	\item ifoperstatus: per una scheda presente, se è operativa oppure no
+	\item iflastchanged: sysuptime dell'ultima volta che l'interfaccia è cambiata di stato
+	\item ifinoctets: otteti in
+	\item ifinucastpkts: unicast in
+	\item ifinnucastpkts: not-unicast in
+	\item ifindiscards: discarded in
+	\item ifinerrors: errori in
+	\item ifinunknownprotos: sconosciuti in
+	\item ifoutoctets: otteti out
+	\item ifoutucastpkts: unicast out
+	\item ifoutnucastpkts: not-unicast out
+	\item ifoutdiscards: discarded out, dipende dall'implementazione della scheda
+	\item ifouterrors: errori out, dipende dall'implementazione della scheda
+	\item ifoutqlen: stessa info del comando \texttt{netstat} e simili, info sulle code in uscita
+	\item ifspecific:
+\end{list}
+router frammenta il pacchetto quando mtu della linea ricevente è più piccolo. ma può essere che mittente mandi pacchetti frammentati quando qualcuno chiede a lui di mandare pacchetto troppo lungo rispetto mtu.\\
+Frammentazione è concetto dell'IPv4\\
+TCP frammentazione non c'è ma non perché non si possa fare, ma perché un pacchetto TCP non può essere frammentato (è indicazione di errore che qualcosa nel TCP non ha funzionato). Path MTU discovery (PMTUD), pacchetti sempre più grandi finché non si trova dimensione massima con l'\textbf{obiettivo di evitare la frammentazione}. Perché meccanismi TCP permettono di farlo. UDP pacchetti vivono di vita propria quindi può succedere frammentazione.\\
+Pacchetti non unicast sono "problematici" perché riempino le porte dello switch.
+\chapter{Bridge MIB}
+Bridge è mettere assieme due interfacce di rete\\
+Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
+
 \end{document}
