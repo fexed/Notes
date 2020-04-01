@@ -39,7 +39,7 @@ else:
         port = int(sys.argv[3])
     else:
         port = 161
-    rrdname = "cpu_" + hostname + ".rrd"
+    rrdname = "snmptest_" + hostname + ".rrd"
     try:
         f = open(rrdname)
         f.close()
@@ -50,7 +50,9 @@ else:
             "--start", "now",
             "--step", "1",
             "RRA:AVERAGE:0.5:1:3600",
-            "DS:cpu:GAUGE:5:0:100")
+            "DS:cpu:GAUGE:5:0:100",
+            "DS:memperc:GAUGE:5:0:100")
+    print("Using " + rrdname)
     print("Requesting " + hostname + ":" + str(port) + "\n")
     now = datetime.now()
 
@@ -227,7 +229,10 @@ else:
                 print('Error %s@[%s]' % (errName, varBinds[int(errIndex) - 1][0]))
             else:
                 memAvail = varBinds[0].prettyPrint().split("=")[1].strip()
-                print(memAvail + "/" + memTotal + " KB")
+                print(memAvail + "/" + memTotal + " KB", end = '')
+                memperc = round(float(100) - (float(memAvail)*100)/float(memTotal), 2)
+                rrd.update([rrdname, "--template", "memperc", "N:" + str(memperc)])
+                print(" (" + str(memperc) + " %)")
         else:
             print("skip")
         end = datetime.now().timestamp()
@@ -236,7 +241,7 @@ else:
 
     # RRD Graph
     graphv_args = [
-        rrdname + '.png',
+        "cpu" + rrdname + '.png',
         '--title', hostname + " CPU",
         '--start', 'now-1h',
         '--end', 'now',
@@ -250,5 +255,22 @@ else:
     ]
     
     rrd.graphv(*graphv_args)
-    print("CPU graph: " + rrdname + ".png")
+    print("CPU graph: cpu" + rrdname + ".png")
+
+    graphv_args = [
+        "mem" + rrdname + '.png',
+        '--title', hostname + " MEM",
+        '--start', 'now-1h',
+        '--end', 'now',
+        '--slope-mode',
+        '--font', 'DEFAULT:7:',
+        '--upper-limit', '100',
+        '--lower-limit', '0',
+        'DEF:MEM=' + rrdname + ':memperc:MAX',
+        'LINE1:MEM#FF0000:MEM',
+        'GPRINT:MEM:LAST:Last value\: %5.2lf'
+    ]
+    
+    rrd.graphv(*graphv_args)
+    print("MEM graph: mem" + rrdname + ".png")
 
