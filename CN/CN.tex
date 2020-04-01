@@ -906,6 +906,192 @@ Mal condizionato per $|\alpha| \rightarrow +\infty$
 %TODO
 \paragraph{Esercizio 2} $A = I + \theta e_1 e_n ^T + \theta e_n e_1^T$
 %TODO
+\section{Esercitazione 4}
+$A = (a_{ij})$ con $a_{ij} = min(i, j)$
+\begin{enumerate}
+	\item Dire se A ammette fattorizzazione LU
+	\item In caso affermativo, determinare la fattorizzazione
+	\item Dire se la fattorizzazione è unica
+	\item Mostrare che A è invertibile
+	\item Scrivere un programma Matlab per la risoluzione di $Ax = b$ con costo lineare
+\end{enumerate}
+$A \in R^{n \times n}$ con $a_{ij} = min(i, j)$\\
+Ad esempio $n = 4$, abbiamo
+\begin{math}
+A = \left[
+\begin{array}{c c c c}
+	1 & 1 & 1 & 1\\
+	1 & 2 & 2 & 2\\
+	1 & 2 & 3 & 3\\
+	1 & 2 & 3 & 4
+\end{array}
+\right]
+\end{math}
+Difficile applicare il teorema, perché valutare la complessità delle sottomatrici principali di testa ha la stessa complessità: sono dello stesso tipo della matrice $A$.\\
+Analizziamo i casi minori, $n = 2$ quindi \begin{math}
+A = \left[
+\begin{array}{c c}
+	1 & 1\\
+	1 & 2
+\end{array}
+\right]
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	l & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	u_1 & u_2\\
+	0 & u_3
+\end{array}
+\right]
+\end{math}
+e avremo $u_1 = 1, u_2 = 1, u_3 = 1$ e $l = 1$\\
+Quindi \begin{math}
+A = \left[
+\begin{array}{c c}
+	1 & 1\\
+	1 & 2
+\end{array}
+\right]
+= \left[
+\begin{array}{c c}
+	1 & 0\\
+	1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c}
+	1 & 1\\
+	0 & 1
+\end{array}
+\right]
+\end{math}\\
+$n = 3$ quindi \begin{math}
+A = \left[
+\begin{array}{c c c}
+	1 & 1 & 1\\
+	1 & 2 & 2\\
+	1 & 2 & 3
+\end{array}
+\right]
+\end{math}
+e usando il teorema, procediamo "upgradando" la fattorizzazione di ordine 2\\
+\begin{math}
+A = \left[
+\begin{array}{c c c}
+	1 & 1 & 1\\
+	1 & 2 & 2\\
+	1 & 2 & 3
+\end{array}
+\right]
+= \left[
+\begin{array}{c c | c}
+	1 & 0 & 0\\
+	1 & 1 & 0\\
+	\hline
+	 & & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c | c}
+	1 & 1 & \\
+	0 & 1 & \\
+	\hline
+	0 & 0 & 
+\end{array}
+\right]
+= \left[
+\begin{array}{c c c}
+	1 & 0 & 0\\
+	1 & 1 & 0\\
+	1 & 1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{c c c}
+	1 & 1 & 1\\
+	0 & 1 & 1\\
+	0 & 0 & 1
+\end{array}
+\right]
+\end{math}
+Ottenendo di nuovo una triangolare superiore con tutti 1 e una triangolare inferiore con tutti 1. Ma non posso dire che \textit{chiaramente} anche la matrice di ordine $n$ generico si fattorizza così, perché fattorizzare per $n$ non dà alcuna informazione sulla fattorizzazione di $m > n$.\\
+Posso \textit{dimostrare} che $A$ si fattorizza LU con due matrici una triangolare inferiore e una triangolare superiore con tutti 1\\
+$B = LU = (b_{ij})$ con $b_{ij} = (i$-esima riga di $L)\times(j$-esima colonna di $U) = 1 + 1 + \ldots + 1$ per $min(i, j)$ volte quindi $= min(i, j)$ e quindi $B = A$\\
+Quindi ho dimostrato che $A$ si fattorizza LU con due matrici una triangolare inferiore con tutti 1 per una triangolare superiore per tutti 1.\\\\
+Invertibile? det$A =$ det$(LU)$ = det$L\cdot$det$U = 1 \cdot 1$ = $1 \neq 0$ quindi $A$ è invertibile.\\
+Osservo che $A = L \cdot U$ e il termine della sottomatrice principale di ordine $k$ di $A$, cioè \begin{math}
+A = \left[
+\begin{array}{c | c}
+	A_k & \\
+	\hline
+	&
+\end{array}
+\right]
+= \left[
+\begin{array}{c | c}
+	L_k & \\
+	\hline
+	&
+\end{array}
+\right]
+\left[
+\begin{array}{c | c}
+	U_k & \\
+	\hline
+	&
+\end{array}
+\right]
+\end{math}\\
+Quindi $A_k = L_k\cdot U_k$ quindi la fattorizzazione LU di A implica una fattorizzazione LU di tutte le radici principali di testa.\\\\
+Risoluzione di $Ax = b$, usando la fattorizzazione $LU$ perché $LUx = b$ e $Ux = y$ e $Ly = b$.
+\begin{lstlisting}
+y(1) = b(1)/l(1, 1);
+for k = 2:n
+	s = 0;
+	for j = 1:k-1
+		s = s + l(k, j)*y(j);
+	end
+	y(k) = (b(k) - s)/l(k ,k);
+end
+\end{lstlisting}
+In generale questo algoritmo ha un costo quadratico. Ma gli elementi di $l$ sono $= 1$
+\begin{lstlisting}
+y(1) = b(1);
+for k = 2:n
+	s = 0;
+	for j = 1:k-1
+		s = s + y(j);
+	end
+	y(k) = b(k) - s;
+end
+\end{lstlisting}
+Non faccio più operazioni moltiplicative, ma il costo rimane quadratico. Ma posso fare un'osservazione: $s = s + y_j$ è una somma crescente
+\begin{lstlisting}
+y(1) = b(1);
+s = 0
+for k = 2:n
+	s = s + y(k - 1);
+end
+\end{lstlisting}
+Diventando così a costo lineare O($n$)
+\paragraph{Esercizio 2} 
+\begin{math}
+A = \left[
+\begin{array}{c c c c}
+	1 & - \gamma_1 & & \\
+	& 1 & \ddots & \\
+	& & 1 & -\gamma_{n-1} \\
+	\gamma_0 & & & 1\\
+\end{array}
+\right]
+\end{math}
+Proviamo che se |$\gamma_i$| < 1 allora A è invertibile. Possiamo farlo con Gerschgorin.\\
+$K_i = \{ z \in C$\ldots\\
+
 \pagebreak
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
