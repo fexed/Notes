@@ -372,6 +372,21 @@ TCP frammentazione non c'è ma non perché non si possa fare, ma perché un pacc
 Pacchetti non unicast sono "problematici" perché riempino le porte dello switch.
 \chapter{Bridge MIB}
 Bridge è mettere assieme due interfacce di rete\\
-Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
-
+Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?
+\chapter{Cattura}
+Quando cattura traffico intervengo sul traffico e me lo copio verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
+Gli sniffer necessiterebbero di diritti su
+\paragraph{Capabilities} Quando uno è SU ha diritti eccessivi rispetto a ciò che deve fare, quindi le \textbf{capabilities} sono le possibilità di spezzare i diritti di amministrazione in categorie: non c'è bisogno di essere root che fa veramente veramente tutto perché se ne può abusare. Quindi il concetto di root è spacchettato in varie possibilità: configurazione del MAC address, Net Admin\ldots\\
+Un'app quindi dovrebbe nascere con conetto di capabilities e avere diritti minimi necessari per fare ciò che vuole/deve fare.
+\paragraph{Filtro} Devo indicare l'interfaccia a cui sono interessato catturare pacchetti (eventualmente tutte) e in caso che tipo di pacchetti ricevere. Così il BPF driver \textbf{non} invia all'applicazioni pacchetti non interessanti, perché anche scartare qualcosa richiede tempo.\\
+BPF e sottosistema è localizzato nel kernel. Solamente la parte del pacchetto è inoltrata, il resto (filtro e copia dei pacchetti) è nel kernel.\\
+Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
+\section{\texttt{libpcap}}
+\paragraph{\texttt{pcap\_open\_live}} Parametri: \texttt{deviceName} scheda di rete, \texttt{maxCaptureLen} lunghezza massima del pacchetto (sia per efficienza, sia per privacy se non ho bisogno dell'intero pacchetto), \texttt{setPromiscuosMode} per abilitare la modalità promiscua (cattura tutto il traffico sulla scheda), \texttt{pktDelay} non c'erano i thread quindi hanno pensato di mettere un tempo massimo per cui aspettare un pacchetto e in caso ritornare senza valore, \texttt{errorBuffer} sempre per ragioni storiche se la \texttt{pcap\_open\_live} fallisce il buffer contiene la ragione per cui è fallita\\
+\texttt{live}: leggo traffico di rete in tempo reale. C'è la possibilità di aprire file \texttt{pcap} per leggere traffico salvato su file.\\
+%TODO problema del pcap
+In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'rrd è registrare i dati all'orario del pacchetto, non a quello di sistema
+\paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
+\paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
+\paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
 \end{document}
