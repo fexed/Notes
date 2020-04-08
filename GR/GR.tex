@@ -310,6 +310,38 @@ Importante sapere IP host che manda trap (potrebbe vederlo dal pacchetto UDP), p
 \texttt{sysDescr}(1) breve descrizione del sistema (stringa, \textbf{arbitraria})\\\\
 \texttt{sysObjectID}(2) identifica sia modello che costruttore, per riconoscerlo e andare nel relativo MIB o, ad esempio, mettere l'icona giusta.\\\\
 \texttt{sysUptIme}(3) da quanto è attivo l'\textbf{agent} (non è per forza identico a quello di sistema). Serve anche per poter leggere correttamente le variabili \texttt{gauge} per esempio, per fare la differenza per sapere quanto è cambiato il valore nell'ultimo minuto (ad esempio). Ma non posso aspettarmi che il nuovo valore sia maggiore (es: è saltata la corrente, oppure se il contatore ha fatto wrap (fine dei bit e ripartito da 0)) Quindi devo distinguere riavvio agent da wrap, non posso fare semplice differenza perché potrei tirare fuori numero sbagliato (es negativo, ma valore \texttt{unsigned} fa diventare grandissimo). Per sapere se si è riavviato agent o se contatore ha fatto wrap uso \texttt{sysUpTime}.
+\subsection{SNMPv2}
+Usato snmpv2 invece che v1 perché aveva problemi strutturali: il primo sono i contatori a 32bit che sono molto limitati per la tecnologia odierna (10-100Gbit il contatore si "riempie" molto velocemente). Inoltre nella v2 c'è tutto quello scartato in v1 per questioni di tempo (necesario fare protocollo in fretta)
+\paragraph{Primitive di SNMPv2} Sono tutto sommato le stesse con \texttt{GetBulk} e \texttt{Inform}
+\begin{list}{}{}
+	\item \texttt{GetBulk} per richieste più efficienti per massimizzare numero richieste in un pacchetto. Metà strada tra \texttt{Get} e \texttt{GetNext}. Oltre OID due parametri:
+	\begin{list}{}{}
+		\item \texttt{non-repeaters}: di tutti gli OID specificati, \texttt{non-repeaters} indicano quanti di quelli sono quelle variabili a cui applicare una \texttt{Get} secca e non in sequenza. Dei restanti, devo fare \texttt{max-repetitions} \texttt{GetNext}
+		\item \texttt{max-repetitions} quante \texttt{GetNext} applicare
+	\end{list}
+	Se chiedo poche cose non risparmio molto rispetto ad una \texttt{GetNext}, se chiedo troppe cose (\texttt{max-repetitions} troppo alto) devo stare attento che entri tutto in un pacchetto.
+	\item \texttt{Inform} è una sorta di \texttt{Trap} informata perché riceve una \texttt{response}. Altra differenza è che la \texttt{Inform} la può mandare sia un Manager (che può informare un Manager di livello superiore, per esempio) che un Agent
+\end{list}
+\paragraph{Formato} Hanno la stessa PDU ma con modifiche all'interno, però sostanzialmente è uguale
+\paragraph{Eccezioni} A differenza degli errori di SNMPv1 sono più esplicativi. Ad esempio \texttt{noSuchName} spacchettata in \texttt{noSuchObject}, \texttt{noSuchInstance} o \texttt{endOfMibView}. Sono un \textbf{raffinamento dei codici di errore di SNMPv1} e un \textbf{miglioramento delle primitive}.
+\paragraph{Differenze principali} Più velocità con la Bulk, contatori a 64bit, errori molto più dettagliati. Ma \textbf{non risolve granché} in termini di sicurezza.
+\subsection{SNMPv3}
+\paragraph{Obiettivi} Bisogna risolvere problemi di sicurezza soprattutto per la \texttt{Set}. Inoltre bisogna fare il design di un'architettura a lungo termine.\\
+Supportare implementazioni sia complesse che semplici (\textbf{scalabilità}).\\
+Il tutto \textbf{rimanendo il più semplici possibile}. Nella realtà non è stato così, e la diffusione è ancora molto limitata con la maggior parte delle reti che continuano ad usare v1 e v2.
+\paragraph{Architettura} Tanti componenti, rimovibili e intercambiabili. Vuoti se una certa implementazione non la supporta, rimovibili a seconda di cambiamenti tecnologici o di implementazione.\\
+Supporta vari tipi di protocollo per lo scambio di messaggi e per il sistema di sicurezza (comunità, utente, "\textit{altro}")
+\paragraph{Caratteristiche più importanti} 
+\begin{enumerate}
+	\item \textbf{Sicurezza}\\
+	Il messaggio è autentico? Data Integrity e Authentication\\
+	Tramite una funzione hash, con chiave simmetrica faccio l'hash dei dati e calcolo un MAC (Message Autethication Code) es MD5. Pacchetto diventa User (key), MAC e Data.\\
+	Il ricevente ricalcola l'hash e se MAC calcolato e ricevuto sono uguali allora apposto.\\
+	Il problema è la \textbf{chiave simmetrica}.
+	\item \textbf{Protezione dalla ripetizione di vecchi messaggi}\\
+	Il ricevente conosce l'orario del messaggio ricevuto, se il messaggio ricevuto è nell'intervallo di validità e \textit{più giovane} dell'ultimo messaggio valido, allora è processato e l'orologio viene aggiornato. Quindi, ad inizio comunicazione gli orologi vengono sincronizzati.
+	\item \textbf{Protezione dallo sniffing}: si crittano i dati
+\end{enumerate}
 \chapter{Rete Cellulare}
 GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella.\\
 Create session crea la connessione e la stabilisce.\\
@@ -372,7 +404,8 @@ TCP frammentazione non c'è ma non perché non si possa fare, ma perché un pacc
 Pacchetti non unicast sono "problematici" perché riempino le porte dello switch.
 \chapter{Bridge MIB}
 Bridge è mettere assieme due interfacce di rete\\
-Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?
+Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
+Attraverso bridge-mib per la topologia di rete. Importante anche per inquadrare che impatto può avere un'allarme sul sistema. Così so sia quali sono i nodi principali ma anche l'impatto di qualche problema: se cade una macchina che collega tante altre macchine, cadono tutte, mentre se cade no nodo marginale il problema è più contenuto.
 \chapter{Cattura}
 Quando cattura traffico intervengo sul traffico e me lo copio verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
 Gli sniffer necessiterebbero di diritti su
@@ -389,4 +422,5 @@ In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orari
 \paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
 \paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
 \paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
+
 \end{document}
