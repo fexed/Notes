@@ -1805,14 +1805,77 @@ $A :- B_1, B_2, \ldots, B_n$ ($A$ \textbf{testa}, $B_1, \ldots, B_n$ \textbf{cor
 $A$ \textbf{vero} se sono veri $B_1, \ldots, B_n$, in accordo al significato logico di implicazione. Questa è la \textbf{interpretazione dichiarativa}.\\
 \textbf{Interpretazione procedurale}: la testa può essere vista come una \textbf{chiamata di procedura} e il corpo come una serie di procedure da eseguire in sequenza.\\
 Altre convenzioni: in PL le variabili sono indicate con le lettere maiuscole e le costanti con le lettere minuscole
-%TODO https://elearning.di.unipi.it/pluginfile.php/31082/mod_resource/content/3/KR-Rules2020.pdf, p. 21
 \subsection{Risoluzione SLD}
-\paragraph{Selection Linear Definit-Clauses} strat lienare ordinata basata su un insieme di supporto (clausola goal), lineare nell'input. SLD è completa per clausole di horn.
-\paragraph{Alberi di Risoluzione SLD}
-Albero SLD per il goal \texttt{antenato(lia, mark)}\\ %TODO
-\paragraph{Strategia di visita dell'albero sld e prolog}
-Prolog genera albero di risoluzione con ricerca in profondità e backtracking su fallimento quindi non è una strat completa. PRogrammatore ha possibile di controlalre ordine di generazione perché regole applicate nell'ordine in cui sono scritte nel file.\\
-%TODO esempio
+\paragraph{Selection Linear Definit-Clauses} Strategia \textbf{lineare} nell'input e  \textbf{ordinata}, \textbf{basata su un insieme di supporto} (la clausola goal).\\SLD è \textbf{completa per clausole Horn}.
+\paragraph{Alberi di Risoluzione SLD} Dato un programma logico P, l'\textbf{albero SLD per un goal G} è definito come segue:
+\begin{list}{}{}
+	\item Ogni nodo dell'albero corrisponde ad un goal (\textbf{congiuntivo})
+	\item La radice è \texttt{:- G$_1$, G$_2$, \ldots, G$_k$}, il nostro goal
+	\item Sia \texttt{:- G$_1$, G$_2$, \ldots, G$_k$} un nodo dell'albero: il \textbf{nodo ha tanti discendenti quanti sono i fatti e le regole in P la cui testa è unificabile con \texttt{G$_1$}}\\
+	Se \texttt{A :- B$_1$, \ldots, B$_k$} $\wedge$ \texttt{A} unificabile con \texttt{G$_1$} $\wedge \gamma =$ MGU(\texttt{A, G$_1$}) $\Rightarrow$ un discendente\\
+	è il goal \texttt{:- (B$_1$, \ldots, B$_k$, G$_2$, \ldots, G$_k$)$\gamma$}
+	\item I nodi che sono \textbf{clausole vuote} sono \textbf{successi}
+	\item I \textbf{nodi che non hanno successori} sono \textbf{fallimenti}
+\end{list}
+\subparagraph{Esempio}
+\begin{enumerate}
+	\item Genitore(X, Y) :- Padre(X, Y)
+	\item Genitore(X, Y) :- Madre(X, Y)
+	\item Antenato(X, Y) :- Genitore(X, Y)
+	\item Antenato(X, Y) :- Genitore(X, Z), Antenato(Z, Y)
+	\item Padre(Gio, Mark)
+	\item Padre(Gio, Luc)
+	\item Madre(Lia, Gio)\\
+	\item :- Antenato(Lia, Mark) \textit{goal negato}
+\end{enumerate}
+\begin{center}
+\includegraphics[scale=0.7]{sldesempio.png}
+\end{center}
+\pagebreak
+\paragraph{Risoluzione SLD} Strategia completa per clausole Horn definite.\\
+Se $P \cup \{\neg G\}$ è insoddisfacibile, allora una delle foglie deve essere la clausola vuota (successo).\\
+\textbf{Non è restrittivo andare in ordine} nel risolvere i sottogoal in $\wedge$. La sostituzione corrispondente è la \textbf{risposta calcolata}.
+\paragraph{Strategia di visita dell'albero SLD e PROLOG} A seconda di come viene visitato l'albero, la clausola vuota potrebbe non essere trovata: la strategia di ricerca può essere la responsabile dell'incompletezza.\\
+In Prolog la visita dell'albero di risoluzione avviene con una ricerca in profondità e backtracking su fallimento, quindi non è una strategia completa. Il programmatore ha la possibilità di controllare l'ordine di generazione perché le regole sono applicate nell'ordine in cui sono scritte nel file.
+\section{Sistemi a Regole in Avanti}
+\paragraph{Modus Ponens Generalizzato}
+$$\frac{p_1'\: p_2'\: \ldots\: p_n'\:\:(p_1\wedge p_2\wedge\ldots\wedge p_n\Rightarrow q)}{(q)\:\Theta} $$
+Dove $\Theta$ = MGU($p_i', p_i$) $\forall\: i$\\
+\begin{list}{}{Regola \textbf{corretta}:}
+	\item Si istanziano gli universali
+	\item Si istanziano le regole
+	\item Si applica il Modus Ponens classico
+\end{list}
+Più in generale di MP, ma anche più limitata nella forma del conseguente
+\paragraph{Esempio} Supponiamo di avere nella KB:
+\begin{list}{}{}
+	\item King(John)
+	\item Greedy(y)
+	\item King(x) $\wedge$ Greedy(x) $\Rightarrow$ Evil(x)
+\end{list}
+Con $\Theta$ = \{x/John, y/John\} si ottiene
+\begin{list}{}{}
+	\item King(John), Greedy(John), King(John) $\wedge$ Greedy(John) $\Rightarrow$ Evil(John)
+\end{list}
+Quindi la conclusione della regola è 
+\begin{list}{}{}
+	\item Evil(John)
+\end{list}
+\paragraph{Esempio di concatenazione in avanti}
+"\textit{È un crimine per un Americano vendere armi a una nazione ostile. Il
+paese Nono, un nemico dell’America, ha dei missili, e tutti i missili gli
+sono stati venduti dal colonnello West, un Americano.}"\\
+\textbf{Dimostrare} che \textit{West è un criminale}. \textbf{Formalizzazione}:
+\begin{list}{}{}
+	\item Americano(x) $\wedge$ Arma(y) $\wedge$ Vende(x, y, z) $\wedge$ Ostile(z) $\Rightarrow$ Criminale(x)
+	\item $\exists$x Possiede(Nono,x) $\wedge$ Missile(x)\\
+	Possiede(Nono, M$_1$) $\wedge$ Missile(M$_1$)
+	\item Missile(x)$\wedge$Possiede(Nono,x) $\Rightarrow$ Vende(West, x, Nono)
+	\item Missile(x) $\Rightarrow$ Arma(x)
+	\item Nemico(x, America) $\Rightarrow$ Ostile(x)
+	\item Americano(West)
+	\item Nemico(Nono, America)
+\end{list}
 \chapter{Machine Learning}
 \section{Introduzione al Machine Learning}
 \paragraph{Apprendimento} Principio universale che riguarda gli esseri viventi, al cuore del problema dell'intelligenza sia biologica che artificiale. \\
