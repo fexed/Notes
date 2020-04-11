@@ -1861,12 +1861,18 @@ Quindi la conclusione della regola è
 \begin{list}{}{}
 	\item Evil(John)
 \end{list}
-\paragraph{Esempio di concatenazione in avanti}
+\paragraph{Concatenazione in avanti} Un semplice processo inferenziale (FOL FC Ask) \textbf{applicaripetutamente il Modus Ponens generalizzato} per ottenere nuovi fatti, fino a che:
+\begin{list}{}{}
+	\item Si dimostra quello che si desidera
+	\item Nessun fatto nuovo può essere raggiunto
+\end{list}
+Strategia di \textbf{ricerca sistematica in ampiezza}
+\subparagraph{Esempio}
 "\textit{È un crimine per un Americano vendere armi a una nazione ostile. Il
 paese Nono, un nemico dell’America, ha dei missili, e tutti i missili gli
 sono stati venduti dal colonnello West, un Americano.}"\\
 \textbf{Dimostrare} che \textit{West è un criminale}. \textbf{Formalizzazione}:
-\begin{list}{}{}
+\begin{enumerate}
 	\item Americano(x) $\wedge$ Arma(y) $\wedge$ Vende(x, y, z) $\wedge$ Ostile(z) $\Rightarrow$ Criminale(x)
 	\item $\exists$x Possiede(Nono,x) $\wedge$ Missile(x)\\
 	Possiede(Nono, M$_1$) $\wedge$ Missile(M$_1$)
@@ -1875,7 +1881,61 @@ sono stati venduti dal colonnello West, un Americano.}"\\
 	\item Nemico(x, America) $\Rightarrow$ Ostile(x)
 	\item Americano(West)
 	\item Nemico(Nono, America)
+\end{enumerate}
+In questo caso non ci sono funzioni ed il processo converge: siamo nelle condizioni di un database Datalog (database deduttivi). \textbf{Prima iterazione}
+\begin{enumerate}
+	\item Possiede(Nono, M$_1$) $\wedge$ Missile(M$_1$)
+	\item Missile(x)$\wedge$Possiede(Nono,x) $\Rightarrow$ Vende(West,x,Nono)\\
+	La regola 3 è soddisfatta con \{x/M$_1$\} e viene aggiunto Vende(West, M$_1$, Nono)
+	\item Missile(x) $\Rightarrow$ Arma(x)\\
+	La regola 4 è soddisfatta con \{x/M$_1$\} e viene aggiunto Arma(M$_1$)
+	\item Nemico(x, America) $\Rightarrow$ Ostile(x)
+	\item Nemico(Nono, America)\\
+	La regola 5 è soddisfatta con \{x/Nono\} e viene aggiunto Ostile(Nono)
+\end{enumerate}
+\textbf{Seconda iterazione}
+\begin{enumerate}
+	\item Americano(x) $\wedge$ Arma(y) $\wedge$ Vende(x, y, z) $\wedge$ Ostile(z) $\Rightarrow$ Criminale(x)\\
+	La regola 1 è soddisfatta con \{x/West, y/M$_1$, z/Nono)\} e Criminale(West) viene aggiunto
+\end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.7]{westdiminavanti.png}\\
+	\textit{Si parte dal basso}
+\end{center}
+\subsection{Analisi di FOL-FC-Ask}
+\textbf{Corretta} perché il Modus Ponens Generalizzato è corretto.\\
+\textbf{Completa} per KB di clausole Horn definite:
+\begin{list}{}{}
+	\item Completa e convergente per calcolo proposizionale e per KB di tipo Datalog (senza funzioni) perché la chiusura deduttiva è un insieme finito
+	\item Completa anche con funzioni ma il processo potrebbe non terminare (semidecidibile)
 \end{list}
+Il metodo descritto è \textbf{sistematico ma non troppo efficiente}.
+\subsection{FC Efficiente}
+\paragraph{Ordinamento dei congiunti} Conviene \textbf{soddisfare prima i congiunti con meno istanze nella KB} e che compaiono in più regole: Missile(x) $\wedge$ Possiede(Nono,x) $\Rightarrow$ Vende(West,x,Nono) (Tipi di missile $<<$ cose possedute)\\
+Altre ottimizzazioni sono mutuate dai CSP.
+\pagebreak
+\paragraph{Rete di discriminazione} Assunzione: regole diverse possono condividere molte delle precondizioni. Ad esempio:
+\begin{list}{}{}
+	\item[R1] (Mammifero x) (Felino x) (Carnivoro x)\\
+	(A-Macchie x) $\Rightarrow$ (assert (Leopardo x))
+	\item[R2] (Mammifero x) (Felino x) (Carnivoro x)\\
+	(A-Strisce x) $\Rightarrow$ (assert (Tigre x))
+\end{list}
+\textbf{Idea}: codificare gli antecedenti delle regole sotto forma di rete di discriminazione.
+\begin{center}
+	\includegraphics[scale=0.7]{fcdiscriminazione.png}
+\end{center}
+\paragraph{Incrementale} Ogni nuovo fatto inferito al tempo $t$ deve essere dedotto usando almeno un fatto dedotto al tempo $t-1$\\
+Si possono guardare solo le regole che hanno premesse unificabili con fatti aggiunti nell'ultima iterazione.\\
+Indicizzare le regole sui fatti, evitare di ricalcolare le unificazioni\ldots\\
+Altre ottimizzazioni presenti nell'algoritmo \texttt{RETE}\ldots
+\paragraph{Ridurre deduzioni irrilevanti} Un modo per evitare di ricavare fatti irrilevanti: \textbf{lavorando all'indietro dal goal}, non c'è questo problema. Si fa una specie di \textbf{pre-processing per individuare le regole che servono}, procedendo all'indietro dal goal e \textbf{marcando le regole utili}. Poi si procede in avanti \textbf{utilizzando solo le regole marcate}.
+\paragraph{\textit{Magic Set}} Dato il goal: Criminal(West), creo una KB $\leftarrow$ KB $\cup$ \{Magic(West)\}. \textbf{Riscrittura delle regole}:
+\begin{list}{}{}
+	\item Magic(x) $\wedge$ Americano(x) $\wedge$ Arma(y) $\wedge$ Vende(x, y, z) $\wedge$ Ostile(z) $\Rightarrow$ Criminale(x)
+\end{list}
+Procedendo poi in avanti saranno utilizzate solo le "\textit{regole magiche}" in modo mirato.\\
+Combina BC con FC.
 \chapter{Machine Learning}
 \section{Introduzione al Machine Learning}
 \paragraph{Apprendimento} Principio universale che riguarda gli esseri viventi, al cuore del problema dell'intelligenza sia biologica che artificiale. \\
