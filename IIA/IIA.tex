@@ -1978,36 +1978,46 @@ Facciamo un esempio intuitivo: il riconoscimento caratteri scritti a mano. L'inp
 Ha \textbf{tutte le caratteristiche elencate} prima: difficile da formalizzare, presenza di rumore nei dati e di dati ambigui. Ma è molto facile collezionare degli esempi etichettati. $\Rightarrow$ esempio di applicazione ottima del ML.\\
 Generalizzo il problema. \textbf{Apprendimento supervisionato} (classificazione e revisione): supervisore che etichetta gli esempi. Spazio di input: $x \rightarrow_f$ cateogrie o valori reali. Costruisco una funzione attraverso gli esempi.
 \pagebreak
-% https://elearning.di.unipi.it/pluginfile.php/31292/mod_resource/content/0/IIA-20-ML-INTROv0.1.pdf, p.23
-\subparagraph{}\textbf{Supervised Learning}\\ %TODO
-Abbiamo delle coppie date da qualcuno $<$\textit{input} $x$, \textit{output} $d>$ per una funzione non nota $f$\\
-\textbf{Target Value} Valore desiderato $d$ o $y$ o $y$\ldots dato dal supervisore\\
-\textbf{Vogliamo trovare una buona approssimazione di $f$}: un'ipotesi $h$ che può essere usata per prevedere un dato nuovo $x'$
-\textbf{Target} Un'\textbf{etichetta} numerica/categorica\\
-\textbf{Classificazione} $f(x)$ ritorna la corretta classe di $x$ ipotizzata\\
-\textbf{Regressione} approssima una funzione obiettivo a valori reali\\
+\subparagraph{}\textbf{Supervised Learning}\\
+Abbiamo delle coppie date da qualcuno (supervisore) $<$\textit{input} $x$, \textit{output} $d>$ per una funzione non nota $f$\\
+\textbf{Target Value}: valore desiderato $d$ o $t$ o $y$\ldots dato dal supervisore in relazione a $f(x)$\\
+\textbf{Vogliamo trovare una buona approssimazione di $f$}: un'ipotesi $h$ che può essere usata per prevedere un dato nuovo $x'$\\
+\textbf{Target}: \textbf{etichetta} numerica/categorica
+\begin{list}{}{}
+	\item \textbf{Classificazione}: $f(x)$ ritorna la corretta classe di $x$ ipotizzata
+	\item \textbf{Regressione}: approssima una funzione obiettivo a valori reali
+\end{list}
 Sono entrambi \textbf{problemi di approssimazione di funzione}, cambia solo il codominio che nel primo caso è a valori discreti.
 \paragraph{Inferire funzioni generali da dati noti}
 \begin{center}
 	\includegraphics[scale=0.7]{ml3.png}
 \end{center}
-\paragraph{Approccio non-Supervisionato} Non c'è il supervisore: serie di esempi non etichettati, ad esempio per trovare raggruppamenti naturali dei dati.
-\paragraph{Modello} Ha lo scopo di catturare e descrivere relazione fra dati. Definisce la classe delle funzioni che il sistema di apprendimento può implementare (\textbf{spazio delle ipotesi})
-\paragraph{esempi di apprendimento} esempi della forma x, f(x), x vettori di valori, f(x)=t è la funzione target
-\paragraph{Ipotesi} proponiamo noi, la $h$ espresisone in un qualche linguaggio che si crede simile ad $f$ ignota
-\paragraph{Spazio delle ipotsi} insieme di tutte le ipotesi che possono essere soluzione
-\paragraph{Linguaggi per l'H} Logica del prim'ordine, equazioni numeriche, ma anche probabilità
-\paragraph{Esempio} %TODO
-$h_w(x) = w_1 x + w_0$
+\paragraph{Approccio Non-Supervisionato} Non c'è il supervisore: serie di esempi non etichettati, ad esempio per \textbf{trovare raggruppamenti naturali dei dati}.
+\paragraph{Modello} Ha lo scopo di \textbf{catturare e descrivere relazioni fra i dati}. Definisce la classe delle funzioni che il sistema di apprendimento può implementare, cioè lo \textbf{spazio delle ipotesi}.
+\paragraph{Esempi di apprendimento} Esempi della forma ($x$, $f(x)$), con $x$ solitamente vettori di valori, $f(x) = t$ è il \textbf{valore target}. La vera funzione $f$ è la funzione target.
+\paragraph{Ipotesi} La proponiamo noi, $h$ espressione in un qualche \textbf{linguaggio} che si crede simile ad $f$ ignota.
+\paragraph{Spazio delle ipotesi} L'insieme di tutte le ipotesi che possono essere soluzione
+\paragraph{Linguaggi per l'$h$} Logica del prim'ordine, equazioni numeriche, ma anche probabilità\ldots
+\textbf{Esempi}
+\begin{list}{}{}
+	\item \textbf{Modelli lineari}: la rappresentazione dell'$h$ definisce un spazio parametrico continuo di potenziali ipotesi. Ogni assegnamento $w$ è un'ipotesi differente, ad esempio $h_w(x) = w_1 x + w_0 \rightarrow h_w(x) = 0.232x + 246$
+	\item \textbf{Regole simboliche}: lo spazio delle ipotesi è basato su rappresentazioni discrete. Sono possibili regole differenti, ad esempio
+	\begin{lstlisting}
+	if (x1 = 0 && x2 = 1) then h(x) = 1
+	else h(x) = 0
+	\end{lstlisting}
+	\item \textbf{Modelli probabilistici}: stima di $p(x, y)$
+	\item Approcci basati su istanze: prevedere il valore medio di $y$ basandosi sui vicini
+\end{list}
+\pagebreak
 \paragraph{Algoritmi di apprendimento} Ci riporta al concetto dei problemi di ricerca: \textbf{ricerca euristica nello spazio delle ipotesi}.\\
-Apprendimento è quindi ricerca di una \textbf{buona} funzione. Cosa significa buona: \textbf{quando ha una buona capacità di generalizzazione} o quindi avere un basso errore di generalizzazione. \textbf{Alta accuratezza su dati nuovi}.\\
-\textbf{Capacità di generalizzazione}: apprendere dai dati per \textbf{applicare in generale}. Altrimenti stiamo costruendo un db.\\
-Learning phase: costruisco il modello da dati noti\\
-Predictive phase (test): applico a nuovi esempi. Valutazione dell'ipotesi predittiva.\\
-\textbf{Performance in ML = accuratezza predittiva} stimata dell'errore calcolata sul \textbf{test set}.
-\paragraph{Teoria} Sotto quali condizioni matematiche un modello è in grado di generalizzare? Statistical Learning Theory.\\
-\begin{center}
-	\includegraphics[scale=0.55]{mlstrutt.png}
-\end{center}
+L'apprendimento è quindi la ricerca di una \textit{buona} funzione. Cosa significa buona: \textbf{quando ha una buona capacità di generalizzazione}, quindi ha un \textbf{basso errore di generalizzazione}. Cioè \textbf{alta accuratezza su dati nuovi}.\\
+\textbf{Capacità di generalizzazione}: apprendere dai dati per \textbf{applicare in generale}. Altrimenti stiamo costruendo un db.
+\begin{list}{}{}
+	\item \textbf{Learning phase}: costruisco il modello da dati noti
+	\item \textbf{Predictive phase} (test): applico a nuovi esempi. Valutazione dell'ipotesi predittiva
+\end{list}
+\textbf{Performance in ML = accuratezza predittiva} stimata dall'errore calcolato sul \textbf{test set}.
+\paragraph{Teoria} Sotto quali condizioni matematiche un modello è in grado di generalizzare? Statistical Learning Theory.
 
 \end{document}
