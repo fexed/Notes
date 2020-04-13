@@ -39,12 +39,9 @@ pkts = 0
 def captured(packet):
     global pkts
     pkts += 1
+    print("\r\033[F\033[K Captured: " + str(pkts))
+    rrd.update([rrdname, "--template", "packets", "N:" + str(pkts)])
 
 capture = pyshark.LiveCapture(interface='wlp1s0')
 
-while True:
-    for packet in capture.sniff_continuously(packet_count=5):
-        pkts += 1
-        print("\r\033[F\033[K Captured: " + str(pkts))
-        rrd.update([rrdname, "--template", "packets", "N:" + str(pkts)])
-    
+capture.apply_on_packets(captured)
