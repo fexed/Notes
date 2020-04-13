@@ -822,6 +822,212 @@ A = \left[
 \end{array}
 \right]
 \end{math}
+\subsection{Calcolo della fattorizzazione LU}
+\paragraph{Strumento} Per il calcolo della fattorizzazione LU utilizzeremo le \textbf{matrici elementari di Gauss}.
+\subparagraph{Matrice elementare di Gauss} Una matrice E $\in R^{n\times n}$ si dice \textbf{matrice elementare di Gauss} se $\exists\: k$ con $1 \leq k \leq n$ e $v \in R^n$ con $v_1 = v_2 = \ldots = v_k = 0$ tale che $$E = I - v\cdot e_k\,^T$$
+con $e_k$ $k$-esimo vettore della base canonica, quindi lungo $n$ e con tutti gli elementi $= 0$ tranne un $1$ in $k$-esima posizione.\\
+Abbiamo quindi l'identità meno un vettore colonna per un vettore riga, quindi $v\cdot e_k\,^T$ \textbf{non è un prodotto scalare} ma è un \textbf{prodotto tra una matrice $n\times$1 per una matrice 1$\times n$}, quindi la si esegue riga per colonna.
+\pagebreak
+\paragraph{Esempi} Con $n$ = 4
+\begin{list}{}{}
+	\item[$k$ = 1]
+		\begin{math}
+		E = \left[
+			\begin{array}{c c c c}
+			1 & & & \\
+			-v_2 & 1 & & \\
+			-v_3 & & 1 & \\
+			-v_4 & & & 1
+			\end{array}
+		\right]
+		= I - \left[
+		\begin{array}{c}
+		0\\v_2\\v_3\\v_4
+		\end{array}
+		\right]
+		\cdot
+		\left[
+		\begin{array}{c c c c}
+		1 & 0 & 0 & 0
+		\end{array}
+		\right]
+		\end{math}
+	\item[$k$ = 2]
+		\begin{math}
+		E = \left[
+			\begin{array}{c c c c}
+			1 & & & \\
+			& 1 & & \\
+			& -v_3 & 1 & \\
+			& -v_4 & & 1
+			\end{array}
+		\right]
+		= I - \left[
+		\begin{array}{c}
+		0\\0\\v_3\\v_4
+		\end{array}
+		\right]
+		\cdot
+		\left[
+		\begin{array}{c c c c}
+		0 & 1 & 0 & 0
+		\end{array}
+		\right]
+		\end{math}
+	\item[$k$ = 3]
+		\begin{math}
+		E = \left[
+			\begin{array}{c c c c}
+			1 & & & \\
+			& 1 & & \\
+			& & 1 & \\
+			& & -v_4 & 1
+			\end{array}
+		\right]
+		= I - \left[
+		\begin{array}{c}
+		0\\0\\0\\v_4
+		\end{array}
+		\right]
+		\cdot
+		\left[
+		\begin{array}{c c c c}
+		0 & 0 & 1 & 0
+		\end{array}
+		\right]
+		\end{math}
+	\item[$k$ = 4] $E = I$
+\end{list}
+Quindi le \textbf{matrici elementari di Gauss} sono matrici \textbf{triangolari inferiori}, con \textbf{elementi diagonali = 1} ed altri elementi non nulli soltanto in una colonna sotto l'elemento diagonale.
+\paragraph{Proprietà}
+\begin{enumerate}
+	\item $E = I - v\cdot e_k\,^T$ è \textbf{invertibile} e $E^{-1} = I + v\cdot e_k\,^T$ ed è \textbf{ancora elementare di Gauss}\\
+	\textbf{Dim}: $(I - v\cdot e_k\,^T)\cdot(I + v\cdot e_k\,^T) = I + \not{v e_k\,^T} - \not{v e_k\,^T} - v(e_k\,^T v)e_k\,^T = I$
+	\item Dato $x \in R^n$ con $x_k \neq 0 \Rightarrow \exists\: E \in R^{n \times n}$ elementare di Gauss tale che
+	\begin{math}
+		E\cdot x = \left[ \begin{array}{c}
+		x_1\\\vdots\\x_k\\0\\\vdots\\0
+		\end{array} \right]	
+	\end{math}\\
+	\textbf{Dim}: cerchiamo $E = I - v\cdot e_k\,^T$, quindi dobbiamo determinare $v$.\\
+	$(I - v\cdot e_k\,^T)x = x - v(e_k\,^T\cdot x) = x - v x_k$, quindi voglio che $x - v x_k = \left[ \begin{array}{c}
+	x_1\\\vdots\\x_k\\0\\\vdots\\0
+\end{array} \right]$\\
+	Questo significa, scambiando le componenti, che $\Leftrightarrow v x_k = \left[ \begin{array}{c}
+	0\\\vdots\\0\\x_{k+1}\\\vdots\\x_n
+\end{array} \right]$\\
+	$\Leftrightarrow v_1 = \ldots = v_k = 0 \wedge v_j x_k = x_j$ per $j = k+1..n$\\
+	 Questo significa che $v_j = \frac{x_j}{x_k}$ per $j = k+1..n$
+	 \item Il \textbf{prodotto} $E x$ con $E$ matrice elementare di Gauss \textbf{costa O($n$) operazioni}.\\
+	 Questo perché $E = I - v\cdot e_k\,^T$, quindi $Ex = (I - v\cdot e_k\,^T)x = x - v x_k$\\
+	 \begin{math}
+	 	= \left[ \begin{array}{c}
+	 	x_1\\\vdots\\x_k\\x_{k+1} - x_k v_{k+1}\\\vdots\\ x_n - x_k v_n
+	 	\end{array} \right]
+	 \end{math}
+	 Quindi calcolo solamente le ultime $n-k$ componenti, ognuna richiedente un prodotto ed una sottrazione. Di conseguenza $n-k$ operazioni moltiplicative e $n-k$ operazioni addittive $\Rightarrow$ O($n$) operazioni aritmetiche.
+\end{enumerate}
+Vediamo come si esegue il calcolo.
+\paragraph{Calcolo} Supponiamo la matrice $A$, che al tempo $t = 0$ (corrispondente alla matrice originale senza passaggi di calcolo effettuati) è $$A^{(0)} = \left[ \begin{array}{c c c}
+	a_{11}^{(0)} & \ldots & a_{1n}^{(0)}\\
+	\vdots & & \\
+	a_{n1}^{(0)} & \ldots & a_{nn}^{(0)}\\
+\end{array} \right] \in R^{n \times n}$$
+\begin{list}{}{}
+	\item \textbf{Primo passo}, partiamo da una supposizione: $a_{11}^{(0)} \neq 0 \Rightarrow$
+	$E_1 = I - v\cdot e_1\,^T$ tale che $E_1 \cdot \left[ \begin{array}{c}
+	a_{11}^{(0)}\\\vdots\\a_{n1}^{(0)}
+	\end{array} \right] = \left[ \begin{array}{c}
+	a_{11}^{(0)}\\0\\\vdots\\0
+	\end{array} \right]$\\
+	$v_j = \frac{a_{j1}^{(0)}}{a_{11}^{(0)}}$ per $j = 2..n$ ($v_1 = 0$ per costruzione), chiamati \textbf{moltiplicatori di Gauss}.\\
+	A questo punto posso calcolare $A^{(1)} = E_1 A^{(0)}$\\
+	\begin{math}
+		A^{(1)} = 
+		\left[ \begin{array}{c c c c}
+		1 & & & \\
+		-v_2 & \ddots & & \\
+		\vdots & & \ddots & \\
+		-v_n & & & 1
+		\end{array} \right]
+		\cdot
+		\left[ \begin{array}{c c c}
+			a_{11}^{(0)} & \ldots & a_{1n}^{(0)}\\
+			\vdots & & \\
+			a_{n1}^{(0)} & \ldots & a_{nn}^{(0)}\\
+		\end{array} \right]
+		=
+		\left[ \begin{array}{c c c c}
+			a_{11}^{(1)} & \ldots & \ldots & a_{1n}^{(1)}\\
+			0 & a_{22}^{(1)} & \ldots & a_{2n}^{(1)} \\
+			\vdots & \vdots & & \\
+			0 & a_{n2}^{(1)} & \ldots & a_{nn}^{(1)} 
+		\end{array} \right]
+	\end{math}\\
+	Gli elementi sulla prima riga non cambiano, $a_{1i}^{(0)} = a_{1i}^{(1)}$\\
+	$a_{ij}^{(1)} =$ $i$-esima riga di $E_1 \times j$-esima colonna di $A^{(0)}$
+	\begin{math}
+		= \left[ \begin{array}{c c c c c c c c}
+		-v_1 & 0 & \ldots & 0 & 1 & 0 & \ldots & 0
+		\end{array} \right]
+		\left[ \begin{array}{c}
+		a_{1j}^{(0)}\\
+		\vdots\\
+		a_{nj}^{(0)}
+		\end{array} \right]
+	\end{math}\\
+	$= a_{ij}^{(0)} - v_1 a_{1j}^{(0)} =$
+	$= a_{ij}^{(0)} - \left( \frac{a_{i1}^{(0)}}{a_{11}^{(0)}} \right) a_{1j}^{(0)}$\\
+	Quindi $$a_{ij}^{(1)} = a_{ij}^{(0)} - \left( \frac{a_{i1}^{(0)}}{a_{11}^{(0)}} \right)\cdot a_{1j}^{(0)}\textsl{    per }i = 2\textsl{..}n\textsl{, }j = 2\textsl{..}n$$
+	Costo computazionale: O($n$) operazioni per calcolare i moltiplicatori, poi aggiorno $A^{(1)}$ con O($n^2$) operazioni (precisamente $(n-1)^2$ moltiplicazioni e $(n-1)^2$ addizioni)
+	\item \textbf{Secondo passo}, andiamo a mettere elementi nulli nella seconda colonna.\\
+	\begin{math}
+		A^{(1)} = \left[ \begin{array}{c c c c}
+			a_{11}^{(1)} & \ldots & \ldots & a_{1n}^{(1)}\\
+			0 & a_{22}^{(1)} & \ldots & a_{2n}^{(1)} \\
+			\vdots & \vdots & & \\
+			0 & a_{n2}^{(1)} & \ldots & a_{nn}^{(1)} 
+		\end{array} \right]
+	\end{math}
+	e suppongo $a_{22}^{(1)} \neq 0$. Gli elementi $a_{kk}^{(k-1)}$ sono chiamati \textbf{pivot} perché sono alla basa della costruzione dei moltiplicatori.\\
+	Posso determinare $E_2$ tale che
+	\begin{math}
+		E_2 \cdot \left[ \begin{array}{c}
+	a_{22}^{(1)}\\\vdots\\a_{n2}^{(1)}
+	\end{array} \right] = \left[ \begin{array}{c}
+	a_{12}^{(1)}\\a_{22}^{(1)}\\0\\\vdots\\0
+	\end{array} \right]	
+	\end{math}, quindi\\
+	\begin{math}
+	E_2 = I - v e_2\,^T = \left[ \begin{array}{c c c c c}
+		1 & & & & \\
+		& 1 & &  &\\
+		& -v_3 & \ddots & &\\
+		& \vdots & & \ddots & \\
+		& -v_n & & & 1
+		\end{array} \right]
+	\end{math}
+	e $v_j = \frac{a_{j2}^{(1)}}{a_{22}^{(1)}}$ per $j = 3..n$ e la costruzione si ripete.\\
+	$A^{(2)} = E_2 \cdot A^{(1)}$
+	\begin{math}
+	= \left[ \begin{array}{c c c c c}
+	a_{11}^{(2)} & & \ldots & & a_{1n}^{(2)}\\
+	0 &  a_{22}^{(2)} & \ldots & & \\
+	\vdots & 0 &  a_{33}^{(2)} & \ldots & a_{3n}^{(2)} \\
+	\vdots & \vdots & \vdots & & \\
+	0 & 0 &  a_{n3}^{(2)} & \ldots & a_{nn}^{(2)} \\
+	\end{array} \right]
+	\end{math}
+	\item Proseguirò analogamente, supponendo $a_{33}^{(2)} \neq 0$, mettendo 0 nella terza colonna e così via.
+\end{list}
+\paragraph{In conclusione} Se $a_{kk}^{(k-1)} \neq 0$ per $k = 1..n-1$, allora posso determinare $E_1\ldots E_{n-1}$ matrici elementari di Gauss tali che
+$$E_{n-1}\ldots E_1 A^{(0)} = A^{(n-1)} = U$$
+Quindi $U$ è matrice diagonale superiore per via della costruzione ($E_i$ ha messo zeri nella $i$-esima colonna).\\
+Quindi posso scrivere $E_{n-1}\ldots E_1 A = U$, ma le matrici elementari di Gauss sono invertibili, quindi\\
+$A = (E_{n-1}^{-1}\ldots E_1^{-1})\cdot U$ e se chiamo $(E_{n-1}^{-1}\ldots E_1^{-1}) = L$ ottengo $$A = L \cdot U$$
+Questo strumento funziona con l'ipotesi di lavoro di avere gli elementi pivot non nulli, cioè $a_{kk}^{(k-1)} \neq 0$\\
+Abbiamo anche l'ipotesi di esistenza ed unicità, cioè det$A_k \neq 0$ per $k = 1 .. n-1$\\Concludiamo che $A_k \neq 0$ per $k = 1 .. n-1$ $\Rightarrow$ $a_{kk}^{(k-1)} \neq 0$
+
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
