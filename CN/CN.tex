@@ -1027,7 +1027,37 @@ Quindi posso scrivere $E_{n-1}\ldots E_1 A = U$, ma le matrici elementari di Gau
 $A = (E_{n-1}^{-1}\ldots E_1^{-1})\cdot U$ e se chiamo $(E_{n-1}^{-1}\ldots E_1^{-1}) = L$ ottengo $$A = L \cdot U$$
 Questo strumento funziona con l'ipotesi di lavoro di avere gli elementi pivot non nulli, cioè $a_{kk}^{(k-1)} \neq 0$\\
 Abbiamo anche l'ipotesi di esistenza ed unicità, cioè det$A_k \neq 0$ per $k = 1 .. n-1$\\Concludiamo che $A_k \neq 0$ per $k = 1 .. n-1$ $\Rightarrow$ $a_{kk}^{(k-1)} \neq 0$
-
+\subsection{Predominanza Diagonale}
+\paragraph{Predominanza Diagonale} $A \in R^{n \times n}$ è \textbf{predominante diagonale per righe} se l'elemento della diagonale \textit{pesa di più} della somma degli elementi della stessa riga in modulo, cioè $$|a_{ii}| > \sum_{j=1, j \neq i}^n |a_{ij}|$$
+Ci riferiamo a questa quando diciamo "predominante diagonale" senza specificare.\\
+Ad esempio \begin{math}
+\left[ \begin{array}{c c}
+-3 & 1 \\
+1 & -2
+\end{array} \right]
+\end{math}
+lo è, mentre
+\begin{math}
+\left[ \begin{array}{c c}
+-3 & 1 \\
+1 & -1
+\end{array} \right]
+\end{math}
+non lo è ($i = 2$ non soddisfa)
+\paragraph{Predominanza Diagonale per colonne} $A \in R^{n \times n}$ è \textbf{predominante diagonale per colonne} se l'elemento della diagonale \textit{pesa di più} della somma degli elementi della stessa colonna in modulo, cioè $$|a_{ii}| > \sum_{j=1, j \neq i}^n |a_{ji}|$$
+La \textbf{predominanza diagonale} è importante per il seguente teorema.
+\paragraph{Teorema} Se $A \in R^{n \times n}$ è \textbf{predominante diagonale} $\Rightarrow$ A è \textbf{invertibile}
+\subparagraph{Dim} Segue dal teorema di Gerschgorin, che dice $\lambda$ autovalore di $A \Rightarrow \lambda \in \bigcup_{i=1}^n K_i$.\\
+Mostriamo che $0 \not\in \bigcup_{i=1}^n K_i \Rightarrow$ 0 non è autovalore $\Rightarrow A$ è invertibile.\\
+$K_i = \{ z \in C\: |\: |z - a_{ii} \leq \sum_{j=1, j\neq i}^n |a_{ij}|\}$, $0 \in? K_i$\\
+$|0 - a_{ii}| = !a_{ii}| > \sum_{j=1, j\neq i}^n |a_{ij}|$ per predominanza diagonale, $\Rightarrow 0 \not\in K_i$\\
+Vale $\forall\: i \Rightarrow 0 \not\in \bigcup_{i=1}^n K_i$ quindi A è invertibile.\\
+La dimostrazione per colonne è analoga, utilizzando il teorema di Gerschgorin per colonne.
+\paragraph{Corollario} $A \in R^{n \times n}$ predominante diagonale $\Rightarrow \exists!$ la fattorizzazione $LU$ di $A$
+\subparagraph{Dim} Se $A$ è predominante diagonale $\Rightarrow A_k$ è predominante diagonale per $k = 1 .. n-1$\\
+$\Rightarrow A_k$ è invertibile $\Rightarrow$ per il teorema di esistenza ed unicità, $A$ ammette unica la fattorizzazione $LU$
+\paragraph{} La \textbf{predominanza diagonale} è una \textbf{condizione sufficiente} per: \textbf{invertibilità} ed \textbf{esistenza ed unicità di $LU$}\\
+In generale, il metodo di eliminazione Gaussiana \textbf{non preserva} la sparsità: si riempiono le matrici.
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
