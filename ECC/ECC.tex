@@ -935,10 +935,35 @@ Inoltre $K$, $K_0$ e $K_1$ si riducono l'un l'altro.
 \begin{center}
 Fine della Calcolabilità
 \end{center}
-%TODO 16/04 prima della pausa
 \chapter{Complessità}
+%TODO 16/04
+Primi passi verso una teoria quantitativa degli algoritmi
 Sappiamo che RE insiemi ricorsiv enumerabili includono strettamente gli insiemi ricorsivi. Esiste NPSPACE spazio non deterministico polinomiale = PSPACE\\
 Logspace $\subset$ P $\subset$ NP
 \section{Misure di complessità deterministiche}
-\paragraph{MdT a $k$ nastri} MdT come tutte le altre (Q, $\Sigma$, $\delta$, q$_0$) ma la $\delta$ è un po' diversa e $h$ stato di terminazione diviso in 2: stato si e stato no.
+\paragraph{MdT a $k$ nastri} MdT come tutte le altre (Q, $\Sigma$, $\delta$, q$_0$) ma la $\delta$ è un po' diversa e $h$ stato di terminazione diviso in 2: stato si (stato di arresto buono) e stato no (stato di arresto cattivo).
+
+La nuova $\delta = (q, \sigma_1, \sigma_2, \ldots, \sigma_k) = (q', (\sigma'_1, D_1), \ldots, (\sigma'_k, D_k))$\\
+Quindi $(q, u_1\sigma_1 v_1, u_2\sigma_2 v_2, \ldots, u_k \sigma_k v_k) \rightarrow (q', u'_1\sigma'_1 v'_1, u'_2\sigma'_2 v'_2, \ldots, u'_k \sigma'_k v'_k)$\\
+Il tempo di richiesto da $M$ a $k$ nastri per decidere $x \in I$ è $t \Leftrightarrow$ partendo dallo stato iniziale\\
+$(q_0, \underline{\triangleright}x, \underline{\triangleright}, \ldots, \underline{\triangleright}) \longrightarrow_M^t (H, w_1, \ldots, w_k)$ con $H \in \{$si, no$\}$\\
+Non si può decidere precisamente il numero di passi, ci accontenteremo di una stima superiore $f($taglia$(x))$. Non sapremo calcolare la taglia in generale, ma deve essere relativamente facile da calcolare: lunghezza di un vettore, dimensione in memoria\ldots\\
+$M$ \textbf{decide} $I$ in tempo $f \Leftrightarrow \forall\: x$ il tempo $t$ per decidere $x \in I$ è tale che $t \leq f($taglia$(x))$\\
+La \textbf{classe di complessità} TIME$(f) = \{$problemi $I\:|\: \exists\: M$ che decide $I$ in tempo deterministico $f\}$\\
+o$f$ è insieme di tt funzioni g tali che esiste costante reale positiva tale che g(n) è minore di\ldots cioè la $f$ da un certo punto in poi sta sopra la g.
+$\Omega$ è sotto invece, $\Theta$ è crescita allo stesso modo.
+\paragraph{Teorema di riduzione del numero dei nastri} Teorema per\ldots\\
+Per ogni M a k nastri che decide I in o(f) deterministica, allora esiste $M'$ a 1 nastro che decide $I$ in $o(f^2)$\\
+\textbf{Dim}: da $_k\gamma$ (a $k$ nastri) $\longrightarrow (_1q, \triangleright \triangleright' u_1 \overline{\sigma_1} v_1 \triangleleft' \triangleright' u_2 \overline{\sigma_2} v_2 \triangleleft'\ldots \triangleright' u_k \overline{\sigma_k} v_k \triangleleft')$\\
+$\sigma_i \longrightarrow \overline{\sigma_i}$
+\begin{enumerate}
+	\item Sistemare il nastro iniziale: $(q_0,\underline{\triangleright} \triangleright' x \triangleleft' \triangleright' \triangleleft' \ldots \triangleright' \triangleleft' )$\\$2k + \#\Sigma$ nuovi stati
+	\item Per simulare una mossa di $M$, $M'$ scorre il nastro da sinistra a destra per scovare i caratteri correnti, quelli sovralineati: avanti e indietro\\
+	Riscorro il nastro per scrivere i nuovi simboli e fissare i nuovi correnti: avanti e indietro.
+\end{enumerate}
+Non si può usare più spazio che tempo: non si possono vedere più caselle di quanti passi si fanno.\\ Inoltre per simulare un passo ci vogliono al massimo 4K passi.\\
+Il nastro contiene al massimo $K = k\cdot (2 + f(|x|)) + 1$ con $|x|$ = taglia$(x)$\\
+2 per le parentesi di ogni nastro, 1 per il respingente iniziale.\\\\
+$M$ fa $f(|x|)$ passi, $M'$ fa $f(|x|) \cdot 4K$ quindi $f(x) \cdot \not k \cdot (\not 2 + f(|x|)) + \not 1)$ con la roba cancellata perché non dipende dall'input ma dalla macchina.\\
+Quindi $M$ fa $o(f)$ mentre $M'$ fa $o(f^2)$
 \end{document}
