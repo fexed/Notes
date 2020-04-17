@@ -2019,5 +2019,68 @@ L'apprendimento è quindi la ricerca di una \textit{buona} funzione. Cosa signif
 \end{list}
 \textbf{Performance in ML = accuratezza predittiva} stimata dall'errore calcolato sul \textbf{test set}.
 \paragraph{Teoria} Sotto quali condizioni matematiche un modello è in grado di generalizzare? Statistical Learning Theory.
-
+\section{Concept Learning}
+\paragraph{Concept Learning} Inferire una funzione booleana da esempi d'addestramento positivi e negativi. X spazio delle istanze, C: X $\rightarrow$ \{tt, ff\} oppure \{+, -\} oppure \{0, 1\}
+\paragraph{Esempio} $<x, c(x)>$ in D (o training set)
+\paragraph{Soddisfa} $h : X \rightarrow \{0, 1\}$ soddisfa $x$ se $h(x) = 1$
+\paragraph{Consistenza} Un'ipotesi è consistente con l'intero D se è consistente se coincide con i valori target\\\\ %TODO
+L'obiettivo nostro è ricostruire quell'\textit{unknown function}. Questo è un \textbf{problema inverso} (\textbf{ill posed}, o malposto), perché può violare l'esistenza, l'unicità o la stabilità della funzione.\\
+Nel caso generale $|H| = 2^{\textsl{num istanze}} = 2^{2^n}$ per input binari, con $n =$ dimensione dell'input
+\subsection{Regole congiuntive}
+proposizioni fatte con l'and\\
+posso mettere o non mettere quindi tutti i modi possibili sono 2$^n$, se includo anche il not diventano $3^n + 1$
+%TODO descrizione ed esempio
+\paragraph{Learning hypothesis}
+\paragraph{Specificare l'ordinamento}
+Considerate due funzioni a valori booleani $h_j$ e $h_k$ definite su X, allora $h_j$ \textbf{è più generale di o uguale a} $h_k$ (scritto $h_j \geq h_k$) $\Leftrightarrow \forall x \in X : [(h_k(x) = 1) \Rightarrow (h_j(x) = 1)]$\\
+Ordine parziale.
+\begin{center}
+	\includegraphics[scale=0.6]{ml_strutturadih.png}
+\end{center}
+L'idea è fare una ricerca in un oridne intelligente, smart. Parto dall'ip + specifica e mi sposto verso quella più generale, guardando istanze una ad uno che arrivano dalla tabella. Se l'ipotesi non soddisfa cerco di generalizzarla (rendere vera l'ipotesi) ma col passo minore possibile.
+\subsection{Algoritmo Find-S}
+\begin{enumerate}
+	\item inizializziamo h con ipotesi più specifica
+	\item per ciascuna istanza positiva, guardiamo attributi dell'ipotesi\\
+	Se attributi sono soddisfatti dall'istanza nuova allora ok\\
+	altrimenti bisogna cambiare attributi per generalizzare ipotesi e portarla ad 1. Facendo il minimo possibile
+	\item Output: ipotesi h
+\end{enumerate}
+%TODO esempio
+\paragraph{Proprietà}
+\begin{list}{}{}
+	\item lo spazio delle ipotesi è descritto da congiunzioni di attributi (limitante!)
+	\item Find-S produce l'ipotesi più specifica in H cosnistente con gli esempi d'allenamento positivi
+	\item L'ipotesi di output h saràù anche consistente con gli esempi negativi, se il concetto obiettivo è contenuto in H, perché c $\geq$ h.
+\end{list}
+\paragraph{Version Spaces} è sottinisnieme ipotesi consistente con tutti gli esempi di addestramento
+\subsection{Algoritmo List-Then-Eliminate}
+Irrealistico perché richiede enumerazione esaustiva di tutte le ipotesi di $h$ in $H$
+\begin{enumerate}
+	\item %TODO
+\end{enumerate}
+Ma vogliamo sfruttare ordinamento parziale
+\paragraph{Rappresentare i version spaces}
+\begin{list}{}{Definizioni}
+	\item General boundary
+	\item Specific boundary
+	\item Teorema
+\end{list}
+\subsection{Algoritmo Candidate Elimination}
+%TODO
+grazie all'ordine parziale posso controllare di non avere cose più generali/specifiche e mantenere consistenza
+\section{Bias Induttivo ed il suo ruolo}
+Per ora abbiamo usato uno spazio delle ipotesi biased, vincolato. Abbiamo assunto che lo spazio delle ipotessi contenesse C, cioè che l'obiettivo C fosse espresso in and e non in or.\\
+Supponiamo sistema di apprendimento unbiased, con H che esprime ogni concetto insegnabile: H è l'insieme di tutti i possibili subset di X: P(X).\\
+Se $|X|$ = 96, $|P(X)| = 2^{96}$ cioè circa $10^{28}$.\\
+Cosa succede nella generalizazione?
+\paragraph{Definizione} Un unbiased learner è impossibilitato a generalizzare: ogni istanza non osservata, viene classificata positiva da precisamente delle ipotesi nel version space e negativa dall'altra metà. Per ogni h consistente con xi test esiste h' identica ad h eccetto h'(xi) diverso da h(xi), h in VS quindi h' in VS (identiche su D).\\Il bias non è solo assunto per efficienza ma anche necessario per la generalizzazione.
+\paragraph{Bias Induttivo} Il bias induttivo di L è un set minimo di asserzioni B tale che per ogni concetto obiettivo C e dati di addestramento corrispondenti D$_C$,\\ %TODO
+\paragraph{Tre learner con bias differenti}
+\begin{list}{}{}
+	\item Lookup table
+	\item Version space
+	\item Find-S
+\end{list}
+\subsection{Decision Trees}
 \end{document}
