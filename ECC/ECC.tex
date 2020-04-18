@@ -936,15 +936,30 @@ Inoltre $K$, $K_0$ e $K_1$ si riducono l'un l'altro.
 Fine della Calcolabilità
 \end{center}
 \chapter{Complessità}
-%TODO 16/04
-Primi passi verso una teoria quantitativa degli algoritmi
-Sappiamo che RE insiemi ricorsiv enumerabili includono strettamente gli insiemi ricorsivi. Esiste NPSPACE spazio non deterministico polinomiale = PSPACE\\
-Logspace $\subset$ P $\subset$ NP
+Una volta che abbiamo chiaro \textit{cosa} si può calcolare, ci si può porre il problema del \textit{come} calcolare. Sapendo distinguere il \textit{come} si calcola, riusciamo a distinguere tra loro le varie tecniche di calcolo, quindi a distinguere problemi \textit{facili} da \textit{difficili}.\\
+Primi passi verso una \textbf{teoria quantitativa} degli algoritmi. Considereremo solo i problemi decidibili, e parleremo solamente delle risorse di tempo e spazio. Per vederle, modificheremo leggermente le MdT già viste.
+\paragraph{Taglia} La \textbf{taglia} di un problema è il \textbf{numero di ingressi} della funzione.
+\paragraph{Valutare} Avere una $f$ funzione che \textbf{valuta asintoticamente l'utilizzo delle risorse}. Studieremo al \textbf{caso pessimo}, per semplificazione.
+\paragraph{Classi di gerarchia} Come si relazionano fra loro? Ce ne sono di particolarmente interessanti, caratterizzate da problemi particolarmente interessanti? Sicuramente abbiamo già sentito parlare della \textbf{classe di problemi risolvibili in tempo polinomiale deterministico P} e anche quella dei  \textbf{problemi risolvibili in tempo polinomiale non deterministico NP}, che sono due classi particolarmente interessanti cercando la loro relazione e le loro proprietà.
+$$\mathscr{RE} \supset \mathscr{R} \supset \textsl{NPSPACE} = \textsl{PSPACE} \supseteq \mathscr{NP} \supseteq \mathscr{P} \supseteq \textsl{Logspace}$$
+\begin{list}{}{Considerando}
+	\item \textsl{Logspace}: insieme delle funzioni il cui tempo di calcolo è asintoticamente simile al logaritmo della taglia
+	\item \textsl{NPSPACE} e \textsl{PSPACE} uguali, ma diversi da \textsl{Logspace}
+	\item Non esiste ancora una dimostrazione di $\mathscr{P} \subseteq \mathscr{NP}$
+	\item Per decidere la non appartenenza ad $\mathscr{R}$ basta un tempo finito, ma per decidere la non appartenenza a $\mathscr{RE}$ no.
+\end{list}
 \section{Misure di complessità deterministiche}
-\paragraph{MdT a $k$ nastri} MdT come tutte le altre (Q, $\Sigma$, $\delta$, q$_0$) ma la $\delta$ è un po' diversa e $h$ stato di terminazione diviso in 2: stato si (stato di arresto buono) e stato no (stato di arresto cattivo).
+Misure in tempo e spazio per decidere $x \in I$
+\paragraph{MdT a $k$ nastri} MdT come tutte le altre (Q, $\Sigma$, $\delta$, q$_0$)\\
+La funzione di transizione $\delta$ è un po' diversa e $h$, stato di terminazione, viene diviso in 2: stato \textbf{si} (stato di arresto buono) e stato \textbf{no} (stato di arresto cattivo), entrambi $\not\in$ Q. Operano in \textbf{modo sincrono su $k$ nastri}.\\\\
+Per ciascun simbolo, $\delta$ dovrà fornire il nuovo simbolo e spostare sincronamente le testine quindi fornire una direzione: 
+$\delta(q, \sigma_1, \sigma_2, \ldots, \sigma_k) = (q', (\sigma'_1, D_1), (\sigma'_2, D_2), \ldots, (\sigma'_k, D_k))$\\
+La configurazione iniziale sarà leggermente diversa, quindi: 
+$\gamma = (q_0, u_1 \sigma_1 v_1, u_2 \sigma_2 v_2, \ldots, u_k \sigma_k v_k)$\\
+Una transizione d'esempio: $(q, u_1\sigma_1 v_1, u_2\sigma_2 v_2, \ldots, u_k \sigma_k v_k) \rightarrow (q', u'_1\sigma'_1 v'_1, u'_2\sigma'_2 v'_2, \ldots, u'_k \sigma'_k v'_k)$
 
-La nuova $\delta = (q, \sigma_1, \sigma_2, \ldots, \sigma_k) = (q', (\sigma'_1, D_1), \ldots, (\sigma'_k, D_k))$\\
-Quindi $(q, u_1\sigma_1 v_1, u_2\sigma_2 v_2, \ldots, u_k \sigma_k v_k) \rightarrow (q', u'_1\sigma'_1 v'_1, u'_2\sigma'_2 v'_2, \ldots, u'_k \sigma'_k v'_k)$\\
+
+\paragraph{}
 Il tempo di richiesto da $M$ a $k$ nastri per decidere $x \in I$ è $t \Leftrightarrow$ partendo dallo stato iniziale\\
 $(q_0, \underline{\triangleright}x, \underline{\triangleright}, \ldots, \underline{\triangleright}) \longrightarrow_M^t (H, w_1, \ldots, w_k)$ con $H \in \{$si, no$\}$\\
 Non si può decidere precisamente il numero di passi, ci accontenteremo di una stima superiore $f($taglia$(x))$. Non sapremo calcolare la taglia in generale, ma deve essere relativamente facile da calcolare: lunghezza di un vettore, dimensione in memoria\ldots\\
