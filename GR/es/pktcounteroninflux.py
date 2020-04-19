@@ -30,6 +30,7 @@ from influxdb import InfluxDBClient
 from threading import Timer
 from time import sleep
 
+# Timer that ticks every interval seconds and execs function
 class RepeatedTimer(object):
     def __init__(self, interval, function, *args, **kwargs):
         self._timer     = None
@@ -55,7 +56,7 @@ class RepeatedTimer(object):
         self._timer.cancel()
         self.is_running = False
 
-# Signal handler
+# Signal handler to build the rrd graph and stop the timer
 def signal_handler(sig, frame):
     rt.stop()
     graphv_args = [
@@ -75,7 +76,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
-# Params check
+# Params parsing
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Simple script that captures packets and writes trivial data onto a RRD and a InfluxDB')
@@ -102,7 +103,7 @@ uname = args.username
 upwd = args.userpwd
 
 oldpkts = 0
-# Timed job
+# Timed job that puts data into RRD and InfluxDB
 def doJob():
     global pkts
     global oldpkts
@@ -121,6 +122,7 @@ def doJob():
     ]
     client.write_points(json_body)
 
+# Starting the timed job
 rt = RepeatedTimer(1, doJob)
 
 # RRD database
@@ -145,6 +147,7 @@ client.create_database(influxname)
 client.create_retention_policy('awesome_policy', '3d', 3, default=True)
 client.switch_user(uname, upwd)
 
+# Trivial capture and count
 pkts = 0
 def captured(packet):
     global pkts
