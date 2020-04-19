@@ -22,9 +22,37 @@ import sys
 import argparse
 from datetime import datetime
 from influxdb import InfluxDBClient
+from threading import Timer
+from time import sleep
+
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer     = None
+        self.interval   = interval
+        self.function   = function
+        self.args       = args
+        self.kwargs     = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
 
 # Signal handler
 def signal_handler(sig, frame):
+    rt.stop()
     graphv_args = [
         rrdname + '.png',
         '--title', "Packets count",
@@ -50,11 +78,45 @@ def parse_args():
                         default='eth0',
                         help='interface from which to sniff packets')
     parser.add_argument('--port', type=int, required=False, default=8086,
-                        help='port of InfluxDB')
+                        help='port of InfluxDB'),
+    parser.add_argument('--adminname', type=str, required=False, default='root',
+                        help='admin username of InfluxDB')
+    parser.add_argument('--adminpwd', type=str, required=False, default='root',
+                        help='admin password of InfluxDB')
+    parser.add_argument('--username', type=str, required=False, default='usr',
+                        help='username of InfluxDB')
+    parser.add_argument('--userpwd', type=str, required=False, default='pwd',
+                        help='user password of InfluxDB')
     return parser.parse_args()
 
 args = parse_args()
 iface = args.interface
+aname = args.adminname
+apwd = args.adminpwd
+uname = args.username
+upwd = args.userpwd
+
+oldpkts = 0
+# Timed job
+def doJob():
+    global pkts
+    global oldpkts
+    print("\r\033[F\033[K Captured: " + str(pkts))
+    rrd.update([rrdname, "--template", "packets", "N:" + str(pkts)])
+    newpkts = pkts - oldpkts
+    oldpkts = pkts
+    json_body = [
+        {
+            "measurement": "packets",
+            "time": datetime.now(),
+            "fields": {
+                "number": newpkts
+            }
+        }
+    ]
+    client.write_points(json_body)
+
+rt = RepeatedTimer(1, doJob)
 
 # RRD database
 rrdname = iface + "packets.rrd"
@@ -73,27 +135,15 @@ print("Using \"" + rrdname + "\"")
 
 # Influx database
 influxname = iface + "packetsdb"
-client = InfluxDBClient('127.0.0.1', '8086', 'root', 'root', influxname)
+client = InfluxDBClient('127.0.0.1', '8086', aname, apwd, influxname)
 client.create_database(influxname)
 client.create_retention_policy('awesome_policy', '3d', 3, default=True)
-client.switch_user('usr', 'pwd')
+client.switch_user(uname, upwd)
 
 pkts = 0
 def captured(packet):
     global pkts
     pkts += 1
-    print("\r\033[F\033[K Captured: " + str(pkts))
-    rrd.update([rrdname, "--template", "packets", "N:" + str(pkts)])
-    json_body = [
-        {
-            "measurement": "packets",
-            "time": datetime.now(),
-            "fields": {
-                "number": pkts
-            }
-        }
-    ]
-    client.write_points(json_body)
 
 capture = pyshark.LiveCapture(interface=iface)
 
