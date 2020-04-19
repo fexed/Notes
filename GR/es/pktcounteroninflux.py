@@ -12,7 +12,12 @@
 # pip3 install influxdb
 #
 # Usage
-# python3 pktcounter.py interface
+# python3 pktcounter.py [--interface <interface>]
+#                       [--port <InfluxDB server port>]
+#                       [--adminname <InfluxDB admin username>]
+#                       [--adminpwd <InfluxDB admin password>]
+#                       [--username <InfluxDB user username>]
+#                       [--userpwd <InfluxDB user password>]
 # ####
 
 import pyshark
