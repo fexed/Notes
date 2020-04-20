@@ -10,7 +10,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Analisi Matematica: [cheatsheet :white_check_mark:](https://github.com/fexed/Notes/blob/master/AM/AM.pdf), [eserciziario (WIP)](https://github.com/fexed/Notes/blob/master/AM/AM_eserciziario.pdf)
 
-##### Architettura degli Elaboratori: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/AE/architettura_appunti.pdf)
+##### Architettura degli Elaboratori: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/AE/architettura_appunti.pdf), ([D-RISC compiler :white_check_mark:](https://github.com/fexed/D-RISCcompiler))
 
 ##### Basi di Dati: [appunti](https://github.com/fexed/Notes/blob/master/BD/BD.pdf)
 
@@ -24,7 +24,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Programmazione d'Interfacce: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
 
-##### Reti di Calcolatori: [appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf). [WordQuizzle (progetto) :white_check_mark:](https://github.com/fexed/WordQuizzle)
+##### Reti di Calcolatori: [appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf), ([WordQuizzle (progetto) :white_check_mark:](https://github.com/fexed/WordQuizzle))
 
 ##### Sviluppo Applicazioni Mobili: [appunti](https://github.com/fexed/Notes/blob/master/SAM/SAM.pdf)
 
