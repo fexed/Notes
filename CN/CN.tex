@@ -1142,7 +1142,45 @@ Con $U$ triangolare superiore, ed $L$ permutazione di una matrice triangolare in
 	\item \textbf{Non altera il costo computazionale}
 	\item Può \textbf{aumentare il fill-in}
 \end{enumerate}
+\section{Metodi Iterativi}
+\paragraph{Idea} Ricerca di un metodo alternativo per \textbf{trattare matrici sparse}.\\
+Quindi il problema è risolvere $Ax = b$ con $A$ inveribile e sparsa. $A$ sparsa = molti elementi sono nulli.\\
+Vogliamo \textbf{sfruttare questa proprietà}, non sfruttata dal processo di eliminazione. Un esempio di matrice sparsa è
+$$A = \left[
+\begin{array}{c c c c}
+1 & x & \ldots & x \\
+x & \ddots \\
+\vdots & & \ddots & \\
+x & & & 1
+\end{array}
+\right] $$
+\paragraph{Sparsità} Quantitativamente, la sparsità si potrebbe definire nel seguente modo \texttt{nnz}(A) $<< n^2$, dove con \texttt{nnz(A)} in \texttt{MATLAB} si intende il numero di elementi $\neq 0$ della matrice A.\\
+Quindi si accettano valori come \texttt{nnz}(A) $= \left\{ \begin{array}{c}O(n) \\ O(n\cdot log^p n) \end{array} \right. $ ma principalmente \texttt{nnz}(A) $= O(n)$
+\pagebreak
 
+Il metodo di eliminazione gaussiana è indicato come \textbf{metodo diretto}, perché \textbf{in un numero finito di passi determina la soluzione del sistema}.\\
+I \textbf{metodi iterativi} adottano un \textbf{approccio differente}, cioè di \textbf{costruire una successione $\{x^{(k)}\}$ di vettori tali che $x^{(k)} \rightarrow x$} ($x^{(k)}$ converge a $x$) \textbf{con $x$ soluzione del sistema lineare}.\\
+Siccome la successione è potenzialmente infinita, ho bisogno di un \textbf{criterio di arresto}.
+\paragraph{Def} La successione di vettori $\{x^{(k)}\}_{k\in N}$ con $x^{k} \in R^n$ \textbf{converge a $x$} (cioè $\lim_{k\to +\infty} x^{(k)} = x$) solamente se
+$$\lim_{k\to +\infty} x^{(k)} = x \Leftrightarrow \lim_{k\to +\infty} ||x^{(k)} - x|| = 0$$
+Per l'equivalenza topologica delle norme, vale per qualsiasi norma. Posso scegliere la norma infinito 
+$$||x^{(k)} - x||_\infty = \textsl{max}_{j=1:n}|x_j^{(k)} - x_j|$$
+e se $\textsl{max}_{j=1:n}|x_j^{(k)} - x_j| \rightarrow 0$ per $k \rightarrow +\infty$ allora $|x_j^{(k)} - x_j| \rightarrow 0$ per $k \rightarrow +\infty$ per $j = 1\ldots n$\\
+Quindi una successione di vettori tende ad un vettore se \textbf{componente per componente le successioni delle componenti tendono alle componenti del vettore obiettivo}.
+\subsection{Come nascono}
+Un'idea è partire dalla relazione $Ax = b$ e provo a scrivere $A$ come differenza di due matrici $A = M - N$ con $M$ invertibile. Quindi potrei dire $$Ax = b \Leftrightarrow (M - N)x = b \Leftrightarrow Mx = Nx + b \Leftrightarrow x = M^{-1}Nx + M^{-1}b$$ e quindi $x = Px + q$ con $P = M^{-1}N$ e $q = M^{-1}b$.\\
+Dunque $$Ax = b \Leftrightarrow \begin{array}{c}
+x = Px + q \\
+P = M^{-1}N\\q = M^{-1}b\\
+A = M - N
+\end{array}$$
+\paragraph{Perché} Questo perché per risolvere $x = Px + q$ posso usare un metodo composto in questo modo $\left\{ \begin{array}{c}
+x^{(0)} \in R^n\\
+x^{(k + 1)} = Px^{(k)} + q
+\end{array} \right.$
+\paragraph{Teorema} Se la successione generata in questo modo ha $\lim_{k\to +\infty} x^{(k)} = x \in R^n$ allora $x = Px + q$ e quindi è soluzione del sistema lineare
+\subparagraph{Dim} Sappiamo per ipotesi che $x^{(k)} \rightarrow x$ e sappiamo sempre per ipotesi che $x^{(k + 1)} = Px^{(k)} + q$. Da queste ipotesi ottengo
+$$x = \lim_{x\to +\infty}x^{(k + 1)} = \lim_{x\to +\infty} Px^{(k)} + q = Px + q$$
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
