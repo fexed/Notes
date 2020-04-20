@@ -823,6 +823,7 @@ A = \left[
 \right]
 \end{math}
 \subsection{Calcolo della fattorizzazione LU}
+\subsubsection{Processo di eliminazione gaussiana}
 \paragraph{Strumento} Per il calcolo della fattorizzazione LU utilizzeremo le \textbf{matrici elementari di Gauss}.
 \subparagraph{Matrice elementare di Gauss} Una matrice E $\in R^{n\times n}$ si dice \textbf{matrice elementare di Gauss} se $\exists\: k$ con $1 \leq k \leq n$ e $v \in R^n$ con $v_1 = v_2 = \ldots = v_k = 0$ tale che $$E = I - v\cdot e_k\,^T$$
 con $e_k$ $k$-esimo vettore della base canonica, quindi lungo $n$ e con tutti gli elementi $= 0$ tranne un $1$ in $k$-esima posizione.\\
@@ -1058,6 +1059,90 @@ La dimostrazione per colonne è analoga, utilizzando il teorema di Gerschgorin p
 $\Rightarrow A_k$ è invertibile $\Rightarrow$ per il teorema di esistenza ed unicità, $A$ ammette unica la fattorizzazione $LU$
 \paragraph{} La \textbf{predominanza diagonale} è una \textbf{condizione sufficiente} per: \textbf{invertibilità} ed \textbf{esistenza ed unicità di $LU$}\\
 In generale, il metodo di eliminazione Gaussiana \textbf{non preserva} la sparsità: si riempiono le matrici.
+\subsection{Eliminazione Gaussiana con pivoting}
+Vogliamo migliorare la \textbf{stabilità} dell'eliminazione gaussiana e \textbf{trovare approcci differenti} applicabili a matrici sparse.\\
+I due problemi del \textbf{calcolare la fattorizzazione LU} e \textbf{risolvere il sistema lineare}, entrambi richiedenti il \textbf{processo di eliminazione gaussiana}, sono quindi profondamente \textbf{collegati}.
+\paragraph{Esempio} Partiamo da un esempio: $A \in R^{n \times n}$ invertibile.
+$$A = A^{(0)} = \left[
+\begin{array}{c c c}
+a_{11}^{(0)} & \ldots & a_{1n}^{(0)} \\
+\vdots \\
+a_{n1}^{(0)} & \ldots & a_{nn}^{(0)}
+\end{array}
+\right]$$
+La matrice è invertibile, quindi se guardo la prima colonna posso dire che esiste un elemento $\neq 0$ perché se la prima colonna avesse tutti elementi nulli allora la matrice sarebbe singolare. In generale ce ne possono ovviamente essere tanti di elementi $\neq 0$, per motivi di \textbf{stabilità numerica} scelgo l'\textbf{elemento di modulo massimo della prima colonna}. Quindi suppongo che l'elemento di modulo massimo sia sulla riga $j$ (in caso di più elementi di modulo massimo solitamente si sceglie il primo $j$ trovato)
+$$\exists\: a_{j1}^{(0)} \neq 0\textsl{ con }j\: : \:|a_{j1}^{(0)}| = \textsl{max}_{(k = 1:n)}|a_{k1}^{(0)}|$$
+A questo punto, \textbf{scambio la $j$-esima riga con la prima}
+$$A^{(0)} \longrightarrow A^{(\frac{1}{2})} = \left[
+\begin{array}{c c c}
+a_{j1}^{(0)} & \ldots & a_{jn}^{(0)} \\
+\vdots \\
+a_{11}^{(0)} & \ldots & a_{1n}^{(0)} \\
+\vdots
+\end{array}
+\right]
+\begin{array}{c}
+\textsl{I riga}\\
+\\
+j\textsl{-esima riga}\\
+\\
+\end{array}$$
+Dal punto di vista matriciale, scambiare le righe corrisponde a moltiplicare la matrice per una matrice $P_1$ composta sostanzialmente dalla matrice identità con la prima e la $j$-esima colonna scambiate.
+$$A^{(\frac{1}{2})} = \left[
+\begin{array}{c c c c c c c c}
+ & & & & 1 & & & \\
+ & 1 & & & & & & \\
+ & & \ddots\\
+ & & & 1\\
+ 1 \\
+ & & & & & 1 \\
+ & & & & & & \ddots\\
+ & & & & & & & 1
+\end{array}
+\right]\cdot A^{(0)}$$
+$P_1$ si chiama \textbf{matrice di permutazione}. Hanno la proprietà che $P^{-1} = P^{T}$, cioè che l'inversa coincide con la trasposta.\\
+Una volta eseguito lo scambio di riga, possiamo procedere con un passo di eliminazione su $A^{(\frac{1}{2})} = p_1\cdot A^{(0)}$ ed ottenere $A^{(1)} = E_1\cdot P_1\cdot A^{(0)}$ utilizzando $a_{j1}^{(0)}$ portato in posizione $1, 1$ come \textbf{pivot}. Ottengo
+$$A^{(1)} = \left[
+\begin{array}{c c c c}
+a_{11}^{(1)} & \ldots & & a_{1n}^{(1)} \\
+0 & a_{22}^{(1)} & \ldots\\
+\vdots & \vdots & & \vdots\\
+0 & a_{n2}^{(1)} & \ldots & a_{nn}^{(1)}
+\end{array}
+\right]$$
+Per continuare il processo di eliminazione dovrò lavorare su $\left[
+\begin{array}{c c c}
+a_{22}^{(1)} & \ldots\\
+\vdots & & \vdots\\
+a_{n2}^{(1)} & \ldots & a_{nn}^{(1)}
+\end{array}
+\right]$ e quindi guardare la seconda colonna di $A^{(1)}$ sulla quale posso dire che $\exists\: j \geq 2\: : \: a_{j2}^{(1)} \neq 0$ quindi che c'è almeno un elemento $\neq 0$ sulla seconda colonna. Posso dirlo perché se tutti fossero $= 0$, allora la prima e la seconda colonna sarebbero \textbf{linearmente dipendenti}, quindi $A^{(1)}$ sarebbe \textbf{singolare}. Ma $A^{(1)}$ singolare $\Rightarrow A^{(0)}$ singolare $\Leftrightarrow A$ singolare, ma siamo partiti da una matrice invertibile, quindi è \textbf{assurdo}. Di conseguenza, la seconda colonna non può avere elementi tutti nulli.\\
+
+\pagebreak
+Quindi determino $$|a_{j2}^{(1)}| = \textsl{max}_{(k = 2:n)}|a_{k2}^{(1)}|$$
+Dopodiché scambio la seconda e la $j$-esima riga\ldots\\
+Il processo \textbf{termina} perché a \textbf{nessun punto del processo potrò avere tutti elementi nulli nella parte attiva della colonna considerata}.\\
+In termini matriciali, il processo diventa
+$$E_{n-1}P_{n-1}E_{n-2}\ldots E_1P_1A^{(0)} = U$$
+La differenza sta che in ogni passo moltiplico per una coppia \textbf{matrice di eliminazione} e \textbf{matrice di permutazione}. Porto tutte le matrici da sinistra di $A^{(0)}$ a destra e ottengo
+$$A^{(0)} = \underline{P^T_1E^{-1}_1 \ldots P^T_{n-1}E^{-1}_{n-1}} U$$
+Con $P^T_1E^{-1}_1 \ldots P^T_{n-1}E^{-1}_{n-1} = L$, quindi
+$$A^{(0)} = L\cdot U$$
+Ma in generale \textbf{L non è triangolare}. \texttt{MATLAB} ci dice che è \textit{psicologicamente triangolare}, cioè che si crede essere triangolare inferiore ma non lo è, perché è \textbf{infestata dalle matrici di permutazione $P_i$}. Quindi è una \textbf{matrice psicologicamente triangolare perché è permutazione di una matrice triangolare}.
+\paragraph{\texttt{MATLAB}} Il comando \texttt{lu} di \texttt{MATLAB} quindi restituisce questa L e questa U
+\begin{lstlisting}
+[L, U] = lu(A)
+\end{lstlisting}
+Con $U$ triangolare superiore, ed $L$ permutazione di una matrice triangolare inferiore.
+\paragraph{Pivoting} La nostra tecnica di \textbf{pivoting} (o \textbf{partial pivoting} perché il pivot è cercato solamente in una colonna) quindi ha le seguenti \textbf{proprietà}:
+\begin{enumerate}
+	\item Rende il \textbf{processo applicabile ad ogni matrice invertibile}.\\
+	Quindi ogni matrice invertibile ha una fattorizzazione \textit{tipo}-LU
+	\item \textbf{Migliora la stabilità dell'algoritmo di eliminazione gaussiana}, perché scambiare le righe e rendere il pivot più grande migliora la stabilità dell'algoritmo
+	\item \textbf{Non altera il costo computazionale}
+	\item Può \textbf{aumentare il fill-in}
+\end{enumerate}
+
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
