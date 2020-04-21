@@ -2053,6 +2053,7 @@ L'idea è fare una ricerca in un oridne intelligente, smart. Parto dall'ip + spe
 	\item Find-S produce l'ipotesi più specifica in H cosnistente con gli esempi d'allenamento positivi
 	\item L'ipotesi di output h saràù anche consistente con gli esempi negativi, se il concetto obiettivo è contenuto in H, perché c $\geq$ h.
 \end{list}
+\subsection{Complaints about Find-S}
 \paragraph{Version Spaces} è sottinisnieme ipotesi consistente con tutti gli esempi di addestramento
 \subsection{Algoritmo List-Then-Eliminate}
 Irrealistico perché richiede enumerazione esaustiva di tutte le ipotesi di $h$ in $H$
@@ -2082,5 +2083,94 @@ Cosa succede nella generalizazione?
 	\item Version space
 	\item Find-S
 \end{list}
+
 \subsection{Decision Trees}
+\section{Linear Models}
+\begin{list}{}{\textbf{Ingredienti}}
+	\item %TODO
+\end{list}
+\paragraph{Compito supervisionato} %TODO
+\subsection{Problemi di regressione}
+Processo di stima di una funz a val real su una base di un insieme finito di esempi rumorosi: coppie $(x, f(x) + \textsl{ rumore casuale})$. Un esempio è una tabella $x \mapsto$ valore che \begin{tabular}{c | c}
+	$x$ & target\\
+	\hline
+	1 & 2.1\\
+	2 & 3.9\\
+	3 & 6.1\\
+	4 & 8.4\\
+	5 & 9.8
+\end{tabular}
+Si può ipotizzare che $f(x) = 2x$, a mente: abbiamo applicato un algoritmo di machine learning assumendo la funzione lineare\ldots\\ %TODO
+\paragraph{Definizione} Assumiamo un modello hw(x) espresso come w=w1x+w0\ldots %TODO
+Trovare a partire dall'esempio un'ipotesi h che al meglio fa il fitting dei dati dai dati osservati x e y. Assumento che y sia collegata linearmente ad un'altra variabile x o altre variablili y= w1x + w0 + rumore, dove le w sono libere. costruiamo il modello cercando di trovare i valori di w per predirre e stimare y per altri valori di x non osservati.
+%TODO esem
+\paragraph{Costruire il modello} Apprendimento tramite LMS. Dato insieme esempi training, trovare hw(x) nella forma (w1+ w0) che minimizza l'errore medio. Least mean square: $$\textsl{loss}(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2$$ con valori al quadrato per non avere negativi \ldots\\
+Perché LMS per il migliore $h$? Minimizzo la distanza dalla media (linea blu) , approccio standard mper approssimare la soluzione di sistemi sovra-determinati: n eq più delle incognite.
+\paragraph{Come risolvere} Punto di minimo è stazionario dove il gradiente è nullo. Bisogna cercare fra quelli a gradiente nullo $$\frac{\partial E(w)}{\partial w_i} = 0$$ quindi per la regressione lineare (a due parametri) $$\frac{\partial E(w)}{\partial w_0} = 0 \:\: \frac{\partial E(w)}{\partial w_1} = 0$$
+\subparagraph{Come impostare il gradiente} (per ogni pattern $p$)
+\begin{center}
+	\includegraphics[scale=0.55]{partial.png}
+\end{center}
+Derivata della somma = somma delle derivate.\\
+Per $\frac{\partial E(w)}{\partial w_1} = \frac{\partial y}{\partial w_1} - (\frac{\partial w_1 x}{\partial w_1} + \frac{\partial w_0}{\partial w_1}) = 0 - (x + 0)$
+\paragraph{Riassumendo} Dato un set l insieme set di trainingi come coppie xpyp, trovare i valori di w costruendo hw(x) espressoa come w1x + w0. Trovata si può usare per esprimere nuovi valori. La linea diretta è meno interessante, preferiamo il gradiente per l'approccio della ricerca locale.\\
+Il gradiente ci dà la direzione di \textbf{ascesa}, quindi per il minimo basta prendere l'opposto.\\
+$w_{new} = w_{old} + \eta\cdot\Delta w$ con $\Delta w  = -\textsl{gradiente di }E(w)$\\
+$\Delta w$ è il "passo" che si fa in direzione del gradiente e $\eta$ costante di apprendimento.
+def error correction (delta rule) che cambia la w proporzionalmente all'errore
+\paragraph{Per pattern $l$}
+\begin{center}
+	\includegraphics[scale=0.55]{patternl.png}
+\end{center}
+aggiornaimo w \ldots\\ %TODO
+\paragraph{Input multidimensionale} caso standard: da 2 a migliaia di input/variabili: pattern di input è un vettore
+\begin{list}{}{Esempi}
+	\item %TODO
+\end{list}
+\paragraph{DATA notation} $X$ è una matrice $l \times n$, $l$ righe, $n$ colonne (variabili)\\
+$p = 1..l$, $j = 1..n$\\\\
+$
+\begin{array}{c c c c c}
+Pattern & x_1 & x_2 & x_j & x_n\\
+Pat 1 & x_{11} & x_{12} & & x_{1n}\\
+\ldots\\
+Pat p & x_{p1} & x_{p2} & & x_{pn}\\
+\end{array}$\\
+%TODO each row...
+Notazione: x come vettore con indice pattern nella prima posizione %TODO
+\begin{center}
+	\includegraphics[scale=0.55]{riassuntone.png}
+\end{center}
+\subsection{Gradient descent Algorithm}
+Semplice algoritmo sul quale si basano molti di quelli attuali
+\begin{enumerate}
+	\item Inizio con un vettore di pesi $w_{initial}$ inizializzato con valori piccoli, fisso $\eta$ (0 $< \eta <$ 1)
+	\item Si calcola $\Delta w = -$ "gradiente di $E(w)$ = $- \frac{\partial E(w)}{\partial w}$ (per ogni $w_i$)
+	\item Si fa il passo, calcolando $w_{new} = w_{old} + \eta\cdot\Delta w$ (per ogni $w_i$)\\
+	Con $\eta$ dimensione del passo, o \textbf{coefficiente di apprendimento}
+	\item Ripeto da 2 finche converge o $E(w)$ è \textit{sufficientemente piccolo}
+\end{enumerate}
+\begin{list}{}{}
+	\item $\Delta w / l$ LMN (least mean squares)
+	\item Batch versions ($\Delta w$ dopo ogni epoca di dati $l$) vedi prima
+	\item %TODO
+	\item $eta$: tasso di apprendimento, trade-off su velocità/stabilità. Può essere gradualmente ridotto a 0: garantisce la convergenza, evita oscillazione intorno al minore)
+\end{list}
+\paragraph{Esempi di curva di apprendimento} Curva di appr: elettrocardiogramma del modello. Se prendo modello, applico i dati e l'algoritmo 
+\begin{center}
+	\includegraphics[scale=0.5]{curveappre.png}\\
+	\textit{n iterazioni (epoche)}
+\end{center}
+\paragraph{Vantaggi dei modelli lineari} Se funzionano bene sono modelli fantastici
+\begin{list}{}{}
+	\item Semplice
+	\item Tutti i dati in w
+	\item Facile da interpretare: praticati in medicina, biologia, chimica\ldots
+	\item Dati rumorosi ammessi
+	\item Statistici contenti (proprietà interessanti)
+	\item Fenomeni lineari: un sogno per la scienza
+	\item \textbf{Baseline per l'apprendimento}: è un problema lineare?
+	\item Usato/incluso in modelli più complessi
+\end{list}
+Ma hanno molte limitazioni evidenti: soprattutto su funzioni non lineari.
 \end{document}
