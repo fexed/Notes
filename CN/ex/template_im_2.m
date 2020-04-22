@@ -1,5 +1,5 @@
 function [a,iter] = template_im_2(b,tol,maxiter)
-if (norm(b-b2, inf)>0)
+if (norm(b-b', inf)>0)
     disp('matrice non simmetrica');
     return
 end
