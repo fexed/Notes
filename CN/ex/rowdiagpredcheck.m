@@ -13,7 +13,9 @@ for i = 1:n
    % check |matrix(i,i)| > sum(j=1:m, j!=i)(|matrix(i,j)|)
    if (aii <= sum)
        isPredominanteDiagonalePerRighe = 0;
-       break;
+       disp('La matrice NON è predominante diagonale');
+       return
    end
 end
+disp('La matrice è predominante diagonale');
 end
