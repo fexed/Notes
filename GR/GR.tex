@@ -460,5 +460,29 @@ $$ \% \textsl{disponibilità} = \frac{MTBF}{MTBF + MTTR} $$
 \end{list}
 
 \paragraph{ETSI} Definisce metriche che nel mondo internet non sono state definite.\\
-
+\chapter{Deep Packet Inspection}
+\paragraph{Traffic classification} Traffic classification importante per capire cosa viaggia sulla rete. SNMP permette vedere se unicast o meno, ma non dice niente del traffico: buono, conosciuto\ldots\\
+Per classificare traffico quattro metodi:
+\begin{enumerate}
+	\item Basato sulle porte TCP/UDP\\
+	Più o meno sempre fatta, specialmente nei primi anni di internet. Identificati da protocollo e porta nel range delle well known ports. Facile da evitare (porte dinamiche) quinidi inaffidabile (TCP/80 $\neq$ HTTP)
+	\item Flag del pacchetto (DSCP)\\
+	
+	\item classificazione statistica\\
+	Di moda per un certo periodo, utilizzo del machine learning per classificare pacchetti. Si pensava che ML costasse meno rispetto analisi profonda del pacchetto
+	\item Deep Packet Inspection\\
+	Analisi del pacchetto internamente. Selective metadata extraction (HTTP URL o User-Agent) necessario per fare monitoring accurato. Lo fa il DPI toolkit senza replicarlo sulle applicazioni di monitoring.
+\end{enumerate}
+\paragraph{Protocolli in nDPI} Identificati da \texttt{major.minor}\\
+Major è protocollo di rete, minor è protocollo.\\
+Oggi molti protocolli basati su HTTP e TLS. nDPI supporta riconoscimento protocolli basato su stringhe: DNS query name, HTTP campi host/server, SSL/QUIC SNI\\
+I protocolli sono tantissimi, ma nDPI consente di raggrupparli in categorie, che possono includere migliaia di protocolli ed essere (ri)caricate dinamicamente.
+\paragraph{Come usare} Applicazione cattura il pacchetto e mantiene il flusso di stato, nDPI si aspetta di ricevere il pacchetto.\\
+Ogni dissettore è codificato in un differente \texttt{.c}, ognuno classifica il singolo protocollo, per modularità ed estensibilità.
+\paragraph{Traffic Classification Lifecycle} Basato sul tipo di traffico, dissectors applicati sequenzialmente iniziando con quello che più probabilmente matcherà (es HTTP dissector se traffico su TCP/80)\\
+Ogni flusso mantiene lo stato per dissector non-matching per saltarli in futuro.\\
+Analisi dura fino a match o dopo troppi tentativi (8 pacchetti solitamente)\\
+Flusso è bidirezionale e corrisponde alla quintupletta IP+prot+porta+src+dest(+vlan)\ldots\\
+Riconoscimento avviene solamente ad inizio del flusso.\\
+nDPI funziona con i pacchetti IP.
 \end{document}
