@@ -2172,5 +2172,44 @@ Semplice algoritmo sul quale si basano molti di quelli attuali
 	\item \textbf{Baseline per l'apprendimento}: è un problema lineare?
 	\item Usato/incluso in modelli più complessi
 \end{list}
-Ma hanno molte limitazioni evidenti: soprattutto su funzioni non lineari.
+Ma hanno molte limitazioni evidenti: soprattutto su funzioni non lineari.\\
+Possiamo introdurre, al posto delle $x$ originali delle trasformazioni non lineari: $x^2$, $x^3$,\ldots: $w_0 + w_1 x + w_w x^2 + w_3 x^3$\ldots che corrisponde ad una \textbf{regressione polinomiale} = $$y(x, w) = \sum_{j=0}^M w_j x^j$$ si può sempre risolvere con Least Square solution. Questo perché ad esempio posso chiamare $x^2 = z_2$ e niente cambia nella tecnica risolutiva.\\
+\textbf{Linear Basis Expansion} (LBE)
+$$h_w(x) = \sum_{k=0}^K w_k \phi_k (x)$$
+Aumento gli input e ciascuna trasformazione di $x$ tramite la funzione $\phi_k : R^n \rightarrow R$\\
+$\phi$ può essere una qualsiasi trasformazione: la norma, il quadrato, logaritmo\ldots\\
+Sto espandendo l'insieme delle variabili considerate, quindi $K > n$, lineare nei parametri e in $\phi$ ma non in $x$: possiamo usare i soliti algoritmi lineari di prima.
+\paragraph{Esempi}
+\textbf{LBE} è anche detto \textbf{approccio a dizionario}: le $\phi$ sono le parole a disposizione per comporre le "frasi": più espressivo, modella relazioni non lineari. Svantaggio: se introduco troppe trasformazioni possiamo avere un modello \textit{troppo} complesso rispetto alle necessità (\textbf{overfitting}).
+\paragraph{Trade-Off} sulla complessità del modello:
+\begin{list}{}{}
+	\item Modello troppo semplice non fa buon fitting, underfitting, soluzione biased
+	\item Modello troppo complesso: sensibile a perturbazione dei dati, molta varianza ed overfitting
+\end{list}
+metodi di \textbf{regolarizzazione del modello} per \textbf{trovare bialnciamento cotnrollo complessità modello}. Penalizzando funzioni troppo complesse (riducendo valore dei pesi) mantenendo flessibilità spazio ipotesi.\\
+Rasoio di Occam: la spiegazione più semplice è spesso la più corretta. \textit{Preferire le ipotesi più semplici che corrispondono ai dati}.\\
+Questo è un concetto fondamentale in ML, che troveremo di nuovo quando "razionalizzaremo" alla fine. Ora introduciamo un approccio per i modelli lineari: regolarizazione con ridge regression
+\section{Ridge Regression}
+\paragraph{Rikhonov Regularization} Bassa varianza, meno overfitting. Modello smoothed.\\
+Introduce vincol iche controllino somma val nostri parametri w favorendo modelli sparsi, abbassando valore w. Se alcuni li portiamo bassi in particolare a 0, anche se abbiamo introdotto molte funzioni alcune spariscono.
+$$\textsl{Loss}(h_w) = \sum_p (y_p + h_w(x_p))^2 + \lambda ||w||^2 $$ con nuova aggiunta alla nostra funzione di loss: $\lambda ||w||^2$, con $\lambda$ \textbf{coefficiente di regolarizzazione} (parametro costante) e $||w||^2 = \sum w_i^2$\\
+Quando minimizzo l'errore cerco anche di tenere i $w$ bassi, perché la Loss deve riuscire ad abbassare entrambi i termini. Devo anche fare altre considerazioni\ldots\\
+Efftto: decatimento del peso (in pratica aggiungo $2\lambda w$ al gradiente
+$$w_{new} = w_{old} + \eta\cdot\Delta w - 2\lambda w_{old}$$\\
+Se $\lambda$ è alto allora modello fortemente normalizzato, se $\lambda$ basso allora dò molta importanza ai dati quindi rischio overfitting.
+\paragraph{Limitazione delle funzioni base expansion} %TODO p. 63
+$\phi$ sono fissate \textit{prima} di osservare i dati.
+\chapter{Classificazione}
+\paragraph{Classificazione di modelli lineari} Riusiamo il modello lineare Attribuiamo categoria ad es 0/1, -1/+1\ldots\\
+Usiamo l'iperpiano ($wx$) asssumendo val pos e neg.\\
+Decidiamo se $x$ appartiene a zona positiva o negativa. Vogliamo trovare $w$ tramite apprendimento
+\paragraph{Decision boundary} $w^T x = w_1x_1 + w_2x_2 + w_0 = 0$ punto d'intersezione fra i due piani.\\
+Metto scalino: tutte le volte che ero in zona poisitiva attribuisco valori uscita ad 1, dall'altra parte 0/-1
+hx = 1 se wx + w0 magguguale 0, o 0 altrimenti\\
+Oppure h(x) = sign(wx + w0)
+Iperpiano separatore: insieme dei punti per cui il nostro modello è 0. Quando maggug 0 possiamo dire 1 altrimenti 0. LTU: linear threadhold unit.
+\paragraph{Def} Dato un set di $l$ esempi d'apprendimento, trovare $w$ da \textbf{minimizzare} la somma di quadrati $$E(w) = \sum_{p=1}^l (y_p - x_p^Tw)^2 = ||y - Xw||^2$$
+Non usiamo $h(x)$ perché in classificazione ci starei mettendo $h(x) = \textsl{sign}(wx)$ che \textbf{non è differenziabile}.\\\\
+Abbiamo ancora l'algoritmo iterative gradient descent
+$$\Delta w_i = - \frac{\partial E(w)}{\partial w_i} = \sum_{p=1}^l (y_p - x_p^Tw)\cdot x_{pi}$$
 \end{document}
