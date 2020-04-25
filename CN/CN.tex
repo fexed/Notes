@@ -1191,6 +1191,39 @@ $$A^{(k)} = \frac{A^{(k-1)} + (A^{(k-1)})^{-1}}{2}\:\:\textsl{con }k \geq 1$$
 	Può non andare bene perché non ho garanzie, in generale, che il metodo converga e che quindi la differenza diventi, ad un certo punto, inferiore alla tolleranza indicata.
 	\item $k \geq$ \texttt{MAX\_ITER}
 \end{list}
+\pagebreak
+\subsection{Convergenza}
+Vediamo nel dettaglio cosa intendiamo per convergenza dei metodi iterativi. In generale, un metodo iterativo converge quando genere una sequenza convergente di matrici. Il nostro problema computazionale è calcolare $Ax = b$, lo riformuliamo con $A = M - N$ con $M$ invertibile. Quindi riscrivo come $(M - N)x = b \Leftrightarrow Mx = Nx + b \Leftrightarrow x = M^{-1}N x + M^{-1}b$ e indico $M^{-1}N = P$ e $M^{-1}b = q$.\\
+Ho ricondotto il problema $Ax = b$ al problema di trovare un vettore $x\:|\: x = Px + q$. Possiamo scegliere un vettore iniziale $x^{(0)} \in R^n$ e costruiamo una successione $x^{(k+1)} = Px^{(k)} + q$ cioè
+\begin{list}{}{}
+	\item $\left\{\begin{array}{c} x^{(0)} \in R^n\\x^{(k+1)} = Px^{(k)} + q \end{array}\right. $ che solitamente lo si implementa come $\left\{\begin{array}{c} x^{(0)} \in R^n\\Mx^{(k+1)} = Nx^{(k)} + b \end{array}\right. $ 
+\end{list}
+Fissata $A$, la \textbf{convergenza dipende in generale da come seleziono $M$, $N$ e dalla scelta del vettore iniziale}. Vogliamo \textbf{eliminare} questa \textbf{dipendenza dalla scelta del vettore iniziale}. Questo perché non possiamo considerare metodi che convergono per determinati vettori iniziali e divergono per altri, perché a quel punto la scelta del vettore iniziale diventa un problema di pari complessità a quello della risoluzione di $Ax = b$
+\paragraph{Convergente} Un metodo iterativo $x^{(k+1)} = Px^{(k)} + q$ con $k \geq 0$ per risolvere $Ax = b$ con $P = M^{-1}N$ e $q = M^{-1}b$, e $A = M - N$, si dice \textbf{convergente} se $\forall\:x^{(0)}\in R^n \Rightarrow \lim x^{(k)} = x$ con $x$ soluzione del sistema, cioè la \textbf{successione generata converge alla soluzione del sistema lineare}.\\\\
+Partiamo col cercare delle condizioni di convergenza. Sappiamo che il metodo iterativo genera delle successioni con $x^{(k+1)} = Px^{(k)} + q$ e sappiamo che la soluzione del sistema lineare soddisfa $x = Px + q$, di conseguenza
+$$x^{(k+1)} - x = P(x^{(k)} - x)$$
+Chiamiamo $e^{(k)} = x^{(k)} - x$, $e^{(k)}$ misura una sorta d'\textbf{errore} cioè quanto dista la $k$-esima iterata dalla soluzione del sistema. La relazione precedente diventa $$e^{(k + 1)} = Pe^{(k)}\:\:\:\: k\geq 0$$
+\paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è \textbf{convergente} se $\exists$ una norma matriciale indotta dalla norma vettoriale $||\cdot||$ tale che $||P|| < 1$
+\subparagraph{Dim} $e^{(k + 1)} = Pe^{(k)} \Leftrightarrow ||e^{(k + 1)}|| = ||Pe^{(k)}|| \leq ||P||\cdot||e^{(k)}|| \leq ||P||^2\cdot||e^{(k-1)}|| \leq \ldots \leq ||P||^{k+1}\cdot||e^{(0)}||$\\
+$0 \leq ||e^{(k+1)}|| \leq ||P||^{k+1}\cdot||e^{(0)}||$, che per $k\to\infty$
+\begin{list}{}{}
+	\item $0\to 0$
+	\item $||P||^{k+1}\cdot||e^{(0)}||\to 0$ perché $||P|| < 1$ per ipotesi $\Rightarrow||P||^{k+1}\to 0$ per $k\to\infty$
+	\item $\Rightarrow||e^{(k+1)}||\to 0$ per il teorema del confronto.
+\end{list}
+Quindi se trovo una norma come sopra, posso dire che il metodo è convergente: il teorema fornisce una \textbf{condizione sufficiente}.\\
+Adesso cerchiamo una condizione necessaria.
+\paragraph{Teorema} Se il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente, allora $\rho(P) < 1$\\
+$\rho(P)$ è il \textbf{raggio spettrale} di $P$, il \textbf{modulo dell'autovalore di modulo massimo di $P$}.\\
+Quindi il metodo \textbf{non converge} se $\rho(P) \geq 1$, mentre \textbf{può convergere} se $\rho(P) < 1$.
+\subparagraph{Dim} Se è convergente, allora la successione converge $\forall\: x^{(0)}$ e quindi $\forall\:e^{(0)}$ ho $e^{(k)}\to 0$\\
+Prendo $e^{(0)} = v\:|\: Pv = \lambda v$ con $|\lambda| = \rho(P)$ quindi un autovettore relativo all'autovalore di modulo massimo.
+$$e^{(k+1)} = Pe^{(k)} = \ldots = P^{k+1}e^{(0)} = P^{k+1}v$$
+$$P^{k+1}v = \lambda^{k+1}v = \lambda^{k+1}e^{(0)}$$
+$$\Rightarrow||e^{(k+1)}|| = |\lambda|^{k+1}\cdot||e^{(0)}|| \neq 0$$
+$$||e^{(k+1)}||\to 0 \Leftrightarrow |\lambda| < 1$$
+Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{necessaria e sufficiente}.
+\paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente $\Leftrightarrow \rho(P) < 1$.
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
