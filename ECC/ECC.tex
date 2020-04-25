@@ -961,7 +961,7 @@ Una transizione d'esempio: $(q, u_1\sigma_1 v_1, u_2\sigma_2 v_2, \ldots, u_k \s
 \paragraph{Tempo} Il tempo di richiesto da $M$ a $k$ nastri per decidere $x \in I$ è $t \Leftrightarrow$ partendo dallo stato iniziale $q_0$ ho $(q_0, \underline{\triangleright}x, \underline{\triangleright}, \ldots, \underline{\triangleright}) \longrightarrow_M^t (H, w_1, \ldots, w_k)$ con $H \in \{$si, no$\}$\\
 Non si può decidere precisamente il numero di passi, ci accontenteremo di una \textbf{stima superiore} $f(|(x)|)$, con $|x| =$ taglia$(x)$. Non sapremo come calcolare la taglia in generale, ma deve essere relativamente \textbf{facile} farlo: lunghezza di un vettore, dimensione in memoria\ldots\\
 $M$ \textbf{decide} $I$ in tempo $f \Leftrightarrow \forall\: x$ il tempo $t$ per decidere $x \in I$ è tale che $t \leq f($taglia$(x))$
-\paragraph{TIME} La \textbf{classe di complessità} TIME$(f) = \{$problemi $I\:|\: \exists\: M$ che decide $I$ in tempo deterministico $f\}$\\\\
+\subparagraph{TIME($f$)} $= \{I\:|\: \exists\: M$ che decide $I$ in tempo deterministico $f\}$\\\\
 $O(f) = \{g | \exists r \in R  g(n) < r\cdot f(n)\}$ salvo un pezzo iniziale. Cioè la $f$ da un certo punto in poi sta sopra la $g$.\\$\Omega(f)$ è quando la $f$ sta sotto.\\$\Theta(f)$ è quando le funzioni crescono allo stesso modo.
 \subsection{Teorema di Riduzione del Numero di Nastri}
 \paragraph{Teorema} Teorema per\ldots\\
@@ -992,7 +992,54 @@ Quindi se $f$ è $c\cdot n$ posso eliminare $c$ e mettere $\epsilon = \frac{1}{c
 $M'$ in 6 passi simula $m$ passi di $M$, con $M'$ macchina veloce e $M$ macchina lenta, questo perché partizionando l'input in blocchi di $m$ caratteri i cambiamenti possono essere fatti in blocchi contigui.\\
 $M'$ farà $|x|+2$ passi per condensare l'input + $6\cdot \left( \frac{f(|x|)}{m} \right)$ passi, quindi posso prendere come $m = \left( \frac{6}{\epsilon} \right)$\\\\
 Grazie a questi risultati definisco $\mathscr{P}$ come $$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|n|^k) $$
-%TODO lezione 23/04
+\pagebreak
+\paragraph{Ricapitolando}
+\subparagraph{} M richiede tempo $t$ per decidere $I$ $\Leftrightarrow$ $M(x) = (q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$ con $h \in \{\textsl{si, no}\}$
+\subparagraph{} M decide $I$ in tempo $f$ $\Leftrightarrow$ $\forall\:x\in I\:\:M(x) \rightarrow^t (\textsl{si}, w_1, \ldots, w_k)$ cioè M richiede tempo $t$ per deciderlo, con $t \leq f(|x|)$
+\subparagraph{TIME($f$)} $=\{I\:|\:\exists\: M$ che decide $I$ in tempo $f\}$\\
+$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|n|^k)$
+\subparagraph{}Abbiamo anche scoperto che \textbf{non si può usare più spazio che tempo}.
+\paragraph{Spazio necessario al calcolo} Quantità di celle che il programma utilizza durante l'esecuzione.\\
+Ignoreremo lo spazio utilizzato dal nastro d'ingresso.
+\section{MdT I/O a $k$ nastri}
+Si tratta di una MdT in cui il \textbf{primo nastro contiene l'ingresso} mentre l'\textbf{ultimo nastro contiene l'uscita}.
+$$\delta(\sigma_1, \ldots, \sigma_k) = (q', (\sigma_1', D_1), \ldots, (\sigma_k', D_k))$$
+\paragraph{Nastro d'ingresso} Ogni $\delta$ come sopra deve essere tale che il primo nastro ($\sigma_1', D_1$) sia di \textbf{sola lettura} perché è il nastro dell'input.\\
+La \textbf{condizione} quindi è che $\sigma'_1 = \sigma_1$ \textbf{sempre}, cioè \textbf{il nastro di ingresso è di sola lettura}.
+\paragraph{Nastro d'uscita} Analogamente ci deve essere una condizione sul nastro d'uscita:
+\begin{list}{}{}
+	\item $D_k = R$
+	\item oppure $D_k = -$ allora $\sigma_k' = \sigma_k$, cioè \textbf{nastro d'uscita di sola scrittura}.
+\end{list}
+\paragraph{Altra condizione} Inoltre, bisogna costruire le $\delta$ in modo che quando finisco di leggere il nastro d'ingresso, finendo quindi sul carattere bianco $\#$, io debba necessariamente tornare indietro. Altrimenti, anche se non scrivo niente, potrei usare le operazioni di spostamento sui caratteri bianchi per codificare delle operazioni. Quindi \begin{list}{}{}
+	\item $\sigma_1 = \# \Rightarrow D_1 \in \{\textsl{L}, -\}$
+\end{list}
+\paragraph{Teorema} Collega le MdT a $k$ nastri con le MdT di tipo I/O a $k+2$ nastri\\$\forall\:M$ a $k$ nastri che decide $I$ in tempo deterministico $f\Rightarrow\exists\:M'$ a $k+2$ nastri $I/O$ che decide $I$ in tempo $c\cdot f$\\
+La dimostrazione, intuitivamente, consiste per $M'$ nel copiare il nastro d'ingresso sul secondo nastro e, a computazione conclusa ed eseguita come $M$, copiare il nastro d'uscita sull'ultimo nastro.
+\subsection{Complessità in spazio}
+\paragraph{} $M$ a $k$ nastri di tipo I/O che va $(q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$ con $h \in \{\textsl{si, no}\}$ richiederà, come spazio, quello dei nastri di lavoro $w_i$. Hanno spazio costante, quindi so in principio qual'è. Quindi:
+\begin{list}{}{}
+	\item $M$ a $k$ nastri I/O richiede spazio $\sum_{i=2}^{k-1} |w_i| \Leftrightarrow (q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$
+\end{list}
+Ad esempio, per $k = 3$ avrò un unico nastro di lavoro, quindi lo spazio occupato dalla macchina sarà quello del nastro di lavoro (come detto prima, ignoriamo l'occupazione in spazio dei nastri input e output).
+\pagebreak
+\paragraph{} $M$ decide $I$ in spazio $f \Leftrightarrow \forall\: x\:\:M$ richiede spazio$\leq f(|x|)$
+\subparagraph{SPACE($f$)} = $\{I\: |\:\exists\: M$ che decide $I$ in spazio $f\}$
+\paragraph{Teorema} Posso ridurre linearmente lo spazio.\\
+$I \in$ SPACE$(f) \Rightarrow \forall\:\epsilon\in R_+\: I \in$ SPACE$(2 + \epsilon\cdot f(n))$
+$$\textsl{PSPACE} = \bigcup_{k\geq 1} \textsl{SPACE}(n^k)$$
+$$\textsl{LogSPACE} = \bigcup_{k\geq 1} \textsl{SPACE}(k\cdot\log(n))$$
+\paragraph{Teorema} $\textsl{LogSPACE} \subseteq \mathscr{P}$
+\subparagraph{Dim} Sia $I \in \textsl{LogSPACE} \Rightarrow \exists\: M$ di tipo I/O\ldots\\
+Quante \textbf{configurazioni diverse posso avere sul nastro di lavoro}? Dipende da quanti simboli ho sulla macchina. Poniamo $x$ input e la sua lunghezza $|x| = n$, avrò $\#\Sigma^{\log(n)}$ nastri diversi, cioè il numero di simboli (cardinalità di $\Sigma$) alla $\log (n)$. Inoltre posso avere il cursore in $\log(n)$ posizioni diverse in ciascun stato (che sono $\# Q$). Inoltre il cursore sta anche nell'input, in $|x|$ posizioni diverse. Quindi le configurazioni diverse del nastro di lavoro sono 
+$$n\cdot\log(n)\cdot\# Q\cdot\#\Sigma^{\log(n)}$$
+Per dimostrare che $\textsl{LogSPACE} \subseteq \mathscr{P}$ devo trovare $k$ tale che $n\cdot\log(n)\cdot\# Q\cdot\#\Sigma^{\log(n)} \leq n^k$. Applico il $\log$ da entrambi i membri
+$$\log(n) + \log(\log(n)) + \log(\# Q) + \log(n)\log(\#\Sigma) \leq k\cdot\log(n)$$
+Elimino $\log(\log(n))$ perché è molto piccolo, e $\log(\# Q)$ perché è una costante, poi semplifico per $\log(n)$
+$$\not\log(n) + \not\log(n)\log(\#\Sigma) \leq k\cdot\not\log(n)$$
+$$1 + \log(\#\Sigma) \leq k$$
+Quindi basta usare $k \geq \log(\#\Sigma)$.\\\\
+Come conseguenza, scopriamo che \textbf{lo spazio limita il tempo}, perché se passo troppe volte sopra la solita configurazione vado in ciclo.
 \section{}
 Macchine di turing a k nastri eventualmente di tipo I/O\\
 per ogni x macchina (m, x \ldots) $\rightarrow^t$ M situazione di alt\\
