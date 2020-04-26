@@ -2106,43 +2106,80 @@ La rappresentazione scelta per $H$ determina lo spazio di ricerca:
 \textbf{In generale la dimensione è molto grande}, può addirittura essere infinita. \textbf{Strutturare bene lo spazio di ricerca $H$ può aiutare drasticamente nel ricercare in maniera efficiente}.
 %IIA-20-ML-concept-learning-v0.1.pdf, p. 16
 \paragraph{Specificare l'ordinamento}
-Considerate due funzioni a valori booleani $h_j$ e $h_k$ definite su X, allora $h_j$ \textbf{è più generale di o uguale a} $h_k$ (scritto $h_j \geq h_k$) $\Leftrightarrow \forall x \in X : [(h_k(x) = 1) \Rightarrow (h_j(x) = 1)]$\\
-Ordine parziale.
+Considerate due funzioni a valori booleani $h_j$ e $h_k$ definite su X, allora $h_j$ \textbf{è più generale di o uguale a} $h_k$ (scritto $h_j \geq h_k$) $\Leftrightarrow \forall x \in X : [(h_k(x) = 1) \Rightarrow (h_j(x) = 1)]$\\\\
+Un esempio:
+\begin{list}{}{}
+	\item $h_1 = \langle$Sunny, ?, ?, Strong, ?, ?$\rangle$
+	\item $h_2 = \langle$Sunny, ?, ?, ?, ?, ?$\rangle$
+\end{list}
+$h_2$ \textbf{impone meno vincoli rispetto ad} $h_1$, e quindi \textbf{classifica un maggior numero di istanze $x$ come positive} $h(x) = 1$\\
+Questo impone un \textbf{ordinamento parziale} sullo spazio di ipotesi $H$ che viene utilizzato da molti metodi di concept learning. Possiamo usare questo ordinamento parziale a nostro vantaggio per organizzare efficientemente la ricerca in $H$.
 \begin{center}
 	\includegraphics[scale=0.6]{ml_strutturadih.png}
 \end{center}
-L'idea è fare una ricerca in un oridne intelligente, smart. Parto dall'ip + specifica e mi sposto verso quella più generale, guardando istanze una ad uno che arrivano dalla tabella. Se l'ipotesi non soddisfa cerco di generalizzarla (rendere vera l'ipotesi) ma col passo minore possibile.
+L'idea è di fare una ricerca in un ordine intelligente. Parto dall'ipotesi più specifica e mi sposto verso quella più generale, guardando le istanze che arrivano dalla tabella una ad una. Se l'ipotesi non soddisfa, \textbf{cerco di generalizzarla} (renderla vera) ma \textbf{col passo minore possibile}.
+\pagebreak
 \subsection{Algoritmo Find-S}
+Si cerca di usare l'ordinamento parziale per cercare efficientemente le $h$ consistenti, senza enumerare esplicitamente ogni $h\in H$.
 \begin{enumerate}
-	\item inizializziamo h con ipotesi più specifica
-	\item per ciascuna istanza positiva, guardiamo attributi dell'ipotesi\\
-	Se attributi sono soddisfatti dall'istanza nuova allora ok\\
-	altrimenti bisogna cambiare attributi per generalizzare ipotesi e portarla ad 1. Facendo il minimo possibile
-	\item Output: ipotesi h
+	\item Inizializziamo $h$ con l'ipotesi più specifica in $H$
+	\item Per ciascuna istanza positiva, guardiamo gli attributi dell'ipotesi.\\
+	Se gli attributi sono soddisfatti dall'istanza nuova allora ok.\\
+	Altrimenti bisogna cambiare gli attributi per generalizzare l'ipotesi e portarla ad 1, ma facendo il minimo possibile. In pseudocodice:
+	\begin{list}{}{}
+		\item for each attributo $a_i \in h$
+		\begin{list}{}{}
+			\item if $a_i$ è soddisfatto da $x$ then do nothing
+			\item else sostituisci $a_i$ in $h$ con il prossimo vincolo più generale che è soddisfatto da $x$ (cioè \textbf{rimuovi da $h$ i letterali che non soddisfano $x$}
+		\end{list}
+	\end{list}
+	\item Output: ipotesi $h$
 \end{enumerate}
 %TODO esempio
 \paragraph{Proprietà}
 \begin{list}{}{}
-	\item lo spazio delle ipotesi è descritto da congiunzioni di attributi (limitante!)
-	\item Find-S produce l'ipotesi più specifica in H cosnistente con gli esempi d'allenamento positivi
-	\item L'ipotesi di output h saràù anche consistente con gli esempi negativi, se il concetto obiettivo è contenuto in H, perché c $\geq$ h.
+	\item Lo spazio delle ipotesi è descritto da congiunzioni di attributi (limitante!)
+	\item Find-S produce l'ipotesi più specifica in H consistente con gli esempi d'allenamento \textbf{positivi}
+	\item L'ipotesi in output $h$ sarà anche consistente con gli esempi negativi, se il concetto obiettivo è contenuto in $H$, perché c $\geq$ h.
 \end{list}
-\subsection{Complaints about Find-S}
-\paragraph{Version Spaces} è sottinisnieme ipotesi consistente con tutti gli esempi di addestramento
+\subsubsection{Limitazioni del Find-S}
+\begin{list}{}{}
+	\item Non c'è tolleranza al rumore: ignorando gli esempi negativi non c'è modo di sapere se gli esempi d'apprendimento sono inconsistenti.
+	\item Non si può dire se chi apprende converge verso il concept obiettivo, nel senso che non può determinare se ha trovato l'\textit{unica} ipotesi consistente con gli esempi.
+	\item Perché preferire l'ipotesi più specifica?
+	\item Cosa succede se ci sono più ipotesi massimalmente specifiche
+\end{list}
+\subsubsection{Version Spaces}
+\paragraph{Idea} Come output una descrizione dell'insieme di \textit{tutte} le $h$ consistenti con $D$.\\
+Possiamo farlo senza enumerarle tutte
+\begin{list}{}{}
+	\item Consistent($h$, $D$) $:= \forall\:\langle x, c(x)\rangle\in D\:\:h(x) = c(x)$
+\end{list}
+\paragraph{Definizione} Il \textbf{version space} $VS_{H, D}$, rispetto allo spazio delle ipotesi $H$ e al training set $D$, è il \textbf{sottoinsieme delle ipotesi di $H$ consistenti con tutti gli esempi d'apprendiemnto}
+\begin{list}{}{}
+	\item $VS_{H, D} = \{h\in H\:|\:$ Consistent$(h, D)\}$
+\end{list}
 \subsection{Algoritmo List-Then-Eliminate}
 Irrealistico perché richiede enumerazione esaustiva di tutte le ipotesi di $h$ in $H$
 \begin{enumerate}
-	\item %TODO
+	\item \textit{VersionSpace}: una lista contenente tutte le ipotesi di $H$
+	\item $\forall$ esempio d'apprendimento $\langle x, c(x)\rangle$
+	\begin{list}{}{}
+		\item rimuoviamo da \textit{VersionSpace} tutte le ipotesi inconsistenti con l'esempio d'apprendimento, cioè con\\$h(x) \neq c(x)$
+	\end{list}
+	\item Output: la lista di ipotesi in \textit{VersionSpace}
 \end{enumerate}
 Ma vogliamo sfruttare ordinamento parziale
-\paragraph{Rappresentare i version spaces}
+\subsection{Rappresentare i Version Spaces}
 \begin{list}{}{Definizioni}
-	\item General boundary
-	\item Specific boundary
-	\item Teorema
+	\item \textbf{General boundary} G di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente generici}
+	\item \textbf{Specific boundary} S di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente specifici}
+	\item \textbf{Teorema}: ogni membro del VS sta tra questi due confini
+	\item $VS_{H,D} = \{h\in H\:|\: \exists\:s\in S, \exists\:g \in G \Rightarrow g \geq h \geq s\}$
 \end{list}
+Dove con $x \geq y$ si intende che $x$ è più generale o uguale a $y$.
 \subsection{Algoritmo Candidate Elimination}
-%TODO
+%TODO IIA-20-ML-concept-learning-v0.1.pdf, p. 26
 grazie all'ordine parziale posso controllare di non avere cose più generali/specifiche e mantenere consistenza
 \section{Bias Induttivo ed il suo ruolo}
 Per ora abbiamo usato uno spazio delle ipotesi biased, vincolato. Abbiamo assunto che lo spazio delle ipotessi contenesse C, cioè che l'obiettivo C fosse espresso in and e non in or.\\
