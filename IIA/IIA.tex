@@ -2020,17 +2020,91 @@ L'apprendimento è quindi la ricerca di una \textit{buona} funzione. Cosa signif
 \textbf{Performance in ML = accuratezza predittiva} stimata dall'errore calcolato sul \textbf{test set}.
 \paragraph{Teoria} Sotto quali condizioni matematiche un modello è in grado di generalizzare? Statistical Learning Theory.
 \section{Concept Learning}
-\paragraph{Concept Learning} Inferire una funzione booleana da esempi d'addestramento positivi e negativi. X spazio delle istanze, C: X $\rightarrow$ \{tt, ff\} oppure \{+, -\} oppure \{0, 1\}
-\paragraph{Esempio} $<x, c(x)>$ in D (o training set)
-\paragraph{Soddisfa} $h : X \rightarrow \{0, 1\}$ soddisfa $x$ se $h(x) = 1$
-\paragraph{Consistenza} Un'ipotesi è consistente con l'intero D se è consistente se coincide con i valori target\\\\ %TODO
-L'obiettivo nostro è ricostruire quell'\textit{unknown function}. Questo è un \textbf{problema inverso} (\textbf{ill posed}, o malposto), perché può violare l'esistenza, l'unicità o la stabilità della funzione.\\
-Nel caso generale $|H| = 2^{\textsl{num istanze}} = 2^{2^n}$ per input binari, con $n =$ dimensione dell'input
+\paragraph{Concept Learning} Inferire una funzione booleana da esempi d'addestramento positivi e negativi. X spazio delle istanze, C: X $\rightarrow$ \{tt, ff\} oppure \{+, -\} oppure \{0, 1\}\ldots\\
+Si apprende dagli esempi come una ricerca nello spazio delle ipotesi. \textbf{Imparare è migliorare, tramite l'esperienza, in qualche attività}.
+\begin{list}{}{}
+	\item Migliorare sul task T
+	\item rispetto a delle misure di performance P
+	\item tramite l'esperienza E
+\end{list}
+\subsection{Supervised Learning}
+Vengono forniti una serie di \textbf{esempi} $\langle$input, output$\rangle$ = $\langle x, d\rangle$ per una qualche \textbf{funzione sconosciuta} $f$.\\
+Il \textbf{valore obiettivo} $d$, o $t$, o $y$\ldots è dato dal \textbf{supervisore} in accordo a $f(x)$. L'\textbf{obiettivo} è \textbf{trovare una \textit{buona} approssimazione di $f$}.
+\subparagraph{Esempio} $\langle x, c(x)\rangle \in$ D (o training set, TR set)
+\subparagraph{Soddisfa} $h : X \rightarrow \{0, 1\}$ \textbf{soddisfa} $x$ se $h(x) = 1$
+\subparagraph{Consistenza} Un'\textbf{ipotesi è consistente con l'intero D se coincide con i valori target forniti per ogni esempio}. Cioè se $\forall\:\langle x, c(x)\rangle\in D \Rightarrow h(x) = c(x)$
+\paragraph{} L'obiettivo è \textbf{ricostruire} quell'\textit{unknown function}. Questo è un \textbf{problema inverso} (\textbf{ill posed}, o malposto), perché può violare l'esistenza, l'unicità o la stabilità della funzione.\\
+Nel caso generale, $|h| = 2^{\textsl{num istanze}} = 2^{2^n}$ per input binari, con $n =$ dimensione dell'input
 \subsection{Regole congiuntive}
-proposizioni fatte con l'and\\
-posso mettere o non mettere quindi tutti i modi possibili sono 2$^n$, se includo anche il not diventano $3^n + 1$
-%TODO descrizione ed esempio
-\paragraph{Learning hypothesis}
+Proposizioni fatte con l'AND. Quante regole congiuntive ci sono?\\
+Nel caso generale, ho i \textbf{letterali positivi} (esempi: $h_1 = l_2$, $h_2 = (l_1 \wedge l_2)$, $h_3 = \textsl{true}$\ldots).
+Ognuno lo posso mettere o non mettere all'interno della regola congiuntiva, quindi tutti i modi possibili sono 2$^n$, se includo anche il $\neg$ diventano $3^n + 1$
+\pagebreak
+\paragraph{Esempio: Enjoy Sport} Idea: "\textit{giorni in cui il mio amico Aldo preferisce praticare sport}".\\
+Task: predire il valore di "enjoy sport" per un giorno arbitrario basandosi sul valore di una serie di attributi
+\begin{center}
+\begin{tabular}{c c c c c c r}
+\textbf{Sky} & \textbf{Temp.} & \textbf{Humid.} & \textbf{Wind} & \textbf{Water} & \textbf{Forecast} & \textit{\textbf{Enjoy Sport}}\\
+\hline
+Sunny & Warm & Normal & Strong & Warm & Same & \textit{Yes}\\
+Sunny & Warm & High & Strong & Warm & Same & \textit{Yes}\\
+Rainy & Cold & High & Strong & Warm & Change & \textit{No}\\
+Sunny & Warm & High & Strong & Cool & Change & \textit{Yes}\\
+\end{tabular}\\
+\textit{Una riga rappresenta un'istanza}
+\end{center}
+\subsection{Rappresentare le ipotesi}
+Un'ipotesi $h$ è una \textbf{congiunzione di vincoli sugli attributi}. Ogni vincolo può essere:
+\begin{list}{}{}
+	\item Un valore specifico, es \textit{Water = Warm}
+	\item Un valore ininfluente, es \textit{Water = ?}
+	\item Un'ipotesi nulla, nessun valore concesso, es: \textit{Water = $\emptyset$}, \textit{$l_i \wedge \neg l_j$}
+\end{list}
+Esempio di ipotesi $h$
+\begin{center}
+\begin{tabular}{c c c c c c}
+\textbf{Sky} & \textbf{Temp.} & \textbf{Humid.} & \textbf{Wind} & \textbf{Water} & \textbf{Forecast}\\
+$\langle$ Sunny & ? & ? & Strong & ? & Same $\rangle$
+\end{tabular}
+\end{center}
+Corrispondente alla funzione booleana
+\begin{center}
+Sky = Sunny $\wedge$ Wind = Strong $\wedge$ Forecast = Same
+\end{center}
+\subparagraph{Ipotesi più specifica} $\langle\emptyset\:\:\emptyset\:\:\emptyset\:\:\emptyset\:\:\emptyset\:\:\emptyset\rangle$
+\subparagraph{Ipotesi più generale} $\langle$? ? ? ? ? ?$\rangle$
+\paragraph{Learning hypothesis} \textbf{Dati}
+\begin{list}{}{}
+	\item \textbf{Istanze} $X$: giorni possibile descritti dagli attributi Sky, Temp, Humid, Wind, Water, Forecast
+	\item \textbf{Funzione Target} $c : $ Enjoy Sport $X$ $\rightarrow$ \{0, 1\}
+	\item \textbf{Ipotesi} $H$: insieme di ipotesi, che sono congiunzioni di un'insieme finito di letterali.\\Es $\langle$Sunny ? ? Strong ? Same$\rangle$
+	\item \textbf{Esempi d'apprendimento} $D$: esempi positivi e negativi della funzione target.\\Es $\langle x_1, c(x_1)\rangle$, \ldots, $\langle x_n, c(x_n)\rangle$
+\end{list}
+\textbf{Trovare} un'\textbf{ipotesi $h \in H$ tale che $\forall\: x \in X$, $h(x) = c(x)$}\\
+Quindi \textbf{apprendere} = \textbf{cercare} nello spazio delle ipotesi $H$.
+\paragraph{Assunzione} Ogni ipotesi che approssima bene la funzione obiettivo sugli esempi d'apprendimento, approssimerà la funzione obiettivo anche su esempi non osservati.
+\begin{list}{}{}
+	\item $h(x) = c(x) \forall\: x \in D$ (cioè \textit{consistente} con $D$)
+	\item $h(x) = c(x) \forall\: x \in X$ \textbf{?}\\
+	\textbf{Il problema fondamentale del Machine Learning}
+\end{list}
+\pagebreak
+\subsection{Numerare le istanze, concetti, ipotesi}
+La rappresentazione scelta per $H$ determina lo spazio di ricerca:
+\begin{list}{}{}
+	\item Sky: Sunny, Cloudy, Rainy (3 valori)
+	\item Temp: Warm, Cold
+	\item Humid: Normal, High
+	\item Wind: Strong, Weak
+	\item Water: Warm, Cold
+	\item Forecast: Same, Change
+\end{list}
+\# istanze distinte = $3\cdot2\cdot2\cdot2\cdot2\cdot2 = 96$\\
+\# concetti distinti = $2^{\# istanze}$ = $2^{96}$\\
+\# ipotesi sintatticamente distinte (congiunzioni) = $5\cdot4\cdot4\cdot4\cdot4\cdot4 = 5120$ (es: warm/cold/?/$\emptyset$)\\
+\# ipotesi semanticamente distinte = $1 + 4\cdot3\cdot3\cdot3\cdot3\cdot3 = 973$ perché tutte le $h$ con $\emptyset$ equivalgono a \textit{false}.\\
+\textbf{In generale la dimensione è molto grande}, può addirittura essere infinita. \textbf{Strutturare bene lo spazio di ricerca $H$ può aiutare drasticamente nel ricercare in maniera efficiente}.
+%IIA-20-ML-concept-learning-v0.1.pdf, p. 16
 \paragraph{Specificare l'ordinamento}
 Considerate due funzioni a valori booleani $h_j$ e $h_k$ definite su X, allora $h_j$ \textbf{è più generale di o uguale a} $h_k$ (scritto $h_j \geq h_k$) $\Leftrightarrow \forall x \in X : [(h_k(x) = 1) \Rightarrow (h_j(x) = 1)]$\\
 Ordine parziale.
