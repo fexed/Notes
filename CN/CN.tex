@@ -1556,6 +1556,105 @@ x_{n-1} = \gamma_0\gamma_1\ldots\gamma_{n-1}
 Determiniamo per quali valori di $\gamma_i$ $A$ è invertibile.\\
 Sappiamo che $A$ invertibile $\Leftrightarrow \textsl{det}(U) \neq 0 \Leftrightarrow\textsl{det}(U) = \beta \neq 0 \Leftrightarrow \mathlarger{\prod_{i=0}^{n-1} \gamma_i} \neq -1$\\
 Se $|\gamma_i| < 1 \Rightarrow\:\vline\:\mathlarger{\prod_{i=0}^{n-1} \gamma_i}\:\vline = \mathlarger{\prod_{i=0}^{n-1} |\gamma_i|} < 1$
+\section{Esercitazione 5}
+\begin{math}
+A = \left[ \begin{array}{c c c}
+	a & & 1\\
+	& \ddots & \\
+	1 & & a
+\end{array} \right] \in R^{n \times n}
+\end{math}
+con $a \in R$
+\paragraph{Per quali $a$, $A$ ammette LU?}  Abbiamo \begin{math}
+A_k = \left[ \begin{array}{c c c}
+	a & & \\
+	& \ddots & \\
+	& & a
+\end{array} \right] \in R^{k \times k}
+\end{math}
+per $k = 1\ldots n-1$\\
+$\textsl{det}(A_k) = a^k \neq 0 \Leftrightarrow a \neq 0$, quindi \textbf{$A_k$} per $k = 1\ldots n-1$ \textbf{è invertibile $\Leftrightarrow a \neq 0$}\\
+Quindi, per il \textbf{teorema di esistenza ed unicità}, $a \neq 0 \Rightarrow \exists!$ fattorizzazione $LU$ di $A$\\
+\begin{math}
+A_{n-1} = \left[
+\begin{array}{c c c}
+	a & & \\
+	& \ddots & \\
+	& & a
+\end{array}
+\right] = I_{n-1} \cdot \left[
+\begin{array}{c c c}
+	a & & \\
+	& \ddots & \\
+	& & a
+\end{array}
+\right]
+\end{math}\\
+\begin{math}
+A = \left[ 
+\begin{array}{c c c c | c}
+ & & & &\\
+ & I_{n-1} & & & 0\\
+ & & & &\\
+ \hline
+ \mathlarger{\frac{1}{a}} & 0 & \ldots & 0 & 1
+\end{array}
+\right] \left[
+\begin{array}{c c c c | c}
+ a & & & & 1\\
+ & \ddots & & & 0\\
+ & & & & \vdots \\
+ & & & a & 0 \\
+ \hline
+ & 0^T & & & \mathlarger{a - \frac{1}{a}}
+\end{array}
+\right]
+\end{math}\\
+\begin{math}
+I_{n-1} \cdot z = \left[ \begin{array}{c} 1\\0\\\vdots\\0\end{array} \right]
+\Leftrightarrow
+z = \left[ \begin{array}{c} 1\\0\\\vdots\\0\end{array} \right]
+\end{math}\\
+\begin{math}
+x^T\cdot\left[
+\begin{array}{c c c}
+	a & & \\
+	& \ddots & \\
+	& & a
+\end{array}
+\right] = [1\:0\ldots0] \Rightarrow \left\{ \begin{array}{l}
+x_1a = 1\\x_2a = 0\\\vdots\\a_{n-1}a = 0
+\end{array} \right. \Leftrightarrow \left\{ \begin{array}{l}
+x_1 = \mathlarger{\frac{1}{a}}\\x_2 = x_3 = \ldots = x_{n-1} = 0
+\end{array} \right.
+\end{math}\\
+\begin{math}
+\mathlarger{\frac{1}{a}} + \beta = a \Leftrightarrow \mathlarger{\beta = a - \frac{1}{a}}
+\end{math}
+\paragraph{Dimostrare che $A$ è invertibile per $|a| > 1$} Usiamo \textbf{Gerschgorin}
+\begin{list}{}{Per $a > 0$}
+	\item $K_1 = K_n = \{z \in C\:|\: |z - a| \leq 1\}$
+	\item $K_2 = \ldots = K_{n-1} = \{z \in C\:|\:|z - a| = 0\}$
+\end{list}
+Per $a > 1 \Leftrightarrow a - 1 > 0$ ottengo $0 \not\in \bigcup K_i$\\
+$\Rightarrow$ A è invertibile per $a > 1$\\
+Per $a < 0 \Rightarrow a < -1 \Leftrightarrow a + 1 < 0 \Rightarrow 0 \not\in\bigcup K_i$\\
+$\Rightarrow$ A è invertibile per $a < -1$\\
+$\Rightarrow$ \textbf{A invertibile} per $|a| > 1$
+\paragraph{Determinante di A} Usiamo \textbf{Laplace}\\
+$A = LU \Rightarrow \textsl{det}(A) = \textsl{det}(L)\cdot\textsl{det}(U)$ (per \textbf{Binet})\\
+$\textsl{det}(U) = \mathlarger{\prod_{k=1}^n u_{kk}} = a^{n-1}(a - \frac{1}{a}) = a^n - a^{n-2} = a^{n-2}(a^2 - 1)$\\
+A è singolare $\Leftrightarrow$ U è singolare $\Leftrightarrow a = 0 \vee a = \pm 1 $
+\paragraph{} $f(a) = a^n - a^{n-2}$\\
+$C_a = \mathlarger{\frac{f'(a)}{f(a)}\cdot a}$\\
+$|\epsilon_{in}| = |C_a|\cdot|\epsilon_a| \leq |C_a|a$
+$$C_a = \frac{n\cdot a^{n-1} - (n-2)\cdot a^{n-3}}{a^n - a^{n-2}}\cdot a$$
+$$C_a = \frac{\not a^{n-2}(n\cdot a^2 - (n-2))}{\not a^{n-2}(a^2 - 1)}$$
+$$C_a = \frac{n\cdot a^2 - (n-2)}{a^2 - 1}$$
+\textbf{Mal condizionato per $a\to\pm1$}\\
+Cosa posso dire quando $|a| \to +\infty$? $a^2\to+\infty$\\
+$$\lim_{|a|\to+\infty} C_a = \lim_{|a|\to+\infty} \frac{n\cdot a^2 - (n-2)}{a^2 - 1} = \lim_{|a|\to+\infty} \frac{\not a^2(n - \frac{n-2}{a^2})}{\not a^2(1 - \frac{1}{a^2})} = n$$
+Quindi è \textbf{ben condizionato per $|a|\to+\infty$}
 \pagebreak
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
