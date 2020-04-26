@@ -6,6 +6,7 @@
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{tikz}
 \usepackage{color}
+\usepackage{relsize}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
 \usepackage{mathrsfs}
@@ -1480,6 +1481,7 @@ for k = 2:n
 end
 \end{lstlisting}
 Diventando così a costo lineare O($n$)
+\pagebreak
 \paragraph{Esercizio 2} 
 \begin{math}
 A = \left[
@@ -1491,9 +1493,71 @@ A = \left[
 \end{array}
 \right]
 \end{math}
-Proviamo che se |$\gamma_i$| < 1 allora A è invertibile. Possiamo farlo con Gerschgorin.\\
-$K_i = \{ z \in C$\ldots\\
-
+Proviamo che se $|\gamma_i| <$ 1 allora A è invertibile.\\Possiamo farlo con \textbf{Gerschgorin}:
+\begin{list}{}{}
+	\item $K_i = \{ z \in C\:|\: |z-1| \leq |\gamma_i|\}$ per $i = 1..n-1$
+	\item $K_n = \{ z \in C\:|\: |z-1| \leq |\gamma_0|\}$
+\end{list}
+$$1 - |\gamma_i| > 0 \Leftrightarrow 1 > |\gamma_i| \Leftrightarrow |\gamma_i| < 1$$
+$$|\gamma_i| < 1 \Rightarrow 1 - |\gamma_i| > 0 \Rightarrow 0 \not\in K_i \Rightarrow 0 \not\in \bigcup_{i=1}^n K_i \Rightarrow A\textsl{ è invertibile}$$
+\subparagraph{Fattorizzazione LU} $A_k = \left[
+\begin{array}{c c c c}
+	1 & - \gamma_1 & & \\
+	& 1 & \ddots & \\
+	& & 1 & -\gamma_{k-1}
+\end{array}
+\right]$\\Triangolare superiore con elementi diagonali $\neq 0 \Rightarrow A_k$ invertibile per $k = 1..n-1 \Rightarrow \exists!\:LU$ di $A$\\
+\begin{math}
+A = \left[ \begin{array}{c c c | c}
+	1 & -\gamma_1 & & \\
+	& \ddots & \ddots & \\
+	& &\ddots & -\gamma_{n-1}\\
+	\hline
+	\gamma_0 & & & 1
+\end{array} \right] =
+\left[ \begin{array}{c c c | c}
+	& & & \\
+	& & & \\
+	& I_{n-1} & & 0 \\
+	& & & \\
+	& & & \\
+	\hline
+	x_1 & \ldots & x_{n-1} & 1
+\end{array} \right] \cdot
+\left[ \begin{array}{c c c c | c}
+	1 & -\gamma_1 & & & 0\\
+	& \ddots & \ddots & & \vdots\\
+	& & \ddots & -\gamma_{n-2} & 0\\
+	& & & 1 & -\gamma_{n-1}\\
+	\hline
+	& & 0^T & & \beta
+\end{array} \right]
+\end{math}\\
+\begin{math}
+\left[x_1 \ldots x_n\right]\cdot\left[ \begin{array}{c c c c}
+	1 & -\gamma_1 & & \\
+	& \ddots & \ddots &  \\
+	& & \ddots & -\gamma_{n-2} \\
+	& & & 1
+\end{array} \right]
+= \left[ \gamma_0\: 0 \ldots 0 \right] \rightarrow \left\{
+\begin{array}{ll}
+x_1 = \gamma_0\\
+-x_1\gamma_1 + x_2 = 0 \Leftrightarrow x_2 = \gamma_0\gamma_1\\
+-x_2\gamma_2 + x_3 = 0 \Leftrightarrow x_3 = x_2\gamma_2 = \gamma_0\gamma_1\gamma_2\\
+\vdots\\
+x_{n-1} = \gamma_0\gamma_1\ldots\gamma_{n-1}
+\end{array}
+\right.
+\end{math}\\
+\begin{math}
+\left[ x_1\ldots x_{n-1} \right]\cdot\left[\begin{array}{c}
+ 0\\\vdots\\0\\-\gamma_{n-1}
+\end{array} \right] + \beta = 1 \Leftrightarrow \beta = 1 + x_{n-1}\gamma_{n-1} = 1 + \gamma_0\gamma_1\ldots\gamma_{n-2}\gamma_{n-1} \Leftrightarrow \mathlarger{ \beta = 1 + \prod_{i=0}^{n-1} \gamma_i}
+\end{math}\\
+Determiniamo per quali valori di $\gamma_i$ $A$ è invertibile.\\
+Sappiamo che $A$ invertibile $\Leftrightarrow \textsl{det}(U) \neq 0 \Leftrightarrow\textsl{det}(U) = \beta \neq 0 \Leftrightarrow \mathlarger{\prod_{i=0}^{n-1} \gamma_i} \neq -1$\\
+Se $|\gamma_i| < 1 \Rightarrow\:\vline\:\mathlarger{\prod_{i=0}^{n-1} \gamma_i}\:\vline = \mathlarger{\prod_{i=0}^{n-1} |\gamma_i|} < 1$
 \pagebreak
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
