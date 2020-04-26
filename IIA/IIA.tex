@@ -5,6 +5,7 @@
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{color}
+\usepackage{mathrsfs}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
 \lstset{
@@ -2172,30 +2173,87 @@ Irrealistico perché richiede enumerazione esaustiva di tutte le ipotesi di $h$ 
 Ma vogliamo sfruttare ordinamento parziale
 \subsection{Rappresentare i Version Spaces}
 \begin{list}{}{Definizioni}
-	\item \textbf{General boundary} G di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente generici}
-	\item \textbf{Specific boundary} S di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente specifici}
+	\item \textbf{General boundary} G di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente generici} (\textit{maximally general})
+	\item \textbf{Specific boundary} S di $VS_{H,D}$, è l'insieme dei membri (di $H$ consistenti con $D$) \textbf{massimamente specifici} (\textit{maximally specific})
 	\item \textbf{Teorema}: ogni membro del VS sta tra questi due confini
 	\item $VS_{H,D} = \{h\in H\:|\: \exists\:s\in S, \exists\:g \in G \Rightarrow g \geq h \geq s\}$
 \end{list}
 Dove con $x \geq y$ si intende che $x$ è più generale o uguale a $y$.
 \subsection{Algoritmo Candidate Elimination}
-%TODO IIA-20-ML-concept-learning-v0.1.pdf, p. 26
-grazie all'ordine parziale posso controllare di non avere cose più generali/specifiche e mantenere consistenza
+\paragraph{Pseudocodice} Dati G (insieme delle ipotesi massimamente generiche) e S (insieme delle ipotesi massimamente specifiche).
+\begin{list}{}{}
+	\item Per ogni esempio d'addestramento $d=\langle x, c(x)\rangle$
+	\begin{list}{}{}
+		\item Se $d$ è un esempio \textbf{positivo}
+		\begin{list}{}{}
+			\item Rimuovi da G ogni ipotesi inconsistente con $d$ (def. di VS)
+			\item Per ogni ipotesi $s \in S$ inconsistente con $d \rightarrow$
+			\begin{list}{}{\textbf{Generalizza S}}
+				\item Rimuovi $s$ da S
+				\item Aggiungi a S tutte le generalizzazioni minime $h$ di $s$ tali che
+				\begin{list}{-}{}
+					\item $h$ è consistente con $d$
+					\item $\exists\:g \in G$ più generale di $h$
+				\end{list}
+				\item Rimuovi da S tutte le ipotesi che sono più generali di un'altra ipotesi in S
+			\end{list}
+		\end{list}
+		\item Se $d$ è un esempio \textbf{negativo}
+		\begin{list}{}{}
+			\item Rimuovi da S tutte le ipotesi inconsistenti con $d$ ($h = 1$)
+			\item Per ogni ipotesi $g \in G$ inconsistente con $d \rightarrow$
+			\begin{list}{}{\textbf{Specializza G}}
+				\item Rimuovi $g$ da G
+				\item Aggiungi a G tutte le specializzazioni minime $h$ di $g$ tali che
+				\begin{list}{-}{}
+					\item $h$ è consistente con $d$
+					\item $\exists\:s \in S$ più specifico di $h$
+				\end{list}
+				\item Rimuovi da G tutte le ipotesi che sono meno generali di un'altra ipotesi in G
+			\end{list}
+		\end{list}
+	\end{list}
+\end{list}
+Grazie all'ordinamento parziale posso controllare di non avere cose più generali/specifiche e mantenere la consistenza.
 \section{Bias Induttivo ed il suo ruolo}
-Per ora abbiamo usato uno spazio delle ipotesi biased, vincolato. Abbiamo assunto che lo spazio delle ipotessi contenesse C, cioè che l'obiettivo C fosse espresso in and e non in or.\\
-Supponiamo sistema di apprendimento unbiased, con H che esprime ogni concetto insegnabile: H è l'insieme di tutti i possibili subset di X: P(X).\\
-Se $|X|$ = 96, $|P(X)| = 2^{96}$ cioè circa $10^{28}$.\\
-Cosa succede nella generalizazione?
-\paragraph{Definizione} Un unbiased learner è impossibilitato a generalizzare: ogni istanza non osservata, viene classificata positiva da precisamente delle ipotesi nel version space e negativa dall'altra metà. Per ogni h consistente con xi test esiste h' identica ad h eccetto h'(xi) diverso da h(xi), h in VS quindi h' in VS (identiche su D).\\Il bias non è solo assunto per efficienza ma anche necessario per la generalizzazione.
-\paragraph{Bias Induttivo} Il bias induttivo di L è un set minimo di asserzioni B tale che per ogni concetto obiettivo C e dati di addestramento corrispondenti D$_C$,\\ %TODO
+Per ora abbiamo usato uno spazio delle ipotesi \textbf{biased}, vincolato. Abbiamo assunto che lo spazio delle ipotesi contenesse C, cioè che l'obiettivo C fosse espresso in $\wedge$ e non in $\vee$. Quindi il nostro H non è in grado di rappresentare un concetto target disgiuntivo.\\
+Supponiamo sistema di apprendimento unbiased, con H che esprime ogni concetto insegnabile: H è l'insieme di tutti i possibili sottoinsiemi di X: $\mathscr{P}$(X).\\
+Se $|X|$ = 96, $|\mathscr{P}(X)| = 2^{96}$ cioè circa $10^{28}$.\\
+Cosa succede nella generalizzazione?
+\paragraph{Definizione} Un \textbf{unbiased learner} è \textbf{impossibilitato a generalizzare}: \textbf{ogni istanza non osservata, viene classificata come positiva da precisamente metà delle ipotesi nel version space e come negativa dall'altra metà}. $\forall\:h$ consistente con $x_i$ test $\Rightarrow\exists\:h'$ identica ad $h$ eccetto che $h'(x_i) \neq h(x_i)$\\
+$h \in VS \Rightarrow h' \in VS$ (identiche su D).\\
+\paragraph{Inutilità dell'apprendimento senza bias} Un learner che non fa assunzioni a priori riguardo l'identità del concetto target non ha basi razionali per classificare qualsiasi istanza non osservata.\\Il bias non è solo assunto per efficienza ma anche \textbf{necessario per la generalizzazione}.\\
+Un semplice esempio:
+\begin{list}{}{}
+	\item $\langle x, c(x)\rangle$, H=\{$x$, $\neg x$, 0, 1\}
+	\item[TR] $\langle0,0\rangle$, VS=\{$x$, 0\}
+	\item[TS] $\langle1, ?\rangle \rightarrow$ può essere 1 o 0\ldots a meno che non si siano usate tutte le $x$ come TR
+\end{list}
+\paragraph{Bias Induttivo} Considero:
+\begin{list}{}{}
+	\item Un algoritmo di concept learning L
+	\item Istanze X, target concept C
+	\item Esempi d'apprendimento $D_C = \{\langle x, c(x)\rangle\}$
+	\item $L(x_i, D_C)$ denota la classificazione assegnata all'istanza $x_i$ da L dopo l'apprendimento su $D_C$
+\end{list}
+Il \textbf{bias induttivo} di L è un set minimo di asserzioni B tale che per ogni concetto obiettivo C e dati di addestramento corrispondenti D$_C$ ottengo
+\begin{list}{}{}
+	\item $\forall\:x_i\in X$ [$B \wedge D_C \wedge x_i$] $\vdash$ $L(x_i, D_C)$\\
+\end{list}
+Dove con $A \vdash B$ indico che A è conseguenza logica di B
+\section{Sistemi Induttivi e Sistemi Deduttivi Equivalenti}
+\begin{center}
+	\includegraphics[scale=0.55]{ml4.png}
+\end{center}
 \paragraph{Tre learner con bias differenti}
 \begin{list}{}{}
-	\item Lookup table
-	\item Version space
-	\item Find-S
+	\item \textbf{Lookup table}: mantiene gli esempi, classifica $x$ se e solo se corrisponde ad un esempio precedentemente osservato.\\
+	Non ha bias induttivo $\Rightarrow$ non ha generalizzazione
+	\item \textbf{Version space candidate elimination algorithm}, il cui bias è: lo spazio di ipotesi contiene il target concept (cioè è una congiunzione di attributi)\\$|H| = 973$ vs $10^{128}$	
+	\item \textbf{Find-S}, il cui bias: lo spazio delle ipotesi contiene il target concept e tutte le istanze sono istanze negative a meno che l'opposto non sia dedotto da altra conoscenza (vista come esempio positivo)
 \end{list}
-
-\subsection{Decision Trees}
+\pagebreak
+%TODO da IIA-20-ML-linear-EN-v0.12.pdf
 \section{Linear Models}
 \begin{list}{}{\textbf{Ingredienti}}
 	\item %TODO
