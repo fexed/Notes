@@ -2386,75 +2386,130 @@ x$^T$ = $[1, x_1, x_2, \ldots, x_n]$, w$^T$ = $[w_0, w_1, \ldots, w_n]$
 		\item $\Delta w_i = \mathlarger{-\frac{\partial E(\text{w})}{\partial w_i}} = 2\mathlarger{\sum_{p=1}^l}(y_p - h_w(\text{x}_p))\cdot x_{pi} = 2\mathlarger{\sum_{p=1}^l}(y_p - \text{x}_p^T\text{w})\cdot x_{pi}$
 	\end{list}
 \end{list}
-\subsection{Gradient descent Algorithm}
+\subsection{Gradient Descent Algorithm}
 Semplice algoritmo sul quale si basano molti di quelli attuali
 \begin{enumerate}
-	\item Inizio con un vettore di pesi $w_{initial}$ inizializzato con valori piccoli, fisso $\eta$ (0 $< \eta <$ 1)
-	\item Si calcola $\Delta w = -$ "gradiente di $E(w)$ = $- \frac{\partial E(w)}{\partial w}$ (per ogni $w_i$)
-	\item Si fa il passo, calcolando $w_{new} = w_{old} + \eta\cdot\Delta w$ (per ogni $w_i$)\\
+	\item Inizio con un vettore di pesi w$_{initial}$ inizializzato con valori piccoli, fisso $\eta$ (0 $< \eta <$ 1)
+	\item Si calcola $\Delta \text{w} = -$ "gradiente di $E(\text{w})$" = $\mathlarger{- \frac{\partial E(\text{w})}{\partial \text{w}}}$ ($\forall\:w_i$)
+	\item Si fa il passo, calcolando w$_{new} = $w$_{old} + \eta\cdot\Delta$w ($\forall\:w_i$)\\
 	Con $\eta$ dimensione del passo, o \textbf{coefficiente di apprendimento}
-	\item Ripeto da 2 finche converge o $E(w)$ è \textit{sufficientemente piccolo}
+	\item Ripeto da 2 finché converge o $E($w$)$ è \textit{sufficientemente piccolo}
 \end{enumerate}
 \begin{list}{}{}
-	\item $\Delta w / l$ LMN (least mean squares)
-	\item Batch versions ($\Delta w$ dopo ogni epoca di dati $l$) vedi prima
-	\item %TODO
-	\item $eta$: tasso di apprendimento, trade-off su velocità/stabilità. Può essere gradualmente ridotto a 0: garantisce la convergenza, evita oscillazione intorno al minore)
+	\item $\mathlarger{\frac{\Delta \text{w}}{l}}$ LMN (least mean squares)
+	\item Batch version ($\Delta$w dopo ogni epoca di dati $l$)
+	\item On-Line version: migliorare w dopo ogni pattern $p$ (tramite $\Delta_p$w $ = $ x$_p(y_p - $x$_p^T$w$)$) senza aspettare la somma totale su $l$.\\
+	Può essere il più veloce, ma necessità di un $\eta$ più piccole: progredisce con ogni esempio che osserva.
+	\item $eta$: tasso di apprendimento, trade-off su velocità/stabilità.\\
+	Può essere gradualmente ridotto a 0: garantisce la convergenza, evita oscillazione intorno al minore.
 \end{list}
-\paragraph{Esempi di curva di apprendimento} Curva di appr: elettrocardiogramma del modello. Se prendo modello, applico i dati e l'algoritmo 
+\paragraph{Esempi di curva di apprendimento} Curva di apprendimento: elettrocardiogramma del modello. Se prendo modello, applico i dati e l'algoritmo, la curva di apprendimento mi mostra l'andatura del mio modello.
 \begin{center}
-	\includegraphics[scale=0.5]{curveappre.png}\\
+	\includegraphics[scale=0.75]{curveappre.png}\\
 	\textit{n iterazioni (epoche)}
 \end{center}
 \paragraph{Vantaggi dei modelli lineari} Se funzionano bene sono modelli fantastici
 \begin{list}{}{}
-	\item Semplice
+	\item Semplici
 	\item Tutti i dati in w
-	\item Facile da interpretare: praticati in medicina, biologia, chimica\ldots
-	\item Dati rumorosi ammessi
-	\item Statistici contenti (proprietà interessanti)
-	\item Fenomeni lineari: un sogno per la scienza
-	\item \textbf{Baseline per l'apprendimento}: è un problema lineare?
+	\item Facili da interpretare: praticati in medicina, biologia, chimica\ldots
+	\item Dati rumorosi \textbf{ammessi}
+	\item Statistici contenti (possiedono proprietà interessanti)
+	\item Fenomeni lineari: un sogno per la scienza, ideali per creare una "legge naturale"
+	\item \textbf{Baseline per l'apprendimento}, prima cosa a cui pensare: è un problema lineare?
 	\item Usato/incluso in modelli più complessi
 \end{list}
 Ma hanno molte limitazioni evidenti: soprattutto su funzioni non lineari.\\
-Possiamo introdurre, al posto delle $x$ originali delle trasformazioni non lineari: $x^2$, $x^3$,\ldots: $w_0 + w_1 x + w_w x^2 + w_3 x^3$\ldots che corrisponde ad una \textbf{regressione polinomiale} = $$y(x, w) = \sum_{j=0}^M w_j x^j$$ si può sempre risolvere con Least Square solution. Questo perché ad esempio posso chiamare $x^2 = z_2$ e niente cambia nella tecnica risolutiva.\\
+Possiamo introdurre, al posto delle $x$ originali delle trasformazioni non lineari: $x^2$, $x^3$,\ldots\\
+$w_0 + w_1 x + w_w x^2 + w_3 x^3$\ldots che corrisponde ad una \textbf{regressione polinomiale} = $$y(x, w) = \sum_{j=0}^M w_j x^j$$ si può sempre risolvere con Least Square Solution. Questo perché ad esempio posso chiamare $x^2 = z_2$ e niente cambia nella tecnica risolutiva.\\
 \textbf{Linear Basis Expansion} (LBE)
 $$h_w(x) = \sum_{k=0}^K w_k \phi_k (x)$$
-Aumento gli input e ciascuna trasformazione di $x$ tramite la funzione $\phi_k : R^n \rightarrow R$\\
+Aumento il vettore di input con variabili aggiuntive, ciascuna è trasformazione di $x$ tramite la funzione $\phi_k : R^n \rightarrow R$\\
 $\phi$ può essere una qualsiasi trasformazione: la norma, il quadrato, logaritmo\ldots\\
-Sto espandendo l'insieme delle variabili considerate, quindi $K > n$, lineare nei parametri e in $\phi$ ma non in $x$: possiamo usare i soliti algoritmi lineari di prima.
+Sto espandendo l'insieme delle variabili considerate, quindi $K > n$, lineare nei parametri e in $\phi$ ma non in $x$: \textbf{possiamo usare i soliti algoritmi lineari} di prima.
 \paragraph{Esempi}
-\textbf{LBE} è anche detto \textbf{approccio a dizionario}: le $\phi$ sono le parole a disposizione per comporre le "frasi": più espressivo, modella relazioni non lineari. Svantaggio: se introduco troppe trasformazioni possiamo avere un modello \textit{troppo} complesso rispetto alle necessità (\textbf{overfitting}).
+\textbf{LBE} è anche detto \textbf{approccio a dizionario}: le $\phi$ sono le parole a disposizione per comporre le "frasi": diventa più espressivo, modella le relazioni non lineari.\\
+\textbf{Svantaggio}: se introduco troppe trasformazioni possiamo avere un modello \textit{troppo} complesso rispetto alle necessità (\textbf{overfitting}).
 \paragraph{Trade-Off} sulla complessità del modello:
 \begin{list}{}{}
-	\item Modello troppo semplice non fa buon fitting, underfitting, soluzione biased
-	\item Modello troppo complesso: sensibile a perturbazione dei dati, molta varianza ed overfitting
+	\item Modello troppo semplice non fa buon fitting, cioè \textbf{underfitting}, soluzione biased
+	\item Modello troppo complesso: sensibile a perturbazione dei dati, molta varianza ed \textbf{overfitting}
 \end{list}
-metodi di \textbf{regolarizzazione del modello} per \textbf{trovare bialnciamento cotnrollo complessità modello}. Penalizzando funzioni troppo complesse (riducendo valore dei pesi) mantenendo flessibilità spazio ipotesi.\\
-Rasoio di Occam: la spiegazione più semplice è spesso la più corretta. \textit{Preferire le ipotesi più semplici che corrispondono ai dati}.\\
-Questo è un concetto fondamentale in ML, che troveremo di nuovo quando "razionalizzaremo" alla fine. Ora introduciamo un approccio per i modelli lineari: regolarizazione con ridge regression
+Metodi di \textbf{regolarizzazione del modello} per \textbf{trovare bilanciamento sul controllo della complessità del modello}. Penalizzando le funzioni troppo complesse (riducendo il valore dei pesi) mantenendo la flessibilità spazio ipotesi.\\
+\textbf{Rasoio di Occam}: \textit{la spiegazione più semplice è spesso la più corretta}.\\\textit{Preferire le ipotesi più semplici che corrispondono ai dati}.\\
+Questo è un \textbf{concetto fondamentale in ML}, che troveremo di nuovo quando "razionalizzeremo" alla fine. Ora introduciamo un approccio per i modelli lineari: regolarizzazione con \textbf{ridge regression}.
+\pagebreak
 \section{Ridge Regression}
-\paragraph{Rikhonov Regularization} Bassa varianza, meno overfitting. Modello smoothed.\\
-Introduce vincol iche controllino somma val nostri parametri w favorendo modelli sparsi, abbassando valore w. Se alcuni li portiamo bassi in particolare a 0, anche se abbiamo introdotto molte funzioni alcune spariscono.
-$$\textsl{Loss}(h_w) = \sum_p (y_p + h_w(x_p))^2 + \lambda ||w||^2 $$ con nuova aggiunta alla nostra funzione di loss: $\lambda ||w||^2$, con $\lambda$ \textbf{coefficiente di regolarizzazione} (parametro costante) e $||w||^2 = \sum w_i^2$\\
-Quando minimizzo l'errore cerco anche di tenere i $w$ bassi, perché la Loss deve riuscire ad abbassare entrambi i termini. Devo anche fare altre considerazioni\ldots\\
-Efftto: decatimento del peso (in pratica aggiungo $2\lambda w$ al gradiente
+\paragraph{Tikhonov Regularization} Bassa varianza, meno overfitting. Modello smoothed.\\
+Introduce vincoli che controllano la somma dei valori nostri parametri $|w_j|$ favorendo modelli sparsi, abbassando il valore di w. Se alcuni li \textbf{portiamo bassi}, in \textbf{particolare a 0}, anche se abbiamo introdotto molte funzioni alcune \textbf{spariscono}.
+$$\textsl{loss}(h_w) = \sum_p (y_p + h_\text{w}(\text{x}_p))^2 + \lambda ||w||^2 $$ con nuova aggiunta alla nostra funzione di loss: $\lambda ||w||^2$, con $\lambda$ \textbf{coefficiente di regolarizzazione} (parametro costante) e $||w||^2 = \sum w_i^2$\\
+Quando minimizzo l'errore cerco anche di tenere i $w_i$ bassi, perché la loss deve riuscire ad \textbf{abbassare entrambi i termini}.\\
+Effetto: decadimento del peso (in pratica aggiungo $2\lambda w$ al gradiente
 $$w_{new} = w_{old} + \eta\cdot\Delta w - 2\lambda w_{old}$$\\
-Se $\lambda$ è alto allora modello fortemente normalizzato, se $\lambda$ basso allora dò molta importanza ai dati quindi rischio overfitting.
-\paragraph{Limitazione delle funzioni base expansion} %TODO p. 63
-$\phi$ sono fissate \textit{prima} di osservare i dati.
-\chapter{Classificazione}
-\paragraph{Classificazione di modelli lineari} Riusiamo il modello lineare Attribuiamo categoria ad es 0/1, -1/+1\ldots\\
-Usiamo l'iperpiano ($wx$) asssumendo val pos e neg.\\
-Decidiamo se $x$ appartiene a zona positiva o negativa. Vogliamo trovare $w$ tramite apprendimento
-\paragraph{Decision boundary} $w^T x = w_1x_1 + w_2x_2 + w_0 = 0$ punto d'intersezione fra i due piani.\\
-Metto scalino: tutte le volte che ero in zona poisitiva attribuisco valori uscita ad 1, dall'altra parte 0/-1
-hx = 1 se wx + w0 magguguale 0, o 0 altrimenti\\
-Oppure h(x) = sign(wx + w0)
-Iperpiano separatore: insieme dei punti per cui il nostro modello è 0. Quando maggug 0 possiamo dire 1 altrimenti 0. LTU: linear threadhold unit.
-\paragraph{Def} Dato un set di $l$ esempi d'apprendimento, trovare $w$ da \textbf{minimizzare} la somma di quadrati $$E(w) = \sum_{p=1}^l (y_p - x_p^Tw)^2 = ||y - Xw||^2$$
-Non usiamo $h(x)$ perché in classificazione ci starei mettendo $h(x) = \textsl{sign}(wx)$ che \textbf{non è differenziabile}.\\\\
+Se $\lambda$ è alto allora modello fortemente normalizzato, se $\lambda$ basso allora do molta importanza ai dati quindi rischio overfitting.
+\paragraph{Limitazione delle funzioni base expansion}
+\begin{list}{}{}
+	\item Avere una basis function lungo ogni dimensione di uno spazio di input a dimensione $D$ richiede un numero combinatorio di funzioni.\\
+	Ad esempio, un polinomio generale di ordine 3 usa tutte le combinazioni di input a causa dei prodotti $x_1x_2, x_2x_3,\ldots x_1x_2x_3\ldots \Rightarrow D^3$
+	\item $\phi$ sono fissate \textit{prima} di osservare i dati.
+\end{list}
+In altri modelli, vedremo come cavarcela con un numero minore di basis function, scegliendole tra i dati di apprendimento: $\phi$ dipenderà da w e il modello non sarà lineare (es: \textbf{reti neurali})\\
+In altri modelli ancora, la computazione del nuovo spazio è fatta implicitamente attraverso funzioni kernel e di controllo della complessità del modello (es: \textbf{SVM})
+\section{Classificazione}
+\paragraph{Classificazione di modelli lineari} Riusiamo il modello lineare.\\ Attribuiamo una categoria ad es 0/1, -1/+1\ldots\\
+Usiamo l'iperpiano (wx) asssumendo valori positivi o negativi.\\
+Decidiamo se x appartiene a zona positiva o negativa. Vogliamo trovare w tramite l'apprendimento.
+\paragraph{Decision boundary} $w^T x = w_1x_1 + w_2x_2 + w_0 = 0$ punto d'\textbf{intersezione} fra i due piani.\\
+Metto uno scalino: tutte le volte che ero nella zona positiva attribuisco il valore d'uscita 1, dall'altra parte ad esempio 0 o -1\ldots
+$$h(\text{x}) = \left\{ \begin{array}{l r}
+1 & \text{se wx} + w_0 \geq 0\\
+0 & \text{altrimenti}
+\end{array} \right. \:\:\text{oppure}\:\:h(\text{x}) = \textsl{sign}(\text{wx} + w_0)$$
+Usando x$_p$ e includendo $w_0$ in w posso avere $h($x$_p) = \textsl{sign}($x$_p^T$w$) = \textsl{sign}\left(\mathlarger{\sum_{i=0}^n} x_{pi}w_i\right)$
+\paragraph{Iperpiano separatore} Insieme dei punti per cui il nostro modello è 0. Quando $\geq$ 0 possiamo dire 1 altrimenti 0.\\
+\textbf{LTU}: linear threshold unit.
+\pagebreak
+\subsection{Problema d'apprendimento per classificatori lineari}
+Dato un set di $l$ esempi d'apprendimento, trovare w per cui \textbf{minimizzare} la somma di quadrati $$E(\text{w}) = \sum_{p=1}^l (y_p - \text{x}_p^T\text{w})^2 = ||\text{y} - \text{Xw}||^2$$
+Errore minimo: se $y_p = 1$ allora x$_p^T$w $\rightarrow 1$. Se $y_p = 0/-1$ allora x$_p^T$w $\rightarrow 0/-1$\\
+Non usiamo $h(\text{x})$ perché in classificazione ci starei mettendo $h(\text{x}) = \textsl{sign}(\text{wx})$ che \textbf{non è differenziabile}.\\\\
 Abbiamo ancora l'algoritmo iterative gradient descent
-$$\Delta w_i = - \frac{\partial E(w)}{\partial w_i} = \sum_{p=1}^l (y_p - x_p^Tw)\cdot x_{pi}$$
+$$\Delta w_i = - \frac{\partial E(\text{w})}{\partial w_i} = \sum_{p=1}^l (y_p - \text{x}_p^T\text{w})\cdot x_{pi}$$
+\paragraph{Learning Rule} $\Delta$w come correzione d'errore.\\
+Se misclassified (perché la funzione target è diversa) allora posso aumentare i $w_i$ corrispondenti agli errori proporzionalmente al $\Delta$ attraverso $\eta$.
+\subsubsection{Riassumendo}
+Il modello viene \textbf{addestrato} (su un TR set) con LS (LMS) su wx, tramite il simple gradient descent algorithm usato per la regressione lineare.\\
+Il modello viene \textbf{usato} per classificare applicando la funzione treshold $h($x$) = \textsl{sign}($wx$)$\\
+L'errore può essere computato come errore di classificazione o numero di pattern mal classificati (non sono dal mean square error)
+$$L(h(\text{x}_p), d_p) =
+\left\{ \begin{array}{l r}
+0 & \text{se }h(\text{x}_p) = d_p\\
+1 & \text{altrimenti}
+\end{array} \right.
+\:\:\:\:
+\textsl{mean\_err} =
+\frac{1}{l\cdot
+\sum_{i=1}^l L(h(x_i), d_i)}$$
+Con $\textsl{num\_err} = \mathlarger{\sum_{i=1}^l L(h(x_i), d_i)}$
+\paragraph{Accuratezza} Media dei classificati correttamente = $\mathlarger{\frac{l - \textsl{num\_err}}{l}}$
+\subsection{Algoritmo di Apprendimento}
+Come per la regressione: vedi gradient descent algorithm. Anche il linear basis expansion e Tikhonov possono essere usati.\\
+Notare che: l'algoritmo di apprendimento
+\begin{list}{}{}
+	\item Converge asintoticamente al MinLS
+	\item Non necessariamente al numero minimo di errori di classificazione
+\end{list}
+\paragraph{Limitazioni} In geometria, due insiemi di punti in uno spazio a due dimensioni sono \textbf{linearmente separabili} quando i due set di punti possono essere completamente separati da una singola linea.\\
+In generale, \textbf{due gruppi sono linearmente separabili in uno spazio ad $n$-dimensioni se possono essere separati da un iperpiano a $(n-1)$-dimensioni}.\\
+Il linear decision boundary può fornire soluzioni esatte solo per insiemi linearmente separabili.
+\pagebreak
+\begin{center}
+\textbf{Linearmente separabili vs non-linearmente separabili}\\
+\includegraphics[scale=0.75]{ml_linvsnonlin.png}
+\end{center}
+\section{Conclusione sui modelli lineari}
+Approccio base e ben fondato sia per regressione che per classificazione: la conoscenza è rappresentata in maniera molto compatta, ma con forti assunzioni sulle relazioni fra i dati.\\
+Un \textbf{algoritmo di correzione iterativa dell'errore} (LMS) che cerca continuativamente nello spazio delle ipotesi (base di molti altri approcci ML).\\
+Una visione delle limitazioni degli approcci lineari e delle necessità di modelli di ML più flessibili ed i loro problemi: un'estensione dei modelli lineari per task non lineari, un'introduzione al controllo della complessità (regolarizzazione).
+\section{Alberi di Decisione}
 \end{document}
