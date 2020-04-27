@@ -485,4 +485,50 @@ Analisi dura fino a match o dopo troppi tentativi (8 pacchetti solitamente)\\
 Flusso è bidirezionale e corrisponde alla quintupletta IP+prot+porta+src+dest(+vlan)\ldots\\
 Riconoscimento avviene solamente ad inizio del flusso.\\
 nDPI funziona con i pacchetti IP.
+%TODO latenza di rete e latenza applicativa
+\paragraph{Latenza applicativa di rete} Calcolata utilizzando il TCP durante l'handshaking, monitorando con un probe in un punto della rete ma non si può dire se cho messo pià temopio andata che ritorno.\\
+Con sottrazioni trovo latenza rete e applicativa.
+\paragraph{Throughput} Metrica misura quantità dati inviati su un link in un certo istante.\\
+Quant'è il tempo? Tipicamente al secondo ma la durata del monitoring dev'essere maggiore, si guarda al secondo ma la durata dell'esperimento dev'essere maggiore. Throughout dice  indicazione idea di quanto è la banda disponibile.\\
+Misura quantità di dati inviata in istante di tempo, \textbf{conservativa della banda disponibile} cioè misurando questo ho idea di quello che faccio effettivamente passare ma non della banda reale perché parte della banda la sto usando. Quindi \textbf{il throughput non è la banda}. Il throughput tipicamente cambia, la banda no. Inoltre è una misura orientata all'applicazione.
+\paragraph{Goodput} Nei pacchetti c'è tanto overhead: ethernet, header IP, UDP\ldots fino al payload che è la \textbf{parte interessante}. Con il \textbf{goodput} si vede quanti dati effettivamente si spostano. Invece di misurare i byte inviati sul filo, vado a vedere i byte inviati di contenuto. Quando scarico un file di 1Mb ho mandato sul filo molto più di un 1Mb: header di ogni pacchetto, ACK per la connessione, RDY e FIN\ldots\\
+Goodput mostra quanti dei dati transitati sono effettivamente usati per la connessione.
+\paragraph{Latenza} Tempo che serve ad un pacchetto per andare \textbf{da sorgente a destinazione}, \textbf{monodirezionale}.
+\paragraph{Jitter} Come cambia la latenza nel tempo: varianza dell'intrapacket delay su link monodirezionale.\\
+Finché jitter è inferiore alla durata temporale del buffer lato ricezione, la comunicazione sarà ideale. Se io tengo buffer grande (1-2s) la voce la sento bene risolvendo il jitter, ma ho aumentata la latenza.
+\paragraph{Bandwith} LA banda è quella misura che stima più o meno quello che dovrebbe passare sul cavo. Viene calcolata: 
+\begin{list}{}{}
+	\item TC intervallo di misura, tipicamente 1s
+	\item BC burst committed, n max bit/s che il network accetta di trasferire nel TC
+	\item CIR committed information rate, banda garantita BC/TC
+	\item BE burst excess, parte che trasporta in eccesso se ha disponibilità proverà a trasportarne di più 
+	\item MaxR maximum data rate: (BC + BE)/TC = ((BC + BE)/BC)*CIR
+\end{list}
+\chapter{ScaPy}
+Manipolazione di pacchetti in maniera semplice. Con Pcap si legge e invia, ma gestisce i pacchetti raw e non permette di manipolarli, funge da specie di socket. Wireshark è molto utile ma è un tool a sé state, ma se serve fare cose in batch non è molto utile. Wireshark può essere collegato tramite API a PyShark, ma è sola lettura. ScaPy permette sia di inviare che di ricevere.
+\paragraph{Modulo} ScaPy è un modulo Python.\\
+Cosa ci possiamo fare? \begin{list}{}{}
+	\item \textbf{Manipolazione dei pacchetti}\\
+	Ha un operatore particolare, \texttt{/} che permette di creare un pacchetto, esempio: \texttt{packet = IP() / TCP()} che crea un pacchetto IP e sopra ci mette una parte TCP. Senza i parametri lo crea con opzioni di default (es IPv4) e non bisogna preoccuparci granché dei campi non riempiti, possiamo spedirlo (anche se non va da nessuna parte perché non ha indirizzo di destinazione).\\
+	Con \texttt{ls(IP, verbose=True)} stampa i vari campi, con tipo e valore. Più o meno è la stessa informazione vista con Wireshark e Tshark.\\
+	Volendo posso stampare un campo voluto, ad esempio con \texttt{print(p[IP].src)}.\\
+	\texttt{summary()} stampa tutti i campi del pacchetto.
+	\item \textbf{Interagire con la rete}\\
+	Permette di inviare e ricevere i pacchetti, oltre a crearli. La funzione per inviare traffico è \texttt{srl()}, ad esempio\\\texttt{r = srl(IP(dst="8.8.8.8") / UDP() / DNS(qd=DNSQR()))}.\\
+	\texttt{srl()} riceve anche la risposta, che nell'esempio sarà memorizzata in \texttt{r}, che posso leggere ad esempio con \texttt{r[DNS].an}.\\
+	\texttt{srp()} invece consente anche di specificare la parte ethernet. Spedisce una lista di frame e ritorna due variabili
+	\begin{list}{}{}
+		\item \texttt{r}, lista di query e risposte
+		\item \texttt{u}, lista di pacchetti non risposti
+	\end{list}
+	\item \textbf{Pcap}\\
+	Possiamo leggere e scrivere un file pcap, con \texttt{wrpcap("file.pcap", r)} e \texttt{rdpcap("file.pcap")}\ldots\\
+	Con \texttt{command()} su un pacchetto pcap, ritorna il comando da fare con ScaPy per ricreare un pacchetto di pcap.
+	\item \textbf{Sniffing}\\
+	Con il comando \texttt{sniff()}, applicando filtri, funzioni\ldots\\
+	\item \textbf{ARP}\\
+	Con \texttt{arping("192.168.1.0/24")} per mandare richieste ARP sulla rete specificata. La differenza con ICMP è che il ping classico può essere ignorato. Con ICMP quando c'è risposta la macchina è attiva, quando non c'è non si può sapere.
+	\item \textbf{AnsweringMachine}\\
+	Permette di gestire le risposte, un esempio è avviarla in monitoring su un'interfaccia. 
+\end{list}
 \end{document}
