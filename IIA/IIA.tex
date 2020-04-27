@@ -6,6 +6,8 @@
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{color}
 \usepackage{mathrsfs}
+\usepackage{amsmath}
+ \usepackage{relsize}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
 \lstset{
@@ -2254,13 +2256,38 @@ Dove con $A \vdash B$ indico che A è conseguenza logica di B
 \end{list}
 \pagebreak
 %TODO da IIA-20-ML-linear-EN-v0.12.pdf
-\section{Linear Models}
+\section{Modelli Lineari}
 \begin{list}{}{\textbf{Ingredienti}}
-	\item %TODO
+	\item \textbf{Dati di allenamento}
+	\item \textbf{Spazio delle ipotesi} $H$
+	\begin{list}{-}{}
+		\item Costituisce l'\textbf{insieme delle funzioni che possono essere realizzate dal sistema di apprendimento}
+		\item Si assume che la funzione da apprendere $f$ possa essere rappresentata da una ipotesi $h \in H$\\
+		Si seleziona $h$ attraverso i dati di apprendimento
+		\item Oppure si assume che almeno una delle ipotesi $h \in H$ sia \textit{simile} ad $f$ (\textbf{approssimazione})
+	\end{list}
+	\item \textbf{Algoritmo di apprendimento}, cioè un algoritmo di \textbf{ricerca nello spazio delle ipotesi}\\
+	Ad esempio: adattamento dei parametri liberi del modello al task
+	\item Nota: $H$ \textbf{non può coincidere con l'insieme di tutte le funzioni possibili} e la ricerca potrebbe essere esaustiva (\textbf{Bias Induttivo})
 \end{list}
-\paragraph{Compito supervisionato} %TODO
-\subsection{Problemi di regressione}
-Processo di stima di una funz a val real su una base di un insieme finito di esempi rumorosi: coppie $(x, f(x) + \textsl{ rumore casuale})$. Un esempio è una tabella $x \mapsto$ valore che \begin{tabular}{c | c}
+\paragraph{Compito supervisionato} Un task\\ \begin{list}{}{\textbf{Dati}}
+	\item Esempi d'apprendimento come $\langle x, d\rangle = \langle$ input, output $\rangle$ per una qualche funzione sconosciuta $f$\\
+	Target value: il valore desiderato $d$, o $t$, o $y$\ldots è dato dal supervisore a seconda di $f(x)$
+\end{list}
+\begin{list}{}{\textbf{Trovare}}
+	\item Una \textit{buona} approssimazione di $f$\\
+	Cioè un'ipotesi $h$ che può essere usata per previsioni su dati non osservati $x'$
+\end{list}\textbf{Target $d$} (o $t$): un'\textbf{etichetta numerica/categorica}
+\begin{list}{}{}
+	\item \textbf{Classificazione}: $f(x)$ ritorna la corretta classe (ipotizzata) per $x \Rightarrow f(x)$ è una funzione a valori discreti
+	\item \textbf{Regressione}: approssimare una funzione obiettivo a valori reali (in $R$ o $R^n$)
+	\item Entrambe sono task di approssimazione di funzioni
+\end{list}
+\subsection{Problemi di Regressione}
+\textbf{Processo di stima di una funzione a valori reali} basandosit su un'insieme finito di \textbf{esempi rumorosi}:\\coppie $\langle x, f(x) + \textsl{ rumore casuale}\rangle$.\\Un esempio è una tabella $x \mapsto$ valore come la seguente
+\begin{multicols}{2}
+\begin{center}
+\begin{tabular}{c | c}
 	$x$ & target\\
 	\hline
 	1 & 2.1\\
@@ -2269,47 +2296,96 @@ Processo di stima di una funz a val real su una base di un insieme finito di ese
 	4 & 8.4\\
 	5 & 9.8
 \end{tabular}
-Si può ipotizzare che $f(x) = 2x$, a mente: abbiamo applicato un algoritmo di machine learning assumendo la funzione lineare\ldots\\ %TODO
-\paragraph{Definizione} Assumiamo un modello hw(x) espresso come w=w1x+w0\ldots %TODO
-Trovare a partire dall'esempio un'ipotesi h che al meglio fa il fitting dei dati dai dati osservati x e y. Assumento che y sia collegata linearmente ad un'altra variabile x o altre variablili y= w1x + w0 + rumore, dove le w sono libere. costruiamo il modello cercando di trovare i valori di w per predirre e stimare y per altri valori di x non osservati.
-%TODO esem
-\paragraph{Costruire il modello} Apprendimento tramite LMS. Dato insieme esempi training, trovare hw(x) nella forma (w1+ w0) che minimizza l'errore medio. Least mean square: $$\textsl{loss}(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2$$ con valori al quadrato per non avere negativi \ldots\\
-Perché LMS per il migliore $h$? Minimizzo la distanza dalla media (linea blu) , approccio standard mper approssimare la soluzione di sistemi sovra-determinati: n eq più delle incognite.
-\paragraph{Come risolvere} Punto di minimo è stazionario dove il gradiente è nullo. Bisogna cercare fra quelli a gradiente nullo $$\frac{\partial E(w)}{\partial w_i} = 0$$ quindi per la regressione lineare (a due parametri) $$\frac{\partial E(w)}{\partial w_0} = 0 \:\: \frac{\partial E(w)}{\partial w_1} = 0$$
+\end{center}
+Si può ipotizzare che $f(x) = 2x$, a mente: abbiamo applicato un algoritmo di machine learning assumendo che la funzione sia lineare del tipo $y = w_1x + w_0$
+\end{multicols}
+\paragraph{Definizione} Assumiamo un modello $h_w(x)$ espresso come $y = w_1x + w_0$
+Trovare, a partire dall'esempio, un'ipotesi $h$ che esegue il \textbf{fitting} dei dati dai dati osservati $x$ e $y$ al meglio possibile.\\
+Assumendo che $y$ sia legata linearmente ad un'altra variabile $x$ o altre variablili $y= w_1x + w_0 + \textsl{ rumore}$, dove le $w$ sono libere e $\textsl{rumore}$ è l'errore misurato negli obiettivi.\\
+Costruiamo il modello cercando di trovare i valori di $w$ per predire e stimare $y$ per altri valori di $x$ \textbf{non osservati}.
+\subsubsection{Costruire il modello}
+\paragraph{Apprendimento tramite LMS} \textbf{Dato} l'insieme di $l$ esempi di training $\langle x_p, y_p\rangle$, trovare $h_w(x)$ nella forma\\$h_w(x) = w_1 + w_0$ che \textbf{minimizza l'errore atteso sui dati d'apprendimento}.\\
+Per l'errore utilizziamo la \textbf{least mean square} (\textbf{LMS}): $$\textsl{loss}(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2 = \sum_{p=1}^l (y_p - (w_1x_p + w_0))^2$$ con valori al quadrato per non avere negativi.
+\paragraph{Perché?} Perché LMS per il migliore $h$?
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.7]{ml_lms.png}
+\end{center}
+Minimizzo la distanza (linee verdi) dalla media (linea blu).\\
+Approccio standard per approssimare la soluzione di sistemi \textbf{sovra-determinati}, cioè con più equazioni che incognite.\\\\
+Diverse medie avranno diversi errori. Minimizzare gli errori è un buon modo per trovare la migliore approssimazione/fitting dei dati (cioè il nostro $h_w(x)$ o la linea blu).\\
+$E(w)$ quantifica le linee verdi.
+\end{multicols}
+\paragraph{Come risolvere} Un \textbf{punto di minimo} è un \textbf{punto stazionario, cioè dove il gradiente è nullo}. Bisogna cercare fra quelli a gradiente nullo $$\frac{\partial E(w)}{\partial w_i} = 0$$ quindi per la regressione lineare (a due parametri) $$\frac{\partial E(w)}{\partial w_0} = 0 \:\:\: \frac{\partial E(w)}{\partial w_1} = 0$$
 \subparagraph{Come impostare il gradiente} (per ogni pattern $p$)
 \begin{center}
 	\includegraphics[scale=0.55]{partial.png}
 \end{center}
 Derivata della somma = somma delle derivate.\\
-Per $\frac{\partial E(w)}{\partial w_1} = \frac{\partial y}{\partial w_1} - (\frac{\partial w_1 x}{\partial w_1} + \frac{\partial w_0}{\partial w_1}) = 0 - (x + 0)$
-\paragraph{Riassumendo} Dato un set l insieme set di trainingi come coppie xpyp, trovare i valori di w costruendo hw(x) espressoa come w1x + w0. Trovata si può usare per esprimere nuovi valori. La linea diretta è meno interessante, preferiamo il gradiente per l'approccio della ricerca locale.\\
-Il gradiente ci dà la direzione di \textbf{ascesa}, quindi per il minimo basta prendere l'opposto.\\
-$w_{new} = w_{old} + \eta\cdot\Delta w$ con $\Delta w  = -\textsl{gradiente di }E(w)$\\
-$\Delta w$ è il "passo" che si fa in direzione del gradiente e $\eta$ costante di apprendimento.
-def error correction (delta rule) che cambia la w proporzionalmente all'errore
-\paragraph{Per pattern $l$}
-\begin{center}
-	\includegraphics[scale=0.55]{patternl.png}
-\end{center}
-aggiornaimo w \ldots\\ %TODO
-\paragraph{Input multidimensionale} caso standard: da 2 a migliaia di input/variabili: pattern di input è un vettore
-\begin{list}{}{Esempi}
-	\item %TODO
+Per $\mathlarger{\frac{\partial E(w)}{\partial w_1} = \frac{\partial y}{\partial w_1} - \left(\frac{\partial w_1 x}{\partial w_1} + \frac{\partial w_0}{\partial w_1}\right) = 0 - (x + 0)}$
+\pagebreak
+\paragraph{Riassumendo} Dato un insieme di $l$ esempi d'apprendimento come coppie $\langle x_p, y_p\rangle$, trovare i valori di $w$ costruendo $h_w(x)$ espressa come $w_1 x + w_0$.\\ Trovata $h_w(x)$, si può usare per esprimere nuovi valori. La linea diretta è meno interessante, preferiamo il gradiente per l'approccio della ricerca locale.\\
+Il gradiente ci dà la direzione di \textbf{ascesa}, quindi per il minimo basta prendere l'opposto.
+$$w_{new} = w_{old} + \eta\cdot\Delta w$$ con $\Delta w  = -\textsl{ gradiente di }E(w)$\\
+$\Delta w$ è il "\textbf{passo}" che si fa in direzione del gradiente e $\eta$  è la \textbf{costante di apprendimento}.
+$$\Delta w_0 = -\frac{\partial E(w)}{\partial w_0} = 2(y - h_w(x))\:\:\:\:\Delta w_1 = -\frac{\partial E(w)}{\partial w_1} = 2(y - h_w(x))\cdot x$$
+\paragraph{Error Correction} (\textbf{Delta Rule}) Regola che cambia la $w$ proporzionalmente all'errore:
+\begin{list}{}{}
+	\item Target $y$ $-$ output $h$ = Err = 0 $\rightarrow$ nessuna correzione
+	\item Output $>$ target $\Rightarrow$ $y-h<0$ \textbf{output troppo grande}
+	\begin{list}{}{}
+		\item $\Rightarrow$ $\Delta w_0$ negativa $\Rightarrow$ \textbf{ridurre $w_0$} e
+		\item se (input $x > 0$) $\Delta w_1$ negativa $\Rightarrow$ \textbf{ridurre $w_1$} altrimenti aumenta $w_1$
+	\end{list}
+	\item Output $<$ target $\Rightarrow$ $y-h>0$ \textbf{output troppo piccolo}\ldots
 \end{list}
-\paragraph{DATA notation} $X$ è una matrice $l \times n$, $l$ righe, $n$ colonne (variabili)\\
-$p = 1..l$, $j = 1..n$\\\\
-$
-\begin{array}{c c c c c}
-Pattern & x_1 & x_2 & x_j & x_n\\
-Pat 1 & x_{11} & x_{12} & & x_{1n}\\
-\ldots\\
-Pat p & x_{p1} & x_{p2} & & x_{pn}\\
-\end{array}$\\
-%TODO each row...
-Notazione: x come vettore con indice pattern nella prima posizione %TODO
+Consente la \textbf{ricerca in uno spazio d'ipotesi infinito}. Può essere facilmente applicata sempre per $H$ continui a perdita differenziabile, \textbf{non solo a modelli lineari}.\\
+Efficiente? Ci sono molte migliorie, come il metodo di Newton, gradiente coniugato\ldots
+\paragraph{Per pattern $l$}
+$$\Delta w_0 = -\frac{\partial E(w)}{\partial w_0} = 2\sum_{p\to l}(y_p - h_w(x_p))\:\:\:\:\Delta w_1 = -\frac{\partial E(w)}{\partial w_1} = 2\sum_{p\to l}(y_p - h_w(x_p))\cdot x_p$$
+\begin{multicols}{2}
+Possiamo aggiornare $w$ dopo aver ripetuto un'\textit{epoca} di dati d'apprendimento $l$\\$\rightarrow$ Algoritmo Batch (blu)\\\\
+Altrimenti possiamo aggiornare $w$ dopo ogni pattern $p$\\$\rightarrow$ Algoritmo On-Line (stochastic gradient descent,\\viola e verde)
+\paragraph{Input multidimensionale} Nel caso standard ho input multidimensionale, da 2 a migliaia di input/variabili: il pattern di input è un \textbf{vettore}.
 \begin{center}
-	\includegraphics[scale=0.55]{riassuntone.png}
+	\includegraphics[scale=0.75]{ml_patternl.png}
 \end{center}
+\end{multicols}
+
+\paragraph{DATA notation} $X$ è una matrice $l \times n$ ($l$ righe, $n$ colonne (variabili)) $p = 1..l$, $j = 1..n$
+\begin{multicols}{2}
+\begin{center}
+\begin{tabular}{l c c c c}
+Pattern & $x_1$ & $x_2$ & $x_j$ & $x_n$\\
+Pat 1 & $x_{11}$ & $x_{12}$ & \ldots& $x_{1n}$\\
+\vdots\\
+Pat $p$ & $x_{p1}$ & $x_{p2}$ & \ldots & $x_{pn}$\\
+\end{tabular}\\
+\end{center}
+
+\begin{list}{}{}
+	\item Ogni riga corrisponde ad un generico x vettore: esempio, pattern, istanza, sample\ldots
+	\item $x_i$, $x_j$ scalari: componenti $i$ o $j$ di un dato pattern, omettendo $p$
+	\item x$_p$ o x$_i$ vettori: $p$-esima o $i$-esima riga nella tabella, cioè pattern $p$ o $i$
+	\item $x_{pj}$ scalare, anche scritto come (x$_p$)$_j$: componente $j$ del pattern $p$
+	\item Per il target $y$ tipicamente si usa $y_p$ con $p = 1..l$\\
+	Nota: con una variabile (cioè fin'ora) x$_p$ = $x_{p1}$
+\end{list}
+\end{multicols}
+\paragraph{Notazione} Si assumono x e w come vettori colonna.\\
+Il numero di dati è $l$, la dimensione del vettore input è $n$, i target sono $y_p$ (precedentemente $d_i$ o $t_i$) con $p=1..l$\\
+$w_0$ è il threshold, bias, offset\ldots\\
+Spesso conviene includere la costante $x_0 = 1$ cosi possiamo scrivere la prima equazione come w$^T$x = x$^T$w con\\
+x$^T$ = $[1, x_1, x_2, \ldots, x_n]$, w$^T$ = $[w_0, w_1, \ldots, w_n]$
+\subsubsection{Riassunto}
+\begin{list}{}{}
+	\item \textbf{Dato} un set di $l$ esempi d'apprendimento $\langle x_p, y_p\rangle$
+	\item \textbf{Trovare} il vettore di pesi w che minimizza l'errore atteso sui dati d'apprendimento
+	\begin{list}{}{}
+		\item $E($w$) = \mathlarger{\sum_{p=1}^l} (y_p -$x$_p^T$w$)^2 = ||$y$-$Xw$||^2$
+		\item $\Delta w_i = \mathlarger{-\frac{\partial E(\text{w})}{\partial w_i}} = 2\mathlarger{\sum_{p=1}^l}(y_p - h_w(\text{x}_p))\cdot x_{pi} = 2\mathlarger{\sum_{p=1}^l}(y_p - \text{x}_p^T\text{w})\cdot x_{pi}$
+	\end{list}
+\end{list}
 \subsection{Gradient descent Algorithm}
 Semplice algoritmo sul quale si basano molti di quelli attuali
 \begin{enumerate}
