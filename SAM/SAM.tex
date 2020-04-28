@@ -517,5 +517,38 @@ Tutta la grafica è renderizzata sul DOM.
 \chapter{Kotlin}
 Preferenza per: modernità, comodità e diminuire ulteriormente dipendenza da tecnologie proprietarie (Java)\\
 \texttt{val} da errore se compilatore trova flusso d'esecuzione possibile con due assegnamenti.
-
+\chapter{Esecuzione Concorrente}
+\section{Sistema e Callback}
+Come visto, le applicazioni si limitano a definire callback: \texttt{onPause()}, \texttt{onDraw()}\ldots\\
+C'è un thread, tipicamente definito "thread della UI", \textbf{principale dell'app}.\\
+Due regole auree:
+\begin{list}{!}{}
+	\item \textbf{Mai usare il thread UI per le operazioni lunghe}\\
+	Tipicamente bloccanti come accesso a file system o alla rete, o computazionalmente pesanti, ma in generale tutte le operazioni che richiedono più di 100ms.
+	\item \textbf{Mai usare un thread diverso dal thread UI per aggiornare la UI}
+\end{list}
+Come fare se serve un'operazione lunga che deve aggiornare la UI? Es: accesso a DB, alla rete, calcoli \textit{pesanti}\ldots\\
+Creare nuovi thread aiuta per la prima regola, non per la seconda.
+\subsection{AsyncTask}
+Asincrono $\neq$ concorrente!
+Fai del lavoro, poi riprendi dopo senza avere illusione di essere l'unico con la CPU.
+\paragraph{Caso comune} Thread UI fa partire un task (lungo), che deve aggiornare la UI durante lo svolgimento e deve fornire il risultato alla UI alla fine.\\
+Per questo particolare caso è \textbf{molto comodo usare la classe} (astratta e generica) \textbf{AsyncTask}.
+\paragraph{\texttt{AsyncTask$<$A, P, R$>$}} Prende argomenti del task di tipo A, progress report di tipo P e risultato di tipo R.
+\paragraph{Chi esegue} Prima di partire chiamata \texttt{void onPreExecute()}, al suo ritorno la \texttt{R doInBackground(A...)} che se chiama \texttt{void publishProgress()} chiamata la \texttt{void onProgressUpdate(P...)} e alla fine \texttt{void onPostExecute(R)}.\\
+Su cancellazione anticipata \texttt{void onCancelled(R)}.\\
+All'esterno ci sono i costruttori, \texttt{AsyncTask execute(A...)}, \texttt{cancel(boolean interrupt)}, \texttt{R get()} e \texttt{AsyncTask.status getStatus()}. Con \texttt{R get())} prendo il risultato restituito da \texttt{R doInBackground(A...)}, comodo per prendere il valore quando voglio io.\\
+Il thread della UI esegue (devono essere veloci ma possibile interagire con UI:
+\begin{list}{}{}
+	\item \texttt{onPreExecute}
+	\item \texttt{onProgressUpdate}
+	\item \texttt{onCancelled}
+	\item Costruttori (ma possono essere eseguiti da altri thread)
+	\item \texttt{execute}
+\end{list}
+mentre un nuovo thread esegue (possono essere lenti ma no interazione con UI):
+\begin{list}{}{}
+	\item \texttt{doInBackground}
+	\item \texttt{publishProgress}
+\end{list}
 \end{document}
