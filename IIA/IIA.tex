@@ -2512,4 +2512,49 @@ Approccio base e ben fondato sia per regressione che per classificazione: la con
 Un \textbf{algoritmo di correzione iterativa dell'errore} (LMS) che cerca continuativamente nello spazio delle ipotesi (base di molti altri approcci ML).\\
 Una visione delle limitazioni degli approcci lineari e delle necessità di modelli di ML più flessibili ed i loro problemi: un'estensione dei modelli lineari per task non lineari, un'introduzione al controllo della complessità (regolarizzazione).
 \section{Alberi di Decisione}
+Cambia sostanzialmente lo spazio delle ipotesi percHé cambia la forma delle ipotesi a disposizione. si rappresenta graficamente come un albero di decisione: albero dove ogni nodo ha un test di attributo er le foglie corrispondono al classificatore finale (Si/No).\\
+L'albero di decisione rappresenta la disgiunzione di congiunzioni di vincoli sul valore degli attrivuti
+\begin{list}{}{}
+	\item outlook = sunny and humid = normal or
+	\item outlook = overcast or
+	\item outlook = rain and wind = weak
+\end{list}
+Oppure, \texttt{if-then-else}. H di decision tree è capace di esprimere qualsiasi funzione finita a valori discreti.
+\subsection{Algoritmo Top-Down Induction}
+Ricerca nello spazio del decision tree, top-down greedy.\\
+Domanda fonamentale è quale attributo testare dopo?\\ %TODO
+Scegliere il migliore attributo
+\begin{center}
+pseudocodice
+\end{center}
+\paragraph{Best Attribute} In base all'\textbf{entropia}\\
+\textbf{Entropia}: quantità di informazione portata da un segnale, più è stabile meno entropia porta quindi meno informazione, più oscilla più entropia più informazione. Nel nostro caso, il concetto di entropia misura impurità di una collezione d'esempi.\\
+S collezione esempi training, p+ proprorzione esempi positivi in S, p- negativi
+Entrpy(s) = -p+ logs(p+) - p- log2(p-) assumo 0log2(0) = 0\\
+Tutti positivi/tutti negativi, entropia 0.\\
+Casi misti entropia alta.\\
+Bassa omogeneità non va bene (alta impurità, alta entropia)\\
+Notare che 0$\leq$p$\leq$1, quindi 0$\leq$entropia$\leq$1\\
+Brutto casi 7+ 7- si entra nella zona scomoda di indecisione. Più nodi devono portare più discriminazione.\\
+Vogliamo dscriminare, quindi seleziona migliore attributo: quello che dà miglior riduzione entropia conoscendo valore dell'attributo\\
+Gain(S, A) = entropy(S) - sum(v in values(A)) (|Sv|/|S| * Entropy(Sv))\\
+Più alto information gain, più efficace è nella classificare i dati.
+Se ottengo tutti sottoinsiemi con positivi e 0 negativi, e 0 positivi e negativi ottengo una classificazione pulita.\\
+Entropia misura omogeneità (impurità) della classe del sottoninsieme di esempi, seleziono A che massimizza.
+Dopo aver separato, mi aspetto tanti sottoinsieme omogenei con valori più bassi quindi più alto guadagno.\\
+Quindi l'entropia guida la funzioen di apprendimento.
+\paragraph{Perché funziona?} I casi con entropia molto bassa pesano molto, sono molto omogenei (es 6+ 1-)
+\paragraph{Problemi con l'information gain} Così com'è favorisce situazioni con molti valori possibili. Ma ci sono casi dove non sono significativi. %TODO esempio
+Elemento correttivo può essere GainRatio(S,A) = Gain(S,A)/SplitInformation(S,A)\\
+SplitInformation(S,A) = -sum(i=1toc) |Si|/|S| * log2 |Si|/|S|\\
+Splitinf misura l'entropia di S rispetto ai valori di A, pià uniformemente dispersi sono i dati meglio è.\\
+GainRatio penalizza\\ %TODO
+Ha un denominatore che può succedere vada a 0 quando |Si| è circa uguale a |S| per qualche vaolre i (log1 = 0)\\
+Caso estremo |S1|=0 e |S2| = n, splitinformation = -0 -0 = 0 che farebbe esplodere gainratio e farebbe scegliere questo attr che in realtà è costante e non darebbe informazione\\
+Per mitigare effetto, calcolo gain per ogni attr e applico gainratio solo ad attributi con gain $>$ media.
+\subsection{Ricerca nello spazio delle ipotesi dei Decision Trees}
+Ricerca hill-climbing attraverso lo spazio de possibili dt dal più semplice al più complesso (\textbf{ricerca locale senza backtracking}). Quindi si riscia ottimo locale e non ottimalità. Maniene una singola ipotesi corrente in memora e lo lo spaz ipotesi è comnpelto (rappresenta tutta le funzioni a valori discreti). Usa ttuti gli esempi disponibili (non è incrementale).\\
+Può \textbf{terminare prima}, accettando classi rumorose senza accuratezza del 100\% sul TR.
+\subsubsection{Due tipi di bias}
+
 \end{document}
