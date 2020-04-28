@@ -2556,5 +2556,38 @@ Per mitigare effetto, calcolo gain per ogni attr e applico gainratio solo ad att
 Ricerca hill-climbing attraverso lo spazio de possibili dt dal più semplice al più complesso (\textbf{ricerca locale senza backtracking}). Quindi si riscia ottimo locale e non ottimalità. Maniene una singola ipotesi corrente in memora e lo lo spaz ipotesi è comnpelto (rappresenta tutta le funzioni a valori discreti). Usa ttuti gli esempi disponibili (non è incrementale).\\
 Può \textbf{terminare prima}, accettando classi rumorose senza accuratezza del 100\% sul TR.
 \subsubsection{Due tipi di bias}
-
+Qual è il bias induttivo dei DT?
+\begin{list}{}{}
+	\item Alberi più corti preferiti rispetto alberi più lunghi\\
+	Legato all'aspetto greedy, con cui scegliamo il miglior attributo
+	\item Preferiamo segliere attributi con maggiore information gain più vicini alla radice, per primi
+\end{list}
+Nota che il DT non è limitato nel rappresentare tutte le possibili funzioni: la restrizioni non è sullo spazio delle ipotesi, è sulla strategia di ricerca
+\begin{list}{}{}
+	\item \textbf{Preferenza} o \textbf{search bias} è \textbf{legato alla strategia con cui ci muoviamo nello spazio delle ipotesi}\\
+	Es ID£ cerca in uno spazio ipotesi compl ma la strategia è incompl
+	\item \textbf{Restrizione} o \textbf{language bias} è \textbf{sulle ipotesi esprimibili o considerabili}\\
+	Es Candidate Elimination su spazio ipotesi incompleto (solo and) ma strategia completa
+\end{list}
+\paragraph{Perché bias di ricerca preferibile a quello di linguaggio?} Pe revitare di limiatre a priori linguaggi di espressione percHé così nonho più possibilità di trovare determinate soluzioni. Se mantengo tutte le possibilità me la gioco con la strategia di ricerca\\
+In ML tipicamente si usano \textbf{approcci flessibili} o con \textbf{capacità di approssimazione universale} senza escludere a priori una possibile funzione target.\\Ovviamente c'è il rischio di overfitting.
+\paragraph{Perché preferire ipotesi più breve} L'ipotesi più semplice che dà un buon fitting è quella che dà una buona risposta con maggiore probabilità.\\
+Ricordare il controllo della complessità del modello tramite la regolarizzazione dei modelli lineari.
+\subsection{Problemi nell'apprendimento con DT}
+La risoluz costruirà il C4.5
+\paragraph{Overfitting} %TODO dati
+$h$ overfitta i dati di apprendimento se c'è un'ipotesi alternativa $h' \in H$ tale che errd(h) min errd(h') e errx(h') min errx(h) cioè h' si comporta peggio sui TR e meglio sui dati non osservati
+Approcci flessibili possono facilmente incontrare l'overfitting.
+\paragraph{"Evitare" l'overfitting} "avoiding" non va bene, non si può evitare l'overfitting che è un problema inerente e gli strumenti lo controllano ma non ci sollevano dalla responsabilità di gestire la questione.\\
+Tecnica comune è quella di fermare l'apprendimento presto prima di avere una classificazione perfetta.\\
+Oppure consentire crescita ed overfitting ma fare un pruning a posteriori tornando ad un albero più piccolo.\\
+Come agire?
+\begin{list}{}{}
+	\item Training e validation set\\
+	Si divide in due parti e si usa validation per decidere quando fermarsi o quando effettuare pruning
+	\item minimum description leght, usa misura complesistà e mi fermo quando cresce troppo oltre una certa misura (similitudine con Tikhonov)
+\end{list}
+Ogni nodo è candidato per il pruning. pruning ocnsiste rimuove sottoalb rad in un certo nodo, che diventa foglia assegnata\ldots\\
+Nodi rimossi solo se risultatoi albero non peggiore sul valid set.\\
+Noti pruned iterativamente: ad ongi iterazione il nodo la cui rimozione aumenta maggiormente l'accureatezza è tagliato.
 \end{document}
