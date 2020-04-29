@@ -504,6 +504,76 @@ Finché jitter è inferiore alla durata temporale del buffer lato ricezione, la 
 	\item BE burst excess, parte che trasporta in eccesso se ha disponibilità proverà a trasportarne di più 
 	\item MaxR maximum data rate: (BC + BE)/TC = ((BC + BE)/BC)*CIR
 \end{list}
+\paragraph{Misure End-To-End} Nelle misure devo mettere in conto il tempo della mia applicazione per elaborare ed anche il ritardo di rete.\\
+Performance di rete $\neq$ Performance app.\\
+Bisogna fare attenzione rispetto alle misure per link, ad esempio perché traffico fa routing diverso andata-ritorno qudini rtt/2=latenza è in generale sbagliato. misure endtoend sono più vicine all'utente, si rapporta al server remoto non alla misura link link. Quella link link serve a noi per fare troubleshooting.\\
+EndToEnd e LinkLink sono in relazione, endtoend dà se c'è problema che si scorpora sul link
+\paragraph{Approcci di monitoraggio} Sono multipli. fin'ora è una misura di tipo passivo: si cattura traffico, senza influenzare niente.\\
+Nella misura attiva inietto del traffico e vedo la reazione della rete, ad es. un ping.\\
+Ad es traceroute calcola latenza e da dove passa un certo tipo di traffico.\\
+\paragraph{Inline} Inline significa quando monitoriamo se tramite snmp connetto allo switch con lo stesso filo che snmp sta monitorando: \textbf{inline}.\\
+Offline invece è monitoring tramite altra rete: reti sdoppiate, una per monitorare e una per i servizi. Vincolata dalla struttura della rete, a volte non possibile.\\\\
+Quindi approcci attivi/passivi, inline/offline.
+\chapter{Remote Monitoring}
+\textbf{Analisi rete remota rispetto dove siamo noi}.\\
+Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (edge), inoltre è anche "forzato" dalle parti wireless che sta diventando predominante. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
+Diventa necessario \ldots Inote tipi traffici che nascono e muoiono in periferia senza passare dal core.\\
+Il problema è andare a spillare il traffico remoto, vedere il traffico che fluisce in questa rete. Nn sempre banale perché magari necessario modificare la rete. Quindi attenzione alla topologia, e attenzione ai tap di rete usati percHé hanno limitazioni importanti.\\
+Anche le funzionalità di monitoraggio degli apparati di rete comuni sono limitate, spesso il massimo che posso vedere sono i byte totali, ip assegnati\ldots\\
+Spesso i costi per sistemi di monitoring sono importanti.\\
+Misura in remoto tramite snmp nasce subito dopo mibv2. con snmp misuro quanto ma non posso fare misure pià complicate, e non posso assegnare soglie e in base mandare allarme ma misurare in continuazione e fare i nostri calcolo.\\
+MIB RMON (MIB SNMP), risolve problema monitoraggio remoto. Consente di gestire disservizi. Inserisce un minimo di logica per generare allarmi.
+\section{RMON} Cosa fà? Primo passaggio da monitoraggio snmp a monitoraggio a pacchetti.\\
+Vedo traffico di rete remoto e metto una sonda remota.
+\subparagraph{RMON vs SNMP} SNMP controlla e configura un probe, solitamente con GUI. SNMP esegue la \textbf{richiesta periodica} (polling). L'azione è eseguita dal manager.\\
+RMON sposta un po' della logica nell'apparato, che raccoglie da sé stat e impostare allarmi direttamente sull'apparato.
+\begin{list}{}{\textbf{Gruppi RMON}}
+	\item Statistics: vedo info che SNMP non dà precisamente, es pacchetti droppati
+	\item History: dati i contatori (es. quante volte una porta cambia stato) consente di non andare sullo switch e leggere e scrivermeli ma chiedere la storia recente del contatore. Memoria piccola, 3-5-10 misure, poche. RMON legge un po' nel passato, SNMP legge sempre e solo in real-time
+	\item Alarm: 
+	\item Host: a livello di host quali traffici per un certo host, es. byte in out per certo host.
+	\item HostTopN: per i top N host quanto traffico fanno, quale porta più occupata. Se c'è connesso un PC è il colpevole, ma se ce ne sono N non mi è chiaro. Con HostTopN analizzo traffico della porta e trovo N computer che fanno più traffico\ldots
+	\item Matrix: mostra comunicazioni tra indirizzi
+\end{list}
+C'è anche una formula per capire quanto è usata una porta di rete (100x((pachets x 160)+(octets x 8)))/(portspeed x timeinsec)
+\paragraph{Allarmi} Impostare soglie su contatori di RMON, soglie di due tipi: rising e falling. Quando troppo alta (rising) o bassa (falling) posso effettuare operazioni.\\
+Es troppo traffico se utilizzo sup a 80\% manda allarme.
+\paragraph{Case Study} \ldots RMON va a mappare ogni quanto misuro dati, valori di soglia
+\section{RTFM} Real-Time Flow Measurement\\
+Cambio di architettura.
+\begin{list}{}{}
+	\item Meter: colui che misura, il contatore. Và messo dove passa il traffico
+	\item Reader: parla col meter e tira fuori i suoi dati. Deve essere "vicino" al meter, ma non è dentro
+	\item Manager: gestisce configurazione di meter e reader e che chiede i dati. Implementato in SNMP
+	\item Applicazione: fa i grafici, configura il manager\ldots
+\end{list}
+\section{Monitoraggio a flussi}
+Nel caso di SNMP agent (dove passa traffico) e manager (query all'agent). Nel caso di un problema, agent avverte manager tramite trap (cambio di stato, o superamento soglia in caso di RMON).\\
+Agent snmp non è libero di monitorare tutto, si limita al MIB.\\
+Nei flussi prendo traffico di rete, lo metto insieme in base a caratt (es protocollo, stesso ip:porta sorg, stesso ip:porta dest = quintupletta)\\
+Non configuro il flusso. Nel caso di NetFlow la device stessa dove passa il traffico di rete (es router) prende e spara verso collezionatore (manager) le informazioni da monitorare. In questo caso quindi i flussi sono prodotti ed emessi verso colui che deve riceverli.\\
+No concetto allarme ne abilità per agents di fare alcunché: tutta la logica è nel collezionatore.\\
+Strumentazione del probe è fatta offline.\\
+Probe sono posizionati dove fluisce il traffico.\\
+\textbf{Cosa si misura?} Dove viene scambiato il traffico organizzato per gruppi autonomi, IP\ldots\\
+A livello applicativo quanto traffico in base a porta o protocollo\\
+Quali servizi, livelli di traffico\ldots\\
+Con i flussi non si riesce a misurare traffico nonIP, informazioni livello 2 (stato delle interfacce), traffico flitrato (firewall), statistiche per-link, statistiche per applicazioni.
+\paragraph{flusso}: insieme di pacchetti accumunati da una stessa quintupletta. Flussi sia unidirezionali che bidirezionali. Calcolati dal probe (era: agent) che qguarda traffico che passa attraverso e lo misura. Flusso creato quando vedo il primo pacchetto del flusso, probe sta fermo.\\
+Massima durata flusso regardless lo stato della connessione: termino flusso o quando dura troppo o quando non c'è traffico per un po' di tempo.\\
+Contenuti del flusso: peers (src e dst), contatori (packets, bytes, tempo), info routing (sistema autonomo, netmask, interfaces).\\
+Possono essere uni e bidirezionali. Due flussi unidirezionali opposti sono equiv a uno bidirezionale. Flussi bid possono contenere altre info come rtt o comportamento tcp.\\
+\textbf{Problemi vari}\\
+\begin{list}{}{Overhead vs accuratezza}
+	\item + misure + dati
+	\item + aggregazione flussi - granularità
+	\item overhead su router, switc e endhosts
+\end{list}
+\begin{list}{}{Security vs data sharing}
+	\item flussi devono andare ai collezionatori su cammini protetti
+	\item privacy va rispettata
+	\item misure di traffico devono essere mantenute protette per non rivelare informazioni di rete importanti a terze parti
+\end{list}
 \chapter{ScaPy}
 Manipolazione di pacchetti in maniera semplice. Con Pcap si legge e invia, ma gestisce i pacchetti raw e non permette di manipolarli, funge da specie di socket. Wireshark è molto utile ma è un tool a sé state, ma se serve fare cose in batch non è molto utile. Wireshark può essere collegato tramite API a PyShark, ma è sola lettura. ScaPy permette sia di inviare che di ricevere.
 \paragraph{Modulo} ScaPy è un modulo Python.\\
@@ -531,4 +601,5 @@ Cosa ci possiamo fare? \begin{list}{}{}
 	\item \textbf{AnsweringMachine}\\
 	Permette di gestire le risposte, un esempio è avviarla in monitoring su un'interfaccia. 
 \end{list}
+
 \end{document}
