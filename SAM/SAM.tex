@@ -551,4 +551,31 @@ mentre un nuovo thread esegue (possono essere lenti ma no interazione con UI):
 	\item \texttt{doInBackground}
 	\item \texttt{publishProgress}
 \end{list}
+\paragraph{WeakReference} Normalmente riferenza a oggetto impedisce a garbage collector di eliminarlo. Il nostro bitmapdownloadertask avrebbe riferimento a imageview, se non avessi usato una weakreference. Però imageview avrebbe riferimento al proprio layout, che ha riferimenti all'albero, che è radicato in un context che ha riferimenti a tantissime cose. Quindi sarebbe praticamente impossibile liberare la memoria. Si comporta come un riferimento ma non impedisce al gc di disallocare la memoria (sempre che non ci siano altri riferimenti in giro)\\
+In caso di disallocamento, il \texttt{get()} della WeakReference ritorna null.
+\paragraph{Cursor} Generalmente sono lenti e bloccanti (quindi no thread UI), o thread a parte oppure Loader.
+\paragraph{Loader} Classe \textbf{astratta} specifica \textbf{protocolo generico} per caricamente asincrono di dati.\\ Si tratta di classi di utilità, \textbf{componenti attivi}: a Loader attivo, quando i dati sottostanti vengono aggiornati, il Loader deve trasferire aggiornamenti al suo utente. Il Loader stesso non specifica come fare.\\
+Ogni activity ha associato un LoaderManager, che gestisce i Loader di quell'activity (analogamente ai FragmentManager). Uno solo per activity, che gestisce un numero qualunque di loader. Offre initloader (crea loader), getloader, restartloader, destroyloader.\\
+CursorLoader è una sottoclasse di Loader: interroga un ContentResolver in background.\\
+Il pattern diventa da aprifile a inizia ad aprilo e ho finito di aprirlo.\\
+StarLoading, \textit{OnStartLoading}, StopLoading, \textit{OnStopLoading}\ldots (\textit{corsivo} = astratte, da implementare).\\
+\textbf{Attenzione}: deprecati da Android 9
+\paragraph{Download HTTP con DownloadManager} Succede tantissime volte: mappe, api\ldots\\
+Come si usa, servizio di sistema: getSystemService(DOWNLOAD\_SERVICE). Posso \textbf{accodare} una richiesta di scaricare qualcosa (\textbf{long id = downloadmanager.equeue(request);}. Al termine si viene avvisati con un broadcast (ACTION\_DOWNLOAD\_COMPLETE), quindi bisognerà registrare un BroadcastReceiver.\\
+\texttt{request} deve essere un'istanza di \texttt{DownloadManager.Request}, incapsula una richiesta di download e contiene tutte le info necessarie fra cui
+\begin{list}{}{}
+	\item URI (obbligatoria)
+	\item Dove metterla (default spazio shared)
+	\item Se visualizzare notifica o no durante download
+	\item Titolo e descrizione per la notifica (Se ci sono)
+	\item Restrizione sulla rete (Solo wifi, anche cellulare, anche roaming\ldots)
+\end{list}
+\paragraph{AsyncPlayer} Molte classi di sistema gestiscono multithreading completamente al proprio interno.\\
+Una di queste è AyncPlayer: riproduce audio in background, il thread c'è ma non si vede.\\
+%TODO metodi e costruttori
+Due metodi importanti: play e stop. Play prende la URI dell'audio, stop non ha parametri.
+\paragraph{Pattern command} Trasformo azione (tipicamente chiamata di metodo) e trasformo in struttura dati.\\
+Command diventa un dato da fare in un momento qualsiasi, ad esempio mettendolo in una coda.
+
+
 \end{document}
