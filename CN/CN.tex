@@ -7,6 +7,7 @@
 \usepackage{tikz}
 \usepackage{color}
 \usepackage{relsize}
+\usepackage{amsmath}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
 \usepackage{mathrsfs}
@@ -1223,6 +1224,88 @@ $$\Rightarrow||e^{(k+1)}|| = |\lambda|^{k+1}\cdot||e^{(0)}|| \neq 0$$
 $$||e^{(k+1)}||\to 0 \Leftrightarrow |\lambda| < 1$$
 Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{necessaria e sufficiente}.
 \paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente $\Leftrightarrow \rho(P) < 1$.
+\subsection{Metodi} Nella pratica, studiare le proprietà di $P$ matrice d'iterazione può essere complicato, quindi necessitiamo di risultati che ci dicano se un metodo converge o meno in base alle proprietà soddisfatte da $P$.
+\paragraph{Problema} Il nostro problema è sempre la risoluzione di un sistema lineare $Ax = b$, sempre con l'idea classica dei metodi iterativi cioè di partizionare la matrice $A = M-N$ con $M$ invertibile.
+\subsubsection{Metodo di Jacobi}
+Nel metodo di Jacobi scriviamo $A$ come \textbf{somma di 3 matrici} $A = L + U + D$ con \begin{list}{}{}
+	\item $L = \textsl{tril}(A, -1)$ cioè la \textbf{parte strettamente triangolare inferiore di $A$}, completata con 0 sulla diagonale principale e nella parte superiore.
+	\item $U = \textsl{tril}(A, 1)$ cioè la \textbf{parte strettamente triangolare superiore di $A$}, completata con 0 sulla diagonale principale e nella parte inferiore.
+	\item $D = \textsl{diag}(A)$ cioè la \textbf{diagonale di $A$}
+\end{list}
+\textbf{Un esempio}\\
+$A = \left[\begin{array}{c c c}
+1&2&3\\4&5&6\\7&8&9
+\end{array}\right] \longrightarrow L = \left[\begin{array}{c c c}
+0&0&0\\4&0&0\\7&8&0
+\end{array}\right] \:\: U = \left[\begin{array}{c c c}
+0&2&3\\0&0&6\\0&0&0
+\end{array}\right] \:\: D = \left[\begin{array}{c c c}
+1&0&0\\0&5&0\\0&0&9
+\end{array}\right] \Rightarrow A = L+U+D$
+\paragraph{Nel metodo Jacobi} Vengono scelte $\begin{array}{l}
+M = D\\N = -L-U
+\end{array}$
+\begin{list}{}{}
+	\item \textbf{Applicabilità} (un \textbf{metodo è applicabile se posso costruire la successione}).\\
+	Siccome in Jacobi $M$ è diagonale, Jacobi è applicabile $\Leftrightarrow$ $M$ è invertibile $\Leftrightarrow$ $a_{ii} \neq 0$ con $i = 1\ldots n$ cioè che \textbf{tutti gli elementi sulla diagonale principale siano $\neq 0$}\\
+	Se il metodo è applicabile, posso generare la sequenza.
+	\begin{multicols}{2}	
+	$\left\{\begin{array}{l}
+	x^{(0)} \in R^n\\
+	Mx^{(k+1)} = Nx^{(k)} + b
+	\end{array}\right.$\\
+	$\left[ \begin{array}{c c c}
+	a_{11}\\
+	& \ddots\\
+	& & a_{nn}
+	\end{array}\right] \left[ \begin{array}{c}
+	x_1^{(k+1)}\\\vdots\\x_n^{(k+1)}
+	\end{array} \right] = Nx^{(k)} + b$
+	$$a_jj x_j^{(k+1)} = b_j - \sum_{l = 1, l\neq j}^n \left(a_{jl}\cdot x^{(k)}_l\right)\text{per }j = 1\ldots n$$
+	\columnbreak
+	\begin{center}
+		\textbf{Iterazione di Jacobi}	
+	\end{center}
+	$$x_j^{(k+1)} = \frac{1}{a_{jj}} \left(b_j - \sum_{l = 1, l\neq j}^n \left(a_{jl}\cdot x^{(k)}_l\right)\right)$$
+	Per $j = 1\ldots n$ e $k \geq 0$
+	\end{multicols}
+	\item Molto semplice: richiede due vettori per l'implementazione $x^{(k)}$ e $x^{(k+1)}$
+	\item Il numero di operazioni moltiplicative è nell'ordine del numero di operazioni addittive, quindi considero le moltiplicative: sono fatte all'interno della sommatoria tutte le volte che incontro un elemento di $A$ che sia $\neq 0$\\
+	Quindi \textbf{un'iterazione di Jacobi costa \texttt{nnz(A)}}, dove \texttt{nnz(A)} è il numero degli elementi di $A$ che sono $\neq 0$.\\
+	Quindi, nel caso di \textbf{matrici sparse}, \textbf{un passo del metodo di Jacobi costa poco}.
+\end{list}
+\subsubsection{Metodo di Gauss-Seidel}
+Il metodo di Gauss-Seidel si sviluppa a partire dall'iterazione di Jacobi
+$$x_j^{(k+1)} = \frac{1}{a_{jj}} \left(b_j - \sum_{l = 1, l\neq j}^n \left(a_{jl}\cdot x^{(k)}_l\right)\right)$$
+La prima osservazione che possiamo fare è che possiamo spezzare la sommatoria, sommando da $1$ a $j-1$ e poi da $j+1$ a $n$, sempre saltando $j$.
+$$x_j^{(k+1)} = \frac{1}{a_{jj}} \left(b_j - \sum_{l = 1}^{j-1} \left(a_{jl}\cdot x^{(k)}_l\right) - \sum_{l = j + 1}^{n} \left(a_{jl}\cdot x^{(k)}_l\right)\right)$$
+Ma quando calcolo $x_j^{(k+1)}$ ho già calcolato $x_1^{(k+1)}$\ldots$x_{j-1}^{(k+1)}$, quindi posso sostituire $x_l^{(k)}$ con $x_l^{(k+1)}$
+$$x_j^{(k+1)} = \frac{1}{a_{jj}} \left(b_j - \sum_{l = 1}^{j-1} \left(a_{jl}\cdot x^{(k+1)}_l\right) - \sum_{l = j + 1}^{n} \left(a_{jl}\cdot x^{(k)}_l\right)\right)$$
+Sostanzialmente il costo computazionale non è cambiato. Ma dal punto di vista pratico, utilizzare l'informazione più "fresca" disponibile, cioè la $x$ al tempo $k+1$, ha un impatto sulla convergenza: \textbf{Gauss-Seidel converge più rapidamente}, cioè in un numero minore di passi.\\
+Perdo, però, la componente parallela essendo un \textbf{metodo intrinsicamente sequenziale}. Gauss-Seidel, però, permette di mantenere un solo vettore in memoria poiché posso "sovrascrivere" le componenti calcolate passo dopo passo.
+\subsubsection{Confronto}
+In \textbf{Gauss-Seidel} il partizionamento è $\begin{array}{l}
+M = L + D\\N = -U
+\end{array}$, che quindi prende la parte triangolare inferiore di $A$, mentre \textbf{Jacobi} partiziona $\begin{array}{l}
+M = D\\N = -L-U
+\end{array}$ quindi prendendo la parte diagonale di $A$. 
+\paragraph{Applicabilità} La stessa, cioè $\Leftrightarrow a_{ii} \neq 0$ per $i = 1\ldots n$
+\paragraph{Calcolo parallelo} Meglio Jacobi
+\paragraph{Convergenza} In generale nella pratica è meglio Gauss-Seidel
+\paragraph{Implementazione} Gauss-Seidel può richiedere un solo vettore
+\paragraph{Costo computazionale} Medesimo e dipendente dalla sparsità della matrice: O(\texttt{nnz(}$A$\texttt{)})
+\subsection{Teorema} Sia $A \in R^{n \times n}$ \textbf{predominante diagonale} $\Rightarrow A$ è invertibile $\wedge$ Jacobi e Gauss-Seidel sono applicabili e convergenti.
+\paragraph{Dim} $A$ predominante diagonale $\Rightarrow A$ invertibile \textbf{OK}\\
+$A$ predominante diagonale $\Leftrightarrow |a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|$ per $i=1\ldots n$\\
+$|a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}| \geq 0$ per $i=1\ldots n \Rightarrow |a_{ii}| > 0 \Rightarrow a_{ii} \neq 0$ per $i=1\ldots n$ quindi i metodi sono applicabili \textbf{OK}\\
+La convergenza dipende dalla matrice d'iterazione $P$, più precisamente dagli autovalori di $P$. Vogliamo dimostrare che gli autovalori di $P$ hanno tutti modulo $< 1$, perché quindi $\rho(P) < 1 \Rightarrow$ convergente.\\
+Se cerchiamo per quali valori il determinante è 0 allora il verso del calcolo non cambia perché cambierebbe solo il segno, perché $\textsl{det}(A) = -\textsl{det}(-A)$
+$$\textsl{det}(\lambda I - P) = \textsl{det}(\lambda I - M^{-1}N) = \textsl{det}(\lambda M^{-1}M - M^{-1}N) = \textsl{det}(\lambda M^{-1}(\lambda M - N)) = \textsl{det}(M^{-1})\cdot\textsl{det}(\lambda M - N))$$
+E dato che $M$ è invertibile, $\textsl{det}(M^{-1})\neq 0$, quindi scopriamo che
+$$\textsl{det}(\lambda I - P) = 0 \Leftrightarrow \textsl{det}(\lambda M - N) = 0$$
+Quindi $\lambda$ autovalore di $P \Leftrightarrow \textsl{det}(\lambda M - N) = 0$\\
+Per quali $\lambda \in C$ $\lambda M - N$ è una matrice singolare? Se $|\lambda|\geq 1$, mostriamo che $\lambda M - N$ è predominante diagonale e quindi invertibile.\\
+$M = L + D$, $N = - U$ %TODO
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
