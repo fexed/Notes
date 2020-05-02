@@ -1920,13 +1920,161 @@ A = \left[
 \end{math}
 \paragraph{Determinare condizioni sufficienti su $\theta$ affinché $A$ abbia fattorizzazione $LU$} Predominanza diagonale
 \begin{list}{}{}
-	\item[$i = 1$] $|1| = 1 > (n-1)|\theta| \Leftrightarrow |\theta| < \frac{1}{n-1}$\\
+	\item[$i = 1 \rightarrow$] $|1| = 1 > (n-1)|\theta| \Leftrightarrow |\theta| < \mathlarger{\frac{1}{n-1}}$\\
 $\Leftrightarrow \mathlarger{-\frac{1}{n-1} < \theta < \frac{1}{n-1}}$
-\item[$i = 2\ldots n$] $|1| = 1 > |-\theta| = |\theta| \Leftrightarrow |\theta| < 1$\\ 
+\item[$i = 2\ldots n \rightarrow$] $|1| = 1 > |-\theta| = |\theta| \Leftrightarrow |\theta| < 1$\\ 
 $\Leftrightarrow -1 < \theta < 1 $
 \end{list}
-Quindi $A$ è predominante diagonale $\Leftrightarrow \mathlarger{-\frac{1}{n-1} < \theta < \frac{1}{n-1}} \Rightarrow \exists!\: LU$
-%Lezione_Esercitazione_15_04.pdf
+Quindi $A$ è predominante diagonale $\Leftrightarrow \mathlarger{-\frac{1}{n-1} < \theta < \frac{1}{n-1}} \Rightarrow \exists!\: \text{ la fattorizzazione }LU$
+\paragraph{Determinare tutti i valori di $\theta$ per i quali A ammette fattorizzazione $LU$} Determinante?\\$\textsl{det}(\left[ 
+\begin{array}{c c c c}
+1 & \theta & \ldots & \theta \\
+-\theta & \ddots & &\\
+\vdots & & \ddots &\\
+-\theta & & & 1
+\end{array}
+\right]) = \textsl{det}(\left[ 
+\begin{array}{c c c c}
+1 & & & -\theta\\
+& \ddots & & \vdots\\
+& & \ddots & -\theta\\
+\theta & \ldots & \theta & 1
+\end{array}
+\right])$\\
+Questo perché passo da $\left[ 
+\begin{array}{c c c c}
+1 & \theta & \ldots & \theta \\
+-\theta & \ddots & &\\
+\vdots & & \ddots &\\
+-\theta & & & 1
+\end{array}
+\right]$ a $\left[ 
+\begin{array}{c c c c}
+1 & & & -\theta\\
+& \ddots & & \vdots\\
+& & \ddots & -\theta\\
+\theta & \ldots & \theta & 1
+\end{array}
+\right]$ semplicemente scambiando righe e colonne.\\
+Questa osservazione è utile perché di $\left[ 
+\begin{array}{c c c c}
+1 & \theta & \ldots & \theta \\
+-\theta & \ddots & &\\
+\vdots & & \ddots &\\
+-\theta & & & 1
+\end{array}
+\right]$ a $\left[ 
+\begin{array}{c c c c}
+1 & & & -\theta\\
+& \ddots & & \vdots\\
+& & \ddots & -\theta\\
+\theta & \ldots & \theta & 1
+\end{array}
+\right]$ so calcolare la fattorizzazione $LU$.
+$$\left[ \begin{array}{c c c | c}
+  & & & \\
+  & I_{n-1} & & \\
+  & & & \\
+  \hline
+  \theta &\ldots &\theta & 1
+\end{array}\right] \cdot \left[ \begin{array}{c c c | c}
+  & & & -\theta\\
+  & I_{n-1} & &\vdots \\
+  & & &-\theta \\
+  \hline
+  & 0 & & 1 + (n-1)\theta^2
+\end{array}\right]$$
+Questo mi dice che $\textsl{det}(A) = 1 + (n-1)\theta^2 \neq 0\:\:\forall\:\theta$\\
+Quindi le sottomatrici principali di testa sono invertibili $\forall\:\theta$, quindi \textbf{ammette unica fattorizzazione $LU$ $\forall\:\theta$}
+\paragraph{Determinare $E_1$ matrice elementare di Gauss tale che $E_1\cdot A$ abbia 0 nella prima colonna esclusa la prima posizione} $E_1 = ?$, ricordando la costruzione della matrice di Gauss ottengo
+$$E_1 = \left[ \begin{array}{c c c c}
+1\\
++\theta & \ddots\\
+\vdots & & \ddots\\
++\theta & & & 1
+\end{array} \right]$$
+$$E_1 A = \left[ \begin{array}{c c c c}
+1\\
++\theta & \ddots\\
+\vdots & & \ddots\\
++\theta & & & 1
+\end{array} \right]\cdot\left[ 
+\begin{array}{c c c c}
+1 & \theta & \ldots & \theta \\
+-\theta & \ddots & &\\
+\vdots & & \ddots &\\
+-\theta & & & 1
+\end{array}
+\right] = \left[ 
+\begin{array}{c c c c c c }
+1 & \theta & \ldots & \ldots & \ldots & \theta \\
+0 & 1 + \theta^2 & \theta^2 & \ldots & \ldots & \theta^2\\
+\vdots & \theta^2 & 1 + \theta^2 & \theta^2 & \ldots & \theta^2\\
+\vdots & \vdots & &\ddots & & \vdots\\
+\vdots & \vdots & & & \ddots & \theta^2\\
+0 & \theta^2 & \ldots & \ldots & \theta^2 & 1 + \theta^2
+\end{array}
+\right]$$
+Con $1 + \theta^2$ sulla diagonale principale e $\theta^2$ fuori da essa.\\
+Notiamo che $A$ è una matrice sparsa, cioè \textit{tanti elementi di $A$ sono $0$}, che è una proprietà che vogliamo sfruttare. Ma in generale \textbf{il metodo di eliminazione gaussiana non preserva la sparsità della matrice}. Si riempiono sia $A^{(k)}$ sia $L$ e $U$: questo si chiama \textbf{fill-in}.
+\paragraph{Esercizio}
+\begin{multicols}{2}
+\begin{center}
+	$$A = \left[\begin{array}{c c c c}
+	2 + h & -1\\
+	-1 & \ddots & \ddots\\
+	& \ddots & \ddots & -1\\
+	& & -1 & 2+h
+\end{array}\right]$$
+\end{center}
+\columnbreak
+\begin{enumerate}
+	\item Determinare condizioni sufficienti su $h$ tali da garantire esistenza ed unicità della fattorizzazione $LU$
+	\item Sotto tali condizioni, scrivere un programma per il calcolo dei fattori $L$ e $U$
+\end{enumerate}
+\end{multicols}
+\begin{enumerate}
+	\item Proviamo attraverso la predominanza diagonale
+	\begin{list}{}{}
+		\item[$i = 1$, $n \rightarrow$] $|2+h| > 1$
+		\item[$i = 2\ldots n-1 \rightarrow$] $|2+h| > 2$
+	\end{list}
+	Quindi la condizione sarà $|2+h| > 2 \Leftrightarrow \left\{\begin{array}{l}
+	2 + h > 2\\
+	2 + h \geq 0
+	\end{array}\right. \bigcup \left\{\begin{array}{l}
+	-(2 + h) > 2\\
+	2 + h \leq 0
+	\end{array}\right. \Leftrightarrow \left\{\begin{array}{l}
+	h > 0\\
+	h \geq -2
+	\end{array}\right. \bigcup \left\{\begin{array}{l}
+	h < -4\\
+	h \leq -2
+	\end{array}\right.$\\
+	$\Rightarrow$ la matrice è predominante diagonale quando $h < -4 \vee h > 0$
+	\item Abbiamo le condizioni, vediamo come si comportano $L$ ed $U$\\
+	Abbiamo una matrice del tipo $\left[\begin{array}{c c c c}
+	a & b\\
+	b & \ddots & \ddots\\
+	& \ddots & \ddots & b\\
+	& & b & a
+\end{array}\right]$ con $a = 2+h$ e $b = -1$. Il primo passo della fattorizzazione è mettere $0$ nella prima colonna. L'unico elemento da annullare è quello in posizione $(2, 1)$, basta quindi prendere $\mathlarger{-\frac{b}{a}}$ come elemento corrispondente in $E_1$
+$$E_1 = \left[\begin{array}{c c c}
+1 & & \\
+\mathlarger{-\frac{b}{a}} & \ddots\\
+& & 1
+\end{array} \right]$$
+$$E_1 A = \left[\begin{array}{c c c c c}
+a & b & &\\
+0 & \overline{a} & b & \\
+\vdots & b & a & \ddots\\
+0 & & \ddots & \ddots
+\end{array} \right]$$
+La matrice su cui dovrò lavorare, cioè $E_1 A$ privata della prima riga e della prima colonna, è ancora tridiagonale. In questo caso, e in generale nelle matrici cosiddette "a banda", il metodo di eliminazione gaussiama preserva la sparsità.\\
+$E_2$ sarà analogamente con un elemento $\mathlarger{-\frac{b}{a}}$\ldots\\
+La $U$ sarà una bidiagonale superiore, mentre la $L$ sarà bidiagonale inferiore.
+\end{enumerate}
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
 \section{Esponenziale}
