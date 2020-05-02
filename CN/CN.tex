@@ -1227,8 +1227,8 @@ Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{neces
 \paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente $\Leftrightarrow \rho(P) < 1$.
 \subsection{Metodi} Nella pratica, studiare le proprietà di $P$ matrice d'iterazione può essere complicato, quindi necessitiamo di risultati che ci dicano se un metodo converge o meno in base alle proprietà soddisfatte da $P$.
 \paragraph{Problema} Il nostro problema è sempre la risoluzione di un sistema lineare $Ax = b$, sempre con l'idea classica dei metodi iterativi cioè di partizionare la matrice $A = M-N$ con $M$ invertibile.
-\subsubsection{Metodo di Jacobi}
-Nel metodo di Jacobi scriviamo $A$ come \textbf{somma di 3 matrici} $A = L + U + D$ con \begin{list}{}{}
+\subsubsection{Suddivisione}
+In entrambi i metodi scriviamo $A$ come \textbf{somma di 3 matrici} $A = L + U + D$ con \begin{list}{}{}
 	\item $L = \textsl{tril}(A, -1)$ cioè la \textbf{parte strettamente triangolare inferiore di $A$}, completata con 0 sulla diagonale principale e nella parte superiore.
 	\item $U = \textsl{tril}(A, 1)$ cioè la \textbf{parte strettamente triangolare superiore di $A$}, completata con 0 sulla diagonale principale e nella parte inferiore.
 	\item $D = \textsl{diag}(A)$ cioè la \textbf{diagonale di $A$}
@@ -1319,7 +1319,145 @@ Nella seconda sommatoria lo abbiamo lasciato fuori perché, siccome $|\lambda| \
 $$\sum_{j=1}^{i-1} |\lambda a_{ij}| + |\lambda|\sum_{j=i+1}^{n} |a_{ij}| \geq \sum_{j=1}^{i-1} |\lambda a_{ij}| + \sum_{j=i+1}^{n} |a_{ij}|$$
 Dimostrando che 
 $$|\lambda a_{ii}| > \sum_{j=1}^{i-1} |\lambda a_{ij}| + \sum_{j=i+1}^{n} |a_{ij}|$$
-
+\subsection{Esempi}
+\begin{multicols}{2}
+	\begin{center}
+		\begin{math}
+		A = \left[
+			\begin{array}{c c c c}
+			1 & & &\alpha\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			& & -1 & 1
+			\end{array}
+		\right]
+		\in \mathbb{R}^{n \times n}
+		\text{, } n \geq 2
+		\end{math}
+		\columnbreak
+		\begin{enumerate}
+			\item Per quali valori di $\alpha$, $A$ è predominante diagonale?
+			\item Per quali valori di $\alpha$ il metodo di G-S è convergente?
+			\item Per quali valori di $\alpha$ il metodo di Jacobi è convergente?
+		\end{enumerate}
+	\end{center}
+\end{multicols}
+\begin{enumerate}
+	\item Ricordiamo la condizione di predominanza diagonale
+	$$|a_{ii}| > \sum_{j=1\:j\neq i}^n |a_{ij}|\text{ per } i = 1\ldots n$$
+	\begin{list}{}{Vediamo per righe}
+		\item[$i = 1 \rightarrow$] $1 > |\alpha| \Leftrightarrow |\alpha| < 1$
+		\item[$i = 2\ldots n \rightarrow$] $1 > |-1| = 1$ \textbf{impossibile}
+	\end{list}
+	Quindi $A$ \textbf{non è mai predominante diagonale}. Quindi la risposta è \textbf{per nessun valore di $\alpha$}.
+	\item Il fatto che la matrice non sia mai predominante diagonale non ci dice niente sulla convergenza dei metodi, perché la predominanza diagonale è una \textbf{condizione sufficiente} ma \textbf{non necessaria}.\\
+	In parole povere, predominanza diagonale $\Rightarrow$ convergenza, ma in generale non è vero il contrario.\\
+	Vediamo la matrice d'iterazione $P = M^{-1}N$, talvolta scritta come $G$ (ricordiamo che in G-S $M = L + D$ e $N = -U$)
+	$$P = G = M^{-1}N = \left[\begin{array}{c c c c}
+			1\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			& & -1 & 1
+			\end{array}\right]^{-1}\cdot
+			\left[
+			\begin{array}{c c c c}
+			0 &\ldots & 0&-\alpha\\
+			\vdots & & \vdots & 0 \\
+			\vdots & & \vdots & \vdots\\
+			0 & \ldots & 0 & 0
+			\end{array}
+		\right] = \left[\begin{array}{c|c|c|c}
+				 & & &\\			
+				0 & \ldots & 0 & M^{-1}v\\
+				 & & &\\
+			\end{array}
+		\right]$$
+		$$M^{-1}v = \left[\begin{array}{c c c c}
+			1\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			& & -1 & 1
+			\end{array}\right]^{-1}\cdot\left[\begin{array}{c}
+			-\alpha\\0\\\vdots\\0
+			\end{array}\right] = x$$
+			Per trovare $M^{-1}v = x$ potrei calcolare l'inversa e procedere così, ma in generale il calcolo dell'inversa è complesso. Quindi di solito si preferisce risolvere il sistema lineare 
+			$$Mx = \left[\begin{array}{c}
+			-\alpha\\0\\\vdots\\0
+			\end{array}\right] \Leftrightarrow
+			\left[\begin{array}{c c c c}
+			1\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			& & -1 & 1
+			\end{array}\right]\left[\begin{array}{c}
+			x_1\\\vdots\\\vdots\\x_n
+			\end{array}\right] = \left[\begin{array}{c}
+			-\alpha\\0\\\vdots\\0
+			\end{array}\right]$$
+			Che è un sistema triangolare inferiore, risolvibile con un metodo di sostituzione in avanti\\
+			$ \left\{ \begin{array}{l}
+			x_1 = -\alpha\\
+			-x_1 + x_2 = 0 \Leftrightarrow x_2 = x_1 = -\alpha\\
+			-x_2 + x_3 = 0 \Leftrightarrow x_3 = x_2 = -\alpha\\
+			\vdots\\
+			x_n = -\alpha
+			\end{array} \right. \text{ scoprendo così che }
+			M^{-1}v = \left[ \begin{array}{c}
+			-\alpha\\\vdots\\-\alpha
+			\end{array}\right]$\\
+			Come conseguenza ho
+			$$P = \left[ \begin{array}{c c c}
+			& & -\alpha\\
+			& 0 &\vdots\\
+			& & -\alpha
+			\end{array}\right]\:\:\rho(P) = \:?$$
+			Dato che $P$ è triangolare superiore, $\rho(P) = |\alpha|$\\
+			Quindi posso dire che \textbf{G-S è convergente} $\Leftrightarrow |\alpha| < 1$
+			\item Per quando riguarda Jacobi, la cui matrice d'iterazione $P$ è spesso scritta anche come $J$ (ricordiamo che in Jacobi $M = D$ e $N = -L-U$)
+			$$P = J = M^{-1}N = I^{-1}\cdot\left[\begin{array}{c c c c}
+			0 & & & -\alpha\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			0 & & -1 & 0
+			\end{array}\right] = \left[\begin{array}{c c c c}
+			0 & & &-\alpha\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			0 & & -1 & 0
+			\end{array}\right]$$
+			Per trovare gli autovalori possiamo
+			\begin{list}{}{}
+				\item provare a calcolare il polinomio caratteristico
+				\item provare a scrivere $Jx = \lambda x$
+			\end{list}
+			Seguiamo la seconda strada, poiché il calcolo del polinomio può in generale essere complicato.
+			$$\left[\begin{array}{c c c c}
+			0 & & &-\alpha\\
+			-1 & \ddots\\
+			& \ddots & \ddots\\
+			0 & & -1 & 0
+			\end{array}\right]\left[\begin{array}{c}
+			x_1\\\vdots\\\vdots\\x_n
+			\end{array}\right] = \lambda\left[\begin{array}{c}
+			x_1\\\vdots\\\vdots\\x_n
+			\end{array}\right] \Leftrightarrow \left\{ \begin{array}{l}
+			- \alpha x_n = \lambda x_1\\
+			x_1 = \lambda x_2\\
+			x_2 = \lambda x_3\\
+			\vdots\\
+			x_{n-2} = \lambda x_{n-1}\\
+			x_{n-1} = \lambda x_n
+\end{array} \right. \Leftrightarrow \left\{ \begin{array}{l}
+			x_{1} = \lambda x_2 = \lambda^2 x_3 = \ldots = \lambda^{n-1}x_n\\
+			-\alpha x_n = \lambda\cdot\lambda^{n-1}x_n = \lambda^n x_n
+\end{array} \right.$$
+$x_n \neq 0$ perché altrimenti tutte le componenti sarebbero $= 0$\\
+Dividendo per $x_n$, ottengo che $\lambda^n = -\alpha$ quindi gli autovalori soddisfano questa relazione.\\
+Questo significa $|\lambda^n| = |-\alpha| = |\alpha|$, quindi $|\lambda|^n = |\alpha| \Leftrightarrow |\lambda| = \sqrt[n]{|\alpha|}$, quindi \textbf{tutti gli autovalori della matrice $J$ hanno lo stesso modulo}.\\
+Quindi la condizione per la convergenza è $\sqrt[n]{|\alpha|} < 1 \Leftrightarrow |\alpha| < 1$, che in questo caso è la stessa di G-S.\\
+Notare che $\rho(J) = \sqrt[n]{|\alpha|}$, quindi $\neq \rho(G) = |\alpha|$. Quando il metodo è convergente su questa matrice\\$0\leq \rho(G) < \rho(J) < 1$, quindi su questa matrice \textbf{G-S converge più rapidamente di Jacobi}.
+\end{enumerate}
+\pagebreak
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
