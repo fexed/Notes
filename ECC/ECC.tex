@@ -994,7 +994,7 @@ Quindi se $f$ è $c\cdot n$ posso eliminare $c$ e mettere $\epsilon = \frac{1}{c
 \end{enumerate}
 $M'$ in 6 passi simula $m$ passi di $M$, con $M'$ macchina veloce e $M$ macchina lenta, questo perché partizionando l'input in blocchi di $m$ caratteri i cambiamenti possono essere fatti in blocchi contigui.\\
 $M'$ farà $|x|+2$ passi per condensare l'input + $6\cdot \left( \frac{f(|x|)}{m} \right)$ passi, quindi posso prendere come $m = \left( \frac{6}{\epsilon} \right)$\\\\
-Grazie a questi risultati definisco $\mathscr{P}$ come $$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|n|^k) $$
+Grazie a questi risultati definisco $\mathscr{P}$, la classe dei problemi decidibili in tempo polinomiale deterministico, come $$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|n|^k) $$
 \pagebreak
 \paragraph{Ricapitolando}
 \subparagraph{} M richiede tempo $t$ per decidere $I$ $\Leftrightarrow$ $M(x) = (q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$ con $h \in \{\textsl{si, no}\}$
@@ -1043,67 +1043,67 @@ $$\not\log(n) + \not\log(n)\log(\#\Sigma) \leq k\cdot\not\log(n)$$
 $$1 + \log(\#\Sigma) \leq k$$
 Quindi basta usare $k \geq \log(\#\Sigma)$.\\\\
 Come conseguenza, scopriamo che \textbf{lo spazio limita il tempo}, perché se passo troppe volte sopra la solita configurazione vado in ciclo.
-\section{}
-Macchine di turing a k nastri eventualmente di tipo I/O\\
-per ogni x macchina (m, x \ldots) $\rightarrow^t$ M situazione di alt\\
-$t \leq f(x+1)$ somma i a k-1 somma nastri di lavoro approssimata per eccesso da f(x)\\
-TIME(I | esiste M)\\
-SPACE(I | esiste M)\\
-Riesce perché aggiungere nastri e avere I/O, o anche allargare la parola su cui lavorano le machcine quindi compattare simboli sono tutte operazioni algoritmicamente effettive: si possono fare con algoritmi. Dà bel vantaggio.\\
-Però sorge problema: dobbiamo decidere un insieme (risolvere un problema) che sappiamo essere decidibile e una funzione che sappiamo essere calcolabile, ma il problema per cui non riusciamo a individuare struttura matematica e proprietà tramite le quali risolverlo \textit{facilmente}.\\
-Per esempio macchina che decideva stringa palindroma abbiamo sfruttato una proprietà delle stringa: leggibile da dx a sx e da sx a dx. In questo caso è banale, ma ci sono problemi per cui non conosciamo la struttura e ciò rende la vita difficile.
+\paragraph{Ricapitolando} MdT a $k$ nastri, eventualmente di tipo I/O. $\forall\:x$ macchina $M(x) \rightarrow^t M$ in una situazione di alt.
+Riesce perché: \textbf{aggiungere nastri}, \textbf{avere I/O}, \textbf{aumentare la parola} su cui lavorano le macchine (quindi \textbf{compattare} simboli) sono tutte \textbf{operazioni algoritmicamente effettive}: si possono fare con algoritmi. Ciò fornisce un bel vantaggio.\\
+Però sorge un \textbf{problema}: dobbiamo decidere un insieme (quindi risolvere un problema) che \textbf{sappiamo essere decidibile} e calcolare una funzione che \textbf{sappiamo essere calcolabile}, ma non riusciamo a individuare una struttura matematica e delle proprietà tramite le quali risolverlo \textit{facilmente}.\\
+Per esempio per costruire una macchina che decideva se una data stringa fosse palindroma, \textbf{abbiamo sfruttato una proprietà} delle stringa: che essa sia leggibile da destra a sinistra e da sinistra a destra. In questo caso era banale, ma ci sono problemi per cui non conosciamo la struttura e ciò rende la vita difficile.
 \paragraph{Esempio} %TODO
-\paragraph{Spazio degli stati}
-\begin{list}{}{}
-	\item \textbf{Generato esplicitamente}
+
+\subsection{Spazio degli stati}
+\begin{list}{}{Lo spazo degli stati di una MdT può essere}
+	\item \textbf{Generato esplicitamente}, 
 	\item \textbf{Generato implicitamente}, guess \& try
 \end{list}
 \section{MdT non deterministica}
 N = (Q, $\Sigma$, $\Delta$, $q_0$) \textbf{MdT non deterministica}
 \begin{list}{}{}
-	\item $\Delta \subseteq (Q\times\Sigma)\times(Q\times\{\textsl{si, no}\}\times\Sigma\times\{Q, L, -\})$
-	\item $\gamma = (q, u\sigma v) \rightarrow (q', u'\sigma'v')$
-	\item Computazione $M(x) \rightarrow\gamma_1\rightarrow\ldots\rightarrow\gamma_n$ cioè $M(x) \rightarrow^n\gamma_n$
+	\item \textbf{Relazione di transizione} $\Delta \subseteq (Q\times\Sigma)\times(Q\times\{\textsl{si, no}\}\times\Sigma\times\{Q, L, -\})$\\
+	Possono essere presenti più quintuple associate allo stesso stato ed allo stesso simbolo, quindi molte configurazioni $(q', u'\sigma'v')$ raggiungibili da $(q, u\sigma v)$
+	\item \textbf{Stato iniziale} $\gamma = (q, u\sigma v) \rightarrow (q', u'\sigma'v')$
+	\item \textbf{Computazione} $M(x) \rightarrow\gamma_1\rightarrow\ldots\rightarrow\gamma_n$ cioè $M(x) \rightarrow^n\gamma_n$
 \end{list}
-\textbf{Basta che ci sia un cammino che porti alla soluzione} perché il problema sia risolto.
+La potenza del non determinismo si vede nel modo in cui si accetta: \textbf{basta che ci sia un cammino che porti alla soluzione} perché il problema sia risolto.
 \paragraph{DNA Computing} Calcolo eseguito ricombinando fra loro sequenze biologiche invece che per passi come da tradizione.
-\paragraph{Come decide un problema una macchina non deterministica} 
+\paragraph{Come decide un problema una macchina non deterministica} Di seguito la definizione.\\
 N decide I $\Leftrightarrow$ $\forall\: x \in I \Rightarrow \exists$ computazione $M(x) \rightarrow^* (\textsl{si, }w)$\\
-Se $x$ sta in I allora e solamente allora deve esistere una computazione, un cammino. Basta che ne esista una che accetta.\\
+Se $x \in I$ allora e solamente allora deve esistere \textit{almeno una} computazione, un cammino, che accetta $x$.\\
 Il contrario è che \textbf{tutte rifiutino}, allora $x \not\in I$\\
-%TODO albero p. 155
-Numerando archi di decisione identifico una computazione con la successione di numeri. Enumerare data certa sigma ho tante quintuple in delta, le enumero e le ordino in qualche modo. Prendo la $n_1$ scelta dallo stato iniziale, la $n_2$ scelta dallo stato risultante\ldots\\
+\begin{center}
+	\includegraphics[scale=1]{grafo_nondet.png}
+\end{center}
+Numerando gli archi di decisione identifico una computazione tramite la successione di numeri. Data una certa $\sigma$ ho tante quintuple in $\Delta$, le enumero e le ordino in qualche modo. Prendo la $n_1$ scelta dallo stato iniziale, la $n_2$ scelta dallo stato risultante\ldots\\
+Nell'esempio, una scelta Si è identificata dalla computazione $(2, 0, 0)$, un'altra da $(2, 0, 3, 1)$.
 \subsection{Misure di complessità non deterministica}
 \paragraph{Tempo} $N$ decide $I$ in \textbf{tempo non deterministico} $f(|x|)$ (più semplicemente $f$) $\Leftrightarrow$
 \begin{list}{}{}
 	\item $N$ decide $I$
 	\item $\forall\: x \in I\:\:\:\exists\: t\:|\:M(x)\rightarrow^t(\textsl{si, }w)$ e $t \leq f(|x|)$
 \end{list}
-NTIME(f) = \{I $|$ $\exists$ N dcide $I$ in tempo non deterministico $f$\}\\
+$\textsl{NTIME}(f) = \{I \:|\:\exists\:N$ che decide $I$ in tempo non deterministico $f\}$\\
 $\mathscr{NP} = \bigcup_{k\geq 1}\textsl{NTIME}(n^k)$
-\paragraph{Teorema} $Se I in NTIME(f) allora I in TIME(c^f) con c$ $\geq$ $1 che dipende soltanto dalla macchina in NTIME(f). In altre parole\\
-se I e' deciso da N a k nastri in tempo non deterministico f(n) allora esiste M a k+1 nastri che decide i in o(c^f(x)), c$ $>$ $1 che dipende solo da N$\\
+\paragraph{Teorema} Se $I \in \textsl{NTIME}(f) \Rightarrow I \in \textsl{TIME}(c^f)   $ con $c \geq 1$ che \textbf{dipende soltanto dalla macchina} in $\textsl{TIME}(f)$.\\ In altre parole: se $I$ è deciso da $N$ a $k$ nastri in tempo non deterministico $f(n)$, allora $\exists\:M$ a $k+1$ nastri che decide $I$ in $O(c^{f(x)})$, $c \geq 1$ che dipende solo da $N$\\
 In altre parole $\textsl{NTIME}(f) \subseteq \textsl{TIME}(c^f)$
-\subparagraph{Dim} Grado di diramazione massimo $d$ = max\{grado(q, sigma) = card\{(q, sigma, q', sigma', \} \}\\ %TODO
-con archi ordinati, ho una successione di scelte\\
-%TODO
-Macchina M riproduce una successione di scelte partendo sempre da principio. Per esempio riproduce la scelta 20300 e magari arriva in uno stato di accettazione.\\
-Se ci arriva, bene ho finito.\\
+\pagebreak
+\subparagraph{Dim} Il grado di diramazione massimo, o il \textbf{grado di non determinismo}, è 
+\begin{list}{}{}
+	\item $d = \textsl{max}\{\textsl{grado}(q, \sigma)\:|\:q\in Q, \sigma \in \Sigma\}$
+	\item dove $\textsl{grado}(q, \sigma) = \#\{(q', \sigma', D)\:|\:((q, \sigma), (q', \sigma', D))\in \Delta \}$
+\end{list}
+Per ogni stato $q \in Q$ e ogni simbolo $\sigma \in \Sigma$ ordino totalmente, ottenendo così che ogni computazione è una sequenza di scelte lunga $t$, indicabili come una sequenza di $t$ numeri naturali nell'intervallo $[0\ldots d-1]$. Una macchina $M$ che simula $N$ produce una successione di scelte partendo sempre dal principio. Per esempio riproduce la scelta 20300 e magari arriva in uno stato di accettazione. Se ci arriva, bene \textbf{ho finito}.\\
 Se non ci arriva prende il prossimo numero $t+1$ in base $d$, nell'esempio 20301.\\
-Se supera il numero di archi la stringa aumenta di un carattere e faccio 00, 01, 02\ldots col numero di archi poi 10, 11, 12\ldots\\
+Se supera il numero di archi la stringa aumenta di un carattere e faccio 00, 01, 02\ldots poi 10, 11, 12\ldots\\
 Sarà dell'ordine di $d^{f(n)}$ con $c = d$.\\
 Ho una perdita esponenziale. Ma aggiungere il non determinismo non cambia le classi dei problemi.
 \paragraph{Spazio} $N$ decide $I$ in \textbf{spazio non deterministico} $f(|x|)$ (più semplicemente $f$) $\Leftrightarrow$
 \begin{list}{}{}
 	\item $N$ decide $I$
-	\item $\forall\: x \in I\:\:\:\exists\: t\:|\:M(x)\rightarrow^*\sum$ %TODO
+	\item $\forall\: x \in I\:\:\:\exists\:w_1,\ldots, w_k$ tali che $(q_0, \underline{\triangleright}x,\ldots,\underline{\triangleright})\rightarrow_N^*($Si$, w_1, \ldots, w_k)$ e $\mathlarger{\sum_{2\leq i \leq k-1}|w_i| \leq f(|x|)}$
 \end{list}
 NSPACE(f) = \{I $|$ $\exists$ N dcide $I$ in spazio non deterministico $f$\}\\
 $\mathscr{NPSPACE} = \bigcup_{k\geq 1}\textsl{NSPACE}(n^k)$
 \paragraph{Teorema di Savich} $\textsl{NPSPACE} = \textsl{PSPACE}$
 $$\textsl{LogSpace} \subseteq \mathscr{P} \subseteq \mathscr{NP} \subseteq \textsl{PSPACE} + \textsl{NPSPACE} \subset \mathscr{R} \subset \mathscr{RE}$$
 $$\mathscr{P} ? \mathscr{NP}$$
-\pagebreak
 \paragraph{} Siamo giunti alla conclusione che una MdT non deterministica accetta $x$ in tempo $f$ $\Leftrightarrow$ $\forall\:x\in I$ $\exists$ una computazione $N(x)\rightarrow^t($Si$, w)$ con $t \leq f(|x|)$\\
 Per confutare invece, bisogna che \textbf{tutte} le computazioni rifiutano, cioè per rifiutare $x$ bisogna che $\forall$ computazione $N(x) \rightarrow^t ($No$, w)$ con $t \leq f(|x|)$
 \subsection{Commesso Viaggiatore}
