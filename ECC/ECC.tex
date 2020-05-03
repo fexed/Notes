@@ -8,6 +8,9 @@
 \usepackage{graphicx}
 \usepackage{makecell}
 \usepackage{mathrsfs}
+\usepackage{amsmath}
+\usepackage{relsize}
+\usepackage{amssymb} 
 \graphicspath{ {./img/} }
 \usepackage{color}
 
@@ -1100,4 +1103,56 @@ $\mathscr{NPSPACE} = \bigcup_{k\geq 1}\textsl{NSPACE}(n^k)$
 \paragraph{Teorema di Savich} $\textsl{NPSPACE} = \textsl{PSPACE}$
 $$\textsl{LogSpace} \subseteq \mathscr{P} \subseteq \mathscr{NP} \subseteq \textsl{PSPACE} + \textsl{NPSPACE} \subset \mathscr{R} \subset \mathscr{RE}$$
 $$\mathscr{P} ? \mathscr{NP}$$
+\pagebreak
+\paragraph{} Siamo giunti alla conclusione che una MdT non deterministica accetta $x$ in tempo $f$ $\Leftrightarrow$ $\forall\:x\in I$ $\exists$ una computazione $N(x)\rightarrow^t($Si$, w)$ con $t \leq f(|x|)$\\
+Per confutare invece, bisogna che \textbf{tutte} le computazioni rifiutano, cioè per rifiutare $x$ bisogna che $\forall$ computazione $N(x) \rightarrow^t ($No$, w)$ con $t \leq f(|x|)$
+\subsection{Commesso Viaggiatore}
+$n$ città connesse da strade, la distanza fra la città $i$ e la città $j$ è $d(i,j)$. Sulle distanze vale la proprietà riflessiva e la diseguaglianza triangolare.\\
+Le distanze sono rappresentate con le coppie $(i, j)$ che sono $O\left(\mathlarger{\frac{n\cdot(n-1)}{2}}\right)$. Il problema è trovare un cammino che tocchi le città una ed una sola volta, con costo minimo. Il costo è la somma delle distanze percorse.\\
+Cerchiamo quindi una \textbf{permutazione} degli indici $i, j$ in modo tale che la somma delle distanze sia minima. Una permutazione è una bigezione $\Pi : \left[1, n\right] \rightarrow \left[1, n\right]$.\\
+Il nostro costo $\mathlarger{\sum_{1\leq i \leq n-1} d(i, i+1)} \leq B$ con $\Pi(h) = i$ e $\Pi(k) = i+1$, cioè $i$ e $i+1$ sono permutazioni di, rispettivamente, un certo $h$ ed un certo $k$.
+\paragraph{Forza Bruta} Deterministica
+\begin{enumerate}
+	\item \textbf{Generare l'intero spazio di ricerca}, cioè tutte le possibile permutazioni esistenti $\Pi$ come stringhe, che sono nell'ordine di $n! = O(n!)$
+	\item \textbf{Certificazione}: prendere la prima permutazione e verificare se è $\leq B$.\\
+	$n$ accessi al nastro d'ingresso, uno per città, e $n^2$ per vedere la distanza di ciascuna città, quindi $O(n\cdot n^2)$
+\end{enumerate}
+Esponenziale in tempo ma lineare $O(n)$ in spazio, perché si mantiene una singola permutazione alla volta.\\
+Dire che non esiste soluzione richiede di valutare tutte le permutazioni.
+\paragraph{MdT non deterministica}
+\begin{enumerate}
+	\item Bisogna \textbf{scrivere una MdT non deterministica} che generi ad ogni passo un numero tra $1$ ed $n$ compresi: abbiamo così una permutazione delle città.\\Con un po' di accorgimenti si evitano stringhe del tipo $111\ldots$, ad esempio scrivendo la MdT in modo che non rigeneri numeri già generati.
+	\item \textbf{Certificazione}: la stringa è una permutazione $\Pi$? Si scopre in $n$ passi.\\
+	Dopodiché faccio esattamente la certificazione precedente, per verificare se $\leq B$: tutto ciò si fa in $O(n^3)$ come prima.
+\end{enumerate}
+\section{Funzioni di valutazione}
+Una \textbf{funzione di valutazione} potrebbe essere una qualunque funzione calcolabile che dalla dimensione dell'input porti in un numero naturale che indica la valutazione: numero di passi, di moltiplicazioni\ldots\\
+Sappiamo che le classi di complessità formano una gerarchia: ad esempio la classe $\textsl{TIME}(O(n^3))$ cioè i problemi risolvibili in tempo cubico, include propriamente quelli risolvibili in tempo quadratico. Questo lo sappiamo dall'esperienza. Perché queste funzioni funzionino dobbiamo porre loro dei vincoli: chiameremo queste funzioni\\\textbf{appropriate}/oneste/costruibili.\\
+\begin{list}{}{Vincoli:}
+	\item \textbf{Monotone crescenti}\\
+	Significa che se devo risolvere un problema la cui dimensione è maggiore di un altro problema ci devo mettere più tempo che spazio.
+	\item $\exists\:M\:|\:\forall\:x\in\Sigma^*$ si arresta (dando come risultato $\diamond^{f(|x|)}$, $\diamond \not\in \Sigma$ carattere speciale, lungo tanti caratteri quanto $f(|x|)$) in tempo $O(f(|x|) + |x|)$ con l'addendo $|x|$ per rendere lineare quando $f(|x|)$ è sub-lineare e spazio $O(f(|x|))$
+\end{list}
+Esempi: $n^k, \lfloor\log n\rfloor, n!, k^n,\ldots$\\
+Se $f$, $g$ sono appropriate, anche $f(g)$, $f^g$, $f\cdot g$, $f + g$\ldots: la classe è chiusa per una serie di operazioni.
+\subsection{Teorema di gerarchia}
+Data $f$ appropriata, allora (ricordando che $\textsl{TIME}(f(n))=\{I\:|\:\exists\:M$ che decide $I$ in tempo $f(n)\}$
+\begin{list}{}{}
+	\item $\textsl{TIME}(f(n))\subsetneq\textsl{TIME}(f(2n + 1)^3)$
+	\item $\textsl{SPACE}(f(n))\subsetneq\textsl{SPACE}(f(n)\cdot\log(f(n)))$
+\end{list}
+La dimostrazione è omessa, si noti che quella del primo punto si basa sulla dimostrazione che il problema\\$\{x\:|\:\phi_x(x)$ termina in $f(|x|)$ passi$\}$, che è un pezzetto di $K$, appartiene a $\textsl{TIME}(f(2n+1)^3)$ ma non a $\textsl{TIME}(f(n))$\\
+Analogamente per le MdT non deterministiche.
+\paragraph{} Possiamo ora dimostrare la nostra gerarchia, in particolare che $\mathscr{P} \subsetneq \textsl{EXP} = \mathlarger{\bigcup_{k \geq 1}\textsl{TIME}(2^{n^k})}$
+\subparagraph{Dim} Sappiamo che $\mathscr{P} \subseteq \textsl{EXP}$, cioè $\mathscr{P} \subseteq \textsl{TIME}(2^n)$ perché al crescere di $n$ per qualunque $k$, $n^k \leq 2^n$\\
+Abbiamo quindi $\mathscr{P} \subseteq \textsl{TIME}(2^n) \subsetneq\textsl{TIME}(f(2^{(2n + 1)^3}) \subseteq \mathlarger{\bigcup_{k \geq 1}\textsl{TIME}(2^{n^k})}$
+\subsection{Qualche assioma}
+\begin{list}{-}{}
+	\item $\textsl{SPACE}(f(n))\subseteq\textsl{NSPACE}(f(n))$
+	\item $\textsl{TIME}(f(n))\subseteq\textsl{NTIME}(f(n))$
+	\item $\textsl{NSPACE}(f(n))\subseteq\textsl{TIME}(k^{\log n + f(n)})$
+\end{list}
+Avevamo anche dimostrato che $\textsl{NTIME}(f(n)) \subseteq \textsl{TIME}(c^{f(n))}$ da cui deriva $\mathscr{NP} \subseteq \textsl{EXP}$\\
+Si ricorda quindi anche che
+$$\textsl{LogSpace} \subseteq \mathscr{P} \subseteq \mathscr{NP} \subseteq \textsl{EXP}$$
 \end{document}
