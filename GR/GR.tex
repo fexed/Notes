@@ -514,6 +514,62 @@ Ad es traceroute calcola latenza e da dove passa un certo tipo di traffico.\\
 \paragraph{Inline} Inline significa quando monitoriamo se tramite snmp connetto allo switch con lo stesso filo che snmp sta monitorando: \textbf{inline}.\\
 Offline invece è monitoring tramite altra rete: reti sdoppiate, una per monitorare e una per i servizi. Vincolata dalla struttura della rete, a volte non possibile.\\\\
 Quindi approcci attivi/passivi, inline/offline.
+\section{Calcolo delle serie temporali}
+Posso fare una misura mettendo una soglia assoluta, ma posso anche impostare queste soglie a seconda del comportamento della rete.\\
+La media è la misura media, la deviazione standard è una misura "standard" di cosa è normale e di cosa è molto grande ($>$ media + devstd) o molto piccolo ($<$ media - devstd)
+\paragraph{Percentile} Quando si prende una misurazione, es. quantità della banda, nel caso delle rete il 95esimo percentile è interessante. \textbf{Percentile} è valore sotto il quale ricade una certa percentuale di osservazioni.\\
+Esempio: l'80esimo percentile è l'età in cui cade l'80\% della popolazione.\\
+Perché importante? Se devo parlare ad esempio della banda, posso calcolare economicamente parlando per vedere se quella banda è utilizzata, o per vedere se la banda che metto a disposizione è utilizzata. Quando arriva il momento di fare un upgrade, ad esempio? Oppure anche usabile per far pagare delle penalty.\\
+Il 95esimo percentile di una rete è la soglia sotto cui sono stato per il 95\% del tempo.\\
+Calcolo: data una serie di valori, si definisce il percentile (es. 80), si ordina la serie dal passo all'alto, calcolo indice che corrisponde al percentie (len(serie)*(percentile/100)), prendo l'indice intero (es int(index + 0.5))\\
+Percentile = serie\_ordinata[indiceintero-1]
+\paragraph{Calcolo del jitter} \texttt{jitter = sum(|x(i) - x(i-1)|) / (n-1)}\\
+Se il jitter è nell'ordine di grandezza del valore allora la situazione è drammatica. Jitter basso: valore costante. Jitter alto: valore cambia spesso nel tempo.
+\subsection{Timeseries, Forecast, Anomaly Detection}
+Negli RRD c'erano dei valori $\alpha$, $\beta$, $\gamma$ che avevamo detto di lasciare quelli di default. Sono serie temporali su cui vogliamo fare delle previsioni, che ci forniscono le anomalie. Quand'è che una cosa è anormale? Quando ho il concetto di normalità. Ad esempio, una soglia. Quindi come trovare le condizioni tali in cui il sistema che sto guardando si comporta stranamente?\\
+\begin{list}{}{\textbf{Definizioni}:}
+	\item \textbf{Serie}: sequenza ordinata di numeri, non sorted ma con indici
+	\item \textbf{Ordine}: indice di un numero in una serie
+	\item \textbf{Serie temporale}: serie di punti ordinati temporalmente
+	\item \textbf{Osservazione}: valore numerico osservato (nella realtà) in un momento specifico
+	\item \textbf{Previsione}: stima di un valore atteso (che non sappiamo ancora) in un momento specifico (\textit{alle 12 quanto traffico farò?})
+	\item \textbf{Forecast error}: differenza positiva/negativa nell'osservazione rispetto alla previsione. Solitamente l'errore è riportato come quadrato per avere sempre numero positivo.
+	\item \textbf{SSE}: la somma degli errori quadrati (\textbf{sum of squared errors}) di una serie \texttt{sum((osservazione$_i$ - previsione$_i$)$^2$)}\\
+	Idealmente deve essere 0, o comunque basso
+	\item Dato $y$, $\overline{y}_{x+1}$ è la predizione di $y$ al tempo $x+1$
+	\item \textbf{Simple Average}: media di tutti i punti della serie
+	\item \textbf{Moving Average}: media degli ultimi $n$ punti
+	\item \textbf{Weighted Moving Average}: come la media mobile ma con i valori pesati (tipicamente pesando di più i valori più recenti)
+\end{list}
+\textbf{Anomalia} quando \textbf{la predizione và in conflitto con l'osservazione}.
+\pagebreak
+\paragraph{Predirre il futuro}
+\begin{center}
+	\includegraphics[scale=0.7]{averageforectast.png}
+\end{center}
+\subparagraph{Single Exponential Smoothing}
+$\overline{y}_x = \alpha\cdot y_x + (1 - \alpha) \cdot \overline{y}_{x-1}$\\
+$\alpha$ è un fattore di \textbf{ammorbidimento} o \textbf{memory decay rate}, più alto è più tengo presente gli ultimi valori e meno tengo presente i vecchi.\\
+$\overline{y}_x$ è chiamato livello $l_x$
+\subparagraph{Double Exponential Smoothing}
+Trend $b$ su una serie temporale, fra due punti è $y_x - y_{x-1}$
+$b_x$ = $\beta\cdot(l_x - l_{x-1})$\ldots\\
+Con $\beta$ non prendo solo la media ma tengo conto anche del trend, così da avere previsioni più accurate. Quindi alla previsione si aggiunge $b_x$
+\begin{center}
+	\includegraphics[scale=0.7]{doubexpsmo.png}
+\end{center}
+\pagebreak
+\paragraph{Holt-Winters Method} Anche detto \textbf{Triple Exponential Smoothing}\\
+Nel double exponential smoothing manca il concetto di \textbf{stagione}: quando una serie è ripetitiva a intervalli regolari si dice \textbf{stagionale}.\\
+Lunghezza della stagione: numero dei data point in una stagione.\\
+Componente stagionale: deviazione da level+trend del double exponential che si ripete all'interno della stagione.\\
+$\gamma$ fornisce il concetto di stagionalità. Serve il modulo della durata della stagione, perché è in loop. Inoltre con H-W posso \textbf{predire un numero arbitrario di punti}. valori più grandi danno previsione meno conservativa. $\alpha, \beta, \gamma$ si assegnano tramite il \textbf{fitting}.
+\subparagraph{Deviazione in H-W} $d_t = \gamma\cdot |y_t - \overline{y}_t| + (1 - \gamma)\cdot d_{t-m}$\\
+Fasce di confidenza con $\delta$ tra 2 e 3:
+\begin{list}{}{}
+	\item Superiore: $\overline{y}_t - \delta\cdot d_{t-m}$
+	\item Inferiore: $\overline{y}_t + \delta\cdot d_{t-m}$
+\end{list}
 \chapter{Remote Monitoring}
 \textbf{Analisi rete remota rispetto dove siamo noi}.\\
 Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (edge), inoltre è anche "forzato" dalle parti wireless che sta diventando predominante. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
@@ -574,6 +630,7 @@ Possono essere uni e bidirezionali. Due flussi unidirezionali opposti sono equiv
 	\item privacy va rispettata
 	\item misure di traffico devono essere mantenute protette per non rivelare informazioni di rete importanti a terze parti
 \end{list}
+
 \chapter{ScaPy}
 Manipolazione di pacchetti in maniera semplice. Con Pcap si legge e invia, ma gestisce i pacchetti raw e non permette di manipolarli, funge da specie di socket. Wireshark è molto utile ma è un tool a sé state, ma se serve fare cose in batch non è molto utile. Wireshark può essere collegato tramite API a PyShark, ma è sola lettura. ScaPy permette sia di inviare che di ricevere.
 \paragraph{Modulo} ScaPy è un modulo Python.\\
