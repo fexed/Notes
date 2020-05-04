@@ -1225,6 +1225,21 @@ $$\Rightarrow||e^{(k+1)}|| = |\lambda|^{k+1}\cdot||e^{(0)}|| \neq 0$$
 $$||e^{(k+1)}||\to 0 \Leftrightarrow |\lambda| < 1$$
 Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{necessaria e sufficiente}.
 \paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente $\Leftrightarrow \rho(P) < 1$.
+\pagebreak
+\paragraph{Esempio}
+\begin{multicols}{2}
+$$x^{(k+1)} = Px^{(k)} + q$$
+$$P = \left[ \begin{array}{c c}
+\mathlarger{\frac{1}{2}} & \mathlarger{\frac{2}{3}}\\
+\\
+\mathlarger{\frac{1}{3}} & \mathlarger{\frac{1}{4}}
+\end{array} \right]$$
+\textbf{Convergente?}
+$$||P||_1 = \textsl{max}\left\{\frac{1}{2} + \frac{1}{3}, \frac{2}{3} + \frac{1}{4}\right\} = \textsl{max}\left\{\frac{5}{6}, \frac{11}{12}\right\} = \frac{11}{12} < 1$$
+$$||P||_\infty = \frac{1}{2} + \frac{2}{3} = \frac{3 + 4}{6} = \frac{7}{6} > 1$$
+$$||P||_\infty > 1 \text{, ma }\underline{||P||_1 < 1}$$
+Quindi \textbf{il metodo è convergente}
+\end{multicols}
 \subsection{Metodi} Nella pratica, studiare le proprietà di $P$ matrice d'iterazione può essere complicato, quindi necessitiamo di risultati che ci dicano se un metodo converge o meno in base alle proprietà soddisfatte da $P$.
 \paragraph{Problema} Il nostro problema è sempre la risoluzione di un sistema lineare $Ax = b$, sempre con l'idea classica dei metodi iterativi cioè di partizionare la matrice $A = M-N$ con $M$ invertibile.
 \subsubsection{Suddivisione}
@@ -1457,7 +1472,57 @@ Questo significa $|\lambda^n| = |-\alpha| = |\alpha|$, quindi $|\lambda|^n = |\a
 Quindi la condizione per la convergenza è $\sqrt[n]{|\alpha|} < 1 \Leftrightarrow |\alpha| < 1$, che in questo caso è la stessa di G-S.\\
 Notare che $\rho(J) = \sqrt[n]{|\alpha|}$, quindi $\neq \rho(G) = |\alpha|$. Quando il metodo è convergente su questa matrice\\$0\leq \rho(G) < \rho(J) < 1$, quindi su questa matrice \textbf{G-S converge più rapidamente di Jacobi}.
 \end{enumerate}
-\pagebreak
+\paragraph{Esempio}
+\begin{multicols}{2}
+$$A = \left[\begin{array}{c c c c}
+1 & & & \theta\\
+& \ddots & & \vdots\\
+& & \ddots & \theta\\
+\theta & \ldots & \theta & 1
+\end{array} \right]$$
+$$A = M - N$$
+$$M = \left[\begin{array}{c c c c}
+1 & & &\\
+& \ddots & &\\
+& & \ddots &\\
+\theta & \ldots & \theta & 1
+\end{array} \right]$$
+$$N = \left[\begin{array}{c c c c}
+ & & & -\theta\\
+& 0 & & \vdots\\
+& &  & -\theta\\
+0 & \ldots & \ldots & 0
+\end{array} \right]$$
+\end{multicols}
+\paragraph{Convergente?} $P = M^{-1}N = M^{-1}\left[0|\ldots|0|v\right] = \left[0|\ldots|0|M^{-1}v\right]$ con $M^{-1}v = x \Leftrightarrow Mx = v$
+$$\left[\begin{array}{c c c c}
+1 & & &\\
+& \ddots & &\\
+& & \ddots &\\
+\theta & \ldots & \theta & 1
+\end{array} \right] \left[ \begin{array}{c}
+x_1\\\vdots\\\vdots\\x_n
+\end{array}\right] = \left[ \begin{array}{c}
+-\theta\\\vdots\\-\theta\\0
+\end{array}\right] \Leftrightarrow \left\{\begin{array}{l}
+x_1 = x_2 = \ldots = x_{n-1} = -\theta\\
+\\
+\theta x_1 + \theta x_2 + \ldots + \theta x_{n-1} + x_n = 0\\
+\Leftrightarrow x_n = \theta^2 + \theta^2 + \ldots + \theta^2 = (n-1)\theta^2
+\end{array}\right.$$
+$$P = \left[ \begin{array}{c c c}
+& & -\theta\\
+& 0 & \vdots\\
+& & -\theta\\
+& & (h-1)\theta^2
+\end{array} \right]$$
+$\rho(P) = ?$ $P$ è triangolare superiore, quindi i suoi autovalori sono sulla diagonale principale:
+\begin{list}{}{}
+	\item $\lambda = 0$
+	\item $\lambda = (n-1)\theta^2$
+\end{list}
+$\Rightarrow \rho(P) = (n-1)\theta^2$, di conseguenza è \textbf{convergente} $\Leftrightarrow (n-1)\theta^2 < 1 \Leftrightarrow \theta^2 < \mathlarger{\frac{1}{n-1}}$ quindi se $$-\frac{1}{\sqrt{n-1}} < \theta < \frac{1}{\sqrt{n-1}}$$
+$||P||_\infty = \textsl{max}\left\{|\theta|, (n-1)\theta^2\right\} < 1$
 \paragraph{Esempio}
 \begin{multicols}{2}
 \begin{center}
@@ -1474,6 +1539,63 @@ La somma sugli elementi di ogni riga in valore assoluto, esclusi gli elementi de
 $$n > n-1 \Rightarrow A\text{ è predominante diagonale}$$
 $\Rightarrow$ J e G-S convergono.
 \end{multicols}
+\pagebreak
+\paragraph{Esempio}
+\begin{multicols}{2}
+$$A = \left[\begin{array}{c c c c}
+1 & & & \theta\\
+& \ddots & & \vdots\\
+& & \ddots & \theta\\
+\theta & \ldots & \theta & 1
+\end{array} \right]$$
+$$M = \left[\begin{array}{c c c c}
+1 & & & \\
+& \ddots & & \\
+& & \ddots & \\
+ &  &  & 1
+\end{array} \right]\: N = \left[\begin{array}{c c c c}
+ & & & -\theta\\
+& 0 & & \vdots\\
+& &  & -\theta\\
+-\theta & \ldots & -\theta & 0
+\end{array} \right]$$
+\end{multicols}
+$P = M^{-1}N = N$, quindi condizione sufficiente su $\theta$ affinché il metodo sia convergente è $$||P||_\infty = ||P||_1 < 1 \Leftrightarrow (n-1)|\theta| < 1 \Leftrightarrow |\theta| < \frac{1}{n-1}$$
+$$-\frac{1}{n-1} < \theta < \frac{1}{n-1}$$
+Condizione necessaria e sufficiente è $\rho(P) < 1$, $\rho(P) = ?$\\
+$\textsl{det}\left(\left[ \begin{array}{c c c c}
+\lambda & & & \theta\\
+& \ddots & & \vdots\\
+& & \ddots & \theta\\
+\theta & \ldots & \theta & \lambda
+\end{array}\right]\right) = ?$, notiamo che $\forall\:\lambda\neq 0$ la matrice ammette $LU$
+$$\left[ \begin{array}{c c c c}
+\lambda & & & \theta\\
+& \ddots & & \vdots\\
+& & \ddots & \theta\\
+\theta & \ldots & \theta & \lambda
+\end{array}\right] = \left[ \begin{array}{c c c | c}
+1 & & & \\
+& \ddots & & 0\\
+& & 1 & \\
+\hline
+\frac{\theta}{\lambda} & \ldots & \frac{\theta}{\lambda} & 1
+\end{array}\right]\cdot \left[ \begin{array}{c c c | c}
+\lambda & & & \theta \\
+& \ddots & & \vdots\\
+& & \lambda & \theta \\
+\hline
+& & & x
+\end{array}\right]\text{ con }\begin{array}{l}
+x + (n-1)\mathlarger{\frac{\theta^2}{\lambda}} = \lambda \Leftrightarrow\\
+\Leftrightarrow x = \lambda - (n-1)\mathlarger{\frac{\theta^2}{\lambda}}
+\end{array}$$
+Di conseguenza $\textsl{det}(\lambda I - P) = \textsl{det}(U) \cdot \textsl{det}(L)$ ma $\textsl{det}(L) = 1$, quindi
+$$\textsl{det}(\lambda I - P) = \lambda^{n-1}\cdot\left[\lambda - \mathlarger{\frac{(n-1)\theta^2}{\lambda}}\right] = \lambda^n - (n-1)\theta^2\lambda^{n-2} = \lambda^{n-2}\cdot(\lambda^2 - (n-1)\theta^2) = \begin{array}{l}
+\lambda = 0\\
+\lambda = \pm\sqrt{n-1}\cdot\theta
+\end{array}$$
+Di conseguenza $\rho(P) = \sqrt{n-1}\cdot|\theta| < 1 \Leftrightarrow |\theta| < \mathlarger{\frac{1}{\sqrt{n-1}}}$
 \chapter{Esercitazioni}
 \section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
@@ -2075,6 +2197,7 @@ La matrice su cui dovrò lavorare, cioè $E_1 A$ privata della prima riga e dell
 $E_2$ sarà analogamente con un elemento $\mathlarger{-\frac{b}{a}}$\ldots\\
 La $U$ sarà una bidiagonale superiore, mentre la $L$ sarà bidiagonale inferiore.
 \end{enumerate}
+
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
 \section{Esponenziale}
