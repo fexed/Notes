@@ -2590,4 +2590,82 @@ Come agire?
 Ogni nodo è candidato per il pruning. pruning ocnsiste rimuove sottoalb rad in un certo nodo, che diventa foglia assegnata\ldots\\
 Nodi rimossi solo se risultatoi albero non peggiore sul valid set.\\
 Noti pruned iterativamente: ad ongi iterazione il nodo la cui rimozione aumenta maggiormente l'accureatezza è tagliato.
+\section{Validazione}
+Ogni volta che si aumenta la precisione c'è il rischio di andare in overfitting. Bisogna quindi \textbf{valutare la capacità di generalizzazione dell'ipotesi}: ruolo essenziale della validazione. Con cenni di fondamenti teorici.\\
+Aspetto teorico e pratico per un \textbf{uso consapevole del ML}.
+\paragraph{Quando un modello di ML è un buon modello?} Usare ML vs usare \textit{bene} ML.\\
+Ricordiamo apprendimento: ricerca di una buona funzione in uno spazio.\\
+\textbf{Inductive learning ipotesi}\ldots\\ %TODO
+Overfitting\ldots\\ %TODO
+Misure: classificazione Mean Square Error, accuratezza e mean error rate ma anche specificitià, sensitività (su falsi positivi e falsi negativi), per la regressione Mean Square Error, Root MSE, Mean Absolute Error, Max absolute error ma anche statistica come R\\
+Ovviamente errore alto accuratezza bassa. sia per TR che per test\ldots\\basso fitting alto errore training, bassa generalizz alto errore di test\\
+\textbf{Due obiettivi}:
+\begin{list}{}{}
+	\item  \textbf{Model Selection} Stima performance/prestazioni su modelli differenti di apprendimento per scegliere il migliore da generalizzare\\
+	Include la ricerca dei parametri migliori per il modello. \textbf{Ritorna un modello}
+	\item \textbf{Model Assessment} Scelto il modello finale, stimare/valutare il rischio/errore di predizione su dati di test (nuovi). Misuro la qualità del modello finale. \textbf{Ritorna una stima} "predice all'85\% di accuratezza"
+\end{list}
+Obiettivo importante è separare il data set così da perseguire gli obiettivi: fitting, model selection e assessment. Tre parti: \textbf{training, validation e test}. Sono \textbf{insiemi disgiunti}. Ad esempio 50\% dati in TR, 25\% in VL e 25\% in TS.
+\begin{list}{}{}
+	\item TR training
+	\item VL validation
+	\item TR+VL solitamente chiamato development/design set, usato per costruire.
+	\item TS test
+\end{list}
+La stima in model selection è solo per scopi di model selection, non è buona stima di rischio che và fatta su test. Il TS non può essere usato per la model selection.\\Posso usare il TS più volte? No perché sto facendo model selection e non assessement affidabile. Non possiamo riusarlo su esempi futuri. \textbf{Blind Test Set}: se vedi la soluzione non è un test!\\Si avrebbe una stima overottimistica\\
+\textbf{Regola d'oro}: mantenere una separazione fra gli obiettivi e usa set separati: TR per training, VL per model selection e TS per risk estimation.
+\begin{center}
+	\includegraphics[scale=0.55]{trvlts.png}
+\end{center}
+\paragraph{Meta-Algoritmo}
+\begin{list}{}{}
+	\item Separare TR, VL e TS
+	\item Seleziono il miglior $h_{w, \lambda}()$ cambiando $\lambda$
+	\item Per ciascun $\lambda$ alleno il modello cambiando $w$ che minimizza errore (fitting TR). miglior è minimo errore su TR (\textbf{fitting}).\\Finito, cambio $\lambda$ e riprovo i vari $w$.
+	\item Seleziono il miglior modello su $\lambda$ che minor errore su VL
+	\item opzionalmente, posso fare fitting su TR+VL (unico training set) col migliore $\lambda$ trovato
+	\item Finito, valuto $h_{w,\lambda}(x)$ sul TS
+\end{list}
+Un \textbf{iper-parametro} è un parametro non appreso, ad esempio $\lambda$. Ricercare l'iper-parametro migliore può essere un ciclo su una griglia di possibilità. Può essere automatizzato e parallelizzato (prove indipendenti).\\
+\textbf{Si sceglie il modello migliore su VL}, \textbf{NON si usa TS per model selection}.
+\paragraph{Esercizio} %TODO
+\paragraph{Controesempio} %TODO
+\paragraph{Verso SLT} Mettendo tutto insieme
+\begin{list}{}{}
+	\item La capacità di generalizzazione, rispetto errore training ed eliminando over e underfitting
+	\item Rispetto a ruolo complessità modello
+	\item Rispetto al numero di dati
+\end{list}
+\paragraph{Formal setting SLT} Statistical Learning Theory SLT\\
+approssimare funzione f minimizzare funzione rischio R\\
+Data valore dal supervisore e distribuzione di probabilita P(x,d)\\
+e una funzione di loss (o costo) L(h(x), d)\\
+Errore in fitting rischio empirico Remp = sum\ldots\\
+ERM: empirical Risk Minimization. Possiamo usare EMP per approssimare R?\\
+La teoria esiste: Statistical Learning Theory. Ingrediente fondamentale: VC-Dim (Vapnik-Chervonenkis) misura della complessità di H (flessibilità per fitting dati)
+Si ha, con probabilità $1 -\delta$, che ($R$ rischio garantito)
+$$R\leq R_{EMP} + \epsilon\left(\frac{1}{l}, VC, \frac{1}{\delta}\right)$$
+Con $\epsilon\ldots$ VC-Confidence, direttamente proporzionale a $VC$ ($VC-dim$), inversamente proporzionale a $l$ numero dei dati e $\delta$ confidenza, guida la probabilità che valga il bound. $\delta$ piccolo, probabilità 0.99.
+\paragraph{Structural Risk Minimization}
+\begin{center}
+\includegraphics[scale=0.7]{vc-dim.png}
+\end{center}
+\begin{list}{}{\textbf{Intuizione}}
+	\item $l$ alto, $R$ basso
+	\item VC-dim alto, $R_{EMP}$ riduce ma $R$ potrebbe aumentare (overfitting)
+\end{list}
+Bisogna mettersi dove $R$ è minore (linea viola)
+\paragraph{SLT} Permette di inquadrare formalmente il problema della generalizzaizone e underfitting//overfitting, fornendo limitazioni superiori analitiche e quantitative al rischio R di predizione.\\
+ML è ben fondato: rischio di learning (err generalizz) può essere analiticamente limitato e solo pochi concetti sono fondamentali\\
+Si può trovare una buona approssimazione dell'$f$ da esempi, avendo un buon numero di dati e un'adeguata complessità (misurabile con la VC-dim)\\
+Porta a nuovi modelli (SVM) e altri modelli che direttamente considerino il controllo delal complessità nella costruzione.\\
+Fonda uno dei principi induttiv.
+\begin{list}{}{}
+	\item esistono altri principi?
+	\item come misurare complessità?
+\end{list}
+Modelli lineari:  è intuitivamente legato al numero di parametri liberi (dim input)\\
+Decision trees: numero di nodi.
+\paragraph{Conclusioni} Flessibilità modelli ML. Potenza ML senza controllo produce risultati illusori. Controllare tradeoff tra fitting e complessità. Fondamentale il ruolo dei processi di validazione
+\paragraph{ML ben fondato teoricamente} Domande fondamentali nella SLT.
 \end{document}
