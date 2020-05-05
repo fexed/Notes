@@ -577,5 +577,32 @@ Due metodi importanti: play e stop. Play prende la URI dell'audio, stop non ha p
 \paragraph{Pattern command} Trasformo azione (tipicamente chiamata di metodo) e trasformo in struttura dati.\\
 Command diventa un dato da fare in un momento qualsiasi, ad esempio mettendolo in una coda.
 
+\chapter{Intent}
+Alcuni \textbf{devono} essere dichiarati dinamicamente. Di solito, registrazione in onResume e deregistrazione in onPause.
+\paragraph{Sticky} Un intent sticky rimane vivo, se viene lanciato altro intent viene consegnato anche il precedente se i filter combaciano.\\
+Questo significa che l'intent sticky non può essere eliminato dal garbage collector: infatti richiede permessi speciali.
+\paragraph{sendBroadcast(Intent intent)} per mandare un intent in broadcast (serve permesso). Ha senso se fornisco info che interessano ad altre app. Intent mandato con sendBroadcast a broadcastReceiver diverso da intent passato a startActivity.\\
+sendBroadcast è \textbf{asincrona}.
+\paragraph{Varianti}
+\begin{list}{}{}
+	\item \textbf{Permessi}: possibile consegnare Intent solamente a app con determinato/i permessi
+	\item \textbf{Serializzazione}: possibile invio serializzato ed ordinato. Normalmente i broadcastreceiver sono eseguiti concorrentemente.
+	\item \textbf{Abort}: in risposta a sendOrderedBroadcast(), recever possono abortire il broadcast e restituire risultati
+	\item \textbf{Risultati}: per avere risultati si attiva un \textit{folding} con un resultReceiver. Si usa variante di sendOrderedBroadcast: con resultReceiver proprio broadcaastreceiver, schduler se coda personalizzata e tre variabili "accumulatore" int initialCode, Strign initialData, Bundel initialExtras.\\
+	Perché così? L'idea è folding. chiamo il primo breceiver nella lista e passo la lista initial che la modifica, la prendo e la passo al secondo che la rimodifica\ldots e così via. Quando passo all'ultimo, la tripla modificata la mando al resultReceiver.
+	\item \textbf{Sticky} L'essere sticky viene determinato da chi li lancia. sendStickyBroadcast(Intent intent)
+\end{list}
+\paragraph{Esempio per stato di carica} IntentFilter con \texttt{Intent.ACTION\_BATTERY\_CHANGED}, e Intent battery = registerReceiver(null, filer), null perché così prendo il più recente intent sticky.\\
+Poi status = battery.getIntentExtras(BatteryManager.EXTRA\_STATUS, -1)\ldots
+\paragraph{Broadcast Locali} Con LocalBroadcastManager con metodi analoghi.
+\chapter{AlarmManager}
+Servizio di sistema: \texttt{Context.ALARM\_SERVICE}, restituisce AlarmManager.\\
+Ipostare sveglie e ricevere Intent alla ricezione di una sveglia.\\
+Anche possibile \texttt{setInexactRepeating}.\\
+Usare alarm solamente quando si vuole essere svegliati, per compiti di temporizzazione meglio csotrutti come quelli nativi Java (Thread.sleep(), System.currentTimeMillis()\ldots) oppure Handler con postDelayed.\\
+Alarm scattano anchea telefono in sleep. Durante la onReceive di chi ha ricevuto il pendingIntent, il telefono viene svegliato e tenuto sveglio. Ma al ritorno della onReceive può tornare immediatamente in sleep. Se fa partire qualche attività asincrona, questa potrebbe fermarsi subito perché il telefono torna in sospensione.
+\paragraph{Cambiamenti} Fino alal 4.0 alarm sempre esatti, a meno che non fossero esplicitamente inesattiv. Da Android 4 in poi, per le app con arget 19 o successivo, allarmi sono \textbf{inesatti per default}. Il sistema li aggiusta per ridurre risvegli e ottimizzare batteria. Per specificare l'esattezza, c'è \texttt{setExact}.\\
+Si può usare \texttt{setWindow} per dichiarare "quanto inesatto" sono disposto ad accettare, cioè quanto aggiustamento concedere al sistema. L'allarme scatta in qualunque punto della finestra concessa.\\
+Da Android 7 in poi c'è la modalità \textbf{Doze}, può ritardare l'attivazione di allarmi. A schermo spento e device in movimento gli allarmi funzionano normalmente.\\Possibile settare allarmi che superino il Doze (setAndAllowWhileIdle, setExactAndAllowWhileIdle): ovviamente peggiora la durata della batteria.
 
 \end{document}
