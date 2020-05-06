@@ -1597,7 +1597,6 @@ $$\textsl{det}(\lambda I - P) = \lambda^{n-1}\cdot\left[\lambda - \mathlarger{\f
 \end{array}$$
 Di conseguenza $\rho(P) = \sqrt{n-1}\cdot|\theta| < 1 \Leftrightarrow |\theta| < \mathlarger{\frac{1}{\sqrt{n-1}}}$
 \chapter{Esercitazioni}
-\section{Esercitazione 2}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
 \paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
 Dato che $C_x = n$ possiamo dire che il problema è \textbf{ben condizionato}
@@ -1627,7 +1626,6 @@ L'analisi della stabilità ci dice che il primo algoritmo è preferibile.
 Il \textbf{secondo algoritmo}, più complicato perché ci sono due operazioni non razionali oltre alla moltiplicazione.
 \paragraph{Esercizio} Supposto $n = 2^k$ e $f(x) = x^n = x^{2^k}$, determinare un algoritmo che calcola $f(x)$ con $k = \log_2(n)$ operazioni moltiplicative. Eseguire anche l'analisi dell'errore algoritmico per l'algoritmo trovato.
 \pagebreak
-\section{Esercitazione 3}
 \paragraph{Esercizio 1}
 $A = I + \alpha e e^T$ con $e^T = [1\ldots ]^T$ vettore colonna, quindi $n \times 1$. $e\cdot e^T$ è quindi una matrice $n \times n$.\\
 Quindi $A = I + \alpha\left[
@@ -1680,7 +1678,6 @@ Mal condizionato per $|\alpha| \rightarrow +\infty$
 %TODO
 \paragraph{Esercizio 2} $A = I + \theta e_1 e_n ^T + \theta e_n e_1^T$
 %TODO
-\section{Esercitazione 4}
 $A = (a_{ij})$ con $a_{ij} = min(i, j)$
 \begin{enumerate}
 	\item Dire se A ammette fattorizzazione LU
@@ -1929,7 +1926,6 @@ x_{n-1} = \gamma_0\gamma_1\ldots\gamma_{n-1}
 Determiniamo per quali valori di $\gamma_i$ $A$ è invertibile.\\
 Sappiamo che $A$ invertibile $\Leftrightarrow \textsl{det}(U) \neq 0 \Leftrightarrow\textsl{det}(U) = \beta \neq 0 \Leftrightarrow \mathlarger{\prod_{i=0}^{n-1} \gamma_i} \neq -1$\\
 Se $|\gamma_i| < 1 \Rightarrow\:\vline\:\mathlarger{\prod_{i=0}^{n-1} \gamma_i}\:\vline = \mathlarger{\prod_{i=0}^{n-1} |\gamma_i|} < 1$
-\section{Esercitazione 5}
 \begin{math}
 A = \left[ \begin{array}{c c c}
 	a & & 1\\
@@ -2028,7 +2024,6 @@ $$C_a = \frac{n\cdot a^2 - (n-2)}{a^2 - 1}$$
 Cosa posso dire quando $|a| \to +\infty$? $a^2\to+\infty$\\
 $$\lim_{|a|\to+\infty} C_a = \lim_{|a|\to+\infty} \frac{n\cdot a^2 - (n-2)}{a^2 - 1} = \lim_{|a|\to+\infty} \frac{\not a^2(n - \frac{n-2}{a^2})}{\not a^2(1 - \frac{1}{a^2})} = n$$
 Quindi è \textbf{ben condizionato per $|a|\to+\infty$}
-\section{Esercitazione 6}
 \begin{math}
 A = \left[ 
 \begin{array}{c c c c}
@@ -2139,6 +2134,7 @@ $$E_1 A = \left[ \begin{array}{c c c c}
 \right]$$
 Con $1 + \theta^2$ sulla diagonale principale e $\theta^2$ fuori da essa.\\
 Notiamo che $A$ è una matrice sparsa, cioè \textit{tanti elementi di $A$ sono $0$}, che è una proprietà che vogliamo sfruttare. Ma in generale \textbf{il metodo di eliminazione gaussiana non preserva la sparsità della matrice}. Si riempiono sia $A^{(k)}$ sia $L$ e $U$: questo si chiama \textbf{fill-in}.
+\pagebreak
 \paragraph{Esercizio}
 \begin{multicols}{2}
 \begin{center}
@@ -2197,7 +2193,151 @@ La matrice su cui dovrò lavorare, cioè $E_1 A$ privata della prima riga e dell
 $E_2$ sarà analogamente con un elemento $\mathlarger{-\frac{b}{a}}$\ldots\\
 La $U$ sarà una bidiagonale superiore, mentre la $L$ sarà bidiagonale inferiore.
 \end{enumerate}
-
+\paragraph{Esempio} \begin{multicols}{2}
+$$A = \left[\begin{array}{c c c c}
+\alpha & 1 & & 0\\
+\vdots & \ddots & \ddots\\
+\vdots & & \ddots & 1\\
+\alpha & \ldots & \ldots & \alpha
+\end{array} \right] \in\mathbb{R}^{n\times n}\text{ con }n\geq 2$$
+\paragraph{Predominante diagonale?}
+\begin{list}{}{}
+	\item[$i = 1 \rightarrow$] $|a| > 1$
+	\item[$i = 2 \rightarrow$] $\left\{\begin{array}{l l}
+	n = 2 & |a| > |a|\\
+	n > 2 & |a| > |a| + 1
+	\end{array}\right.$
+\end{list}
+Quindi non è predominante diagonale per nessun valore $\alpha$
+\end{multicols}
+\paragraph{Per quali $\alpha$, G-S converge?}
+$$M = \left[\begin{array}{c c c c}
+\alpha &  & & \\
+\vdots & \ddots & 0 \\
+\vdots & & \ddots & \\
+\alpha & \ldots & \ldots & \alpha
+\end{array} \right]\:\:\:\:\:\:\:\:N = \left[\begin{array}{c c c c}
+& -1 & & 0\\
+& & \ddots\\
+& 0 & & -1\\
+& &  & 
+\end{array} \right]$$
+Devo studiare $\rho(G) = \textsl{max}_{i=1}^n |\lambda_i|$ \\
+$G = \left[\begin{array}{c c c c}
+\alpha &  & & \\
+\vdots & \ddots & 0 \\
+\vdots & & \ddots & \\
+\alpha & \ldots & \ldots & \alpha
+\end{array} \right]^{-1}\cdot\left[\begin{array}{c c c c}
+& -1 & & 0\\
+& & \ddots\\
+& 0 & & -1\\
+& &  & 
+\end{array} \right]$
+\begin{list}{}{}
+	\item $\left(\alpha\cdot\left[\begin{array}{c c c c}
+1 &  & & \\
+\vdots & \ddots & 0 \\
+\vdots & & \ddots & \\
+1 & \ldots & \ldots & 1
+\end{array} \right]\right)^{-1} = \mathlarger{\frac{1}{\alpha}}\cdot\left[\begin{array}{c c c c}
+1 &  & & \\
+\vdots & \ddots & 0 \\
+\vdots & & \ddots & \\
+1 & \ldots & \ldots & 1
+\end{array} \right]^{-1}$
+	\item Sapendo che $\left[\begin{array}{c c c c}
+		1\\
+		1&1\\
+		1&1&1\\
+		1&1&1&1
+	\end{array}\right]\cdot\left[\begin{array}{c c c c}
+		1\\
+		-1&1\\
+		0&-1&1\\
+		0&0&-1&1
+	\end{array}\right] = \left[\begin{array}{c c c c}
+		1\\
+		&1\\
+		& &1\\
+		& & &1
+	\end{array}\right]$, allora ipotizzo che\\
+	$\left[\begin{array}{c c c c}
+1 &  & & \\
+\vdots & \ddots & 0\\
+\vdots & & \ddots & \\
+1 & \ldots & \ldots & 1
+\end{array} \right]\cdot\left[\begin{array}{c c c c}
+1 &  & & \\
+-1 & \ddots &0 \\
+ & \ddots & \ddots & \\
+ 0&  & -1 & 1
+\end{array} \right] = \left[\begin{array}{c c c c}
+		1\\
+		&\ddots & 0\\
+		&0&\ddots\\
+		& & &1
+	\end{array}\right]$
+\end{list}
+$M^{-1} = \mathlarger{\frac{1}{\alpha}}\left[\begin{array}{c c c c}
+1 &  & & \\
+-1 & \ddots &0 \\
+ & \ddots & \ddots & \\
+ 0&  & -1 & 1
+\end{array} \right]$
+$$G = M^{-1}N = \mathlarger{\frac{1}{\alpha}}\left[\begin{array}{c c c c}
+1 &  & & \\
+-1 & \ddots &0 \\
+ & \ddots & \ddots & \\
+ 0&  & -1 & 1
+\end{array} \right]\cdot\left[\begin{array}{c c c c}
+& -1 & & 0\\
+& & \ddots\\
+& 0 & & -1\\
+& &  & 
+\end{array} \right]
+= \mathlarger{\frac{1}{\alpha}}\left[\begin{array}{c c c c c c c}
+0 & -1 & 0 & \ldots & \ldots & 0\\
+0 & 1 & -1 & 0 & \ldots & 0\\
+0 & 0 & 1 & -1 & \ldots & \ldots\\
+& & & \ddots & \ddots\\
+\\
+\\
+\end{array} \right] = \left[\begin{array}{c c c c}
+0 & -\frac{1}{\alpha} \\
+0 & \frac{1}{\alpha} & \ddots\\
+& & \ddots & -\frac{1}{\alpha}\\
+& & & \frac{1}{\alpha}
+\end{array} \right]$$
+$G$ triangolare superiore $\Rightarrow$ gli autovalori stanno sulla diagonale principale e sono $\begin{array}{l}
+\lambda = 0\\
+\lambda = \mathlarger{\frac{1}{\alpha}}
+\end{array} \Rightarrow \rho(G) = \mathlarger{\frac{1}{|\alpha|}}$\\
+Quindi $\mathlarger{\frac{1}{|\alpha|}} < 1 \Leftrightarrow 1 < |\alpha| \Leftrightarrow |\alpha| > 1$\\
+$\textsl{det}(\lambda I - M^{-1}N) = \textsl{det}(\lambda M^{-1}M - M^{-1}N) = \textsl{det}(M^{-1}\cdot(\lambda M - N)) =$ (per Binet) $\textsl{det}(M^{-1})\cdot\textsl{det}(\lambda M - N)$\\
+Quindi $\textsl{det}(\lambda I - G) = 0 \Leftrightarrow \textsl{det}(\lambda M - N) = 0$
+$$\textsl{det}\left(\alpha\lambda\left[\begin{array}{c c c c}
+1 &  & & \\
+\vdots & \ddots & 0\\
+\vdots & & \ddots & \\
+1 & \ldots & \ldots & 1
+\end{array}\right] + \left[\begin{array}{c c c c}
+ & 1 & & \\
+ &  &\ddots   \\
+ & &  & 1 \\
+ &  &  & 
+\end{array}\right]\right) = \textsl{det}\left(\left[\begin{array}{c c c c}
+\alpha\lambda & 1  & & \\
+\vdots & \ddots & \ddots\\
+\vdots & & \ddots & 1\\
+\alpha\lambda & \ldots & \ldots & \alpha\lambda
+\end{array}\right]\right)$$
+$M = \left[\begin{array}{c c c}
+\alpha\\
+\vdots & \ddots\\
+\alpha & \ldots & \alpha
+\end{array}\right] \Rightarrow \textsl{det}(M^{-1}N) = \textsl{det}(M^{-1})\cdot\textsl{det}(N) = \mathlarger{\frac{\textsl{det}(N)}{\textsl{det}(M)}} = \mathlarger{\frac{\textsl{det}(N)}{\alpha^n}} = \mathlarger{\frac{0}{\alpha^n}} = 0$
+%TODO esercitazione 6/5
 \chapter{Matlab}
 11 bit esponente rappresentato in traslazione, 52 bit mantissa (53 cifre rappresentabili per il bit nascosto) $\Rightarrow$ $u = B^{1-t} = 2^{-52}$
 \section{Esponenziale}
