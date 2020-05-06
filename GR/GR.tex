@@ -523,6 +523,24 @@ Perché importante? Se devo parlare ad esempio della banda, posso calcolare econ
 Il 95esimo percentile di una rete è la soglia sotto cui sono stato per il 95\% del tempo.\\
 Calcolo: data una serie di valori, si definisce il percentile (es. 80), si ordina la serie dal passo all'alto, calcolo indice che corrisponde al percentie (len(serie)*(percentile/100)), prendo l'indice intero (es int(index + 0.5))\\
 Percentile = serie\_ordinata[indiceintero-1]
+\paragraph{Quartile} \begin{list}{}{Definiti così:}
+		\item $Q_1$ è il 25esimo percentile
+		\item $Q_2$ è il 50esimo percentile
+		\item $Q_3$ è il 75esimo percentile
+\end{list}
+\begin{center}
+	\includegraphics[scale=1]{quartile.png}
+\end{center}
+\subparagraph{Outlier} Ciò che devia un sacco dallo standard.\\
+Punti che discostano tantissimo rispetto all'average. Si usa l'IQR (InterQuartile Range): $Q_3 - Q_1$
+\begin{center}
+	\includegraphics[scale=1]{outlier.png}
+\end{center}
+\begin{list}{}{In statistica, un valore è un outlier quando cado fuori da}
+	\item Lower Fence: $Q_1 - 1.5\times IQR$
+	\item Upper Fence: $Q_3 + 1.5\times IQR$
+\end{list}
+Si usano per trovare valori anomali, come errori di misura o sperimentali, o distribuzioni "heavy tailed", cioè che vanno a zero molto lentamente poiché una o più valori molto grandi hanno effetto sulla statistica.
 \paragraph{Calcolo del jitter} \texttt{jitter = sum(|x(i) - x(i-1)|) / (n-1)}\\
 Se il jitter è nell'ordine di grandezza del valore allora la situazione è drammatica. Jitter basso: valore costante. Jitter alto: valore cambia spesso nel tempo.
 \subsection{Timeseries, Forecast, Anomaly Detection}
@@ -542,7 +560,6 @@ Negli RRD c'erano dei valori $\alpha$, $\beta$, $\gamma$ che avevamo detto di la
 	\item \textbf{Weighted Moving Average}: come la media mobile ma con i valori pesati (tipicamente pesando di più i valori più recenti)
 \end{list}
 \textbf{Anomalia} quando \textbf{la predizione và in conflitto con l'osservazione}.
-\pagebreak
 \paragraph{Predirre il futuro}
 \begin{center}
 	\includegraphics[scale=0.7]{averageforectast.png}
@@ -558,7 +575,7 @@ Con $\beta$ non prendo solo la media ma tengo conto anche del trend, così da av
 \begin{center}
 	\includegraphics[scale=0.7]{doubexpsmo.png}
 \end{center}
-\pagebreak
+
 \paragraph{Holt-Winters Method} Anche detto \textbf{Triple Exponential Smoothing}\\
 Nel double exponential smoothing manca il concetto di \textbf{stagione}: quando una serie è ripetitiva a intervalli regolari si dice \textbf{stagionale}.\\
 Lunghezza della stagione: numero dei data point in una stagione.\\
@@ -570,6 +587,7 @@ Fasce di confidenza con $\delta$ tra 2 e 3:
 	\item Superiore: $\overline{y}_t - \delta\cdot d_{t-m}$
 	\item Inferiore: $\overline{y}_t + \delta\cdot d_{t-m}$
 \end{list}
+
 \chapter{Remote Monitoring}
 \textbf{Analisi rete remota rispetto dove siamo noi}.\\
 Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (edge), inoltre è anche "forzato" dalle parti wireless che sta diventando predominante. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
@@ -591,7 +609,7 @@ RMON sposta un po' della logica nell'apparato, che raccoglie da sé stat e impos
 	\item HostTopN: per i top N host quanto traffico fanno, quale porta più occupata. Se c'è connesso un PC è il colpevole, ma se ce ne sono N non mi è chiaro. Con HostTopN analizzo traffico della porta e trovo N computer che fanno più traffico\ldots
 	\item Matrix: mostra comunicazioni tra indirizzi
 \end{list}
-C'è anche una formula per capire quanto è usata una porta di rete (100x((pachets x 160)+(octets x 8)))/(portspeed x timeinsec)
+C'è anche una formula per capire quanto è usata una porta di rete (100x((packets x 160)+(octets x 8)))/(portspeed x timeinsec)
 \paragraph{Allarmi} Impostare soglie su contatori di RMON, soglie di due tipi: rising e falling. Quando troppo alta (rising) o bassa (falling) posso effettuare operazioni.\\
 Es troppo traffico se utilizzo sup a 80\% manda allarme.
 \paragraph{Case Study} \ldots RMON va a mappare ogni quanto misuro dati, valori di soglia
@@ -658,5 +676,42 @@ Cosa ci possiamo fare? \begin{list}{}{}
 	\item \textbf{AnsweringMachine}\\
 	Permette di gestire le risposte, un esempio è avviarla in monitoring su un'interfaccia. 
 \end{list}
-
+\chapter{Flussi}
+\paragraph{Flussi unidirezionali con IP src/dst come key}
+\paragraph{Flussi unidirezionali con IP, Porta e protocollo come key} Avrò più flussi perché distinguo anche i protocolli usati e le porte, quindi ho maggiore informazione sul traffico.
+\paragraph{NetFlow} Architettura a flussi, prima coniata da Cisco. Funziona diversamente da ciò che si è visto fin'ora. Abbiamo un router con un probe (sonda di rete, traduce pacchetti in flussi). La funzionalità di misura è secondaria (il router deve andare bene), ma catalogare i flussi richiede memoria. Router calcola i valori con il probe ma non ha capacità di memorizzazione: manda verso Flow Collector (un pc con un software apposito). Il collezionatore riceve flussi e fa qualcosa: es. manda dati a interfaccia web.\\
+C'è anche problema se si monitora rete abbastanza grande. Si possono mettere più collezionatori che collaborano fra loro, ognuno attaccato ad un endpoint (router verso l'esterno) della rete.
+\paragraph{Spazio} Lo spazio richiesto dipende dal traffico. Qualche valore solito:
+\begin{list}{}{}
+	\item 67320 ottetti/flusso, 92 pacchetti/flusso
+	\item Router occupato: 367GB traffico al giorno, 548000000 pacchetti al giorno, cioè 5900000 flussi al giorno
+	\item %TODO
+\end{list}
+\paragraph{NetFlow} Flussi unidirezionali fino a v8, bidirezionali dal v9. La più comune è v5, l'ultima è v9.\\
+Analisi solo del traffico inbound e IP (non su tutte le piattaforme). IPv4 unicast e multicast. IPv6 solo su v9. La v9 è aperta, cioè integrabile con moduli personalizzati.\\
+Protocollo aperto definito da Cisco e supportato su IOS e CatIOS e su altre piattaforme Cisco.\\
+Ogni versione ha un formato di pacchetti: fino alla 8 era chiuso, dalla v9 è dinamico e aperto a estensioni.\\
+Numeri di sequenza: v1 non ha numeri di sequenza, fino alla 8 numeri di sequenza per flusso e dalla 9 numeri di sequenza per pacchetto (non flusso)\\
+Qualche versione è specifica per alcune piattaforme di Cisco.
+\paragraph{Usare i flussi} Cosa c'è dentro un flusso? Questa domanda risponde anche a cosa ci faccio con essi.
+\begin{list}{}{Nella parte di chiave: la quintupletta}
+	\item Protocollo
+	\item IP src/dst
+	\item Porta src/dst
+\end{list}
+\begin{list}{}{Altre info}
+	\item QoS: Flag TCP, tipo protocollo e tipo di servizio
+	\item Porta: indice di porta in e out
+	\item Info di routing: next hop, da/verso quale AS\ldots
+	\item Contatori: di byte e di paccketti
+	\item Tempo: sysuptime start/end
+\end{list}
+\paragraph{Nascita e morte di un flusso} Siamo a livello 3. Il traffico deve entrare e uscire dal router, quindi interf ingr e usc: il traffico è esaminato, cioè passato al probe. Posso mettere nel pc di casa un software per sniffing, ma nel router i pacchetti passano attraverso di lui. Probe prende dati e li raggruppa, li gestisce. Si tiene una cache dei flussi attivi. Appena c'è pacchett non conosciuto la popola.\\Al suo interno ha sistema ispezione pacchetti. In cache c'è una sorta di hashtable, come chiave ho ip porte\ldots, come valore ho almeno i byte e i pacchetti.\\
+Terminano quando:
+\begin{list}{}{}
+	\item La comunicazione di rete termina (es: FIN)
+	\item Dura troppo (default 30m)
+	\item Non attivo da troppo (default 15s)
+	\item Cache piena e necessario purge (è limitata, non è raro non poter gestire tutti i flussi)
+\end{list}
 \end{document}
