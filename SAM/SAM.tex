@@ -638,4 +638,24 @@ Hanno cicli di vita distinti. Ci sono due modalità
 \end{list}
 Come sempre, Android può uccidere un Service in qualsiasi momento.
 \paragraph{Avviare un service started} startService(new Intent(this, MyService.class));\ldots
+\paragraph{Terminare} Il servizio stesso può terminare con \texttt{stopSelf()}, eventualmente con \textit{id} di uscita.\\
+Un altro componente può chiamare \texttt{stopService(Intent i)} passando l'intent che identifica il servizio.\\
+S.O. può forzatamente chiudere i servizi.\\
+S.O. non tiene traccia delle richieste mandate, usa l'high water mark (si segna solamente un intero che rappresenta più alto numero richieste ricevute fin'ora). Se si chiama \texttt{stopSelf(id)} con id inferiore al max allora ok, se è uguale al max considera il servizio come concluso. Si, è molto pericoloso.
+\paragraph{Riavvio} valore di ritorno da onstart è codice che dice come gestire riavvio
+\begin{list}{}{}
+	\item START\_STICKY: servizio fermato appena possibile viene chiamato nuovamente onstartservice con null. tipicamente startservice, stopservice
+	\item START\_NOT\_STICKY: servizio fermato riavviato solo se ci sono chiamate a onStartService(). Tipicamente startservice, stopself
+	\item START\_REDELIVERY\_INTENT: se serivizio fermato verrè riavviato con l'intent originale.
+\end{list}
+\paragraph{Flag di avvio}
+	\begin{list}{}{}
+		\item 0 è avvio
+		\item START\_FLAG\_REDELIVERY
+		\item START\_FLAG\_RETRY riavvio sticky dopo uccisione forzata
+	\end{list}
+\paragraph{ComponentName} Valore ritorno di startService(). Rappresenta il componente Service (è una classe generale, può anche rappresentare Activity, BroadcastReceiver, ContentProvider)\\
+Se null Intento non consegnato\\
+Altrimenti si può utilizzare per avere info: getClass, getPackageName\ldots
+\paragraph{Riassunto Service Started} %TODO
 \end{document}
