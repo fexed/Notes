@@ -1156,4 +1156,50 @@ Abbiamo quindi $\mathscr{P} \subseteq \textsl{TIME}(2^n) \subsetneq\textsl{TIME}
 Avevamo anche dimostrato che $\textsl{NTIME}(f(n)) \subseteq \textsl{TIME}(c^{f(n))}$ da cui deriva $\mathscr{NP} \subseteq \textsl{EXP}$\\
 Si ricorda quindi anche che
 $$\textsl{LogSpace} \subseteq \mathscr{P} \subseteq \mathscr{NP} \subseteq \textsl{EXP}$$
+\pagebreak
+\paragraph{}Abbiamo dei motivi per cui non possiamo fare a meno delle funzioni di misura appropriate.
+\subsection{Teorema} \textbf{Troveremo sempre problemi via via più difficili}, cioè la gerarchia non è superiormente limitata.\\
+$\forall\:g$ calcolabile totale $\exists\:I$ problema$\:|\:I\in\textsl{TIME}(f(n))\wedge I\not\in\textsl{TIME}(g(n))$, con $f > g$ quasi ovunque\\
+Quindi la gerarchia tratta dal teorema di gerarchia continua a crescere senza fermarsi mai.\\
+Con \textit{quasi ovunque} si intende \textbf{dappertutto eccetto che in un numero finito di punti}.
+\subsection{Teorema di Accelerazione (Blum)} Il teorema di accelerazione \textit{lineare} diceva che possiamo accelerare \textit{linearmente} la soluzione del problema.\\
+Blum ci dice che \textbf{non sempre esiste un algoritmo ottimo} per un problema.\\\\
+$\forall\:h$ calcolabile totale\\
+$\exists\:I\:|\:\forall\:M$ che decide $I$ in tempo $f\:\:\exists\:M'$ che decide $I$ in tempo $f'\:|\:f(n)>h(f'(n))$ quasi ovunque\\\\
+$h$ indica quanto è più veloce $M'$ rispetto a $M$\\
+\textbf{Intuitivamente}: supponendo di avere una macchina universale lenta, e di ottenere una macchina universale nuova e velocissima, allora avremmo dei programmi che rimangono più veloci sulla macchina vecchia che non sulla nuova.
+\subsection{Teorema della lacuna}
+$\exists\:f$ calcolabile totale $|\:\textsl{TIME}(f) = \textsl{TIME}(2^f)$\\
+\textbf{Intuitivamente}: c'è un insieme di programmi che sono altrettanto efficienti/veloci su una macchina lenta che su una macchina nuova.\\
+Questo cozza con un risultato del teorema di gerarchia, che arrivava a dire (a grandi linee)\\$\textsl{TIME}(f(n)) \subsetneq \textsl{TIME}(f(2n + 1)^3)$ perché avrei $\textsl{TIME}(f^2) = \textsl{TIME}(f) \subsetneq \textsl{TIME}(f^3)$, ma quindi avrei una situazione assurda del tipo $A = B < C$, come può essere $A = C$? Ma il teorema di gerarchia vale. Ciò che cambia è che nel teorema della lacuna $f$ non è richiesta appropriata. Questo ci dice che \textbf{non possiamo fare a meno delle funzioni di misura appropriate}, o di classi di funzioni con vincoli a come misuriamo il consumo delle risorse in modo che il teorema di gerarchia valga.
+\subsection{Teoria della Complessità Astratta}
+Si svincola dal tipo di risorsa misurata.\\
+$\phi$ è misura $\Leftrightarrow$ \begin{list}{}{}
+	\item $\phi(\psi, x)$ converge $\Leftrightarrow \psi(x)$ converge
+	\item $\forall\:\psi, x, k$ è decidibile se $\phi(\psi, x) = k$, cioè sapere esattamente il risultato
+\end{list}
+\subsection{Tesi di Cook-Karp}
+\begin{list}{-}{}
+	\item $\mathscr{P}$ sono i problemi \textbf{trattabili}
+	\item $\mathscr{NP}$ sono i problemi \textbf{intrattabili}
+\end{list}
+Nel senso che avendo un algoritmo che funziona in tempo polinomiale ($\mathscr{P}$), allora il problema può essere risolto "efficientemente", altrimenti se il problema sta in $\mathscr{NP}$ allora è troppo difficile per essere gestito da un programma.\\\\
+Ponendo $M$, $M'$ \textbf{modelli di calcolo} (quindi MdT, \texttt{while}-calcolabili\ldots), allora posso passare da $M \longrightarrow M'$ mediante un polinomio.\\
+Inoltre $\mathscr{P}$ e $\mathscr{NP}$ sono chiusi rispetto alle classiche operazioni ma anche alle riduzioni in sottoclassi dei polinomi. Significa che se riduco il problema $I \leq_F J$, con $F \subseteq$ polinomi e $I\in\mathscr{C} \Rightarrow f(I) = J \in\mathscr{C}$\\\\
+Ci sono algoritmi esponenziali al caso pessimo, ma efficientissimi nei casi più comuni: ad esempio l'algoritmo del simplesso, la paginazione, l'inferenza dei tipi in ML\ldots\\
+Ma non sempre posso sapere qual è il caso medio di un problema.
+\subsection{Riduzione efficiente}
+$I$ si riduce efficientemente a $J \Leftrightarrow (x\in I \Leftrightarrow f(x)\in J$ con $f \in \textsl{logspace})$ e si può scrivere $I \leq J$\\
+Otteniamo che $\leq$ classificano $\textsl{logspace}$ e una qualunque classe $\mathscr{E} \subset \{\mathscr{P}, \mathscr{NP}, \textsl{EXP}, \textsl{PSPACE}, \textsl{NPSPACE}\}$\\
+Se prendo una $\mathscr{D} \subset \mathscr{E}$, allora $\leq$ classificano $\mathscr{D}$ ed $\mathscr{E}$ (quindi ad esempio $\mathscr{P}$ ed $\mathscr{NP}$)\\
+Dato che $\textsl{logspace}\leq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classificano $\mathscr{D}$ ed $\mathscr{E}$. Lo si dimostra così, tramite le proprietà della classificazione di una famiglia di riduzioni:
+\begin{enumerate}
+	\item $\textsl{id} \in \textsl{logspace}$, banalmente
+	\item $f, g \in \textsl{logspace} \Rightarrow f(g)\in \textsl{logspace}$\\
+	$f \in \textsl{logspace} \Rightarrow \exists\:M$ che opera in $\textsl{logspace}$, analogamente per la $g$ avrò $M'$. La nuova macchina può considerare l'ultimo nastro di $M$ come nastro di lavoro di $M'$ e calcolare così la composizione delle due. Questa nuova macchina sta in $\textsl{logspace}$? Se prendo ad esempio $f = \textsl{id}$ ho input e output lungo $n$, e la somma dei nastri di lavoro è $n$, quindi lineare e non logaritmica. Allora si fa partire $M'$ in modo da richiedere a $M$ i dati di lavoro e usarli all'occorrenza sostituendoli sempre su una sola casella. Otteniamo così il $\textsl{logspace}$
+	\item $I\leq J$, $J \in \mathscr{D} \Rightarrow I \in \mathscr{D}$\\
+	Se $I$ si riduce per un logaritmo a $J$, e $J$ lo risolvo in tempo logaritmico allora risolvo in tempo logaritmico anche $I$
+	\item $I\leq J$, $J \in \mathscr{E} \Rightarrow I \in \mathscr{E}$\\
+	Analogo al punto precedente.
+\end{enumerate}
 \end{document}
