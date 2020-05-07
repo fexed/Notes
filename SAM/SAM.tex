@@ -604,5 +604,38 @@ Alarm scattano anchea telefono in sleep. Durante la onReceive di chi ha ricevuto
 \paragraph{Cambiamenti} Fino alal 4.0 alarm sempre esatti, a meno che non fossero esplicitamente inesattiv. Da Android 4 in poi, per le app con arget 19 o successivo, allarmi sono \textbf{inesatti per default}. Il sistema li aggiusta per ridurre risvegli e ottimizzare batteria. Per specificare l'esattezza, c'è \texttt{setExact}.\\
 Si può usare \texttt{setWindow} per dichiarare "quanto inesatto" sono disposto ad accettare, cioè quanto aggiustamento concedere al sistema. L'allarme scatta in qualunque punto della finestra concessa.\\
 Da Android 7 in poi c'è la modalità \textbf{Doze}, può ritardare l'attivazione di allarmi. A schermo spento e device in movimento gli allarmi funzionano normalmente.\\Possibile settare allarmi che superino il Doze (setAndAllowWhileIdle, setExactAndAllowWhileIdle): ovviamente peggiora la durata della batteria.
-
+\section{WorkManager}
+uan delle tante api jetpack per task asincroni deferrable coordinati e vincolati
+\begin{list}{}{}
+	\item \textbf{Asincrono}: eseguito in qualche momento del futuro
+	\item \textbf{Deferrabile}: può essere rimandato senza danno
+	\item \textbf{Coordinati}: possono esprimenere strutture (task in seq, parall\ldots) farm, pipeline\ldots e passare mappe chiavi/valori fra task
+	\item \textbf{Vincolati}: per ogni task, si possono specific condizioni che devono essere verificate per l'esecuz.
+\end{list}
+Un task da eseguire è un \textbf{istanza di Worker}, di cui definiremo una sottoclasse (perché è astratta) implementando \textbf{doWork()}. (\textit{Worker sostituisce Runnable, doWork() sostituisce run()}).\\
+doWork() restituisce un Result, ad esempio \texttt{return Return.success()}. doWork() è eseguito da un \textbf{thread non-UI}, gestito dal WorkManager.
+\paragraph{WorkRequest} Per richiedere l'esecuzione di un Worker (cioè task) definisco un'istanza di una sottoclasse di WorkRequest. \textit{Richiesta di eseguire, non la cosa da eseguire}. Ha diverse sottoclassi, tra cui:
+\begin{list}{}{}
+	\item \textbf{OneTimeWorkRequest}: esegui task una volta sola
+	\item \textbf{PeriodicWorkRequest}: esegui il task ripetutamente
+\end{list}
+\texttt{WorkManager.getInstance().enqueue(myWorkRequest);} per mettere in coda una richiesta.\\
+Ho costruttori di esecuzione per accodare richieste insieme da eseguire in parallelo o in sequenza:
+\texttt{WorkManager.getInstance().beginWith(1, 2).then(3).then(4, 5).equeue()} eseguire 1, 2 in contemporanea, poi 3, poi 4, 5 in contemporanea.\\
+Si può annullare l'esecuzione di un task con \texttt{WorkManager.cancelWorkById(wReq.getId());}
+\paragraph{Vincoli} Possibile specificare sotto quali vincoli un task è eseguibile. Vincoli rappresentati come istanze di Constraints, tipicamente vincoli esterni alla computazione. \texttt{Constraints.Builder().setRequires\ldots(true)\ldots.build()}, e usare setConstraints(myConstr) per assegnarli alla WorkRequest.
+\chapter{Services}
+Service pezzo nostro di codice che non possiede interfaccia utente. ContentProvider BroadcastReceiver sono estremamente specializzati, mentre i Services sono più sofisticati: esecuzioni in background arbitrarie. "In background" nel senso che non hanno UI, quindi senza partecipare allo stack delle activity\ldots\\
+Il codice del service è eseguito sempre dal main thread, quello della UI.\\
+Activity possono avviare uno o più Service, sempre nel proprio thread principale, perché rimangano in esecuzione indefinitamente o per lavorare e poi terminare.\\
+Hanno cicli di vita distinti. Ci sono due modalità
+\begin{list}{}{}
+	\item Servire una sola richiesta: \textbf{started}\\
+	Il loro ciclo di vita è startService(), onCreate(), onStartCommand(), esecuzione, onDestroy(), spegnimento.
+	\item Stabilire connessione tra componente e service e rimane a disposizione per gestire un flusso di richieste: \textbf{bound}\\
+	Ha sempre una priorità nella scala delle uccisioni almeno uguale all'activity a cui è collegata.\\
+	Il loro ciclo di vita è bindService(), onCreate(), onBind(), esecuzione, onUnbind(), onDestroy(), spegnimento.
+\end{list}
+Come sempre, Android può uccidere un Service in qualsiasi momento.
+\paragraph{Avviare un service started} startService(new Intent(this, MyService.class));\ldots
 \end{document}
