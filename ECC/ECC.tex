@@ -1184,7 +1184,7 @@ $\phi$ è misura $\Leftrightarrow$ \begin{list}{}{}
 	\item $\mathscr{NP}$ sono i problemi \textbf{intrattabili}
 \end{list}
 Nel senso che avendo un algoritmo che funziona in tempo polinomiale ($\mathscr{P}$), allora il problema può essere risolto "efficientemente", altrimenti se il problema sta in $\mathscr{NP}$ allora è troppo difficile per essere gestito da un programma.\\\\
-Ponendo $M$, $M'$ \textbf{modelli di calcolo} (quindi MdT, \texttt{while}-calcolabili\ldots), allora posso passare da $M \longrightarrow M'$ mediante un polinomio.\\
+Sono \textbf{robuste}, cioè resistono al cambio di modello. Ponendo $M$, $M'$ \textbf{modelli di calcolo} (quindi MdT, \texttt{while}-calcolabili\ldots), allora posso passare da $M \longrightarrow M'$ mediante un polinomio.\\
 Inoltre $\mathscr{P}$ e $\mathscr{NP}$ sono chiusi rispetto alle classiche operazioni ma anche alle riduzioni in sottoclassi dei polinomi. Significa che se riduco il problema $I \leq_F J$, con $F \subseteq$ polinomi e $I\in\mathscr{C} \Rightarrow f(I) = J \in\mathscr{C}$\\\\
 Ci sono algoritmi esponenziali al caso pessimo, ma efficientissimi nei casi più comuni: ad esempio l'algoritmo del simplesso, la paginazione, l'inferenza dei tipi in ML\ldots\\
 Ma non sempre posso sapere qual è il caso medio di un problema.
@@ -1202,4 +1202,81 @@ Dato che $\textsl{logspace}\leq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classif
 	\item $I\leq J$, $J \in \mathscr{E} \Rightarrow I \in \mathscr{E}$\\
 	Analogo al punto precedente.
 \end{enumerate}
+Quindi $\leq_{\textsl{logspace}}$ \textbf{sono riduzioni efficienti} e \textbf{classificano} $\mathscr{P}$ ed $\mathscr{NP}$\\
+Una delle conseguenze è che se trovo un problema completo dentro $\mathscr{P}$ (cioè che tutti i problemi di $\mathscr{P}$ si riducono a lui e lui $\in\mathscr{P}$) allora in qualche modo ho rappresentato la difficoltà massima e $\mathscr{P}$ non ha problemi più difficili perché tutti i problemi si riducono a lui.\\
+Poiché riesco a trovare soluzioni tra problemi in $\mathscr{P}$, questo vuol dire che le soluzioni di tutti i problemi all'interno di una classe hanno una struttura matematicamente analoga tra loro.
+\section{Espressioni Booleane}
+Ponendo $x_1,\ldots,x_n \in X$ \textbf{variabili} e la \textbf{grammatica} $$B\longrightarrow tt\:|\:ff\:|\:x\:|\:\neg B\:|\:B_1 \vee B_2\:|\:B_1 \wedge B_2$$ con $tt$, $ff$, $x$ e $\neg x$ chiamati \textbf{letterali} $l_1,\ldots$.\\
+Diciamo che $V : X' \longrightarrow \{T, F\}$ con $X' \subset X$ è un \textbf{assegnamento booleano}.\\
+B è \textbf{chiusa} se \textbf{non ha variabili}. Un assegnamento booleano è \textbf{buono} se \textbf{lega tutte le variabili di B}.
+\paragraph{Soddisfacibilità} Cioè quando un assegnamento booleano rende vera un'espressione booleana.\begin{list}{}{}
+	\item $V \vDash tt$ banalmente
+	\item $V \vDash x$ quando $V(x) = tt$
+	\item $V \vDash \neg B$ quando $V \not\vDash B$
+	\item $V \vDash B_1 \vee B_2$ quando $V \vDash B_1$ oppure $V \vDash B_2$
+	\item $V \vDash B_1 \wedge B_2$ quando $V \vDash B_1$ e $V \vDash B_2$
+\end{list}
+\paragraph{Forma normale} $B$ è in \textbf{forma normale congiuntiva} $\Leftrightarrow$ $B = \mathlarger{\bigwedge_{i=1}^n C_i}$ e $C_i = \mathlarger{\bigvee_{j=1}^m l_j}$ con $l_j$ letterali\\
+$B$ è in \textbf{forma normale disgiuntiva} $\Leftrightarrow$ $B = \mathlarger{\bigvee_{i=1}^n C_i}$ e $C_i = \mathlarger{\bigwedge_{j=1}^m l_j}$ con $l_j$ letterali\\
+Inoltre $\forall\:B\:\:\exists\:B'$ in forma normale (una delle due) $|\:(V\vDash B \Leftrightarrow V\vDash B')$.\\
+Questo si ottiene avendo, da $B$ con $O(n)$ simboli, un $B'$ con $O(2^n)$ simboli.\\\\
+\textbf{Considereremo espressioni solo in forma normale congiuntiva}.
+\pagebreak
+\section{Alcuni problemi}
+\subsection{Problema SAT}
+Anche chiamato \textbf{problema della soddisfacibilità}. La formulazione è semplice:
+$$\text{Dato }B\text{, allora }\exists\:V\:|\:V\vDash B\text{ ?}$$
+SAT $\in\mathscr{NP}$. Come faccio a dirlo? Dovrei costruire una macchina non deterministica che verifica questa cosa, cioè che dice se l'assegnamento esiste o meno. Come si fa?\\
+Cominciando dallo stato iniziale. Supponendo $n$ variabili, allora ho $n$ scelte all'inizio, per ognuna delle quale ho due scelte: assegnare $tt$ o assegnare $ff$. Lo faccio per la prima, due scelte, poi per la seconda\ldots facendo così tutti i possibili assegnamenti. \textbf{Un cammino è un assegnamento}.\\
+La verifica se un assegnamento soddisfa possiamo farla dinamicamente, quindi è \textbf{polinomiale} perché è nel numero delle variabili.
+\subsection{Problema HAM}
+Problema del cammino hamiltoniano. Dato un grafo orientato $G = (N, A)$, $\exists?$ cammino che tocca tutti i nodi una ed una sola volta?\\
+Vediamo che $\text{HAM} \leq \text{SAT}$. Devo definire $f \in \textsl{logspace}\:|\:$ ($G$ ha un cammino hamiltoniano $\Leftrightarrow f(G) = B$ è tale che $\exists\:V\vDash B$)\\
+Vedremo una riduzione, ma non è la migliore.\\\\
+Supponiamo che $G = (N, A)$ ha $n$ nodi (cioè l'insieme $\{1, 2, \ldots, n\}$), allora $B$ ha $n^2$ variabili $x_{i,j}$: ciascuna rappresenta che nell'$i$-esimo posto di un cammino appare il nodo $j$. Posso rappresentarle anche come $(i, j)$ con $i, j \in [1, n]$.\\
+Definiamo una permutazione $\Pi : [1, n] \rightarrow [1, n]\:|\:\left(\Pi(i), \Pi(i+1)\right) \in A$, dai nodi ai nodi. In realtà nella nostra permutazione, i primi sono i nodi mentre i secondi sono le posizioni che occupano nel cammino. con $\Pi(i)$ rappresento il nodo in posizione $i$.\\
+$\Pi$ deve essere davvero una funzione.
+\begin{enumerate}
+	\item Un nodo non può essere mappato due volte. Quindi: $\neg(x_{ij} \wedge x_{kj})$ con $i \neq k$. Questo però non è un congiunto, quindi applico DeMorgan\\
+	$\Longrightarrow \neg x_{ij} \vee \neg x_{kj}$ con $i \neq k$
+	\item La funzione deve essere definita ovunque (totale), quindi ogni nodo deve apparire in un certo cammino.\\
+	$\Longrightarrow x_{1i} \vee x_{2i} \vee \ldots \vee x_{ni}$
+	\item[] Ho definito che la funzione è totale, quindi ora devo definire la sua surgettività.
+	\item Ogni posizione deve ricevere un nodo, sennò rimane un pezzo "vuoto".\\
+	$\Longrightarrow x_{i1} \vee x_{i2} \vee \ldots \vee x_{in}$
+	\item Non posso avere due nodi nella solita posizione. Quindi: $\neg(x_{ij} \wedge x_{ik})$ con $j \neq k$. Applico DeMorgan.\\
+	$\Longrightarrow \neg x_{ij} \vee \neq x_{ik}$ con $j \neq k$
+	\item[] Ho ben definito la permutazione $\Pi$, quindi ora se riesco a prendere tutti i disgiunti, metterli in and e trovo un assegnamento booleano che li rende veri ho trovato un cammino hamiltoniano. Manca da definire $\left(\Pi(i), \Pi(i+1)\right) \in A$
+	\item Se $(i, j) \not\in A \Longrightarrow \neg x_{k,i} \vee \neg x_{k+1, j}$
+\end{enumerate}
+Adesso devo dimostrare che se c'è un cammino hamiltoniano allora esiste un assegnamento che soddisfa. Dimostro i due versi dell'implicazione separatamente:
+\begin{list}{}{}
+	\item[$\Leftarrow$] $\forall\:j\:\:\exists!\:i\:|\:V(x_{ij}) = tt$, così definiamo la valutazione. Cioè per ogni posizione del cammino $i$ c'è un solo nodo $j$, quindi solo un $x_{ij}$ è vera per ogni $i$.\\
+	Nello stesso modo $\forall\:i\:\:\exists!\:j\:|\:V(x_{ij}) = tt$, cioè ogni nodo $j$ è in una sola posizione del cammino, quindi una sola $i$ per cui $x_{ij}$ è vera.\\
+	Grazie anche alla 5, che garantisce che ci sia il cammino, ho definito la $V$
+	\item[$\Rightarrow$] Ho un cammino, composto da $(\Pi(1), \Pi(2), \ldots, \Pi(n))$, quindi definisco la $V(x_{ij}) = \left\{\begin{array}{l}
+	tt\:\:\text{ se }\Pi(j) = i\\
+	ff\:\:\text{ se }\Pi(j) \neq i
+\end{array}	 \right.$
+\end{list}
+Finito. Ho definito una permutazione che rispetta il fatto che gli archi siano ben rappresentati.\\Manca di dimostrare che $f \in \textsl{logspace}$.
+\pagebreak
+\paragraph{} Dobbiamo costruire una macchina di tipo I/O, così sappiamo misurare lo spazio necessario (somma dello spazio usato dai nastri di lavoro). Naturalmente l'alfabeto della nostra macchina conterrà: simboli di verità, connettivi logici, parentesi, e due caratteri 0 e 1. Perché gli indici delle variabili sono rappresentati in binario.\\
+L'input è la successione degli archi. La macchina scrive in binario il numero di nodi $n$ sul nastro di lavoro. Poi avrò tre ulteriori nastri di lavoro, poiché nelle formule 1|5 compaiono 3 indici: un nastro per $i$, uno per $j$ e uno per $k$.\\
+Per scorrere le clausole farà scorrere da 1 a $n$ gli indici sui nastri di lavoro. Quando ha scritto le quattro formule 1|4, comincia a scrivere sull'output l'ultima formula, la 5. Scorrerà il nastro input anche questa volta per verificare la clausola, finendo ad un certo punto.\\
+Perché è in $\textsl{logspace}$? $\mathlarger{\sum_{i=2}^5} |w_i|$, ma $i$ arriva fino ad $n$ che rappresentato in binario richiede $\log n$. Quindi abbiamo 5 nastri di $\log n$, quindi $\mathlarger{\sum_{i=2}^5} |w_i| = 5\log n$ cioè $f\in \textsl{SPACE}(5\cdot\log n)$
+\paragraph{} Da un \textbf{problema nel mondo dei grafi} ho ottenuto \textbf{la sua soluzione mediante la soluzione di un problema di deduzione logica}. Abbiamo \textbf{ricondotto un problema sui grafi ad un problema di logica}.\\
+Diventa esplicita la \textbf{struttura comune} fra i due problemi.
+\subsection{Problema CRICCA}
+Un problema risolto positivamente se in un certo grafo non orientato esiste un sottoinsieme dei nodi detto \textbf{cricca} tale per cui, per ogni coppia di nodi all'interno della cricca c'è un arco che li congiunge.\\
+Formalmente: dato $G = (N, A)\:\:\exists?\:C\subseteq N\:\:|\:\:\forall\:i,j\in C\:(i,j)\in A$.\\
+$C$, cioè la cricca, è di ordine $k$ se contiene $k$ nodi.\\
+Vediamo come SAT $\leq$ CRICCA, cioè \textbf{riconduciamo un problema di logica ad uno sui grafi}.\\\\
+$\exists\:V\vDash B = \mathlarger{\bigwedge_{i=1}^n} C_i \Leftrightarrow f(B) = (N, A)$ ha $n$-cricca.\\Otteniamo che
+\begin{list}{}{}
+	\item $N$ è l'insieme delle occorrenze dei letterali $l$ in $B$
+	\item $A = \{(i, j)\:|\: i\in C_k \Rightarrow (j\not\in C_k \wedge i \neq \neg j)\}$ cioè metto un arco tra due nodi solo se non sono all'interno dello stesso letterale né se sono uno il negato dell'altro.
+\end{list}
+Da questo ottengo che se c'è una cricca c'è un assegnamento booleano, viceversa se c'è un assegnamento booleano c'è una cricca, quindi è una riduzione.\\
+Appartiene a $\textsl{logspace}$ perché posso usare lo stesso meccanismo della rappresentazione binaria e mantenendo gli indici sui nastri di lavoro.
 \end{document}
