@@ -1596,6 +1596,112 @@ $$\textsl{det}(\lambda I - P) = \lambda^{n-1}\cdot\left[\lambda - \mathlarger{\f
 \lambda = \pm\sqrt{n-1}\cdot\theta
 \end{array}$$
 Di conseguenza $\rho(P) = \sqrt{n-1}\cdot|\theta| < 1 \Leftrightarrow |\theta| < \mathlarger{\frac{1}{\sqrt{n-1}}}$
+\chapter{Equazioni Non Lineari}
+Vogliamo adesso analizzare i metodi per la risoluzione di equazioni non lineari.\\
+Una prima importante \textbf{osservazione} è la seguente: \textbf{tutti i metodi} che si trovano in letteratura \textbf{per la risoluzione di equazioni non lineari sono metodi iterativi}. \textbf{Non abbiamo metodi diretti}.\\
+Metodi iterativi significa che generano delle successioni che, sotto opportune ipotesi, convergono alla soluzione $\alpha$ dell'equazione non lineare.
+\paragraph{Quali metodi} Possiamo distinguerli in un metodo (\textbf{metodo di bisezione}) ed una classe di metodi (\textbf{metodi di iterazione funzionale}). Solitamente vengono usati in combinazione tra loro.\\
+Tra i loro \textbf{elementi distintivi} ci sono la \textbf{velocità di convergenza}, cioè quante iterate vanno calcolate per avere una buona approssimazione della soluzione, e la \textbf{regolarità della funzione} (continua, derivabile\ldots).\\
+Sono elementi distintivi perché in generale \textbf{i metodi di iterazione funzionale} (es: metodo delle tangenti, o di Newton) \textbf{al prezzo di una richiesta di maggiore regolarità della funzione, presenteranno migliori proprietà di convergenza rispetto al metodo di bisezione}.\\
+Il \textbf{metodo di bisezione richiede poca regolarità della funzione} ma \textbf{fornisce una convergenza generalmente lenta}. I metodi di iterazione funzionale richiedono maggiore regolarità ma le successioni che producono convergono più rapidamente.
+\section{Metodo di Bisezione}
+Metodo antico, usato sin dagli antichi greci, ma anche il più semplice. Trova la sua natura d'essere nel teorema di esistenza degli zeri: data $f: [a, b] \rightarrow \mathbb{R}$, $f\in C^0([a, b])$ allora $f(a)f(b)<0 \Rightarrow \exists\:\alpha\in [a, b]\:|\:f(\alpha) = 0$\\
+Esiste un punto, ovviamente non è detto che $\alpha$ sia univocamente determinato.
+\begin{list}{}{Notazione}
+	\item $f$ continua su $[a, b] \Leftrightarrow f\in C^0([a,b])$
+	\item $f$ continua e derivata prima continua su $[a, b] \Leftrightarrow f\in C^1([a,b])$
+	\item $f$ continua e derivata prima e seconda continua su $[a, b] \Leftrightarrow f\in C^2([a,b])$
+\end{list}
+Il metodo di bisezione nasce dal seguente problema: dati $a < b \in \mathbb{R}\:|\:f(a)f(b) < 0$ con $f\in C^0([a,b])$ determinare $\alpha\:|\:f(\alpha)=0$. L'idea del metodo è cercare di ridurre l'ampiezza dell'intervallo costruendo una successione di intervalli sempre più piccoli che si porti dietro almeno una delle radici.
+\begin{lstlisting}
+a[1] = a; b[1] = b;
+for k=1:+inf
+	c(k) = (a[k] + b[k])/2; % punto di mezzo di [ak, bk]
+	if(f(c[k])f(a[k]) <= 0)
+		a[k+1] = a[k]; b[k+1] = c[k];
+	else
+		a[k+1] = c[k]; b[k+1] = b[k];
+	end
+end
+\end{lstlisting}
+\paragraph{Intervallo di separazione per $f$} Intervallo che contiene un'unica soluzione per $f(x) = 0$
+\paragraph{Teorema} Se $[a_1, b_1] = [a, b]$ è un \textbf{intervallo di separazione} per $f \in C^0([a, b])$ con $f(a)f(b) < 0$ allora le successioni $a_k, b_k, c_k \longrightarrow \alpha$
+\subparagraph{Dim} Assumendo che l'intervallo iniziale sia un intervallo di separazione, è un ipotesi semplificata. Quindi nell'intervallo $[a, b]$ non solo c'è una radice ma è unica, e la chiamiamo $\alpha$. Per costruzione $\alpha \in [a_k, b_k]$. La distanza tra $\alpha$ e $a_k$ la possiamo sempre maggiorare con l'ampiezza dell'intervallo.
+$$0 \leq |\alpha - a_k| \leq |b_k - a_k| = b_k - a_k = \frac{b_{k-1} - a_{k-1}}{2} = \ldots = \frac{b_1 - a_1}{2^{k-1}} \Rightarrow \lim_{k\to +\infty} |\alpha - a_k| = 0$$
+Analogamente per \begin{list}{}{}
+	\item $b_k$ $0\leq |\alpha - b_k| \leq \mathlarger{\frac{b_1 - a_1}{2^{k-1}}}$
+	\item $c_k$ $0\leq |\alpha - c_k| \leq \mathlarger{\frac{b_1 - a_1}{2^{k}}}$ (notare il $2^k$, leggero vantaggio, perché la distanza tra $c_k$ e $\alpha$ al primo passo si può maggiorare con la semiampiezza dell'intervallo).
+\end{list}
+Abbiamo mostrato che gli $a_k, b_k, c_k$ convergono alla soluzione.\\
+Supponiamo di voler determinare un'approssimazione della radice $\alpha$, denotandola con $\overline{\alpha}$, tale per cui $|\overline{\alpha} - \alpha| < \epsilon$\\ allora se applico il metodo di bisezione ottengo una successione $c_k$ tale per cui $|c_k - \alpha| \leq \mathlarger{\frac{b_1 - a_1}{2^k}}$\\
+Chiedo che $\mathlarger{\frac{b_1 - a_1}{2^k}} \leq \epsilon$, così posso prendere $\overline{\alpha} = \epsilon$. Quindi chiedo un $k$ sufficientemente grande da permettermi $$\frac{b_1 - a_1}{2^k} \leq \epsilon \Leftrightarrow 2^k \geq \frac{b_1 - a_1}{\epsilon} \Leftrightarrow k \geq \log_2\left(\frac{1}{\epsilon}\right) + \log_2\left(b_1 - a_1\right)$$
+da cui si evince che il numero di passi dipende da $\log_2\left(\mathlarger{\frac{1}{\epsilon}}\right)$.\\
+Quindi se volessi una precisione di $10^{-14}$, dovrò fare un numero di passi dell'ordine di $\log_2(10^{14}) = 14\log_2(10)$. Fornisce un criterio \textbf{a priori} sul numero di passi per ottenere una cerca precisione.
+\paragraph{Vantaggi} Costo relativamente basso per ogni passo (solamente una funzione di valutazione per passo) e l'essere applicabile a funzioni con poca regolarità (richiede solo la continuità).
+\paragraph{Difetti} Si generalizza male a funzioni in più variabili e a valori complessi (necessita di $f(a)f(b)<0$).\\
+Ma soprattutto la convergenza è relativamente lenta. In termini di efficienza complessiva del metodo viene soppiantato da altri metodi. Parliamo dei concetti di convergenza interessati quando si parla di convergenza lenta.\\\\
+Supponiamo di avere una successione $\{x_k\}_{k \in \mathbb{N}}$ con $x_k \to \alpha$ e $\forall\:k\:\:x_k \neq \alpha$ (cioè non diventa costante in un numero finito di passi)
+\begin{list}{}{}
+	\item $\{x_k\}_{k \in \mathbb{N}}$ \textbf{converge linearmente} se 
+	$$\lim_{k\to+\infty} \frac{|x_{k+1} - \alpha|}{|x_k - \alpha|} = l < 1$$
+	Se $l = \mathlarger{\frac{1}{2}}$ significa che dopo un passo ho ridotto di $\frac{1}{2}$, dopo due passi di $\frac{1}{4}$\ldots e per arrivare ad una precisione, per esempio, di $10^{-12}$ ci metto un po'.
+	\item \item $\{x_k\}_{k \in \mathbb{N}}$ \textbf{converge almeno quadraticamente} se 
+	$$\lim_{k\to+\infty} \frac{|x_{k+1} - \alpha|}{|x_k - \alpha|^2} = c \in \mathbb{R}$$
+	Con $c$ costante reale arbitraria.\\
+	Diremo \textbf{quadraticamente} se $c\neq 0$, \textbf{più che quadraticamente} se $c=0$ (la convergenza potrebbe essere anche più rapida).
+\end{list}
+\pagebreak
+Quindi in una convergenza lineare, l'errore al passo $k+1$ $|x_{k+1} - \alpha| \simeq l|x_k - \alpha|$\\
+In una convergenza almeno quadratica, l'errore al passo $k+1$ $|x_{k+1} - \alpha| \simeq c|x_k - \alpha|^2$, con quindi una decrescita nettamente differente e \textbf{molto più rapida}.
+\paragraph{Esempio} $l = \frac{1}{2}$, $c = 1$, $|x_0 - \alpha| = \frac{1}{2}$\\
+Con convergenza lineare ho $\mathlarger{\frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{32},\ldots,\frac{1}{2^{k-1}}}$\\
+Con convergenza quadratica ho $\mathlarger{\frac{1}{2}, \frac{1}{2^2}, \frac{1}{2^4},\frac{1}{2^8}, \ldots, \frac{1}{2^{2^{k-1}}}}$\\\\
+Il problema è che \textbf{il metodo di bisezione presenta tipicamente una convergenza lineare}.
+\section{Metodi di Iterazione Funzionale}
+Seguono un po' la stessa idea che ha portato alla nascita dei metodi iterativi per risolvere sistemi lineari. Posso riformulare
+$$f(x) = 0 \Leftrightarrow x = g(x)$$
+\begin{list}{}{Vari esempi:}
+	\item $f(x) = 0 \Leftrightarrow x = x - f(x)$, con $g(x) = x - f(x)$
+	\item $f(x) = 0 \Leftrightarrow x = x - \frac{f(x)}{h(x)}$, con $g(x) = x - \frac{f(x)}{h(x)}$
+\end{list}
+$f(x) = 0 \Leftrightarrow x = g(x) \Rightarrow \left\{\begin{array}{l}
+x_0 \in \mathbb{R}\\
+x_{k+1} = g(x_k)
+\end{array}\right.$\\Oltre ad una radice $\alpha$ per cui $f(\alpha) = 0$ posso trovare un \textbf{punto fisso} $x = g(x)$ ottenendo che $f(\alpha) = 0 \Leftrightarrow \alpha = g(\alpha)$\\Quindi \textbf{il calcolo degli zeri di $f$ è ricondotto al calcolo dei punti fissi di $g$}. Bisogna capire quando la successione ha speranze di convergere. Molto difficile trovare successioni convergenti per ogni punto iniziale, quasi impossibile.
+\paragraph{Teorema del punto fisso} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$\\
+Se $\exists\:\rho>0\:|\:|g'(x)|<1\:\forall\:x\in I_\alpha = [\alpha - \rho, \alpha + \rho]\subseteq[a, b]$  allora il metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ genera successioni tali che:
+\begin{enumerate}
+	\item $x_k \in I_\alpha\:\:\forall\:k\geq 0$
+	\item $\mathlarger{\lim_{k\to+\infty}}x_k = \alpha$
+\end{enumerate}
+\subparagraph{Dim} $g$ è una funzione di classe $C^1 \Rightarrow g'$ continua $\Rightarrow |g'|$ continua quindi, per Wierstrass (una funzione continua in un intervallo chiuso e limitato ammette massimo e minimo) $\Rightarrow \mathlarger{\textsl{max}_{x\in I_\alpha}}|g'(x)| = \lambda < 1$\\
+Dimostro per induzione che la successione generata dal metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ soddisfa la relazione\\$|x_k - \alpha| \leq \lambda^k\rho\:\:\forall\:k\geq 0$
+\begin{list}{}{}
+	\item Passo base $k = 0$\\
+	$|x_0 - \alpha| \leq \lambda^0\rho = \rho$ \textbf{ok} per l'ipotesi $x_0 \in I_\alpha$
+	\item Passo induttivo $k \Rightarrow k+1$\\
+	$|x_{k+1} - \alpha| = |g(x_k) - g(\alpha)| =$ per \textbf{Lagrange} $|g'(\xi_k)(x_k - \alpha)|$ con $\xi_k$ punto tra $x_k$ e $\alpha$\\
+	Lagrange dice che $f(a) - f(b) = f'(\xi)(a - b)$ con $\xi$ tra $a$ e $b$\\
+	Per ipotesi induttiva $|\xi_k - \alpha| \leq |x_k - \alpha| \leq \lambda^k\rho < \rho$ perché $\lambda < 1$, quindi $\xi_k \in I_\alpha$\\
+	Quindi $|x_{k+1} - \alpha| = |g'(\xi_k)|\cdot|x_k - \alpha| \leq \lambda\cdot\lambda^k\rho = \lambda^{k+1}\rho$
+\end{list}
+Traiamo che tutti i punti della successione appartengono a $I_\alpha$, ma concludiamo anche che $$0 \longleftarrow 0 \leq |x_k - \alpha| \leq \lambda^k\rho \longrightarrow 0$$
+Quindi $|x_k - \alpha| \rightarrow 0 \Leftrightarrow x_k \rightarrow \alpha$
+\paragraph{Corollario} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$, se riesco a trovare un intervallo \textbf{centrato in $\alpha$} tale per cui $|g'(x)| < 1$ allora per ogni punto iniziale di quell'intervallo la successione converge ad $\alpha$. Cioè\\
+se $|g'(x)| < 1 \Rightarrow \exists\:\rho\geq 0\:\:|$ posto $I_\alpha = [\alpha - \rho, \alpha + \rho]$ il metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ genera successioni che soddisfano le precedenti proprietà 1 e 2
+\subparagraph{Dim} $h(x) = |g'(x)| - 1$ continua in $[a, b]$\\
+Allora $h(\alpha) = |g'(\alpha)| - 1 < 0 \Rightarrow$ per il teorema della permanenza del segno $\exists$ un intorno di $\alpha$ dove $h(x) < 0 \Leftrightarrow |g'(x)| < 1$ in cui vale la dimostrazione precedente.\\\\
+Il corollario ci dice che \textit{esiste un intorno}, ma non ci da informazioni su quando ampio sia o quanto ci si possa spostare da $\alpha$. Ci dà un risultato sulla \textbf{convergenza locale}.\\
+Un metodo è localmente convergente se possiamo trovare un intorno tale per cui per ogni punto iniziale preso dall'intorno tutti i punti stanno lì dentro e la successione converge.
 \chapter{Esercitazioni}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
 \paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
