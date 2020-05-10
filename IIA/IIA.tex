@@ -2668,4 +2668,53 @@ Modelli lineari:  è intuitivamente legato al numero di parametri liberi (dim in
 Decision trees: numero di nodi.
 \paragraph{Conclusioni} Flessibilità modelli ML. Potenza ML senza controllo produce risultati illusori. Controllare tradeoff tra fitting e complessità. Fondamentale il ruolo dei processi di validazione
 \paragraph{ML ben fondato teoricamente} Domande fondamentali nella SLT.
+\chapter{Support Vector Machine}
+\paragraph{SVM} Sostanzialmente è un modello lineare, ma è nato dalla Statistical Learning Theory. Diventata famosa, dopo anni di sviluppo teorico, quando usando immagini come input ha avuto un'accuratezza comparabile a quella di reti neurali sviluppate ad hoc.\\
+SVM è attualmente usato in tutti i campi di applicazione dell'apprendimento supervisionato, e anche usato per la regressione.\\
+Argomento tipico introdotto alla fine di un corso di ML, perché discuterlo nei dettagli richiede una visione approfondita del ML. Saremmo comunque tentati di usarlo, attraverso uno dei tanti tool: ci dà una prima \textbf{visione critica}. Anche opportunità per vedere almeno un modello allo stato dell'arte.\\
+\textbf{Ripartiremo dai modelli lineari} per la classificazione, reintegrandoli per problemi non lineari.
+\paragraph{Obiettivi} \begin{enumerate}
+	\item Introdurre il \textbf{concetto di controllo di complessità} del modello \textbf{attraverso un approccio di ottimizzazione}\\
+	Questo per \textbf{approssimare direttamente} la minimizzazione del rischio strutturale (Structural Risk Minimization)\\
+	\textbf{Max Margin Classifier}
+	\item \textbf{Usare efficientemente la linear basis expansion} attraverso il concetto di \textbf{kernel}\\
+	Così otteniamo un altro approccio flessibile per apprendimento non lineare e supervisionato\\
+	\textbf{Kernel}
+	\item \textbf{Evitare misinterpretazioni nell'uso dell'SVM} e del ML
+\end{enumerate}
+\section{Maximum Margin Classifier}
+\paragraph{Soluzioni} In generale per un problema ci possono essere più soluzioni ottime, ma vanno davvero tutte bene? Per noi all'interno del ML \textbf{no}, e vediamo come deciderlo.
+\pagebreak
+\paragraph{Classificazione a massimo margine} Su un problema di classificazione binaria, iniziando con l'assumere di avere un problema linearmente separabile (\textbf{hard margin SVM}).\\
+\textbf{Non tutti gli iperpiani che risolvono un task sono uguali}.
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.55]{mlmargin.png}
+\end{center}\begin{center}
+	\includegraphics[scale=0.55]{mlmargin2.png}
+\end{center}
+\end{multicols}
+Variando l'iperpiano separatore il \textbf{margine} cambia.
+\paragraph{Margine} Il margine è il \textbf{doppio della distanza tra l'iperpiano e i punti più vicini}.
+\paragraph{Intuitivamente} Il max margin classifier intuitivamente è \textbf{la massima distanza dai datapoint, la massima "\textit{safe zone}"}.
+\paragraph{Rappresentazione canonica nell'SVM} I pallini nella figura rappresentano i vettori di supporto, quelli verdi sono i positivi ($x^+$) e i bianchi i negativi ($x^-$).\\
+I \textbf{vettori di supporto} sono quei vettori per cui l'iperpiano vale \textbf{esattamente 1} per i positivi, o -1 per i negativi. \textbf{Quelli su bordo del margine}.\\Cioè $|w^Tx_i + b| = 1$. Tutti i punti sono correttamente classificati se $(w^Tx_i + b)y_i \geq 1$ per ogni $i$ che sostanzialmente indica che tutti i punti sono lontani dal margine.\\\\
+Considereremo il problema di apprendere un modello lineare per classificazione binaria, cioè una funzione\\$h : \mathbb{R}^n \rightarrow \{-1, 1\}$, $h($x$) = \textsl{segno}($w$^T$x$ + b)$, basandosi su esempi $(x_i, y_i)$\\
+\textbf{Training Problem}: trovare $($w$, b)$ \textbf{tale che tutti i punti sono correttamente classificati \textit{e il margine è massimizzato}}.
+\paragraph{Margine} Il margine è dato dalla formula $= \mathlarger{\frac{2}{|\text{w}|}}$, dove $|$w$|^2 = ($w$^T$w$)$\\
+Quindi massimizzo margine $\Leftrightarrow$ minimizzo $|$w$| \Leftrightarrow$ minimizzo $\mathlarger{\frac{|\text{w}|^2}{2}}$
+\paragraph{Th} \textbf{La VC-dim dell'SVM è inversa al margine}, quindi \textbf{controllo della complessità tramite il margine} vedi SLT\\\\
+\textbf{L'iperpiano ottimo è quello che massimizza il margine} e risolve il problema.\\
+Possiamo ora impostare il tutto come un problema di ricerca operativa.
+\paragraph{Forma Primale hard margin} \textbf{Training Problem} diventa minimizzare $\mathlarger{\frac{|\text{w}|^2}{2}}$ (cioè w$^T$w) in maniera che $($wx$_i + b)y_i \geq 1\:\:\forall\:i$\\
+Diventa un problema di ottimizzazione quadratica, risolvibile con software appositi.\\
+Diretta ottimizzazione di complessità del modello. La funzione obiettivo, che è l'ottimizzazione stessa (e fornisce la soluzione con errore 0 perché si assume che il problema sia linearmente separabile), è convessa in w.
+\paragraph{Forma Duale} Nella formula duale si calcolano gli $\alpha$, moltiplicatori di Lagrange, che sono legati ai vettori di supporto e ad una forma speciale della soluzione, più elegante.\\
+Con gli $\alpha$ si può calcolare $($w$, b)$, w $= \sum \alpha_i y_i$x$_i$ con $i=1\ldots l$ e $b = y_k - $w$^T$x$_k$ per qualsiasi $\alpha_k > 0$, con $l$ numero dei dati.
+$$h(\text{x}) = \textsl{segno}(\text{w}^T\text{x} + b) = \textsl{segno}\left(\sum_{i=1}^l \alpha_i y_i \text{x}_i^T\text{x} + b \right) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i \text{x}_i^T\text{x} + b \right)$$
+Si ottiene $\alpha_i \neq 0 \Leftrightarrow $x$_i$ è un \textbf{vettore di supporto}. La \textbf{soluzione è sparsa e formulata solamente in termini dell'SV}: l'\textbf{iperpiano dipende solo dai vettori di supporto}.\\
+In questa formulazione della soluzione non è neanche necessario calcolare esplicitamente $($w$, b)$
+\paragraph{Soft Margin SVM} Nell'hard margin, visto fin'ora, si potrebbe avere troppa restrittività. Possiamo concedere un po' di errore, per tollerare dati rumorosi e avere un margine più ampio.\\
+Soluzione: consentire errori introducendo le slack-variables.
+\paragraph{Forma Primale soft margin} Minimizzare $\mathlarger{\frac{|\text{w}|^2}{2} + C\cdot\sum_i \xi_i}$ (cioè w$^T$w) in maniera che $($wx$_i + b)y_i \geq 1\:\:\forall\:i$\\
 \end{document}
