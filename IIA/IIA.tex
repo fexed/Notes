@@ -2715,6 +2715,75 @@ $$h(\text{x}) = \textsl{segno}(\text{w}^T\text{x} + b) = \textsl{segno}\left(\su
 Si ottiene $\alpha_i \neq 0 \Leftrightarrow $x$_i$ è un \textbf{vettore di supporto}. La \textbf{soluzione è sparsa e formulata solamente in termini dell'SV}: l'\textbf{iperpiano dipende solo dai vettori di supporto}.\\
 In questa formulazione della soluzione non è neanche necessario calcolare esplicitamente $($w$, b)$
 \paragraph{Soft Margin SVM} Nell'hard margin, visto fin'ora, si potrebbe avere troppa restrittività. Possiamo concedere un po' di errore, per tollerare dati rumorosi e avere un margine più ampio.\\
-Soluzione: consentire errori introducendo le slack-variables.
-\paragraph{Forma Primale soft margin} Minimizzare $\mathlarger{\frac{|\text{w}|^2}{2} + C\cdot\sum_i \xi_i}$ (cioè w$^T$w) in maniera che $($wx$_i + b)y_i \geq 1\:\:\forall\:i$\\
+Soluzione: consentire errori introducendo le variabili \textbf{slack} $\xi_i$, non nulle per qualche $i$ dove consento l'errore.
+\paragraph{Forma Primale soft margin} Minimizzare $\mathlarger{\frac{|\text{w}|^2}{2} + C\cdot\sum_i \xi_i}$ in maniera che $($wx$_i + b)y_i \geq 1 - \xi_i\:\:\xi_i \geq 0\:\:\forall\:i$\\
+$C$ è un \textbf{iperparametro} definito dall'utente che \textbf{guida il numero di errori concessi}:
+\begin{list}{}{}
+	\item $C$ basso $\rightarrow$ vengono consentiti molti errori di training $\rightarrow$ possibile underfitting
+	\item $C$ alto $\rightarrow$ non vengono consentiti errori TR $\rightarrow$ margine piccolo e possibile overfitting %29.36
+\end{list}
+Essendo $C$ un iperparametro, và trovato tramite la validation (\textbf{model selection}), quindi rientra in gioco il trade-off.\\
+L'hard margin \textbf{non} si ottiene con $C=0$, poiché bisogna considerare gli $\xi_i$ presenti nei vincoli: si darebbe totale libertà alle variabili slack. $C = 0$ significa "\textit{puoi anche fare il 100\% di errori nel TR}". L'hard margin, quindi, si ottiene con un $C$ \textbf{molto alto}.
+\section{Kernel}
+Fin'ora abbiamo parlato solo di problemi linearmente separabili, per quanto riguarda i casi non lineari?
+\paragraph{Kernel} Modo per usare efficientemente la linear basis expansion, così da ottenere un nuovo approccio flessibile per modelli supervisionati non lineari.\\
+Sappiamo che si può trasformare lo spazio originale in maniera da risolvere i problemi non lineari, tramite la $\phi$. I separatori lineari nel nuovo spazio corrispondono a separatori non lineari nello spazio originale.
+\begin{center}
+	\includegraphics[scale=0.6]{mlkernel.png}\\
+	Nell'esempio $\phi : \mathbb{R}^2 \rightarrow \mathbb{R}^3$ a cui $(x_1, x_2)^T\mapsto (x_1^2, \sqrt{2}x_1x_2, x_2^2)^T$
+\end{center}
+Bisogna quindi mappare i datapoint dello spazio in input verso un \textbf{feature-space} a più dimensioni dove sono linearmente separabili.\\
+Quindi al posto di x possiamo usare $\phi($x$)$. Sappiamo però che usare un high dimensional feature space può essere sia computazionalmente oneroso sia portare all'overfitting se non si opera un controllo della dimensione del feature space e della complessità del classificatore (in termini di dimensioni dell'input, cioè se uso troppe $\phi$).
+$$h_\text{w}(\text{x}) = \textsl{segno}\left(\sum_k w_k\phi_k(\text{x})\right)$$
+\paragraph{Kernel} Approccio per mappare implicitamente il feature space \textbf{nel contesto di un modello regolarizzato}, perché la complessità è legata al margine.\\
+Grazie alla regolarizzazione automatica del SVM, la complessità del classificatore può essere tenuta bassa qualunque sia la dimensione del nuovo feature space.\\
+\textbf{Se proietto in uno spazio anche molto ampio, ma riesco a tenere un margine ampio, la complessità è comunque regolare}.
+\subparagraph{} Nell'SVM non è necessario calcolare w e i dati tramite prodotti scalari $h(\text{x}) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i \text{x}_i^T\text{x} + b \right)$
+$$h_\text{w}(\text{x}) = \textsl{segno}\left(\sum_k w_k\phi_k(\text{x})\right) \Rightarrow h(\text{x}) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i \phi^T(\text{x}_i)\phi(\text{x}) \right)$$
+Ma non è nemmeno necessario calcolare direttamente $\phi$, ma si può \textbf{gestire implicitamente} tramite una funzione Kernel
+$$h(\text{x}) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i K(\text{x}_i, \text{x}) \right)$$
+Con $K(x, y) = \phi(x)^T\phi(y)$
+\subsection{Kernel notevoli}
+\paragraph{Lineare} $K(\text{x}_i, \text{x}_j) = \text{x}_i^T\text{x}_j$\\
+Mappa $\phi : \text{x} \mapsto \phi(\text{x})$ dove $\phi(\text{x}) = \text{x}$
+\paragraph{Polinomiale di potenza $p$} $K(\text{x}_i, \text{x}_j) = (1 + \text{x}_i^T\text{x}_j)^p$\\
+Mappa $\phi : \text{x} \mapsto \phi(\text{x})$ dove $\phi(\text{x})$ ha dimensione esponenziale in $p$
+\paragraph{RBF} (Radial-Basis Function) Gaussiana $K(\text{x}_i, \text{x}_j) = \mathlarger{e^{-\mathlarger{\frac{||\text{x}_i - \text{x}_j||^2}{2\sigma^2}}}}$\\
+Mappa $\phi : \text{x} \mapsto \phi(\text{x})$ dove $\phi(\text{x})$ ha dimensione \textbf{infinita}.\\
+Scelta molto popolare, notare l'iperparametro $\sigma$. Molto flessibile e utilizzabile per costruire decision boundary attorno ad ogni punto. $\sigma$ piccolo significa Kernel a punta stretta, cioè pattern simili solo se molto vicini e il classificatore risponde con la classe del punto più vicino.\\
+Molto potente ma portato all'overfitting.
+\paragraph{} Il design di nuovi kernel per tipi di dato speciali è un argomento di ricerca attuale.
+\section{Sintesi su SVM}
+\begin{list}{}{}
+	\item Trade-off sul parametro $C$ e la funzione kernel $K$ (e i suoi parametri)
+	\item Risolvere il problema di ottimizzazione per trovare $\alpha$\\
+	Il costo computazionale scala con $l$ (numero dai dati) invece di $n$ (dimensione dello spazio).\\
+	Modularità: basta cambiare il kernel
+	\item Modello finale
+	$$h(\text{x}) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i K(\text{x}_i, \text{x}) \right)$$
+\end{list}
+\section{Uso pratico}
+\subsection{Evitare la misinterpretazione}
+La tipica misinterpretazione nell'uso dell'SVM è pensare che non faccia overfitting. Esso può verificarsi se non si opera un'attenta selezione dei parametri C, kernel, parametri del kernel\ldots\\
+La trattazione implicita di un spazio a grandi dimensioni è \textbf{nel feature space}, non nell'input space (assumendo di proiettarci gli input significativi)\\
+Le tecniche di \textbf{validazione} viste precedentemente per il model selection (C, kernel e parametri) e model evaluation dovrebbero essere usate rigorosamente anche qua.\\
+Una piccola guida all'uso (da LIBSVM):
+\begin{enumerate}
+	\item Trasformare i dati nel formato di un software SVM
+	\item Scalare i dati
+	\item Considerare il kernel RBF $K(x, y) = e^{-\gamma||x-y||^2}$ con $\gamma = \mathlarger{\frac{1}{2\sigma^2}}$
+	\item Usare il cross-validation per trovare i parametri $C$ e $\gamma$ (\textbf{validation set} $\neq$ TR set)
+	\item Testare (\textbf{su un set separato ed esterno})
+\end{enumerate}
+\paragraph{Data processing} Alcuni esempi:
+\begin{list}{}{}
+	\item Colori \{rosso, verde, blu\} $\rightarrow$ (0,0,1), (0,1,0), (1,0,0)
+	\item Per scalare valori continui in un range con la formula $\mathlarger{\frac{x - \textsl{min}}{\textsl{max} - \textsl{min}}}$
+\end{list}
+\paragraph{Model selection grid-search} Per esempio per trovare $C$ e $\gamma$ nell'RBF: con una tabella con tutte le combinazioni di valori crescenti possibili per trovare intervalli buoni, ad esempio
+\begin{list}{}{}
+	\item $C = 2^{-5}, 2^{-3},\ldots,2^{15}$
+	\item $\gamma = 2^{-15}, 2^{-13},\ldots,2^3$
+\end{list}
+Per poi usare una grid-search più fine, una volta trovato il range interessato (es. $2^2, 2^3$).
 \end{document}
