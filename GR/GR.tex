@@ -706,7 +706,7 @@ Qualche versione è specifica per alcune piattaforme di Cisco.
 	\item Contatori: di byte e di paccketti
 	\item Tempo: sysuptime start/end
 \end{list}
-\paragraph{Nascita e morte di un flusso} Siamo a livello 3. Il traffico deve entrare e uscire dal router, quindi interf ingr e usc: il traffico è esaminato, cioè passato al probe. Posso mettere nel pc di casa un software per sniffing, ma nel router i pacchetti passano attraverso di lui. Probe prende dati e li raggruppa, li gestisce. Si tiene una cache dei flussi attivi. Appena c'è pacchett non conosciuto la popola.\\Al suo interno ha sistema ispezione pacchetti. In cache c'è una sorta di hashtable, come chiave ho ip porte\ldots, come valore ho almeno i byte e i pacchetti.\\
+\paragraph{Nascita e morte di un flusso} Siamo a livello 3. Il traffico deve entrare e uscire dal router, quindi interf ingr e usc: il traffico è esaminato, cioè passato al probe. Posso mettere nel pc di casa un software per sniffing, ma nel router i pacchetti passano attraverso di lui. Probe prende dati e li raggruppa, li gestisce. Si tiene una cache dei flussi attivi. Appena c'è pacchetto non conosciuto la popola.\\Al suo interno ha sistema ispezione pacchetti. In cache c'è una sorta di hashtable, come chiave ho ip porte\ldots, come valore ho \textit{almeno} i byte e i pacchetti.\\
 Terminano quando:
 \begin{list}{}{}
 	\item La comunicazione di rete termina (es: FIN)
@@ -714,4 +714,83 @@ Terminano quando:
 	\item Non attivo da troppo (default 15s)
 	\item Cache piena e necessario purge (è limitata, non è raro non poter gestire tutti i flussi)
 \end{list}
+Perché taglio quando il flusso dura troppo? Sennò manderei i dati tutti alla fine, con picchi di traffico, e sballerebbe le misura.
+\paragraph{Pacchetti NetFlow} Header comune rispetto alle varie versioni. A seconda della versione c'è un campo che specifica il numero di record $N$. $N$ è determinato dalla dimensione massima del payload UDP (circa 1480 byte), $N=30$ per v5. Nessuna frammentazione.\\
+Header contiene:\begin{list}{}{}
+	\item \textbf{version} es: 5
+	\item \textbf{count} (numero di record nel payload)
+	\item \textbf{sysuptime} del router (da quanto è acceso)
+	\item \textbf{unix\_secs} (epoca del flusso, secondi da 0000 UTC 1970)
+	\item \textbf{unix\_nsecs}
+	\item \textbf{flow\_sequence} (numero di flussi inviati, per sapere se collezionatore si è perso qualcosa non sa cosa ma sa di aver perso qualcosa)
+	\item \textbf{engine\_type} per caratterizzare tramite info su chi ha generato i dati
+	\item \textbf{engine\_id} numero di slot per l'engine
+\end{list}
+Flusso contiene:
+\begin{multicols}{2}
+ \begin{list}{}{}
+	\item \textbf{srcaddr} ipv4
+	\item \textbf{dstaddr} ipv4
+	\item \textbf{nexthop} (per sapere come viene routato traffico dentro il pc: 
+	\item \textbf{input} indice di interfaccia snmp
+	\item \textbf{output} indice di interfaccia snmp
+	\item \textbf{dPkts} numero pacchetti
+	\item \textbf{dOctets} numero ottetti
+	\item \textbf{First} sysuptime dell'inizio del flusso
+	\item \textbf{Last} sysuptime dell'ultimo pacchetto
+	\item \textbf{srcport} TCP/UDP porta origine
+	\item \textbf{dstport} TCP/UDP porta destinazione
+	\item \textbf{pad1} padding
+	\item \textbf{tcp\_flags} or cumulativo dei flag tcp
+	\item \textbf{prot} protocollo ip (6=TCP, 17=UDP\ldots)
+	\item \textbf{tos} type-of-service
+	\item \textbf{src\_as} as origine
+	\item \textbf{dst\_as} as destinazione
+	\item \textbf{src\_mask} bitmask source route
+	\item \textbf{dst\_mask} bitmask dest route
+	\item \textbf{pad2} padding
+ \end{list}
+\end{multicols}
+\chapter{Data Structures}
+\paragraph{Bitmap} Array di bit. Lunghezza arbitraria e aggiunta/rimozione in O(1) con operazioni su bit semplici. Memoria in base ai bit usati
+\begin{center}
+	\includegraphics[scale=0.75]{bitmap.png}
+\end{center}
+\paragraph{Compressed Bitmaps} Array di bit solitamente di lunghezza predefinita. Utile per specifici domini, possono essere sparse. Es. [0,12,23,500,510,522,10000] maggiorparte a 0 e solo 7 bit a 1. Inefficiente. Si possono comprimere contando il numero di ripetizioni es. 1(1), 11(0), 1(1), 10(0), 1(1), 476(0)\ldots che significa 1 bit a 1, 11 bit a 0\ldots\\
+Molte librerie come WAH, EWAH, COMPAX\ldots la maggiorparte non permettono di settare un bit arbitrario.\\
+Se si settano bit solo in avanti si può costruire la bitmap a runtime con memoria minima.\\
+Vantaggio: una volta compressa si possono fare AND, OR, NOT senza fare unroll (cioè decomprimere). Una delle più popolari è \texttt{roaringbitmap.org}
+\subparagraph{Compressed Bitmap Indexes} 
+\begin{center}
+	\includegraphics[scale=0.7]{comprbitmapindex.png}
+\end{center}
+Sono utili per memorizzare dati flussi perché molto efficienti. Nell'esempio si ragiona per colonne, prendo uno dei valori e setto nelle colonne il valore corrispondente nei bit. Creo l'indice bit a bit, e ogni colonna rappresenta il bit $i$-esimo. $n$ colonne, una per bit, se vedo ogni colonna indipendente la posso vedere come una bitmap compressa.\\
+Dammi tutte le righe che hanno valore 1: $C_0 = 1$ AND $C_1 = 0$ AND $C_2 = 0$ AND $C_3 = 0$\\
+Estremamente veloci, molto più delle bitree su dimensioni notevoli. Altra proprietà: per trovare indirizzi nelle netmask (tutte colonne che fanno parte della maschera settati come voglio), oppure mettere in AND due righe per prendere quelle che si intersecano su valori che voglio.
+\paragraph{Bloom Filters} I bloom filters sono strutture dati probabilistiche che rispondono alla domanda: elemento appartiene a set? Risponde con una certa probabilità.\\
+Si può rispondere a questa domanda con altre strutture dati, come hash o bitmap molto lunghe, al prezzo di un costo molto maggiore perché in quei casi si analizzano dati raw.\\
+Sono array di bit di lunghezza $m$, settando i bit usando almeno due funzioni hash indipendenti e uniformemente distribuite $h_1()$ e $h_2()$. Se voglio aggiungere $\alpha$, faccio $h_1(\alpha)$ e setto i bit che vengono fuori, poi $h_2(\alpha)$ e setto i bit. Per vedere se $\beta$ è presente, faccio le due hash e vedo se i due bit sono stati settati, allora \textbf{certa probabilità} che $\beta$ appartiene, se uno o nessuno dei due è settato allora sicuramente non appartiene.\\\\
+La probabilità non è uno svantaggio, perché permette di fare ricerche molto veloci. Essendo probabilistica \textbf{non posso avere la certezza}.
+\begin{center}
+	\includegraphics[scale=0.85]{bloomfilters.png}
+\end{center}
+Con i \textbf{counting bloom filters} rimpiazzo il vettore di bit con un intero per sapere quanti bit sono settati o quante volte è stato settato un bit. Più memoria, ma si possono rimuovere elementi (con i bloom non si può).\\
+Buoni hash sono murmur, nfv e md5.
+\paragraph{Trie} Pronunciato try, (pun su \textit{re\underline{trie}val and tree}). Albero non basato su comparazioni, ogni nodo ha etichetta.
+\begin{center}
+	\includegraphics[scale=0.5]{tries.png}
+\end{center}
+Nodi aggiunti/rimossi/cercati. Possibilità di cercare stringhe che iniziano per prefissi, e generare stringa in ordine di dizionario (se link in ordine alfabetico)
+Performance in $O(w)$ dove $w$ è lunghezza dell'albero.
+\subparagraph{Radix tree} Come trie ma nodi collassati
+\begin{center}
+	\includegraphics[scale=0.5]{radixtrie.png}
+\end{center}
+\subparagraph{Patricia Tree} Numeri invece di stringhe, ogni nodo contiene una parte di indirizzi IP.\\
+Struttura dati di riferimento per subnetting match su IPv4/IPv6.\\
+codice su \texttt{github.com/ntop/nDPI/blob/dev/src/lib/third\_party/src/ndpi\_patricia.c}
+\paragraph{Entropia} Entropia misura usata per misurare come i dati sono distribuiti su un certo range. Più alta entropia più dati sono sparpagliati.\\
+Formula \texttt{csrc.nist.gov/csrc/media/publications\ldots}\\
+Esempio per usarla: grado di quanto sono distribuiti i dati\\
+Esempio di uso sul TLS: entropia dei byte prima e dopo crittografia cambia ma è sempre compresa fra delle soglie per dati omogenei. Tramite entropia si può capire il tipo di dato.
 \end{document}
