@@ -658,4 +658,14 @@ S.O. non tiene traccia delle richieste mandate, usa l'high water mark (si segna 
 Se null Intento non consegnato\\
 Altrimenti si può utilizzare per avere info: getClass, getPackageName\ldots
 \paragraph{Riassunto Service Started} %TODO
+\paragraph{Ottimizzazione batteria} Alcune strutture\\
+\textbf{JobIntentService} Come intent service ma come job periodici invece che come\\\textbf{startForegroundService()} come starService()\ldots
+\paragraph{Bound Service} Interazione limitata. Garantiscono disponibilità servizio per un periodo più lungo. chiamare metodi del service attraverso inter-process communication: in-process con un IBinder o cross-process con AIDL (Android Interface Description Language) (analogo a RMI e RPC)\\
+Binding: service e componente legati in modo più stabile e comunicativo, connessione rimane fino ad unbound esplicito.
+\paragraph{Iniziare un Binding} bindService, servizio si identifica comunque con un Intent. Altro parametro: connection che controlla tempo di vita del binding. Su connessione lancia onServiceConnected(ComponentName name, IBinder binder) con binder interfaccia su cui chiamare i metodi\\
+Su disconnessione onServiceDisconnected(ComponentName name)
+\paragraph{Usare un servizio bound} bindService(intent, conn, flag) $\rightarrow$ onBind(intent) del service e forse onCreate(). onBind restituisce binder che implementa l'interfaccia IBinder, passato alla onServiceConnected() di conn. Da qui in poii si usano i metodi del binder, alla fine si chiama unbindService(conn)\\\\
+Rischio sicurezza se usiamo un intent implicito in bindService(): non possiamo sapere quale rispondere, ma qua è pieggio perché possiamo invocare metodi che il service che ha risposto non ha. Da Android 5.0 non si può chiamare con intent implicito (eccezione).
+\paragraph{Mescolare bound e unbound} Possibile che un Service offra sia interfaccia unbound e bound, perché onStartCommand() e onBind() sono separate. Tuttavia complica molto il ciclo di vita, meglio in generale scegliere uno stile e mantenerlo.
+
 \end{document}
