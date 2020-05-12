@@ -667,5 +667,34 @@ Su disconnessione onServiceDisconnected(ComponentName name)
 \paragraph{Usare un servizio bound} bindService(intent, conn, flag) $\rightarrow$ onBind(intent) del service e forse onCreate(). onBind restituisce binder che implementa l'interfaccia IBinder, passato alla onServiceConnected() di conn. Da qui in poii si usano i metodi del binder, alla fine si chiama unbindService(conn)\\\\
 Rischio sicurezza se usiamo un intent implicito in bindService(): non possiamo sapere quale rispondere, ma qua è pieggio perché possiamo invocare metodi che il service che ha risposto non ha. Da Android 5.0 non si può chiamare con intent implicito (eccezione).
 \paragraph{Mescolare bound e unbound} Possibile che un Service offra sia interfaccia unbound e bound, perché onStartCommand() e onBind() sono separate. Tuttavia complica molto il ciclo di vita, meglio in generale scegliere uno stile e mantenerlo.
+\chapter{Sensori di sistema}
+\paragraph{Accesso ai sensori} Android implementa sistema sensori del tutto generico. Esteso a tipi di sensori diversi, meccanismi simili ma \textbf{valori da interpretare}.\\
+Servizio di sistema: \textbf{SensorManager}. Come per altri servizi, una volta ottenuto l'handle si possono usare i metodi.
+\paragraph{Sensor Discovery} getSensorList, restituisce lista di oggetti di classe Sensor. Chiede un qualificatore di tipo, con Sensor.TYPE\_ALL chiedo tutti i sensori.\\
+Ogni Sensor descrive un tipo di sensore: type, name, vendor, version, max range, min delay, resolution, power.\\
+Si può avere più di un Sensor per tipo, uno è quello usato per default. Per ottenerlo getDefaultSensor(tipo).\\
+Alcuni sono hw altri sw: integrando un sensore di accelerazione, si può ottenere un sensore di velocità, oppure con un filtro passa-basso si può determinare la forza di gravità. Allo sviluppatore non importa distinguerli (è anche una brutta idea tentare di farlo).
+\paragraph{Sensori necessari} Si può chiedere nel manifest che sul dispositivo ci sia un certo sensore: uses-feature.
+\paragraph{Leggere sensori} \textit{Con calma e per favore}: si registra un listener indicando anche con che frequenza si vuole essere chiamati ma è il sistema a decidere quando chiamarti. Due callback:
+\begin{list}{}{}
+	\item onSensorChanged(): cambia valore letto (es: bussola e telefono viene ruotato)
+	\item onAccuracyChanged(): cambia l'accuratezza del sensore (es: passo da localizzazione GPS a quella radio \textit{anche se GPS non è letto come sensore è solo un esempio})
+\end{list}
+\textbf{Molto sensato} registrare listener nella onResume e de-registrarlo nella onPause(), così da leggere sensore solo quando activity è in primo piano.\\\\
+Registrazione con registerListener(SensorEventListener l, Sensor sens, int rate): registra l per essere informato degli eventi relativi a senso con una frequenza di \textbf{circa} rate (espresso in microsecondi: ci sono costanti predefinite.\\
+Il listener può essere creato come anonymous (new SensoEventListener dentro la chiamata) o implementarlo nell'Activity come al solito.
+\paragraph{Accuracy} indicazione realativa allo stato del sensore, \textbf{non è la risoluzione}.
+\paragraph{SensorEvent}
+\paragraph{Cautele}
+\begin{list}{}{}
+	\item + precisione + batteria
+	\item + frequenza + batteria
+	\item mai lasciare listener registrati per più del dovuto
+	\item considerare approcci adattivi: leggere poco e male quando non serve, aumento precisione e frequenza quando serve
+	\item non dedicarsi a operazioni lente nei metodi on\ldots()\\
+	Semmai, memorizzare in una struttura dati e processare in un thread (sincronizzazione!). Il thread di processing può avere il suo tempo di ciclo, diverso da quello di lettura del sensore.
+	\item SensorEvent passato al listener rimane di proprietà del SensorManager: mai tenere riferimenti all'evento che restano anche dopo il ritorno da onSensorChanged()
+	\item SensorManager potrebbe usare una pool di SensorEvent: per evitare di fare una new per ogni lettura, in questo caso gli stessi oggetti vengono riciclati più volte
+\end{list}
 
 \end{document}
