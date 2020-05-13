@@ -751,6 +751,20 @@ Flusso contiene:
 	\item \textbf{pad2} padding
  \end{list}
 \end{multicols}
+\paragraph{Pacchetto NetFlow} In SNMP dati letti tramite polling (eccettuate le trap). Cambi di stato SNMP sono pochi, agent SNMP non fa attesa attiva ma è S.O. stesso a comunicare a SNMP quando cambia qualcosa. Es: Inotify (\texttt{wikipedia.org/wiki/Inotify}) o netlink (\texttt{wikipedia.org/wiki/Netlink}) su Linux.\\
+In NetFlow però siamo obbligati ad analizzare attivamente ogni pacchetto che passa. Inoltre buffering limitato, quindi pacchetti vanno gestiti subito. Inoltre la quantità di flussi da esportare dipende molto dal tipo di traffico. Può esserci un solo flusso su 10 gigabit, ma posso avere decide di flussi su 7 megabit.\\
+Il traffico conteggiato da NetFlow è inferiore da quello che verrebbe contato da SNMP.
+\paragraph{Perché serve NetFlow v9?} La v5 ha solo IPv4, poche informazioni (pacchetti e byte). Ogni volta che si deve aggiungere qualcosa bisogna rifare il formato, aggiornare software\ldots\\
+In v9 risolvono problema della flessibilità: flussi mandati con un template che indica i campi. Inoltre supporta il livello 2, traffico VLAN e altri tipi di incapuslamento come MPLS, oltre che IPv6.
+\subparagraph{Template} Mandato prima dei flussi, così da specificare al collezionatore in che modo interpretare i dati ricevuti. Specifica una maniera di mappare le info relative al flusso.\\
+Vengono mandati periodicamente.
+\paragraph{Sampling} Per ridurre il carico sulla macchina introduco il sampling: non analizzo ogni pacchetto, ma ad esempio uno su 10. Questo introduce un errore, sia sul conteggio dei byte che sulle informazioni trovate. Sampling da usare solamente in situazioni particolari.\\
+Si parla di \textbf{packet sampling}, ma si può fare anche \textbf{flow sampling} (esempio: esportarne uno su 10). Questo per ridurre il traffico sul collezionatore.
+\paragraph{Principi del v9} Modello push probe verso collezionatore come in v5\\
+Manda template regolarmente (ogni tot flussi, ogni tot secondi)\\
+Indipendente dal protocollo sottostante (UDP/TCP)\\
+Può andare sia template che record in una export\\
+Può mischiare le informazioni sui flussi nel singolo record.
 \chapter{Data Structures}
 \paragraph{Bitmap} Array di bit. Lunghezza arbitraria e aggiunta/rimozione in O(1) con operazioni su bit semplici. Memoria in base ai bit usati
 \begin{center}
