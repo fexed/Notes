@@ -696,5 +696,24 @@ Il listener può essere creato come anonymous (new SensoEventListener dentro la 
 	\item SensorEvent passato al listener rimane di proprietà del SensorManager: mai tenere riferimenti all'evento che restano anche dopo il ritorno da onSensorChanged()
 	\item SensorManager potrebbe usare una pool di SensorEvent: per evitare di fare una new per ogni lettura, in questo caso gli stessi oggetti vengono riciclati più volte
 \end{list}
-
+\chapter{Geolocalizzazione}
+\section{GPS}
+\paragraph{Non è un sensore} Approccio simile a quello di un sensore: si interpella un servizio di sistema per avere accesso ai vari fornitori di informazioni sulla posizione. Si registrano listener per ottenere informazioni sulla posizione e opzionalmente si richiede di lanciare un intent sotto certe condizioni: per esempio se si è entro un certo raggio da un punto dato.\\
+Servizio di sistema: \textbf{LocationManager}: \texttt{LocationManager lm = getSystemService(Context.LOCATION\_SERVICE);}
+\paragraph{LocationProvider} Analogamente a Sensor c'è \textbf{LocationProvider} che descrive i diversi componenti che possono dare la posizione: \textbf{GPS}, GPS-A, triangolazione di celle radiomobile, triangolazione di reti wi-fi\ldots\\
+LocationProvider descrive anche la sua precisione, consumo energetico, costo (\$)\ldots\\
+Cosa si può fare:
+\begin{list}{}{}
+	\item Ottenere lista dei providers: \texttt{getAllProviders()}
+	\item Lista dei provider attualmente abilitati (o meno): \texttt{getProviders(enabled)}
+	\item Un provider indicato per nome: \texttt{LocationProvider prov = lm.getProvider(name)}
+	\item Il \textit{miglior} provider in base a certi criteri: \texttt{getBestProvider(criteria)}\\
+	Accuratezza: COARS, LOW, HIGH, FINE, sulle misure horizontal, vertical, bearing, speed. Power: LOW, MEDIUM, HIGH. Altitudine: richiesta la capacità di dare l'altitudine o meno. Tutto incapsulato in android.location.Criteria\\
+	Si può anche chiedere una particolare tecnologia: GPS\_PROVIDER, NETWORK\_PROVIDER, PASSIVE\_PROVIDER.\\
+	Possono essere provider non standard (Galileo, GLONASS\ldots) meglio specificare i criteri e far scegliere la tecnologia al S.O.
+\end{list}
+Possibile registrare un listener da chiamare su certe condizioni: dopo intervallo di tempo, dopo aver percorso una distanza prefissata, solo da specifico provider, oppure continuamente finché non stacco (continuous) o una volta e basta finché non lo richiedo (one-shot)\\
+Per deregistrare un listener: \texttt{removeUpdates(LocationListener)}. Opportuno registrare nella onResume e deregistrarlo nella onPause (se uso nella UI) oppure registrare in un Service.
+\section{Geocoding}
+\section{Maps}
 \end{document}
