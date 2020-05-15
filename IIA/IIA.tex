@@ -2788,14 +2788,88 @@ Una piccola guida all'uso (da LIBSVM):
 Per poi usare una grid-search più fine, una volta trovato il range interessato (es. $2^2, 2^3$).
 %TODO da qui lezione 12/5
 \chapter{K-Nearest Neighbors}
+\section{1-Nearest Neighbor}
 \paragraph{Supervised Learning} 
-\begin{list}{}{}
-	\item Memorizza i dati di training $\langle x_j, y_j\rangle$
-	\item Viene fornito un input $x$ (dimensione $n$)
-	\item Per rispondere troviamo il training example più vicino $x_i$\\
-	Trovare l'indice $i$ con la minima distanza da $x$ $i(x) =$ arg min $d(x,x_j)$\\
-	La distanza è la classica distanza euclidea, per esempio, cioè: $d(x, x_j) = ||x - x_k||$
-	\item Come output $y_i$
+\begin{list}{}{Alcune definizioni}
+	\item Memorizza i dati di training $\langle x_j, y_j\rangle$\\
+	\textbf{Training finito}, non c'è da fare altro.
+	\item Viene fornito un input x di dimensione $n$
+	\item Per rispondere, troviamo il training example più vicino x$_i$\\
+	Trovare l'indice $i$ con la minima distanza da x $i($x$) =$ arg min$_j d($x$, $x$_j)$\\
+	La distanza è la classica distanza euclidea, per esempio, cioè: $d($x$, $x$_j) = ||$x$ - $x$_k|| = \sqrt{\mathlarger{\sum_{t=1}^n (x_t - x_{jt})^2}}$
+	\item Come output $y_i$, elemento x$_i$ del TR più vicino a x input
 \end{list}
-Può creare superficie di separazione molto flessibile
+\begin{center}
+	\includegraphics[scale=0.75]{ml1nn.png}
+\end{center}
+Può creare superficie di separazione molto flessibile, anche troppo. Non c'è errore sui dati di TR, mentre i decision boundaries non sono lineari, ma anzi molto irregolari.
+\pagebreak
+\paragraph{Smoothing} Un possibile smoothing della 1-NN è la 5-NN:
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item 1-NN ritorna + per x$_q$
+	\item 5-NN ritorna - per x$_q$
+\end{list}
+\textbf{Smooting} su un set di vicini per dati rumorosi.
+\begin{center}
+	\includegraphics[scale=0.5]{ml5nn.png}
+\end{center}
+\end{multicols}
+\section{K-Nearest Neighbors}
+Un modo naturale per classificare un nuovo punto è \textbf{guardare i suoi vicini}, e \textbf{prenderne la media}:
+\begin{list}{}{}
+	\item $\textsl{avg}_k($x$) = \mathlarger{\frac{1}{k}\cdot\sum_{\text{x}_i\in N_k(\text{x})}y_i}$
+\end{list}
+dove $N_k($x$)$ è il \textbf{vicinato di} x \textbf{che contiene esattamente $k$ vicini} in accordo a $d$\\
+Se c'è una classe dominante nell'intorno di x osservato, allora è probabile che prenderemo quella classe anche come osservazione. Di conseguenza, la \textbf{regola di classificazione è la regola di maggioranza tra i membri di} $N_k($x$)$. Come prima, $h(\text{x}) = \left\{\begin{array}{l l}
+1 & \text{se }\textsl{avg}_k(\text{x}) > 0.5\\
+0 & \text{altrimenti}
+\end{array} \right.$ per $y_i=\{0, 1\}$ target\\
+Per i task di \textbf{regressione} si \textbf{usa direttamente l'$\textsl{avg}$}, la media sui K-nn.
+\begin{multicols}{2}
+\begin{center}
+	\textbf{15-NN}\\
+	\includegraphics[scale=0.65]{ml15nn.png}
+\end{center}
+\begin{list}{}{}
+	\item Ancora molto flessibile
+	\item Accetta errori di classificazione nei dati TR
+	\item Decision boundary non lineare, ma ancora (seppur meno) irregolare
+	\item Decision boundary si adatta alle densità locali delle classi
+\end{list}
+\end{multicols}
+\subsection{Complessità}
+\paragraph{Trade-off} Come sempre c'è un trade-off tra underfitting e overfitting sui possibili valori di K\\
+Abbiamo la solita curva ad U sul grafico con $K$, muovendosi da un caso estremamente flessibile ($K=1$, overfitting) fino ad un modello molto rigido ($K=l$, underfitting), con una media per tutti i dati.\\
+Il $K$ migliore, come sempre, è il giusto bilanciamento tra la complessità del modello rispetto al problema e, come sempre, si trova tramite il validation set e il model selection.
+\pagebreak
+\paragraph{Con pià classi?} Per ciascuna classe vado a contare nell'intorno quante occorrenze ho e rispondo con la classe più frequente.
+\begin{list}{}{}
+	\item $h($x$) = \textsl{arg max}_v \mathlarger{\sum_{\text{x}_i\in N_k(\text{x})}\text{l}_{v, y_i}}$
+	\item l$_{v, y_i} = \left\{\begin{array}{l l}
+	1 & \text{se } v = y_i\\
+	0 & \text{altrimenti}
+\end{array}	 \right.$
+\end{list}
+\subsection{Un estremo} K-NN non è un vero a proprio modello, ma è un estremo. Non fa un'ipotesi globale, quindi non ha un modello per cui fare il fitting. Memorizziamo tutti i dati d'esempio, senza un modello parametrico. Per contro, basti pensare al modello parametrico lineare con un insieme di parametri w.\\
+Ha altre caratteristiche, fa una \textbf{stima locale} con delle funzioni costanti locali, in contrasto ai modelli globali di stima/approssimazione della funzione target.\\\\
+\textbf{Metodi basati sulla distanza, pigri, basati sulla memoria, basati sugli esempi}. La \textbf{distanza} è la misura critica, definita quella ho definito quali sono i più vicini.
+\subsection{Qualche limite di K-NN}
+\paragraph{Costo computazionale} Notare che il K-NN fa un'approssimazione locale della funzione target per ogni nuovo esempio da predire: il \textbf{costo computazionale è spostato verso la fase di predizione}.\\
+Inoltre, alto costo di retrieval: computazionalmente intenso per ogni nuovo input, calcolo della distanza dall'esempio di test verso \textit{tutti} i vettori in memoria
+\begin{list}{}{}
+	\item Tempo proporzionale al numero di pattern memorizzati
+	\item Possibilità di ottimizzazione ad-hoc, ad esempio con algoritmi di indicizzazione dei pattern
+\end{list}
+Costoso anche in spazio, tutti i dati sono memorizzati.
+\paragraph{Curse of dimension} Quando abbiamo molte variabili in input ($n$ alto), i metodi K-NN spesso falliscono per la \textit{maledizione della dimensionalità} (curse of dimension):
+\begin{list}{}{}
+	\item Quando la dimensionalità $d$ aumenta, il volume (lato$^d$) dello spazio aumenta così velocemente che i dati disponibili diventano sparsi
+	\item vale a dire che la quantità di dati necessaria a supportare il risultato, cioè avere un intorno relativamente buono, cresce \textbf{esponenzialmente} con la dimensionalità
+\end{list}
+\paragraph{Curse of noisy} Feature irrilevanti: se il target dipende solo sul alcune delle molte feature in x (es 2 su 20), possiamo fare il retrieval di un pattern "simile" con la similarità dominata dal grande numero di feature irrilevanti.\\
+Cresce con la dimensionalità.
+\subsection{Considerazioni} I metodi basati sulla distanza o sulla metrica (linea comune tra, ad esempio, tra gli approcci K-means, K-NN e kernel-based) sono \textbf{basati sulla similiarità}.\\
+Cosa significa simile? Misura quando una coppia di pattern sono \textit{simili}, data una metrica sto ponendo un forte bias. La metrica tipicamente, dipende dal dominio: stringhe in un linguaggio, in biologia\ldots. Basata magari sulla conoscenza pregressa di un esperto\ldots\\
+Ci chiediamo: è \textbf{possibile imparare la metrica?} Si.
 \end{document}
