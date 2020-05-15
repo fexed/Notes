@@ -1721,6 +1721,69 @@ Quindi posso dire che \textbf{il metodo è localmente convergente}, quindi $\exi
 $$|g'(x)|<1\Leftrightarrow|\sin x|<1\text{ soddisfatta se }x \in \left(-\frac{\pi}{2}, \frac{\pi}{2} \right)$$
 Quindi qualunque intorno centrato in $\alpha$ che sta in $\left(-\frac{\pi}{2}, \frac{\pi}{2} \right)$, preso un punto in quell'intorno la successione converge ad $\alpha$.\\
 Possiamo vedere se $\alpha < \mathlarger{\frac{\pi}{4}}$ o $\alpha > \mathlarger{\frac{\pi}{4}}$, così da avere un'indicazione su come scegliere il punto di partenza.
+\subsection{Metodo delle Tangenti}
+\paragraph{Metodo di Newton} Il più efficiente metodo di iterazione funzionale, grazie anche alla semplicità delle condizioni di convergenza espresse in termini di $f(x)$ e non di $g(x)$. Genera successioni che convergono velocemente e con solo due valutazioni di funzioni per passo.\\
+Efficiente inteso in termine generale: una valutazione complessiva del costo computazionale e della velocità di convergenza.
+\paragraph{Definizione} Vogliamo trovare lo zero $\alpha$ di una equazione non lineare. Supponiamo un punto iniziale $x_0$, da cui vogliamo generare una successione che sperabilmente converga ad $\alpha$.\\
+L'idea è la seguente: prendiamo la retta tangente a $f(x)$ nel punto $(x_0, f(x_0))$. Questa retta intersecherà l'asse delle ascisse in un nuovo punto, che chiamiamo $x_1$ e \textbf{ripetiamo la costruzione}.\\
+$\left\{\begin{array}{l}
+y - f(x_0) = f'(x_0)\cdot(x - x_0)\\
+y = 0
+\end{array} \right. \Rightarrow x_1 - x_0 = -\mathlarger{\frac{f(x_0)}{f'(x_0)}} \Leftrightarrow x_1 = x_0 - \mathlarger{\frac{f(x_0)}{f'(x_0)}}$
+\paragraph{Metodo delle Tangenti} $\left\{\begin{array}{l}
+x_0 \in \mathbb{R}\\
+x_{k+1} = x_k - \mathlarger{\frac{f(x_k)}{f'(x_k)}}
+\end{array} \right.$\\
+Questo è un metodo di iterazione funzionale, perché $x_{k+1} = g(x_k)$, con $g(x) = x - \frac{f(x)}{f'(x)}$. Quindi dobbiamo avere $g \in C^1 \Leftrightarrow f' \in C^1 \Leftrightarrow f \in C^2$
+\pagebreak
+\subsubsection{Convergenza Locale}
+\paragraph{Teorema} Sia $f\in C^2([a, b])$ e $f(\alpha) = 0$, $f'(\alpha) \neq 0$, $\alpha \in (a, b)$\\
+Allora il \textbf{metodo delle tangenti} è \textbf{localmente convergente in $\alpha$ è la convergenza è almeno quadratica}.\\Cioè $\exists\:I_\alpha = [\alpha - \rho, \alpha + \rho]\:\:|\:\:\forall\:x_0\in I_\alpha$ valgono
+\begin{enumerate}
+	\item $x_k \in I_\alpha$
+	\item $\mathlarger{\lim_{k\to+\infty} x_k = \alpha}$\\
+	Fino a qui per la convergenza locale
+	\item Se $\forall\:k\:\:x_k\neq\alpha \Rightarrow \mathlarger{\lim_{k\to+\infty} \frac{|x_{k+1} - \alpha|}{|x_k - \alpha|^2}} = c \in \mathbb{R}$
+\end{enumerate}
+\subparagraph{Dim} $f'(\alpha) \neq 0 \Rightarrow \exists\:\overline{I_{\alpha}}\:\:|\:\: \forall\:x\in\overline{I_\alpha}\:\:f'(x)\neq 0$\\
+Su $\overline{I_\alpha}$ posso definire $g : \overline{I_\alpha} \rightarrow \mathbb{R}$ con $g(x) = x -\mathlarger{\frac{f(x)}{f'(x)}}$\\
+$g'(x) = 1 - -\mathlarger{\frac{f'(x)^2 - f(x)f''(x)}{f'(x)^2}} = \mathlarger{\frac{f(x)f''(x)}{f'(x)^2}}$ continua perché composizione di funzioni continue, quindi $g \in C^1$.\\
+$g'(\alpha) = \mathlarger{\frac{f(\alpha)f''(\alpha)}{f'(\alpha)^2}} = 0 \Rightarrow |g'(\alpha)| < 1$\\ $\Rightarrow$ per il corollario del teorema del punto fisso $\exists\:I_\alpha\subseteq\overline{I_\alpha}\:\:|$ si ha convergenza locale.\\\\
+Prendiamo un punto iniziale $x_0 \in I_\alpha$ e supponiamo che la successione generata soddisfi la proprietà $x_k \neq \alpha\:\:\forall\: k$\\
+Ricordiamo l'espressione dell'errore inerente, con la \textbf{formula di Taylor arrestata al secondo ordine} di centro $x_k$ e raggio $\alpha - x_k$
+$$0 = f(\alpha) = f(x_k) + f'(x_k)(\alpha - x_k) + \frac{f''(\xi_k)(\alpha - x_k)^2}{2}\:\:\:\:\:\text{con }\alpha < \xi_k < x_k$$
+Posso portare $f(x_k)$ al primo membro, dividere per $f'(x_k)$ e portare $x_k$ al primo membro, ottenendo
+$$x_k - \frac{f(x_k)}{f'(x_k)} = \alpha + \frac{f''(\xi_k)}{f'(x_k)}\cdot\frac{(\alpha - x_k)^2}{2}$$
+Mi accorgo che $\mathlarger{x_k - \frac{f(x_k)}{f'(x_k)} = x_{k+1}}$
+$$x_{k+1} = \alpha + \frac{f''(\xi_k)}{f'(x_k)}\cdot\frac{(\alpha - x_k)^2}{2}$$
+Posso dividere per $(\alpha - x_k)^2$ e spostare $\alpha$
+$$\frac{x_{k+1} - \alpha}{(\alpha - x_k)^2} = \frac{1}{2}\cdot\frac{f''(\xi_k)}{f'(x_k)}$$
+Ora posso fare il limite. Sapendo che $x_k \rightarrow \alpha$
+$$\lim_{k\to+\infty}\frac{|x_{k+1} - \alpha|}{|\alpha - x_k|^2} = \frac{1}{2}\cdot\:\vline\frac{f''(\alpha)}{f'(\alpha)}\vline \in \mathbb{R}$$
+\subsubsection{Convergenza in largo}
+\paragraph{Teorema} Sia $f\in C^2([a, b])$, $f(\alpha) = 0$ e $\alpha \in (a, b)$\\
+Se $\exists\:\delta > 0$ tale che $f'(x) \neq 0 \wedge f(x)f''(x) > 0$ $\forall\:x \in(\alpha, \alpha + \delta]\subseteq[a, b]$ allora $\forall\:x_0\in(\alpha, \alpha + \delta]$ la successione generata dal metodo delle tangenti a partire da $x_0$ converge ad $\alpha$. Questo vale anche per gli intervalli sinistri di $\alpha$\\\\
+Questo ha delle conseguenza:
+\begin{list}{}{}
+	\item $f\in C^2(\mathbb{R}^+)$ e $f'(\alpha) \neq 0 \Rightarrow$ il metodo è localmente convergente in $\alpha$
+	\item $\forall\:x_0 \geq \alpha$ il metodo delle tangenti genera successioni convergenti in $\alpha$
+\end{list}
+\pagebreak
+\paragraph{Esempio} $f(x) = e^x + x = 0$\\
+$f\in C^\infty(\mathbb{R})$, $\mathlarger{\lim_{x\to+\infty}} f(x) = +\infty$, $\mathlarger{\lim_{x\to-\infty}} f(x) = -\infty$\\
+Quindi $f(x)$ va da $-\infty$ a $+\infty$, di conseguenza ha almeno una soluzione\\
+$f'(x) = e^x + 1 > 0$, questo $\forall\:x \in\mathbb{R}$\\
+$f''(x) = e^x > 0$, questo $\forall\:x \in\mathbb{R}$\\\\
+$\left\{\begin{array}{l}
+f(0) = e^0 = 1 > 0\\f(-1) = e^{-1} - 1 < 0
+\end{array}\right.\Rightarrow -1 < \alpha < 0$\\\\
+Convergenza locale? Si, perché $f'(\alpha) \neq 0$\\\\
+$\forall\:x_0\in\mathbb{R}$ ho $x_k \rightarrow \alpha$, convergenza globale
+\paragraph{Esempio} $f(x) = \mathlarger{\frac{1}{x}} - a = 0$\\
+Può sembrare banale e venire da dire $x = \mathlarger{\frac{1}{a}}$ ma non è banale. Vediamo il metodo delle tangenti associato:\\
+$$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} = x_k -  \frac{\mathlarger{\left(\frac{1}{x_k} - a\right)}}{\mathlarger{\frac{1}{x_k^2}}} = x_k + x_k^2\cdot\left(\frac{1}{x_k} - a \right) = x_k + x_k - ax_k^2 = 2x_k - ax_k^2 = x_k(2 - ax_k)$$
+Non è banale perché implementando il metodo delle tangenti si nota che non c'è bisogno di alcuna divisione. Ho due prodotti e un'addizione.\\
+Questo è importante perché nei primi elaboratori elettronici l'aritmetica di macchina implementava solamente tre operazioni: addizione, sottrazione e moltiplicazione. La divisione era implementata calcolando il reciproco del numero con il metodo delle tangenti e moltiplicando. Quindi $b/a$ era implementata calcolando $1/a$ con Newton e calcolando $b\cdot(1/a)$
 \chapter{Esercitazioni}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
 \paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
