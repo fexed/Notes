@@ -13,6 +13,7 @@
 \usepackage{amssymb} 
 \graphicspath{ {./img/} }
 \usepackage{color}
+\usepackage{tikz}
 
 \begin{document}
 \renewcommand*\contentsname{Indice}
@@ -1279,4 +1280,88 @@ $\exists\:V\vDash B = \mathlarger{\bigwedge_{i=1}^n} C_i \Leftrightarrow f(B) = 
 \end{list}
 Da questo ottengo che se c'è una cricca c'è un assegnamento booleano, viceversa se c'è un assegnamento booleano c'è una cricca, quindi è una riduzione.\\
 Appartiene a $\textsl{logspace}$ perché posso usare lo stesso meccanismo della rappresentazione binaria e mantenendo gli indici sui nastri di lavoro.
+\section{Funzioni Booleane}
+$$V \vDash B \Leftrightarrow f(V(x_1), \ldots, V(x_n)) = tt\:\:\: f: X \rightarrow \{0, 1\}$$
+$f$ si \textbf{costruisce mediante un circuito booleano}, cioè un grafo $G = (N, A)$ \textbf{aciclico}, con 
+\begin{list}{}{}
+	\item $i \in N$ nodi\\
+	\textbf{Sorta} $s(i) = \{tt, ff, \neg, \wedge, \vee\} \bigcup X$ ($X$ variabili)\\
+	\textbf{Ingressi} le porte con $s(i) \subset \{tt, ff\} \bigcup X$\\
+	\textbf{Uscita} $i$ la porta più in alto (il massimo del circuito quando viene ordinato con ordinamento parziale)\\
+	Se $s(i) = \neg \Rightarrow i$ ha 1 ingresso ed 1 uscita\\
+	Se $s(i) \subset \{\wedge, \vee\} \Rightarrow i$ ha 2 ingressi e 1 uscita\\
+	Per calcolare l'uscita ho bisogno di una funzione di valutazione che assegni i valori di verità agli ingressi, definiamone la semantica
+	\begin{multicols}{2} \begin{list}{}{}
+		\item $[i]_V = tt$ se $s(i) = tt$
+		\item $[i]_V = f$ se $s(i) = ff$
+		\item $[i]_V = V(x)$ se $s(i) = x$
+		\item $[i]_V = \textsl{not}([j]_V)$ se $(j, i) \in A$ e $s(i) = \neg$
+		\item $[i]_V = [j]_V \textsl{ and } [h]_B$ se $(j, i), (h, i) \in A$ e $s(i) = \wedge$
+		\item $[i]_V = [j]_V \textsl{ or } [h]_B$ se $(j, i), (h, i) \in A$ e $s(i) = \vee$
+	\end{list} \end{multicols}
+	\item $(i, j) \in A$
+\end{list}
+\paragraph{Esempio} $(x \vee (x \wedge y)) \vee ((x \wedge y) \wedge \neg(y \vee z))$
+%TODO grafo
+\subsection{Circuit SAT}
+$$\exists\:V\:\:|\:\:[C]_V = tt ?$$ con $[C]_V = [n]_V$ con $n$ porta di uscita. Questo problema $\in \mathscr{NP}$\\
+\textbf{Circuit Value}: se $C$ non ha variabili, $[C]_\emptyset = tt$? Questo è il problema della soddisfacibilità, per verificare se dato un assegnamento il circuito è soddisfatto o meno.\\
+\textbf{Circuit Value} $\in \mathscr{P}$ perché tengo sul nastro input la rappresentazione del grafo, cioè l'insieme delle coppie che formano gli archi e la sorta di ogni nodo (porta).\\
+Sui nastri di lavoro tengo i valori dei vari livelli di porte, ma non ho ripetizioni quindi è polinomiale\\\\ %TODO rivedere
+Notiamo che \textbf{Circuit Value $\leq$ Circuit SAT}, perché SAT è la versione più generale di value. Value è la versione di SAT in cui non ho bisogno della funzione di assegnamento.\\\\
+Più interessante è scopire che Circuit SAT $\leq_{\textsl{logspace}}$ SAT. Intuitivamente è vero, costruiamo la riduzione.\\
+Significa che $\forall$ circuito con variabili $\in X$, dobbiamo trovare una $f \in \textsl{logspace}\:\:|\:\:[C]_V = tt \Leftrightarrow\exists\:V'\supseteq V\:\:\:V'\vDash f(C)$\\
+$V(x) = tt \Rightarrow V'(x) = tt$ e $f(C) = \bigwedge B_k$\\
+Le variabili di $f(C)$ includono tutte le variabili di $C$, cioè $X$, unito ad una variabile per ogni porta,\\cioè $X \cup \{x_i = i\:|\:i \in N\}$
+\begin{list}{}{}
+	\item Se $g$ è la porta di uscita $\Rightarrow$ genera un congiunto $g$ variabile
+	\item Se $s(i) = tt$ o $ff$ $\Rightarrow$ genera un congiunto $i$ nel primo caso, $\neg i$ nel secondo caso
+	\item Se $s(i) = x \Rightarrow (i \Leftrightarrow x)$ cioè $i$ è vero se e soltanto se $x$ è vero, cioè $(i \Rightarrow x) \wedge (x \Rightarrow i)$ cioè $(\neg i \vee x) \wedge (\neg x \vee i)$
+	\item Se $s(i) = \wedge \Rightarrow (i$ è vero$ \Leftrightarrow h \wedge k)$ con  $(h,i), (k,i)\in A$ , espandendola diventa $\neg(i \vee h) \wedge (\neg i \vee k) \wedge (\neg h \vee \neg k \vee i)$
+	\item Se $s(i) = \vee \Rightarrow (i$ è vero$ \Leftrightarrow h \vee k)$ con  $(h,i), (k,i)\in A$ , espandendola diventa $(\neg i \vee h \vee k) \wedge (\neg h \vee i) \wedge (\neg k \vee i)$
+\end{list}
+Usando $x \wedge ff$ come esempio, mettendo come nodi $h = x$, $g = \wedge$ e $k = ff$, ottengo la formula $$g \wedge \neg k \wedge (\neg h \vee x) \wedge (h \wedge \neg x) \wedge(\neg g \vee h) \wedge (\neg g \vee k) \wedge (\neg h \vee \neg k \vee g)$$
+Vediamo che $[g] = ff\:\:\forall\:V$
+\begin{list}{}{}
+	\item $g \wedge$ $\longrightarrow V(g) = tt$ 
+	\item $\neg k \wedge$ $\longrightarrow V(k) = ff$
+	\item $(\neg h \vee x) \wedge$ 
+	\item $(h \wedge \neg x) \wedge$
+	\item $(\neg g \vee h) \wedge$
+	\item $(\neg g \vee k) \wedge$ $\longrightarrow V(k) = tt$ ottenendo un assurdo
+	\item $(\neg h \vee \neg k \vee g)$
+\end{list}
+\section{Tabella di computazione}
+Prendiamo un problema $I \in \mathscr{P} \Leftrightarrow \exists\:M\:\:|\:\:\forall\:x \in I M(x)\longrightarrow_t ($si/no, $w)$ con $t \leq |x|^k$\\
+Ho la configurazione iniziale $\underline{\triangleright}a_1\ldots a_n$, copo un certo passo ho $\triangleright\underline{a_1}\ldots a_n$ e così via.\\
+Posso immaginare di mettere il tutto in una matrice:$\begin{array}{c c c c}
+\underline{\triangleright} &a_1&\ldots & a_n\\
+\triangleright&\underline{a_1}&\ldots& a_n\\
+\triangleright\\
+\triangleright\\
+\end{array}$\\
+Ad ogni riga $i$ ho il passo di computazione e la configurazione al passo $i$: ho rappresentato l'intera computazione in una matrice. Possiamo dare a questa \textbf{tabella di computazione} un \textbf{formato standard}.
+\pagebreak
+\paragraph{Tabella di computazione} Una matrice quadrata $T[i, j]$ con $1 \leq i,j \leq |x|^k$ se $M(x)$ termina in $|x|^k - 2$ passi. \textbf{Condizioni}:
+\begin{enumerate}
+	\item La macchina termina in meno di $|x|^k - 2$ passi, come detto
+	\item Presa la riga $i$, essa comincia con il respingente e termina con tutti i caratteri bianchi.\\
+	Tutte le caselle non significative di una riga, quindi, sono riempite con $\#$\\
+	Siccoma la lunghezza della riga è $|x|^k$, ma la macchina termina in $|x|^k - 2$ passi, non avrò mai il cursore in ultima posizione perché il tempo limita lo spazio.
+	\item Supponiamo il cursore in una posizione, posso codificare lo stato nell'alfabeto\\
+	L'alfabeto contiene $\sigma_q \in (\Sigma \times Q \times \{h\}$ che registra che nella configurazione $i$-esima il cursore si trova nella posizione $j$, si legge $\sigma$ e lo stato è $q$. Basta prendere $\Sigma \times Q$ nuovi simboli.
+	\item All'inizio il cursore è sul primo carattere subito dopo il respingente. In più i passaggi sul respingente "indietro-avanti", cioè i due passi obbligati successivi di andare sul respingente e tornare a destra, vengono condensati in un singolo passo. Così facendo, il cursore non si troverà mai sul respingente. C'è un'eccezione, nel caso seguente
+	\item Quando $T[i, j] =$ si/no, allora sposta il cursore fino alla seconda colonna (con massimo $O(|x|^k)$ passi), introducendo uno stato ausiliario di finto arresto. Lo stato di accettazione, se raggiunto, è quindi sempre in $T(l, 2)$ per qualche $l \leq |x|^k$.\\
+	Si ammette che il cursore passi sopra il simbolo $\triangleright$ quando lo stato sia $q_{SI}$ (abbreviazione di $\sigma_{q_{SI}}$, con il vincolo che non debba mai toccare il $\triangleright$ più a sinistra (che rappresenta l'inizio del nastro.
+	\item Se $\sigma_{SI}$ oppure $\sigma_{NO}$ appaiono sulla riga $p<|x|^k$ e nella seconda colonna, allora tutte le righe di indice $q$ con $p\leq q \leq |x|^k$ sono uguali alla $p$-esima
+\end{enumerate}
+Abbiamo l'ovvia condizione di terminazione con successo: M accetta $x$ $\Leftrightarrow \exists\:i\:\:|\:\:T(i, 2) = \sigma_{SI} (= T(|x|^k, 2))$\\
+Su una tabella di computazione T di una macchina di Turing $M$ che decide $I$ in $|x|^k$, con $x$ lungo $n$ caratteri, ho una serie di fatti:
+\begin{list}{}{}
+	\item $T(1, 2)$ contiene lo stato iniziale e il primo carattere di $x$ $x_q^1$\\
+	Inoltre $\forall\:j, 2\leq j \leq |x| + 1$, la casella $T(1, j)$ contiene il $j - 1$-esimo simbolo di $x$\\
+	Infine, $\forall\:j, |x| + 2 \leq j \leq |x|^k$, la casella $T(1, j)$ contiene $\#$
+	\item $\forall\:i, T(i, 1) = \triangleright$
+	\item $\forall\:i, T(i, |x|^k) = \#$ (si impiega meno spazio che tempo!)
+\end{list}
 \end{document}
