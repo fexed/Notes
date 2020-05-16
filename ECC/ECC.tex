@@ -1363,5 +1363,75 @@ Su una tabella di computazione T di una macchina di Turing $M$ che decide $I$ in
 	Infine, $\forall\:j, |x| + 2 \leq j \leq |x|^k$, la casella $T(1, j)$ contiene $\#$
 	\item $\forall\:i, T(i, 1) = \triangleright$
 	\item $\forall\:i, T(i, |x|^k) = \#$ (si impiega meno spazio che tempo!)
+	\item $T(i, j) = $ come determinarlo? (Osservazione tratta dall'esempio successivo)\\
+	L'elemento $T(i, j)$ dipende dall'elemento $T(i-1, j\pm1)$ oppure da $T(i-1, j)$. Nell'esempio successivo, $T(4, 4)$ dipende da $T(3, 4)$, $T(8, 3)$ da $T(7, 4)$ e $T(11, 5)$ da $T(10, 4)$\\
+	\textbf{Ciascuna cella}, quindi, \textbf{dipende solo e solamente dalle tre precedenti}. Questo perché ad ogni passo la macchina si sposta di un posto solo.\\
+	Quindi $T(i, j)$ dipende solo da $T(i-1, j-1)$, $T(i-1, j)$, $T(i-1, j+1)$ e dalla $\delta$.
 \end{list}
+Una tabella di computazione, quadrata, ha $|x|^k$ righe/colonne. Siccome si ferma in $|x|^k - 2$ passi, abbiamo la sicurezza che la prima colonna è composta da tutti $\triangleright$ e l'ultima è composta da tutti $\#$ perché non si può usare più spazio che tempo.\\
+La prima riga, oltre il respingente, avrà i caratteri $x_1\:x_2\:\ldots\:x^n$ e dopo tutti caratteri bianchi $\#$. Le righe rappresentano i passi di computazione, fino a che ad un certo punto (in una certa riga = un certo passo di computazione) in un certo carattere si troverà uno stato di accettazione $\sigma_h$. Questo stato di accettazione viene portato, nei passi successivi, in seconda posizione (subito dopo il respingente) e da quella riga in poi sono tutte uguali, per cui l'ultima riga sarà $\triangleright\:\sigma'_h\:\ldots\:\#$
+\pagebreak
+\paragraph{Esempio} MdT che verifica se una stringa è palindroma. Esempio: la stringa \texttt{abba}, 16 passi per verificare, quindi 18 righe e colonne
+\begin{center}
+\begin{math}
+	\begin{array}{r l l l l l l l l l l}
+		 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & \ldots & 17 & 18\\
+		\hline
+		1 & \triangleright & a_{q_0} & b & b & a & \# & \# & \ldots & \# & \#\\
+		2 & \triangleright & \triangleright & b_{q_A} & b & a & \# & \# & \ldots & \# & \#\\
+		3 & \triangleright & \triangleright & b & b_{q_A} & a & \# & \# & \ldots & \# & \#\\
+		4 & \triangleright & \triangleright & b & b & a_{q_A} & \# & \# & \ldots & \# & \#\\
+		5 & \triangleright & \triangleright & b & b & a & \#_{q_A} & \# & \ldots & \# & \#\\
+		6 & \triangleright & \triangleright & b & b & a_{q'_A} & \# & \# & \ldots & \# & \#\\
+		7 & \triangleright & \triangleright & b & b_{q_1} & \# & \# & \# & \ldots & \# & \#\\
+		8 & \triangleright & \triangleright & b_{q_1} & b & \# & \# & \# & \ldots & \# & \#\\
+		9 & \triangleright & \triangleright & b_{q_0} & b & \# & \# & \# & \ldots & \# & \#\\
+		10 & \triangleright & \triangleright & \triangleright & b_{q_B} & \# & \# & \# & \ldots & \# & \#\\
+		11 & \triangleright & \triangleright & \triangleright & b & \#_{q_B} & \# & \# & \ldots & \# & \#\\
+		12 & \triangleright & \triangleright & \triangleright & b_{q'_B} & \# & \# & \# & \ldots & \# & \#\\
+		13 & \triangleright & \triangleright & \triangleright & \#_{q_0} & \# & \# & \# & \ldots & \# & \#\\
+		14 & \triangleright & \triangleright & \triangleright_{SI} & \# & \# & \# & \# & \ldots & \# & \#\\
+		15 & \triangleright & \triangleright_{SI} & \triangleright & \# & \# & \# & \# & \ldots & \# & \#\\
+		16 & \triangleright & \triangleright_{SI} & \triangleright & \# & \# & \# & \# & \ldots & \# & \#\\
+		17 & \triangleright & \triangleright_{SI} & \triangleright & \# & \# & \# & \# & \ldots & \# & \#\\
+		18 & \triangleright & \triangleright_{SI} & \triangleright & \# & \# & \# & \# & \ldots & \# & \#\\
+	\end{array}
+\end{math}
+\end{center}
+\subsection{Circuit Value è $\mathscr{P}$-completo}
+$\forall\:I\in\mathscr{P}$, $x \in I \Leftrightarrow [f(x)]_\emptyset = tt$ con $f \in \textsl{logspace}$\\
+$I\in\mathscr{P} \Rightarrow \exists\:M$ che decide $x$ in $|x|^k = n^k \Rightarrow M(x) \rightarrow^t ($SI, $w)$ con $t \leq n^k - 2$\\
+Allora \textbf{costruiamo la tabella di computazione}, aggiungendo ad $M$ $\Sigma \times Q \cup \{h\}$ nuovi simboli. Chiamo $\Sigma'$ il nuovo alfabeto.\\
+Ciascun simbolo $\rho \in \Sigma'$ viene mappato in una stringa di bit, successioni di 0/1 $(s_1,\ldots,s_m)\in\{tt, ff\}^m$, con\\$m = \lceil\log_2(\#\Sigma')\rceil$ cioè numero di bit necessari per rappresentare i $\#\Sigma'$ simboli contenuti in $\Sigma'$.\\
+Posso codificare il respingente e il carattere bianco come preferisco, ad esempio $\triangleright = tt\ldots tt$ e $\# = ff\ldots ff$\\
+Ogni elemento della tabella quindi diventa una sequenza di $m$ bit: $T(i, j) = s_{i,j,1}, s_{i,j,2},\ldots,s_{i,j,m}$, cioè $m$ simboli ciascuno che codifica anche la riga $i$ e la colonna $j$.\\
+$T(i,j) = f\left( \begin{array}{l l l l}
+	s_{i-1,j-1,2}, & s_{i-1,j-1,2}, &\ldots, &s_{i-1,j-1,m},\\
+	s_{i-1,j,2}, &s_{i-1,j,2}, &\ldots, &s_{i-1,j,m},\\
+	s_{i-1,j+1,2}, &s_{i-1,j+1,2},&\ldots, &s_{i-1,j+1,m}
+\end{array}
+\right)$
+perché dipende solamente da $\begin{array}{l}
+T(i-1, j-1)\\T(i-1,j)\\T(i-1,j+1)
+\end{array}$\\
+Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. Prendo questa tabella e la codifico in binario, ottenendo un'altra tabella in cui invece dei simboli ho 0/1.\\
+La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$.\\
+Ogni gruppo di $m$ input di $\overline{C}$ proviene da un circuito $\overline{C}$ a sua volta, perché è il gruppo di bit di una cella, e così via\ldots\\
+Riempio la tabella binaria, con $\overline{C}_\triangleright$ e $\overline{C}_\#$ circuiti costanti che fanno le veci del respingente e del carattere bianco.\\
+Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra incastrando le une con le entrate delle altre. Ogni cella riceve input dalle tre celle sottostanti (il segnale fluisce verso l'altro nel grafo dei circuiti). La prima riga, invece, riceve input da $x$.
+\begin{center}
+	\begin{math}
+		\begin{array}{c | c c c | c}
+			\overline{C}_\triangleright & &\ldots & & \overline{C}_\#\\
+			\overline{C}_\triangleright & & \overline{C} & & \overline{C}_\#\\
+			\overline{C}_\triangleright & \overline{C} & \overline{C} & \overline{C} & \overline{C}_\#\\
+			\overline{C}_\triangleright & &\ldots & & \overline{C}_\#\\
+			\overline{C}_\triangleright & & & & \overline{C}_\#\\
+			\overline{C}_\triangleright & \overline{C}_{x_1} & \ldots & \overline{C}_{x_n} & \overline{C}_\#\\
+		\end{array}
+	\end{math}
+\end{center}
+Verifichiamo che $f$ stia in $\textsl{logspace}$. Per verificare questo è necessario considerare l'indice di riga, colonna e la dimensione della matrice. Gli indici li rappresento in binario, con $\lceil\log_2(|x|)\rceil$ bit.\\
+Con gli indici scorro la matrice avanti e indietro (due for annidati), 3 nastri di lavoro.\\
+Quindi sto in $\textsl{logspace}$
 \end{document}
