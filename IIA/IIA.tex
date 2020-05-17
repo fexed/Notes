@@ -2872,4 +2872,122 @@ Cresce con la dimensionalità.
 \subsection{Considerazioni} I metodi basati sulla distanza o sulla metrica (linea comune tra, ad esempio, tra gli approcci K-means, K-NN e kernel-based) sono \textbf{basati sulla similiarità}.\\
 Cosa significa simile? Misura quando una coppia di pattern sono \textit{simili}, data una metrica sto ponendo un forte bias. La metrica tipicamente, dipende dal dominio: stringhe in un linguaggio, in biologia\ldots. Basata magari sulla conoscenza pregressa di un esperto\ldots\\
 Ci chiediamo: è \textbf{possibile imparare la metrica?} Si.
+\chapter{Vari Modelli}
+\section{Overview sul supervised learning}
+\begin{list}{}{}
+	\item \textbf{Spazi discreti}, ad esempio: congiunzione di letterali, decision tree (regole proposizionali), grammatiche induttive, programmazione logica induttiva\ldots
+	\item \textbf{Spazi continui}, ad esempio: Multiple Linear Regression, Linear Threshold Unit (LTU), regressione polinomiale, \textbf{k-means}, SVM, reti neurali\ldots
+	\item \textbf{Probabilistici/generativi}: modelli parametrici tradizionali (stima di densità, analisi del discriminante, regressione polinomia), modelli grafici (reti Bayesiane, Naive Bayes, modelli di Markov, modelli di Markov nascosti\ldots)\ldots
+	\item \textbf{Instance-Based}: \textbf{nearest neighbors}
+\end{list}
+\section{Unsupervised learning}
+\paragraph{No teacher} Nessun supervisore, TR è un insieme di dati senza etichetta $\langle x \rangle$\\
+Si affrontano compiti diversi, come il raggruppamento naturale di insiemi di dati, ad esempio \textbf{clustering}: ripartire dati in gruppi, sottoinsieme di dati "simili". \textbf{Centroide}: un centro che rappresenta gli elementi del cluster. 
+\begin{center}
+	\includegraphics[scale=0.75]{mlclustering.png}
+\end{center}
+\paragraph{Utilità del clustering} \begin{list}{}{In natura:}
+	\item Tassonomia, per organizzare le forme di vita: cosa sono i mammiferi?
+	\item Apprendimento umano: i bambini imparano a riconoscere le facce familiari prima di comprendere il linguaggio umano
+\end{list}
+\begin{list}{}{In \textbf{data analysis}:}
+	\item Explorative data analysis, per scoprire la struttura latente e trovare dei pattern tipici
+	\item Preprocessing per altri approcci ML, es. riduzione della dimensionalità
+	\item Collezionare dati non etichettati è più facile che collezionare dati etichettati: ad esempio 10 milioni di immagini, da frame di YouTube, raggiungendo un riconoscimento degli oggetti allo stato dell'arte (22'000 categorie)
+\end{list}
+\paragraph{Clustering} \textbf{Ripartire dati in gruppi di dati simili}. I pattern all'interno di un cluster valido sono più simili tra loro rispetto a qualsiasi altro pattern appartenente ad un altro cluster. (Con pattern si intende l'elemento del TR, quindi l'esempio di training)\\
+Il centroide, o \textbf{prototipo}, è il "baricentro" del cluster: un po' come il rappresentante del cluster, alla minima distanza da tutti gli altri.\\\\
+L'\textbf{obiettivo} è quindi ottenere una ripartizione dello spazio in $x$ in regioni/cluster approssimate dal cluster center o \textbf{prototipo}.\\\\
+\textbf{H}: insieme dei quantizzatori $x\rightarrow c(x)$ che rappresenta il cluster, da spazio continuo a spazio discreto. Esempio di funzione di loss: misurare l'ottimalità del vettore quantizzatore. Una funzione di loss comune potrebbe essere la \textbf{squared error distortion}$$L(h(\text{x}_i)) = ||\text{x}_i - c(\text{x}_i)||^2$$
+Il valore medio sulla distribuzione degli input è la distorsione media, o ricostruzione, o \textbf{errore di quantizzazione}.
+\section{K-Means} Il più semplice e più usato algoritmo che implementa la squared error: Popolare perché facile da implementare e efficiente in generale, ma ha diverse limitazioni che vedremo.
+\begin{enumerate}
+	\item Si scelgono $k$ cluster, che coincidono con $k$ pattern scelti a caso o $k$ punti all'interno del volume contenente i pattern
+	\item Assegniamo ogni pattern al più vicino cluster, cioè al cluster il cui centro è più vicino al pattern (il winner)
+	\item[$\uparrow$]
+	\item Si ricalcolano i centri dei cluster (centroide geometrico, vale a dire la media) usando l'attuale appartenenza ai cluster
+	\item Se il criterio di convergenza non viene raggiunto, ritorno allo step due, cioè:
+	\begin{list}{}{}
+		\item Non c'è, o è minimo, il riassegnamento dei nuovi pattern
+		\item Diminuzione minima nell'errore quadratico
+	\end{list}
+\end{enumerate}
+\paragraph{Alcuni difetti} \begin{list}{}{}
+ 	\item Come scegliere il winner: dati i centri dei cluster $c_1,\ldots,c_k$ (vettori di dimensione $n$, come x)\\
+	Per ogni x il winner si determina similmente al winner del k-NN: $i^*($x$) =$ arg $\textsl{min}_i ||$x$-c_i||^2$, trovo $i$ tale che la distanza minima (solo l'indice)\\
+	$||$x$-C_i||^2 = \mathlarger{\sum_j^n}(x_j - c_{ij})^2$\\
+	Ora x appartiene al cluster $i^*$
+	\item Per ogni cluster $i$, la nuova media (centroide) è: $$c_i = \frac{1}{|\text{cluster}_i|}\cdot\sum_{j\:|\:x_j\in\text{cluster}_i}\text{x}_j$$
+\end{list}
+\paragraph{Limitazioni} \begin{list}{}{}
+	\item $k$ è scelto a priori: trial-and-error per trovare il $k$ più adatto
+	\item I minimi locali della loss $L($x$)$ rendono il metodo dipendente dall'inizializzazione.\\
+	Si può provare più volte con inizializzazioni differenti, magari tramite euristica
+	\item Può funzionare bene per cluster compatti e ipersferici, non altre forme
+	\item Non ha proprietà di visualizzazione, non consente di proiettare dati su un spazio di dimensione minore
+\end{list}
+\paragraph{Valutazione} Come valutare un metodo di clustering? Più sottile rispeto al solito, perché non sappiamo in generale a priori come si dovrebbe comportare. Cosa caratterizza un "buon" clustering da un clustering poco interessante?\\
+\textbf{Soggettivo}: non esistono "gold-standard", a parte sottodomini particolari\\
+Le misure obiettive esistono, come l'errore di quantizzazione (ma dipende dal numero di centroidi, se metto un centroide per dato ho errore di quantizzazione pari a zero)
+\section{Dimensionality Reduction}
+\paragraph{Approccio al preprocessing} Tra la moltitudine di approcci, si merita una menzione in questo corso il \textbf{dimensionality reduction} (unsupervised learning):
+$\langle x_1, x_2,\ldots,x_n\rangle \rightarrow \langle x_1', x_2', \ldots, x_m'\rangle$ con $n > m$\\
+Si può ridurre la dimensionalità degli elementi mantenendone le informazioni principali. Questo si può fare selezionando alcune feature o \textbf{creando una combinazione}, ad esempio tramite il \textbf{Principal Component Analysis} (PCA)
+\paragraph{PCA} In nuovi assi sono computati tramite gli assi dove i dati variano di più.
+\paragraph{Selezione delle feature} Scegliere un sottoinsieme delle feature (feature engineering, selezionadole automaticamente in base a ridondanza o rilevanza nel task cioè le più informative). Tanti approcci, problema difficile tanto quanto il problema dell'apprendimento.
+\section{Altri task nell'ML}
+\subsection{Reinforcement Learning} Apprendimento con criterio di giusto o sbagliato.\\
+Si tratta nell'adattamento di sistemi autonomi (specialmente in robotica) rispetto al mondo. L'algoritmo apprende una politica che indica come agire in accordo ad una data osservazione del mondo. Ogni \textbf{azione} ha un impatto nell'ambiente, e l'\textbf{ambiente fornisce feedback} che guida l'algoritmo di apprendimento.\\
+Invece di una supervisione in ogni passo, abbiamo informazione riguardo vittoria/perdita (\textbf{reward} o \textbf{punishment}) nello stato finale.\\
+L'azione deve massimizzare la quantità di reward, e l'apprendimento decide quali azioni sono responsabili per le vittorie e le perdite
+\begin{center}
+	\includegraphics[scale=0.75]{mlreinfor.png}
+\end{center}
+\subsection{Semi-supervised learning} Combina esempi etichettati e non (tipicamente in numero maggiore) per generare una funzione/classificazione appropriata.\\
+\paragraph{Learn to rank} Esempio per i motori di ricerca, l'input è una serie di oggetti e l'output è la loro classifica
+\subsection{On-Line Learning} Nuovi esempi appresi e usati per fare il learning nel tempo
+\subsection{Apprendimento di domini strutturati e apprendimento relazionale}
+I domini di input/output  possono essere strutturati sottoforma di sequenze (segnali, serie temporali\ldots) o anche più complessi: alberi, grafi, reti.\\
+Pattern vettori con relazioni con altri componenti. Input: molecole, pagine web come grafi di reti\ldots Output: nodi di una rete sociale, alberi di parsing da una frase\ldots.
+\subsection{Reti Neurali}
+\paragraph{Neural Networks} Per learning supervisionato e non supervisionato.\\
+Lo abbiamo accennato: è vicino alla LTU (Linear Treshhold Unit). La LTU è l'unità base di una \textbf{Artificial Neural Network}: il \textbf{perceptron}.\\
+Una NN (neural network) è una rete di tali unità non lineari, con una capacità di approssimazione universale (qualsiasi tipo di funzione).
+\begin{center}
+	\includegraphics[scale=1]{nn.png}
+\end{center}
+Si compone così un approccio molto flessibile per qualsiasi obiettivo del ML. Approccio più comune: gradient descent.
+\paragraph{Ispirazione biologica} Vengono studiate come paradigmi di calcolo sin dagli anni '40. Adesso rappresentano un'insieme di potenti modelli di calcolo per approssimazione di funzioni con capacità predittive, supportate da una rigorosa fondazione teorica (learning theory)
+\begin{center}
+	\includegraphics[scale=0.65]{nn2.png}
+\end{center}
+\paragraph{Perché i layer interni?} Le 3 $f$ impilate nell'immagine precedente sono i cosiddetti \textbf{layer nascosti}.\\
+Forniscono al modello di estrarre, attraverso l'apprendimento, una nuova rappresentazione dei dati con l'apprendimento delle features.\\
+La nuova rappresentazione semplifica il task di classificazione al layer finale (la $f$ in fondo).\\
+Possiamo considerarle come una linear basis expansion $\phi(x)$, dove le $\phi$ sono apprese e quindi dipendono anche da w $\phi(x,$w$)$\\
+Questo comporta un problema di ottimizzazione non lineare, quindi i metodi diretti non funzionano più (ma la discesa di gradiente si).
+\pagebreak
+\subsection{Deep Learning}
+\paragraph{DL} Intuitivamente: architetture NN multilayer profonde
+\begin{center}
+	\includegraphics[scale=0.7]{dl.png}
+\end{center}
+\paragraph{Aspetti simili tra approcci differenti}
+\begin{list}{}{}
+	\item \textbf{Livelli multipli} di unità di processo non lineari
+	\item Apprendimendo supervisionato o non supervisionato delle \textbf{feature representation} in ogni layer, con i livelli che formano una gerarchia da low-level a high-level features/representations (livelli differenti di astrazione)
+\end{list}
+\paragraph{Apprendere la rappresentazione dei dati} Per esempio, è difficile dire quali sono le feature utili per riconoscere un volto.\\
+Si scoprono in maniera automatica le feature necessarie. Si aumenta il livello di astrazione attraverso diversi layer. Ad esempio, un'immagine può essere una matrice di pixel, o in maniera più astratta come un insieme di bordi/aree, regioni dalla forma particolare\ldots\\
+L'organizzazione viene scoperta \textbf{in maniera del tutto autonoma}.\\\\
+Si comporta bene quando l'input ha qualche struttura (spaziale, temporale\ldots come immagini, linguaggio, suoni\ldots)
+\paragraph{Riutilizzo} Le feature di basso livello introdotte possono essere riusate per essere ricomposte in vari modi, per generalizzare esempi non visti. Ad esempio, combinando l'immagine di un uomo con occhiali con quella di una donna si può ottenere una donna con occhiali. Questo perché nella rappresentazione si sono \textbf{separati i concetti} di volto e occhiali. Combinazione geometrica.
+\begin{center}
+	\includegraphics[scale=0.75]{dl2.png}
+\end{center}
+Quindi non ha bisogno di avere tutte le combinazioni da vedere, ma può generarle da sé.
+\paragraph{Vantaggi} Sfruttano la composizionalità della rappresentazione interna, ottenendo un guadagno esponenziale nella potenza di rappresentazione. Questo grazie al fatto che i concetti semplici sono rappresentati nei layer della rete e possono essere usati come primitive dal layer successivo per rappresentare concetti più complessi, evitando rappresentazione combinatorie esplicite e l'apprendimento delle features.\\
+Quindi \textbf{meno esempi necessari per avere una buona capacità di generalizzazione}.
+\paragraph{Risultati} Le reti neurali profonde sono sempre esistite, ma erano difficili da istruire in passato. Combinando le nuove tecniche di apprendimento per modelli così grandi, high-performance computing (es. GPU) e collezioni di dati molto grandi sia dall'industria che da applicazioni reali (es. milioni di immagini).\\
+Oggi funzionano molto bene.
 \end{document}
