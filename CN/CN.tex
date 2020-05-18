@@ -147,7 +147,8 @@ Nel secondo caso abbiamo quattro tecniche di approssimazione:
 \end{enumerate}
 Per semplicità considereremo una macchina che opera per troncamento sull'insieme $F(B, t, m, M)$.\\
 Indicheremo con $trn(x) = \overline{x}$ il risultato dell'approssimazione di $x$ con troncamento e più in generale $fl(x)$ l'\textbf{approssimazione in macchina del dato $x$} nel sistema floating point considerato.
-\paragraph{Teorema} Sia $x \in \mathbb{R}$ con $\omega \leq |x| \leq \Omega$. Si ha $$|\epsilon_x| = |\frac{trn(x) - x}{x}| \leq u = B^{1-t}$$
+\paragraph{Teorema 2.2.1} Sia $x \in \mathbb{R}$ con $\omega \leq |x| \leq \Omega$. Si ha $$|\epsilon_x| = \:\vline\:\frac{trn(x) - x}{x}\:\vline \leq u = B^{1-t}$$
+\subparagraph{Dim} Sia $x = (-1)^sB^p\alpha$. L'errore assoluto $|trn(x) - x|$ risulta maggiorato dalla distanza tra due numeri di macchina consecutivi, quindi $$|trn(x) - x|\leq B^{p-t}$$ Inoltre $|x| \geq B^{p-1}$, pertanto vale $$|\epsilon_x| = \:\vline\:\frac{trn(x) - x}{x}\:\vline \leq \frac{B^{p-t}}{B^{p-1}} = B^{1-t} = u$$
 Si osserva che:
 \begin{list}{}{}
 	\item $u = B^{1-t}$ è detta \textbf{precisione di macchina} ed è \textbf{indipendente dalla grandezza del numero}, ma è caratteristica dell'aritmetica floating point, dell'insieme dei numeri rappresentabili e dalla tecnica di approssimazione. Se ad esempio si opera con arrotondamento, $u$ si dimezza.
@@ -224,7 +225,7 @@ Se l'errore algoritmico è qualitativamente elevato in valore assoluto si dice c
 \pagebreak
 \subsection{Errore Totale}
 \paragraph{Definizione} Si dice \textbf{errore totale} generato nel calcolo di $f(x) \neq 0$ mediante l'algoritmo specificato da $g$ la quantità $$\epsilon_{tot} = \frac{g(\tilde{x}) - f(x)}{f(x)}$$ L'errore totale misura la \textbf{differenza relativa tra l'output atteso e l'output effettivamente calcolato}.
-\paragraph{Teorema} In un analisi al primo ordine, vale $$\epsilon_{tot} = \epsilon_{in} + \epsilon_{alg}$$
+\paragraph{Teorema 3.1.1} In un analisi al primo ordine, vale $$\epsilon_{tot} = \epsilon_{in} + \epsilon_{alg}$$
 \subparagraph{Dim} $$\epsilon_{tot} = \frac{g(\tilde{x}) - f(x)}{f(x)} = \frac{f(\tilde{x}) - f(\tilde{x})}{f(\tilde{x})}\cdot\frac{f(\tilde{x})}{f(x)} + \frac{f(\tilde{x}) - f(x)}{f(x)} = \epsilon_{alg}(1 + \epsilon_{in}) + \epsilon_{in} \doteq \epsilon_{alg} + \epsilon_{in}$$
 Viene espresso il fatto che nel calcolo di una funzione razione, in un'analisi al primo ordine, le due fonti di generazione d'errore forniscono contributi separati che possono essere analizzati indipendentemente.\\
 L'obiettivo dell'analisi numerica è \textbf{trovare algoritmi numericamente stabili per problemi ben condizionati}.
@@ -502,7 +503,7 @@ Questo ci dice che \textbf{le colonne di $S$ sono gli autovettori di $A$}.\\\\
 \textbf{Calcolare gli autovalori di una matrice è, in generale, un problema difficile}, perché \textbf{gli autovalori non sono funzioni razionali dei coefficienti della matrice}.\\
 Quindi \textbf{non esiste algoritmo che esegue un numero finito di operazioni razionali per calcolare gli autovalori}.\\
 In generale si utilizzano \textbf{metodi iterativi} che \textbf{costruiscono successioni convergenti agli autovalori}. Per la convergenza di queste successioni, è \textbf{importante avere teoremi di localizzazione che mi dicono dove stanno gli autovalori nel piano complesso}.
-\subsection{Teorema di Gerschgorin}
+\subsection{Teorema di Gerschgorin (4.4.1)}
 Sia $A \in \mathbb{C}^{n \times n}$ e siano $K_i$ gli \textbf{insiemi} definiti da $$K_i = \left\{z \in \mathbb{C} \:\:\vline\:\: |z-a_{ii}| \leq \sum_{j = 1, j \neq i}^n |a_{ij}|\right\}\:\:\:\:\textit{per}\:\:i = 1 \ldots n$$ Allora se $\lambda \in \mathbb{C}$ è autovalore di A $$\Rightarrow \lambda \in \bigcup_{i = 1}^n K_i$$\\
 Gli autovalori di $A$ quindi appartengono ad almeno uno dei $K_i$, i cosiddetti \textbf{cerchi di Gerschgorin}, dove $a_{ii}$ è l'elemento della diagonale principale, $|z - a_{ii}|$ è il \textbf{centro} e $\sum_{j = 1, j \neq i}^n |a_{ij}|$ è il \textbf{raggio}, formato dalla somma degli elementi della stessa riga escluso l'elemento della diagonale principale.
 \paragraph{Dimostrazione} $\lambda$ autovalore di $A$ se $\exists\:x \neq 0 \:\:\vline\:\: Ax = \lambda x$. Riscrivendo per componenti, otteniamo
@@ -797,7 +798,7 @@ A = \left[
 \right.
 \end{math}\\
 $\Rightarrow$ fattorizzazione $LU$ \textbf{unica}
-\paragraph{Teorema} Esistenza ed unicità della fattorizzazione\\
+\paragraph{Teorema 5.1.1} Esistenza ed unicità della fattorizzazione\\
 Sia $A \in \mathbb{R}^{n \times n}$ e siano $A_k = A(1:k, 1:k)$ con $k = 1\ldots n$ le \textbf{sottomatrici principali di testa}.\\
 Se $A_1, \ldots, A_{n-1}$ sono invertibili $\Rightarrow\exists !\: LU$ di $A$
 \subparagraph{Dim} Per induzione sulla dimensione della matrice\\
@@ -1086,7 +1087,7 @@ lo è, mentre
 non lo è ($i = 2$ non soddisfa)
 \paragraph{Predominanza Diagonale per colonne} $A \in \mathbb{R}^{n \times n}$ è \textbf{predominante diagonale per colonne} se l'elemento della diagonale \textit{pesa di più} della somma degli elementi della stessa colonna in modulo, cioè $$|a_{ii}| > \sum_{j=1, j \neq i}^n |a_{ji}|$$
 La \textbf{predominanza diagonale} è importante per il seguente teorema.
-\paragraph{Teorema} Se $A \in \mathbb{R}^{n \times n}$ è \textbf{predominante diagonale} $\Rightarrow$ A è \textbf{invertibile}
+\paragraph{Teorema 6.3.1 (1)} Se $A \in \mathbb{R}^{n \times n}$ è \textbf{predominante diagonale} $\Rightarrow$ A è \textbf{invertibile}
 \subparagraph{Dim} Segue dal teorema di Gerschgorin, che dice $\lambda$ autovalore di $A \Rightarrow \lambda \in \bigcup_{i=1}^n K_i$.\\
 Mostriamo che $0 \not\in \bigcup_{i=1}^n K_i \Rightarrow$ 0 non è autovalore $\Rightarrow A$ è invertibile.\\
 $K_i = \{ z \in \mathbb{C}\: |\: |z - a_{ii} \leq \sum_{j=1, j\neq i}^n |a_{ij}|\}$, $0 \in? K_i$\\
@@ -1242,7 +1243,7 @@ Fissata $A$, la \textbf{convergenza dipende in generale da come seleziono $M$, $
 Partiamo col cercare delle condizioni di convergenza. Sappiamo che il metodo iterativo genera delle successioni con $x^{(k+1)} = Px^{(k)} + q$ e sappiamo che la soluzione del sistema lineare soddisfa $x = Px + q$, di conseguenza
 $$x^{(k+1)} - x = P(x^{(k)} - x)$$
 Chiamiamo $e^{(k)} = x^{(k)} - x$, $e^{(k)}$ misura una sorta d'\textbf{errore} cioè quanto dista la $k$-esima iterata dalla soluzione del sistema. La relazione precedente diventa $$e^{(k + 1)} = Pe^{(k)}\:\:\:\: k\geq 0$$
-\paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è \textbf{convergente} se $\exists$ una norma matriciale indotta dalla norma vettoriale $||\cdot||$ tale che $||P|| < 1$
+\paragraph{Teorema 6.1.2} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è \textbf{convergente} se $\exists$ una norma matriciale indotta dalla norma vettoriale $||\cdot||$ tale che $||P|| < 1$
 \subparagraph{Dim} $e^{(k + 1)} = Pe^{(k)} \Leftrightarrow ||e^{(k + 1)}|| = ||Pe^{(k)}|| \leq ||P||\cdot||e^{(k)}|| \leq ||P||^2\cdot||e^{(k-1)}|| \leq \ldots \leq ||P||^{k+1}\cdot||e^{(0)}||$\\
 $0 \leq ||e^{(k+1)}|| \leq ||P||^{k+1}\cdot||e^{(0)}||$, che per $k\to\infty$
 \begin{list}{}{}
@@ -1252,7 +1253,7 @@ $0 \leq ||e^{(k+1)}|| \leq ||P||^{k+1}\cdot||e^{(0)}||$, che per $k\to\infty$
 \end{list}
 Quindi se trovo una norma come sopra, posso dire che il metodo è convergente: il teorema fornisce una \textbf{condizione sufficiente}.\\
 Adesso cerchiamo una condizione necessaria.
-\paragraph{Teorema} Se il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente, allora $\rho(P) < 1$\\
+\paragraph{Teorema 6.1.3} Se il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente, allora $\rho(P) < 1$\\
 $\rho(P)$ è il \textbf{raggio spettrale} di $P$, il \textbf{modulo dell'autovalore di modulo massimo di $P$}.\\
 Quindi il metodo \textbf{non converge} se $\rho(P) \geq 1$, mentre \textbf{può convergere} se $\rho(P) < 1$.
 \subparagraph{Dim} Se è convergente, allora la successione converge $\forall\: x^{(0)}$ e quindi $\forall\:e^{(0)}$ ho $e^{(k)}\to 0$\\
@@ -1348,7 +1349,7 @@ M = D\\N = -L-U
 \paragraph{Convergenza} In generale nella pratica è meglio Gauss-Seidel
 \paragraph{Implementazione} Gauss-Seidel può richiedere un solo vettore
 \paragraph{Costo computazionale} Medesimo e dipendente dalla sparsità della matrice: O(\texttt{nnz(}$A$\texttt{)})
-\subsection{Teorema} Sia $A \in \mathbb{R}^{n \times n}$ \textbf{predominante diagonale} $\Rightarrow A$ è invertibile $\wedge$ Jacobi e Gauss-Seidel sono applicabili e convergenti.
+\subsection{Teorema 6.3.1 (2)} Sia $A \in \mathbb{R}^{n \times n}$ \textbf{predominante diagonale} $\Rightarrow A$ è invertibile $\wedge$ Jacobi e Gauss-Seidel sono applicabili e convergenti.
 \paragraph{Dim} $A$ predominante diagonale $\Rightarrow A$ invertibile \textbf{OK}\\
 $A$ predominante diagonale $\Leftrightarrow |a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|$ per $i=1\ldots n$\\
 $|a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}| \geq 0$ per $i=1\ldots n \Rightarrow |a_{ii}| > 0 \Rightarrow a_{ii} \neq 0$ per $i=1\ldots n$ quindi i metodi sono applicabili \textbf{OK}\\
@@ -1663,7 +1664,7 @@ for k=1:+inf
 end
 \end{lstlisting}
 \paragraph{Intervallo di separazione per $f$} Intervallo che contiene un'unica soluzione per $f(x) = 0$
-\paragraph{Teorema} Se $[a_1, b_1] = [a, b]$ è un \textbf{intervallo di separazione} per $f \in C^0([a, b])$ con $f(a)f(b) < 0$ allora le successioni $a_k, b_k, c_k \longrightarrow \alpha$
+\paragraph{Teorema (10.1.1)} Se $[a_1, b_1] = [a, b]$ è un \textbf{intervallo di separazione} per $f \in C^0([a, b])$ con $f(a)f(b) < 0$ allora le successioni $a_k, b_k, c_k \longrightarrow \alpha$
 \subparagraph{Dim} Assumendo che l'intervallo iniziale sia un intervallo di separazione, è un ipotesi semplificata. Quindi nell'intervallo $[a, b]$ non solo c'è una radice ma è unica, e la chiamiamo $\alpha$. Per costruzione $\alpha \in [a_k, b_k]$. La distanza tra $\alpha$ e $a_k$ la possiamo sempre maggiorare con l'ampiezza dell'intervallo.
 $$0 \leq |\alpha - a_k| \leq |b_k - a_k| = b_k - a_k = \frac{b_{k-1} - a_{k-1}}{2} = \ldots = \frac{b_1 - a_1}{2^{k-1}} \Rightarrow \lim_{k\to +\infty} |\alpha - a_k| = 0$$
 Analogamente per \begin{list}{}{}
@@ -1706,7 +1707,7 @@ $f(x) = 0 \Leftrightarrow x = g(x) \Rightarrow \left\{\begin{array}{l}
 x_0 \in \mathbb{R}\\
 x_{k+1} = g(x_k)
 \end{array}\right.$\\Oltre ad una radice $\alpha$ per cui $f(\alpha) = 0$ posso trovare un \textbf{punto fisso} $x = g(x)$ ottenendo che $f(\alpha) = 0 \Leftrightarrow \alpha = g(\alpha)$\\Quindi \textbf{il calcolo degli zeri di $f$ è ricondotto al calcolo dei punti fissi di $g$}. Bisogna capire quando la successione ha speranze di convergere. Molto difficile trovare successioni convergenti per ogni punto iniziale, quasi impossibile.
-\paragraph{Teorema del punto fisso} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$\\
+\paragraph{Teorema del punto fisso (10.2.2)} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$\\
 Se $\exists\:\rho>0\:|\:|g'(x)|<1\:\forall\:x\in I_\alpha = [\alpha - \rho, \alpha + \rho]\subseteq[a, b]$  allora il metodo $\left\{\begin{array}{l}
 x_0 \in I_\alpha\\
 x_{k+1} = g(x_k)
@@ -1731,7 +1732,7 @@ x_{k+1} = g(x_k)
 \end{list}
 Traiamo che tutti i punti della successione appartengono a $I_\alpha$, ma concludiamo anche che $$0 \longleftarrow 0 \leq |x_k - \alpha| \leq \lambda^k\rho \longrightarrow 0$$
 Quindi $|x_k - \alpha| \rightarrow 0 \Leftrightarrow x_k \rightarrow \alpha$
-\paragraph{Corollario} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$, se riesco a trovare un intervallo \textbf{centrato in $\alpha$} tale per cui $|g'(x)| < 1$ allora per ogni punto iniziale di quell'intervallo la successione converge ad $\alpha$. Cioè\\
+\paragraph{Corollario (10.2.3)} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$, se riesco a trovare un intervallo \textbf{centrato in $\alpha$} tale per cui $|g'(x)| < 1$ allora per ogni punto iniziale di quell'intervallo la successione converge ad $\alpha$. Cioè\\
 se $|g'(x)| < 1 \Rightarrow \exists\:\rho\geq 0\:\:|$ posto $I_\alpha = [\alpha - \rho, \alpha + \rho]$ il metodo $\left\{\begin{array}{l}
 x_0 \in I_\alpha\\
 x_{k+1} = g(x_k)
@@ -1760,8 +1761,7 @@ $$|g'(x)|<1\Leftrightarrow|\sin x|<1\text{ soddisfatta se }x \in \left(-\frac{\p
 Quindi qualunque intorno centrato in $\alpha$ che sta in $\left(-\frac{\pi}{2}, \frac{\pi}{2} \right)$, preso un punto in quell'intorno la successione converge ad $\alpha$.\\
 Possiamo vedere se $\alpha < \mathlarger{\frac{\pi}{4}}$ o $\alpha > \mathlarger{\frac{\pi}{4}}$, così da avere un'indicazione su come scegliere il punto di partenza.
 \subsection{Metodo delle Tangenti}
-\paragraph{Metodo di Newton} Il più efficiente metodo di iterazione funzionale, grazie anche alla semplicità delle condizioni di convergenza espresse in termini di $f(x)$ e non di $g(x)$. Genera successioni che convergono velocemente e con solo due valutazioni di funzioni per passo.\\
-Efficiente inteso in termine generale: una valutazione complessiva del costo computazionale e della velocità di convergenza.
+\paragraph{Metodo di Newton} Il più efficiente metodo di iterazione funzionale, grazie anche alla semplicità delle condizioni di convergenza espresse in termini di $f(x)$ e non di $g(x)$. Genera successioni che convergono velocemente e con solo due valutazioni di funzioni per passo. Efficiente inteso in termine generale: una valutazione complessiva del costo computazionale e della velocità di convergenza.
 \paragraph{Definizione} Vogliamo trovare lo zero $\alpha$ di una equazione non lineare. Supponiamo un punto iniziale $x_0$, da cui vogliamo generare una successione che sperabilmente converga ad $\alpha$.\\
 L'idea è la seguente: prendiamo la retta tangente a $f(x)$ nel punto $(x_0, f(x_0))$. Questa retta intersecherà l'asse delle ascisse in un nuovo punto, che chiamiamo $x_1$ e \textbf{ripetiamo la costruzione}.\\
 $\left\{\begin{array}{l}
@@ -1773,9 +1773,8 @@ x_0 \in \mathbb{R}\\
 x_{k+1} = x_k - \mathlarger{\frac{f(x_k)}{f'(x_k)}}
 \end{array} \right.$\\
 Questo è un metodo di iterazione funzionale, perché $x_{k+1} = g(x_k)$, con $g(x) = x - \frac{f(x)}{f'(x)}$. Quindi dobbiamo avere $g \in C^1 \Leftrightarrow f' \in C^1 \Leftrightarrow f \in C^2$
-\pagebreak
 \subsubsection{Convergenza Locale}
-\paragraph{Teorema} Sia $f\in C^2([a, b])$ e $f(\alpha) = 0$, $f'(\alpha) \neq 0$, $\alpha \in (a, b)$\\
+\paragraph{Teorema (10.3.1)} Sia $f\in C^2([a, b])$ e $f(\alpha) = 0$, $f'(\alpha) \neq 0$, $\alpha \in (a, b)$\\
 Allora il \textbf{metodo delle tangenti} è \textbf{localmente convergente in $\alpha$ è la convergenza è almeno quadratica}.\\Cioè $\exists\:I_\alpha = [\alpha - \rho, \alpha + \rho]\:\:|\:\:\forall\:x_0\in I_\alpha$ valgono
 \begin{enumerate}
 	\item $x_k \in I_\alpha$
