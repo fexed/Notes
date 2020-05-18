@@ -764,7 +764,28 @@ Si parla di \textbf{packet sampling}, ma si può fare anche \textbf{flow samplin
 Manda template regolarmente (ogni tot flussi, ogni tot secondi)\\
 Indipendente dal protocollo sottostante (UDP/TCP)\\
 Può andare sia template che record in una export\\
-Può mischiare le informazioni sui flussi nel singolo record.
+Può mischiare le informazioni sui flussi nel singolo record.\\
+Posso inserire nuovi campi oltre counting di pacchetti e byte: contenuto, velocità\ldots\\
+Si aggiorna \textit{ogni tanto}, all'esportazione del flusso (tipicamente scadenza timeout)\\
+Salta 24Byte perché parte da livello 3.
+\subparagraph{Configurazione Cisco IOS} Configurato su ogni interfaccia, specificando versione e IP del collezionatore. Specifico sampling rate, durata massima e aggregazione (\\
+Si abilitano flussi basandoli sull'interfaccia.
+\subparagraph{Configurazione Juniper JunOS} Si appoggia al firewall, quando pacchetti attraversano router (eventualmente non filtrante). Router divisi in data/switching plane (hw) e control plane (sw). Sorta di loopback interno per analisi traffico, per portarlo da data a control plane. Juniper usa questa interfaccia per portare pacchetti in parte di controllo, limitata a 7000 pacchetti al secondo per evitare sovraccarico. Nello spazio utente c'è il probe che calcola i flussi ed esporta.
+\paragraph{NetFlow generico: IPFIX} A inizio 2000 perché NetFlow è di Cisco\\
+\textbf{IPFIX} definito dalla IETF.\\
+Basato su NetFlow v9, abilità di definire nuovi campi del flusso attraverso un formato standard (OID, Object Identifier). Dopo aver definito il "PEN?" specifico OID univoci per me e in generale.\\
+Protocollo di trasporto (SCTP, Stream Control Transport Protocol) orientato allo stream, connection-oriented, vincoli rilassati così da non perdere eventualmente troppo tempo a riempire il pacchetto. Opzionalmente supporta TCP/UDP.\\
+Attualmente: bozza di specifica del protocollo.\\
+\textbf{Fondamentalmente}, IPFIX = NetFlow v9 su SCTP con qualche differenza extra.
+\paragraph{Aggregazione flussi} Flussi raw ok esporto e via. Spesso dobbiamo rispondere a domande diverse: quanto traffico certo protocollo? Quando verso Google?\\
+Una volta che ho i flussi dentro il router posso esportarli raw o aggregarli: accorpare fra loro flussi a seconda di criteri stabiliti (es: IP, maschero le altre colonne come se non ci fossero ad esempio con valore fittizio 0 e sommando eventuali contatori). \textbf{Risparmio spazio e trasmissione}. Perdo informazione, non posso separare flussi aggregati.\\
+Permette di trovare forme tipiche per rispondere a domande tipo: porte più usate, chi parla con chi\ldots\\
+Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.
+\paragraph{Filtraggio flussi} Scartare flussi basandosi su criteri: furata, src/dest, porte\ldots\\
+Magari esportare solo unidirezionali. Diverso da aggregazione, possono coesistere e solitamente filtraggio applicato prima dell'aggregazione.
+\paragraph{Esempi di intrusione} Flussi con pacchetti o ottetti eccessivi conteggio\\Src con tante destinazioni (host scanning) o con tante porte dest su stesso host (port scanning)
+\paragraph{sFlow}
+
 \chapter{Data Structures}
 \paragraph{Bitmap} Array di bit. Lunghezza arbitraria e aggiunta/rimozione in O(1) con operazioni su bit semplici. Memoria in base ai bit usati
 \begin{center}
