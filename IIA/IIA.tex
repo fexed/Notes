@@ -2529,15 +2529,22 @@ pseudocodice
 \end{center}
 \paragraph{Best Attribute} In base all'\textbf{entropia}\\
 \textbf{Entropia}: quantità di informazione portata da un segnale, più è stabile meno entropia porta quindi meno informazione, più oscilla più entropia più informazione. Nel nostro caso, il concetto di entropia misura impurità di una collezione d'esempi.\\
-S collezione esempi training, p+ proprorzione esempi positivi in S, p- negativi
-Entrpy(s) = -p+ logs(p+) - p- log2(p-) assumo 0log2(0) = 0\\
-Tutti positivi/tutti negativi, entropia 0.\\
-Casi misti entropia alta.\\
+Data $S$ \textbf{collezione di esempi training}, $p+$ proporzione degli esempi positivi in $S$ e $p-$ degli esempi negativi
+$$Entropy(S) = -(p+)\cdot(\log_2(p+)) - (p-)\cdot(\log_2(p-))\text{ assumendo }0\cdot\log_2(0) = 0$$
+Se ho tutti positivi o tutti negativi, l'entropia è 0. Nei casi misti entropia alta.\\
 Bassa omogeneità non va bene (alta impurità, alta entropia)\\
 Notare che 0$\leq$p$\leq$1, quindi 0$\leq$entropia$\leq$1\\
-Brutto casi 7+ 7- si entra nella zona scomoda di indecisione. Più nodi devono portare più discriminazione.\\
-Vogliamo dscriminare, quindi seleziona migliore attributo: quello che dà miglior riduzione entropia conoscendo valore dell'attributo\\
-Gain(S, A) = entropy(S) - sum(v in values(A)) (|Sv|/|S| * Entropy(Sv))\\
+Nei casi peggiori, esempio 7+ 7-, si entra nella zona scomoda di indecisione. Più nodi devono portare più discriminazione.\\
+Vogliamo discriminare, quindi seleziono l'attributo migliore: quello che dà miglior riduzione dell'entropia conoscendo valore dell'attributo
+$$Gain(S, A) = Entropy(S) - \sum_{v \in values(A)} \left(\frac{|Sv|}{|S|} \cdot Entropy(Sv)\right)$$
+Un esempio
+\begin{center}
+	\includegraphics[scale=0.75]{ifgainex.png}
+\end{center}
+$$G(S, A1) = E(S) - \left[\frac{2}{12}\cdot\left(-\frac{2}{2}\log_2(\frac{2}{2})-\frac{0}{2}\log_2(\frac{0}{2})\right)+\frac{4}{12}\left(-\frac{2}{4}\log_2(\frac{2}{4})-\frac{2}{4}\log_2(\frac{2}{4})\right)+\frac{6}{12}\left(-\frac{0}{12}\log_2(\frac{0}{12})-\frac{6}{12}\log_2(\frac{6}{12})\right) \right]$$
+$$=E(S) - \frac{2}{12}(0) - \frac{4}{12}(1) + \frac{6}{12}(0) = E(S) - \frac{1}{3} $$
+$$G(S, A2) = E(S) - \frac{1}{12}(0) - \frac{6}{12}(1) - \frac{5}{12}(0) = E(S) - \frac{1}{2} $$
+In questo esempio si sceglierebbe $A1$\\
 Più alto information gain, più efficace è nella classificare i dati.
 Se ottengo tutti sottoinsiemi con positivi e 0 negativi, e 0 positivi e negativi ottengo una classificazione pulita.\\
 Entropia misura omogeneità (impurità) della classe del sottoninsieme di esempi, seleziono A che massimizza.
