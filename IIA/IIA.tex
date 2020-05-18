@@ -2552,13 +2552,13 @@ Dopo aver separato, mi aspetto tanti sottoinsieme omogenei con valori più bassi
 Quindi l'entropia guida la funzioen di apprendimento.
 \paragraph{Perché funziona?} I casi con entropia molto bassa pesano molto, sono molto omogenei (es 6+ 1-)
 \paragraph{Problemi con l'information gain} Così com'è favorisce situazioni con molti valori possibili. Ma ci sono casi dove non sono significativi. %TODO esempio
-Elemento correttivo può essere GainRatio(S,A) = Gain(S,A)/SplitInformation(S,A)\\
-SplitInformation(S,A) = -sum(i=1toc) |Si|/|S| * log2 |Si|/|S|\\
+Elemento correttivo può essere $$GainRatio(S,A) = \frac{Gain(S,A)}{SplitInformation(S,A)}$$
+$$SplitInformation(S,A) = -\sum_{i=1}^c\left( \frac{|S_i|}{|S|} \cdot \log_2 \frac{|S_i|}{|S|} \right)$$
 Splitinf misura l'entropia di S rispetto ai valori di A, pià uniformemente dispersi sono i dati meglio è.\\
 GainRatio penalizza\\ %TODO
-Ha un denominatore che può succedere vada a 0 quando |Si| è circa uguale a |S| per qualche vaolre i (log1 = 0)\\
-Caso estremo |S1|=0 e |S2| = n, splitinformation = -0 -0 = 0 che farebbe esplodere gainratio e farebbe scegliere questo attr che in realtà è costante e non darebbe informazione\\
-Per mitigare effetto, calcolo gain per ogni attr e applico gainratio solo ad attributi con gain $>$ media.
+Ha un denominatore che può succedere vada a 0 quando $|S_i|$ è circa uguale a $|S|$ per qualche valore $i$ ($\log(1) = 0$ per esempio)\\
+Un caso estremo $|S_1|=0$ e $|S_2| = n$, $SplitInformation = -0 -0 = 0$ che farebbe esplodere $GainRatio$ e farebbe scegliere questo attributo che in realtà è costante e non darebbe informazione\\
+Per mitigare questo effetto, calcolo il $Gain$ per ogni attributo e applico $GainRatio$ solo ad attributi con $Gain >$ media.
 \subsection{Ricerca nello spazio delle ipotesi dei Decision Trees}
 Ricerca hill-climbing attraverso lo spazio de possibili dt dal più semplice al più complesso (\textbf{ricerca locale senza backtracking}). Quindi si riscia ottimo locale e non ottimalità. Maniene una singola ipotesi corrente in memora e lo lo spaz ipotesi è comnpelto (rappresenta tutta le funzioni a valori discreti). Usa ttuti gli esempi disponibili (non è incrementale).\\
 Può \textbf{terminare prima}, accettando classi rumorose senza accuratezza del 100\% sul TR.
