@@ -1821,6 +1821,20 @@ Può sembrare banale e venire da dire $x = \mathlarger{\frac{1}{a}}$ ma non è b
 $$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} = x_k -  \frac{\mathlarger{\left(\frac{1}{x_k} - a\right)}}{\mathlarger{\frac{1}{x_k^2}}} = x_k + x_k^2\cdot\left(\frac{1}{x_k} - a \right) = x_k + x_k - ax_k^2 = 2x_k - ax_k^2 = x_k(2 - ax_k)$$
 Non è banale perché implementando il metodo delle tangenti si nota che non c'è bisogno di alcuna divisione. Ho due prodotti e un'addizione.\\
 Questo è importante perché nei primi elaboratori elettronici l'aritmetica di macchina implementava solamente tre operazioni: addizione, sottrazione e moltiplicazione. La divisione era implementata calcolando il reciproco del numero con il metodo delle tangenti e moltiplicando. Quindi $b/a$ era implementata calcolando $1/a$ con Newton e calcolando $b\cdot(1/a)$
+\paragraph{Esempio} $f(x) = x\cdot\log x - 1 = 0$\\
+$f \in C^\infty(\mathbb{R}^+)$, $\mathlarger{\lim_{x\to+\infty}f(x) = +\infty}$\\
+$\mathlarger{\lim_{x\to0^+}f(x) =\: ?} = \mathlarger{\lim_{x\to0^+} \frac{\log x}{\frac{1}{x}}} = \mathlarger{\lim_{x\to0^+} \frac{\frac{1}{x}}{-\frac{1}{x^2}}} = \mathlarger{\lim_{x\to0^+} -\frac{1}{\not x}\cdot x^{\not 2}} = 0$\\
+$f'(x) = 1\cdot\log x + x\cdot\mathlarger{\frac{1}{x}} = \log x + 1$
+\begin{list}{}{}
+	\item $\log x + 1 \geq 0 \Leftrightarrow \log x \geq -1 \Leftrightarrow x \geq e^{-1} = \mathlarger{\frac{1}{e}}$
+\end{list}
+Quindi tra $0$ e $\frac{1}{e}$ escluso la funzione è decrescente, mentre da $\frac{1}{e}$ compreso in poi è crescente. $f(0) = -1 \Rightarrow$ la funzione è negativa fino ad un certo $\alpha > \frac{1}{e}$ in cui vale 0, per poi essere positiva all'infinito.\\
+$f''(x) = \mathlarger{\frac{1}{x}} > 0\:\:\:\:\forall\alpha > 0$\\
+Abbiamo che $f\in C^2(\mathbb{R}^+)$, $f'(\alpha)\neq 0 \Rightarrow$ il metodo è localmente convergente in $\alpha$\\
+$\forall\:x_0\geq\alpha$ il metodo delle tangenti converge ad $\alpha$.\\
+Se $\mathlarger{\frac{1}{e}} < x_0 < \alpha \Rightarrow x_1 \geq \alpha \longrightarrow x_1 - \alpha = g(x_0) - g(\alpha) =$ per Lagrange $= g'(\xi)\cdot(x_0 - \alpha) = \mathlarger{\frac{f(\xi)\cdot f''(\xi)}{f'(\xi)^2}(x_0 - \alpha)}$\\con $\xi \in [x_0, \alpha]$\\
+$x_0 - \alpha < 0$, $\mathlarger{\frac{f(\xi)\cdot f''(\xi)}{f'(\xi)^2}} < 0$, $x_1 - \alpha \geq 0$\\
+$x_1 \geq \alpha$
 \chapter{Esercitazioni}
 Studiare il \textbf{condizionamento} del problema, la \textbf{stabilità} degli algoritmi e il \textbf{costo computazionale} (stimare il numero di operazioni) di $$f(x) = x^n = e^{n\log(x)}$$ con $x > 0$
 \paragraph{Condizionamento} Dato che non è dipendente dal modo in cui lo si calcola, calcoliamo il condizionamento per $f(x) = x^n$ con la formula $\epsilon_{in} = \frac{f'(x)}{f(x)}\cdot x\cdot\epsilon_x$ $$\epsilon_{in} = \frac{n\cdot \not x^{n-1} \cdot \not x}{\not x^n}\epsilon_x = n\epsilon_x$$ quindi $$|\epsilon_{in}| = |n\cdot \epsilon_x| \leq n\cdot u$$
