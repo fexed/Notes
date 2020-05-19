@@ -715,5 +715,64 @@ Cosa si può fare:
 Possibile registrare un listener da chiamare su certe condizioni: dopo intervallo di tempo, dopo aver percorso una distanza prefissata, solo da specifico provider, oppure continuamente finché non stacco (continuous) o una volta e basta finché non lo richiedo (one-shot)\\
 Per deregistrare un listener: \texttt{removeUpdates(LocationListener)}. Opportuno registrare nella onResume e deregistrarlo nella onPause (se uso nella UI) oppure registrare in un Service.
 \section{Geocoding}
+%TODO
 \section{Maps}
+%TODO
+\chapter{Architettura multimediale}
+Framework sofisticato. Classi principali:
+\begin{list}{}{}
+	\item MediaPlayer - riproduce media
+	\item MediaRecorder - registra media
+\end{list}
+Ma ha moltissime altre funzioni: post-processing, transcoding, face recognition, streaming, audio routing\ldots i vari componenti sono in \texttt{android.media.*}.
+\section{Riproduzione audio/video}
+\paragraph{Riproduzione} La riproduzione richiede di \textbf{allocare} e \textbf{configura} \textbf{\textit{un} MediaPlayer}. Si configura da dove si ottengono i dati da riprodurre, su quale dispositivo eventualmente controllando i dettagli (finestra per il video, mixing dell'audio\ldots), controllare riproduzione (play, pausa, stop) sia direttamente dall'utente che da programma.\\
+Infine, liberare le risorse.
+Quindi \begin{enumerate}
+	\item allocare
+	\item configurare
+	\item controllare
+	\item liberare
+\end{enumerate}
+\paragraph{MediaPlayer} Automa a stati
+\begin{list}{}{}
+	\item Inizialmente \textbf{Idle} e attende la configurazione
+	\item Dopo la configurazione è \textbf{Initialized}
+	\item Segue il caricamento dei buffer/inizializzazione dello streaming \textbf{Preparing}
+	\item Quando tutto è pronto, \textbf{Prepared}
+\end{list}
+\begin{center}
+	immagine automa a stati con varie operazioni
+\end{center}
+Supporta molti formati comuni, ma si possono fare conversioni al volo. Formati nuovi sono supportati solo su versioni recenti di Android.
+\subsection{Sorgenti}
+\begin{list}{}{\textbf{Quattro tipi}}
+	\item \textbf{File locali}, tramite path o FileDescriptor
+	\item \textbf{Risorse} (\texttt{R.raw.*})
+	\item \textbf{URI locali}, \texttt{content://\ldots} da ContentProvider
+	\item \textbf{URL remote}, statiche \texttt{http://\ldots} o streaming \texttt{rtsp://\ldots}
+\end{list}
+\paragraph{Prepare} Va chiamata su altro thread. Pattern comune: configuro sorgente, registro listener, chiamo prepareAsync che torna subito e quando ha fatto viene chiamato il listener.
+\paragraph{Rispettare lo stato} Maggior parte dei metodi legali solamente in certi stati (del MediaPlayer). Esempio, prepare solo in Initialized, start solo in Prepared\ldots (vedi schema).
+\paragraph{Rilasciare} Ogni istanza di MediaPlayer occupa tanta memoria e blocca tante risorse: buffer audio/video, socket di rete, porzione di schermo\ldots\\
+\textbf{Fondamentale} rilasciarle dopo l'uso: sempre considerare un try/catch/finally. Rilasciare con \texttt{release();} e \texttt{mp = null;} per rilasciare effettivamente e liberare con il garbage collector.
+\subsection{Riproduzione video} Simile ad audio, occorre indicare destinazione su schermo con due modi:
+\begin{list}{}{}
+	\item \texttt{setSurface(Surface s)}
+	\item \texttt{setDisplay(SurfaceHolder s)}\\
+	SurfaceHolder tipicamente ottenuto da un SurfaceView di una layout:\\\texttt{sh = ((SurfaceView)findViewById(R.layout.video)).getHolder();}
+\end{list}
+\subsection{Wake Lock}
+Anche durante la riproduzione di audio/video, Android si sente libero di andare in modalità "sleep" fermando tutto. Spesso non è desiderato: riproduzione di musica in background (spegnere schermo ma tenere in riproduzione), riproduzione video (mantenere schermo acceso e continuare la riproduzione).\\
+L'app può quindi chiedere un \textbf{wake lock}.
+\paragraph{Ottenerlo} Wake lock concetto globale, ma MediaPlayer fornisce metodi di utilità: \texttt{mp.setScreenOnWhilePlaying(boolean b)} preferito per i video e \texttt{mp.setWakeMode(context, flags}\begin{list}{}{}
+	\item PARTIAL\_WAKE\_LOCK: cpu on* (ottimizzazioni di batteria possono intervenire), schermo off, tastiera off
+	\item SCREEN\_DIM\_WAKE\_LOCK: cpu on, schermo dim, tastiera off
+	\item SCREEN\_BRIGHT\_WAKE\_LOCK: cpu on, schermo luminoso, tastiera off
+	\item FULL\_WAKE\_LOCK: cpu on, schermo luminoso, tastiera luminosa
+\end{list}
+Si può associare un wake lock staticamente ad un'Activity: \texttt{android:keepScreenOn="true"} o dinamicamente\\ \texttt{getWindow().addFlags(WindowManager.LayoutParams.FLAG\_KEEP\_SCREEN\_ON);} e \texttt{clearFlags} per toglierlo\\
+Per usarli, serve il permission \texttt{android.permission.WAKE\_LOCK}.
+\section{Cattura audio/video}
+\section{Fotografia}
 \end{document}
