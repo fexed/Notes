@@ -784,8 +784,54 @@ Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.
 \paragraph{Filtraggio flussi} Scartare flussi basandosi su criteri: furata, src/dest, porte\ldots\\
 Magari esportare solo unidirezionali. Diverso da aggregazione, possono coesistere e solitamente filtraggio applicato prima dell'aggregazione.
 \paragraph{Esempi di intrusione} Flussi con pacchetti o ottetti eccessivi conteggio\\Src con tante destinazioni (host scanning) o con tante porte dest su stesso host (port scanning)
-\paragraph{sFlow}
-
+\subsection{sFlow}
+Flow da non associare a NetFlow. NetFlow: insieme di pacchetti con caratteristiche in comune (a meno di aggregazione). NetFlow nasce per girare intralan, sui router per traffico che passa attraverso. Con probe software, ma anche hardware.\\
+NetFlow è nato soprattutto per la parte geografica, non per la LAN. Se voglio sapere quello che succede in rete, il traffico non passa dal router: non vedrò con NetFlow ciò che passa in casa.\\
+8 porte gigabit: 16 gigabit di traffico (8 gigabit andata e 8 gigabit ritorno). Diventa complicato analizzarlo.\\
+Devo \textbf{deduplicare}: dividerlo a metà per le due direzioni.\\
+Su una rete reale il traffico da analizzare è troppo: costerebbe di più l'infrastruttura. Inoltre sonde software richiedono lavoro: versioni diverse, librerie\ldots e non è detto che si possa installare probe.\\
+Entra in campo sFlow. Ci si orienta verso di esso perché aumentando i problemi aumentano i costi. Aumentando porte devo aumentare potenza e memorizzazione. Ma devo partire dal perché voglio analizzare: visibilità di rete per sapere se ci sono problemi, come stanno andando le cose. La domanda è la visibilità. sFlow non pretende di vedere tutto sempre, non pretende di essere veloce quanto la rete, si analizza 1 pacchetto ogni $x$ (\textbf{Campionamento}: $x$ random, non fisso, sennò rischio di sincronizzarmi con traffico periodico e vedere sempre il solito), più pacchetti si analizzano più preciso sono ma se la rete è troppo veloce si campiona di più.\\
+\textbf{Perdita controllata}.
+\paragraph{Architettura} Probe campiona traffico, pacchetti campionati mandati all'sFlow collector in formato sFlow, periodicamente il probe manda al collezionatore le statistiche SNMP MIB-II all'interno dei pacchetti sFlow. Pacchetti usati per scalare il traffico. Il sampling è fatto per porta, per avere una visibilità per porta.\\
+La differenza è che \textbf{il probe manda il pacchetto ogni $n$ con l'header sFlow e lo manda al collezionatore, senza analizzarlo}. Ci permette di andare veloci.\\\\
+\texttt{RFC 3176}, definisce formato pacchetti (UDP, non SNMP) e un MIB SNMP per accedere i dati. Architettura simile a NetFlow: probe manda \textbf{pacchetti} al collezionatore.\\
+probe fondamentalmente sniffer che cattura 1 ogni $x$ pacchetti (tipicamente $x = 400$ e incapsula con info sFlow.\\
+Errore statistico $\leq 196\cdot\sqrt{\frac{1}{\textsl{numero dei sample}}}$\\
+Scalabile (aumento il rateo di sampling).\\\\
+sFlow $\neq$ NetFlow\\
+Flussi sFlow e flussi NetFlow \textbf{non hanno niente in comune}. In sFlow un campione è un flusso, in NetFlow un flusso è una quintupla con contatori.\\
+Oltre a vedere il pacchetto può mostrare anche info sul contesto agendo sullo switch\\
+AS source e destination relative ad ip src/dst in netflow\\
+in sflow ho as del router che lo invia e as che lo deve ricevere\\
+Con sflow vedo parte del traffico ma con \textbf{più informazioni estratte dal contesto}\\
+Si riesce a sapere, sugli AP, anche user e pwd. Info riguardo al traffico come gira nella rete, grazie al contesto.\\\\
+Solitamente NetFlow su router e sFlow sugli switch.
+\paragraph{Agent} Implementato in hw. Pacchetto ogni $x$, arricchito con info di contesto.\\\\
+sFlow sugli switch, RMON su switch compatibini L2/L3, NetFlow sui router $\rightarrow$ soluzioni di analisi del traffico: sorveglianza continua sulla rete\ldots
+\begin{list}{}{}
+	\item \textbf{Ambiente}\\sFlow switch, ma anche su router\\
+	NetFlow router
+	\item \textbf{Velocità}\\sFlow Multigigabit\\
+	NetFlow $\leq$ 1 Gigabit
+	\item \textbf{Campionamento}\\sFlow sempre\\
+	NetFlow ogni tanto campiona
+	\item \textbf{Monitoraggio}\\sFlow monitoraggio statistico\\
+	NetFlow monitoragglio accurato (senza packet loss)
+\end{list}
+\subsection{Radius} \textbf{Remote Authentication Dial In User Service}, protocollo comune. \textbf{Lato operatore}\\
+Importante per:
+\begin{list}{}{}
+	\item Protocollo più usato per implementare l'autenticazione sui dispositivi di rete
+	\item Usato per le attività di billing (calcolo pagamenti) su reti cablate (ADSL, Modem\ldots)
+	\item Consente di gestire connessioni per durata o volume
+	\item Supportato da tutti i dispositivi di rete (esclusi dispositivi a basso livello)
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.75]{radius.png}
+\end{center}
+Il \textbf{client} è nella \textbf{centrale dell'operatore}. Client comunica con il server che mantiene info sugli utenti e risponderà si/no per accettare l'autenticazione.\\
+Dopo accesso c'è l'accounting request start: da ora navighi e calcolo informazioni per fare "il conto". A fine si manda richiesta di stop e in base a quello si calcola  costo.\\
+Si può solamente fare billing su tempo e durata.
 \chapter{Data Structures}
 \paragraph{Bitmap} Array di bit. Lunghezza arbitraria e aggiunta/rimozione in O(1) con operazioni su bit semplici. Memoria in base ai bit usati
 \begin{center}
