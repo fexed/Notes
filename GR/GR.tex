@@ -874,4 +874,18 @@ codice su \texttt{github.com/ntop/nDPI/blob/dev/src/lib/third\_party/src/ndpi\_p
 Formula \texttt{csrc.nist.gov/csrc/media/publications\ldots}\\
 Esempio per usarla: grado di quanto sono distribuiti i dati\\
 Esempio di uso sul TLS: entropia dei byte prima e dopo crittografia cambia ma è sempre compresa fra delle soglie per dati omogenei. Tramite entropia si può capire il tipo di dato.
+\chapter{Network Traffic Monitoring su Container}
+Traffic monitoring: garantire disponibilità fiunzionamento a lungo termine. A inizio 2000 fondamentalmente solo SNMP. Misure volumetriche, con RMON poco di più: sempre aggregate. Successivamente sFlow (2001) per risolvere problema visibilità: sempre contatori ma con informazioni di contesto.\\
+Si dice che \textit{i pacchetti non mentono mai}, info utili per capire: problemi di traffico, traffico non conforme a politiche\ldots\\
+Sempre pacchetti e flussi. Non sono sbagliati i pacchetti, ma il problema è che bisogna adattarsi ai pacchetti. Paradigma utile per monitorare in maniera passiva, ma la crittografia ad esempio crea problemi. Non è \textbf{naturale per le persone}.
+\paragraph{System Introspection} Senza catturare traffico di rete chiedo al sistema. Ma ho comunque bisogno di info di contesto.\\
+Adesso monitoraggio \textbf{unificato}: sempre parte classica (NetFlow, SNMP, IPFIX) ma con anche strumenti moderni per ambienti in container.
+\section{eBPF}
+macchina virtuale semplice eseguita nel kernel linux\\
+codice eseguito nel kernel space
+\begin{center}
+	\includegraphics[scale=0.75]{ebf.png}
+\end{center}
+eBPF verifier: rigetta tutto ciò che non reputa adatto ad essere eseguito in kernel space. serie di condizioni per verificare che sia adatto: no loop indefiniti, ricorsione limitata, limitazione in spazio, no variabili globali, no allocazione dinamica, numero massimo istruzioni.
+\paragraph{Container} Istanze utente isolate, ognuna possibilmente su un processo diverso. Solitamente sfruttano feature del kernel: cgroup (limiti a risorse usabili per singoli processi), namespace (gruppi a cui iscriversi per avere vista limitata del sistema)
 \end{document}
