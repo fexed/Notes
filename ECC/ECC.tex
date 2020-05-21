@@ -573,9 +573,9 @@ D'ora in avanti parliamo solo di funzioni calcolabili, quindi $\phi_i$ \textit{�
 \paragraph{Tempo di calcolo} $\exists$? una funzione calcolabile totale $t(i, n)$ che maggiora il tempo di calcolo di M$_i$(n)? No. Vediamo come dimostrarlo, introducendo una \textbf{diagonalizzazione}.\\
 $t(i, n)$ = \begin{math}
 \left\{
-\begin{array}{c c}
-	k & \textsl{se }M_i(n)\downarrow \textsl{in meno di }i\textsl{ passi}\\
-	0 & \textsl{altrimenti}
+\begin{array}{l l}
+	k & \text{se }M_i(n)\downarrow \text{in meno di }i\text{ passi}\\
+	0 & \text{altrimenti}
 \end{array}
 \right.
 \end{math}\\
@@ -583,17 +583,17 @@ Sia T$_i$ la misura \textbf{esatta} del tempo di calcolo di M$_i$. T$_i$(n) $\le
 $\psi(x) = $
 \begin{math}
 \left\{
-\begin{array}{c c}
-	\phi_x(x) + 1 & \textsl{se }T_x(x) \leq t(x, x)\\
-	0 & \textsl{altrimenti}
+\begin{array}{l l}
+	\phi_x(x) + 1 & \text{se }T_x(x) \leq t(x, x)\\
+	0 & \text{altrimenti}
 \end{array}
 \right.
 \end{math}\\
 Quindi anche $\psi$ è calcolabile totale. Applico Church-Turing, quindi $\phi_i(i) = \psi(i) =$ \begin{math}
 \left\{
-\begin{array}{c c}
-	\phi_i(i) + 1 & \textsl{se }T_i(i) \leq t(i, i)\\
-	0 & \textsl{altrimenti}
+\begin{array}{l l}
+	\phi_i(i) + 1 & \text{se }T_i(i) \leq t(i, i)\\
+	0 & \text{altrimenti}
 \end{array}
 \right.
 \end{math}\\
@@ -602,9 +602,9 @@ Per lo stesso motivo non possiamo imporre limiti allo spazio.
 \paragraph{Spazio di calcolo} $\exists$? una funzione calcolabile totale che dato M$_i$, $x$ dice quante celle di memoria uno specifico calcolatore C userà per calcolare M$_i(x)$?\\
 $h(i, x) = $\begin{math}
 \left\{
-\begin{array}{c c}
-	1 & \textsl{se }M_i(x)\uparrow (\textsl{su }C)\\
-	0 & \textsl{altrimenti}
+\begin{array}{l l}
+	1 & \text{se }M_i(x)\uparrow (\text{su }C)\\
+	0 & \text{altrimenti}
 \end{array}
 \right.
 \end{math}\\
@@ -1229,24 +1229,24 @@ Anche chiamato \textbf{problema della soddisfacibilità}. La formulazione è sem
 $$\text{Dato }B\text{, allora }\exists\:V\:|\:V\vDash B\text{ ?}$$
 SAT $\in\mathscr{NP}$. Come faccio a dirlo? Dovrei costruire una macchina non deterministica che verifica questa cosa, cioè che dice se l'assegnamento esiste o meno. Come si fa?\\
 Cominciando dallo stato iniziale. Supponendo $n$ variabili, allora ho $n$ scelte all'inizio, per ognuna delle quale ho due scelte: assegnare $tt$ o assegnare $ff$. Lo faccio per la prima, due scelte, poi per la seconda\ldots facendo così tutti i possibili assegnamenti. \textbf{Un cammino è un assegnamento}.\\
-La verifica se un assegnamento soddisfa possiamo farla dinamicamente, quindi è \textbf{polinomiale} perché è nel numero delle variabili.
+Vedremo invece che la verifica se un assegnamento soddisfa possiamo farla dinamicamente, quindi è \textbf{polinomiale} perché è nel numero delle variabili.
 \subsection{Problema HAM}
 Problema del cammino hamiltoniano. Dato un grafo orientato $G = (N, A)$, $\exists?$ cammino che tocca tutti i nodi una ed una sola volta?\\
 Vediamo che $\text{HAM} \leq \text{SAT}$. Devo definire $f \in \textsl{logspace}\:|\:$ ($G$ ha un cammino hamiltoniano $\Leftrightarrow f(G) = B$ è tale che $\exists\:V\vDash B$)\\
 Vedremo una riduzione, ma non è la migliore.\\\\
 Supponiamo che $G = (N, A)$ ha $n$ nodi (cioè l'insieme $\{1, 2, \ldots, n\}$), allora $B$ ha $n^2$ variabili $x_{i,j}$: ciascuna rappresenta che nell'$i$-esimo posto di un cammino appare il nodo $j$. Posso rappresentarle anche come $(i, j)$ con $i, j \in [1, n]$.\\
 Definiamo una permutazione $\Pi : [1, n] \rightarrow [1, n]\:|\:\left(\Pi(i), \Pi(i+1)\right) \in A$, dai nodi ai nodi. In realtà nella nostra permutazione, i primi sono i nodi mentre i secondi sono le posizioni che occupano nel cammino. con $\Pi(i)$ rappresento il nodo in posizione $i$.\\
-$\Pi$ deve essere davvero una funzione.
+$\Pi$ deve essere davvero una funzione:
 \begin{enumerate}
 	\item Un nodo non può essere mappato due volte. Quindi: $\neg(x_{ij} \wedge x_{kj})$ con $i \neq k$. Questo però non è un congiunto, quindi applico DeMorgan\\
 	$\Longrightarrow \neg x_{ij} \vee \neg x_{kj}$ con $i \neq k$
-	\item La funzione deve essere definita ovunque (totale), quindi ogni nodo deve apparire in un certo cammino.\\
+	\item La funzione deve essere definita ovunque (totale), quindi ogni nodo deve apparire nel cammino.\\
 	$\Longrightarrow x_{1i} \vee x_{2i} \vee \ldots \vee x_{ni}$
 	\item[] Ho definito che la funzione è totale, quindi ora devo definire la sua surgettività.
 	\item Ogni posizione deve ricevere un nodo, sennò rimane un pezzo "vuoto".\\
 	$\Longrightarrow x_{i1} \vee x_{i2} \vee \ldots \vee x_{in}$
 	\item Non posso avere due nodi nella solita posizione. Quindi: $\neg(x_{ij} \wedge x_{ik})$ con $j \neq k$. Applico DeMorgan.\\
-	$\Longrightarrow \neg x_{ij} \vee \neq x_{ik}$ con $j \neq k$
+	$\Longrightarrow \neg x_{ij} \vee \neg x_{ik}$ con $j \neq k$
 	\item[] Ho ben definito la permutazione $\Pi$, quindi ora se riesco a prendere tutti i disgiunti, metterli in and e trovo un assegnamento booleano che li rende veri ho trovato un cammino hamiltoniano. Manca da definire $\left(\Pi(i), \Pi(i+1)\right) \in A$
 	\item Se $(i, j) \not\in A \Longrightarrow \neg x_{k,i} \vee \neg x_{k+1, j}$
 \end{enumerate}
@@ -1349,10 +1349,10 @@ Ad ogni riga $i$ ho il passo di computazione e la configurazione al passo $i$: h
 	Tutte le caselle non significative di una riga, quindi, sono riempite con $\#$\\
 	Siccoma la lunghezza della riga è $|x|^k$, ma la macchina termina in $|x|^k - 2$ passi, non avrò mai il cursore in ultima posizione perché il tempo limita lo spazio.
 	\item Supponiamo il cursore in una posizione, posso codificare lo stato nell'alfabeto\\
-	L'alfabeto contiene $\sigma_q \in (\Sigma \times Q \times \{h\}$ che registra che nella configurazione $i$-esima il cursore si trova nella posizione $j$, si legge $\sigma$ e lo stato è $q$. Basta prendere $\Sigma \times Q$ nuovi simboli.
+	L'alfabeto contiene $\sigma_q \in (\Sigma \times Q \times \{h\})$ che registra che nella configurazione $i$-esima il cursore si trova nella posizione $j$, si legge $\sigma$ e lo stato è $q$. Basta prendere $\Sigma \times Q$ nuovi simboli.
 	\item All'inizio il cursore è sul primo carattere subito dopo il respingente. In più i passaggi sul respingente "indietro-avanti", cioè i due passi obbligati successivi di andare sul respingente e tornare a destra, vengono condensati in un singolo passo. Così facendo, il cursore non si troverà mai sul respingente. C'è un'eccezione, nel caso seguente
 	\item Quando $T[i, j] =$ si/no, allora sposta il cursore fino alla seconda colonna (con massimo $O(|x|^k)$ passi), introducendo uno stato ausiliario di finto arresto. Lo stato di accettazione, se raggiunto, è quindi sempre in $T(l, 2)$ per qualche $l \leq |x|^k$.\\
-	Si ammette che il cursore passi sopra il simbolo $\triangleright$ quando lo stato sia $q_{SI}$ (abbreviazione di $\sigma_{q_{SI}}$, con il vincolo che non debba mai toccare il $\triangleright$ più a sinistra (che rappresenta l'inizio del nastro.
+	Si ammette che il cursore passi sopra il simbolo $\triangleright$ quando lo stato sia $q_{SI}$ (abbreviazione di $\sigma_{q_{SI}}$), con il vincolo che non debba mai toccare il $\triangleright$ più a sinistra (che rappresenta l'inizio del nastro).
 	\item Se $\sigma_{SI}$ oppure $\sigma_{NO}$ appaiono sulla riga $p<|x|^k$ e nella seconda colonna, allora tutte le righe di indice $q$ con $p\leq q \leq |x|^k$ sono uguali alla $p$-esima
 \end{enumerate}
 Abbiamo l'ovvia condizione di terminazione con successo: M accetta $x$ $\Leftrightarrow \exists\:i\:\:|\:\:T(i, 2) = \sigma_{SI} (= T(|x|^k, 2))$\\
