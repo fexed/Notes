@@ -1414,7 +1414,7 @@ $T(i,j) = f\left( \begin{array}{l l l l}
 perché dipende solamente da $\begin{array}{l}
 T(i-1, j-1)\\T(i-1,j)\\T(i-1,j+1)
 \end{array}$\\
-Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. Prendo questa tabella e la codifico in binario, ottenendo un'altra tabella in cui invece dei simboli ho 0/1.\\
+Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. Prendo questa tabella e la codifico in binario, ottenendo un'altra tabella in cui invece dei simboli ho 0/1. \textbf{Ottengo un circuito}.\\
 La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$.\\
 Ogni gruppo di $m$ input di $\overline{C}$ proviene da un circuito $\overline{C}$ a sua volta, perché è il gruppo di bit di una cella, e così via\ldots\\
 Riempio la tabella binaria, con $\overline{C}_\triangleright$ e $\overline{C}_\#$ circuiti costanti che fanno le veci del respingente e del carattere bianco.\\
@@ -1433,5 +1433,32 @@ Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra inca
 \end{center}
 Verifichiamo che $f$ stia in $\textsl{logspace}$. Per verificare questo è necessario considerare l'indice di riga, colonna e la dimensione della matrice. Gli indici li rappresento in binario, con $\lceil\log_2(|x|)\rceil$ bit.\\
 Con gli indici scorro la matrice avanti e indietro (due for annidati), 3 nastri di lavoro.\\
-Quindi sto in $\textsl{logspace}$
+Quindi sto in $\textsl{logspace}$.\\
+Abbiamo visto come realizzare un'intuizione avuta all'inizio: la MdT ha un approccio hardware alla computabilità (e di conseguenza alla complessità), ma solo ora abbiamo visto un processo diretto di trasformazione di una computazione in un circuito.
+\subsection{Monotone Circuit Value} \paragraph{Circuito Monotono} Circuito dove non compare il NOT ($\neg$). Mentre tutti gli altri operatori logici sono monotoni, nel senso che mantengono l'informazione, il $\neg$ la butta via. Ma d'altra parte, senza il $\neg$ non si possono esprimere tutte le formule.\\
+Il problema di calcolare il valore in un circuito monotono è un problema $in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.\\\\
+Nel grafo del circuito, riscritto dall'alto verso il basso e da sinistra verso destra, lo riscrivo mantenendo però un "cambio di stato" quando incontro un $\neg$. I nodi successivi saranno quindi invertiti secondo le leggi di DeMorgan, ad esempio $\vee$ diventa $\wedge$.
+\paragraph{Grammatica} $G = (N, \Sigma, P, S)$
+\begin{list}{}{}
+	\item $N$ \textbf{alfabeto}, insieme di simboli non terminali
+	\item $\Sigma$ insieme di \textbf{simboli terminali}
+	\item $P$ insieme di \textbf{produzioni}, $P = \{A\rightarrow\alpha\:|\:A\in N$, $\alpha\in(N\cup\Sigma)^+\}$, cioè $\alpha$ è una stringa non vuota.
+	\item $S \in N$ \textbf{simbolo distinto}
+\end{list}
+Una certa stringa si trasforma secondo la $G$, cioè $\gamma A\beta \Rightarrow_G \gamma\alpha\beta$ se $A \rightarrow \alpha \in P$ senza nessun vincolo (\textbf{grammatica libera da contesto})\\
+Il \textbf{linguaggio generato dalla grammatica} è l'insieme $L(G) = \{w\in\Sigma^+ \:|\:S\Rightarrow^* w\}$ cioè tutte le stringhe $w$ generate da $S$ tramite la grammatica $G$ in un numero qualsiasi di passi ($\Rightarrow^*$)
+\subparagraph{Esempio} $S \rightarrow () | (S) | SS$ genera il linguaggio delle parentesi bilanciate, tipo $S \Rightarrow (S) \Rightarrow (SS) \Rightarrow (()())$
+\paragraph{Verificare} Data una grammatica libera $G$, $L(G) = \emptyset$? Questo problema viene spesso considerato il capostipite dei problemi $\mathscr{P}$-completi.\\
+Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  cioè che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.
+\section{SAT è $\mathscr{NP}$-completo}
+Passiamo attraverso Circuit SAT, dimostrando che Circuit SAT è $\mathscr{NP}$-completo. Devo prendere un problema\\$I \in \mathscr{NP}$ e costruire $f\in\textsl{logspace}\:|\:x\in I\Leftrightarrow f(x) = C$ ed $\exists\:V\:|\:[C]_V = tt$\\\\
+$x \in I$ vuol dire che $\exists$ una macchina non deterministica $N$ ed $\exists$ una computazione $N(x)\longrightarrow^t($si, $w)$ con $t\leq |x|^k$\\
+Da $N$ posso ottenere una $N'$ \textit{equivalente} (cioè se N termina con si anche N' termina con si, analogo per il no) che calcola esattamente la stessa cosa, il cui grado di diramazione (grado di non determinismo) = 2\\
+Come farlo? Se la macchina in uno stato $q$ che va in $q'$ posso sdoppiare lo stato di arrivo $q'$ in $q'_1, q'_2$. Se ho $n > 2$ scelte, prendo la prima scelta e considero tutte le altre come se fossero un singolo nuovo stato. In questo nuovo stato, prendo il primo degli $n-1$ stati rimanenti e considero i successivi come un singolo nuovo stato e così via.\\
+Posso farlo in tempo polinomiale (basta ricopiare gli stati) e il rallentamento della nuova macchina è dovuto al numero di nuovi stati ma sempre polinomiale.\\\\
+Se la prima scelta la codifico con $ff$, la seconda scelta la codifico con $tt$, allora la computazione $N(x)\longrightarrow^t($si, $w)$ è rappresentata da una successione di bit $b_0 b_1\ldots b_{|x|^n - 1}$. $T_{ij}$ non dipenderà solamente dalle tre celle superiori della tabella di computazione, ma anche dal bit $b_i$\\
+Costruisco il circuito $\overline{C}$ con $3m$ input e $m$ output, ma stavolta con un bit ulteriore in input. Ho ottenuto $\overline{C_n}$ che ci serve per riempire la tabella, a costo costante che dipende solo dalla $\Delta'$ di $N'$.\\
+Riempiamo il circuito con $|x|^k$ circuiti per $\triangleright$, $|x|$ circuiti per $\#$, e $|x|^{k-2}\times|x|^k$ copie di $\overline{C_n}$ opportunamente connesse.\\
+Il \textbf{teorema di Cook è dimostrato}.
+\paragraph{Altri problemi $\mathscr{NP}$-completi} HAM, CRICCA, commesso viaggiatore, programmazione lineare, e altri e altri ancora\ldots
 \end{document}
