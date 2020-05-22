@@ -2444,13 +2444,13 @@ Questo è un \textbf{concetto fondamentale in ML}, che troveremo di nuovo quando
 Introduce vincoli che controllano la somma dei valori nostri parametri $|w_j|$ favorendo modelli sparsi, abbassando il valore di w. Se alcuni li \textbf{portiamo bassi}, in \textbf{particolare a 0}, anche se abbiamo introdotto molte funzioni alcune \textbf{spariscono}.
 $$\textsl{loss}(h_w) = \sum_p (y_p + h_\text{w}(\text{x}_p))^2 + \lambda ||w||^2 $$ con nuova aggiunta alla nostra funzione di loss: $\lambda ||w||^2$, con $\lambda$ \textbf{coefficiente di regolarizzazione} (parametro costante) e $||w||^2 = \sum w_i^2$\\
 Quando minimizzo l'errore cerco anche di tenere i $w_i$ bassi, perché la loss deve riuscire ad \textbf{abbassare entrambi i termini}.\\
-Effetto: decadimento del peso (in pratica aggiungo $2\lambda w$ al gradiente
+Effetto: decadimento del peso (in pratica aggiungo $2\lambda w$ al gradiente)
 $$w_{new} = w_{old} + \eta\cdot\Delta w - 2\lambda w_{old}$$\\
 Se $\lambda$ è alto allora modello fortemente normalizzato, se $\lambda$ basso allora do molta importanza ai dati quindi rischio overfitting.
 \paragraph{Limitazione delle funzioni base expansion}
 \begin{list}{}{}
 	\item Avere una basis function lungo ogni dimensione di uno spazio di input a dimensione $D$ richiede un numero combinatorio di funzioni.\\
-	Ad esempio, un polinomio generale di ordine 3 usa tutte le combinazioni di input a causa dei prodotti $x_1x_2, x_2x_3,\ldots x_1x_2x_3\ldots \Rightarrow D^3$
+	Ad esempio, un polinomio generale di ordine 3 usa tutte le combinazioni di input a causa dei prodotti\\$x_1x_2, x_2x_3,\ldots x_1x_2x_3\ldots \Rightarrow D^3$
 	\item $\phi$ sono fissate \textit{prima} di osservare i dati.
 \end{list}
 In altri modelli, vedremo come cavarcela con un numero minore di basis function, scegliendole tra i dati di apprendimento: $\phi$ dipenderà da w e il modello non sarà lineare (es: \textbf{reti neurali})\\
@@ -2675,7 +2675,7 @@ Modelli lineari:  è intuitivamente legato al numero di parametri liberi (dim in
 Decision trees: numero di nodi.
 \paragraph{Conclusioni} Flessibilità modelli ML. Potenza ML senza controllo produce risultati illusori. Controllare tradeoff tra fitting e complessità. Fondamentale il ruolo dei processi di validazione
 \paragraph{ML ben fondato teoricamente} Domande fondamentali nella SLT.
-\chapter{Support Vector Machine}
+\section{Support Vector Machine}
 \paragraph{SVM} Sostanzialmente è un modello lineare, ma è nato dalla Statistical Learning Theory. Diventata famosa, dopo anni di sviluppo teorico, quando usando immagini come input ha avuto un'accuratezza comparabile a quella di reti neurali sviluppate ad hoc.\\
 SVM è attualmente usato in tutti i campi di applicazione dell'apprendimento supervisionato, e anche usato per la regressione.\\
 Argomento tipico introdotto alla fine di un corso di ML, perché discuterlo nei dettagli richiede una visione approfondita del ML. Saremmo comunque tentati di usarlo, attraverso uno dei tanti tool: ci dà una prima \textbf{visione critica}. Anche opportunità per vedere almeno un modello allo stato dell'arte.\\
@@ -2689,7 +2689,7 @@ Argomento tipico introdotto alla fine di un corso di ML, perché discuterlo nei 
 	\textbf{Kernel}
 	\item \textbf{Evitare misinterpretazioni nell'uso dell'SVM} e del ML
 \end{enumerate}
-\section{Maximum Margin Classifier}
+\subsection{Maximum Margin Classifier}
 \paragraph{Soluzioni} In generale per un problema ci possono essere più soluzioni ottime, ma vanno davvero tutte bene? Per noi all'interno del ML \textbf{no}, e vediamo come deciderlo.
 \pagebreak
 \paragraph{Classificazione a massimo margine} Su un problema di classificazione binaria, iniziando con l'assumere di avere un problema linearmente separabile (\textbf{hard margin SVM}).\\
@@ -2731,7 +2731,7 @@ $C$ è un \textbf{iperparametro} definito dall'utente che \textbf{guida il numer
 \end{list}
 Essendo $C$ un iperparametro, và trovato tramite la validation (\textbf{model selection}), quindi rientra in gioco il trade-off.\\
 L'hard margin \textbf{non} si ottiene con $C=0$, poiché bisogna considerare gli $\xi_i$ presenti nei vincoli: si darebbe totale libertà alle variabili slack. $C = 0$ significa "\textit{puoi anche fare il 100\% di errori nel TR}". L'hard margin, quindi, si ottiene con un $C$ \textbf{molto alto}.
-\section{Kernel}
+\subsection{Kernel}
 Fin'ora abbiamo parlato solo di problemi linearmente separabili, per quanto riguarda i casi non lineari?
 \paragraph{Kernel} Modo per usare efficientemente la linear basis expansion, così da ottenere un nuovo approccio flessibile per modelli supervisionati non lineari.\\
 Sappiamo che si può trasformare lo spazio originale in maniera da risolvere i problemi non lineari, tramite la $\phi$. I separatori lineari nel nuovo spazio corrispondono a separatori non lineari nello spazio originale.
@@ -2760,7 +2760,7 @@ Mappa $\phi : \text{x} \mapsto \phi(\text{x})$ dove $\phi(\text{x})$ ha dimensio
 Scelta molto popolare, notare l'iperparametro $\sigma$. Molto flessibile e utilizzabile per costruire decision boundary attorno ad ogni punto. $\sigma$ piccolo significa Kernel a punta stretta, cioè pattern simili solo se molto vicini e il classificatore risponde con la classe del punto più vicino.\\
 Molto potente ma portato all'overfitting.
 \paragraph{} Il design di nuovi kernel per tipi di dato speciali è un argomento di ricerca attuale.
-\section{Sintesi su SVM}
+\subsection{Sintesi su SVM}
 \begin{list}{}{}
 	\item Trade-off sul parametro $C$ e la funzione kernel $K$ (e i suoi parametri)
 	\item Risolvere il problema di ottimizzazione per trovare $\alpha$\\
@@ -2769,8 +2769,8 @@ Molto potente ma portato all'overfitting.
 	\item Modello finale
 	$$h(\text{x}) = \textsl{segno}\left(\sum_{i\in \text{SV}} \alpha_i y_i K(\text{x}_i, \text{x}) \right)$$
 \end{list}
-\section{Uso pratico}
-\subsection{Evitare la misinterpretazione}
+\subsection{Uso pratico}
+\subsubsection{Evitare la misinterpretazione}
 La tipica misinterpretazione nell'uso dell'SVM è pensare che non faccia overfitting. Esso può verificarsi se non si opera un'attenta selezione dei parametri C, kernel, parametri del kernel\ldots\\
 La trattazione implicita di un spazio a grandi dimensioni è \textbf{nel feature space}, non nell'input space (assumendo di proiettarci gli input significativi)\\
 Le tecniche di \textbf{validazione} viste precedentemente per il model selection (C, kernel e parametri) e model evaluation dovrebbero essere usate rigorosamente anche qua.\\
@@ -2794,8 +2794,8 @@ Una piccola guida all'uso (da LIBSVM):
 \end{list}
 Per poi usare una grid-search più fine, una volta trovato il range interessato (es. $2^2, 2^3$).
 %TODO da qui lezione 12/5
-\chapter{K-Nearest Neighbors}
-\section{1-Nearest Neighbor}
+\section{K-Nearest Neighbors}
+\subsection{1-Nearest Neighbor}
 \paragraph{Supervised Learning} 
 \begin{list}{}{Alcune definizioni}
 	\item Memorizza i dati di training $\langle x_j, y_j\rangle$\\
@@ -2822,7 +2822,7 @@ Può creare superficie di separazione molto flessibile, anche troppo. Non c'è e
 	\includegraphics[scale=0.5]{ml5nn.png}
 \end{center}
 \end{multicols}
-\section{K-Nearest Neighbors}
+\subsection{K-Nearest Neighbors}
 Un modo naturale per classificare un nuovo punto è \textbf{guardare i suoi vicini}, e \textbf{prenderne la media}:
 \begin{list}{}{}
 	\item $\textsl{avg}_k($x$) = \mathlarger{\frac{1}{k}\cdot\sum_{\text{x}_i\in N_k(\text{x})}y_i}$
