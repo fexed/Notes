@@ -231,7 +231,7 @@ Viene espresso il fatto che nel calcolo di una funzione razione, in un'analisi a
 L'obiettivo dell'analisi numerica è \textbf{trovare algoritmi numericamente stabili per problemi ben condizionati}.
 \section{Tecniche per l'Analisi degli Errori}
 \subsection{Coefficiente di Amplificazione}
-Dalla seguente relazione $$\epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} = \frac{f(\tilde{x}) - f(x)}{\tilde{x} - x}\cdot\frac{x}{f(x)}\cdot\frac{\tilde{x} - x}{x}$$ si ricava che la \textbf{differenziabilità di $f(x)$ è essenziale} per il controllo dell'errore inerente. Se assumiamo che $f(x)$ è derivabile due volte e continua in $(a, b)$, allora vale lo sviluppo di Taylor $$f(\tilde{x}) = f(x) + f'(x)(\tilde{x} - x) + \frac{f''(\xi)}{2}(\tilde{x} - x)^2,\:\:\:\:\:\:|\xi - x| \leq |\tilde{x} - x| $$ da cui si ottiene $$ \epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} \doteq \frac{f'(x)}{f(x)}x\epsilon_x = c_x\epsilon_x,\:\:\:\:\:\:c_x = \frac{f'(x)}{f(x)}x $$
+Dalla seguente relazione $$\epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} = \frac{f(\tilde{x}) - f(x)}{\tilde{x} - x}\cdot\frac{x}{f(x)}\cdot\frac{\tilde{x} - x}{x}$$ si ricava che la \textbf{differenziabilità di $f(x)$ è essenziale} per il controllo dell'errore inerente. Se assumiamo che $f(x)$ sia derivabile due volte e continua in $(a, b)$, allora vale lo sviluppo di Taylor $$f(\tilde{x}) = f(x) + f'(x)(\tilde{x} - x) + \frac{f''(\xi)}{2}(\tilde{x} - x)^2,\:\:\:\:\:\:|\xi - x| \leq |\tilde{x} - x| $$ da cui si ottiene $$ \epsilon_{in} = \frac{f(\tilde{x}) - f(x)}{f(x)} \doteq \frac{f'(x)}{f(x)}x\epsilon_x = c_x\epsilon_x,\:\:\:\:\:\:c_x = \frac{f'(x)}{f(x)}x $$
 La quantità $c_x = c_x(f) = \frac{f'(x)}{f(x)}x$ è detta \textbf{coefficiente di amplificazione} e fornisce una \textbf{misura del condizionamento del problema}.\\
 In generale, se $f$ : $\Omega \rightarrow \mathbb{R}$ è definita su un insieme aperto di $\mathbb{R}^n$, differenziabile due volte su $\Omega$ ed il segmento di estremi $\tilde{\textbf{x}}$ e $\textbf{x}$ è contenuto in $\Omega$ allora vale
 $$ \epsilon_{in} = \frac{f(\tilde{\textbf{x}}) - f(\textbf{x})}{f(\textbf{x})} \doteq \frac{1}{f(\textbf{x})}\sum_{i=1}^n \frac{\partial f}{\partial x_i}(\textbf{x})x_i\epsilon_{x_i} = \sum_{i=1}^n c_{x_i}(f)\epsilon_{x_i}$$
@@ -532,7 +532,7 @@ A = \left[
 \end{math}\\
 $K_1 = \left\{ z \in \mathbb{C} \:\:\vline\:\: |z - 3| \leq 1\right\}$\\
 $K_2 = \left\{ z \in \mathbb{C} \:\:\vline\:\: |z - 3| \leq 2\right\}$\\
-$K_3 = \left\{ z \in \mathbb{C} \:\:\vline\:\: |z - 3| \leq 2\right\} = K_1$
+$K_3 = \left\{ z \in \mathbb{C} \:\:\vline\:\: |z - 3| \leq 1\right\} = K_1$
 \section{Fattorizzazione LU}
 \paragraph{Problema} Dato $A \in \mathbb{R}^{n \times n}, b \in \mathbb{R}^n$, determinare $x \in \mathbb{R}^n\:\:\vline\:\: Ax = b$. Assunzione: $A$ invertibile.\\
 Quindi, convenzionalmente, $A$ è la \textbf{matrice dei coefficienti}, $b$ è il \textbf{termine noto} e $x$ il \textbf{vettore delle incognite}.\\
@@ -841,6 +841,7 @@ v^T = x^T U_{n-1}\\
 \begin{array}{l}
 y = L_{n-1}^{-1}z\\
 x^T = v^T U_{n-1}^{-1}\\
+\beta = \alpha - x^Ty
 \end{array}
 \right.
 $$
@@ -1089,10 +1090,10 @@ non lo è ($i = 2$ non soddisfa)
 La \textbf{predominanza diagonale} è importante per il seguente teorema.
 \paragraph{Teorema 6.3.1 (1)} Se $A \in \mathbb{R}^{n \times n}$ è \textbf{predominante diagonale} $\Rightarrow$ A è \textbf{invertibile}
 \subparagraph{Dim} Segue dal teorema di Gerschgorin, che dice $\lambda$ autovalore di $A \Rightarrow \lambda \in \bigcup_{i=1}^n K_i$.\\
-Mostriamo che $0 \not\in \bigcup_{i=1}^n K_i \Rightarrow$ 0 non è autovalore $\Rightarrow A$ è invertibile.\\
-$K_i = \{ z \in \mathbb{C}\: |\: |z - a_{ii} \leq \sum_{j=1, j\neq i}^n |a_{ij}|\}$, $0 \in? K_i$\\
-$|0 - a_{ii}| = !a_{ii}| > \sum_{j=1, j\neq i}^n |a_{ij}|$ per predominanza diagonale, $\Rightarrow 0 \not\in K_i$\\
-Vale $\forall\: i \Rightarrow 0 \not\in \bigcup_{i=1}^n K_i$ quindi A è invertibile.\\
+Mostriamo che $0 \not\in \mathlarger{\bigcup_{i=1}^n} K_i \Rightarrow$ 0 non è autovalore $\Rightarrow A$ è invertibile.\\
+$K_i = \left\{ z \in \mathbb{C}\: |\: |z - a_{ii}| \leq \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|\right\}$, $0 \in? K_i$\\
+$|0 - a_{ii}| = |a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|$ per predominanza diagonale, $\Rightarrow 0 \not\in K_i$\\
+Vale $\forall\: i \Rightarrow 0 \not\in \mathlarger{\bigcup_{i=1}^n} K_i$ quindi A è invertibile.\\
 La dimostrazione per colonne è analoga, utilizzando il teorema di Gerschgorin per colonne.
 \paragraph{Corollario} $A \in \mathbb{R}^{n \times n}$ predominante diagonale $\Rightarrow \exists!$ la fattorizzazione $LU$ di $A$
 \subparagraph{Dim} Se $A$ è predominante diagonale $\Rightarrow A_k$ è predominante diagonale per $k = 1 .. n-1$\\
@@ -1201,7 +1202,7 @@ Quindi si accettano valori come \texttt{nnz}(A) $= \left\{ \begin{array}{l}O(n) 
 Il metodo di eliminazione gaussiana è indicato come \textbf{metodo diretto}, perché \textbf{in un numero finito di passi determina la soluzione del sistema}.\\
 I \textbf{metodi iterativi} adottano un \textbf{approccio differente}, cioè di \textbf{costruire una successione $\{x^{(k)}\}$ di vettori tali che $x^{(k)} \rightarrow x$} ($x^{(k)}$ converge a $x$) \textbf{con $x$ soluzione del sistema lineare}.\\
 Siccome la successione è potenzialmente infinita, ho bisogno di un \textbf{criterio di arresto}.
-\paragraph{Def} La successione di vettori $\{x^{(k)}\}_{k\in N}$ con $x^{k} \in \mathbb{R}^n$ \textbf{converge a $x$} (cioè $\lim_{k\to +\infty} x^{(k)} = x$) solamente se
+\paragraph{Def} La successione di vettori $\{x^{(k)}\}_{k\in N}$ con $x^{k} \in \mathbb{R}^n$ \textbf{converge a $x$} (cioè $\mathlarger{\lim_{k\to +\infty}} x^{(k)} = x$) solamente se
 $$\lim_{k\to +\infty} x^{(k)} = x \Leftrightarrow \lim_{k\to +\infty} ||x^{(k)} - x|| = 0$$
 Per l'equivalenza topologica delle norme, vale per qualsiasi norma. Posso scegliere la norma infinito 
 $$||x^{(k)} - x||_\infty = \textsl{max}_{j=1:n}|x_j^{(k)} - x_j|$$
