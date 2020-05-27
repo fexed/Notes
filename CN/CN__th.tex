@@ -1,0 +1,241 @@
+\documentclass[10pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{multicol}
+\usepackage[bookmarks]{hyperref}
+\usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\usepackage{tikz}
+\usepackage{color}
+\usepackage{relsize}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\usepackage{listings}
+\usepackage{mathrsfs}
+\lstset{
+	language=Matlab,
+	commentstyle=\color{mygray}
+}
+\usepackage{graphicx}
+\usepackage{makecell}
+\graphicspath{ {./img/} }
+\usepackage{color}
+
+\begin{document}
+\renewcommand*\contentsname{Indice}
+\title{Teoremi di Calcolo Numerico}
+\author{Federico Matteoni}
+\date{A.A. 2019/20}
+\maketitle
+\tableofcontents
+\pagebreak
+\section*{Introduzione}
+Questo PDF raccoglie i vari teoremi con dimostrazioni che possono essere richiesti durante la prova orale, come specificato dal prof. Luca Gemignani per l'A.A. 2019/20.
+\chapter{Teoremi}
+\section{Teorema 2.2.1: Aritmetica di Macchina} Sia $x \in \mathbb{R}$ con $\omega \leq |x| \leq \Omega$. Si ha $$|\epsilon_x| = \:\vline\:\frac{trn(x) - x}{x}\:\vline \leq u = B^{1-t}$$
+\subsection{Dimostrazione} Sia $x = (-1)^sB^p\alpha$. L'errore assoluto $|trn(x) - x|$ risulta maggiorato dalla distanza tra due numeri di macchina consecutivi, quindi $$|trn(x) - x|\leq B^{p-t}$$ Inoltre $|x| \geq B^{p-1}$, pertanto vale $$|\epsilon_x| = \:\vline\:\frac{trn(x) - x}{x}\:\vline \leq \frac{B^{p-t}}{B^{p-1}} = B^{1-t} = u$$
+\section{Teorema 3.1.1: Errori nel Calcolo di una Funzione Razionale} In un analisi al primo ordine, vale $$\epsilon_{tot} = \epsilon_{in} + \epsilon_{alg}$$
+\subsection{Dimostrazione} $$\epsilon_{tot} = \frac{g(\tilde{x}) - f(x)}{f(x)} = \frac{g(\tilde{x}) - f(\tilde{x})}{f(\tilde{x})}\cdot\frac{f(\tilde{x})}{f(x)} + \frac{f(\tilde{x}) - f(x)}{f(x)} = \epsilon_{alg}(1 + \epsilon_{in}) + \epsilon_{in} \doteq \epsilon_{alg} + \epsilon_{in}$$
+Viene espresso il fatto che nel calcolo di una funzione razione, in un'analisi al primo ordine, le due fonti di generazione d'errore forniscono contributi separati che possono essere analizzati indipendentemente.\\
+L'obiettivo dell'analisi numerica è \textbf{trovare algoritmi numericamente stabili per problemi ben condizionati}.
+\section{Teorema 4.4.1: Localizzazione degli Autovalori}
+Sia $A \in \mathbb{C}^{n \times n}$ e siano $K_i$ gli \textbf{insiemi} definiti da $$K_i = \left\{z \in \mathbb{C} \:\:\vline\:\: |z-a_{ii}| \leq \sum_{j = 1, j \neq i}^n |a_{ij}|\right\}\:\:\:\:\textit{per}\:\:i = 1 \ldots n$$ Allora se $\lambda \in \mathbb{C}$ è autovalore di A $$\Rightarrow \lambda \in \bigcup_{i = 1}^n K_i$$\\
+Gli autovalori di $A$ quindi appartengono ad almeno uno dei $K_i$, i cosiddetti \textbf{cerchi di Gerschgorin}, dove $a_{ii}$ è l'elemento della diagonale principale, $|z - a_{ii}|$ è il \textbf{centro} e $\sum_{j = 1, j \neq i}^n |a_{ij}|$ è il \textbf{raggio}, formato dalla somma degli elementi della stessa riga escluso l'elemento della diagonale principale.
+\subsection{Dimostrazione} $\lambda$ autovalore di $A$ se $\exists\:x \neq 0 \:\:\vline\:\: Ax = \lambda x$. Riscrivendo per componenti, otteniamo
+$$Ax = \lambda x \Leftrightarrow \sum_{j = 1}^n a_{ij}x_j = \lambda x_i\:\:\:\:\textsl{per}\:i = 1\ldots n$$
+Porto al primo membro
+$$\Leftrightarrow  \sum_{j = 1, j \neq i}^n a_{ij}x_j = (\lambda - a_{ii})x_i\:\:\:\:\textsl{per}\:i = 1\ldots n$$
+$x \neq 0$, quindi esiste almeno una componente $\neq 0$. Prendiamo quella di modulo massimo $x_p$, quindi $|x_p| = ||x||_\infty$
+$$Ax = \lambda x \Rightarrow \sum_{j = 1, j \neq p}^n a_{pj}x_j = (\lambda - a_{pp})x_p \Rightarrow\:\vline\sum_{j = 1, j \neq p}^n a_{pj}x_j\vline = |(\lambda - a_{pp})x_p|$$
+Per le proprietà del valore assoluto
+$$\Rightarrow |\lambda - a_{pp}|\cdot|x_p| \leq \sum_{j = 1, j \neq p}^n |a_{pj}|\cdot |x_j| $$
+$x_p \in \mathbb{C}$ in generale, quindi posso dividere per $|x_p| \in \mathbb{R}$, sicuramente $> 0$ e sicuramente positivo quindi la disequazione non cambia verso
+$$\Rightarrow |\lambda - a_{pp}| \leq \sum_{j = 1, j \neq p}^n |a_{pj}|\cdot \frac{|x_j|}{|x_p|} $$
+Siccome $x_p$ è la componente di modulo massimo, allora tutte le $\frac{|x_j|}{|x_p|} \leq 1$ posso concludere che
+$$\Rightarrow |\lambda - a_{pp}| \leq \sum_{j = 1, j \neq p}^n |a_{pj}|$$
+Per la definizione di $K_p$, questa relazione $\Rightarrow \lambda \in K_p$. Dato che non conosco $p$ in generale, $$\Rightarrow \lambda \in \bigcup_{i = 1}^n K_i$$\\\\\\
+Abbiamo considerato i cerchi \textbf{per riga}. Ma posso anche considerare i cerchi per colonna, perché \textbf{gli autovalori di $A$ sono gli autovalori di $A^T$} in generale.\\
+Questo perché $\textsl{det}(A - \lambda I) = \textsl{det}((A - \lambda I)^T) = \textsl{det}(A^T - \lambda I)$
+
+\section{Teorema 5.1.1: Esistenza ed unicità della fattorizzazione LU} Sia $A \in \mathbb{R}^{n \times n}$ e siano $A_k = A(1:k, 1:k)$ con $k = 1\ldots n$ le \textbf{sottomatrici principali di testa}.\\
+Se $A_1, \ldots, A_{n-1}$ sono invertibili $\Rightarrow\exists !\: LU$ di $A$
+\subsection{Dimostrazione} Per induzione sulla dimensione della matrice\\
+$n = 1$, $A = [a] \Rightarrow a = 1\cdot a$
+$$* = \left[ 
+\begin{array}{c c | c}
+	A_{n-1} & & z\\
+	& &\\
+	\hline
+	v^T & & \alpha
+\end{array}
+\right]
+= \left[ 
+\begin{array}{c c | c}
+	L_{n-1} & & 0\\
+	& &\\
+	\hline
+	x^T & & 1
+\end{array}
+\right]
+\left[ 
+\begin{array}{c c | c}
+	U_{n-1} & & y\\
+	& &\\
+	\hline
+	0^T & & \beta
+\end{array}
+\right]
+\Leftrightarrow
+\left\{
+\begin{array}{l}
+A_{n-1} = L_{n-1}U_{n-1}\\
+z = L_{n-1}y\\
+v^T = x^T U_{n-1}\\
+\alpha = x^T y + \beta
+\end{array}
+\right.
+\Leftrightarrow
+\left\{
+\begin{array}{l}
+y = L_{n-1}^{-1}z\\
+x^T = v^T U_{n-1}^{-1}\\
+\beta = \alpha - x^Ty
+\end{array}
+\right.
+$$
+Con $A_{n-1}$ matrice di ordine $n - 1$\\
+Le sue sottomatrici principali di testa di ordine $1\ldots n-2$ sono quelle di A e quindi, per ipotesi, invertibili\\
+$\Rightarrow$ per ipotesi $\exists !$ fattorizzazione LU di $A_{n-1}$\\
+Per ipotesi, $A_{n-1}$ invertibile, quindi
+$$0 \neq \textsl{det}(A_{n-1}) = \textsl{det}(L_{n-1}U_{n-1}) =$$
+Per Binet
+$$ = \textsl{det}(L_{n-1})\textsl{det}(U_{n-1}) = \textsl{det}(U_{n-1})$$
+\section{Teorema 6.1.2: Norma Matriciale nei Metodi Iterativi} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è \textbf{convergente} se $\exists$ una norma matriciale indotta dalla norma vettoriale $||\cdot||$ tale che $||P|| < 1$
+\subsection{Dimostrazione} $e^{(k + 1)} = Pe^{(k)} \Leftrightarrow ||e^{(k + 1)}|| = ||Pe^{(k)}|| \leq ||P||\cdot||e^{(k)}|| \leq ||P||^2\cdot||e^{(k-1)}|| \leq \ldots \leq ||P||^{k+1}\cdot||e^{(0)}||$\\
+$0 \leq ||e^{(k+1)}|| \leq ||P||^{k+1}\cdot||e^{(0)}||$, che per $k\to\infty$
+\begin{list}{}{}
+	\item $0\to 0$
+	\item $||P||^{k+1}\cdot||e^{(0)}||\to 0$ perché $||P|| < 1$ per ipotesi $\Rightarrow||P||^{k+1}\to 0$ per $k\to\infty$
+	\item $\Rightarrow||e^{(k+1)}||\to 0$ per il teorema del confronto.
+\end{list}
+Quindi se trovo una norma come sopra, posso dire che il metodo è convergente: il teorema fornisce una \textbf{condizione sufficiente}.\\
+Adesso cerchiamo una condizione necessaria.
+\section{Teorema 6.1.3: Raggio Spettrale nei Metodi Iterativi} Se il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente, allora $\rho(P) < 1$\\
+$\rho(P)$ è il \textbf{raggio spettrale} di $P$, il \textbf{modulo dell'autovalore di modulo massimo di $P$}.\\
+Quindi il metodo \textbf{non converge} se $\rho(P) \geq 1$, mentre \textbf{può convergere} se $\rho(P) < 1$.
+\subsection{Dimostrazione} Se è convergente, allora la successione converge $\forall\: x^{(0)}$ e quindi $\forall\:e^{(0)}$ ho $e^{(k)}\to 0$\\
+Prendo $e^{(0)} = v\:|\: Pv = \lambda v$ con $|\lambda| = \rho(P)$ quindi un autovettore relativo all'autovalore di modulo massimo.
+$$e^{(k+1)} = Pe^{(k)} = \ldots = P^{k+1}e^{(0)} = P^{k+1}v$$
+$$P^{k+1}v = \lambda^{k+1}v = \lambda^{k+1}e^{(0)}$$
+$$\Rightarrow||e^{(k+1)}|| = |\lambda|^{k+1}\cdot||e^{(0)}|| \neq 0$$
+$$||e^{(k+1)}||\to 0 \Leftrightarrow |\lambda| < 1$$
+Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{necessaria e sufficiente}.
+
+\section{Teorema 6.3.1 (1): Convergenza di metodi iterativi} Se $A \in \mathbb{R}^{n \times n}$ è \textbf{predominante diagonale} $\Rightarrow$ A è \textbf{invertibile}
+\subsection{Dimostrazione} Segue dal teorema di Gerschgorin, che dice $\lambda$ autovalore di $A \Rightarrow \lambda \in \bigcup_{i=1}^n K_i$.\\
+Mostriamo che $0 \not\in \mathlarger{\bigcup_{i=1}^n} K_i \Rightarrow$ 0 non è autovalore $\Rightarrow A$ è invertibile.\\
+$K_i = \left\{ z \in \mathbb{C}\: |\: |z - a_{ii}| \leq \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|\right\}$, $0 \in? K_i$\\
+$|0 - a_{ii}| = |a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|$ per predominanza diagonale, $\Rightarrow 0 \not\in K_i$\\
+Vale $\forall\: i \Rightarrow 0 \not\in \mathlarger{\bigcup_{i=1}^n} K_i$ quindi A è invertibile.\\
+La dimostrazione per colonne è analoga, utilizzando il teorema di Gerschgorin per colonne.
+\subsection{Corollario} $A \in \mathbb{R}^{n \times n}$ predominante diagonale $\Rightarrow \exists!$ la fattorizzazione $LU$ di $A$
+\subsubsection{Dimostrazione} Se $A$ è predominante diagonale $\Rightarrow A_k$ è predominante diagonale per $k = 1 .. n-1$\\
+$\Rightarrow A_k$ è invertibile $\Rightarrow$ per il teorema di esistenza ed unicità, $A$ ammette unica la fattorizzazione $LU$
+\paragraph{} La \textbf{predominanza diagonale} è una \textbf{condizione sufficiente} per: \textbf{invertibilità} ed \textbf{esistenza ed unicità di $LU$}\\
+In generale, il metodo di eliminazione Gaussiana \textbf{non preserva} la sparsità: si riempiono le matrici.
+\section{Teorema 6.3.1 (2): Convergenza di Metodi Iterativi} Sia $A \in \mathbb{R}^{n \times n}$ \textbf{predominante diagonale} $\Rightarrow A$ è invertibile $\wedge$ Jacobi e Gauss-Seidel sono applicabili e convergenti.
+\subsection{Dimostrazione} $A$ predominante diagonale $\Rightarrow A$ invertibile \textbf{OK}\\
+$A$ predominante diagonale $\Leftrightarrow |a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}|$ per $i=1\ldots n$\\
+$|a_{ii}| > \mathlarger{\sum_{j=1, j\neq i}^n} |a_{ij}| \geq 0$ per $i=1\ldots n \Rightarrow |a_{ii}| > 0 \Rightarrow a_{ii} \neq 0$ per $i=1\ldots n$ quindi i metodi sono applicabili \textbf{OK}\\
+La convergenza dipende dalla matrice d'iterazione $P$, più precisamente dagli autovalori di $P$. Vogliamo dimostrare che gli autovalori di $P$ hanno tutti modulo $< 1$, perché quindi $\rho(P) < 1 \Rightarrow$ convergente.\\
+Se cerchiamo per quali valori il determinante è 0 allora il verso del calcolo non cambia perché cambierebbe solo il segno, perché $\textsl{det}(A) = -\textsl{det}(-A)$
+$$\textsl{det}(\lambda I - P) = \textsl{det}(\lambda I - M^{-1}N) = \textsl{det}(\lambda M^{-1}M - M^{-1}N) = \textsl{det}( M^{-1}(\lambda M - N)) = \textsl{det}(M^{-1})\cdot\textsl{det}(\lambda M - N)$$
+E dato che $M$ è invertibile, $\textsl{det}(M^{-1})\neq 0$, quindi scopriamo che
+$$\textsl{det}(\lambda I - P) = 0 \Leftrightarrow \textsl{det}(\lambda M - N) = 0$$
+Quindi $\lambda$ autovalore di $P \Leftrightarrow \textsl{det}(\lambda M - N) = 0$ cioè se $\lambda M - N$ è singolare\\
+Per quali $\lambda \in \mathbb{C}$ $\lambda M - N$ è una matrice singolare? Se $|\lambda|\geq 1$, mostriamo che $\lambda M - N$ è predominante diagonale e quindi invertibile.\\
+Consideriamo il metodo di Gauss-Seidel $M = L + D$, $N = - U$ (per Jacobi c'è una dimostrazione analoga)
+$$\lambda M - N = \lambda(L+D)+U$$
+Quindi l'elemento sulla diagonale principale è $\lambda a_{ii}$, quindi la condizione di predominanza diagonale (ricordiamo che se non è specificato si sottintende predominanza diagonale per righe) è la seguente.
+$$|\lambda a_{ii}| > \sum_{j=1}^{i-1} |\lambda a_{ij}| + \sum_{j=i+1}^{n} |\lambda a_{ij}|$$
+Sappiamo che la matrice è predominante diagonale, cioè che
+$$|a_{ii}| > \sum_{j=1}^{i-1} |a_{ij}| + \sum_{j=i+1}^{n} |a_{ij}|$$
+In $\mathbb{C}$ non c'è un ordinamento, quindi non ci sono le disequazioni, e $\lambda \in \mathbb{C}$ ma $|\lambda| \in \mathbb{R}$ quindi posso moltiplicare ambo i membri per $|\lambda| > 0$
+$$|\lambda||a_{ii}| > |\lambda|\sum_{j=1}^{i-1} |a_{ij}| + |\lambda|\sum_{j=i+1}^{n} |a_{ij}|$$
+$$|\lambda a_{ii}| > \sum_{j=1}^{i-1} |\lambda a_{ij}| + |\lambda|\sum_{j=i+1}^{n} |a_{ij}|$$
+Nella seconda sommatoria lo abbiamo lasciato fuori perché, siccome $|\lambda| \geq 1$ allora vale la seguente disequazione
+$$\sum_{j=1}^{i-1} |\lambda a_{ij}| + |\lambda|\sum_{j=i+1}^{n} |a_{ij}| \geq \sum_{j=1}^{i-1} |\lambda a_{ij}| + \sum_{j=i+1}^{n} |a_{ij}|$$
+Dimostrando che 
+$$|\lambda a_{ii}| > \sum_{j=1}^{i-1} |\lambda a_{ij}| + \sum_{j=i+1}^{n} |a_{ij}|$$
+
+\section{Teorema 10.1.1: Metodi di Bisezione} Se $[a_1, b_1] = [a, b]$ è un \textbf{intervallo di separazione} per $f \in C^0([a, b])$ con $f(a)f(b) < 0$ allora le successioni $a_k, b_k, c_k \longrightarrow \alpha$
+\subsection{Dimostrazione} Assumendo che l'intervallo iniziale sia un intervallo di separazione, è un ipotesi semplificata. Quindi nell'intervallo $[a, b]$ non solo c'è una radice ma è unica, e la chiamiamo $\alpha$. Per costruzione $\alpha \in [a_k, b_k]$. La distanza tra $\alpha$ e $a_k$ la possiamo sempre maggiorare con l'ampiezza dell'intervallo.
+$$0 \leq |\alpha - a_k| \leq |b_k - a_k| = b_k - a_k = \frac{b_{k-1} - a_{k-1}}{2} = \ldots = \frac{b_1 - a_1}{2^{k-1}} \Rightarrow \lim_{k\to +\infty} |\alpha - a_k| = 0$$
+Analogamente per \begin{list}{}{}
+	\item $b_k\rightarrow$ $0\leq |\alpha - b_k| \leq \mathlarger{\frac{b_1 - a_1}{2^{k-1}}}$
+	\item $c_k\rightarrow$ $0\leq |\alpha - c_k| \leq \mathlarger{\frac{b_1 - a_1}{2^{k}}}$ (notare il $2^k$, leggero vantaggio, perché la distanza tra $c_k$ e $\alpha$ al primo passo si può maggiorare con la semiampiezza dell'intervallo).
+\end{list}
+Abbiamo mostrato che gli $a_k, b_k, c_k$ convergono alla soluzione.\\
+Supponiamo di voler determinare un'approssimazione della radice $\alpha$, denotandola con $\overline{\alpha}$, tale per cui $|\overline{\alpha} - \alpha| < \epsilon$\\ allora se applico il metodo di bisezione ottengo una successione $c_k$ tale per cui $|c_k - \alpha| \leq \mathlarger{\frac{b_1 - a_1}{2^k}}$\\
+Chiedo che $\mathlarger{\frac{b_1 - a_1}{2^k}} \leq \epsilon$, così posso prendere $\overline{\alpha} = \epsilon$. Quindi chiedo un $k$ sufficientemente grande da permettermi $$\frac{b_1 - a_1}{2^k} \leq \epsilon \Leftrightarrow 2^k \geq \frac{b_1 - a_1}{\epsilon} \Leftrightarrow k \geq \log_2\left(\frac{1}{\epsilon}\right) + \log_2\left(b_1 - a_1\right)$$
+da cui si evince che il numero di passi dipende da $\log_2\left(\mathlarger{\frac{1}{\epsilon}}\right)$.\\
+Quindi se volessi una precisione di $10^{-14}$, dovrò fare un numero di passi dell'ordine di $\log_2(10^{14}) = 14\log_2(10)$. Fornisce un criterio \textbf{a priori} sul numero di passi per ottenere una cerca precisione.
+
+\section{Teorema 10.2.2: Teorema del Punto Fisso} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$\\
+Se $\exists\:\rho>0\:|\:|g'(x)|<1\:\forall\:x\in I_\alpha = [\alpha - \rho, \alpha + \rho]\subseteq[a, b]$  allora il metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ genera successioni tali che:
+\begin{enumerate}
+	\item $x_k \in I_\alpha\:\:\forall\:k\geq 0$
+	\item $\mathlarger{\lim_{k\to+\infty}}x_k = \alpha$
+\end{enumerate}
+\subsection{Dimostrazione} $g$ è una funzione di classe $C^1 \Rightarrow g'$ continua $\Rightarrow |g'|$ continua quindi, per Wierstrass (una funzione continua in un intervallo chiuso e limitato ammette massimo e minimo) $\Rightarrow \mathlarger{\textsl{max}_{x\in I_\alpha}}|g'(x)| = \lambda < 1$\\
+Dimostro per induzione che la successione generata dal metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ soddisfa la relazione\\$|x_k - \alpha| \leq \lambda^k\rho\:\:\forall\:k\geq 0$
+\begin{list}{}{}
+	\item Passo base $k = 0$\\
+	$|x_0 - \alpha| \leq \lambda^0\rho = \rho$ \textbf{ok} per l'ipotesi $x_0 \in I_\alpha$
+	\item Passo induttivo $k \Rightarrow k+1$\\
+	$|x_{k+1} - \alpha| = |g(x_k) - g(\alpha)| =$ per \textbf{Lagrange} $|g'(\xi_k)(x_k - \alpha)|$ con $\xi_k$ punto tra $x_k$ e $\alpha$\\
+	Lagrange dice che $f(a) - f(b) = f'(\xi)(a - b)$ con $\xi$ tra $a$ e $b$\\
+	Per ipotesi induttiva $|\xi_k - \alpha| \leq |x_k - \alpha| \leq \lambda^k\rho < \rho$ perché $\lambda < 1$, quindi $\xi_k \in I_\alpha$\\
+	Quindi $|x_{k+1} - \alpha| = |g'(\xi_k)|\cdot|x_k - \alpha| \leq \lambda\cdot\lambda^k\rho = \lambda^{k+1}\rho$
+\end{list}
+Traiamo che tutti i punti della successione appartengono a $I_\alpha$, ma concludiamo anche che $$0 \longleftarrow 0 \leq |x_k - \alpha| \leq \lambda^k\rho \longrightarrow 0$$
+Quindi $|x_k - \alpha| \rightarrow 0 \Leftrightarrow x_k \rightarrow \alpha$
+\section{Teorema 10.2.3: Convergenza dei Metodi Iterativi Funzionali} Data $g : [a, b] \rightarrow\mathbb{R}$, con $g \in C^1([a, b])$, $\alpha \in (a, b)\:|\:g(\alpha) = \alpha$, se riesco a trovare un intervallo \textbf{centrato in $\alpha$} tale per cui $|g'(x)| < 1$ allora per ogni punto iniziale di quell'intervallo la successione converge ad $\alpha$. Cioè\\
+se $|g'(x)| < 1 \Rightarrow \exists\:\rho\geq 0\:\:|$ posto $I_\alpha = [\alpha - \rho, \alpha + \rho]$ il metodo $\left\{\begin{array}{l}
+x_0 \in I_\alpha\\
+x_{k+1} = g(x_k)
+\end{array}\right.$ genera successioni che soddisfano le precedenti proprietà 1 e 2
+\subsection{Dimostrazione} $h(x) = |g'(x)| - 1$ continua in $[a, b]$\\
+Allora $h(\alpha) = |g'(\alpha)| - 1 < 0 \Rightarrow$ per il teorema della permanenza del segno $\exists$ un intorno di $\alpha$ dove $h(x) < 0 \Leftrightarrow |g'(x)| < 1$ in cui vale la dimostrazione precedente.\\\\
+Il corollario ci dice che \textit{esiste un intorno}, ma non ci da informazioni su quando ampio sia o quanto ci si possa spostare da $\alpha$. Ci dà un risultato sulla \textbf{convergenza locale}.\\
+Un metodo è localmente convergente se possiamo trovare un intorno tale per cui per ogni punto iniziale preso dall'intorno tutti i punti stanno lì dentro e la successione converge.
+\section{Teorema 10.3.1: Convergenza Locale} Sia $f\in C^2([a, b])$ e $f(\alpha) = 0$, $f'(\alpha) \neq 0$, $\alpha \in (a, b)$\\
+Allora il \textbf{metodo delle tangenti} è \textbf{localmente convergente in $\alpha$ è la convergenza è almeno quadratica}.\\Cioè $\exists\:I_\alpha = [\alpha - \rho, \alpha + \rho]\:\:|\:\:\forall\:x_0\in I_\alpha$ valgono
+\begin{enumerate}
+	\item $x_k \in I_\alpha$
+	\item $\mathlarger{\lim_{k\to+\infty} x_k = \alpha}$\\
+	Fino a qui per la convergenza locale
+	\item Se $\forall\:k\:\:x_k\neq\alpha \Rightarrow \mathlarger{\lim_{k\to+\infty} \frac{|x_{k+1} - \alpha|}{|x_k - \alpha|^2}} = c \in \mathbb{R}$
+\end{enumerate}
+\subsection{Dim} $f'(\alpha) \neq 0 \Rightarrow \exists\:\overline{I_{\alpha}}\:\:|\:\: \forall\:x\in\overline{I_\alpha}\:\:f'(x)\neq 0$\\
+Su $\overline{I_\alpha}$ posso definire $g : \overline{I_\alpha} \rightarrow \mathbb{R}$ con $g(x) = x -\mathlarger{\frac{f(x)}{f'(x)}}$\\
+$g'(x) = 1 - -\mathlarger{\frac{f'(x)^2 - f(x)f''(x)}{f'(x)^2}} = \mathlarger{\frac{f(x)f''(x)}{f'(x)^2}}$ continua perché composizione di funzioni continue, quindi $g \in C^1$.\\
+$g'(\alpha) = \mathlarger{\frac{f(\alpha)f''(\alpha)}{f'(\alpha)^2}} = 0 \Rightarrow |g'(\alpha)| < 1$\\ $\Rightarrow$ per il corollario del teorema del punto fisso $\exists\:I_\alpha\subseteq\overline{I_\alpha}\:\:|$ si ha convergenza locale.\\\\
+Prendiamo un punto iniziale $x_0 \in I_\alpha$ e supponiamo che la successione generata soddisfi la proprietà $x_k \neq \alpha\:\:\forall\: k$\\
+Ricordiamo l'espressione dell'errore inerente, con la \textbf{formula di Taylor arrestata al secondo ordine} di centro $x_k$ e raggio $\alpha - x_k$
+$$0 = f(\alpha) = f(x_k) + f'(x_k)(\alpha - x_k) + \frac{f''(\xi_k)(\alpha - x_k)^2}{2}\:\:\:\:\:\text{con }\alpha < \xi_k < x_k$$
+Posso portare $f(x_k)$ al primo membro, dividere per $f'(x_k)$ e portare $x_k$ al primo membro, ottenendo
+$$x_k - \frac{f(x_k)}{f'(x_k)} = \alpha + \frac{f''(\xi_k)}{f'(x_k)}\cdot\frac{(\alpha - x_k)^2}{2}$$
+Mi accorgo che $\mathlarger{x_k - \frac{f(x_k)}{f'(x_k)} = x_{k+1}}$
+$$x_{k+1} = \alpha + \frac{f''(\xi_k)}{f'(x_k)}\cdot\frac{(\alpha - x_k)^2}{2}$$
+Posso dividere per $(\alpha - x_k)^2$ e spostare $\alpha$
+$$\frac{x_{k+1} - \alpha}{(\alpha - x_k)^2} = \frac{1}{2}\cdot\frac{f''(\xi_k)}{f'(x_k)}$$
+Ora posso fare il limite. Sapendo che $x_k \rightarrow \alpha$
+$$\lim_{k\to+\infty}\frac{|x_{k+1} - \alpha|}{|\alpha - x_k|^2} = \frac{1}{2}\cdot\:\vline\frac{f''(\alpha)}{f'(\alpha)}\vline \in \mathbb{R}$$
+\end{document}
