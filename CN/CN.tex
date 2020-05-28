@@ -83,7 +83,7 @@ Modello per capire cosa aspettarci dal punto di vista degli errori dell'esecuzio
 \section{Rappresentazione in macchina}
 \paragraph{Rappresentare i numeri} Siamo comunemente abituati a rappresentare un numero in diverse forme.\\
 Ad esempio, $0.1 = \frac{1}{10} = 10 \cdot 0.01$. In generale, per ogni numero ho diversi metodi di rappresentazione $\Rightarrow$ In macchina dobbiamo poter \textbf{rappresentare i numeri in maniera univoca}.
-\paragraph{Base di numerazione} $B \in N, B > 1$, poiché in base 1 non si può contare.\\Una base $B$ ha cifre nell'insieme $\{0, 1, \ldots, B - 1\}$
+\paragraph{Base di numerazione} $B \in \mathbb{N}, B > 1$ (poiché in base 1 non si può contare).\\Una base $B$ ha cifre nell'insieme $\{0, 1, \ldots, B - 1\}$
 \paragraph{Teorema} Dato $x \in \mathbb{R}$, con $x \neq 0$\\$\exists!\:\:(\{d_i\}_{i \geq 1}$ con $d_1 \neq 0$ e $d_i$ non definitivamente uguali a $B - 1) \wedge (p \in Z) \:\:\vline\:\: x = segno(x)\:\cdot\:B^p\:\cdot\:\mathlarger{\sum_{i=1}^\infty}\left( d_i \cdot B^{-i}\right)$
 \begin{list}{}{Considerazioni}
 	\item Se $x \in \mathbb{C}$ allora viene rappresentato come coppia di numeri reali, quindi il problema si riconduce sempre alla loro rappresentazione
@@ -167,8 +167,7 @@ Si osserva che:
 \subsection{Operazioni di Macchina}
 Per le \textbf{operazioni aritmetiche} in un sistema floating point si pone un analogo problema di approssimazione, in quanto \textbf{il risultato di un'operazione eseguita tra due numeri di macchina in generale non sarà un numero di macchina}.
 \paragraph{Operazioni} Indichiamo con $\oplus$, $\ominus$, $\otimes$, $\oslash$ le \textbf{operazioni aritmetiche di macchina} corrispondenti relativamente all'addizione, sottrazione, prodotto e divisione. Si richiede che le operazioni siano interne all'insieme dei numeri di macchina. Una ragionevole definizione, derivata dal teorema precedente e in assenza di overflow/underflow, risulta: $$\forall a, b \in F(B, t, m, M), a \oplus b = fl(a + b) = (a + b)(1 + \epsilon_1), |\epsilon_1| \leq u$$ con $\epsilon_1$ detto  \textbf{errore locale dell'operazione}. Sempre in assenza di overflow/underflow, se $a, b \in \mathbb{R}$ si ha $$fl(a + b) = fl(a)\oplus fl(b) = (a(1 + \epsilon_a) + b(1 + \epsilon_b))(1 + \epsilon_1) \doteq (a + b) + a\epsilon_a + b\epsilon_b + (a + b)\epsilon_1$$ dove con $\doteq$ si indica che l'eguaglianza vale \textbf{considerando le sole componenti lineari negli errori} e trascurando le componenti di ordine superiore (\textbf{analisi al primo ordine dell'errore}), in virtù del fatto che gli $\epsilon$ sono quantità piccole $0 < \epsilon < 1$, quindi trascurabili negli ordini superiori al primo.\\
-Si ottiene che, in assenza di overflow/underflow, se $a, b \in \mathbb{R}, a + b \neq 0$, allora $$\frac{fl(a + b) - (a + b)}{a + b} \doteq \frac{a}{a + b}\epsilon_a + \frac{b}{a + b}\epsilon_b + \epsilon_1$$ che esprime la dipendenza dell'errore totale commesso nel calcolo della somma tra due numeri reali rispetto agli errori generati dall'approssimazione dei dati iniziali (\textbf{errore inerente}) e agli errori generati dall'algoritmo di calcolo (\textbf{errore algoritmico}) visto come sequenza di operazioni artimetiche.\\
-\pagebreak
+Si ottiene che, in assenza di overflow/underflow, se $a, b \in \mathbb{R}, a + b \neq 0$, allora $$\frac{fl(a + b) - (a + b)}{a + b} \doteq \frac{a}{a + b}\epsilon_a + \frac{b}{a + b}\epsilon_b + \epsilon_1$$ che esprime la dipendenza dell'errore totale commesso nel calcolo della somma tra due numeri reali rispetto agli errori generati dall'approssimazione dei dati iniziali (\textbf{errore inerente}) e agli errori generati dall'algoritmo di calcolo (\textbf{errore algoritmico}) visto come sequenza di operazioni artimetiche.
 \paragraph{Esempio}
 Analizziamo cosa succede in macchina quando proviamo a calcolare $f(x) = x^2 - 1 = (x - 1)(x + 1)$. La \textbf{prima situazione di errore} sia ha sulla rappresentazione di $x$ che, \textbf{in generale}, \textbf{non è un numero di macchina}.$$x \rightarrow \tilde{x} = x(1 + \epsilon_x)$$ con $|\epsilon_x| \leq u$. Inoltre, sempre in generale, \textbf{le operazioni aritmetiche non sono operazioni di macchina} $$f(x) = (\tilde{x} \otimes \tilde{x}) \ominus 1 = (\tilde{x} \ominus 1)\otimes(\tilde{x} \oplus 1)$$Poniamo $g_1(x) = (\tilde{x} \otimes \tilde{x}) \ominus 1$ e $g_2(x) = (\tilde{x} \ominus 1)\otimes(\tilde{x} \oplus 1)$. La formula per l'\textbf{errore totale} dell'operazione è $$\epsilon_{tot1} = \frac{g_1(x) - f(x)}{f(x)}$$ $$\epsilon_{tot2} = \frac{g_2(x) - f(x)}{f(x)}$$ Sviluppiamo $g_1(x)$
 
@@ -184,6 +183,7 @@ $$|\epsilon_i| \leq u$$ Quindi, portando al primo membro dell'uguaglianza $\epsi
 	\item \textbf{Errore algoritmico}, locale all'operazione e \textbf{proprietà dell'algoritmo}. Nell'esempio, $\epsilon_{alg} = \frac{x^2}{x^2 - 1}\epsilon_1 + \epsilon_2$.\\
 	Se è piccolo, si dice che l'\textbf{espressione è ben condizionata} e \textbf{poco sensibile rispetto alla perturbazione}. Viceversa, è \textbf{mal condizionata}.
 \end{list}
+\pagebreak
 Sviluppiamo ora $g_2(x)$ (gli errori $\delta_i$ sono analoghi agli $\epsilon_i$, si usa una notazione differente per evidenziare che hanno valori diversi, esseno propri del calcolo e dei valori usati in esso)
 $$g_2(x) = ((x(1 + \epsilon_x) - 1)(1 + \delta_1))((x(1 + \epsilon_x) + 1)(1 + \delta_2))(1 + \delta_3) \doteq$$
 $$\doteq (x^2(1 + \epsilon_x)^2 - 1)(1 + \delta_1 + \delta_2 + \delta_3) \doteq$$
@@ -193,7 +193,6 @@ $$= (x^2 - 1) + 2x^2\epsilon_x + (x^2 - 1)(\delta_1 + \delta_2 + \delta_3) = g_2
 $$|\epsilon_x| \leq u, |\delta_i| \leq u$$
 Come prima, porto gli $f(x)$ al primo membro dell'uguaglianza $\epsilon_{tot2} = \frac{g_2(x) - f(x)}{f(x)}$ e ottengo
 $$\epsilon_{tot2} = \frac{2x^2}{x^2 - 1}\epsilon_x + \delta_1 + \delta_2 + \delta_3$$
-\pagebreak
 
 \begin{list}{}{Notiamo come}
 	\item $\epsilon_{in} = \frac{2x^2}{x^2 - 1}\epsilon_x$, come il calcolo precedente. Infatti, ripetiamo, l'errore inerente è una proprietà della funzione e non di come essa viene calcolata
@@ -221,7 +220,6 @@ Se l'errore inerente è qualitativamente elevato in valore assoluto, diciamo che
 \paragraph{Definizione} Si dice \textbf{errore algoritmico} generato nel calcolo di $f(x) \neq 0$ la quantità $$\epsilon_{alg} = \frac{g(\tilde{x}) - f(\tilde{x})}{f(\tilde{x})}$$
 Osserviamo che l'errore algoritmico è \textbf{dipendente dall'algoritmo utilizzato}: la funzione $g$ dipende dall'algoritmo usato per calcolare $f(x)$. In generale, \textbf{differenti algoritmi conducono a differenti errori algoritmici}.\\
 Se l'errore algoritmico è qualitativamente elevato in valore assoluto si dice che \textbf{l'algoritmo è numericamente instabile}, altrimenti si dice che è \textbf{numericamente stabile}.
-\pagebreak
 \subsection{Errore Totale}
 \paragraph{Definizione} Si dice \textbf{errore totale} generato nel calcolo di $f(x) \neq 0$ mediante l'algoritmo specificato da $g$ la quantità $$\epsilon_{tot} = \frac{g(\tilde{x}) - f(x)}{f(x)}$$ L'errore totale misura la \textbf{differenza relativa tra l'output atteso e l'output effettivamente calcolato}.
 \paragraph{Teorema 3.1.1} In un analisi al primo ordine, vale $$\epsilon_{tot} = \epsilon_{in} + \epsilon_{alg}$$
@@ -687,7 +685,7 @@ $$Ax = b \Leftrightarrow L\cdot Ux = b \Leftrightarrow \left\{ \begin{array}{l}
 	Ux = y
 \end{array}
 \right.$$
-\paragraph{Definizione} $A \in \mathbb{R}^{n \times n}$ si dice \textbf{fattorizzabile $LU$} se $\exists L$ matrice triangolare inferiore con elementi $= 1$ sulla diagonale principale e $U$ triangolare superiore tale che $A = L\cdot U$
+\paragraph{Definizione} $A \in \mathbb{R}^{n \times n}$ si dice \textbf{fattorizzabile $LU$} se $\exists\: L$ matrice triangolare inferiore con elementi $= 1$ sulla diagonale principale e $U$ triangolare superiore tale che $A = L\cdot U$
 \subparagraph{Esempio} \begin{math}
 A = \left[
 \begin{array}{c c}
