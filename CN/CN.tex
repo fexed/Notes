@@ -151,7 +151,7 @@ Indicheremo con $trn(x) = \overline{x}$ il risultato dell'approssimazione di $x$
 Si osserva che:
 \begin{list}{}{}
 	\item $u = B^{1-t}$ è detta \textbf{precisione di macchina} ed è \textbf{indipendente dalla grandezza del numero}, ma è caratteristica dell'aritmetica floating point, dell'insieme dei numeri rappresentabili e dalla tecnica di approssimazione. Se ad esempio si opera con arrotondamento, $u$ si dimezza.
-	\item Per valutare la precisione di macchina possiamo determinare il più piccolo numero di macchina maggiore di 1. Dato $x$ tale numero, abbiamo $x - 1 = |x - 1| = B^{1-t}$ essendo $1 = B^1 \cdot B^{-1}$ rappresentato con esponente $p = 1$. Il seguente script MatLab fornisce il valore richiesto:
+	\item Per valutare la precisione di macchina possiamo determinare il più piccolo numero di macchina maggiore di 1. Dato $x$ tale numero, abbiamo $x - 1 = |x - 1| = B^{1-t}$ essendo $1 = B^1 \cdot B^{-t}$ rappresentato con esponente $p = 1$. Il seguente script MatLab fornisce il valore richiesto:
 	\begin{lstlisting}
 		eps = 0.5;
 		eps1 = eps + 1;
@@ -455,7 +455,7 @@ Da questo ottengo $$\frac{||x - \widehat{x}||}{||x||} \leq \frac{||A^{-1}||\cdot
 Quindi $$\epsilon_{in} = \frac{||x - \widehat{x}||}{||x||} \leq ||A||\cdot||A^{-1}||\cdot\frac{||\widehat{b} - b||}{||b||}$$
 $\frac{||\widehat{b} - b||}{||b||}$ \textbf{perturbazione relativa sul termine noto}\\
 $||A||\cdot||A^{-1}||$ \textbf{coefficiente di amplificazione}\\\\
-Quindi se $||A||\cdot||A^{-1}||$ è grande, allora il sistem è mal condizionato.\\
+Quindi se $||A||\cdot||A^{-1}||$ è grande, allora il sistema è mal condizionato.\\
 Se $||A||\cdot||A^{-1}||$ è piccolo, allora è ben condizionato. Piccolo quanto?
 \paragraph{Osservazione} $||A\cdot A^{-1}|| = ||I|| \leq ||A||\cdot||A^{-1}||$, ma $||I|| = max_{||x|| = 1} ||Ix|| = max_{||x|| = 1} ||x|| = 1$\\
 Quindi $||A||\cdot||A^{-1}|| \geq 1$ che quindi è un coefficiente di amplificazione effettivo, con valore minimo pari a 1.
@@ -866,7 +866,6 @@ A = \left[
 \subparagraph{Matrice elementare di Gauss} Una matrice E $\in \mathbb{R}^{n\times n}$ si dice \textbf{matrice elementare di Gauss} se $\exists\: k$ con $1 \leq k \leq n$ e $v \in \mathbb{R}^n$ con $v_1 = v_2 = \ldots = v_k = 0$ tale che $$E = I - v\cdot e_k\,^T$$
 con $e_k$ $k$-esimo vettore della base canonica, quindi lungo $n$ e con tutti gli elementi $= 0$ tranne un $1$ in $k$-esima posizione.\\
 Abbiamo quindi l'identità meno un vettore colonna per un vettore riga, quindi $v\cdot e_k\,^T$ \textbf{non è un prodotto scalare} ma è un \textbf{prodotto tra una matrice $n\times$1 per una matrice 1$\times n$}, quindi la si esegue riga per colonna.
-\pagebreak
 \paragraph{Esempi} Con $n$ = 4
 \begin{list}{}{}
 	\item[$k$ = 1]
@@ -1191,8 +1190,7 @@ x & & & 1
 \end{array}
 \right] $$
 \paragraph{Sparsità} Quantitativamente, la sparsità si potrebbe definire nel seguente modo \texttt{nnz}(A) $<< n^2$, dove con \texttt{nnz(A)} in \texttt{MATLAB} si intende il numero di elementi $\neq 0$ della matrice A.\\
-Quindi si accettano valori come \texttt{nnz}(A) $= \left\{ \begin{array}{l}O(n) \\ O(n\cdot log^p n) \end{array} \right. $ ma principalmente \texttt{nnz}(A) $= O(n)$
-\pagebreak
+Quindi si accettano valori come \texttt{nnz}(A) $= \left\{ \begin{array}{l}O(n) \\ O(n\cdot log^p n) \end{array} \right. $ ma principalmente \texttt{nnz}(A) $= O(n)$\\
 
 Il metodo di eliminazione gaussiana è indicato come \textbf{metodo diretto}, perché \textbf{in un numero finito di passi determina la soluzione del sistema}.\\
 I \textbf{metodi iterativi} adottano un \textbf{approccio differente}, cioè di \textbf{costruire una successione $\{x^{(k)}\}$ di vettori tali che $x^{(k)} \rightarrow x$} ($x^{(k)}$ converge a $x$) \textbf{con $x$ soluzione del sistema lineare}.\\
@@ -1227,7 +1225,6 @@ $$A^{(k)} = \frac{A^{(k-1)} + (A^{(k-1)})^{-1}}{2}\:\:\textsl{con }k \geq 1$$
 	Può non andare bene perché non ho garanzie, in generale, che il metodo converga e che quindi la differenza diventi, ad un certo punto, inferiore alla tolleranza indicata.
 	\item $k \geq$ \texttt{MAX\_ITER}
 \end{list}
-\pagebreak
 \subsection{Convergenza}
 Vediamo nel dettaglio cosa intendiamo per convergenza dei metodi iterativi. In generale, un metodo iterativo converge quando genera una sequenza convergente di matrici. Il nostro problema computazionale è calcolare $Ax = b$, lo riformuliamo con $A = M - N$ con $M$ invertibile. Quindi riscrivo come $(M - N)x = b \Leftrightarrow Mx = Nx + b \Leftrightarrow x = M^{-1}N x + M^{-1}b$ e indico $M^{-1}N = P$ e $M^{-1}b = q$.\\
 Ho ricondotto il problema $Ax = b$ al problema di trovare un vettore $x\:|\: x = Px + q$. Possiamo scegliere un vettore iniziale $x^{(0)} \in \mathbb{R}^n$ e costruiamo una successione $x^{(k+1)} = Px^{(k)} + q$ cioè
@@ -1260,7 +1257,6 @@ $$\Rightarrow||e^{(k+1)}|| = |\lambda|^{k+1}\cdot||e^{(0)}|| \neq 0$$
 $$||e^{(k+1)}||\to 0 \Leftrightarrow |\lambda| < 1$$
 Si può dimostrare che è una condizione anche sufficiente, quindi \textbf{necessaria e sufficiente}.
 \paragraph{Teorema} Il metodo $x^{(k+1)} = Px^{(k)} + q$ è convergente $\Leftrightarrow \rho(P) < 1$.
-\pagebreak
 \paragraph{Esempio}
 \begin{multicols}{2}
 $$x^{(k+1)} = Px^{(k)} + q$$
@@ -1576,7 +1572,6 @@ La somma sugli elementi di ogni riga in valore assoluto, esclusi gli elementi de
 $$n > n-1 \Rightarrow A\text{ è predominante diagonale}$$
 $\Rightarrow$ J e G-S convergono.
 \end{multicols}
-\pagebreak
 \paragraph{Esempio}
 \begin{multicols}{2}
 $$A = \left[\begin{array}{c c c c}
