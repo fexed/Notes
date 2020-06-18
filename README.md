@@ -14,7 +14,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Basi di Dati: [appunti](https://github.com/fexed/Notes/blob/master/BD/BD.pdf)
 
-##### Calcolo Numerico: [appunti](https://github.com/fexed/Notes/blob/master/CN/CN.pdf)
+##### Calcolo Numerico: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/CN/CN.pdf)
 
 ##### Elementi di Calcolo e Complessità: [appunti](https://github.com/fexed/Notes/blob/master/ECC/ECC.pdf)
 
