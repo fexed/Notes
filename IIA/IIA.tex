@@ -2528,7 +2528,7 @@ Il processo è ripetuto per ogni nodo successore finché tutti gli esempi sono c
 \paragraph{Best Attribute} In base all'\textbf{entropia}\\
 \textbf{Entropia}: quantità di informazione portata da un segnale, più è stabile meno entropia porta quindi meno informazione, più oscilla più entropia più informazione. Nel nostro caso, il concetto di entropia misura impurità di una collezione d'esempi.\\
 Data $S$ \textbf{collezione di esempi training}, $p+$ proporzione degli esempi positivi in $S$ e $p-$ degli esempi negativi
-$$Entropy(S) = -(p_+)\cdot(\log_2(p_+)) - (p_-)\cdot(\log_2(p_-))\text{ (assumendo }0\cdot\log_2(0) = 0\text{)}$$
+$$Entropy(S) = -(p_+)\cdot\log_2(p_+) - (p_-)\cdot\log_2(p_-)\text{ (assumendo }0\cdot\log_2(0) = 0\text{)}$$
 Se ho tutti positivi o tutti negativi, l'entropia è 0. Nei casi misti entropia alta.\\
 Bassa omogeneità non va bene (alta impurità, alta entropia)\\
 Notare che 0$\leq$p$\leq$1, quindi 0$\leq$entropia$\leq$1\\
@@ -2600,11 +2600,14 @@ Ogni volta che si aumenta la precisione c'è il rischio di andare in overfitting
 Aspetto teorico e pratico per un \textbf{uso consapevole del ML}.
 \paragraph{Quando un modello di ML è un buon modello?} Usare ML vs usare \textit{bene} ML.\\
 Ricordiamo apprendimento: ricerca di una buona funzione in uno spazio.\\
-\textbf{Inductive learning ipotesi}\ldots\\ %TODO
-Overfitting\ldots\\ %TODO
-Misure: classificazione Mean Square Error, accuratezza e mean error rate ma anche specificitià, sensitività (su falsi positivi e falsi negativi), per la regressione Mean Square Error, Root MSE, Mean Absolute Error, Max absolute error ma anche statistica come R\\
+\textbf{Inductive learning hypotesis}: qualunque $h$ che approssima \textit{bene} $f$ sui TR la approssimerà bene anche su istanze non viste $x$. \textbf{Misure}:
+\begin{list}{}{}
+	\item \textbf{Classificazione}: Mean Square Error per la perdita, \textbf{accuratezza} e \textbf{Mean Error Rate} per il risultato\\
+	Ma anche precisione, specificità, sensitività (per falsi positivi e negativi)
+	\item \textbf{Regressione}: \textbf{Mean Square Error}, Root MSE, \textbf{Mean Absolute }Error, Max Absolute Error\\Ma anche statistica come R (correlazione coefficiente/indice)\ldots
+\end{list}
 Ovviamente errore alto accuratezza bassa. sia per TR che per test\ldots\\basso fitting alto errore training, bassa generalizz alto errore di test\\
-\textbf{Due obiettivi}:
+\textbf{Due obiettivi} della validazione:
 \begin{list}{}{}
 	\item  \textbf{Model Selection} Stima performance/prestazioni su modelli differenti di apprendimento per scegliere il migliore da generalizzare\\
 	Include la ricerca dei parametri migliori per il modello. \textbf{Ritorna un modello}
@@ -2612,45 +2615,47 @@ Ovviamente errore alto accuratezza bassa. sia per TR che per test\ldots\\basso f
 \end{list}
 Obiettivo importante è separare il data set così da perseguire gli obiettivi: fitting, model selection e assessment. Tre parti: \textbf{training, validation e test}. Sono \textbf{insiemi disgiunti}. Ad esempio 50\% dati in TR, 25\% in VL e 25\% in TS.
 \begin{list}{}{}
-	\item TR training
-	\item VL validation
-	\item TR+VL solitamente chiamato development/design set, usato per costruire.
-	\item TS test
+	\item \textbf{TR}, per il \textbf{training}
+	\item \textbf{VL}, per la \textbf{validation}
+	\item \textbf{TS}, per il \textbf{test}
 \end{list}
-La stima in model selection è solo per scopi di model selection, non è buona stima di rischio che và fatta su test. Il TS non può essere usato per la model selection.\\Posso usare il TS più volte? No perché sto facendo model selection e non assessement affidabile. Non possiamo riusarlo su esempi futuri. \textbf{Blind Test Set}: se vedi la soluzione non è un test!\\Si avrebbe una stima overottimistica\\
+TR+VL solitamente chiamato development/design set, usato per costruire.\\
+La stima in model selection è solo per scopi di model selection, \textbf{non è buona stima di rischio}, la quale va fatta sul TS. Il \textbf{TS non può essere usato per la model selection}.\\Posso usare il TS più volte? \textbf{No}, perché altrimenti starei facendo una model selection e non assessement affidabile. Non possiamo riusarlo su esempi futuri. \textbf{Blind Test Set}: se vedi la soluzione non è un test!\\Si avrebbe una stima overottimistica\\\\
 \textbf{Regola d'oro}: mantenere una separazione fra gli obiettivi e usa set separati: TR per training, VL per model selection e TS per risk estimation.
 \begin{center}
 	\includegraphics[scale=0.55]{trvlts.png}
 \end{center}
 \paragraph{Meta-Algoritmo}
-\begin{list}{}{}
+\begin{enumerate}
 	\item Separare TR, VL e TS
-	\item Seleziono il miglior $h_{w, \lambda}()$ cambiando $\lambda$
-	\item Per ciascun $\lambda$ alleno il modello cambiando $w$ che minimizza errore (fitting TR). miglior è minimo errore su TR (\textbf{fitting}).\\Finito, cambio $\lambda$ e riprovo i vari $w$.
-	\item Seleziono il miglior modello su $\lambda$ che minor errore su VL
-	\item opzionalmente, posso fare fitting su TR+VL (unico training set) col migliore $\lambda$ trovato
-	\item Finito, valuto $h_{w,\lambda}(x)$ sul TS
-\end{list}
-Un \textbf{iper-parametro} è un parametro non appreso, ad esempio $\lambda$. Ricercare l'iper-parametro migliore può essere un ciclo su una griglia di possibilità. Può essere automatizzato e parallelizzato (prove indipendenti).\\
+	\item Selezionare il miglior $h_{w, \lambda}()$ cambiando $\lambda$
+	\item Per ciascun $\lambda$, allenare il modello cambiando $w$ che minimizza errore (\textbf{fitting TR}). Miglior significa minimo errore su TR (\textbf{fitting}).\\Una volta finito, cambiare $\lambda$ e riprovare i vari $w$.
+	\item Selezionare il miglior modello su $\lambda$ che ha un minor errore su VL
+	\item Opzionalmente, si può fare fitting su TR+VL (unico training set) col il miglior $\lambda$ trovato
+	\item Una volta finito, valutare $h_{w,\lambda}(x)$ sul TS
+\end{enumerate}
+\paragraph{Iper-Parametro} Un \textbf{iper-parametro} è un parametro non appreso, ad esempio $\lambda$. Ricercare l'iper-parametro migliore può essere un ciclo su una griglia di possibilità. Può essere automatizzato e parallelizzato (prove indipendenti).\\
 \textbf{Si sceglie il modello migliore su VL}, \textbf{NON si usa TS per model selection}.
 \paragraph{Esercizio} %TODO
 \paragraph{Controesempio} %TODO
-\paragraph{Verso SLT} Mettendo tutto insieme
-\begin{list}{}{}
-	\item La capacità di generalizzazione, rispetto errore training ed eliminando over e underfitting
-	\item Rispetto a ruolo complessità modello
-	\item Rispetto al numero di dati
+\paragraph{Verso SLT} \begin{list}{Mettendo tutto insieme}{}
+	\item La capacità di generalizzazione di un modello, rispetto all'errore di training ed eliminando over e underfitting
+	\item Il ruolo della complessità di un modello
+	\item Il ruolo del numero di dati
 \end{list}
-\paragraph{Formal setting SLT} Statistical Learning Theory SLT\\
-approssimare funzione f minimizzare funzione rischio R\\
-Data valore dal supervisore e distribuzione di probabilita P(x,d)\\
-e una funzione di loss (o costo) L(h(x), d)\\
-Errore in fitting rischio empirico Remp = sum\ldots\\
-ERM: empirical Risk Minimization. Possiamo usare EMP per approssimare R?\\
-La teoria esiste: Statistical Learning Theory. Ingrediente fondamentale: VC-Dim (Vapnik-Chervonenkis) misura della complessità di H (flessibilità per fitting dati)
+\section{SLT} \paragraph{Statistical Learning Theory} \textbf{Approssimare una funzione} $f(x)$ sconosciuta con valori target $d$. \textbf{Minimizzare la funzione rischio} $$R = \int L(d, h(\text{x}))\: dP(\text{x}, d)$$ con x vettore. $R$ indica il \textbf{vero errore su tutti i dati}.\\
+Dato
+\begin{list}{}{}
+	\item il valore dal supervisore
+	\item la distribuzione di probabilita $P(x,d)$
+	\item una funzione di \textbf{loss} (o costo) $L(h(\text{x}), d) = (d - h(\text{x}))^2$
+\end{list}
+bisogna cercare $h$ in $H$ tale che minimizzi $R$. Abbiamo però solo il data set finito TR = $($x$_i, d_i)$ ($i = 1..l$)\\ Per cercare $h$ bisogna minimizzare l'errore in fitting cioè il \textbf{rischio empirico} $$R_{emp} = \frac{1}{l}\sum_{i = 1}^l \left(d_i - h(\text{x}_i)\right) ^2$$
+\textbf{ERM}: \textbf{Empirical Risk Minimization} come principio induttivo. Possiamo usare $R_{emp}$ per approssimare $R$?\\
+La teoria esiste: \textbf{Statistical Learning Theory}. Ingrediente fondamentale: VC-Dim (Vapnik-Chervonenkis) misura della complessità di $H$ (flessibilità per fitting dati)\\
 Si ha, con probabilità $1 -\delta$, che ($R$ rischio garantito)
 $$R\leq R_{EMP} + \epsilon\left(\frac{1}{l}, VC, \frac{1}{\delta}\right)$$
-Con $\epsilon\ldots$ VC-Confidence, direttamente proporzionale a $VC$ ($VC-dim$), inversamente proporzionale a $l$ numero dei dati e $\delta$ confidenza, guida la probabilità che valga il bound. $\delta$ piccolo, probabilità 0.99.
+Con $\epsilon$ detta \textbf{VC-Confidence}, funzione direttamente proporzionale a VC (VC-dim) ed inversamente proporzionale a $l$ numero dei dati e $\delta$ (detta confidenza, guida la probabilità che valga il bound: $\delta$ piccolo 0.01 $\Rightarrow$ probabilità 0.99).
 \paragraph{Structural Risk Minimization}
 \begin{center}
 \includegraphics[scale=0.7]{vc-dim.png}
@@ -2661,10 +2666,10 @@ Con $\epsilon\ldots$ VC-Confidence, direttamente proporzionale a $VC$ ($VC-dim$)
 \end{list}
 Bisogna mettersi dove $R$ è minore (linea viola)
 \paragraph{SLT} Permette di inquadrare formalmente il problema della generalizzaizone e underfitting/overfitting, fornendo limitazioni superiori analitiche e quantitative al rischio R di predizione.\\
-ML è ben fondato: rischio di learning (err generalizz) può essere analiticamente limitato e solo pochi concetti sono fondamentali\\
+ML è ben fondato: rischio di learning (errore di generalizzazione) può essere analiticamente limitato e solo pochi concetti sono fondamentali\\
 Si può trovare una buona approssimazione dell'$f$ da esempi, avendo un buon numero di dati e un'adeguata complessità (misurabile con la VC-dim)\\
-Porta a nuovi modelli (SVM) e altri modelli che direttamente considerino il controllo delal complessità nella costruzione.\\
-Fonda uno dei principi induttiv.
+Porta a nuovi modelli (SVM) e altri modelli che direttamente considerino il controllo della complessità nella costruzione.\\
+Fonda uno dei principi 
 \begin{list}{}{}
 	\item esistono altri principi?
 	\item come misurare complessità?
@@ -2689,7 +2694,6 @@ Argomento tipico introdotto alla fine di un corso di ML, perché discuterlo nei 
 \end{enumerate}
 \subsection{Maximum Margin Classifier}
 \paragraph{Soluzioni} In generale per un problema ci possono essere più soluzioni ottime, ma vanno davvero tutte bene? Per noi all'interno del ML \textbf{no}, e vediamo come deciderlo.
-\pagebreak
 \paragraph{Classificazione a massimo margine} Su un problema di classificazione binaria, iniziando con l'assumere di avere un problema linearmente separabile (\textbf{hard margin SVM}).\\
 \textbf{Non tutti gli iperpiani che risolvono un task sono uguali}.
 \begin{multicols}{2}
@@ -2711,7 +2715,8 @@ Quindi massimizzo margine $\Leftrightarrow$ minimizzo $|$w$| \Leftrightarrow$ mi
 \paragraph{Th} \textbf{La VC-dim dell'SVM è inversa al margine}, quindi \textbf{controllo della complessità tramite il margine} vedi SLT\\\\
 \textbf{L'iperpiano ottimo è quello che massimizza il margine} e risolve il problema.\\
 Possiamo ora impostare il tutto come un problema di ricerca operativa.
-\paragraph{Forma Primale hard margin} \textbf{Training Problem} diventa minimizzare $\mathlarger{\frac{|\text{w}|^2}{2}}$ (cioè w$^T$w) in maniera che $($wx$_i + b)y_i \geq 1\:\:\forall\:i$\\
+\paragraph{Training Problem} Trovare $($w$, b)$ tale che tutti i punti sono classificati correttamente e il margine è massimizzato.
+\paragraph{Forma Primale hard margin} \textbf{Training Problem} diventa minimizzare $\mathlarger{\frac{|\text{w}|^2}{2}}$ (cioè minimizzare w$^T$w) in maniera che $($wx$_i + b)y_i \geq 1\:\:\forall\:i$\\
 Diventa un problema di ottimizzazione quadratica, risolvibile con software appositi.\\
 Diretta ottimizzazione di complessità del modello. La funzione obiettivo, che è l'ottimizzazione stessa (e fornisce la soluzione con errore 0 perché si assume che il problema sia linearmente separabile), è convessa in w.
 \paragraph{Forma Duale} Nella formula duale si calcolano gli $\alpha$, moltiplicatori di Lagrange, che sono legati ai vettori di supporto e ad una forma speciale della soluzione, più elegante.\\
@@ -2737,7 +2742,7 @@ Sappiamo che si può trasformare lo spazio originale in maniera da risolvere i p
 	\includegraphics[scale=0.6]{mlkernel.png}\\
 	Nell'esempio $\phi : \mathbb{R}^2 \rightarrow \mathbb{R}^3$ a cui $(x_1, x_2)^T\mapsto (x_1^2, \sqrt{2}x_1x_2, x_2^2)^T$
 \end{center}
-Bisogna quindi mappare i datapoint dello spazio in input verso un \textbf{feature-space} a più dimensioni dove sono linearmente separabili.\\
+Bisogna quindi mappare i datapoint dello spazio in input verso un \textbf{feature-space} a dimensioni maggiori dove sono linearmente separabili.\\
 Quindi al posto di x possiamo usare $\phi($x$)$. Sappiamo però che usare un high dimensional feature space può essere sia computazionalmente oneroso sia portare all'overfitting se non si opera un controllo della dimensione del feature space e della complessità del classificatore (in termini di dimensioni dell'input, cioè se uso troppe $\phi$).
 $$h_\text{w}(\text{x}) = \textsl{segno}\left(\sum_k w_k\phi_k(\text{x})\right)$$
 \paragraph{Kernel} Approccio per mappare implicitamente il feature space \textbf{nel contesto di un modello regolarizzato}, perché la complessità è legata al margine.\\
@@ -2777,7 +2782,7 @@ Una piccola guida all'uso (da LIBSVM):
 	\item Trasformare i dati nel formato di un software SVM
 	\item Scalare i dati
 	\item Considerare il kernel RBF $K(x, y) = e^{-\gamma||x-y||^2}$ con $\gamma = \mathlarger{\frac{1}{2\sigma^2}}$
-	\item Usare il cross-validation per trovare i parametri $C$ e $\gamma$ (\textbf{validation set} $\neq$ TR set)
+	\item Usare il cross-validation per trovare i parametri $C$ e $\gamma$ (\textbf{VL set} $\neq$ TR set)
 	\item Testare (\textbf{su un set separato ed esterno})
 \end{enumerate}
 \paragraph{Data processing} Alcuni esempi:
@@ -2808,7 +2813,6 @@ Per poi usare una grid-search più fine, una volta trovato il range interessato 
 	\includegraphics[scale=0.75]{ml1nn.png}
 \end{center}
 Può creare superficie di separazione molto flessibile, anche troppo. Non c'è errore sui dati di TR, mentre i decision boundaries non sono lineari, ma anzi molto irregolari.
-\pagebreak
 \paragraph{Smoothing} Un possibile smoothing della 1-NN è la 5-NN:
 \begin{multicols}{2}
 \begin{list}{}{}
