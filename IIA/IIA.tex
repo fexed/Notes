@@ -1979,11 +1979,11 @@ Facciamo un esempio intuitivo: il riconoscimento caratteri scritti a mano. L'inp
 	\includegraphics[scale=0.55]{ml2.png}
 \end{center}
 Ha \textbf{tutte le caratteristiche elencate} prima: difficile da formalizzare, presenza di rumore nei dati e di dati ambigui. Ma è molto facile collezionare degli esempi etichettati. $\Rightarrow$ esempio di applicazione ottima del ML.\\
-Generalizzo il problema. \textbf{Apprendimento supervisionato} (classificazione e revisione): supervisore che etichetta gli esempi. Spazio di input: $x \rightarrow_f$ cateogrie o valori reali. Costruisco una funzione attraverso gli esempi.
+Generalizzo il problema. \textbf{Apprendimento supervisionato} (classificazione e regressione): supervisore che etichetta gli esempi. Spazio di input: $x \rightarrow_f$ cateogrie o valori reali. Costruisco una funzione attraverso gli esempi.
 \pagebreak
 \subparagraph{}\textbf{Supervised Learning}\\
 Abbiamo delle coppie date da qualcuno (supervisore) $<$\textit{input} $x$, \textit{output} $d>$ per una funzione non nota $f$\\
-\textbf{Target Value}: valore desiderato $d$ o $t$ o $y$\ldots dato dal supervisore in relazione a $f(x)$\\
+\textbf{Target Value}: valore desiderato $d$ dato dal supervisore in relazione a $f(x)$\\
 \textbf{Vogliamo trovare una buona approssimazione di $f$}: un'ipotesi $h$ che può essere usata per prevedere un dato nuovo $x'$\\
 \textbf{Target}: \textbf{etichetta} numerica/categorica
 \begin{list}{}{}
@@ -2032,7 +2032,7 @@ Si apprende dagli esempi come una ricerca nello spazio delle ipotesi. \textbf{Im
 \end{list}
 \subsection{Supervised Learning}
 Vengono forniti una serie di \textbf{esempi} $\langle$input, output$\rangle$ = $\langle x, d\rangle$ per una qualche \textbf{funzione sconosciuta} $f$.\\
-Il \textbf{valore obiettivo} $d$, o $t$, o $y$\ldots è dato dal \textbf{supervisore} in accordo a $f(x)$. L'\textbf{obiettivo} è \textbf{trovare una \textit{buona} approssimazione di $f$}.
+Il \textbf{valore obiettivo} $d$ è dato dal \textbf{supervisore} in accordo a $f(x)$. L'\textbf{obiettivo} è \textbf{trovare una \textit{buona} approssimazione di $f$}.
 \subparagraph{Esempio} $\langle x, c(x)\rangle \in$ D (o training set, TR set)
 \subparagraph{Soddisfa} $h : X \rightarrow \{0, 1\}$ \textbf{soddisfa} $x$ se $h(x) = 1$
 \subparagraph{Consistenza} Un'\textbf{ipotesi è consistente con l'intero D se coincide con i valori target forniti per ogni esempio}. Cioè se $\forall\:\langle x, c(x)\rangle\in D \Rightarrow h(x) = c(x)$
@@ -2087,8 +2087,8 @@ Sky = Sunny $\wedge$ Wind = Strong $\wedge$ Forecast = Same
 Quindi \textbf{apprendere} = \textbf{cercare} nello spazio delle ipotesi $H$.
 \paragraph{Assunzione} Ogni ipotesi che approssima bene la funzione obiettivo sugli esempi d'apprendimento, approssimerà la funzione obiettivo anche su esempi non osservati.
 \begin{list}{}{}
-	\item $h(x) = c(x) \forall\: x \in D$ (cioè \textit{consistente} con $D$)
-	\item $h(x) = c(x) \forall\: x \in X$ \textbf{?}\\
+	\item $h(x) = c(x)\:\: \forall\: x \in D$ (cioè \textit{consistente} con $D$)
+	\item $h(x) = c(x)\:\: \forall\: x \in X$ \textbf{?}\\
 	\textbf{Il problema fondamentale del Machine Learning}
 \end{list}
 \pagebreak
@@ -2272,12 +2272,12 @@ Dove con $A \vdash B$ indico che A è conseguenza logica di B
 \end{list}
 \paragraph{Compito supervisionato} Un task\\ \begin{list}{}{\textbf{Dati}}
 	\item Esempi d'apprendimento come $\langle x, d\rangle = \langle$ input, output $\rangle$ per una qualche funzione sconosciuta $f$\\
-	Target value: il valore desiderato $d$, o $t$, o $y$\ldots è dato dal supervisore a seconda di $f(x)$
+	Target value: il valore desiderato $d$ è dato dal supervisore a seconda di $f(x)$
 \end{list}
 \begin{list}{}{\textbf{Trovare}}
 	\item Una \textit{buona} approssimazione di $f$\\
 	Cioè un'ipotesi $h$ che può essere usata per previsioni su dati non osservati $x'$
-\end{list}\textbf{Target $d$} (o $t$): un'\textbf{etichetta numerica/categorica}
+\end{list}\textbf{Target $d$}: un'\textbf{etichetta numerica/categorica}
 \begin{list}{}{}
 	\item \textbf{Classificazione}: $f(x)$ ritorna la corretta classe (ipotizzata) per $x \Rightarrow f(x)$ è una funzione a valori discreti
 	\item \textbf{Regressione}: approssimare una funzione obiettivo a valori reali (in $R$ o $R^n$)
@@ -2520,17 +2520,15 @@ L'albero di decisione rappresenta la disgiunzione di congiunzioni di vincoli sul
 	\item outlook = rain and wind = weak
 \end{list}
 Oppure, \texttt{if-then-else}. H di decision tree è capace di esprimere qualsiasi funzione finita a valori discreti.
-\subsection{Algoritmo Top-Down Induction}
-Ricerca nello spazio del decision tree, top-down greedy.\\
-Domanda fonamentale è quale attributo testare dopo?\\ %TODO
-Scegliere il migliore attributo
-\begin{center}
-pseudocodice
-\end{center}
+\subsection{Algoritmo Top-Down Induction (ID3)}
+Dato il TR set, l'algoritmo costruisce un Decision Tree ricercando nello spazio dei DT. La costruzione è top-down e la ricerca è greedy.\\
+La domanda fondamentale è \textit{quale attributo testare ora?}, \textbf{quale informazione ci fornisce il maggior information gain?}: \textbf{selezionare il miglior attributo}.\\
+Per ogni possibile valore dell'attributo scelto viene generato un nodo discendente e gli esempi vengono partizionati secondo questo valore.\\
+Il processo è ripetuto per ogni nodo successore finché tutti gli esempi sono correttamente classificati o sono finiti gli attributi.
 \paragraph{Best Attribute} In base all'\textbf{entropia}\\
 \textbf{Entropia}: quantità di informazione portata da un segnale, più è stabile meno entropia porta quindi meno informazione, più oscilla più entropia più informazione. Nel nostro caso, il concetto di entropia misura impurità di una collezione d'esempi.\\
 Data $S$ \textbf{collezione di esempi training}, $p+$ proporzione degli esempi positivi in $S$ e $p-$ degli esempi negativi
-$$Entropy(S) = -(p+)\cdot(\log_2(p+)) - (p-)\cdot(\log_2(p-))\text{ assumendo }0\cdot\log_2(0) = 0$$
+$$Entropy(S) = -(p_+)\cdot(\log_2(p_+)) - (p_-)\cdot(\log_2(p_-))\text{ (assumendo }0\cdot\log_2(0) = 0\text{)}$$
 Se ho tutti positivi o tutti negativi, l'entropia è 0. Nei casi misti entropia alta.\\
 Bassa omogeneità non va bene (alta impurità, alta entropia)\\
 Notare che 0$\leq$p$\leq$1, quindi 0$\leq$entropia$\leq$1\\
