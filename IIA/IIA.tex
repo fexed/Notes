@@ -2581,20 +2581,20 @@ Ricordare il controllo della complessità del modello tramite la regolarizzazion
 \subsection{Problemi nell'apprendimento con DT}
 La risoluzione costruirà il C4.5
 \paragraph{Overfitting} %TODO dati
-$h$ overfitta i dati di apprendimento se c'è un'ipotesi alternativa $h' \in H$ tale che $E_D(h) < E_D(h'$) e $E_x(h') < E_x(h)$, cioè $h'$ si comporta peggio sui TR e meglio sui dati non osservati.\\
+$h$ overfitta i dati di apprendimento se c'è un'ipotesi alternativa $h' \in H$ tale che $$E_D(h) < E_D(h')\wedge E_x(h') < E_x(h)$$ cioè $h'$ si comporta peggio sul TR e meglio sui dati non osservati.\\
 \textbf{Approcci flessibili possono facilmente incontrare l'overfitting}.
 \paragraph{"Evitare" l'overfitting} "Avoiding" non va bene, non si può evitare l'overfitting che è un \textbf{problema inerente} e gli strumenti lo controllano ma non ci sollevano dalla responsabilità di gestire la questione.\\
-Tecnica comune è quella di fermare l'apprendimento presto prima di avere una classificazione perfetta.\\
-Oppure consentire crescita ed overfitting ma fare un pruning a posteriori tornando ad un albero più piccolo.\\
+Una tecnica comune è quella di fermare l'apprendimento presto prima di avere una classificazione perfetta, oppure consentire la crescita e l'overfitting ma fare un \textbf{pruning a posteriori} tornando ad un albero più piccolo.\\
 Come agire?
 \begin{list}{}{}
-	\item Training e validation set\\
+	\item Training e \textbf{validation set}\\
 	Si divide in due parti e si usa validation per decidere quando fermarsi o quando effettuare pruning
-	\item minimum description lenght, usa misura complessità e mi fermo quando cresce troppo oltre una certa misura (similitudine con Tikhonov)
+	\item Minimum description lenght, uso una misura di complessità e mi fermo quando cresce troppo oltre una certa misura (similitudine con Tikhonov)
 \end{list}
-Ogni nodo è candidato per il pruning. Pruning consiste rimuove un sottoalbero radicato in un certo nodo, che diventa foglia assegnata\ldots\\
-Nodi rimossi solo se risulta albero non peggiore sul valid set.\\
-Nodi pruned iterativamente: ad ogni iterazione il nodo la cui rimozione aumenta maggiormente l'accuratezza è tagliato.
+Ogni nodo è candidato per il pruning: consiste nel rimuovere un sottoalbero radicato in un certo nodo, che diventa una foglia assegnat, solo se risulta un albero non peggiore sul validation set.\\\\
+Dopo aver creato l'albero con il TR set, converto ogni cammino in un \textbf{set di regole equivalenti}: ogni cammino corrisponde ad una regola, ogni nodo intermedio ad una precondizione e ogni foglia classificata ad una postcondizione. Il \textbf{pruning generalizza ogni regola rimuovendo le precondizioni che migliorano l'accuratezza} sul VL set e/o sul training con un'euristica pessimistica.
+\paragraph{Valori continui} Si trovano le soglie per cui cambia la classificazione, ad esempio prendendo la media tra due valori consecutivi classificati diversamente.
+\paragraph{Dati incompleti} Si usano gli esempi per indovinare l'attributo mancante: si prende il valore più comune tra gli esempi nella solita classe oppure si assegna ad ogni valore una probabilità e si assegna all'attributo mancante il valore seguendo la probabilità assegnata.
 \section{Validazione}
 Ogni volta che si aumenta la precisione c'è il rischio di andare in overfitting. Bisogna quindi \textbf{valutare la capacità di generalizzazione dell'ipotesi}: ruolo essenziale della validazione. Con cenni di fondamenti teorici.\\
 Aspetto teorico e pratico per un \textbf{uso consapevole del ML}.
