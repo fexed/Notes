@@ -1323,12 +1323,12 @@ La ricerca è limitata naturalmente in profondità dal numero di variabili, quin
 \begin{center}
 	\includegraphics[scale=0.7]{FC_es1.png}
 \end{center}
-\paragraph{Backtracking Cronologico}
+\paragraph{Backtracking cronologico}
 Suppongo di avere \{Q=R, NSW=G, V=B, T=R\} e cerco di assegnare SA. Il fallimento genera un backtracking cronologico: \textbf{si provano tutti i valori alternativi per l'ultima variabile}, T, continuando a fallire\ldots\\
 Questo perché \textbf{non è la T responsabile del fallimento ma le altre variabili}.\\
 Quindi si può fare un \textbf{backtracking "intelligente" guidato dalle dipendenze}.
-%
-\paragraph{Backtracking guidato dalle dipendenze} Considero le alternative solo per le variabili che hanno causato il fallimento \{Q, NSW, V\}, l'\textbf{insieme dei conflitti}.
+\paragraph{Backtracking guidato dalle dipendenze} Considero le alternative solo per le variabili che hanno causato il fallimento \{Q, NSW, V\}, l'\textbf{insieme dei conflitti}.\\
+\textbf{Si considerano alternative solo per le variabili che hanno causato il fallimento}.
 \paragraph{Metodi CSP locali} I problemi CSP possono essere affrontati con metodi locali. Esempio: \textbf{le regine}.\\
 \textbf{Euristica dei conflitti minimi} (\textbf{min-conflicts}): si sceglie un valore che crea meno conflitti. Solitamente si sceglie a caso una delle regie che violano dei vincoli.\\
 Molto efficace: 1 milione di regine in 50 passi!
@@ -1398,6 +1398,7 @@ L'agente interagisce con una KB con un'interfaccia funzionale \textbf{Tell-Ask}:
 \begin{center}
 KB $\vDash \alpha$\\(\textbf{conseguenza logica})
 \end{center}
+In questo caso, i modelli che soddisfano KB sono un sottoinsieme dei modelli che soddisfano $\alpha$
 \pagebreak
 
 \paragraph{Programma di un agente KB} Di seguito
@@ -1536,6 +1537,7 @@ Lo si usa perché è efficiente in tempo e spazio.
 \begin{center}
 	\includegraphics[scale=0.7]{dpllwalksat_confronto.png}
 \end{center}
+WalkSAT è molto efficace quando il problema è sottovincolato: cioè quando ci sono molti modelli che soddisfano la KB (molte soluzioni). Ad esempio 16 soluzioni su 32 modelli possibili, quindi un assegnamento ha il 50\% di probabilità di essere vero.
 \section{Inferenza come Deduzione}
 Un altro modo per decidere se KB $\vDash$ A è usare un meccanismo di \textbf{dimostrazione} (\textbf{deduzione}).\\
 Si scrive KB $\vdash$ A (\textbf{A è deducibile da KB}) e la deduzione avviene specificando delle regole di inferenza: dovrebbero derivare solo le formule che sono conseguenza logica e \textbf{tutte} le formule che sono conseguenza logica.\\
@@ -2304,7 +2306,7 @@ Trovare, a partire dall'esempio, un'ipotesi $h$ che esegue il \textbf{fitting} d
 Assumendo che $y$ sia legata linearmente ad un'altra variabile $x$ o altre variablili $y= w_1x + w_0 + \textsl{ rumore}$, dove le $w$ sono libere e $\textsl{rumore}$ è l'errore misurato negli obiettivi.\\
 Costruiamo il modello cercando di trovare i valori di $w$ per predire e stimare $y$ per altri valori di $x$ \textbf{non osservati}.
 \subsubsection{Costruire il modello}
-\paragraph{Apprendimento tramite LMS} \textbf{Dato} l'insieme di $l$ esempi di training $\langle x_p, y_p\rangle$, trovare $h_w(x)$ nella forma\\$h_w(x) = w_1 + w_0$ che \textbf{minimizza l'errore atteso sui dati d'apprendimento}.\\
+\paragraph{Apprendimento tramite LMS} \textbf{Dato} l'insieme di $l$ esempi di training $\langle x_p, y_p\rangle$, trovare $h_w(x)$ nella forma\\$h_w(x) = w_1 x + w_0$ che \textbf{minimizza l'errore atteso sui dati d'apprendimento}.\\
 Per l'errore utilizziamo la \textbf{least mean square} (\textbf{LMS}): $$\textsl{loss}(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2 = \sum_{p=1}^l (y_p - (w_1x_p + w_0))^2$$ con valori al quadrato per non avere negativi.
 \paragraph{Perché?} Perché LMS per il migliore $h$?
 \begin{multicols}{2}
@@ -2581,7 +2583,7 @@ Ricordare il controllo della complessità del modello tramite la regolarizzazion
 \subsection{Problemi nell'apprendimento con DT}
 La risoluzione costruirà il C4.5
 \paragraph{Overfitting} %TODO dati
-$h$ overfitta i dati di apprendimento se c'è un'ipotesi alternativa $h' \in H$ tale che $$E_D(h) < E_D(h')\wedge E_x(h') < E_x(h)$$ cioè $h'$ si comporta peggio sul TR e meglio sui dati non osservati.\\
+$h$ overfitta i dati di apprendimento se c'è un'ipotesi alternativa $h' \in H$ tale che $$E_D(h) < E_D(h')\wedge E_x(h') < E_x(h)$$ cioè $h'$ si comporta peggio sul TR e meglio sui dati non osservati, altrimenti detto \textbf{peggio su errore empirico e meglio su errore atteso}.\\
 \textbf{Approcci flessibili possono facilmente incontrare l'overfitting}.
 \paragraph{"Evitare" l'overfitting} "Avoiding" non va bene, non si può evitare l'overfitting che è un \textbf{problema inerente} e gli strumenti lo controllano ma non ci sollevano dalla responsabilità di gestire la questione.\\
 Una tecnica comune è quella di fermare l'apprendimento presto prima di avere una classificazione perfetta, oppure consentire la crescita e l'overfitting ma fare un \textbf{pruning a posteriori} tornando ad un albero più piccolo.\\
