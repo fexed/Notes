@@ -20,7 +20,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Gestione di Reti: [appunti](https://github.com/fexed/Notes/blob/master/GR/GR.pdf)
 
-##### Introduzione all'Intelligenza Artificiale: [appunti](https://github.com/fexed/Notes/blob/master/IIA/IIA.pdf)
+##### Introduzione all'Intelligenza Artificiale: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/IIA/IIA.pdf)
 
 ##### Programmazione d'Interfacce: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
 
