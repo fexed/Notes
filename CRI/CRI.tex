@@ -125,4 +125,47 @@ Si scambiano pezzi di chiave tramite la rete e unendole a informazioni locali si
 \end{list}
 \paragraph{Come si usa} Oggi si usa un cifrario a chiave segreta (AES) per le comunicazioni di massa, e un cifrario a chiave pubblica per scambiare le chiavi segrete relative al primo senza incontri fisici tra gli utenti.\\
 Diventa lento solo lo scambio delle chiavi. Siamo anche al sicuro da attacchi chosen plain-text perché se la chiave è scelta bene risulta imprevedibile dal crittoanalista.
+\section{Rappresentazione matematica di oggetti}
+Per rappresentare gli oggetti scegliamo dei \textbf{caratteri} da un \textbf{insieme finito} detto \textbf{alfabeto}.\\
+Un \textbf{oggetto} è \textbf{rappresentato da una sequenza ordinata di caratteri dell'alfabeto}. L'ordine dei caratteri è importante: a \textbf{oggetti diversi corrispondono sequenze diverse} e \textbf{il numero di oggetti che si possono rappresentare non ha limiti}. Significa che fissando un numero $n$ arbitrariamente grande possiamo sempre creare un numero di oggetti $> n$, con sequenze via via più grande.
+\paragraph{Alfabeto} $\Gamma$ con $|\Gamma| = s$ e $N$ oggetti da rappresentare.\\
+$d(s, N)$: lunghezza della sequenza più lunga che rappresenta un oggetto dell'insieme. A noi interessa la rappresentazione che minimizza $d(s, N)$, cioè $d_{min}(s, N)$\\
+Una rappresentazione è tanto più efficiente quanto $d(s, N)$ si avvicina a $d_{min}(s, N)$
+\paragraph{Esempio} $s = 1, \Gamma = \{0\}$ l'unica possibilità è variare la lunghezza $\Rightarrow d_{min}(1, N) = N$, estremamente sfavorevole.\\
+$s = 2, \Gamma = \{0, 1\}$, $\forall\:k\geq 1$ ho $2^k$ sequenze di lunghezza $k$. Il numero totale di sequenze lunghe da $1$ a $k$ è $2^{k+1} - 2$ (si esclude anche la sequenza nulla). Con $N$ oggetti da rappresentare $\Rightarrow k \geq \log_2(N+2) - 1 \Rightarrow N$ sequenze diverse tutte di $\log_2(N)$ caratteri.
+\paragraph{Efficiente} Codifica efficiente quando c'è questa riduzione logaritmica, \textbf{efficiente} quando \textbf{}. Sequenze della stessa lunghezza è vantaggioso perché non servono caratteri separatori. Per questo è necessario che l'alfabeto contenga almeno due caratteri.\\
+La \textbf{notazione posizionale} è una rappresentazione efficiente indipendentemente dalla base $s \geq 2$ scelta. Un intero $N$ è rappresentato con un numero $d$ di cifre $|\: \log_s(N) \leq d \leq \log_s(N) + 1$
+\section{Richiamo della teoria della calcolabilità}
+\paragraph{Problemi computazionali} Formulati matematicamente di cui cerchiamo una soluzione algoritmica: \textbf{decidibili} (e \textbf{trattabili} o \textbf{non trattabili}), o \textbf{non decidibili}.\\
+Calcolabilità $\rightarrow$ \textbf{Algoritmo} e \textbf{problema non decidibile}\\
+Complessità $\rightarrow$ \textbf{Algoritmo efficiente} e \textbf{problema intrattabile}.
+\paragraph{Enumerazione delle sequenze} Si vuole elencare in uno ordine ragionevole le sequenze di lunghezza finita costruite su un alfabeto finito. Le sequenze non sono in numero finito, quindi non si potrà completare l'elenco.\\
+Lo scopo è \textbf{raggiungere qualsiasi sequenza $\sigma$ arbitrariamente scelta in un numero finito di passi}. $\sigma$ deve dunque trovarsi a \textbf{distanza finita} dall'inizio dell'elenco. Non va bene l'ordine del dizionario perché non saprei la posizione della prima stringa che inizia con $b$ perché le stringhe composte da tutte $a$ sono in numero finite.\\
+Si stabilisce un ordine tra i caratteri. Si ordinano prima in lunghezza crescente e, a pari lunghezza, in ordine alfabetico.
+\paragraph{Esempio} $\Gamma = \{a, b, \ldots, z\}$, avrei\\
+$a, b, \ldots, z$\\
+$aa, ab, \ldots, az, ba, \ldots, bz, \ldots, zz$\ldots\\
+Ad una sequenza arbitraria corrisponde un numero intero.\\\\
+La numerazione delle sequenze è fattibile perché sono di lunghezza finita, anche se illimitata. Cioè per qualunque intero $d$ scelto a priori, esistono sequenze di lunghezza maggiore di $d$. Per sequenze di lunghezza infinita la numerazione non è possibile
+\paragraph{Insiemi non numerabili} Insiemi non equivalenti a $N$ come $R$, $(0, 1)$, l'insieme di tutte le linee del piano, insieme delle funzioni in una o più variabili\ldots $\Rightarrow$ l'\textbf{insieme dei problemi computazionali non è numerabile}. Perché un problema computazionale è sempre visualizzabile come una funziona matematica, che associa ad ogni insieme di dati espressi da $k$ numeri interi il corrispondente risultato espresso da $j$ numeri interi $$f:N^k \rightarrow N^j$$
+Quindi l'insieme di queste $f$ \textbf{non è numerabile}.
+\paragraph{Diagonalizzazione}
+$F = \{$ funzioni $f\:|\: f: N \rightarrow \{0, 1\}\}$, ogni $f\in F$ è rappresentata da una sequenza infinita
+\begin{list}{}{}
+	\item $x$ 0 1 2 3 \ldots n \ldots
+	\item $f(x)$ 0 1 0 1 \ldots 0 \ldots
+\end{list}
+ma se è possibile è rappresentabile con una regola (f 0 se x pari 1 se x dispari)\\
+Per assurdo, ipotizzo F numerabile. Si può assegnare ad ogni funzione un numero progressivo nella numerazione e costruire una tabella infinita con tutte le funzioni.
+\begin{center}
+	\includegraphics[scale=0.6]{3.png}
+\end{center}
+Definisco $g(x)$ 0 se $f_x(x) = 1$, 1 se $f_x(x) = 0$, $g$ non può corrispondere a nessuna delle $f_i$ della tabella, perché differisce da tutte le funzioni almeno nella diagonale principale.\\
+$g(x)\:|\:0\:1\:1\:1\ldots$\\
+Per assurdo $\exists\:j\:|\:g(x) = f_j(x)$ allora $g(j) = f_j(j)$ ma per la definizione è il suo complemento, quindi $g(j) \neq f_j(j)$ contraddizione.\\
+Per qualunque numerazione scelta esiste sempre almeno una funzione esclusa, quindi $F$ non è numerabile.
+\subsection{Algoritmi}
+Qualunque modello si scelga, gli algoritmi devono essere descritti da sequenze finite di caratteri di un alfabeto finito $\Rightarrow$ sono possibilmente infiniti ma numerabili
+%TODO problema dell'arresto
+%TODO tesi C-T
 \end{document}
