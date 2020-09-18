@@ -470,4 +470,66 @@ Costruisce un \textbf{glossario}, \textbf{disegna lo schema} di settore, \textbf
 	\item Specificare le operazioni
 	\item Verificare la coerenza fra le operazioni e i dati
 \end{list}
+\section{Modello Relazionale}
+\paragraph{Origini} Proposto da E. F. Codd nel 1970 per favorire l'indipendenza dei dati, disponibile in DBMS reali dal 1981 (non è facile implementare l'indipendenza con efficienza e affidabilità). Si basa sul \textbf{concetto matematico di relazione} con una variante, naturalmente rappresentata come \textbf{tabella}.
+\subsection{Relazione matematica}
+\paragraph{Dalla teoria degli insiemi} Dati $n$ insiemi anche non distinti $D_1,\ldots,D_n$.\\
+Il \textbf{prodotto cartesiano} $D_1\times\ldots\times D_n$ è l'insieme di tutte le $n$-uple $(d_1,\ldots,d_n)$ tali che $d_1\in D_1, \ldots, d_n \in D_n$\\\\
+Una \textbf{relazione matematica} su $D_1,\ldots, D_n$ \textbf{è un sottoinsieme di $D_1\times\ldots\times D_n$}, con $D_1,\ldots, D_n$ detti \textbf{domini della relazione}.
+\paragraph{Un esempio} Dati $D_1 = \{a, b\}$ e $D_2 = \{x, y, z\}$.\\
+Il prodotto cartesiano è l'insieme $D_1\times D_2 = \{(a,x),(a,y),(a,z),(b,x),(b,y),(b,z)\}$\\
+Una relazione $r$ potrebbe essere $r\subset D_1\times D_2 = \{(a,x),(a,z),(b,y)\}$
+\paragraph{Proprietà} Una relazione matematica è un insieme di $n$-uple ordinate $(d_1,\ldots,d_n)$ tali che $d_1\in D_1, \ldots, d_n \in D_n$.\\
+Osservazioni: una relazione è un insieme, quindi
+\begin{list}{}{}
+	\item non c'è ordinamento fra le $n$-uple
+	\item le $n$-uple sono distinte
+	\item \textbf{ciascuna $n$-upla è ordinata}, cioè l'$i$-esimo valore proviene dall'$i$-esimo dominio
+\end{list}
+\paragraph{Tabelle} Una tabella rappresenta una relazione se:
+\begin{list}{}{}
+	\item I valori di ogni colonna sono fra loro omogenei
+	\item Le righe sono diverse fra loro
+	\item Le intestazioni delle colonne sono diverse fra loro
+\end{list}
+In una tabella che rappresenta una relazione \textbf{l'ordinamento} tra le righe e l'ordinamento tra le colonne \textbf{è irrilevante}
+\pagebreak
+\subsection{Valori}
+\paragraph{Il modello relazionale è basato sui valori} Ciò significa che i riferimenti fra dati in relazioni diverse sono rappresentati per mezzo di valori dei domini che compaiono nelle $n$-uple.
+\begin{center}
+	\includegraphics[scale=0.5]{integ.png}
+\end{center}
+\paragraph{Vantaggi}
+\begin{list}{}{}
+	\item \textbf{Indipendenza delle strutture fisiche} che possono cambiare dinamicamente, che potremmo avere anche con puntatori di alto livello. La rappresentazione logica dei dati (che è costituita dai soli valori) non fa riferimento a quella fisica.
+	\item Si \textbf{rappresenta solo ciò che è rilevante} dal punto di vista dell'applicazione
+	\item I \textbf{dati} sono \textbf{portabili} più facilmente da un sistema all'altro
+	\item I \textbf{puntatori} sono \textbf{direzionali}
+\end{list}
+\subsection{Meccanismi}
+\paragraph{Definizione} I meccanismi per definire una base di dati con il modello relazionale sono l'\textbf{ennupla} e la \textbf{relazione}.
+\paragraph{Tipo ennupla} Un tipo ennupla T è un insieme finito di coppie $\langle$attributo, tipo elementare$\rangle$\\
+Se T è un tipo ennupla, R(T) è lo schema della relazione R, quindi \textbf{lo schema di un DB è l'insieme di schemi di relazione R$_i$(T$_i$)}. Un'\textbf{istanza} di uno schema R(T) è un insieme finito di ennuple di tipo T.
+\paragraph{Informazione incompleta} Per rappresentare un'informazione incompleta (es.: l'assenza del secondo nome) \textbf{non bisogna usare elementi del dominio} come lo 0, stringa vuota, "99"\ldots.\\
+Questo perché potrebbero non esistere valori "non utilizzati", e se esistono potrebbero diventare significativi. Inoltre, in fase di utilizzo (nei programmi) bisognerebbe tenere conto ogni volta del "significato" di questi valori.\\\\
+Il \textbf{valore nullo} denota l'\textbf{assenza di un valore del dominio e non è un valore del dominio}.\\
+Quindi t[A] per ogni attributo A è un valore del dominio dom(A) oppure è il valore nullo NULL.\\
+Si possono (e \textbf{devono}) imporre restrizioni sulla presenza di valori sulli.
+\paragraph{Vincoli d'Integrità} Esistono istanze di DB che, nonostante siano sintatticamente corrette, non rappresentano informazioni possibili per l'applicazione e che quindi \textbf{generano informazioni prive di significato}. Ad esempio un voto di 32, o due studenti con la stessa matricola.\\
+Uno \textbf{schema relazionale è costituito da un insieme di schemi di relazione e un insieme di vincoli d'integrità} sui possibili valori delle estensioni delle relazioni.\\
+Un \textbf{vincolo d'integrità} è una \textbf{proprietà che deve essere soddisfatta dalle istanze che rappresentano informazioni corrette} per l'applicazione.
+\pagebreak
+\begin{list}{}{}
+	\item \textbf{Vincoli Intrarelazionali}: sono vincoli che \textbf{devono essere rispettati dai valori contenuti nella relazione considerata}. Vincoli \textbf{sui valori} (o \textbf{di dominio}), vincoli \textbf{di ennupla}.
+	\item \textbf{Vincoli Interrelazionali}: sono vincoli che \textbf{devono essere rispettati da valori contenuti in relazioni diverse}.
+\end{list}
+\paragraph{Chiave} Informalmente, una \textbf{chiave} è un \textbf{insieme di attributi che identificano le ennuple di una relazione}.\\
+Formalmente, \textbf{un insieme K di attributi è \textit{superchiave} per $r$ se $r$ \textit{non} contiene due ennuple distinte $t_1$ e $t_2$ con $t_1[K] = t_2[K]$}.\\
+\textbf{K è chiave per $r$ se è superchiave minimale per $r$}, cioè se non contiene altre superchiavi.\\
+Un esempio classe è la matricola: è superchiave ed è un solo attributo, quindi è minimale.\\\\
+Una relazione non può contenere ennuple distinte ma con valori uguali. Ogni relazione ha \textbf{sicuramente} come superchiave l'insieme di tutti gli attributi su cui è definita, quindi ogni relazione ha (almeno) una chiave.\\
+L'esistenza delle chiavi garantisce l'accesso di ciascun dato della base di dati e permettono di correlare i dati in relazioni diverse.\\
+Un valore nullo in una chiave non permette di identificare le ennuple o realizzare i riferimenti con altre relazioni. Una \textbf{chiave primaria} è una chiave su cui non sono ammessi valori nulli: si denota sottolineando il nome dell'attributo es. \underline{matricola}.
+\paragraph{Integrità referenziale} Le informazioni in relazioni diverse sono correlate attraverso valori comuni. In particolare, \textbf{vengono prese in considerazione i valori delle chiavi primarie}, quindi le \textbf{correlazioni devono essere coerenti}.\\
+Un \textbf{vincolo di integrità referenziale} (foreign key) \textbf{fra gli attributi X di una relazione R$_1$ e un'altra relazione R$_2$ impone ai valori su X in R$_1$ di comparire come valori della chiave primaria di R$_2$}.
 \end{document}
