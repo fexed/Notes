@@ -64,7 +64,7 @@ Es. A $\rightarrow$ D, Z $\rightarrow$ C. La segretezza dipende interamente dall
 	Ogni codice segreto non può essere mantenuto tale per troppo a lungo. La parte segreta si limita alla chiave, nota solamente agli utenti che stanno comunicando.\\
 	Vengono studiati dalla comunità, coinvolgendo tantissime persone. Solo la chiave deve essere segreta.\\
 	\textbf{Il nemico conosce il sistema}.\\
-	Quindi C e D sono note, la chiave \textbf{segreta}\texttt{k} è usata come input sia in C che in D:\\
+	Quindi C e D sono note, la chiave \textbf{segreta} \texttt{k} è usata come input sia in C che in D:\\
 	\texttt{c = C(m, k)}, \texttt{m = D(c, k)}\\
 	Se non si conosce \texttt{k}, anche conoscendo C e D non si possono estrarre informazioni dal crittogramma.\\
 	Tenere segreta una sola chiave è più facile che segretare l'intero metodo. Tutti possono usare C e D pubbliche con chiavi diverse, e se un crittoanalista entra in possesso di una chiave posso generarne semplicemente una nuova.
@@ -75,25 +75,36 @@ Inoltre la chiave deve essere scelta in modo casuale e non prevedibile, sennò i
 Se $|$Key$|$ = $10^{20}$ e con un calcolatore che impiega $10^{-6}$ per calcolare \texttt{D(c, k)} servirebbe in media più di un milione di anni per scoprire il messaggi provando tutte le chiavi. Però la segretezza può essere violata con altre tecniche: esistono cifrari più sicuri di altri pur con uno spazio di chiavi più piccoli.\\
 Un cifrario complicato non è necessariamente più sicuro e \textbf{mai sottovalutare la bravura del crittoanalista}.
 \subsection{Crittoanalista}
-%TODO
+\paragraph{Comportamento} Il comportamento di un crittoanalista può essere:
+\begin{list}{}{}
+	\item \textbf{Passivo}, quando si \textbf{limita ad ascoltare} la comunicazione
+	\item \textbf{Attivo}, quando \textbf{agisce sul canale} disturbando la comunicazione o modificando il contenuto dei messaggi.
+\end{list}
 \paragraph{Attacchi a un sistema crittografico} Hanno l'obiettivo di forzare un sistema. Il metodo e il livello di pericolosità dipendono dalle informazioni in possesso del crittoanalista:
 \begin{list}{}{}
-	\item Cipher Text Attack: conosce una serie di crittogrammi
-	\item Known Plain-Text Attack: conosce una serie di coppie \texttt{(m, c)}
-	\item Chosen Plain-Text Attack: si procura coppie \texttt{(m, c)} relative a messaggi in chiaro da lui scelti. Tutta la crittografia a chiave pubblica è soggetta.
+	\item \textbf{Cipher Text Attack}: conosce una serie di crittogrammi
+	\item \textbf{Known Plain-Text Attack}: conosce una serie di coppie \texttt{(m, c)}
+	\item \textbf{Chosen Plain-Text Attack}: si procura coppie \texttt{(m, c)} relative a messaggi in chiaro da lui scelti.\\
+	Tutta la crittografia a chiave pubblica è soggetta a questo tipo di attacco (avendo la chiave pubblica, cifro dei messaggi che penso possano passare e ascolto finché non trovo nella comunicazione i crittogrammi in mio possesso).
 \end{list}
-\paragraph{Man in the Middle}
+\paragraph{Man in the Middle} Il crittoanalista si installa sul canale di comunicazione:
+\begin{list}{}{}
+	\item \textbf{Interrompe le comunicazioni dirette} tra gli utenti Alice e Bob
+	\item le \textbf{sostituisce con messaggi propri}
+	\item e \textbf{convince} ciascun utente \textbf{che tali messaggi provengano leggitimamente dall'altro} utente.
+\end{list}
+Quindi il crittoanalista \textbf{Eve si finge Bob agli occhi di Alice e Alice agli occhi di Bob}.
 \paragraph{Esiti}
 \begin{list}{}{}
 	\item Successo pieno, si scopre completamente D o si ottiene la chiave
 	\item Successo limitato, si scopre solo qualche informazione ma sufficiente per comprendere il messaggio
 \end{list}
 \subsection{Situazione attuale}
-\paragraph{Cifrari perfetti} Inattaccabili, esistono ma richiedono operazioni complesse e chiavi lunghe tanto quanto il messaggio e mai riusabili.\\
+\paragraph{Cifrari perfetti} Inattaccabili, esistono ma richiedono operazioni complesse, \textbf{chiavi lunghe tanto quanto il messaggio e mai riutilizzabili}.\\
 \textbf{Shannon}, 1945 (pubblicato nel 1949 per motivi di segretezza militare): \texttt{m} e \texttt{c} appaiono totalmente scorrelati, come se \texttt{c} fosse una stringa casuale di bit.\\Nessuna informazione può filtrare dal crittogramma. Vedremo la teoria matematica.
 \subparagraph{One-Time Pad} Anche detto blocco monouso, sicuro ma per essere usato bene richiede chiavi segrete totalmente casuali e lunghe quanto il messaggio. Come generarla e come scambiarla?
-\paragraph{Cifrari attuali} Nella crittografia di massa non si usano cifrari perfetti, ma cifrari \textbf{dichiarati} sicuri, inviolati dagli esperti e che usano algoritmi solo esponenziali per decrittare senza chiave. Il tempo per violare un cifrario è enorme e rende l'operazione insostenibile $\rightarrow$ impossibilità \textit{pratica} di forzare il cifrario.
-\subparagraph{Dichiarati sicuri} Non è noto se questi problemi matematici richiedano algoritmi \textit{necessariamente} esponenziali o se sono dovuti all'incapacità nostra di trovare metodi più efficienti. Si riconduce a $P ? NP$
+\paragraph{Cifrari attuali} Nella crittografia di massa non si usano cifrari perfetti, ma \textbf{cifrari \textit{dichiarati} sicuri}, inviolati dagli esperti e che usano algoritmi solo esponenziali per decrittare senza chiave. Il tempo per violare un cifrario è enorme e rende l'operazione insostenibile $\rightarrow$ impossibilità \textit{pratica} di forzare il cifrario.
+\subparagraph{Dichiarati sicuri} Non è noto se questi problemi matematici richiedano algoritmi \textit{necessariamente} esponenziali o se sono dovuti all'incapacità nostra di trovare metodi più efficienti. Si riconduce a $P = NP$
 \subsection{Cifrari odierni}
 \paragraph{Advanced Encryption Standard} AES, simmetrico a blocchi con chiavi di 128-256bit, pubblicamente noto e realizzabile su computer di ogni tipo. Il messaggio è diviso a blocchi lunghi quanto la chiave.
 \paragraph{Le chiavi} Sono stabilite dai mezzi elettronici (PC, smartphone, terminale...) e su Internet si scambia una chiave per ogni sessione.
@@ -139,14 +150,17 @@ La \textbf{notazione posizionale} è una rappresentazione efficiente indipendent
 \paragraph{Problemi computazionali} Formulati matematicamente di cui cerchiamo una soluzione algoritmica: \textbf{decidibili} (e \textbf{trattabili} o \textbf{non trattabili}), o \textbf{non decidibili}.\\
 Calcolabilità $\rightarrow$ \textbf{Algoritmo} e \textbf{problema non decidibile}\\
 Complessità $\rightarrow$ \textbf{Algoritmo efficiente} e \textbf{problema intrattabile}.
+\paragraph{Numerabilità} Due insiemi $A$ e $B$ hanno lo stesso numero di elementi $\Leftrightarrow$ si può stabilire una \textbf{corrispondenza biunivoca} tra i loro elementi.\\
+Questo porta alla definizione di \textbf{numerabile}: un insieme è numerabile $\Leftrightarrow$ i suoi elementi possono essere messi in \textbf{corrispondenza biunivoca con i numeri naturali}.\\
+Numerabile significa che \textbf{possiede un'infinità numerabile di elementi}. Esempi: l'insieme dei numeri naturali $N$, l'insieme degli interi $Z$ (avendo $n$ in corrispondenza biunivoca con $2n + 1$ per $n\geq 0$ e $n \leftrightarrow 2|n|$ per $n < 0$, dando la sequenza $0, -1, 1, -2, 2\ldots$) o anche l'insieme dei naturali pari ($2n \leftrightarrow n$)
 \paragraph{Enumerazione delle sequenze} Si vuole elencare in uno ordine ragionevole le sequenze di lunghezza finita costruite su un alfabeto finito. Le sequenze non sono in numero finito, quindi non si potrà completare l'elenco.\\
-Lo scopo è \textbf{raggiungere qualsiasi sequenza $\sigma$ arbitrariamente scelta in un numero finito di passi}. $\sigma$ deve dunque trovarsi a \textbf{distanza finita} dall'inizio dell'elenco. Non va bene l'ordine del dizionario perché non saprei la posizione della prima stringa che inizia con $b$ perché le stringhe composte da tutte $a$ sono in numero finite.\\
+Lo scopo è \textbf{raggiungere qualsiasi sequenza $\sigma$ arbitrariamente scelta in un numero finito di passi}. $\sigma$ deve dunque trovarsi a \textbf{distanza finita} dall'inizio dell'elenco. Non va bene l'ordine del dizionario perché non saprei la posizione della prima stringa che inizia con $b$ perché le stringhe composte da tutte $a$ sono infinite.\\
 Si stabilisce un ordine tra i caratteri. Si ordinano prima in lunghezza crescente e, a pari lunghezza, in ordine alfabetico.
 \paragraph{Esempio} $\Gamma = \{a, b, \ldots, z\}$, avrei\\
-$a, b, \ldots, z$\\
-$aa, ab, \ldots, az, ba, \ldots, bz, \ldots, zz$\ldots\\
-Ad una sequenza arbitraria corrisponde un numero intero.\\\\
-La numerazione delle sequenze è fattibile perché sono di lunghezza finita, anche se illimitata. Cioè per qualunque intero $d$ scelto a priori, esistono sequenze di lunghezza maggiore di $d$. Per sequenze di lunghezza infinita la numerazione non è possibile
+$a, b, \ldots, z,$\\
+$aa, ab, \ldots, az, ba, bb, \ldots, bz, \ldots, zz,$\ldots\\
+Ad una sequenza arbitraria corrisponde un numero intero, e la sequenza $s$ arbitraria si troverà tra quelle di lunghezza $|s|$ in posizione alfabetica. Quindi ad una sequenza arbitraria $\leftrightarrow$ $n$ che indica la posizione nell'elenco, e ad un numero naturale $n \leftrightarrow$ la sequenza che occupa l'$n$-esima posizione nell'elenco.\\\\
+La \textbf{numerazione delle sequenze è fattibile perché sono di lunghezza finita}, anche se illimitata. Cioè per qualunque intero $d$ scelto a priori, esistono sequenze di lunghezza maggiore di $d$. Per sequenze di lunghezza infinita la numerazione non è possibile
 \paragraph{Insiemi non numerabili} Insiemi non equivalenti a $N$ come $R$, $(0, 1)$, l'insieme di tutte le linee del piano, insieme delle funzioni in una o più variabili\ldots $\Rightarrow$ l'\textbf{insieme dei problemi computazionali non è numerabile}. Perché un problema computazionale è sempre visualizzabile come una funziona matematica, che associa ad ogni insieme di dati espressi da $k$ numeri interi il corrispondente risultato espresso da $j$ numeri interi $$f:N^k \rightarrow N^j$$
 Quindi l'insieme di queste $f$ \textbf{non è numerabile}.
 \paragraph{Diagonalizzazione}
@@ -160,12 +174,33 @@ Per assurdo, ipotizzo F numerabile. Si può assegnare ad ogni funzione un numero
 \begin{center}
 	\includegraphics[scale=0.6]{3.png}
 \end{center}
-Definisco $g(x)$ 0 se $f_x(x) = 1$, 1 se $f_x(x) = 0$, $g$ non può corrispondere a nessuna delle $f_i$ della tabella, perché differisce da tutte le funzioni almeno nella diagonale principale.\\
-$g(x)\:|\:0\:1\:1\:1\ldots$\\
-Per assurdo $\exists\:j\:|\:g(x) = f_j(x)$ allora $g(j) = f_j(j)$ ma per la definizione è il suo complemento, quindi $g(j) \neq f_j(j)$ contraddizione.\\
+Definisco $g(x)$ = $\left\{ \begin{array}{l l}
+0 & f_x(x) = 1\\ 1 & f_x(x) = 0
+\end{array} \right. \Rightarrow g$ non può corrispondere a nessuna delle $f_i$ della tabella, perché differisce da tutte le funzioni almeno nella diagonale principale.\\
+$g(x)\:\:|\:\:\:0\:1\:1\:1\ldots$\\
+Per assurdo $\exists\:j\:|\:g(x) = f_j(x) \Rightarrow g(j) = f_j(j)$ ma per la definizione $g(j)$ è il complemento di $f_j(j)$, quindi $g(j) \neq f_j(j)$ \textbf{contraddizione}.\\
 Per qualunque numerazione scelta esiste sempre almeno una funzione esclusa, quindi $F$ non è numerabile.
 \subsection{Algoritmi}
-Qualunque modello si scelga, gli algoritmi devono essere descritti da sequenze finite di caratteri di un alfabeto finito $\Rightarrow$ sono possibilmente infiniti ma numerabili
-%TODO problema dell'arresto
-%TODO tesi C-T
+\paragraph{Algoritmi} la \textbf{formulazione di un algoritmo}, una sequenza finita di operazioni, completamente e univocamente determinate, \textbf{dipende dal modello di calcolo utilizzato}.\\
+Qualunque modello si scelga, gli algoritmi devono essere descritti da sequenze finite di caratteri di un alfabeto finito $\Rightarrow$ sono \textbf{possibilmente infiniti ma numerabili}.
+\paragraph{Problemi computazionali} Sono \textbf{funzioni matematiche} che associano ad ogni insieme di dati il corrispondente risultato, e \textbf{non sono numerabili} come visto prima.
+\paragraph{Problema della rappresentazione} C'è una drastica perdita di potenza, perché gli algoritmi sono numerabili ma sono meno dei problemi computazionali $$|\{Problemi\}| >> |\{Algoritmi\}|$$
+$\Rightarrow$ \textbf{esistono problemi privi di un corrispondente algoritmo di calcolo}. Per esempio, il problema dell'arresto.
+\paragraph{Lezione di Turing} \textit{Non esistono algoritmi che decidono il comportamento di altri algoritmi esaminandoli dall'esterno, cioè senza passare dalla loro simulazione}.
+\subsection{Modelli di calcolo}\begin{center}
+La teoria della calcolabilità dipende dal modello di calcolo?\\
+Oppure\\
+la decidibilità è una proprietà del problema?
+\end{center}
+\pagebreak
+I linguaggi di programmazione esistenti sono tutti equivalenti?\\
+Ce ne sono di alcuni più potenti/più semplici di altri?\\
+Ci sono algoritmi descrivibili in un linguaggio ma non in un altro?\\
+È possibile che problemi oggi irrisolvibili possano essere risolti in futuro con altri linguaggi o altri calcolatori?\\
+Le teorie della calcolabilità e della complessità dipendono dal modello di calcolo?
+\paragraph{Tesi di Church-Turing} Tutti i \textit{ragionevoli} modelli di calcolo \textbf{risolvono esattamente la stessa classe di problemi}, quindi \textbf{si equivalgono nella possibilità di risolvere i problemi} pur operando con diversa efficienza.
+\begin{center}
+\textbf{Tesi C-H: la decidibilità è una proprietà del problema}
+\end{center}
+Incrementi qualitativi sui calcolatori o sui linguaggi di programmazione servono \textbf{solo} ad abbassare i tempi di esecuzione o rendere più agevole la programmazione.
 \end{document}
