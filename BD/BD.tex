@@ -532,4 +532,50 @@ L'esistenza delle chiavi garantisce l'accesso di ciascun dato della base di dati
 Un valore nullo in una chiave non permette di identificare le ennuple o realizzare i riferimenti con altre relazioni. Una \textbf{chiave primaria} è una chiave su cui non sono ammessi valori nulli: si denota sottolineando il nome dell'attributo es. \underline{matricola}.
 \paragraph{Integrità referenziale} Le informazioni in relazioni diverse sono correlate attraverso valori comuni. In particolare, \textbf{vengono prese in considerazione i valori delle chiavi primarie}, quindi le \textbf{correlazioni devono essere coerenti}.\\
 Un \textbf{vincolo di integrità referenziale} (foreign key) \textbf{fra gli attributi X di una relazione R$_1$ e un'altra relazione R$_2$ impone ai valori su X in R$_1$ di comparire come valori della chiave primaria di R$_2$}.
+\section{Trasformazione di schemi}
+\paragraph{Progettazione logica} L'obiettivo della progettazione logica è \textbf{tradurre lo schema concettuale in uno schema logico relazionale}, che rappresenti gli stessi dati, \textbf{in maniera corretta ed efficiente}. Questo richiede una ristrutturazione del modello concettuale.
+\subsection{Progettazione logica relazionale}
+\paragraph{Passaggi} La progettazione di uno schema ad oggetti in uno schema relazionale avviene seguendo questi passaggi:
+\begin{enumerate}
+	\item rappresentazione delle associazioni 1:1 e 1:N
+	\item rappresentazione delle associazioni N:M o non binarie
+	\item rappresentazione delle gerarchie d'inclusione
+	\item identificazione delle chiavi primarie
+	\item rappresentazione degli attributi multivalore
+\end{enumerate}
+\paragraph{Obiettivo} Rappresentare le \textbf{stesse informazioni}, \textbf{minimizzando la ridondanza} e \textbf{producendo uno schema comprensibile} che faciliti la scrittura e la manutenzione delle applicazioni.
+\subsection{Rappresentazione delle associazioni}
+\paragraph{Uno a molti} Si rappresentano aggiungendo agli attributi della relazione rispetto a cui l'associazione è univoca la chiave esterna che riferisce l'altra relazione.
+\begin{center}
+	\includegraphics[scale=0.25]{ass1n.png}
+\end{center}
+\paragraph{Uno a uno} Si rappresentano aggiungendo la chiave esterna ad una qualunque delle due relazioni che riferisce l'altra relazione. Nel caso di un vincolo di totalità, la chiave esterna viene aggiunta alla relazione rispetto cui l'associazione è totale.
+\begin{center}
+	\includegraphics[scale=0.25]{ass11.png}
+\end{center}
+\paragraph{Molti a molti} Si rappresenta aggiungendo allo schema una nuova relazione contenente due chiavi esterne che riferiscono le due relazioni coinvolte. La chiave primaria di questa relazione è costituita dall'insieme di tutti i suoi attributi.
+\begin{center}
+	\includegraphics[scale=0.35]{assnn.png}
+\end{center}
+\subsection{Rappresentazione delle gerarchie fra classi}
+Il modello relazionale non può rappresentare direttamente le generalizzazioni. Bisogna eliminare le gerarchie, sostituendole con classi e relazioni:
+\begin{list}{}{}
+	\item \textbf{Relazione unica}: accorpamento delle figlie della generalizzazione nel genitore\\
+	Se $A_0$ è la classe genitore di $A_1$ e $A_2$, allora $A_1$ e $A_2$ vengono eliminate e accorpate ad $A_0$. Ad $A_0$ viene aggiunto un attributo (\textbf{discriminatore}) che indica da quale delle classi figlie deriva una certa istanza, e \textbf{gli attributi di $A_1$ e $A_2$ vengono assorbiti da $A_0$}, assumendo valore nullo sulle istanze provenienti dall'altra classe.
+	\begin{center}
+		\includegraphics[scale=0.5]{relazunica.png}
+	\end{center}
+	\item \textbf{Partizionamento orizzontale}: accorpamento del genitore della generalizzazione nelle figlie\\
+	La classe genitore $A_0$ viene eliminata e le classi figlie $A_1$ e $A_2$ ereditano le proprietà (attributi, identificatore e relazioni) della classe genitore. Le relazioni della classe genitore vengono sdoppiate, coinvolgendo ciascuna delle figlie.\\
+	Divide gli elementi della superclasse in più relazioni diverse, per cui \textbf{non è possibile mantenere un vincolo referenziale verso la superclasse stessa}. Quindi, \textbf{non si usa se nello schema relazionale grafico c'è una freccia che entra nella superclasse} (come la $\leftarrow^S$ nell'esempio sopra, che entra nella superclasse $A$).
+	\begin{center}
+		\includegraphics[scale=0.45]{partorizz.png}
+	\end{center}
+	\item \textbf{Partizionamento verticale}: sostituzione della generalizzazione con relazioni.\\
+	La generalizzazione si trasforma in due associazioni uno ad uno che legano rispettivamente la classe progenitore con le classi figlie. In questo caso, \textbf{non c'è un trasferimento di attributi o di associazioni} e le classi figlie $A_1$ e $A_2$ sono identificate esternamente dalla classe genitore $A_0$.\\
+	Nello schema ottenuto si aggiungono dei vincoli: ogni occorrenza di $A_0$ non può partecipare contemporaneamente alle due associazioni e se la generalizzazione è totale, deve partecipare almeno una delle due.
+	\begin{center}
+		\includegraphics[scale=0.45]{partvert.png}
+	\end{center}
+\end{list}
 \end{document}
