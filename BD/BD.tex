@@ -578,4 +578,72 @@ Il modello relazionale non può rappresentare direttamente le generalizzazioni. 
 		\includegraphics[scale=0.45]{partvert.png}
 	\end{center}
 \end{list}
+\chapter{Algebra Relazionale}
+\section{Linguaggi}
+\paragraph{Linguaggi per i DB}
+\begin{list}{}{}
+	\item \textbf{DDL} \textbf{Data Definition Language}, per le \textbf{operazioni sullo schema}.\\
+Operazioni di creazione, cancellazione e modifica di schemi di tabelle, creazione viste, creazione indici\ldots
+	\item \textbf{DML} \textbf{Data Manipulation Language}, per le \textbf{operazioni sui dati}.\begin{list}{}{}
+	\item \textbf{Data Query Language}, per le \textbf{query}, cioè l'\textbf{interrogazione del DB}
+	\item \textbf{Aggiornamento dati}, per inserimento, cancellazione e modifica dei dati.
+\end{list}
+\end{list}
+\paragraph{Linguaggi relazionali}
+\begin{list}{}{}
+	\item \textbf{Algebra relazionale}: insieme di operatori su relazioni che danno come risultato altre relazioni.\\
+	Non si usa come linguaggio di interrogazione dei DBMS ma come rappresentazione interna delle interrogazioni.
+	\item \textbf{Calcolo relazionale}: linguaggio dichiarativo di tipo logico da cui è stato derivato l'SQL.
+\end{list}
+\section{Operatori}
+\begin{list}{}{}
+	\item Unione, intersezione e differenza
+	\item Ridenominazione
+	\item Selezione
+	\item Proiezione
+	\item Join (naturale, prodotto cartesiano, theta-join)
+\end{list}
+Sono \textbf{operatori insiemistici}: \textbf{le relazioni sono insiemi} e i risultati devono essere relazioni a loro volta. L'unione, intersezione e differenza sono applicabili solamente a relazioni definite sugli stessi attributi, cioè \textbf{possono operare solo su tuple uniformi}.
+\subsection{Ridenominazione}
+\paragraph{Operatore monadico} Un solo argomento, modifica lo schema lasciando inalterata l'istanza dell'operando. Si indica con la lettera $\rho$, esempio: $\rho$ 
+\textit{nomecolonna}$\leftarrow$\textit{nuovonome}
+\subsection{Proiezione}
+\paragraph{Operatore monadico} Produce un risultato che ha \textbf{parte degli attributi} dell'operando e \textbf{contiene ennuple cui contribuiscono tutte le ennuple dell'operando ristrette agli attributi nella lista}. Esempio $\pi_{\textsl{lista attributi}}$(\textit{operando})\\
+$\pi_{A_1\ldots A_n}$(\textit{R})\\
+Contiene \textbf{al più} tante ennuple quante l'operando, ma può contenerne meno. Se $X$ è superchiave di R, allora $\pi_X$(R) contiene esattamente tante ennuple quante R. Se $X$ non è superchiave, \textbf{potrebbero esistere valori ripetuti su quegli attributi}, che quindi \textbf{vengono rappresentati una sola volta}.
+\pagebreak
+\subsection{Selezione}
+\paragraph{Operatore monadico} Produce un risultato con \textbf{lo stesso schema dell'operando}, \textbf{contiene un sottoinsieme delle ennuple dell'operando} cioè quelle che \textbf{soddisfano una condizione} espressa combinando con i connettivi logici $\wedge$, $\vee$, $\neg$, condizioni atomiche del tipo $A\Theta B$ o $A\Theta c$ dove $\Theta$ è un operatore di confronto, $A$ e $B$ sono attributi su cui l'operatore $\Theta$ abbia senso e $c$ sia una costate compatibile col dominio di $A$.\\
+Viene denotata con $\sigma_{\textsl{condizione}}$(\textit{operando}), ad esempio $\sigma_{Stipendio>50\:\wedge\:Filiale='Milano'}$(Impiegati)\\
+Per riferirsi ai valori nulli si usano apposite condizioni IS NULL e IS NOT NULL.\\
+\begin{center}
+$\sigma_{eta>30}$(Persone) $\cup\:\:\sigma_{eta\leq 30}$(Persone) $\cup\:\:\sigma_{eta\:\:IS\:NULL}$(Persone)\\
+$=$\\
+$\sigma_{eta>30\:\:\vee\:\:eta\leq 30\:\:\vee\:\:eta\:IS NULL}$(Persone)\\
+$=$\\
+Persone
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.4]{proiezrestriz.png}
+\end{center}
+\subsection{Join}
+\paragraph{Giunzione} Combinando selezione e proiezione possiamo estrarre informazioni da una relazione, ma \textbf{non possiamo correlare informazioni presenti in relazioni diverse}.\\
+Il \textbf{join} è l'operatore più interessante dell'algebra relazionale perché consente di correlare i dati in relazioni diverse.
+\paragraph{Join naturale} Operatore binario (generalizzabile) che \textbf{correla dati} in relazioni diverse \textbf{sulla base di valori uguali in attributi con lo stesso nome}.\\
+Produce un risultato sull'unione degli attributi degli operandi con \textbf{ennuple ottenute combinando le ennuple degli operandi con valori uguali sugli attributi in comune}.\\
+Dati $R_1(X_1)$, $R_2(X_2)$, allora $R_1\bowtie R_2$ è una relazione su $X_1\cup X_2$\\
+$R_1\bowtie R_2 = \{t$ su $X_1\cup X_2\:|\:\exists t_1\in R_1 \wedge t_2\in R_2$ con $t[X_1] = t_1$ e $t[X_2] = t_2\}$
+\subparagraph{Cardinalità} Dati $R_1(A,B)$ e $R_2(B,C)$, il join contiene un numero di ennuple compreso fra 0 e $|R_1|\cdot|R_2|$
+$$0 \leq |R_1 \bowtie R_2|\leq |R_1|\cdot|R_2|$$
+Se il join è completo, allora contiene un numero di ennuple almeno uguale al massimo tra $|R_1|$ e $|R_2|$. Se il join coinvolge una chiave B di $R_2$, allora $0 \leq |R_1 \bowtie R_2|\leq |R_1|$.\\
+Se coinvolge una chiave B di $R_2$ e un vincolo di integrità referenziale tra attributi di $R_1$ e la chiave di $R_2$,\\allora $|R_1 \bowtie R_2| = |R_1|$
+\paragraph{Join esterno} Estende con valori nulli le ennuple che verrebbero tagliate fuori da un join interno.\\
+Esiste in tre versioni:
+\begin{list}{}{}
+	\item \textbf{Sinistro} $R \overleftarrow{\bowtie} S$, mantiene tutte le ennuple del primo operando estendendole con valori nulli se necessario.
+	\item \textbf{Destro} $R \overrightarrow{\bowtie} S$, idem ma del secondo operando.
+	\item \textbf{Completo}, idem ma di entrambi gli operandi.
+\end{list}
+\paragraph{Prodotto cartesiano} Un join naturale senza attributi in comune: contiene sempre un numero di ennuple pari al prodotto delle cardinalità degli operandi.
+\paragraph{Theta-join} Il prodotto cartesiano ha senso solo se seguito da una selezione $\sigma_{condizione}(R_1\bowtie R_2)$, che viene abbreviato con $R_1\bowtie_{condizione}R_2$
 \end{document}
