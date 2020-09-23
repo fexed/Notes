@@ -208,16 +208,44 @@ Ci sono quindi problemi che non possono essere risolti da nessun calcolatore, in
 Ci sono poi problemi decidibili che possono richiedere tempi di risoluzione esponenziali nella dimensione dell'istanza (\textbf{problemi intrattabili}).\\
 Ci sono poi problemi che possono essere risolti con algoritmi di costo polinomiale nella dimensione dell'inpu\\(\textbf{problemi trattabili}).\\
 Abbiamo poi una famiglia di problemi il cui stato non è noto: clique (cricca), cammino hamiltoniano\ldots Sappiamo risolverli (decidibili) con algoritmi di costo esponenziale, ma non abbiamo limiti inferiori esponenziali. I migliori limiti inferiori sono polinomiali: c'è un gap fra il limite inferiore (polinomiale) e costo della migliore soluzione a disposizione (esponenziale) (\textbf{presumibilmente intrattabili}).
-%TODO notazione
+\subsubsection{Notazione}
+Studiamo la dimensione dei dati trattabili in funzione dell'incremento della velocità del calcolatori.\\
+Dati i calcolatori $C_1$, $C_2$ ($k$ volte più veloce di $C_1$) e tempo di calcolo a disposizione $t$, avrò $n_1$ dati trattabili in tempo $t$ su $C_1$ e $n_2$ trattabili in tempo $t$ su $C_2$.\\\\
+Si \textbf{osserva} che \textbf{usare $C_2$ per un tempo $t$ equivale a usare $C_1$ per un tempo $k\cdot t$}.
+\paragraph{Algoritmi polinomiali} Un algoritmo polinomiale che risolve il problema in $c\cdot n^s$ secondi, con $c$ ed $s$ costanti.
+\begin{list}{}{}
+	\item[$C_1$] $c\cdot n_1^s = t \Rightarrow n_1 = (t/c)^{1/s}$
+	\item[$C_2$] $c\cdot n_2^s = t \Rightarrow n_2 = k^{1/s}\cdot(t/c)^{1/s}$
+	\item[$\Rightarrow$] $n_2 = k^{1/s}\cdot n_1$, miglioramento di un fattore \textbf{moltiplicativo} $k^{1/s}$
+\end{list}
+\paragraph{Algoritmi esponenziali} Un algoritmo polinomiale che risolve il problema in $c\cdot 2^n$ secondi, con $c$ costante.
+\begin{list}{}{}
+	\item[$C_1$] $c2^{n_1} = t \Rightarrow 2^{n_1} = t/c$
+	\item[$C_2$] $c2^{n_2} = k\cdot t \Rightarrow 2^{n_1} = k\cdot t/c = k2^{n_1}$
+	\item[$\Rightarrow$] $n_2 = n_1 + \log_2(k)$, miglioramento di un fattore \textbf{additivo} $\log_2(k)$
+\end{list}
+Di conseguenza \textbf{un algoritmo efficiente è di gran lunga più importante di un calcolatore più potente}.
 \subsection{Tipologie di problemi}
-\paragraph{Problemi decisionali}
-\paragraph{Problemi di ricerca}
-\paragraph{Problemi di ottimizzazione}
-\paragraph{Classe P} Classe dei problemi risolvibili in \textbf{tempo} polinomiale nella dimensione dell'istanza di input.
-\paragraph{Classe PSPACE} Classe dei problemi risolvibili in \textbf{spazio} polinomiale nella dimensione dell'istanza di input. Molto più grande di P.
+Dato un problema $\Pi$ su un insieme di istanze in ingresso $I$ con un insieme di soluzioni $S$.
+\paragraph{Problemi decisionali} Richiedono una risposta binaria $S=\{0, 1\}$, quindi istanze positive $x\in I\:|\:\Pi(x) = 1$ o negative $x\in I\:|\:\Pi(x) = 0$. Esempio: verifica se un numero è primo, o se un grafo è connesso.\\
+La teoria della complessità computazionale è definita principalmente in termini di problemi di decisione: risposta binaria, quindi il tempo per restituire la risposta è costante, e la complessità di un problema è già presente nella versione decisionale.
+\paragraph{Problemi di ricerca} Data un'istanza $x$, richiede di restituire una soluzione $s$.
+\paragraph{Problemi di ottimizzazione} Data un'istanza $x$, si vuole trovare la \textbf{migliore} soluzione $s$ tra tutte quelle possibili. Esempio: clique di dimensione massima, cammino minimo\ldots
+\subsection{Classi di complessità}
+Dato un problema \textbf{decisionale} $\Pi$ ed un algoritmo $A$, diciamo che \textbf{$A$ risolve $\Pi$} se, data un'istanza di input $x$, $A(x) = 1 \Leftrightarrow \Pi(x) = 1$\\
+$A$ risolve $\Pi$ in \textbf{tempo $t(n)$ e spazio $s(n)$}.
+\paragraph{Classi Time e Space}
+\begin{list}{}{}
+	\item Time($f(n)$): insieme dei \textbf{problemi decisionali che possono essere risolti in tempo O($f(n)$)}
+	\item Space($f(n)$): insieme dei \textbf{problemi decisionali che possono essere risolti in spazio O($f(n)$)}
+\end{list}
+\paragraph{Classe P} Classe dei problemi risolvibili in \textbf{tempo} polinomiale nella dimensione dell'istanza di input.\\
+\textbf{Algoritmo polinomiale} nel tempo: $\exists\:c, n_0 > 0\:\:|\:\:$ il numero di passi elementari è al più $n^c$ per ogni input di dimensione $n > n_0$.
+\paragraph{Classe PSPACE} Classe dei problemi risolvibili in \textbf{spazio} polinomiale nella dimensione dell'istanza di input. Molto più grande di P.\\
+\textbf{Algoritmo polinomiale} nello spazio: $\exists\:c, n_0 > 0\:\:|\:\:$ il numero di celle di memoria è al più $n^c$ per ogni input di dimensione $n > n_0$.
 \paragraph{Classe EXPTIME} Classe dei problemi risolvibili in tempo esponenziale nella dimensione dell'istanza di input.
 $$P\subseteq PSPACE \subseteq EXPTIME$$
-Non è noto se queste inclusioni siano note, ad oggi. L'unico risultato dimostrato finora riguarda P ed EXPTIME.
+Non è noto se queste inclusioni siano note, ad oggi. L'unico risultato dimostrato finora riguarda P ed EXPTIME: esiste un problema che può essere risolto in tempo esponenziale ma per cui il tempo polinomiale non è sufficiente (es: torri di Hanoi).
 \subsection{Certificato}
 Per alcuni problemi, per le istanze accettabili (istanze in cui la risposta del problema decisionale è si), è possibile certificare che quell'istanza è accettabile con un certificato $y$ che può convincerci dell'accettabilità.\\
 Per clique, il certificato è il sottoinsieme di $k$ vertici che forma la clique. Per il cammino hamiltoniano è la permutazione degli $n$ vertici che formano il cammino. Per SAT, sono le assegnazioni che rendono vera la formula. Il certificato ha dimensione polinomiale ($k, n$) e la verifica del certificato è lineare.\\
