@@ -646,4 +646,56 @@ Esiste in tre versioni:
 \end{list}
 \paragraph{Prodotto cartesiano} Un join naturale senza attributi in comune: contiene sempre un numero di ennuple pari al prodotto delle cardinalità degli operandi.
 \paragraph{Theta-join} Il prodotto cartesiano ha senso solo se seguito da una selezione $\sigma_{condizione}(R_1\bowtie R_2)$, che viene abbreviato con $R_1\bowtie_{condizione}R_2$
+\paragraph{Self-join} Non si potrebbe fare una join del tipo Genitore $\bowtie$ Genitore, perché ritornerebbe la stessa tabella Genitore poiché tutti gli attributi coincidono. Torna utile effettuare una ridenominazione del tipo $\rho_{Nonno,Genitore\leftarrow Genitore,Figlio}$(Genitore) per poi effettuare una natural join del risultato con Genitore.
+\subsection{Raggruppamento} Con l'operatore $_{\{A_i\}}\gamma_{\{f_i\}}$(R) si effettura il raggruppamento.
+\begin{list}{}{}
+	\item $A_i$ sono gli \textbf{attributi} di R
+	\item $f_i$ sono le \textbf{espressioni} che usano \textbf{funzioni di aggregazione} (min, max, count, sum\ldots)
+\end{list}
+Il valore del raggruppamento è calcolato come segue:
+\begin{list}{}{}
+	\item si partizionano le ennuple di R mettendo nello stesso gruppo tutte le ennuple con valori uguali degli $A_i$ (si \textbf{raggruppa per $A_i$})
+	\item si \textbf{calcolano le espressioni $f_i$} per ogni gruppo
+	\item per ogni gruppo, si \textbf{restituisce una sola ennupla con attributi i valori} degli $A_i$ e delle espressioni $f_i$
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{raggrup.png}
+\end{center}
+\chapter{Interrogazione di una base di dati}
+\paragraph{SQL} L'interrogazione di una base di dati è uno degli aspetti più importanti del linguaggio SQL. I comandi di interrogazione, o \textbf{query}, permettono di effettuare una ricerca dei dati presenti nel database che soddisfano particolari condizioni richieste dall'utente.
+\begin{lstlisting}
+SELECT	s.Nome, e.Data
+FROM	Studenti s, Esami e
+WHERE	e.Materia = 'BD' AND e.Voto = 30 AND e.Matricola = s.Matricola
+\end{lstlisting}
+\begin{lstlisting}
+SELECT	s.Nome AS Nome, 2020 - s.AnnoNascita AS Eta, 0 AS NumeroEsami
+FROM	Studenti s
+WHERE	NOT EXISTS(SELECT * FROM Esami e WHERE e.Matricola = s.Matricola)
+\end{lstlisting}
+\paragraph{Storia} Definito nel 1973, SQL è oggi il linguaggio universale dei sistemi relazionali. Ci sono vari standard (SQL-84, SQL-89\ldots fino a SQL-1999 ANSI/ISO ad oggetti) ed è composto da DDL, DML e \textbf{query language}.
+\paragraph{Select From Where} SQL è un \textbf{calcolo su multinsiemi}. Il comando base dell'SQL è:
+\begin{lstlisting}
+SELECT [DISTINCT] Attributo{, Attributo}
+FROM Tabella [Ide]{, Tabella [Ide]}
+[WHERE Condizione]
+\end{lstlisting}
+La semantica è \textbf{prodotto}, \textbf{restrizione}, \textbf{proiezione}. Un attributo A di una tabella "R x" si denota come A, R.A oppure x.A
+
+\begin{lstlisting}
+SELECT ListaAttributi
+FROM ListaTabelle
+[WHERE Condizione]
+\end{lstlisting}
+La query considera il \textbf{prodotto cartesiano tra le tabelle in \texttt{ListaTabelle}} (\textbf{join}).\\
+Fra queste, \textbf{seleziona solo le righe che soddisfano la \texttt{Condizione}} (\textbf{selezione}).\\
+Infine, \textbf{valuta le espressioni specificate nella target list \texttt{ListaAttributi}} (\textbf{proiezione}).\\
+La SELECT quindi implementa gli operatori di proiezione, selezione e join dell'algebra relazionale.
+\subsection{SELECT}
+\paragraph{Proiezione} Specifica la target list, cioè corrisponde a scegliere gli attributi della/e tabella/e interessate. Implementa quindi l'operazione di \textbf{proiezione} dell'algebra relazionale.
+\subsection{FROM}
+\paragraph{Tabelle} Ha lo scopo di scegliere quali sono le tabelle del database da cui vogliamo estrarre le nostre informazioni. Nel caso in cui le tabelle elencate siano due, la FROM insieme alla WHERE implementa il theta-join.
+\subsection{WHERE}
+\paragraph{Selezione} Serve a scegliere le righe della tabella che soddisfano una certa condizione. In questo modo la clausola WHERE implementa la \textbf{selezione} dell'algebra relazionale.
+% https://elearning.di.unipi.it/pluginfile.php/30980/mod_resource/content/1/6.SQLInterattivo_Parte_A.pdf, p. 38
 \end{document}
