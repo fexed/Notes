@@ -697,5 +697,129 @@ La SELECT quindi implementa gli operatori di proiezione, selezione e join dell'a
 \paragraph{Tabelle} Ha lo scopo di scegliere quali sono le tabelle del database da cui vogliamo estrarre le nostre informazioni. Nel caso in cui le tabelle elencate siano due, la FROM insieme alla WHERE implementa il theta-join.
 \subsection{WHERE}
 \paragraph{Selezione} Serve a scegliere le righe della tabella che soddisfano una certa condizione. In questo modo la clausola WHERE implementa la \textbf{selezione} dell'algebra relazionale.
-% https://elearning.di.unipi.it/pluginfile.php/30980/mod_resource/content/1/6.SQLInterattivo_Parte_A.pdf, p. 38
+\paragraph{Condizioni} In SQL sono disponibili una serie di condizioni a seconda del tipo di dato da confrontare, oltre ai IS NULL e IS NOT NULL per i dati mancanti.\\
+In particolare, con l'operatore LIKE si possono effettuare ricerche con wildcard: $\%$ per zero o più caratteri, $\_$ per un carattere. Per esempio, \texttt{WHERE Nome LIKE \%a} ricercherà tutti i valori del campo \texttt{Nome} che finiscono per \texttt{a}, oppure \texttt{WHERE Sequenza LIKE \%G\_\_\_G\%} seleziona i valori dove compaiono due \texttt{G} separate da 3 caratteri.\\
+Si possono inserire anche dei simboli escape, ad esempio se vogliamo cercare valori in cui compare \texttt{\%} si può scrivere \texttt{WHERE Sconto LIKE \_5\#\% ESCAPE \#}, così da trovare tutti i valori sconto con 5 nelle unità.
+\section{Ordinamento e aggregazione}
+\paragraph{Ordinamento} Il risultato di una SELECT si può ordinare in base ad un attributo e in maniera crescente o decrescente
+\begin{lstlisting}
+SELECT ListaAttributi
+FROM ListaTabelle
+WHERE Condizione
+ORDER BY Attributo [ASC/DESC]
+\end{lstlisting}
+Le righe verranno ordinate in base al campo Attributo in maniera crescente (ASC) o descrescente (DESC). L'ordinamento è quello più naturale sul dominio dell'attributo (numerico, alfabetico\ldots).\\
+Si possono anche fare ordinamenti multipli, ad esempio se si vuole ordinare i dati in base ad una certa chiave (attributo) e poi ordinare i dati che coincidono su quella chiave in base ad un'altra chiave (altro attributo).
+\begin{lstlisting}
+...
+ORDER BY Attributo1 [ASC/DESC]{, Attributon [ASC/DESC]}
+\end{lstlisting}
+Verranno ordinati prima per Attributo1, le righe coincidenti su Attributo1 verranno ordinate per Attributo2\ldots.
+\paragraph{Aggregazione} Nella target list possiamo avere anche espressioni che calcolano valori a partire da insiemi di ennuple e che restituiscono una tabella molto particolare, costituita da un \textbf{singolo valore scalare}.\\
+Sono 5 gli \textbf{operatori aggregati} previsti da SQL2:
+\begin{list}{}{}
+	\item \texttt{COUNT()}, conteggio: restituisce il numero di righe della tabella o il numero di valori di un particolare attributo. Con \texttt{(*)} conta tutte le righe selezionate, con \texttt{ALL} conta tutti i valori non nulli delle righe selezionate, \texttt{DISTINCT} conta tutti i valori non nulli distinti delle righe selezionate. Di default è \texttt{ALL}.
+	\item \texttt{MIN()}, minimo. L'argomento può essere una funziona aritmetica.
+	\item \texttt{MAX()}, massimo. L'argomento può essere una funziona aritmetica.
+	\item \texttt{SUM()}, somma. Le specifiche \texttt{ALL} e \texttt{DISTINCT} permettono di sommare tutti i valori non nulli o tutti i valori distinti. Anche qua di default è \texttt{ALL}.
+	\item \texttt{AVG()}, media (dei valori non nulli). \texttt{ALL} e \texttt{DISTINCT} per calcolare la media fra tutti i valori o fra quelli distinti, default \texttt{ALL}.
+\end{list}
+Non è possibile utilizzare, in una stessa SELECT, una proiezione su alcuni attributi della tabella e operatori aggregati sulla stessa tabella. Si possono, invece, fare operazioni aggregate su colonne diverse della stessa tabella.
+\paragraph{Raggruppamento} A volta può essere richiesto di calcolare operatori aggregati non per l'intera tabella ma raggruppando le righe i cui valori coincidono su un certo attributo: possiamo scrivere \texttt{GROUP BY Attributo}.\\
+Con \texttt{HAVING} si possono applicare condizioni sul valore aggregato per ogni gruppo.\\
+Attributo $\rightarrow$ \texttt{WHERE}\\
+Operatore aggregato $\rightarrow$ \texttt{HAVING}
+\section{Semantica}
+La query è innanzitutto eseguita senza operatori aggregati e senza \texttt{GROUP BY}.\\
+Quindi il risultato è diviso in sottoinsiemi aventi gli stessi valori per gli attributi elencati in \texttt{GROUP BY}.\\
+Quindi l'operatore aggregato è calcolato su ogni sottoinsieme.
+\paragraph{Osservazione} Quando si effettua un \textbf{raggruppamento}, questo \textbf{deve essere effettuato su tutti gli elementi della target list che non sono operatori aggregati} (ossia sull'insieme degli attributi puri).\\
+Questo perché \textbf{nel risultato deve apparire una riga per ogni gruppo}.
+\paragraph{Esempio di query} \texttt{HAVING} può essere usato solo in presenza di un \texttt{GROUP BY} e dopo di esso.
+\begin{lstlisting}
+SELECT		Citta, Avg(Voto)
+FROM		EsamiBD
+WHERE		Eta < 21
+GROUP BY	Citta
+HAVING		AVG(Voto) > 26
+\end{lstlisting}
+\begin{center}
+	\includegraphics[scale=0.5]{sqlalg.png}
+\end{center}
+\section{Subquery}
+Una \textbf{subquery} un comando SELECT racchiuso tra parantesi tonde ed inserito all'interno di un altro comando SQL (ad esempio un'altra query).\\
+Possono essere usate nei seguenti casi:
+\begin{list}{}{}
+	\item in espressioni di confronto
+	\item in espressioni di confronto quantificato
+	\item in espressioni IN
+	\item in espressioni EXISTS
+	\item nel calcolo di espressioni
+\end{list}
+\paragraph{Tipologie} Ci sono tre tipologie di subquery:
+\begin{list}{}{}
+	\item \textbf{Subquery Scalare}: comando SELECT che restituisce \textbf{un solo valore}\\
+	Es: \texttt{SELECT MAX(Cilindrata) FROM Veicoli}
+	\item \textbf{Subquery di Colonna}: comando SELECT che restituisce \textbf{una colonna}\\
+	Es: \texttt{SELECT CodCateogira FROM Veicoli}
+	\item \textbf{Subquery di Tabella}: comando SELECT che restituisce \textbf{una tabella}\\
+	Es: \texttt{SELECT Targa, CodMod, Posti FROM Veicoli}
+\end{list}
+\pagebreak
+\section{Quantificazione}
+Tutte le interrogazioni su di un'associazione multivalore vanno quantificate.
+\begin{center}
+	\includegraphics[scale=0.6]{quantific.png}
+\end{center}
+La query "gli studenti che hanno preso 30" è \textbf{ambigua}.
+\begin{list}{}{}
+	\item Gli studenti che hanno preso \textbf{sempre} 30: \textbf{universale}
+	\item Gli studenti che hanno preso \textbf{almeno un} 30: \textbf{esistenziale}
+	\item Gli studenti che \textbf{non} hanno preso \textbf{qualche} 30: \textbf{universale}
+	\item Gli studenti che \textbf{non} hanno preso \textbf{sempre} 30: \textbf{esistenziale}
+\end{list}
+Universale negata = esistenziale\\
+Esistenziale negata = universale
+\paragraph{ANY, ALL, EXISTS} Le condizioni in SQL permettono il confronto fra un attributo ed il risultato di una subquery che restituisce una colonna od una tabella.
+\begin{list}{}{}
+	\item Operatore \textbf{scalare} (ANY $|$ ALL) \texttt{SELECT\ldots}\\
+	ANY: il predicato è vero se \textbf{almeno uno dei valori restituiti dalla subquery soddisfano la condizione}
+	ALL: il predicato è vero se \textbf{tutti i valori restituiti dalla subquery soddisfano la condizione}
+	\item Quantificatore \textbf{esistenziale} EXISTS \texttt{SELECT\ldots}\\
+	Il predicato è vero se \textbf{la subquery restituisce almeno una tupla}.
+\end{list}
+\section{Unione, Intersezione, Differenza}
+A volte può essere utile poter ottenere un'unica tabella contenente alcuni dei dati contenuti in due tabelle omogenee, ossia con attributi definiti sullo stesso dominio.\\
+La SELECT da sola non permette di fare questo tipo di operazioni su tabelle. Esistono per questo dei costrutti espliciti che utilizzano le parole chiave UNION, INTERSECT, EXCEPT (o MINUS).\\
+Tali operatori lavorano sulle tabelle come se fossero insiemi di righe, dunque i duplicati vengono eliminati anche dalle proiezioni (a meno di non specificare ALL).\\
+Questi operatori vanno in mezzo a due SELECT:
+\begin{lstlisting}
+SELECT...
+(UNION | INTERSECT | EXCEPT) [ALL]
+SELECT...
+\end{lstlisting}
+\paragraph{UNION} Realizza l'operazione di unione definita nell'algebra relazionale. Utilizza come operandi le due tabelle risultanti da comandi SELECT e restituisce una terza tabella che contiene \textbf{tutte le righe della prima e della seconda tabella}.\\
+Nel caso in cui dall'unione e dalla proiezione risultassero delle righe duplicate, UNION ne mantiene una sola copia (a meno di aver specificato ALL dopo UNION).\\
+\textbf{Mantiene i nomi delle colonne del primo operando}. Quindi, se si vuole ridenominare, è bene ridenominare tutte le colonne che vogliamo.
+\paragraph{INTERSECT} Utilizza come operandi due tabelle risultati dai comandi SELECT e restituisce una tabella che contiene \textbf{le righe comuni alle due tabelle iniziali}. Anche qua con ALL mantiene i duplicati, e realizza l'interrsezione dell'algebra relazionale.
+\paragraph{EXCEPT} Utilizza come operandi due tabelle ottenute mediante due SELECT, ed ha come risultato una nuova tabella che contiene \textbf{tutte le righe della prima che non si trovano nella seconda}. Realizza la differenza dell'algebra relazionale, ed anche qua si possono mantenere i duplicati utilizzando ALL.
+\chapter{Modifica di una base di dati}
+\paragraph{Data Manipulation Language} Introduciamo ora il DML, ossia il linguaggio SQL che server per \textbf{inserire, modificare e cancellare i dati} del database ma anche per \textbf{interrogare il database} per estrarne i dati.\\
+Inizieremo descrivendo le istruzioni che servono a inserire, cancellare e modificare i dati, per poi introdurre le istruzioni per estrarre dal database le informazioni che ci interessano.
+\section{Modifica dei dati}
+\paragraph{INSERT} Per inserire un nuovo dato in una tabella si usa INSERT INTO\ldots VALUES
+\begin{lstlisting}
+INSERT INTO Tabella [(ListaAttributi)] (VALUES (ListaValori) | Subquery)
+\end{lstlisting}
+\paragraph{Update} Si possono aggiornare alcuni dati con UPDATE
+\begin{lstlisting}
+UPDATE Tabella SET Attributo = Expr{, Attributo = Expr} WHERE Condizione
+\end{lstlisting}
+\paragraph{DELETE} Per cancellare righe dalle tabelle si usa la DELETE
+\begin{lstlisting}
+DELETE FROM Tabella [WHERE Condizione]
+\end{lstlisting}
+Per eliminare un elemento bisogna individuare quale, stabilito con la clausola WHERE con la condizione che individua l'elemento (o gli elementi) da eliminare.\\
+Un particolare elemento può essere individuato dal suo valore nella chiave primaria.
+%TODO https://elearning.di.unipi.it/pluginfile.php/31092/mod_resource/content/2/7.SQLDefinizioneDati.pdf
 \end{document}
