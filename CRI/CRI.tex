@@ -270,4 +270,64 @@ Questo non vale per coNP, la classe per cui co$\Pi\in$ NP. Si congettura che sia
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
 \end{center}
+\chapter{Sequenze Casuali}
+\section{Esempi di algoritmi numerici}
+\paragraph{Algoritmo di Euclide per il calcolo dell'MCD fra due interi} Suppongo due interi a b a maggug b a magg 0 b maggug 0\\
+MC(a,b) se b è 0 allora ritorno A altrimenti ritorno MCD(b, a mod b).
+\subparagraph{Valutazione complessità} Istanza di input: a, b. Rappresentati ad esempio in base due, quindi la dimensione $n$ dell'istanza di input I, cioè $n = \:|I|\:=\Theta(\log a + \log b) = \Theta(\log a)$.\\
+Algoritmo ricorsivo, quindi bisogna valutare il numero delle chiamate ricorsive, che dipenderanno dai dati. Istanze in cui si termina subito (Es. a multiplo di b, cioè a mod b = 0). Il numero di chiamate cresce con $\log$ a, perché a mod b rimpiazza a.\\
+Si osserva che a mod b $<$ a$/2$, questo perché a = qb + a mod b e siccome per ipotesi a maggug b allora b maggug 1 e lo è anche q, quindi a maggug b + a mod b magg a mod b + a mod b perché b magg a mod b. Quindi 2(a mod b) min a, quindi a mod b min a/2.\\
+Prima chiamata su a, b. Seconda su b, a mod b.\\
+Terza su (a mod b), (b mod (a mod b)).\\
+Quindi ad ogni chiamata a si riduce almeno della metà, e lo possiamo fare al massimo $\log a$ volte, quindi avrò $O(\log a)$ ricorsioni.\\\\
+Il costo del calcolo del modulo è $O(\log a \cdot \log b) = O(\log^2 a)$\\
+Complessivamente T($n$) = $O(\log^3 a) = O(n^3)$ \textbf{polinomiale nella dimensione dell'istanza $|I|$ (cioè nel numero di cifre), polilogaritmico nel valore dei dati}
+\paragraph{Test di primalità} Versione inefficiente.\\
+Primo(N) per i da 2 minugu rad N i++, if N\% i == 0 return false, altrimenti a fine ciclo restituisco true.\\
+Uso la proprietà che se n non è primo ha almeno un divisore minugu rad n.
+\subparagraph{Valutazione di complessità} $I = N, \:|I|\: = \Theta(N) = n$\\
+Ho $\sqrt{N}$ iterazioni, ciascuna di costo $\Theta(\log^2 N)$\\\\
+$T(n) = O(\sqrt{N} \cdot \log^2 N) = O(2^{\frac{n}{2}}\cdot n^2)$ \textbf{pseudopolinomiale}, cioè \textbf{polinomiale nel valore di N ma esponenziale nella dimensione $|I|\: = n$}.
+\section{Casualità}
+\paragraph{Problema} Data una sequenza binaria, vogliamo capire se è una sequenza casuale o meno. Le sequenze casuali sono importanti primo per la generazioni delle classi, secondo perché in crittografia spesso si ricorrono ad algoritmi randomizzati che usano sequenze casuali per funzionare.
+\paragraph{Significato algoritmico della casualità} Vedendo la teoria di Kolmogorov. Prendiamo due sequenze
+\begin{list}{}{}
+	\item $h$: 1111\ldots 1 lunga $n$
+	\item $h'$: 10110110101011010100101\ldots 0
+\end{list}
+La prima è molto facile da descrivere (\textit{scrivi $n$ "uni"}), descrivere la seconda è molto meno pratico: l'intuizione è che una sequenza casuale non si può descrivere in modo compatto.\\
+Ponendo $n$ = 20, la probabilità di generare $h$ è $P(h = (1/20)^{20}$, $P(h') = (1/20)^{20}$ (1/2 per generare 1, 1/2 per generare 0\ldots).\\
+$A_h$ algoritmo che genera $h$. Formalizzabile semplicemente (\textit{genera $n$ uni})\\
+$|A_h|$ = $\#$ bit di $A_h$ codificato in binario $= \log n +$ const (la parte costante è la generazione, varia solo $n$)
+Con $\log n$ bit ne abbiamo descritti $n$.\\
+$A_{h'} =$ print $h'$, $|A_{h'}| > |n| = |h'|$\\\\
+L'intuizione è \textbf{una sequenza binaria è casuale se non ammette un algoritmo di generazione la cui rappresentazione binaria sia più corta di $h$}. Se posso usare meno bit vuol dire che la sequenza ha una qualche regolarità.
+\paragraph{Sistemi di calcolo} Sono un infinità numerabile $S_1\ldots S_i\ldots$\\
+Prendiamo $S_i$. $p$ programma che genera la sequenza $h$ nel sistema $S_i$, cioè $S_i(p) = h$\\
+\textbf{Def}: \textbf{la complessità di Kolmogorov di $h$ nel sistema $S_i$ è $K_{S_i}(h) = min\{\:|p|\: \:|\: S_i(p) = h\}$}\\\\
+Se la sequenza $h$ non segue alcuna legge semplice di regolarità, allora il più breve programma in grado di generarla dovrà contenerla al suo interno, cioè sarà almeno lungo quanto la sequenza stessa generandola trasferendola in output. Quindi $K_{S_i}(h) = \:|h|\: +$ const$_i$. La costante è la parte di programma che trasferisce in output, dipende da $S_i$ ma non ha $h$.\\\\
+Tra tutti i sistemi di calcolo possibili ne esiste uno \textbf{universale} in grado di simulare tutti gli altri, lo chiamiamo $S_u$ e lo prendiamo in considerazione.\\
+Supponiamo $p\:|\:S_i(p) = h$, allora $S_u(\langle i, p\rangle) = S_i(p) = h$. Ottengo $q = \langle i, p\rangle$ programma che genera $h$ in $S_u$\\\\
+$|q| = |\langle i,p\rangle| = |i| + |p| = \log_2 i + |p|$ quindi la lunghezza di $q$ dipende da $i$ ma non da $h$.\\
+$\forall\:h\:\:\forall\: i\:\:K_{S_u}(h) \leq K_{S_i}(h) + C_i$\\
+L'uguale vale per le sequenze generate per simulazione di $S_i$ non essendoci per $S_u$ algoritmi più "brevi". Il minore vale per sequenze generabili con programmi più corti (ad esempio per simulazione su un altro sistema $S_j\neq S_i$).
+\paragraph{Def} La complessita di Kolmogorov di una sequenza $h$ è $K(h) = K_{S_u}(h)$
+\subsection{Sequenze casuali}
+\paragraph{Sequenza casuale} Una sequenza $h$ è casuale se $K(h) \geq |h| - \lceil\log_2 h\rceil$\\
+Non entra in gioco come genero la sequenza, la \textbf{casualità è una proprietà della sequenza}.
+\paragraph{Conteggio delle sequenze} $\forall\: n, \exists$ sequenze casuali (secondo Kolmogorov) di lunghezza $n$\\
+\textbf{Dim}: $n$, $S = 2^n$ \# sequenze binarie di lunghezza $n$\\
+T = \# sequenze di lunghezza $n$ NON casuali. L'obiettivo è dimostrare che T $<$ S.\\
+\ldots %TODO dimostrazione
+$\Rightarrow T\leq N < S \Rightarrow T < S$\\
+Quindi non solo esistono ma sono anche la \textbf{maggioranza}, essendo enormemente più numerose di quelle non casuali. Lo vediamo studiando il rapporto $$\frac{T}{S}\leq \frac{N}{S} = \frac{2^{n - \lceil\log n\rceil}}{2^n} - \frac{1}{2^n} < \frac{1}{2^{\lceil\log n\rceil}}\:\:\:\lim_{n\to +\infty} \frac{T}{S} = 0$$
+\paragraph{Stabilire la casualità} Data una sequenza arbitraria di lunghezza $n$, stabilire se è casuale secondo Kolmogorov è un problema \textbf{indecidibile}.\\
+\textbf{Dim}: per assurdo suppongo esista un algoritmo Random $|$ Random($h$) = 1 se $h$ è casuale, 0 altrimenti. Possiamo costruire l'algoritmo Paradosso che enumera tutte le possibili sequenze binarie in ordine crescente di lunghezza.\\
+Paradosso: for binary h da 1 $\to$ infty do (if $|h| - \lceil\log |h|\rceil > |P|\:\&\&$ Random($h$) == 1 return $h$)\\
+$P$ è una seq binaria che rappresenta la codifica del programma Paradosso e Random. Rappresenta il programma complessivo Paradosso + Random, quindi $|P| = |$Paradosso$| + |$Random$|$, costante che non dipende da $h$, perché la sequenza $h$ non compare in $P$ ma solo come nome di variabile. Il valore rimane registrato fuori dal programma.\\
+Paradosso quindi restituisce come risultato la prima sequenza casuale $|\:|h| - \lceil\log_2 |h|\rceil > |P|$\\
+Quindi $\exists$ sequenze casuali di qualsiasi lunghezza, quindi certamente ne esisterà una che soddisfa entrambe le condizioni dell'if, che viene generata.\\
+Ma la prima condizione mi dice che il programma rappresentato da $P$ è breve e genera $h$, quindi $h$ non è casuale perché prodotta con un programma breve.\\
+Quindi $K(h) \leq |P|$, cioè $P$ genera $h$) ma $|P| < |h| l \lceil\log_2|h|\rceil$ quindi $h$ non è casuale.\\
+Ma la seconda condizione dice $h$ casuale, giungendo ad un \textbf{paradosso} dato dall'assumere l'esistenza di Random.
 \end{document}
