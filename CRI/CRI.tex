@@ -330,4 +330,54 @@ Quindi $\exists$ sequenze casuali di qualsiasi lunghezza, quindi certamente ne e
 Ma la prima condizione mi dice che il programma rappresentato da $P$ è breve e genera $h$, quindi $h$ non è casuale perché prodotta con un programma breve.\\
 Quindi $K(h) \leq |P|$, cioè $P$ genera $h$) ma $|P| < |h| l \lceil\log_2|h|\rceil$ quindi $h$ non è casuale.\\
 Ma la seconda condizione dice $h$ casuale, giungendo ad un \textbf{paradosso} dato dall'assumere l'esistenza di Random.
+\subsection{Sorgente binaria casuale}
+\paragraph{Generatore} Genera una sequenza di bit con queste proprietà:
+\begin{enumerate}
+	\item P(0) = P(1) = 1/2, cioè genera 1 o 0 a pari probabilità.\\
+	Si può indebolire richiedendo P(0) $>$ 0, P(1) $>$ 0 immutabili nel tempo della generazione.
+	\item La generazione di un bit è indipendente dalla generazione degli altri.\\
+	$\Rightarrow$ non si può prevedere il valore di un bit osservando quelli già generati.
+\end{enumerate}
+Perché possiamo indebolire la prima proprietà? Supponiamo di essere in un caso in cui P(0) $>$ P(1), allora è \textbf{sempre possibile bilanciare la sequenza}.\\
+Supponiamo di generare 001100111000010100 e si \textbf{dividono a coppie} 00 11 00 11 10 00 01 01 00 e si scartano le coppie uguali. Si associano le coppie miste, ad esempio 01 $\rightarrow$ 0 e 10 $\rightarrow$ 1. Si presentano in modo equiprobabile, quindi la sequenza si ribilancia ottenendo 100 (caso poco significativo perché sequenza corta).
+\paragraph{Esistono queste sorgenti?} Non si sa. Nella pratica non è possibile garantire la perfetta casualità o l'indipendenza. Quindi sfrutteremo le casualità presenti in processi fisici o processi software.
+\subsection{Generatore di sequenze brevi}
+\paragraph{Fenomeni casuali presenti in natura} Ad esempio il rumore su un microfono o il tempo di decadimento di alcune particelle, sfruttabili come sorgenti di casualità.\\
+Il problema di questo approccio è che bisogna non avere accesso fisico ai dispositivi usati (es: microfono manomesso), oltre alla difficoltà pratica di usare certe sorgenti.
+\paragraph{Processi software} Come la temperatura, la posizione della testina del disco fisico\ldots
+\paragraph{Pseudocasuale} Si genera la casualità \textbf{mediante un algoritmo}, \textbf{cercandola all'interno di processi matematici}. \textbf{Generatore di numeri pseudo-casuali}: ad esempio \texttt{rand()} del C.\\
+Perché pseudocasuali? Perché sono algoritmi deterministici e brevi, quindi non risultano casuali secondo Kolmogorov.
+\subparagraph{Come funzionano?} Partono da un \textit{seed} (seme), breve sequenza che viene amplificata per creare una sequenza più lunga. Quindi un generatore è un \textbf{amplificatore di casualità}.
+\begin{list}{}{}
+	\item Input: seme (sequenza o valore breve)
+	\item Output: flusso di dati %TODO
+	\item \# Sequenze diverse: $2^s << 2^n$ \# sequenze possibili
+\end{list}
+\paragraph{Generatore lineare} $x_i = (a\cdot x_{i-1} + b)$ mod $n$ con $a,b,n$ interi positivi.\\
+Il seme è un valore intero iniziale casuale $x_0$, quindi quando $x_i$ = $x_0$ la sequenza si ripete.\\
+Dobbiamo avere MCD$(b,n)=1$, $(a-1)$ divisibile per ogni fattore primo di $n$ e $(a-1)$ dev'essere un multiplo di 4 se anche $n$ lo è.\\
+Servono per garantire che il generatore produca una permutazione degli interi da 0 a $m-1$
+\section{Test statistici}
+Per valutare le sequenze prodotte da un generatore pseudocasuale.\\
+Si valuta se la sequenza presenta le proprietà tipiche di una sequenza casuale:
+\begin{list}{}{}
+	\item \textbf{test di frequenza}
+	\item \textbf{poker test}: se sottosequenze siano distribuite in modo equo
+	\item \textbf{test di autocorrelazione}: verifica che non ci siano regolarità nella sequenza ottenuta
+	\item \textbf{run test}: verifica se sottosequenze massimali di elementi tutti ripetuti abbiano una distribuzione esponenziale negativa, cioè più sono lunghe meno sono frequenti.
+\end{list}
+Per le applicazioni crittografiche si richiede anche il \textbf{test di prossimo bit}, molto severo che implica tutti gli altri 4 test statistici. Intuitivamente, verifica che sia impossibile prevedere gli elementi della sequenza prima di generarli.
+\paragraph{Test di prossimo bit} Un generatore binario \textbf{supera} il test di prossimo bit \textbf{se non esiste un algoritmo polinomiale in grado di prevedere l'$i+1$-esimo bit della sequenza a partire dalla conoscenza degli $i$ bit precedentemente generati con probabilità maggiore di 1/2}.\\
+Quindi se si hanno a disposizione risorse polinomiale non si può prevedere il prossimo bit. I generatori che superano questo test sono detti \textbf{generatori crittograficamente sicuri}.
+\paragraph{Generatore polinomiale} Non è crittograficamente sicuro. %TODO
+\section{Generatori crittograficamente sicuri}
+\paragraph{Come costruire generatori crittograficamente sicuri}
+Si ricorre alle \textbf{funzioni one-way}: funzioni facili da calcolare ma difficili da invertire, cioè \textbf{computabili in tempo polinomiale ($x\mapsto f(x)$)}, ma \textbf{computazionalmente difficile invertire la funzione ($y\mapsto x=f^{-1}(y)$)}. Come costruire queste funzioni?
+\paragraph{Idea} Con $f$ one-way, scelgo il seme $x_0$. Genero $S$: $x$ $f(x)$ $f(x_1)=f(f(x))$ \ldots $x_i = f(f(\ldots(x_{i-1})\ldots))$\\
+Cioè si itera l'applicazione della funzione one-way un numero arbitrario di volte. L'\textbf{idea è restituire la sequenza al contrario}, perché se conosco $x_{i+1}$ non riesco a calcolare facilmente $x_i$.\\
+Ogni elemento della sequenza S si può calcolare efficientemente con l'elemento precedente, ma non dai valori successivi perché $f$ è one-way. Si calcola S per un certo numero di passi senza svelare il risultato e si comunicano gli elementi in ordine inverso. Ogni elemento non è prevedibile in tempo polinomiale pur conoscendo quelli comunicati.
+\paragraph{Generatori binari crittograficamente sicuri} Si usano i \textbf{"predicati \textit{hard core}" delle funzioni one-way}.\\
+Un predicato hard core di una funzione one-way $f(x)$ è $b(x)$ se $b(x)$ è facile da calcolare quando $x$ è noto, ma è difficile da prevedere se si conosce $f(x)$.\\\\
+Un esempio di funzione one-way è l'elevamento a quadrato in modulo ($f(x) = x^2$ mod $n$ con $n$ non primo). Un predicato hard core è "$b(x) = x$ è dispari"
+\paragraph{Generatore BBS} %TODO
 \end{document}
