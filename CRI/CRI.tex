@@ -272,45 +272,54 @@ Questo non vale per coNP, la classe per cui co$\Pi\in$ NP. Si congettura che sia
 \end{center}
 \chapter{Sequenze Casuali}
 \section{Esempi di algoritmi numerici}
-\paragraph{Algoritmo di Euclide per il calcolo dell'MCD fra due interi} Suppongo due interi a b a maggug b a magg 0 b maggug 0\\
-MC(a,b) se b è 0 allora ritorno A altrimenti ritorno MCD(b, a mod b).
-\subparagraph{Valutazione complessità} Istanza di input: a, b. Rappresentati ad esempio in base due, quindi la dimensione $n$ dell'istanza di input I, cioè $n = \:|I|\:=\Theta(\log a + \log b) = \Theta(\log a)$.\\
-Algoritmo ricorsivo, quindi bisogna valutare il numero delle chiamate ricorsive, che dipenderanno dai dati. Istanze in cui si termina subito (Es. a multiplo di b, cioè a mod b = 0). Il numero di chiamate cresce con $\log$ a, perché a mod b rimpiazza a.\\
-Si osserva che a mod b $<$ a$/2$, questo perché a = qb + a mod b e siccome per ipotesi a maggug b allora b maggug 1 e lo è anche q, quindi a maggug b + a mod b magg a mod b + a mod b perché b magg a mod b. Quindi 2(a mod b) min a, quindi a mod b min a/2.\\
-Prima chiamata su a, b. Seconda su b, a mod b.\\
-Terza su (a mod b), (b mod (a mod b)).\\
-Quindi ad ogni chiamata a si riduce almeno della metà, e lo possiamo fare al massimo $\log a$ volte, quindi avrò $O(\log a)$ ricorsioni.\\\\
+\paragraph{Algoritmo di Euclide} Algoritmo per il calcolo dell'MCD fra due interi.\\
+Suppongo due interi $a$, $b$ con $a \geq b$, $a > 0$ e  $b \geq 0$\\
+MCD$(a,b) = \left\{ \begin{array}{l l}
+a & b = 0\\
+MCD(a, a\: mod\: b) & else
+\end{array}\right.$
+\subparagraph{Valutazione complessità} Data I istanza di input composta da $a$, $b$, vengono rappresentati ad esempio in base due. Quindi la dimensione $n$ dell'istanza di input I $n = \:|I|\:=\Theta(\log a + \log b) = \Theta(\log a)$.\\
+L'algoritmo è ricorsivo, quindi bisogna valutare il numero delle chiamate ricorsive, che dipenderanno dai dati. Ci saranno istanze in cui si termina subito (ad esempio se $a$ multiplo di $b$, cioè $a$ mod $b = 0$). In generale, \textbf{il numero di chiamate cresce con $\log a$}, perché $a$ mod $b$ rimpiazza $a$.\\\\
+Si osserva che $a$ mod $b < \frac{a}{2}$\\
+Questo perché $a = qb + (a$ mod $b)$ e siccome per ipotesi $a \geq b \Rightarrow b \geq 1$ e lo è anche $q \Rightarrow a \geq b + (a$ mod $b) > (a$ mod $b) + (a$ mod $b)$ perché $b > (a$ mod $b)$.\\ $\Rightarrow 2(a$ mod $b) < a \Rightarrow (a$ mod $b) < \frac{a}{2}$.\\
+Prima chiamata su $a, b$.\\
+Seconda su $b, (a$ mod $b)$.\\
+Terza su $(a$ mod $b), (b$ mod $(a$ mod $b))$.\\
+Quindi ad ogni chiamata a si riduce almeno della metà, e lo possiamo fare al massimo $\log a$ volte\\
+\textbf{Quindi avrò $O(\log a)$ ricorsioni}.\\\\
 Il costo del calcolo del modulo è $O(\log a \cdot \log b) = O(\log^2 a)$\\
-Complessivamente T($n$) = $O(\log^3 a) = O(n^3)$ \textbf{polinomiale nella dimensione dell'istanza $|I|$ (cioè nel numero di cifre), polilogaritmico nel valore dei dati}
+Complessivamente T($n$) = $O(\log^3 a) = O(n^3)$ \textbf{polinomiale nella dimensione dell'istanza $|I|$} (cioè nel numero di cifre), \textbf{polilogaritmico nel valore dei dati}
 \paragraph{Test di primalità} Versione inefficiente.\\
-Primo(N) per i da 2 minugu rad N i++, if N\% i == 0 return false, altrimenti a fine ciclo restituisco true.\\
-Uso la proprietà che se n non è primo ha almeno un divisore minugu rad n.
+Primo(N): \texttt{for} ($i$ = 2, $i\leq \sqrt{N}$, $i++$)\\
+\texttt{if} $N\% i == 0$ \texttt{return false}\\
+\texttt{else} \textit{a fine ciclo} \texttt{return true}.\\
+Uso la proprietà che se $N$ non è primo allora ha almeno un divisore $\leq \sqrt{N}$.
 \subparagraph{Valutazione di complessità} $I = N, \:|I|\: = \Theta(N) = n$\\
 Ho $\sqrt{N}$ iterazioni, ciascuna di costo $\Theta(\log^2 N)$\\\\
 $T(n) = O(\sqrt{N} \cdot \log^2 N) = O(2^{\frac{n}{2}}\cdot n^2)$ \textbf{pseudopolinomiale}, cioè \textbf{polinomiale nel valore di N ma esponenziale nella dimensione $|I|\: = n$}.
+\pagebreak
 \section{Casualità}
-\paragraph{Problema} Data una sequenza binaria, vogliamo capire se è una sequenza casuale o meno. Le sequenze casuali sono importanti primo per la generazioni delle classi, secondo perché in crittografia spesso si ricorrono ad algoritmi randomizzati che usano sequenze casuali per funzionare.
+\paragraph{Problema} Data una sequenza binaria, vogliamo \textbf{capire se è una sequenza casuale} o meno. Le sequenze casuali sono importanti sia per la generazioni delle classi, sia perché \textbf{in crittografia spesso si ricorrono ad algoritmi randomizzati che usano sequenze casuali per funzionare}.
 \paragraph{Significato algoritmico della casualità} Vedendo la teoria di Kolmogorov. Prendiamo due sequenze
 \begin{list}{}{}
 	\item $h$: 1111\ldots 1 lunga $n$
 	\item $h'$: 10110110101011010100101\ldots 0
 \end{list}
-La prima è molto facile da descrivere (\textit{scrivi $n$ "uni"}), descrivere la seconda è molto meno pratico: l'intuizione è che una sequenza casuale non si può descrivere in modo compatto.\\
+\textbf{La prima è molto facile da descrivere} (\textit{scrivi $n$ "uni"}), mentre \textbf{descrivere la seconda è molto meno pratico}: l'intuizione è che \textbf{una sequenza casuale non si può descrivere in modo compatto}.\\
 Ponendo $n$ = 20, la probabilità di generare $h$ è $P(h = (1/20)^{20}$, $P(h') = (1/20)^{20}$ (1/2 per generare 1, 1/2 per generare 0\ldots).\\
 $A_h$ algoritmo che genera $h$. Formalizzabile semplicemente (\textit{genera $n$ uni})\\
-$|A_h|$ = $\#$ bit di $A_h$ codificato in binario $= \log n +$ const (la parte costante è la generazione, varia solo $n$)
-Con $\log n$ bit ne abbiamo descritti $n$.\\
-$A_{h'} =$ print $h'$, $|A_{h'}| > |n| = |h'|$\\\\
+$|A_h|$ = $\#$ bit di $A_h$ codificato in binario $= \log n +$ const (la parte costante è la generazione e l'output, varia solo $n$) $\Rightarrow$ con $\log n$ bit ne abbiamo descritti $n$.\\
+$A_{h'} =$ \texttt{print} $h'$, $|A_{h'}| > |n| = |h'|$\\\\
 L'intuizione è \textbf{una sequenza binaria è casuale se non ammette un algoritmo di generazione la cui rappresentazione binaria sia più corta di $h$}. Se posso usare meno bit vuol dire che la sequenza ha una qualche regolarità.
 \paragraph{Sistemi di calcolo} Sono un infinità numerabile $S_1\ldots S_i\ldots$\\
-Prendiamo $S_i$. $p$ programma che genera la sequenza $h$ nel sistema $S_i$, cioè $S_i(p) = h$\\
-\textbf{Def}: \textbf{la complessità di Kolmogorov di $h$ nel sistema $S_i$ è $K_{S_i}(h) = min\{\:|p|\: \:|\: S_i(p) = h\}$}\\\\
-Se la sequenza $h$ non segue alcuna legge semplice di regolarità, allora il più breve programma in grado di generarla dovrà contenerla al suo interno, cioè sarà almeno lungo quanto la sequenza stessa generandola trasferendola in output. Quindi $K_{S_i}(h) = \:|h|\: +$ const$_i$. La costante è la parte di programma che trasferisce in output, dipende da $S_i$ ma non ha $h$.\\\\
-Tra tutti i sistemi di calcolo possibili ne esiste uno \textbf{universale} in grado di simulare tutti gli altri, lo chiamiamo $S_u$ e lo prendiamo in considerazione.\\
+Prendiamo $S_i$, $p$ programma che genera la sequenza $h$ nel sistema $S_i$, cioè $S_i(p) = h$\\
+\textbf{Def}: \textbf{la complessità di Kolmogorov di $h$ nel sistema $S_i$ è $K_{S_i}(h) = min\{\:|p|\: \:|\: S_i(p) = h\}$} cioè la minima lunghezza del programma $p$ che in $S_i$ genera $h$ stessa.\\\\
+Se la sequenza $h$ non segue alcuna legge semplice di regolarità, allora \textbf{il più breve programma in grado di generarla dovrà contenerla al suo interno}, cioè sarà almeno lungo quanto la sequenza stessa e la genererà trasferendola in output. Quindi $K_{S_i}(h) = \:|h|\: +$ \texttt{const}$_i$. La costante è la parte di programma che trasferisce in output, dipende da $S_i$ ma non ha $h$.
+\paragraph{Sistema di calcolo universale} Tra tutti i sistemi di calcolo possibili ne esiste uno \textbf{universale in grado di simulare tutti gli altri}. Lo chiamiamo $S_u$ e lo prendiamo in considerazione.\\
 Supponiamo $p\:|\:S_i(p) = h$, allora $S_u(\langle i, p\rangle) = S_i(p) = h$. Ottengo $q = \langle i, p\rangle$ programma che genera $h$ in $S_u$\\\\
 $|q| = |\langle i,p\rangle| = |i| + |p| = \log_2 i + |p|$ quindi la lunghezza di $q$ dipende da $i$ ma non da $h$.\\
 $\forall\:h\:\:\forall\: i\:\:K_{S_u}(h) \leq K_{S_i}(h) + C_i$\\
-L'uguale vale per le sequenze generate per simulazione di $S_i$ non essendoci per $S_u$ algoritmi più "brevi". Il minore vale per sequenze generabili con programmi più corti (ad esempio per simulazione su un altro sistema $S_j\neq S_i$).
+L'uguale vale per le sequenze generate per simulazione di $S_i$ non essendoci per $S_u$ algoritmi più "brevi".\\Il minore vale per sequenze generabili con programmi più corti (ad esempio per simulazione su un altro sistema $S_j\neq S_i$).
 \paragraph{Def} La complessita di Kolmogorov di una sequenza $h$ è $K(h) = K_{S_u}(h)$
 \subsection{Sequenze casuali}
 \paragraph{Sequenza casuale} Una sequenza $h$ è casuale se $K(h) \geq |h| - \lceil\log_2 h\rceil$\\
@@ -318,15 +327,21 @@ Non entra in gioco come genero la sequenza, la \textbf{casualità è una proprie
 \paragraph{Conteggio delle sequenze} $\forall\: n, \exists$ sequenze casuali (secondo Kolmogorov) di lunghezza $n$\\
 \textbf{Dim}: $n$, $S = 2^n$ \# sequenze binarie di lunghezza $n$\\
 T = \# sequenze di lunghezza $n$ NON casuali. L'obiettivo è dimostrare che T $<$ S.\\
-\ldots %TODO dimostrazione
+Pongo $N$ = \# sequenze binarie di lunghezza $< n - \lceil \log_2 n\rceil = \sum_{i=0}^{n-\lceil \log n\rceil - 1} 2^i = s^{n-\lceil \log n\rceil} - 1$\\
+Tra queste $N$ sequenze ci sono anche i programmi che generano le T sequenze non casuali di lunghezza $n$.\\
 $\Rightarrow T\leq N < S \Rightarrow T < S$\\
 Quindi non solo esistono ma sono anche la \textbf{maggioranza}, essendo enormemente più numerose di quelle non casuali. Lo vediamo studiando il rapporto $$\frac{T}{S}\leq \frac{N}{S} = \frac{2^{n - \lceil\log n\rceil}}{2^n} - \frac{1}{2^n} < \frac{1}{2^{\lceil\log n\rceil}}\:\:\:\lim_{n\to +\infty} \frac{T}{S} = 0$$
 \paragraph{Stabilire la casualità} Data una sequenza arbitraria di lunghezza $n$, stabilire se è casuale secondo Kolmogorov è un problema \textbf{indecidibile}.\\
-\textbf{Dim}: per assurdo suppongo esista un algoritmo Random $|$ Random($h$) = 1 se $h$ è casuale, 0 altrimenti. Possiamo costruire l'algoritmo Paradosso che enumera tutte le possibili sequenze binarie in ordine crescente di lunghezza.\\
-Paradosso: for binary h da 1 $\to$ infty do (if $|h| - \lceil\log |h|\rceil > |P|\:\&\&$ Random($h$) == 1 return $h$)\\
-$P$ è una seq binaria che rappresenta la codifica del programma Paradosso e Random. Rappresenta il programma complessivo Paradosso + Random, quindi $|P| = |$Paradosso$| + |$Random$|$, costante che non dipende da $h$, perché la sequenza $h$ non compare in $P$ ma solo come nome di variabile. Il valore rimane registrato fuori dal programma.\\
-Paradosso quindi restituisce come risultato la prima sequenza casuale $|\:|h| - \lceil\log_2 |h|\rceil > |P|$\\
-Quindi $\exists$ sequenze casuali di qualsiasi lunghezza, quindi certamente ne esisterà una che soddisfa entrambe le condizioni dell'if, che viene generata.\\
+\textbf{Dim}: per assurdo suppongo esista un algoritmo Random $|$ Random($h$) = $\left\{\begin{array}{l l}
+1 & h\:casuale\\
+0 & altrimenti
+\end{array}\right.$ \\
+Possiamo costruire l'algoritmo Paradosso che enumera tutte le possibili sequenze binarie in ordine crescente di lunghezza.\\\\
+Paradosso:\\\texttt{for} (binary h = 1 $\to$ infty) \texttt{do}\\
+\texttt{if} $(|h| - \lceil\log |h|\rceil > |P|\:\&\&$ Random($h$) == 1) \texttt{return} $h$\\\\
+$P$ è una sequenza binaria che rappresenta la codifica del programma complessivo Paradosso + Random, quindi $|P| = |$Paradosso$| + |$Random$|$, costante che non dipende da $h$, perché la sequenza $h$ non compare in $P$ ma solo come nome di variabile. Il valore rimane registrato fuori dal programma.\\
+\textbf{Paradosso quindi restituisce come risultato la prima sequenza casuale} $|\:|h| - \lceil\log_2 |h|\rceil > |P|$\\
+Quindi se $\exists$ sequenze casuali di qualsiasi lunghezza, quindi certamente ne esisterà una che soddisfa entrambe le condizioni dell'\texttt{if}, che viene generata.\\
 Ma la prima condizione mi dice che il programma rappresentato da $P$ è breve e genera $h$, quindi $h$ non è casuale perché prodotta con un programma breve.\\
 Quindi $K(h) \leq |P|$, cioè $P$ genera $h$) ma $|P| < |h| l \lceil\log_2|h|\rceil$ quindi $h$ non è casuale.\\
 Ma la seconda condizione dice $h$ casuale, giungendo ad un \textbf{paradosso} dato dall'assumere l'esistenza di Random.
@@ -341,7 +356,7 @@ Ma la seconda condizione dice $h$ casuale, giungendo ad un \textbf{paradosso} da
 Perché possiamo indebolire la prima proprietà? Supponiamo di essere in un caso in cui P(0) $>$ P(1), allora è \textbf{sempre possibile bilanciare la sequenza}.\\
 Supponiamo di generare 001100111000010100 e si \textbf{dividono a coppie} 00 11 00 11 10 00 01 01 00 e si scartano le coppie uguali. Si associano le coppie miste, ad esempio 01 $\rightarrow$ 0 e 10 $\rightarrow$ 1. Si presentano in modo equiprobabile, quindi la sequenza si ribilancia ottenendo 100 (caso poco significativo perché sequenza corta).
 \paragraph{Esistono queste sorgenti?} Non si sa. Nella pratica non è possibile garantire la perfetta casualità o l'indipendenza. Quindi sfrutteremo le casualità presenti in processi fisici o processi software.
-\subsection{Generatore di sequenze brevi}
+\subsubsection{Generatore di sequenze brevi}
 \paragraph{Fenomeni casuali presenti in natura} Ad esempio il rumore su un microfono o il tempo di decadimento di alcune particelle, sfruttabili come sorgenti di casualità.\\
 Il problema di questo approccio è che bisogna non avere accesso fisico ai dispositivi usati (es: microfono manomesso), oltre alla difficoltà pratica di usare certe sorgenti.
 \paragraph{Processi software} Come la temperatura, la posizione della testina del disco fisico\ldots
@@ -350,8 +365,10 @@ Perché pseudocasuali? Perché sono algoritmi deterministici e brevi, quindi non
 \subparagraph{Come funzionano?} Partono da un \textit{seed} (seme), breve sequenza che viene amplificata per creare una sequenza più lunga. Quindi un generatore è un \textbf{amplificatore di casualità}.
 \begin{list}{}{}
 	\item Input: seme (sequenza o valore breve)
-	\item Output: flusso di dati %TODO
-	\item \# Sequenze diverse: $2^s << 2^n$ \# sequenze possibili
+	\item Output: flusso di bit arbitrariamente lungo e periodico.\\
+	Al suo interno contiene una sottosequenza che si \textbf{ripete}, quindi \textbf{un generatore è tanto migliore tanto più è lungo il suo periodo}
+	\item Avengo $s$ = \# bit nel seme e $n$ lunghezza della sequenza ottenuta dal generatore, con $n >> s$, ho \textbf{una sequenza diversa per ogni seme}, con $2^s$ possibili semi.
+	\\\# sequenze diverse $2^s << 2^n$ \# sequenze possibili
 \end{list}
 \paragraph{Generatore lineare} $x_i = (a\cdot x_{i-1} + b)$ mod $n$ con $a,b,n$ interi positivi.\\
 Il seme è un valore intero iniziale casuale $x_0$, quindi quando $x_i$ = $x_0$ la sequenza si ripete.\\
@@ -369,7 +386,9 @@ Si valuta se la sequenza presenta le proprietà tipiche di una sequenza casuale:
 Per le applicazioni crittografiche si richiede anche il \textbf{test di prossimo bit}, molto severo che implica tutti gli altri 4 test statistici. Intuitivamente, verifica che sia impossibile prevedere gli elementi della sequenza prima di generarli.
 \paragraph{Test di prossimo bit} Un generatore binario \textbf{supera} il test di prossimo bit \textbf{se non esiste un algoritmo polinomiale in grado di prevedere l'$i+1$-esimo bit della sequenza a partire dalla conoscenza degli $i$ bit precedentemente generati con probabilità maggiore di 1/2}.\\
 Quindi se si hanno a disposizione risorse polinomiale non si può prevedere il prossimo bit. I generatori che superano questo test sono detti \textbf{generatori crittograficamente sicuri}.
-\paragraph{Generatore polinomiale} Non è crittograficamente sicuro. %TODO
+\paragraph{Generatore polinomiale} Non è crittograficamente sicuro.\\
+$x_i = (a_1 x_{i-1}^t + a_2 x_{i-1}^{t-1} + \ldots + a_t x_{i-1} + a_{t-1})$ mod $n$\\
+$r_i = \frac{x_i}{n}$
 \section{Generatori crittograficamente sicuri}
 \paragraph{Come costruire generatori crittograficamente sicuri}
 Si ricorre alle \textbf{funzioni one-way}: funzioni facili da calcolare ma difficili da invertire, cioè \textbf{computabili in tempo polinomiale ($x\mapsto f(x)$)}, ma \textbf{computazionalmente difficile invertire la funzione ($y\mapsto x=f^{-1}(y)$)}. Come costruire queste funzioni?
@@ -379,5 +398,24 @@ Ogni elemento della sequenza S si può calcolare efficientemente con l'elemento 
 \paragraph{Generatori binari crittograficamente sicuri} Si usano i \textbf{"predicati \textit{hard core}" delle funzioni one-way}.\\
 Un predicato hard core di una funzione one-way $f(x)$ è $b(x)$ se $b(x)$ è facile da calcolare quando $x$ è noto, ma è difficile da prevedere se si conosce $f(x)$.\\\\
 Un esempio di funzione one-way è l'elevamento a quadrato in modulo ($f(x) = x^2$ mod $n$ con $n$ non primo). Un predicato hard core è "$b(x) = x$ è dispari"
-\paragraph{Generatore BBS} %TODO
+\paragraph{Generatore BBS} Crittograficamente \textbf{sicuro}.\\
+$n = p\cdot q$, con $p$ e $q$ primi \textbf{grandi}.
+\begin{list}{}{}
+	\item $p$ mod 4 = 3
+	\item $q$ mod 4 = 3
+	\item $2\lfloor \frac{p}{4}\rfloor + 1$ e $2\lfloor \frac{q}{4}\rfloor + 1$ \textbf{primi fra loro}
+	\item[$\Rightarrow$] $y$ coprimo con $n$, si calcola $x_0 = y^2$ mod $n$ e \textbf{si usa come seme} per \textbf{calcolare una successione di $m\leq n$ interi}
+	\item $x_i = (x_{i-1})^2$ mod $n$\\
+	$b_i = 1 \Leftrightarrow x_{n-i}$ è dispari
+	\begin{list}{}{}
+		\item $b_1 = 1 \Leftrightarrow x_{n-1}$ dispari
+		\item $b_0 = 1 \Leftrightarrow x_{n}$ dispari
+	\end{list}
+\end{list}
+Quindi $x_0 = b_n$, ottengo una sequenza del tipo
+\begin{list}{}{}
+	\item $x_0 \rightarrow x_1 \rightarrow \ldots \rightarrow x_{n-1} \rightarrow x_n$
+	\item[$\Rightarrow$] $b_n \rightarrow b_{n-1} \rightarrow \ldots \rightarrow b_1 \rightarrow b_0$\\
+	La \textbf{sequenza viene restituita in ordine inverso} $b_0 b_1\ldots$
+\end{list}
 \end{document}
