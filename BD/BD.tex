@@ -963,5 +963,64 @@ Si potrebbe aggiornare direttamente le tabelle collegate, ma \textbf{ha senso ag
 Supponiamo che una vista V1 sia definita in termini di un'altra vista V2. Se V1 è creata con WITH CHECK OPTION, il \textbf{DBMS verifica che la nuova tupla t inserita soddisfi sia la definizione di V1 che quella di V2} (e di tutte le altre eventuali viste da cui V1 dipende), \textbf{indipendentemente dal fatto che V2 sia definita con} WITH CHECK OPTION.\\
 Questo comportamento di default è equivalente a WITH \textbf{CASCADED} CHECK OPTION. Lo si può alterare definendo V1 WITH \textbf{LOCAL} CHECK OPTION, così facendo il DBMS verifica solo che t soddisfi la specifica di V1 e di tutte e sole le viste da cui V1 dipende per cui è stata specificata WITH CHECK OPTION.
 \chapter{Vincoli}
-% https://elearning.di.unipi.it/pluginfile.php/31092/mod_resource/content/2/7.SQLDefinizioneDati.pdf, p. 57
+\section{Vincoli Intrarelazionali}
+\paragraph{Integrità} I \textbf{vincoli di integrità} consentono di \textbf{limitare i valori ammissibili per una determinata colonna della tabella in base a specifici criteri}.\\
+I \textbf{vincoli di integrità intrarelazionali}, ossia che non fanno riferimento ad altre relazioni, sono:
+\begin{list}{}{}
+	\item NOT NULL
+	\item UNIQUE, definisce chiavi\\
+	Può essere espresso in due forme:
+	\begin{list}{}{}
+		\item Nella definizione di un attributo, se forma da solo la chiave.\\
+		Usato nella definizione dell'attributo, UNIQUE indica che non ci possono essere due valori uguali in quella colonna: è una chiave della relazione, ma non una chiave primaria.
+		\item Come elemento separato.\\
+		Può essere riferito anche a insiemi di attributi: ciò significa che non ci devono essere due righe per cui l'insieme dei valori corrispondenti agli attributi specificati siano uguali. In questo caso è dichiarato dopo la specifica delle colonne con UNIQUE (ListaAttributi)
+	\end{list}
+	\item PRIMARY KEY, chiave primaria. Una sola e implica il NOT NULL e l'UNIQUE.\\
+	Questo vincolo è simile a UNIQUE, ma definisce la chiave primaria della relazione ossia \textbf{un attributo che individua univocamente il dato}. Anche qua abbiamo due forme:
+	\begin{list}{}{}
+		\item Nella definizione di un attributo, se forma da solo la chiave.		
+		\item Come elemento separato, nel caso di chiave primaria formata da più attributi.
+	\end{list}
+	\item CHECK, vedremo più avanti
+\end{list}
+\section{Vincoli Interrelazionali}
+\paragraph{Referenziali} Sono quei vincoli che vengono imposti quando \textbf{gli attributi di due diverse tabelle devono essere messi in relazione}. Questo viene fatto per soddisfare l'esigenza di DB \textbf{non ridondanti} e per \textbf{mantenere i dati sincronizzati}.\\
+Se due tabelle gestiscono gli stessi dati, \textbf{è bene che di essi non ce ne siano più copie} sia per non occupare troppa memoria sia per non modificare due volte lo stesso dato per mantenere la coerenza.\\\\
+REFERENCES e FOREIGN KEY permettono di definire i \textbf{vincoli di integrità referenziale}. Anche qua due sintassi:
+\begin{list}{}{}
+	\item Per singoli attributi, come vincolo di colonna
+	\begin{lstlisting}
+Attributok REFERENCES TabellaEsterna(ColonnaRiferita)
+	\end{lstlisting}
+	\item Per insiemi di attributi, come vincolo di tabella
+	\begin{lstlisting}
+FOREIGN KEY (ColonneInterne) REFERENCES TabellaEsterna(ColonneRiferite)
+	\end{lstlisting}
+\end{list}
+\subsection{Reazione alla violazione}
+Possiamo definire \textbf{politiche di reazione alla violazione}, ossia stabilire l'azione che il DBMS esegue quando si viola il vincolo. Questo può succedere quando si cancella o modifica una riga.\\
+Tali reazioni vengono dichiarate al momento della definizione dei vincoli di foreign key rispettivamente mediante ON DELETE e ON UPDATE
+\begin{lstlisting}
+Attributok REFERENCES TabellaEsterna(ColonnaRiferita)
+	[ON DELETE | ON UPDATE Reazione]
+
+FOREIGN KEY (ColonneInterne) REFERENCES TabellaEsterna(ColonneRiferite)
+	[ON DELETE | ON UPDATE Reazione]
+\end{lstlisting}
+\paragraph{Reazioni alla DELETE}\begin{list}{}{}
+	\item NO ACTION: impedisce il delete (default)
+	\item CASCADE: genera un delete a catena su tutte le righe dipendenti
+	\item SET NULL: assegna NULL ai valori della colonna che ha il vincolo referenziale
+	\item SET DEFAULT: assegna il valore di default ai valori della colonna che ha il vincolo referenziale
+\end{list}
+\paragraph{Reazioni alla UPDATE}\begin{list}{}{}
+	\item NO ACTION: impedisce gli aggiornamenti che violano l'integrità referenziale (default)
+	\item CASCADE: i referenti vengono impostati al nuovo valore del riferito
+	\item SET NULL: i referenti vengono impostati a NULL
+	\item SET DEFAULT: i referenti vengono impostati al valore di default
+\end{list}
+\section{CHECK}
+Un vincolo di \textbf{CHECK} richiede che una colonna o un insieme di colonne \textbf{soddisfi una condizione per ogni riga della tabella}. Il vincolo specificato deve essere un'espressione booleana che è valutata usando i valori della colonna che vengono inseriti o aggiornati nella riga.\\
+Può essere espresso come vincolo di colonna se coinvolge un solo attributo, oppure come vincolo di tabella se coinvolge più attributi.
 \end{document}
