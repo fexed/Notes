@@ -17,7 +17,7 @@
 	keywordstyle=\bfseries,
 	identifierstyle=\ttfamily,
 	commentstyle=\color{mygray},
-	morekeywords={database}	
+	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE},
 }
 
 \begin{document}
@@ -804,9 +804,9 @@ Nel caso in cui dall'unione e dalla proiezione risultassero delle righe duplicat
 \paragraph{INTERSECT} Utilizza come operandi due tabelle risultati dai comandi SELECT e restituisce una tabella che contiene \textbf{le righe comuni alle due tabelle iniziali}. Anche qua con ALL mantiene i duplicati, e realizza l'interrsezione dell'algebra relazionale.
 \paragraph{EXCEPT} Utilizza come operandi due tabelle ottenute mediante due SELECT, ed ha come risultato una nuova tabella che contiene \textbf{tutte le righe della prima che non si trovano nella seconda}. Realizza la differenza dell'algebra relazionale, ed anche qua si possono mantenere i duplicati utilizzando ALL.
 \chapter{Modifica di una base di dati}
-\paragraph{Data Manipulation Language} Introduciamo ora il DML, ossia il linguaggio SQL che server per \textbf{inserire, modificare e cancellare i dati} del database ma anche per \textbf{interrogare il database} per estrarne i dati.\\
-Inizieremo descrivendo le istruzioni che servono a inserire, cancellare e modificare i dati, per poi introdurre le istruzioni per estrarre dal database le informazioni che ci interessano.
 \section{Modifica dei dati}
+\paragraph{Data Manipulation Language} Introduciamo ora il DML, ossia il linguaggio SQL che serve per \textbf{inserire, modificare e cancellare i dati} del database ma anche per \textbf{interrogare il database} per estrarne i dati.\\
+Inizieremo descrivendo le istruzioni che servono a inserire, cancellare e modificare i dati, per poi introdurre le istruzioni per estrarre dal database le informazioni che ci interessano.
 \paragraph{INSERT} Per inserire un nuovo dato in una tabella si usa INSERT INTO\ldots VALUES
 \begin{lstlisting}
 INSERT INTO Tabella [(ListaAttributi)] (VALUES (ListaValori) | Subquery)
@@ -821,5 +821,76 @@ DELETE FROM Tabella [WHERE Condizione]
 \end{lstlisting}
 Per eliminare un elemento bisogna individuare quale, stabilito con la clausola WHERE con la condizione che individua l'elemento (o gli elementi) da eliminare.\\
 Un particolare elemento può essere individuato dal suo valore nella chiave primaria.
-%TODO https://elearning.di.unipi.it/pluginfile.php/31092/mod_resource/content/2/7.SQLDefinizioneDati.pdf
+\section{Definizione degli oggetti}
+\paragraph{Data Definition Language} Introduciamo il DDL, cioè il linguaggio SQL che consiste nell'\textbf{insieme delle istruzioni che permettono la creazione, modifica e cancellazione delle tabelle, dei domini e degli altri oggetti del database} al fine di \textbf{definire il suo schema logico}.
+\paragraph{Definizione delle tabelle} Le tabelle vengono definite in SQL con l'istruzione \textbf{CREATE TABLE}. Questa istruzione \textbf{definisce uno schema di relazione}, ne \textbf{specifica attributi, domini e vincoli} e ne crea un'istanza vuota.
+\begin{lstlisting}
+CREATE TABLE NomeTabella
+	(NomeColonna1 TipoColonna1 ClausolaDefault1 VincoloColonna1,
+	 NomeColonna2 TipoColonna2 ClausolaDefault2 VincoloColonna2,
+	 ...
+	 NomeColonnak TipoColonnak ClausolaDefaultk VincoloColonnak,
+	 VincoliDiTabella
+	)
+\end{lstlisting}
+CREATE TABLE è seguito dal nome della tabella e dalla \textbf{lista delle colonne} (attributi), di cui vengono specificate le caratteristiche. Alla fine si possono anche specificare eventuali vincoli di tabella, di cui parleremo.\\
+La CREATE TABLE definisce uno schema di relazione e ne crea un'istanza vuota specificando attributi, domini e vincoli. Una volta create, la tabella è \textbf{pronta} per l'inserimento dei dati (che dovranno soddisfare i vincoli imposti).\\
+Lo schema di una tabella, dopo che è stata creata, può essere visualizzato con \textbf{DESCRIBE NomeTabella}.
+\pagebreak
+\paragraph{Un linguaggio per tanti usi} SQL non è solo un query language, ma anche un linguaggio
+\begin{list}{}{}
+	\item per la definizione di DB (DDL)
+	\begin{lstlisting}
+	CREATE SCHEMA Nome AUTHORIZATION Utente
+	CREATE TABLE
+	CREATE INDEX
+	CREATE PROCEDURE
+	CREATE TRIGGER
+	\end{lstlisting}
+	\item per stabilire controlli sull'uso dei dati
+	\begin{lstlisting}
+	GRANT
+	\end{lstlisting}
+	\item per la modifica dei dati
+\end{list}
+\subsection{Tipi}
+\paragraph{Tipi} I tipi più comuni per i valori sono:
+\begin{list}{}{}
+	\item \textbf{CHAR(n)} per stringhe di caratteri di lunghezza fissa $n$
+	\item \textbf{VARCHAR(n)} per stringhe di caratteri di lunghezza variabile fino ad un massimo di $n$
+	\item \textbf{INTEGER} per interi con la dimensione uguale alla parola di memoria standard dell'elaboratore
+	\item \textbf{REAL} per numeri reali con dimensione uguale alla parola di memoria standard dell'elaboratore
+	\item \textbf{NUMBER(p,s)} per numeri con $p$ cifre di cui $s$ decimali
+	\item \textbf{FLOAT(p)} per numeri binari in virgola mobile con almeno $p$ cifre significative
+	\item \textbf{DATE} per valori che rappresentano istanti nel tempo (in alcuni sistemi come Oracle) oppure solo date (con un altro tipo \textbf{TIME} per indicare l'orario)
+\end{list}
+\paragraph{Un esempio} 
+\begin{lstlisting}
+CREATE TABLE Impiegati
+	(Codice CHAR(8) NOT NULL,
+	 Nome CHAR(20),
+	 AnnoNascita INTEGER CHECK (AnnoNascita < 2000),
+	 Qualifica CHAR(20) DEFAULT 'Impiegato',
+	 Supervisore CHAR(8),
+	 PRIMARY KEY pk_impiegato (Codice),
+	 FOREIGN KEY fk_Impiegati (Supervisore) REFERENCES Impiegati
+	)
+	
+CREATE TABLE FamiliariACarico
+	(Nome CHAR(20),
+	 AnnoNascita INTEGER,
+	 GradoParentela CHAR(10),
+	 CapoFamiglia CHAR(8)
+	 FOREIGN KEY fk_FamiliariACarico (CapoFamiglia) REFERENCES Impiegati
+	)
+\end{lstlisting}
+\paragraph{Eliminare e modificare} Ciò che viene creato con ALTER TABLE può essere eliminato con \textbf{DROP} o modificato con \textbf{ALTER}. Con \textbf{ALTER TABLE} nello standard SQL è possibile
+\begin{list}{}{}
+	\item Aggiungere una colonna \textbf{ADD COLUMN}
+	\item Rimuovere una colonna \textbf{DROP COLUMN}
+	\item Modificare una colonna \textbf{MODIFY}
+	\item Aggiungere l'assegnazione di valori di default \textbf{SET DEFAULT} o eliminarli \textbf{DROP DEFAULT}
+	\item Aggiungere vincoli di tabella \textbf{ADD CONSTRAINT} o eliminarli \textbf{DROP CONSTRAINT}
+	\item Altre opzioni specifica dei linguaggi.
+\end{list}
 \end{document}
