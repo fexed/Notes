@@ -17,7 +17,7 @@
 	keywordstyle=\bfseries,
 	identifierstyle=\ttfamily,
 	commentstyle=\color{mygray},
-	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE},
+	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION},
 }
 
 \begin{document}
@@ -893,4 +893,75 @@ CREATE TABLE FamiliariACarico
 	\item Aggiungere vincoli di tabella \textbf{ADD CONSTRAINT} o eliminarli \textbf{DROP CONSTRAINT}
 	\item Altre opzioni specifica dei linguaggi.
 \end{list}
+\chapter{Viste}
+\paragraph{Viste logiche} Le \textbf{view} possono essere definite come delle \textbf{tabelle virtuali}: i dati sono riaggregazioni dei dati contenuti nelle tabelle "fisiche" (unici veri contenitori dei dati). Le viste \textbf{non contengono fisicamente i dati ma forniscono una visione diversa, dinamicamente aggiornata, degli stessi dati delle tabelle fisiche}.\\\\
+\textbf{Appare all'utente come una normale tabella}, in cui può effettuare interrogazioni e modifiche all'interno dei suoi privilegi.
+\paragraph{Vantaggi} 
+\begin{list}{}{}
+	\item \textbf{Semplificano la rappresentazione dei dati}.\\
+	Oltre ad assegnare un nome ad una vista, la sintassi dell'istruzione \textbf{CREATE VIEW} consente di cambiare i nomi delle colonne.\\
+	In generale, uno dei requisiti per la progettazione di un DB è la \textbf{normalizzazione dei dati}. La forma normalizzata di un DB, sebbene permetta una corretta modellazione della realtà, a volte porta ad una \textbf{maggiore difficoltà di comprensione dei dati da parte dell'utente}. Le viste consentono quindi di fornire i dati all'utente in una forma più intuitiva. Consentono anche di \textbf{convertire le unità di misura e creare nuovi formati}.
+	\item Possono essere \textbf{convenienti per eseguire query molto complesse}.
+	\item Consentono di \textbf{proteggere il database}: le viste ad accesso limitato possono essere usate per \textbf{controllare le informazioni a cui accede un determinato utente} del database.
+	\item \textbf{Indipendenza logica}\\
+	Consentono di operare modifiche allo schema del database senza modificare le applicazioni che lo utilizzano se passano attraverso le viste. Un po' come le interfacce nell'OOP.
+\end{list}
+\paragraph{Limitazioni}
+\begin{list}{}{}
+	\item Non consentono l'utilizzo degli operatori booleani UNION, INTERSECT ed EXCEPT.\\
+	Gli ultimi due possono essere realizzati mediante una semplice SELECT, ma lo stesso non si può dire di UNION.
+	\item Non è possibile usare ORDER BY.
+\end{list}
+\paragraph{Sintassi} Il comando DDL che consente di definire una vista è 
+\begin{lstlisting}
+CREATE VIEW NomeVista [(ListaAttributi)] AS Subquery [WITH [LOCAL | CASCADED] CHECK OPTION]
+\end{lstlisting}
+I nomi delle colonne nella ListaAttributi sono assegnati alle colonen della vista, che corrispondono \textbf{ordinatamente} alle colonne elencate nella SELECT della subquery.\\
+Se questi non sono specificati, le colonne della vista assumono gli stessi nomi di quelli della/e tabella/e a cui si riferisce.\\
+Di seguito un esempio
+\begin{lstlisting}
+CREATE VIEW ImpiegatiAmmin (Matricola, Nome, Cognome, Stipendio)
+AS	(SELECT Matri, Nome, Cognome, Stip
+	 FROM Impiegato
+	 WHERE Dipart = 'Amministrazione' AND Stipendio > 1000
+	)
+\end{lstlisting}
+Nonostante il \textbf{contenuto} sia \textbf{dinamico}, la \textbf{struttura non lo è}. Se una vista è definita su una subquery che riferisce una tabella T a cui viene aggiunta una colonna, la definizione \textit{non} viene estesa alla vista. Ossia la vista conterrà sempre le stesse colonne che aveva prima dell'inserimento della nuova colonna in T.
+\paragraph{Vista di gruppo} Una \textbf{vista di gruppo} è una vista in cui una delle colonne è una funzione di gruppo. Diventa obbligatorio assegnare un nome alla colonna della vista corrispondente alla funzione di gruppo. Un esempio:
+\begin{lstlisting}
+CREATE VIEW A3 (CodFabbrica, NumVersioni)
+AS	(SELECT CodFabbrica, SUM(NumVersioni)
+	 FROM Modelli
+	 GROUP BY CodBFabbrica
+	)
+\end{lstlisting}
+È una vista di gruppo anche una vista definita in base ad una vista di gruppo
+\begin{lstlisting}
+CREATE VIEW A4
+AS	(SELECT NumVersioni
+	 FROM A3
+	)
+\end{lstlisting}
+\paragraph{Eliminare le viste} Le viste si eliminano con il comando
+\begin{lstlisting}
+DROP NomeViste [RESTRICT | CASCADE]
+\end{lstlisting}
+\begin{list}{}{}
+	\item \textbf{RESTRICT}: la vista viene eliminata solo se non è riferita nella definizione di altri oggetti.
+	\item \textbf{CASCADE}: la vista viene eliminata e vengono eliminate tutte le dipendenze da tale vista nelle altre definizioni dello schema.
+\end{list}
+Nell'esempio, \textbf{DROP VIEW A3 CASCADE} elimina anche A4 oltre ad A3, mentre\\\textbf{DROP VIEW A3 RESTRICT} impedisce la cancellazione di A3 finché A4 è presente nello schema.
+\paragraph{Viste modificabili} Le viste si interrogano come le tabelle, ma \textbf{in generale non sono modificabili}. Per poterlo fare, \textbf{deve esistere una corrispondenza biunivoca fra le righe della vista e le righe di una tabella} di base ovvero:
+\begin{list}{}{}
+	\item SELECT senza DISTINCT e solo di sttributi
+	\item FROM una sola tabella modificabile
+	\item WHERE senza sottoquery
+	\item GROUP BY e HAVING non presenti nella definizione
+\end{list}
+Si potrebbe aggiornare direttamente le tabelle collegate, ma \textbf{ha senso aggiornare le view nel case di accesso dati controllato}.
+\paragraph{CHECK OPTION} L'opzione WITH CHECK OPTION messa alla fine della definizione della vista assicura che le operazioni di inserimento e modifica effettuate tramite la vista soddisfino la clausola WHERE della subquery.\\\\
+Supponiamo che una vista V1 sia definita in termini di un'altra vista V2. Se V1 è creata con WITH CHECK OPTION, il \textbf{DBMS verifica che la nuova tupla t inserita soddisfi sia la definizione di V1 che quella di V2} (e di tutte le altre eventuali viste da cui V1 dipende), \textbf{indipendentemente dal fatto che V2 sia definita con} WITH CHECK OPTION.\\
+Questo comportamento di default è equivalente a WITH \textbf{CASCADED} CHECK OPTION. Lo si può alterare definendo V1 WITH \textbf{LOCAL} CHECK OPTION, così facendo il DBMS verifica solo che t soddisfi la specifica di V1 e di tutte e sole le viste da cui V1 dipende per cui è stata specificata WITH CHECK OPTION.
+\chapter{Vincoli}
+% https://elearning.di.unipi.it/pluginfile.php/31092/mod_resource/content/2/7.SQLDefinizioneDati.pdf, p. 57
 \end{document}
