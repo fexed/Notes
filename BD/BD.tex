@@ -17,7 +17,7 @@
 	keywordstyle=\bfseries,
 	identifierstyle=\ttfamily,
 	commentstyle=\color{mygray},
-	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION},
+	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION, FOR, EACH, ROW, DECLARE, BEFORE, AFTER, IF},
 }
 
 \begin{document}
@@ -1023,4 +1023,53 @@ FOREIGN KEY (ColonneInterne) REFERENCES TabellaEsterna(ColonneRiferite)
 \section{CHECK}
 Un vincolo di \textbf{CHECK} richiede che una colonna o un insieme di colonne \textbf{soddisfi una condizione per ogni riga della tabella}. Il vincolo specificato deve essere un'espressione booleana che è valutata usando i valori della colonna che vengono inseriti o aggiornati nella riga.\\
 Può essere espresso come vincolo di colonna se coinvolge un solo attributo, oppure come vincolo di tabella se coinvolge più attributi.
+\chapter{Trigger}
+Un \textbf{trigger} definisce un'\textbf{azione che il database deve attivare automaticamente quando si verifica un determinato evento nel database}. Possono essere usati per \textbf{migliorare l'integrità referenziale dichiarativa}, \textbf{imporre regole complesse} oppure \textbf{effettuare revisioni sulle modifiche} dei dati.
+\paragraph{DML ma anche DDL} L'\textbf{esecuzione è trasparente} all'utente e \textbf{vengono eseguiti automaticamente} quando specifici tipi di comandi (\textbf{eventi}) di manipolazione dei dati vengono eseguiti su specifiche tabelle.\\
+Tali comandi comprendono i comandi DML INSERT, UPDATE e DELETE, ma gli ultimi DBMS prevedono trigger anche su alcune istruzioni DDL.\\
+Anche gli aggiornamenti di specifiche colonne possono essere usati come trigger di eventi.
+\section{Struttura}
+I trigger si basano sul paradigma \textbf{Evento-Condizione-Azione} (\textbf{ECA})
+\begin{lstlisting}
+CREATE TRIGGER NomeTrigger
+TipoDiTrigger Evento {, Evento}
+ON TabellaTarget
+[FOR EACH ROW]
+[WHEN Condizione]
+Azione
+\end{lstlisting}
+\begin{list}{}{}
+	\item TipoDiTrigger: BEFORE o AFTER
+	\item Evento: INSERT/DELETE/UPDATE
+	\item Se si vuole specificare il trigger a livello di riga si mette anche FOR EACH ROW, altrimenti niente
+	\item Condizione che si deve verificare affinché il trigger venga eseguito
+	\item Azione, definita dal codice da eseguire se si verifica la condizione
+\end{list}
+Un esempio:
+\begin{lstlisting}
+CREATE TRIGGER ControlloStipendio BEFORE INSERT ON Impiegati
+DECLARE StipendioMedio FLOAT
+BEGIN
+	SELECT AVG(Stipendio) INTO StipendioMedio
+	FROM Impiegati
+	WHERE Dipartimento = :new.Dipartimento;
+	IF :new.Stipendio > 2 * StipendioMedio THEN
+		RAISE_APPL_ERR('Stipendio Alto')
+	END IF;
+END;
+\end{lstlisting}
+\section{Tipi di trigger}
+\subsection{Trigger a livello di riga}
+Vengono eseguiti \textbf{una volta per ogni riga modificata in una transazione}. Spesso usati in applicazioni di revisione dei dati e si rivelano utili per \textbf{operazioni di audit dei dati} e per \textbf{mantenere sincronizzati i dati distribuiti}.\\
+Si creano con la clausola \textbf{FOR EACH ROW} nel CREATE TRIGGER.
+\subsection{Trigger a livello di istruzione}
+Vengono eseguiti \textbf{una volta per ciascuna transazione}, indipendentemente dal numero di righe che vengono modificate.\\
+Vengono usati per \textbf{attività correlate ai dati} come per \textbf{imporre misure aggiuntive di sicurezza sui tipi di transazione che possono essere eseguiti su una tabella}.\\
+Questo è il \textbf{tipo di trigger predefinito} del CREATE TRIGGER, non serve specificare clausole.
+
+\paragraph{BEFORE/AFTER} I trigger possono essere eseguiti prima o dopo l'utilizzo dei comandi, e all'interno e possibile riferire i vecchi e nuovi valori coinvolti nella transazione.\\
+In caso di BEFORE, i valori \textbf{vecchi sono i valori attualmente nella tabella da modificare} e i \textbf{nuovi sono quelli che vogliamo inserire}.\\
+In caso di AFTER, i valori \textbf{vecchi sono quelli che c'erano prima della modifica} mentre i \textbf{nuovi sono quelli presenti nella tabella alla fine della modifica}.
+\paragraph{Attivi/Passivi} Un trigger è \textbf{attivo quando modifica lo stato della base dei dati}, mentre è \textbf{passivo quando serve a provocare il fallimento della transazione sotto certe condizioni}.
+
 \end{document}
