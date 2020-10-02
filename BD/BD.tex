@@ -17,7 +17,7 @@
 	keywordstyle=\bfseries,
 	identifierstyle=\ttfamily,
 	commentstyle=\color{mygray},
-	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION, FOR, EACH, ROW, DECLARE, BEFORE, AFTER, IF},
+	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION, FOR, EACH, ROW, DECLARE, BEFORE, AFTER, IF, TO, PRIVILEDGES},
 }
 
 \begin{document}
@@ -1071,5 +1071,32 @@ Questo è il \textbf{tipo di trigger predefinito} del CREATE TRIGGER, non serve 
 In caso di BEFORE, i valori \textbf{vecchi sono i valori attualmente nella tabella da modificare} e i \textbf{nuovi sono quelli che vogliamo inserire}.\\
 In caso di AFTER, i valori \textbf{vecchi sono quelli che c'erano prima della modifica} mentre i \textbf{nuovi sono quelli presenti nella tabella alla fine della modifica}.
 \paragraph{Attivi/Passivi} Un trigger è \textbf{attivo quando modifica lo stato della base dei dati}, mentre è \textbf{passivo quando serve a provocare il fallimento della transazione sotto certe condizioni}.
-
+\chapter{Controllo degli accessi}
+Ogni componente dello schema può essere protetto: tabelle, attributi, viste, domini\ldots\\
+Il possessore della risorsa assegna dei privilegi agli altri utenti. Un utente predefinito (\_system) rappresenta l'amministratore della base di dati ed ha completo accesso alle risorsa. Ogni privilegio è caratterizzato da:
+\begin{list}{}{}
+	\item la risorsa a cui si riferisce
+	\item l'utente che concede il privilegio
+	\item l'utente che riceve il privilegio
+	\item l'azione che viene permessa sulla risorsa
+	\item se il privilegio può essere trasmesso o meno ad altri utenti
+\end{list}
+\paragraph{Tipi di privilegi}
+\begin{list}{}{}
+	\item SELECT: lettura dei dati
+	\item INSERT: inserire record
+	\item DELETE: cancellazione record
+	\item UPDATE: modifica record
+	\item REFERENCES: definire chiavi esterne
+	\item WITH GRANT OPTION: si possono trasferire i privilegi ad altri utenti
+\end{list}
+I privilegi si \textbf{garantiscono} con
+\begin{lstlisting}
+GRANT (Privilegi | ALL PRIVILEDGES) ON Oggetto TO Utenti [WITH GRANT OPTION]
+\end{lstlisting}
+e si possono \textbf{revocare} (solo chi li ha garantiti) con
+\begin{lstlisting}
+REVOKE [GRANT OPTION FOR] Privilegi ON Oggetto FROM Utenti [CASCADE]
+\end{lstlisting}
+La revoca di default è RESTRICT (non esegue il comando se la revoca dei privilegi all'utente comporti qualche altra revoca), CASCADE invece forza l'esecuzione. Quando si toglie un privilegio a U, lo si toglie anche a tutti coloro che lo hanno avuto solo da U (\textit{attenzione agli effetti a catena})
 \end{document}
