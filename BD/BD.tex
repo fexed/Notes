@@ -1099,5 +1099,43 @@ e si possono \textbf{revocare} (solo chi li ha garantiti) con
 REVOKE [GRANT OPTION FOR] Privilegi ON Oggetto FROM Utenti [CASCADE]
 \end{lstlisting}
 La revoca di default è RESTRICT (non esegue il comando se la revoca dei privilegi all'utente comporti qualche altra revoca), CASCADE invece forza l'esecuzione. Quando si toglie un privilegio a U, lo si toglie anche a tutti coloro che lo hanno avuto solo da U (\textit{attenzione agli effetti a catena})
-% https://elearning.di.unipi.it/pluginfile.php/31121/mod_resource/content/1/8.SQLProgrammazione.pdf
+\chapter{Programmazione}
+\section{Uso di SQL da programmi}
+\subsection{Problemi} Le problematiche principali che si incontrano quando si programmano applicazioni che comunicano con DB sono:
+\begin{list}{}{}
+	\item come \textbf{collegarsi al DB}
+	\item come \textbf{trattare gli operatori} SQL
+	\item come \textbf{trattare il risultato di un comando} SQL, cioè \textbf{le relazioni}
+	\item come \textbf{scambiare informazioni sull'esito delle operazioni}
+\end{list}
+\subsection{Approcci}
+\paragraph{Linguaggio integrato (dati e DML)} Linguaggio \textbf{disegnato ad-hoc per usare SQL}. I \textbf{comandi} SQL sono \textbf{controllati staticamente} dal traduttore ed \textbf{eseguiti dal DBMS}. Un esempio:
+\subsubsection{PL/SQL, Oracle}
+\paragraph{Un linguaggio integrato} Un linguaggio per manipolare DB che integra DML (SQL) con il linguaggio ospite. \textbf{Linguaggio a blocchi} con una struttura del controllo completa che \textbf{contiene l'SQL come sottolinguaggio}.\\
+Permette di:
+\begin{list}{}{}
+	\item definire variabili di tipo scalare, record (annidato), insieme di scalari, insieme di record piatti, cursore
+	\item definire i tipi delle variabili a partire da quelli del DB
+	\item eseguire interrogazioni SQL ed esplorarne il risultato
+	\item modificare un DB
+	\item definire procedure e moduli
+	\item gestire il flusso del controllo, le transazioni, le eccezioni
+\end{list}
+\paragraph{Linguaggio convenzionale + API} Linguaggio convenzionale che \textbf{usa delle funzioni di libreria per usare SQL}. I \textbf{comandi} SQL sono \textbf{stringhe passate come parametri alle funzioni}, che poi vengono \textbf{controllate dinamicamente} dal DBMS prima di eseguirle.\\
+Quindi invece di modificare il compilatore di un linguaggio, si usa una libreria di funzioni/oggetti che operano su DB (API), alle quali si passa come parametro stringhe SQL e ritornano il risultato sul quale si opera con una logica ad iteratori. Qualche esempio:
+\begin{list}{}{}
+	\item \textbf{Microsoft ODBC}, C/C++ standard per Windows
+	\item \textbf{Sun JDBC}, l'equivalente Java
+\end{list}
+Dovrebbero essere \textbf{indipendenti dal DBMS}: un \textbf{driver} gestisce le richieste e le traduce in codice specifico per il singolo DBMS. Il DB può essere in rete.
+\paragraph{Linguaggio che ospita l'SQL} Linguaggio convenzionale \textbf{esteso con un nuovo costrutto per marcare i comandi} SQL. Occorre un \textbf{pre-compilatore} che \textbf{controlla i comandi SQL}, li \textbf{sostituisce con chiamate a funzioni predefinite} e \textbf{genera un programma in linguaggio convenzionale + API}.
+\paragraph{Cursore} Meccanismo per ottenere uno alla volta gli elementi di una relazione. Un cursore viene definito con un'espressione SQL poi:
+\begin{list}{}{}
+	\item si apre per far calcolare al DBMS il risultato, poi
+	\item con un opportuno comando si trasferiscono i campi delle ennuple in opportune variabili del programma
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{cursore.png}
+\end{center}
+
 \end{document}
