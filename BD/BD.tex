@@ -1137,5 +1137,77 @@ Dovrebbero essere \textbf{indipendenti dal DBMS}: un \textbf{driver} gestisce le
 \begin{center}
 	\includegraphics[scale=0.5]{cursore.png}
 \end{center}
-
+\chapter{Normalizzazione}
+\section{Teoria relazionale}
+\paragraph{Introduzione} Ci sono due metodi per produrre uno schema relazionale:
+\begin{list}{}{}
+	\item Partire da un buon schema ad oggetti e tradurlo
+	\item Partire da uno schema relazionale già esistente e modificarlo o completarlo
+\end{list}
+\textbf{Teoria della progettazione relazionale}: si studia cosa sono le "\textbf{anomalie}" e \textbf{come eliminarle} (\textbf{normalizzazione}).\\
+Molto utile col secondo metodo di produzione, ma utile anche usando il primo.\\\\
+Data una tabella, come si può dire se è fatta male, perché e come  correggerla?
+\paragraph{Esempio} StudentiEdEsami(Matricola, Nome, Provincia, AnnoNascita, Materia, Voto)\\
+Anomalie:
+\begin{list}{}{}
+	\item \textbf{Ridondanze}
+	\item \textbf{Potenziali inconsistenze}
+	\item Anomalie nelle \textbf{inserzioni}
+	\item Anomalie nelle \textbf{eliminazioni}
+\end{list}
+Prima soluzione: dividere lo schema in due tabelle
+\begin{list}{}{}
+	\item Studenti(Matricola, \textbf{Nome}, Provincia, AnnoNascita)
+	\item Esami(\textbf{Nome}, Materia, Voto)
+\end{list}
+Va bene? Potrebbero esserci omonimi, ancora meglio è
+\begin{list}{}{}
+	\item Studenti(\textbf{Matricola}, Nome, Provincia, AnnoNascita)
+	\item Esami(\textbf{Matricola}, Materia, Voto)
+\end{list}
+\paragraph{Dipendenze funzionali} Nozione base. Obiettivi della teoria:
+\begin{list}{}{}
+	\item \textbf{Equivalenza di schemi}: in che misura si può dire che uno schema rappresenta un altro
+	\item \textbf{Qualità degli schemi} (\textbf{forme normali})
+	\item \textbf{Trasformazione degli schemi} (\textbf{normalizzazione} degli schemi)
+\end{list}
+Ipotesi dello \textbf{schema di relazione universale}: tutti i fatti sono descritti da attributi di un'unica relazione (\textbf{relazione universale}), cioè gli \textbf{attributi hanno un significato globale}.
+\paragraph{Definizione} Lo \textbf{schema di relazione universale U} di un DB relazione \textbf{ha come attributi l'unione degli attributi di tutte le relazioni della base di dati}.
+\section{Forme normali}
+Una \textbf{forma normale} è una \textbf{proprietà di un DB relazionale che ne garantisce la qualità}, cioè l'assenza di determinati difetti.\\
+Quando una relazione non è normalizzata \textbf{presenta ridondanze} o \textbf{si presta a comportamenti poco desiderabili} durante gli aggiornamenti.\\
+La \textbf{normalizzazione} è una procedura che permette di trasformare schemi non normalizzati in schemi che soddisfano una forma normale.
+\paragraph{Perché questi fenomeni indesiderabili?}
+\begin{center}
+	\includegraphics[scale=0.5]{ridondanze.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Ridondanza}: lo stipendio di ogni impiegato è ripetuto in tutte le ennuple relative per ogni progetto a cui partecipa, questo perché \textbf{Stipendio \textit{dipende} solo da Impiegato}
+	\item \textbf{Anomalia da aggiornamento}: se lo stipendio varia, è necessario andarne a modificare il valore in diverse ennuple
+	\item \textbf{Anomalia da cancellazione}: se un impiegato interrompe la partecipazione a tutti i progetti, dobbiamo cancellare tutte le ennuple in cui appare e così l'impiegato non è più presente nel DB
+	\item \textbf{Anomalia da inserimento}: un nuovo impiegato non può essere inserito finché non è assegnato ad un progetto
+\end{list}
+\subsection{Linee guida per una corretta progettazione}
+\paragraph{Semantica degli attributi} Si progetti ogni schema relazionale in modo che \textbf{sia semplice spiegarne il significato}. Non si uniscano attributi provenienti da più tipi di classi e tipi di associazione in un unica relazione.
+\paragraph{Ridondanza} Si progettino gli schemi relazionali in modo che nelle relazioni \textbf{non siano presenti anomalie} di inserimento, cancellazione o modifica. Se sono presenti anomalie, le si rilevi chiaramente e ci si assicuri che i programmi che aggiornano il DB operino correttamente.
+\paragraph{Valori nulli} Per quanto possibile, \textbf{si eviti di porre attributi i cui valori possono essere frequentemente nulli}. Se è inevitabile, ci si assicuri che essi si presentino solo in casi eccezionali e che non riguardino una maggioranza di tuple nella relazione.
+\paragraph{Tuple spurie} Si progettino schemi in modo tale che essi possano essere riuniti tramite join con condizioni di uguaglianza su attributi che sono chiavi primarie o chiavi esterne, in modo da garantire che non vengano generate tuple spurie. \textbf{Non si abbiano relazioni con attributi di accoppiamento diversi dalle combinazioni chiave esterna-chiave primaria}.
+\subsection{Dipendenze funzionali}
+Per formalizzare la nozione di schema senza anomalie, occorre descrivere formalmente della semantica dei fatti rappresentati in uno schema relazionale.\\
+\textbf{Istanza valida di R}: è una \textbf{nozione semantica} che dipende da ciò che sappiamo sul dominio del discorso (non estensionale né deducibile da alcune istanze dello schema $\rightarrow$ confronto con il committente!).\\
+Nozione fondamentale: dipendenza funzionale.
+\paragraph{Dipendenza funzionale} Data un'istanza valida $r$ su R(T). Siano X e Y due sottoinsiemi non vuoti di T.\\
+$\exists$ in $r$ una \textbf{dipendenza funzionale} da X a Y se, $\forall$ coppia di ennuple $t_1$, $t_2$ di $r$ con gli stessi valori su X risulta che $t_1$ e $t_2$ hanno gli stessi valori anche su Y.\\
+La dipendenza funzionale da X a Y si denota con X $\rightarrow$ Y.\\\\
+Esempio: Persone(CodiceFiscale, Cognome, Nome, DataNascita) ha CodiceFiscale $\rightarrow$ Cognome.\\
+Più formalmente:\\\\
+Dato uno schema R(T) e X, Y $\subseteq$ T, una \textbf{dipendenza funzionale} (DF) fra gli attributi X e Y è un vincolo su R sulle istanze della relazione espresso nella forma X $\rightarrow$ Y, che significa \textbf{X determina funzionalmente Y} o \textbf{Y è determinato da X}, se $\forall\:\:r$ istanza valida di R $\Rightarrow \forall\:\:t_1,t_2\in r$ si ha $(t_1[X] = t_2[X] \Rightarrow t_1[Y] = t_2[Y])$
+\paragraph{Esempio}
+\begin{center}
+	\includegraphics[scale=0.5]{ridondanze.png}
+\end{center}
+Impiegato $\rightarrow$ Stipendio\\
+Progetto $\rightarrow$ Bilancio\\
+Impiegato Progetto $\rightarrow$ Funzione
+% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf, p. 21
 \end{document}
