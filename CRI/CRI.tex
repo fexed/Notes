@@ -418,4 +418,104 @@ Quindi $x_0 = b_n$, ottengo una sequenza del tipo
 	\item[$\Rightarrow$] $b_n \rightarrow b_{n-1} \rightarrow \ldots \rightarrow b_1 \rightarrow b_0$\\
 	La \textbf{sequenza viene restituita in ordine inverso} $b_0 b_1\ldots$
 \end{list}
+\subsection{Generatori di numeri pseudocasuali basati su cifrari simmetrici}
+\paragraph{Idea} Prendere un cifrario simmetrico e la sua chiave. Anziché usarlo per costruire un crittogramma, si sostituisce il messaggio da cifrare con un \textbf{seme iniziale} legato al generatore. Si comincia a cifrare in questo modo: produce una sequenza imprevedibile per le proprietà del cifrario.
+\paragraph{Esempio} Prodotto dal FIPS:
+\begin{list}{}{}
+	\item Usa il DES
+	\item $r$ = \# bit delle parole che vengono prodotte ($r = 64$ nel DES)
+	\item $s$ = seme casuale di $r$ bit
+	\item $m$ = \# parole da produrre
+	\item $k$ = chiave segreta del cifrario
+\end{list}
+\pagebreak
+%TODO codice
+\begin{lstlisting}
+Generatore(s, m) //flusso di output di n*r bit
+	d = rappresentazione su r bit di data e ora;
+	y = C(d, k);
+	z = s;
+	for (i = 1; i <= n; i++) {
+		xi = C(y xor z, k);
+		z = C(y xor xi, k);
+		output xi;
+	}
+\end{lstlisting}
+\section{Algoritmi randomizzati}
+Si dividono in due classi fondamentali:
+\begin{list}{}{}
+	\item Algoritmi \textbf{Las Vegas}\\
+	Generano un \textbf{risultato sicuramente corretto} in un \textbf{tempo probabilmente breve}.\\
+	Caso tipico: quick sort. Qualche passo a caso per cercare di evitare i casi sfavorevoli.
+	\item Algoritmi \textbf{Montecarlo}\\
+	Generano un \textbf{risultato probabilmente corretto} in un \textbf{tempo sicuramente breve}.\\
+	\textbf{Probabilità di errore} deve essere \textbf{arbitrariamente piccola e matematicamente misurabile}.\\
+	Caso tipico: test di primalità.
+\end{list}
+\paragraph{Test di primalità (Miller, Rabin)}
+\begin{list}{}{}
+	\item $N$ intero (dispari) da testare di $n$ bit\\
+	$\Rightarrow$ N-1 è pari, $N-1 = 2^w \cdot z$ con $z$ dispari, $w$ esponente della potenza di 2 più grande che divide $N-1$\\
+	Es: $N=21, N-1=20 = 2^2\cdot 5$ quindi $z=5, w=2$
+	\item Da $N$, calcolo $N-1\rightarrow\frac{N-1}{2}\rightarrow\frac{N-1}{4}\rightarrow\ldots\rightarrow z = 1$ quindi \# divisioni per 2 $\leq\log N = n$ volte\\
+	Quindi trovo $w$ e $z$ in maniera efficiente, $O(n)$ passi
+	\item Sia quindi $N$ primo e $2\leq y \leq N-1$ arbitrario detto \textit{testimone}, allora
+	\begin{list}{}{}
+		\item[P1] MCD(N,$y$) = 1, per la primalità
+		\item[P2] ($y^z$ mod $N = 1$) $\vee$ ($\exists\:i\:\:0\leq i \leq w-1\:|\:y^{2^i \cdot z}$ mod $N = -1$)
+	\end{list}
+	Se una delle due proposizione è falsa allora N non è primo, ma ci sono numeri composti che verificano P1 e P2 ma non sono primi (sono pochi).
+\end{list}
+\subparagraph{Lemma 1} (Miller, Rabin) $N$ è composto, allora il numero di testimoni $y$ che soddisfano i predicati è basso.\\
+Cioè $N$ composto $\Rightarrow$ il numero di interi $y\:|\:2\leq y \leq N-1$ che soddisfano entrambi i predicati P1 e P2 è minore di $N/4$\\
+La probabilità di scegliere un testimone che rende veri P1 e P2 $< \frac{N/4}{N-2} < \frac{1}{4}$
+\subparagraph{N} $y$ scelto a caso in $[2, N-1]$:
+\begin{list}{}{}
+	\item se uno dei due predicati è \textbf{falso} $\rightarrow N$ è \textbf{certamente composto}
+	\item se sono entrambi veri $\Rightarrow N$ è composto con probabilità $< \frac{1}{4}$, dunque $N$ è primo con probabilità $> \frac{3}{4}$
+\end{list}
+Iterando il test $k$ volte, la probabilità di errore diventa $< \left(\frac{1}{4}\right)^k$, con $k=30$ diventa inferiore al $10^{-18}$.\\
+Di seguito l'algoritmo.
+\pagebreak
+\begin{lstlisting}
+Verifica(N,y) { //controlla la validita del certificato y (certificato che N sia composto)
+	if (P1 == false or P2 == false) return 1; //N certamente composto
+	else return 0; //N probabilmente primo (prob errore < 1/4)
+}
+
+TestMR(N,k) {
+	for (i = 0; i < k; i++) {
+		//sceglie a caso y in [2, N-1]
+		if (Verifica(N, y) == 1) return 0; //N non primo
+	}
+	return 1; //N probabilmente primo (prob errore < (1/4)^k)
+}
+\end{lstlisting}
+%TODO formattazione lstlisting
+\paragraph{Valutazione di complessità} TestMR costa $k$ volte Verifica, quindi valuteremo quest'ultimo.\\
+Il calcolo dell'MCD, quindi di P1, è facile. Quindi indaghiamo la valutazione di P2: bisognerà calcolare
+\begin{list}{}{}
+	\item $y^z$ mod $N == 1$ e, in caso non sia verificato
+	\item $y^{2^i\cdot z}$ mod $N$, con $0 \leq i \leq w-1$
+\end{list}
+	L'esponente massimo per $y$ è $i = w-1$ (da $N-1 = 2^w \cdot z$), perché $2^{w-1}\cdot z = \frac{N-1}{2}$\\
+Quindi $y^{\frac{N-1}{2}}$ mod $N$, al massimo voglio eseguire $\log N$ moltiplicazioni. La moltiplicazione la sappiamo fare polinomiale, e l'elevamento a potenza possiamo eseguirlo polinomiale con l'\textbf{algoritmo delle quadrature successive} o esponenziazione veloce.
+\subparagraph{Algoritmo delle quadrature successive} Vogliamo calcolare $x = y^z$ mod $s$, con $x,z,s$ stesso ordine di grandezza.
+\begin{list}{}{}
+	\item Si scompone $z$ in una somma di potenze di 2\\
+	$z = \sum_{i=0}^t k_i\cdot 2^i$ con $k_i\in\{0,1\}$\\
+	Esempio $z = 45 = 32 + 8 + 4 + 1$\\
+	Il massimo $t$ come visto è $t = \lfloor \log_2 z\rfloor = \Theta(\log z)$
+	\item Si calcolano tutte le potenze $y^{2^i}$ mod $s$ per $1\leq i \leq t = \lfloor\log_2 z\rfloor$, ciascuna come il quadrato della precedente.\\
+	$y^{2^{i+1}}$ mod $s$ = $\left(y^{2^i}\right)^2$ mod $s$\\
+	Esempio $x = 9^{45}$ mod $11$ e $45 = 32 + 8 + 4 + 1$, $t = 5$.\\
+	$y^2$ mod $s$ = $9^2$ mod $11$ = 4\\
+	$y^4$ mod $s$ = $9^4$ mod $11$ = 5\\
+	$y^8$ mod $s$ = $9^8$ mod $11$ = 3\\
+	$y^{16}$ mod $s$ = $9^{16}$ mod $11$ = 9\\
+	$y^{32}$ mod $s$ = $9^{32}$ mod $11$ = 4\\
+	\item Calcoliamo $x = y^z$ mod $s = \Pi_{i:k_i\neq0}\:(y^{2^i})$ mod $s$ %TODO
+\end{list}
+\textbf{Costo}: $t = \Theta(\log_2 z)$ quadrature e al più $t$ moltiplicazioni $\Rightarrow \Theta(\log_2 z)$ quadrature e $O(\log z)$ moltiplicazioni. Ogni moltiplicazione ha un costo al più quadratico nel numero di cifre.\\
+Quindi l'algoritmo è \textbf{polinomiale nella dimensione dei dati}.
 \end{document}
