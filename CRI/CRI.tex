@@ -452,7 +452,7 @@ Si dividono in due classi fondamentali:
 	\textbf{Probabilità di errore} deve essere \textbf{arbitrariamente piccola e matematicamente misurabile}.\\
 	Caso tipico: test di primalità.
 \end{list}
-\paragraph{Test di primalità (Miller, Rabin)}
+\subsection{Test di primalità (Miller, Rabin)}
 \begin{list}{}{}
 	\item $N$ intero (dispari) da testare di $n$ bit\\
 	$\Rightarrow$ N-1 è pari, $N-1 = 2^w \cdot z$ con $z$ dispari, $w$ esponente della potenza di 2 più grande che divide $N-1$\\
@@ -498,8 +498,11 @@ Il calcolo dell'MCD, quindi di P1, è facile. Quindi indaghiamo la valutazione d
 	\item $y^z$ mod $N == 1$ e, in caso non sia verificato
 	\item $y^{2^i\cdot z}$ mod $N$, con $0 \leq i \leq w-1$
 \end{list}
-	L'esponente massimo per $y$ è $i = w-1$ (da $N-1 = 2^w \cdot z$), perché $2^{w-1}\cdot z = \frac{N-1}{2}$\\
-Quindi $y^{\frac{N-1}{2}}$ mod $N$, al massimo voglio eseguire $\log N$ moltiplicazioni. La moltiplicazione la sappiamo fare polinomiale, e l'elevamento a potenza possiamo eseguirlo polinomiale con l'\textbf{algoritmo delle quadrature successive} o esponenziazione veloce.
+Nella seconda parte di P2 và calcolato $y^z$ mod $N$, poi $y^{2z}$ mod $N$ come quadrato del precedente.\\
+L'esponente massimo per $y$ è $i = w-1$ (da $N-1 = 2^w \cdot z$), perché $2^{w-1}\cdot z = \frac{N-1}{2}$\\
+Quindi $y^{\frac{N-1}{2}}$ mod $N$, al massimo voglio eseguire $\log N$ moltiplicazioni. La moltiplicazione la sappiamo fare polinomiale, e l'elevamento a potenza possiamo eseguirlo polinomiale con l'\textbf{algoritmo delle quadrature successive} o esponenziazione veloce.\\
+$w$ elementi al quadrato con $w = O(\log N)$.\\
+Quindi l'algoritmo MR dà un test efficiente per la primalità.
 \subparagraph{Algoritmo delle quadrature successive} Vogliamo calcolare $x = y^z$ mod $s$, con $x,z,s$ stesso ordine di grandezza.
 \begin{list}{}{}
 	\item Si scompone $z$ in una somma di potenze di 2\\
@@ -518,4 +521,15 @@ Quindi $y^{\frac{N-1}{2}}$ mod $N$, al massimo voglio eseguire $\log N$ moltipli
 \end{list}
 \textbf{Costo}: $t = \Theta(\log_2 z)$ quadrature e al più $t$ moltiplicazioni $\Rightarrow \Theta(\log_2 z)$ quadrature e $O(\log z)$ moltiplicazioni. Ogni moltiplicazione ha un costo al più quadratico nel numero di cifre.\\
 Quindi l'algoritmo è \textbf{polinomiale nella dimensione dei dati}.
+\subsection{Generazione di numeri primi}
+In pratica è una \textbf{generazione di un numero casuale seguita da un test di primalità}. Se il test fallisce, lo si incrementa di due iterando fino a trovare un numero \textit{dichiarato} primo.\\
+Sono pochi i numeri da testare grazie alla densità: il numero di interi primi e minori di $N$ tendono a $\frac{N}{\log_e N}$ per $N\to\infty$. Quindi per $N$ sufficientemente grande, in un suo intorno di ampiezza $\log_e N$ cade mediamente un numero primo.
+%TODO algoritmo Primo(n)
+L'algoritmo è polinomiale, circa O($n^4$)
+\section{Classe RP}
+\paragraph{Random Polinomial} Classe dei problemi decisionali verificabili in tempo polinomiale randomizzato.\\
+Dato un problema $\Pi$, e $x$ istanza di input allora $y$ è un \textbf{certificato probabilistico} per l'istanza $x$ \textbf{se ha una lunghezza $|y|$ al più polinomiale} in $|x|$ \textbf{e $y$ è estratto perfettamente a caso da un insieme associato a $x$}\\\\
+$A(x,y)$ in tempo polinomiale \textbf{attesta con certezza che $x$ \textit{non} possiede la proprietà esaminata da $\Pi$}, cioè $\Pi(x) = 0$, \textbf{oppure attesta che $x$ possiede la proprietà} esaminata da $\Pi$ \textbf{con probabilità $> \frac{1}{2}$}.
+\chapter{Cifrari storici}
+
 \end{document}
