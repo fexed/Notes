@@ -5,6 +5,13 @@
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{listings}
+\usepackage{color}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\lstset{
+	language=C,
+	commentstyle=\itshape\color{gray},
+	morekeywords={output}
+}
 \usepackage{graphicx}
 \usepackage{makecell}
 \graphicspath{ {./img/} }
@@ -419,28 +426,30 @@ Quindi $x_0 = b_n$, ottengo una sequenza del tipo
 	La \textbf{sequenza viene restituita in ordine inverso} $b_0 b_1\ldots$
 \end{list}
 \subsection{Generatori di numeri pseudocasuali basati su cifrari simmetrici}
-\paragraph{Idea} Prendere un cifrario simmetrico e la sua chiave. Anziché usarlo per costruire un crittogramma, si sostituisce il messaggio da cifrare con un \textbf{seme iniziale} legato al generatore. Si comincia a cifrare in questo modo: produce una sequenza imprevedibile per le proprietà del cifrario.
-\paragraph{Esempio} Prodotto dal FIPS:
+\paragraph{Idea} Prendere un cifrario simmetrico e la sua chiave. Anziché usarlo per costruire un crittogramma, si sostituisce il messaggio da cifrare con un \textbf{seme iniziale} legato al generatore. Si comincia a cifrare in questo modo: produce una sequenza imprevedibile per le proprietà del cifrario.\\
+Di seguito, un esempio approvato dal FIPS:
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item Usa il DES
-	\item $r$ = \# bit delle parole che vengono prodotte ($r = 64$ nel DES)
+	\item $r$ = \# bit delle parole che vengono prodotte\\($r = 64$ nel DES)
 	\item $s$ = seme casuale di $r$ bit
 	\item $m$ = \# parole da produrre
 	\item $k$ = chiave segreta del cifrario
 \end{list}
-\pagebreak
-%TODO codice
+\columnbreak
 \begin{lstlisting}
-Generatore(s, m) //flusso di output di n*r bit
-	d = rappresentazione su r bit di data e ora;
+Generatore(s, m){ //flusso di output di m*r bit
+	d = <rapp. su r bit di data e ora>;
 	y = C(d, k);
 	z = s;
 	for (i = 1; i <= n; i++) {
 		xi = C(y xor z, k);
 		z = C(y xor xi, k);
-		output xi;
+		output(xi);
 	}
+}
 \end{lstlisting}
+\end{multicols}
 \section{Algoritmi randomizzati}
 Si dividono in due classi fondamentali:
 \begin{list}{}{}
@@ -476,9 +485,8 @@ La probabilità di scegliere un testimone che rende veri P1 e P2 $< \frac{N/4}{N
 \end{list}
 Iterando il test $k$ volte, la probabilità di errore diventa $< \left(\frac{1}{4}\right)^k$, con $k=30$ diventa inferiore al $10^{-18}$.\\
 Di seguito l'algoritmo.
-\pagebreak
 \begin{lstlisting}
-Verifica(N,y) { //controlla la validita del certificato y (certificato che N sia composto)
+Verifica(N,y) { //controlla la validita del certificato y (certifica che N sia composto)
 	if (P1 == false or P2 == false) return 1; //N certamente composto
 	else return 0; //N probabilmente primo (prob errore < 1/4)
 }
@@ -491,7 +499,6 @@ TestMR(N,k) {
 	return 1; //N probabilmente primo (prob errore < (1/4)^k)
 }
 \end{lstlisting}
-%TODO formattazione lstlisting
 \paragraph{Valutazione di complessità} TestMR costa $k$ volte Verifica, quindi valuteremo quest'ultimo.\\
 Il calcolo dell'MCD, quindi di P1, è facile. Quindi indaghiamo la valutazione di P2: bisognerà calcolare
 \begin{list}{}{}
@@ -511,20 +518,36 @@ Quindi l'algoritmo MR dà un test efficiente per la primalità.
 	Il massimo $t$ come visto è $t = \lfloor \log_2 z\rfloor = \Theta(\log z)$
 	\item Si calcolano tutte le potenze $y^{2^i}$ mod $s$ per $1\leq i \leq t = \lfloor\log_2 z\rfloor$, ciascuna come il quadrato della precedente.\\
 	$y^{2^{i+1}}$ mod $s$ = $\left(y^{2^i}\right)^2$ mod $s$\\
-	Esempio $x = 9^{45}$ mod $11$ e $45 = 32 + 8 + 4 + 1$, $t = 5$.\\
-	$y^2$ mod $s$ = $9^2$ mod $11$ = 4\\
-	$y^4$ mod $s$ = $9^4$ mod $11$ = 5\\
-	$y^8$ mod $s$ = $9^8$ mod $11$ = 3\\
-	$y^{16}$ mod $s$ = $9^{16}$ mod $11$ = 9\\
-	$y^{32}$ mod $s$ = $9^{32}$ mod $11$ = 4\\
-	\item Calcoliamo $x = y^z$ mod $s = \Pi_{i:k_i\neq0}\:(y^{2^i})$ mod $s$ %TODO
+	Esempio: $x = 9^{45}$ mod $11$ e $45 = 32 + 8 + 4 + 1$, $t = 5$
+	\begin{list}{}{}
+		\item $y^2$ mod $s$ = $9^2$ mod $11$ = 4
+		\item $y^4$ mod $s$ = $4^2$ mod $11$ = 5
+		\item $y^8$ mod $s$ = $5^2$ mod $11$ = 3
+		\item $y^{16}$ mod $s$ = $3^2$ mod $11$ = 9
+		\item $y^{32}$ mod $s$ = $9^2$ mod $11$ = 4
+	\end{list}
+	\item Calcoliamo $x = y^z$ mod $s = \Pi_{(i\:|\:k_i\neq0)}\:(y^{2^i})$ mod $s$\\
+	Nell'esempio:\\
+	$y^z$ mod $s = 9^{45}$ mod $11 = 9^{32+8+4+1}$ mod $11 =$\\$(\:(9^{32}$ mod $11)\cdot(9^8$ mod $11)\cdot(9^4$ mod $11)\cdot(9^1$ mod $11)\:)$ mod $11 =$\\
+	$(4\cdot3\cdot5\cdot9)$mod$11$ = 1
+	
 \end{list}
 \textbf{Costo}: $t = \Theta(\log_2 z)$ quadrature e al più $t$ moltiplicazioni $\Rightarrow \Theta(\log_2 z)$ quadrature e $O(\log z)$ moltiplicazioni. Ogni moltiplicazione ha un costo al più quadratico nel numero di cifre.\\
 Quindi l'algoritmo è \textbf{polinomiale nella dimensione dei dati}.
 \subsection{Generazione di numeri primi}
 In pratica è una \textbf{generazione di un numero casuale seguita da un test di primalità}. Se il test fallisce, lo si incrementa di due iterando fino a trovare un numero \textit{dichiarato} primo.\\
 Sono pochi i numeri da testare grazie alla densità: il numero di interi primi e minori di $N$ tendono a $\frac{N}{\log_e N}$ per $N\to\infty$. Quindi per $N$ sufficientemente grande, in un suo intorno di ampiezza $\log_e N$ cade mediamente un numero primo.
-%TODO algoritmo Primo(n)
+\begin{lstlisting}
+Primo(n): { //n: # bit del numero generato
+	//genera un numero primo di almeno n bit
+	//probabilita errore < (1/4)^k
+	S = seq di n-2 bit prodotti da un generatore binario pseudocasuale
+	N = (1 S 1) //N ha n bit ed e dispari
+	while(TestMR(N,k) == 0) { N = N + 2 } //O(n) = O(logN) volte
+	//TestMR costo polinomiale in n = logN -> O(n^3)
+	return N;
+}
+\end{lstlisting}
 L'algoritmo è polinomiale, circa O($n^4$)
 \section{Classe RP}
 \paragraph{Random Polinomial} Classe dei problemi decisionali verificabili in tempo polinomiale randomizzato.\\
