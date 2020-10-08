@@ -577,5 +577,92 @@ Opera militare del IV secolo a.C. con un capitolo dedicato ai messaggi segreti. 
 Il più antico cifrario di concezione moderna. L'idea è che il crittogramma è ottenuto dal messaggio in chiaro sostituendo ogni lettera con quella di $3$ posizioni più avanti nell'alfabeto.\\
 Non ha una chiave segreta, e la segretezza dipende dalla conoscenza del metodo: scoprire il metodo significa compromettere irrimediabilmente l'impiego. Il cifrario era quindi destinato all'uso ristretto di un gruppo di conoscenti.\\\\
 Generalizzandolo a $k$ posizioni più avanti, si rende più sicuro ($1\leq k \leq 25$) e si ha $k$ come chiave segreta.
-%TODO formulazione matematica http://pages.di.unipi.it/bernasconi/CRI/CifrariStorici.pdf p.6
+\subsubsection{Formulazione matematica}
+Con pos(X) indichiamo la \textbf{posizione nell'alfabeto della lettera X}: ad esempio pos(A) = 0, pos(Z) = 25\ldots\\
+La chiave $k$ è quindi $1 \leq k \leq 25$, con $k=26$ il cifrario lascerebbe invariato il messaggio.
+\paragraph{Cifratura di X} Lettera Y $|$ pos(Y) = (pos(X) + $k$) mod 26
+\paragraph{Decifrazione di Y} Lettera X $|$ pos(X) = (pos(Y) - $k$) mod 26\\\\
+Un esempio con $k=10$. Cifriamo R, cui pos(R) = 17. La sua cifratura è (17+10) mod 26 = 1 = pos(B)\\Quindi R $\rightarrow$ B.
+\subsubsection{Crittoanalisi}
+\textbf{Se si conosce la struttura del cifrario}, in breve tempo \textbf{si possono applicare tutte le chiavi possibili}, che sono solo 25, ad un crittogramma: così viene \textbf{decifrato} e contemporaneamente si scopre la chiave segreta $k$.
+Come cifrario risulta quindi inutilizzabile a fini crittografici.\\\\
+\textbf{Gode della proprietà commutativa}: data una sequenza di chiavi e di operazioni di cifratura e decifrazione, l'\textbf{ordine delle operazioni può essere permutato arbitrariamente} senza modificare il crittogramma finale.\\
+Per esempio, date $k_1$ e $k_2$ chiavi e $s$ sequenza,
+\begin{list}{}{}
+	\item C(C($s,k_2$),$k_1$) = C($s, k_1 + k_2$)
+	\item D(D($s,k_2$),$k_1$) = D($s, k_1 + k_2$)
+\end{list}
+Una sequenza di operazioni di cifratura e decifrazione può essere ridotta ad una sola operazione di cifratura o decifrazione.\\\\
+Inoltre \textbf{comporre più chiavi non aumenta la sicurezza} del sistema.
+\section{Classificazione dei cifrari storici}
+\subsection{Cifrari a sostituzione} Sostituiscono ogni lettera del messaggio in chiaro con una o più lettere dell'alfabeto secondo una regola prefissata.
+\begin{list}{}{}
+	\item \textbf{Sostituzione monoalfabetica} Es: Cifrario di Cesare.\\
+	Alla stessa lettera del messaggio corrisponde sempre una stessa lettera nel crittogramma.\\
+	Si possono impiegare funzioni di cifratura e decifrazione più complesse dell'addizione e della sottrazione in modulo, ottenendo uno spazio delle chiavi molto più ampio (ma sempre con una sicurezza molto modesta).\\\\
+	Per esempio, usare come $k = \langle a,b \rangle$, cifrare pos(Y)=($a\cdot$pos(X)$+b)$ mod 26 e decifrare\\pos(X) = $a^{-1}\cdot($pos(Y)$-b)$ mod 26 con $a^{-1}$ inverso di $a$ mod 26 ($a\cdot a^{-1} = 1$ mod 26).\\
+	C'è quindi un \textbf{vincolo forte} sulla chiave: MCD($a$, 26) $\neq$ 1 $\Rightarrow$ la funzione di cifratura non è iniettiva e la decifrazione diventa impossibile. Ad esempio con $k=\langle 13,0\rangle$ tutte le lettere posizione pari sono trasformate in A, mentre tutte quelle dispari sono trasformate in N.\\
+	Le chiavi possibili sono quindi $12$ (scelte per $a$) $\cdot$ $26$ (scelte per $b$) = 312 chiavi che sono poche.\\\\
+	Se la segretezza dipende unicamente dalla chiave, allora \textbf{il numero di chiavi deve essere così grande da essere praticamente immune dal brute force} e deve essere \textbf{scelta in modo casuale}.\\\\
+	\textbf{Cifrario completo} prendendo una permutazione arbitraria dell'alfabeto come chiave:\\
+\textit{lettera in chiaro in posizione $i$} $\longrightarrow$ \textit{lettera di posizione $i$ della permutazione}.\\\\
+La chiave è di 26 lettere, con uno spazio delle chiavi esteso a $26! - 1$, cioè circa $4\cdot 10^{26}$ chiavi, il che lo rende molto vasto e inesplorabile.\\
+Ma non è comunque sicuro: si può forzare senza ricorre a brute force, sfruttando la struttura logica dei messaggi in chiaro e l'occorrenza statistica delle lettere.
+	\item \textbf{Sostituzione polialfabetica}\\
+	Alla stessa lettera del messaggio corrisponde una lettera scelta in un insieme di lettere possibili, secondo una regola opportuna (a seconda della posizione o del contesto in cui appare la lettera nel messaggio). L'esempio più antico è l'archivio cifrato di Augusto.\\
+	I documenti in archivio erano scritti in numeri, invece che lettere. Augusto li scriveva in greco, poi metteva in corrispondenza la sequenza di lettere del documento con la sequenza di lettere del primo libro dell'Iliade. Sostituiva ogni lettera del documento con il numero che indicava la distanza, nell'alfabeto greco, di tale lettera con quella in pari posizione nell'Iliade.\\
+	Per esempio:
+	\begin{list}{}{}
+		\item Lettera in posizione $i$ nel documento: $\alpha$
+		\item Lettera in posizione $i$ nell'Iliade: $\epsilon$
+		\item Carattere in posizione $i$ nel crittogramma: 4 (distanza tra $\alpha$ e $\epsilon$)
+	\end{list}
+	Se la chiave è lunghissima, il cifrario diventa difficile da forzare. Venne usato anche della Seconda Guerra Mondiale, prendendo come chiave una pagina prefissata di un libro e cambiandola di giorno in giorno. Lo \textbf{svantaggio} è \textbf{registrare per iscritto la chiave}.\\\\
+	\textbf{Cifrario di Alberti} con due dischi, dove si cambia chiave ogni volta che si incontra un carattere speciale. Inserendo spesso caratteri speciali (scartati nel messaggio ricostruito) diventa difficile da attaccare e il continuo cambio di chiave rende inutili gli attacchi basati sulla frequenza dei caratteri. La \textbf{Macchina Enigma} è un'\textbf{estensione elettromeccanica del cifrario di Alberti}.\\\\
+	\textbf{Cifrario di Vigenère}, con una parola segreta $k$ come chiave. La cifratura di un messaggio $m$ avviene disponendo $m$ e $k$ su due righe adiacenti, allineando le lettere in verticale (se $k$ è più corta di $m$ la si ricopia più volte). Ogni lettera X di $m$ risulta allineata ad una lettera $Y$ della chiave. La X è sostituita nel crittogramma con la lettera che si trova nella cella T all'incrocio tra la riga che inizia con X  e la colonna che inizia con Y
+	\begin{center}
+		\includegraphics[scale=0.5]{6.png}
+	\end{center}
+	Quindi le lettere allineate con A non subiscono modifiche. Quelle allineate con B sono traslate di una posizione in avanti, quelle con R di 17 posizioni\ldots\\
+	Una stessa lettera in chiaro è cifrata in modi diversi a seconda della lettera con cui è allineata, mentre per la decifrazione si esegue il processo inverso.\\
+	La sicurezza del metodo è influenzata dalla lunghezza della chiave: se contiene $h$ caratteri, le apparizioni della stessa lettera distanti un multiplo di $h$ nel messaggio si sovrappongono alla stessa lettera della chiave, quindi sono trasformate nella stessa lettera cifrata.\\
+	I cifrari polialfabetici non sono molto più potenti dei monoalfabetici se le chiavi non sono molto lunghe.\\
+	Se si estende Vigenèere impiegando una chiave lunga quanto il testo, casuale e non riutilizzabile, il cifrario diventa inattaccabile: \textbf{one-time pad}.
+\end{list}
+\subsection{Cifrari a trasposizione} Permutano le lettere del messaggio in chiaro secondo una regola prefissata.\\
+L'idea di base è eliminare qualsiasi struttura linguistica presente nel crittogramma: permutando le lettere del messaggio in chiaro e inserendone eventualmente altre ignorate nella decifrazione.
+\paragraph{Semplice} La chiave è un intero $h$ e una permutazione $\pi$ degli interi $\{1,2,\ldots,h\}$\\
+Nella cifratura si suddivide il messaggio in $m$ blocchi da $h$ lettere e si permutano le lettere di ciascun blocco secondo $\pi$.\\
+Se la lunghezza di $m$ non è divisibile per $h$, si aggiungono alla fine delle lettere qualsiasi (padding): partecipano alla trasposizione, ma sono ignorate perché la decifrazione le riporta alla fine del messaggio.\\
+Ci sono $h! -1$ chiavi ed $h$ non è fissato a priori: tanto è più grande tanto è più difficile impostare un brute force. Al crescere di $h$ però cresce anche la difficoltà di ricordare $\pi$.
+\paragraph{Permutazione di colonne} $k=\langle c,r,\pi\rangle$ con:\begin{list}{}{}
+	\item $c$ ed $r$ denotano il numero di colonne e righe di una tabella di lavoro $T$
+	\item $\pi$ è una permutazione degli interi $\{1,2,\ldots,c\}$
+\end{list}
+Il messaggio $m$ è decomposto in blocchi $m_1,m_2\ldots$ di $c\cdot r$ caratteri.\\
+Nella cifratura i caratteri di ogni blocco sono distribuiti tra le celle di T in modo regolare, scrivendoli per righe dall'alto verso il basso. Poi le colonne vengono permutate secondo $\pi$ e si prendono le colonne dalla prima leggendole dall'alto verso il basso e da sinistra verso destra, ottenendo il crittogramma.
+\begin{center}
+	\includegraphics[scale=0.4]{7.png}
+\end{center}
+Per cifrare il prossimo blocco, si azzera T e si ripete il procedimento.\\
+Le chiavi sono teoricamente esponenziali nella lunghezza del messaggio, non essendoci vincoli su $r$ e $c$.
+\paragraph{Cifrario a griglia} Antenato: cifrario di Richelieu. Il crittogramma può essere celato in un libro qualsiasi. La chiave è data da una scheda perforata e dall'indicazione di una pagina del libro: la decifrzione consiste nel sovrapporre la scheda alla pagina, e le lettere visibili attraverso i fori costituiscono il messaggio in chiaro.
+\section{Crittoanalisi Statistica} La sicurezza di un cifrario è legata alla dimensione dello spazio delle chiavi. Ci sono altri metodi di attacco: i cifrari storici sono stati violati con un attacco statistico di tipo cipher text.\\
+Nella crittoanalisi statistica si fanno delle ipotesi. Ci sono delle \textbf{informazioni note al crittoanalista}: il metodo usare per la cifratura e la decifrazionem, il linguaggio naturale con cui è scritto il messaggio e si ammette che il messaggio sia sufficientemente lungo per poter rilevare alcuni dati statistici sui caratteri che compongono il crittogramma.
+\paragraph{Attacco} La frequenza con cui appaiono in media le varie lettere dell'alfabeto è ben studiata in ogni lingua. Dati simili sono noti per le frequenze di diagrammi (gruppi di due lettere consecutive), trigrammi (gruppi di tre lettere) e così via (\textbf{q-grammi}).
+\paragraph{Decifrazione cifrari monoalfabetici}
+Se un crittogramma è generato per sostituzione monoalfabetica allora la frequenza di Y nel crittogramma è circa la frequenza della corrispondente X del messaggio.\\
+Nei \textbf{cifrari completi} si associano le lettere in base alle frequenze, provando le varie combinazioni. Con le combinazioni di prova, si studiano le frequenze dei possibili diagrammi, dei trigrammi e così via.
+\paragraph{Decifrazione cifrari polialfabetici} Più difficile. Per esempio in Vigenère ogni lettera Y del crittogramma dipende da una coppia di lettere $\langle$X, K$\rangle$ provenienti dal messaggio e dalla chiave.\\
+Se la chiave è di $h$ caratteri, il crittogramma è composto di $h$ sottosequenze, ciascuna ottenuta per sostituzione monoalfabetica. Il problema è scoprire $h$ per scomporre il crittogramma e continuare la decifrazione con il metodo monoalfabetico.\\
+Quindi il messaggio contiene quasi sicuramente gruppi di lettere adiacenti ripetuti più volte. Le apparizioni della stessa sottosequenza allineate con la stessa porzione di chiave danno sottosequenze identiche. Si cercano nel crittogramma coppie di posizioni $p_1$, $p_2$ in cui indiziano sottosequenze identiche. La distanza $d = p_2 - p_1$ è \textit{probabilmente} uguale ad $h$ o ad un suo multiplo.
+\paragraph{Decifrazione di cifrari a trasposizione}
+Le lettere nel crittogramma sono le stesse del messaggio in chiaro, non ha senso un attacco statistico basato sulle frequenze: si studiano i q-grammi\\
+Se si conosce la lunghezza $h$ della chiave, si divide il crittogramma in porzioni di lunghezza $h$, in ciascuna si cercano gruppi di $q$ lettere che formano i q-grammi più diffusi. se un gruppo deriva effettivamente da un q-gramma, si scopre parte della permutazione.
+\paragraph{Conclusione} La rilevazione delle frequenze delle singole lettere del crittogramma è un potente indizio per discernere tra i vari tipi di cifrario:
+\begin{list}{}{}
+	\item nei cifrari a trasposizione, l'istogramma delle frequenze coincide circa con quello proprio del linguaggio
+	\item nei cifrari a sostituzione monoalfabetica, i due istogrammi coincidono a meno di una permutazione delle lettere
+	\item nei cifrari a sostituzione polialfabetica, l'istogramma del crittogramma è assai più appiattito di quello del linguaggio
+\end{list}
 \end{document}
