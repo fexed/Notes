@@ -1244,5 +1244,20 @@ Si presenta spesso il problema di decidere se una dipendenza funzionale appartie
 Dato R$\langle$T, F$\rangle$ e X $\subseteq$ T, la \textbf{chiusura di X rispetto ad F}, denotata con X$_F^+$ (o X$^+$ se F è chiaro dal contesto) è X$_F^+$ = $\{$A$_i\in$ T $|$ F $\vdash$ X $\rightarrow$ A$_i\}$
 \paragraph{Problema dell'implicazione} Controllare se una DF V $\rightarrow$ W $\in$ F$^+$.\\
 Un algoritmo efficiente per risolverlo senza calcolare F$^+$ parte dal seguente \textbf{teorema}: F $\vdash$ X $\rightarrow$ Y $\Leftrightarrow$ Y $\subseteq$ X$_F^+$
-% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf p.46, algoritmo
+\subparagraph{Idea} Sia X un insieme di attributi e F un insieme di dipendenze. Vogliamo calcolare X$_F^+$.
+\begin{enumerate}
+	\item Inizializziamo X$^+$ con l'insieme X
+	\item Se fra le dipendenze di F c'è una dipendenza Y $\rightarrow$ A con Y $\subseteq$ X$^+$ allora si inserisce A in X$^+$ ossia X$^+$ = X$^+\cup\{$A$\}$
+	\item Si ripete 2. fino a quando non ci sono altri attributi da aggiungere a X$^+$
+	\item Output X$_F^+$ = X$^+$
+\end{enumerate}
+\paragraph{Chiavi e attributi primi} Dato lo schema R$\langle$T, F$\rangle$, diremo che un insieme di attributi W $\subseteq$ T è una \textbf{chiave candidata} di R se
+\begin{list}{}{}
+	\item W \textbf{superchiave}, cioè W $\rightarrow$ T $\in$ F$^+$
+	\item V $\subset$ W $\Rightarrow$ V non superchiave, cioè $\forall$ V $\subset$ W, V $\rightarrow$ T $\not\in$ F$^+$
+\end{list}
+\textbf{Attributo primo}: attributo che appartiene ad almeno una chiave.\\\\
+Il problema di trovare tutte le chiavi di una relazione richiede un algoritmo di complessità esponenziale nel caso peggiore.\\
+Il problema di controllare se un attributo è primo è NP-Completo.
+% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf, p.56
 \end{document}
