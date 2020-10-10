@@ -1208,6 +1208,41 @@ Dato uno schema R(T) e X, Y $\subseteq$ T, una \textbf{dipendenza funzionale} (D
 \end{center}
 Impiegato $\rightarrow$ Stipendio\\
 Progetto $\rightarrow$ Bilancio\\
-Impiegato Progetto $\rightarrow$ Funzione
-% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf, p. 21
+Impiegato Progetto $\rightarrow$ Funzione\\\\
+Le \textbf{dipendenze funzionali sono una proprietà semantica}, cioè \textbf{dipendono dai fatti rappresentati} e non dalla rappresentazione degli attributi negli schemi.
+\paragraph{Notazione} Con R$\langle$T, F$\rangle$ si denota uno schema con attributi T e dipendenze funzionali F.\\
+Si parla di dipendenza funzionale \textbf{completa} quando X $\rightarrow$ Y e $\forall$ W $\subset$ X non vale W $\rightarrow$ Y.\\
+Se X è una superchiave, allora X determina ogni altro attributo della relazione cioè X $\rightarrow$ T. Se X è chiave, allora X $\rightarrow$ T è una dipendenza funzionale completa.
+\paragraph{Proprietà} Da un insieme F di dipendenze funzionali, in generale altre dipendenze funzionali sono "implicate" da F. Per esempio (Matricola $\rightarrow$ CodFisc, CodFisc $\rightarrow$ Cognome allora Matricola $\rightarrow$ Cognome)
+\begin{list}{}{}
+	\item \textbf{Dipendenze implicate}: sia F un insieme di DF sullo schema R, diremo che F \textbf{implica logicamente} X $\rightarrow$ Y (F $|=$ X $\rightarrow$ Y) se ogni istanza $r$ di R che soddisfa F soddisfa anche X $\rightarrow$ Y
+	\item \textbf{Dipendenze banali}: implicate dal vuoto.\\
+	Ad esempio $\{\}\:|=\:X \rightarrow Y$
+\end{list}
+Come derivare le DF implicate logicamente da F? Usando un \textbf{insieme di regole d'inferenza}.
+\paragraph{Assiomi di Armstrong} Sono in realtà regole d'inferenza:
+\begin{list}{}{}
+	\item \textbf{Riflessività R}: Y $\subseteq$ X $\Rightarrow$ X $\rightarrow$ Y
+	\item \textbf{Arricchimento A}: X $\rightarrow$ Y $\wedge$ Z $\subseteq$ Y $\Rightarrow$ XZ $\rightarrow$ YZ
+	\item \textbf{Transitività T}: X $\rightarrow$ Y $\wedge$ Y $\rightarrow$ Z $\Rightarrow$ X $\rightarrow$ Z 
+\end{list}
+\paragraph{Derivazione} Sia F un insieme di DF. Diremo che \textbf{X $\rightarrow$ Y sia derivabile da F (F $\vdash$ X $\rightarrow$ Y)} se X $\rightarrow$ Y può essere inferito da F usando gli assiomi di Armstrong.\\
+Si dimostra che valgono anche le seguenti regole:
+\begin{list}{}{}
+	\item \textbf{Unione U}: $\{$X $\rightarrow$ Y, X $\rightarrow$ Z$\}\vdash$ X $\rightarrow$ YZ
+	\item \textbf{Decomposizione D}: Z $\subseteq$ Y $\{$X $\rightarrow$ Y $\}\vdash$ X $\rightarrow$ Z
+\end{list}
+Una derivazione di $f$ da F è una sequenza finita $f_1,\ldots,f_m$ di dipendenze, dove $f_m = f$ e ogni $f_i$ è un elemento di F oppure è ottenuta dalle precedenti dipendenze $f_1\ldots,f_{i-1}$ della derivazione usando una regola d'inferenza.
+\paragraph{Correttezza e completezza} Gli assiomi di Armstrong sono corretti e completi. Attraverso essi, si può dimostrare l'equivalenza della nozione di implicazione logica ($|=$) e di quella di derivazione ($\vdash$): \textbf{se una dipendenza è derivabile con gli assiomi di Armstrong, allora è anche implicata logicamente} (correttezza) e viceversa \textbf{se una dipendenza è implicata logicamente allora è anche derivabile dagli assiomi} (completezza).\\
+Formalmente:
+\begin{list}{}{}
+	\item $\forall\:f\:\:\:$ F $\vdash\:f\Rightarrow$ F $|=\:f$
+	\item $\forall\:f\:\:\:$ F $|=\:f\Rightarrow$ F $\vdash\:f$
+\end{list}
+\paragraph{Chiusura di un insieme F} Dato un insieme F di DF, la \textbf{chiusura di F}, denotata con F$^+$, è\\F$^+$ = $\{$X $\rightarrow$ Y $|$ F $\vdash$ X $\rightarrow$ Y$\}$\\
+Si presenta spesso il problema di decidere se una dipendenza funzionale appartiene a F$^+$ (\textbf{problema dell'implicazione}). La sua risoluzione con l'algoritmo banale (di generare F$^+$ applicando ad F ripetutamente gli assiomi di Armstrong) ha una \textbf{complessità esponenziale} rispetto al numero di attributi dello schema.\\\\
+Dato R$\langle$T, F$\rangle$ e X $\subseteq$ T, la \textbf{chiusura di X rispetto ad F}, denotata con X$_F^+$ (o X$^+$ se F è chiaro dal contesto) è X$_F^+$ = $\{$A$_i\in$ T $|$ F $\vdash$ X $\rightarrow$ A$_i\}$
+\paragraph{Problema dell'implicazione} Controllare se una DF V $\rightarrow$ W $\in$ F$^+$.\\
+Un algoritmo efficiente per risolverlo senza calcolare F$^+$ parte dal seguente \textbf{teorema}: F $\vdash$ X $\rightarrow$ Y $\Leftrightarrow$ Y $\subseteq$ X$_F^+$
+% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf p.46, algoritmo
 \end{document}
