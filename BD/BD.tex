@@ -1259,5 +1259,106 @@ Un algoritmo efficiente per risolverlo senza calcolare F$^+$ parte dal seguente 
 \textbf{Attributo primo}: attributo che appartiene ad almeno una chiave.\\\\
 Il problema di trovare tutte le chiavi di una relazione richiede un algoritmo di complessità esponenziale nel caso peggiore.\\
 Il problema di controllare se un attributo è primo è NP-Completo.
-% https://elearning.di.unipi.it/pluginfile.php/31320/mod_resource/content/1/5.Normalizzazione.pdf, p.56
+\section{Copertura Canonica}
+\paragraph{Copertura} Due insiemi di dipendenze funzionali F e G sullo schema R sono \textbf{equivalenti} F $\equiv$ G $\Leftrightarrow$ F$^+$ = G$^+$\\
+F $\equiv$ G $\Rightarrow$ F è una \textbf{copertura} di G (e G è una copertura di F).
+\paragraph{Attributo estraneo} Sia F un insieme di DF.\\
+Data una X $\rightarrow$ Y $\in$ F, si dice che X \textbf{contiene un attributo estraneo} A$_i$ $\Leftrightarrow$ (X - $\{$A$_i\}$) $\rightarrow$ Y $\in$ F$^+$, cioè\\F $\vdash$ (X - $\{$A$_i\}$) $\rightarrow$ Y\\
+Per verificare se A è estraneo in AX $\rightarrow$ B, calcoliamo X$^+$ e verifichiamo se include B, cioè se basta X a determinare B.
+\subparagraph{Un esempio} Consideriamo Orari(CodAula, NomeAula, Piano, Posti, Materia, CDL, Docente, Giorno, Ora)\\
+Se vale \begin{list}{}{}
+	\item Docente, Giorno, \textit{Ora} $\rightarrow$ CodAula
+	\item Docente, Giorno $\rightarrow$ \textit{Ora}
+\end{list}
+Allora \begin{list}{}{}
+	\item Docente, Giorno $\rightarrow$ CodAula
+\end{list}
+Nella prima dipendenza \textbf{\textit{Ora} è attributo estraneo}.
+\paragraph{Dipendenza ridondante} Sia F un insieme di DF.\\
+X $\rightarrow$ Y è una \textbf{dipendenza ridondante} $\Leftrightarrow$ (F - $\{$X $\rightarrow$ Y$\}$)$^+$ = F$^+$, cioè F - $\{$X $\rightarrow$ Y$\}$ $\vdash$ X $\rightarrow$ Y\\
+Per verificare se X $\rightarrow$ A è ridondante la eliminiamo da F, calcoliamo X$^+$ e verifichiamo se include A, ovvero se con la DF che restano riusciamo ancora a dimostrare che X determina A.
+\paragraph{Esempi}
+\begin{list}{}{}
+	\item F$_1$=$\{$A $\rightarrow$ B, AB $\rightarrow$ C, A $\rightarrow$ C$\}$\\
+	Ridondante perché $\{$A $\rightarrow$ B, AB $\rightarrow$ C$\}\Rightarrow$ A $\rightarrow$ C
+	\item F$_2$=$\{$A $\rightarrow$ B, AB $\rightarrow$ C$\}$\\
+	Non è ridondante, ma B è estraneo perché può essere eliminato dal primo membro della seconda dipendenza
+	\item F$_3$=$\{$A $\rightarrow$ B, A $\rightarrow$ C$\}$\\
+	Non presenta attributi estranei
+\end{list}
+\paragraph{Copertura canonica} F è detta copertura canonica $\Leftrightarrow$ \begin{list}{}{}
+	\item la parte destra di ogni DF $\in$ F è un attributo
+	\item non esistono attributi estranei
+	\item nessuna dipendenza è ridondante
+\end{list}
+\textbf{Teorema}: per ogni insieme F di DF esiste una copertura canonica.\\
+La copertura canonica si calcola così:
+\begin{list}{}{}
+	\item Trasformare le dipendenze nella forma X $\rightarrow$ A\\
+Si sostituisce l'insieme dato con quello equivalente che ha tutti i secondi membri costituiti da singoli attributi (\textbf{dipendenze atomiche})
+	\item Eliminare gli attributi estranei\\
+Per ogni dipendenza si verifica se esistono attributi eliminabili dal primo membro. Cioè $\forall$ X $\rightarrow$ A $\in$ F, verifichiamo se esiste Y $\subseteq$ X $|$ F $\equiv$ F - $\{$X $\rightarrow$ A$\}\cup\{$Y $\rightarrow$ A$\}$
+	\item Eliminare le dipendenze ridondanti
+\end{list}
+\section{Decomposizione di Schemi}
+In generale, per eliminare le anomalie da uno schema, occorre decomporlo in schemi più piccoli "equivalenti".
+\paragraph{Definizione} Dato uno schema R(T), $\rho$ = $\{$R$_1$(T$_1$),\ldots, R$_k$(T$_k$)$\}$ è una \textbf{decomposizione di R} $\Leftrightarrow$ T$_1$ $\cup$\ldots$\cup$ T$_k$ = T\\
+Una decomposizione deve avere due \textbf{proprietà desiderabili}:
+\begin{list}{}{}
+	\item \textbf{Conservazione dei dati} (nozione semantica)\\
+	Una decomposizione $\rho$ = $\{$R$_1$(T$_1$),\ldots, R$_k$(T$_k$)$\}$ di uno schema R(T) \textbf{preserva i dati} $\Leftrightarrow$ $\forall$ istanza \textbf{valida} $r$ di R si ha $r$ = $(\pi_{T_1}r)\vee\ldots\vee(\pi_{T_k}r)$\\
+	Dalla definizione di join naturale si ottiene un \textbf{teorema}: se $\rho$ = $\{$R$_1$(T$_1$),\ldots, R$_k$(T$_k$)$\}$ è una decomposizione su R(T) $\Rightarrow$ $\forall$ istanza $r$ di R si ha $r\subseteq(\pi_{T_1}r)\vee\ldots\vee(\pi_{T_k}r)$\\
+	Uno schema R(T) si \textbf{decompone senza perdita} negli schemi R$_1$(T$_1$) ed R$_2$(T$_2$) se, per ogni possibile istanza $r$ di R(T), il \textbf{join naturale delle proiezioni di $r$ su T$_1$ ed T$_2$ produce la tabella di partenza} (cioè senza ennuple spurie.\\
+	Cioè $\pi_{T_1}(r)\bowtie\pi_{T_2}(r) = r$. La decomposizione senza perdita è garantita se l'insieme degli attributi comuni alle due relazioni (T$_1\cap$T$_2$) è \textbf{chiave per almeno una delle due relazioni decomposte}. Questo perché:
+	\begin{list}{}{}
+		\item Supponiamo $r$ relazione sugli attributi ABC, consideriamo le sue proiezioni $r_1$ su AB e $r_2$ su AC.
+		\item Supponiamo $r$ soddisfi la DF A $\rightarrow$ C, allora \textbf{A è chiave per $r_1$ su AC}, quindi non ci sono in tale proiezione due tuple diverse sui gli stessi valori di A.
+		\item Il join costruisce tuple a partire dalle tuple nelle proiezioni.
+		\item Sia $t = (a, b, c)$ una tupla del join di $r_1$ ed $r_2$, mostriamo che appartiene ad $r$ (cioè non è spuria): \begin{list}{}{}
+			\item $t$ è ottenuta tramite join da $t_1 = (a, b)$ di $r_1$ e $t_2 = (a, c)$ su $r_2$
+			\item Allora per definizione di proiezione esistono due tuple in $r$ $t'_1=(a, b, *)$ e $t'_2=(a, *, c)$, dove $*$ sta per valore non noto.
+			\item Dato che A $\rightarrow$ C in $r$ allora $\exists$ un solo valore in C associato al valore $a$. Dato che $(a, c)$ compare nella proiezione, questo valore è proprio $c$
+			\item Ma allora in $t'_1$ ci deve essere proprio $c$, quindi $(a, b, c) \in r$
+		\end{list}
+	\end{list}
+	\item \textbf{Conservazione delle dipendenze}\\
+	Dato lo schema R$\langle$T, F$\rangle$, la decomposizione $\rho = \{$R$_1$,\ldots, R$_n\}$ \textbf{preserva le dipendenze} $\Leftrightarrow$ l'\textbf{unione delle dipendenze in $\pi_{T_i}($F$)$ è una copertura di F}.\\
+	Il problema di stabilire se la decomposizione $\rho = \{$R$_1$,\ldots,R$_n\}$ preserva le dipendenze ha complessità di tempo polinomiale. Un \textbf{teorema} importante dice che dato $\rho = \{$R$_i\langle$T$_i$,F$_i\rangle\}$ una decomposizione di R$\langle$T, F$\rangle$ che \textbf{preserva le dipendenze} e tale che T$_j$ \textbf{sia una superchiave di R}, allora $\rho$ \textbf{preserva i dati}.
+\end{list}
+\paragraph{Qualità} Una decomposizione dovrebbe sempre soddisfare le seguenti \textbf{proprietà}:
+\begin{list}{}{}
+	\item la \textbf{decomposizione senza perdita}, che garantisce la ricostruzione delle informazioni originarie senza generazione di tuple spurie
+	\item la \textbf{conservazione delle dipendenze}, che garantisce il mantenimento dei vincoli d'integrità originari
+	\item \textbf{Soddisfacimento della FNBC}: ogni tabella prodotta deve essere in FNBC
+\end{list}
+\section{Forme Normali}
+Una \textbf{forma normale} è una \textbf{proprietà} di un DB relazionale che ne \textbf{garantisce la qualità}, cioè l'assenza di determinati effetti. Quando una relazione non è normalizzata presenta ridondanze e si presta a comportamenti poco desiderabili durante gli aggiornamenti. Ci sono vari tipi di forme normali:
+\begin{list}{}{}
+	\item \textbf{1FN}: impone una restrizione sul tipo di una relazione, in cui \textbf{ogni attributo ha un tipo elementare}
+	\item \textbf{2FN, 3FN e FNBC}: impongono \textbf{restrizioni sulle dipendenze}. FNBC/BCNF (Boyce-Codd) è la più naturale e \textbf{restrittiva}.
+\end{list}
+\subsection{FNBC} Una relazione $r$ è in FNBC se $\forall$ DF non banale X $\rightarrow$ Y definita su di essa, X \textbf{contiene una chiave K di $r$} (cioè è superchiave).\\
+La forma normale non richieve che i concetti in una relazione siano omogenei (solo proprietà direttamente associate alla chiave). L'intuizione è che se esiste in R una dipendenza X $\rightarrow$ A non banale ed X non è chiave, allora X modella l'identità di un'entità diversa da quelle modellate dall'intera R.
+\paragraph{Definizione} R$\langle$T,F$\rangle$ è in BCNF $\Leftrightarrow$ $\forall$ X $\rightarrow$ A $\in$ F$^+$, con A $\not\in$ X (non banale), X è una superchiave
+\subparagraph{Teorema} R$\langle$T,F$\rangle$ è in BCNF $\Leftrightarrow$ $\forall$ X $\rightarrow$ A $\in$ F non banale, X è una superchiave
+\paragraph{L'algoritmo di analisi} R$\langle$T,F$\rangle$ è decomposta in R$_1$(X, Y) e R$_2$(X, Z) e su di esse si repete il procedimento, esponenziale.
+\paragraph{} A vole la decomposizione per raggiungere la BCNF può risultare difficile o impossibile, ed occorre quindi ricorrere ad una forma normale indebolita.
+\subsection{3FN}
+Una relazione $r$ è in 3NF se $\forall$ DF non banale X $\rightarrow$ Y definita su $r$, è verificata almeno una delle seguenti condizioni:
+\begin{list}{}{}
+	\item X contiene una chiave K di $r$ (come nella BCNF)
+	\item ogni attributo in Y è contenuto in almeno una chiave K di $r$
+\end{list}
+Meno restrittiva della FNBC: tollera alcune ridondanze e certifica meno la qualità dello schema ottenuto, ma è \textbf{sempre ottenibile} qualunque sia lo schema di partenza. Basta usare l'algoritmo di normalizzazione in TFN.
+\subsection{Algoritmo di Sintesi (versione base)}
+\paragraph{Input} Insieme R di attributi e insieme F di dipendenze su R
+\paragraph{Output} Decomposizione $\rho = \{$S$_i\}_{i=1\ldots n}$ di R tale che preservi i dati e le dipendenze ed ogni S$_i$ sia in 3NF rispetto alle proiezioni di F su S$_i$.
+\begin{enumerate}
+	\item Trova una copertura canonica G di F e poni $\rho = \{\}$
+	\item Sostituisci in G ogni insieme X $\rightarrow$ A$_1$, \ldots, X $\rightarrow$ A$_h$ di dipendenze con lo stesso determinante con la dipendenza X $\rightarrow$ A$_1$\ldots A$_h$
+	\item Per ogni dipendenza X $\rightarrow$ Y in G metti uno schema con attributi XY in $\rho$
+	\item Elimina da $\rho$ ogni schema che sia contenuto in un altro schema di $\rho$
+	\item Se la decomposizione non contiene alcuno schema i cui attributi costituiscano una superchiave per R, aggiungi ad essa lo schema con attributi W, con W una chiave di R.
+\end{enumerate}
+%TODO https://elearning.di.unipi.it/pluginfile.php/31312/mod_resource/content/2/9.RealizzazioneDBMS_Parte_I.pdf
 \end{document}
