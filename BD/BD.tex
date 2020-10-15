@@ -1341,7 +1341,7 @@ Una \textbf{forma normale} è una \textbf{proprietà} di un DB relazionale che n
 La forma normale non richieve che i concetti in una relazione siano omogenei (solo proprietà direttamente associate alla chiave). L'intuizione è che se esiste in R una dipendenza X $\rightarrow$ A non banale ed X non è chiave, allora X modella l'identità di un'entità diversa da quelle modellate dall'intera R.
 \paragraph{Definizione} R$\langle$T,F$\rangle$ è in BCNF $\Leftrightarrow$ $\forall$ X $\rightarrow$ A $\in$ F$^+$, con A $\not\in$ X (non banale), X è una superchiave
 \subparagraph{Teorema} R$\langle$T,F$\rangle$ è in BCNF $\Leftrightarrow$ $\forall$ X $\rightarrow$ A $\in$ F non banale, X è una superchiave
-\paragraph{L'algoritmo di analisi} R$\langle$T,F$\rangle$ è decomposta in R$_1$(X, Y) e R$_2$(X, Z) e su di esse si repete il procedimento, esponenziale.
+\paragraph{L'algoritmo di analisi} R$\langle$T,F$\rangle$ è decomposta in R$_1$(X, Y) e R$_2$(X, Z) e su di esse si ripete il procedimento, esponenziale.
 \paragraph{} A vole la decomposizione per raggiungere la BCNF può risultare difficile o impossibile, ed occorre quindi ricorrere ad una forma normale indebolita.
 \subsection{3FN}
 Una relazione $r$ è in 3NF se $\forall$ DF non banale X $\rightarrow$ Y definita su $r$, è verificata almeno una delle seguenti condizioni:
@@ -1360,5 +1360,40 @@ Meno restrittiva della FNBC: tollera alcune ridondanze e certifica meno la quali
 	\item Elimina da $\rho$ ogni schema che sia contenuto in un altro schema di $\rho$
 	\item Se la decomposizione non contiene alcuno schema i cui attributi costituiscano una superchiave per R, aggiungi ad essa lo schema con attributi W, con W una chiave di R.
 \end{enumerate}
-%TODO https://elearning.di.unipi.it/pluginfile.php/31312/mod_resource/content/2/9.RealizzazioneDBMS_Parte_I.pdf
+\chapter{DBMS}
+Un DBMS deve gestire grandi quantità di dati persistenti e condivisi. La gestione richiede \textbf{particolare attenzione ai problemi di efficienza}, come l'ottimizzazione delle richieste ma non solo.\\
+La \textbf{persistenza} e la \textbf{condivisione} richiedono che un DBMS fornisca dei \textbf{meccanismi per garantire l'affidabilità dei dati} (\textbf{fault tolerance}), per il \textbf{controllo degli accessi} e per il \textbf{controllo della concorrenza}. Diverse altre funzionalità vengono messe a disposizione per motivi di efficacia, ovvero per semplificare la descrizione dei dati, lo sviluppo delle applicazioni, l'amministrazione del DB\ldots
+\paragraph{Condivisione dei dati} La \textbf{gestione integrata} e la \textbf{condivisione dei dati} permettono di evitare le ripetizioni (ridondanza dovuta a copie multiple dello stesso dato) e quindi di \textbf{evitare un inutile spreco di risorse} (memoria).\\
+Inoltre, la \textbf{ridondanza può dare luogo a problemi di inconsistenza} delle copie e comporta la necessità di propagare le modifiche, con un ulteriore spreco di risorse (CPU e rete).
+\paragraph{Modello dei dati} Dal punto di vista utente, un DB è visto come una collezione di dati che modellano una certa porzione della realtà di interesse.\\
+L'\textbf{astrazione logica} con cui i dati vengono resi disponibili all'utente \textbf{definisce un modello dei dati}. Più precisamente: \textbf{un modello dei dati è una collezione di concetti che vengono utilizzati per descrivere i dati, le loro associazioni/relazioni ed i vincoli che questi devono rispettare}.\\
+Un \textbf{ruolo di primaria importanza} nella definizione di un modello dei dati è svolto dai \textbf{meccanismi che possono essere usati per strutturare i dati} (tipo i costruttori di tipo in un linguaggio di programmazione). Per esempio, ci sono modelli in cui i dati sono descritti solo sotto forma di albero (modello \textbf{gerarchico}), di grafi (modello \textbf{reticolare}), di oggetti complessi (modello \textbf{a oggetti}), di relazioni (modello \textbf{relazionale}).
+\paragraph{Indipendenza fisica e logica} Tra gli obiettivi di un DBMS, vi sono quelli di fornire caratteristiche di
+\begin{list}{}{}
+	\item \textbf{Indipendenza fisica} dei dati: dipende da considerazioni legate all'efficienze delle organizzazioni adottate. \textbf{La riorganizzazione fisica dei dati non deve comportare effetti collaterali sui programmi applicativi}.
+	\item \textbf{Indipendenza logica}: permette di \textbf{accedere ai dati logici indipendentemente dalla loro rappresentazione fisica}.
+\end{list}
+\pagebreak
+\paragraph{Architettura semplificata di un DBMS}
+\begin{center}
+	\includegraphics[scale=0.45]{dbmsstrutt.png}\\
+	\includegraphics[scale=0.45]{dbmslogfis.png}
+\end{center}
+\paragraph{Gerarchia di memoria} La memoria in un sistema di calcolo è organizzata in una gerarchia: al livello più alto ci sono memorie di piccola dimensione, molto veloci e costose, mentre più si scende più la dimensione aumenta e si riducono velocità e costi.\\
+Le prestazioni si misurano in termini di tempo di accesso
+\begin{center}
+\textsl{Tempo di accesso} = \textsl{latenza} + $\frac{\textsl{dimensione dati da trasferire}}{\textsl{velocità di trasferimento}}$
+\end{center}
+A causa delle dimensioni, un DB solitamente risiede sui dischi. I dati devono essere trasferiti in memoria centrale per essere elaborati dal DBMS: il \textbf{trasferimento non avviene a singole tuple ma a blocchi}, anche detti pagine.\\\\
+\pagebreak
+Spesso le operazioni di I/O costituiscono il \textbf{collo di bottiglia di un sistema}, quindi è necessario \textbf{ottimizzare l'implementazione fisica del DB} attraverso:
+\begin{list}{}{}
+	\item Organizzazione efficiente delle tuple su disco
+	\item Struttura di accesso efficienti
+	\item Gestione efficiente dei buffer in memoria
+	\item Strategie di esecuzione efficienti per le query
+\end{list}
+\paragraph{Gestore di memoria permanente} Fornisce un'astrazione della memoria permanente in termini di insiemi di file logici, di pagine fisiche e di blocchi, nascondendo le caratteristiche dei dischi e del sistema operativo.
+\paragraph{Gestore del buffer} Si preoccupa del trasferimento delle pagine tra la memoria temporanea e la memoria permanente, offrendo agli altri livelli una visione della memoria permanente come un insieme di pagine utilizzabili in memoria temporanea, astraendo da quando esse vengano trasferite dalla memoria permanente al buffer e viceversa.\\
+Nei DBMS, la LRU per rimpiazzare le pagine non è sempre una buona scelta. Per alcune query, il "pattern di accesso" ai dati è noto e quindi può essere utilizzato per operare scelte più accurate, in grado di migliorare anche di molto le prestazioni.
 \end{document}
