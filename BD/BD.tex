@@ -1410,5 +1410,83 @@ Nei DBMS, la LRU per rimpiazzare le pagine non è sempre una buona scelta. Per a
 	\item Occupazione di memoria
 	\item Costo delle operazioni di: ricerca, modifica, inserzione, cancellazione
 \end{list}
-% https://elearning.di.unipi.it/pluginfile.php/31487/mod_resource/content/1/9.RealizzazioneDBMS_ParteIIIa.pdf
+\paragraph{Ordinamento di archivi} Ordinare gli archivi è importante per eseguire alcune operazioni relazionali (JOIN, SELECT DISTINCT, GROUP BY) e per avere risultati ordinati dalle interrogazioni (ORDER BY).
+\subparagraph{Algoritmo} L'algoritmo utilizzato costa N$\cdot\log$(N): è lo Z-way merge sort (merge sort a Z vie).\\
+Supponiamo di dover ordinare un input che consiste in un file di NP pagine e di avere a disposizione solo NB $<$ NP buffer in memoria centrale. L'algoritmo opera in due fasi:
+\begin{list}{}{}
+	\item \textbf{Sort interno}: si leggono una alla volta le pagine del file. I \textbf{record di ogni pagina sono ordinati facendo uso di un algoritmo di sort interno} (es: quicksort). \textbf{Ogni pagina così ordinata}, detta anche \textbf{run}, \textbf{viene scritta su disco} in un file \textbf{temporaneo}.
+	\item \textbf{Merge}: operando \textbf{uno o più passi di fusione} le \textbf{run vengono fuse fino a produrne una sola}.
+\end{list}
+Per la \textbf{complessità}, consideriamo il solo numero di operazioni I/O al caso base Z = 2 e NB = 3. Si osserva che:
+\begin{list}{}{}
+	\item Nella fase di sort interno si leggono e riscrivono NP pagine
+	\item Ad ogni passo di merge si leggono e riscrivono NP pagine\\
+	Il numero di passi di fusione è pari a $\lceil\log_2$NP$\rceil$, in quanto ad ogni passo il numero di run si dimezza.
+	\item Il \textbf{costo complessivo} è pertanto $2\cdot$NP$\cdot(\lceil\log_2$NP$\rceil+1)$
+\end{list}
+Al caso generale, possiamo osservare che nel passo di sort interno si possono ordinare NB pagine alla volta invece che una sola, il che abbassa il costo a $2\cdot$NP$\cdot(\lceil\log_2$(NP/NB)$\rceil+1)$\\\\
+Oltre che per ordinare le tuple, il sort può essere usato per le query dove compare DISTINCT, per eliminare i duplicati, oppure anche per le query contenenti GROUP BY.
+\subsection{Piani di accesso}
+\paragraph{Esecuzione di un'interrogazione}
+\begin{enumerate}
+	\item Analisi lessicale e sintattica del comando SQL Q\\
+	\texttt{SQLCommand parseTree = Parser.parseStatement(Q);}
+	\item Analisi semantica del comando\\
+	\texttt{Type type = parseTree.check();}
+	\item Ottimizzazione dell'interrogazione\\
+	\texttt{Value pianoDiAccesso = parseTree.Optimize();}
+	\item Esecuzione del piano di accesso
+\end{enumerate}
+\begin{multicols}{2}
+	\begin{center}
+		\includegraphics[scale=0.5]{ottimizz.png}
+	\end{center}
+	\columnbreak
+	\textbf{Analisi e semplificazione}: verifica la correttezza del comando, normalizzazione e semplificazione della condizione.\\
+	\textbf{Piano di accesso}: \textbf{scelta} dell'algoritmo per eseguire ogni operatore: \textbf{Ideale}, trovare il piano migliore, ed \textbf{Euristica}, evitare i piani peggiori.
+	\begin{lstlisting}
+	SELECT	Nome
+	FROM	Studenti S, Esami E
+	WHERE	S.Matricola = E.Matricola
+		AND Provincia = "PI"
+		AND VOTO > 25
+	\end{lstlisting}
+	\begin{center}
+		\includegraphics[scale=0.5]{ottimizzazese.png}\\
+		\includegraphics[scale=0.5]{ottimizzazese2.png}
+	\end{center}
+	Le foglie sono le tabelle ed i nodi interni specificano le modalità con cui gli accessi alle tabelle e le operazioni relazionali sono effettuate.
+\end{multicols}
+\pagebreak
+\paragraph{Realizzazione degli operatori relazionali} Si considerano gli operatori di: proiezione, selezione, raggruppamento, join.\\
+Un \textbf{operatore può essere realizzato con algoritmi diversi}, \textbf{codificati in opportuni operatori fisici}.
+\paragraph{Operatori fisici} Gli algoritmi per realizzare gli operatori relazionali si codificano in opportuni operatori fisici. Ad esempio, \texttt{TableScan(R)} è l'operatore fisico per la scansione di R.\\
+Ogni operatore fisico è un \textbf{iteratore}, cioè un \textbf{oggetto con metodi} \texttt{open}, \texttt{next}, \texttt{isDone}, \texttt{reset} e \texttt{close}, realizzati usando gli operatori della macchina fisica e con \texttt{next} che ritorna un record.\\
+Prenderemo come esempio gli operatori fisici del sistema JRS, usandoli per descrivere un algoritmo che esegue un'interrogazione SQL.
+\begin{list}{}{}
+	\item \texttt{open}: inizializza lo stato dell'operatore,  alloca buffer per gli input e l’output, richiama ricorsivamente open sugli operatori figli; viene anche usato per passare argomenti (ad es. la condizione che un operatore \texttt{Filter} deve applicare)
+	\item \texttt{next}: usato per richiedere un’altra tupla del risultato dell’operatore. L’implementazione di questo metodo include \texttt{next} sugli operatori figli e codice specifico dell’operatore
+	\item \texttt{close}: usato per terminare l’esecuzione dell’operatore, con conseguente rilascio delle risorse ad esso allocate
+	\item \texttt{isDone}: indica se vi sono ancora valori da leggere, in genera è booleano.
+\end{list}
+Il \textbf{piano di accesso} quindi, cioè l'algoritmo che viene usato per eseguire un'interrogazione usando gli operatori fisici disponibili, è rappresentato da un albero del tipo
+\begin{center}
+	\includegraphics[scale=0.75]{ottimizzazese2.png}
+\end{center}
+\begin{tabular}{c | l}
+\textbf{Operatore logico} & \textbf{Operatore fisico}\\
+\hline
+R & \makecell[l]{\texttt{TableScan(R)} per la scansione di R\\\texttt{IndexScan(R, Idx)} per la scansione di R con l'indice Idx\\\texttt{SortScan(R, \{A$_i$\})} per la scansione di R ordinata sugli \{A$_i$\}}\\
+\hline
+\makecell{$\pi^b_{\{A_i\}}$\\$\pi_{\{A_i\}}$} & \makecell[l]{\texttt{Project(O, \{A$_i$\})} per la proiezione dei record i O senza l'eliminazione dei duplicati\\\texttt{Distinct(O)} per eliminare i duplicati dei record ordinati da O}\\
+\hline
+$\sigma_\psi$ & \makecell[l]{\texttt{Filter(O, $\psi$)} per la restrizione senza indici dei record di O\\\texttt{IndexFilter(R, Idx, $\psi$)} per la restrizione con indice dei record di R}\\
+\hline
+$\tau_{\{A_i\}}$ & \texttt{Sort(O, \{A$_i$\})} per ordinare i record di O sugli \{A$_i$\}, per valori crescenti\\
+\hline
+$_{\{A_i\}}\gamma_{\{f_i\}}$ & \makecell[l]{\texttt{GroupBy(O, \{A$_i$\}, \{f$_i$\})} per raggruppare i record di O sugli \{A$_i$\} usando le\\funzioni di aggregazione in \{f$_i$\}.\\
+Nell'insieme \{f$_i$\} vi sono le funzioni di aggregazione presenti nella SELECT e nella HAVING.\\L'operatore ritorna record con attributi gli \{A$_i$\} e le funzioni in \{f$_i$\}\\I record di O sono ordinati sugli \{A$_i$\}}\\
+\hline
+$\bowtie_{\psi_j}$ & \makecell[l]{\texttt{NestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{nested loop} e $\psi_j$ condizione di join\\\texttt{PageNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{page nested loop}\\\texttt{IndexNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con l'\textbf{index nested loop}. L'operando interno O$_I$\\è un \texttt{IndexFilter(R, Idx, $\psi_j$)} oppure \texttt{Filter(O, $\psi'$)} con O un \texttt{IndexFilter(R, Idx, $\psi_j$)}.\\Per ogni record $r$ di O$_E$, la condizione $\psi_j$ dell'\texttt{IndexFilter} è quella di giunzione con\\gli attributi di O$_E$ sostituiti dai valori in $r$.\\\texttt{SortMerge(O$_E$, O$_I$, $\psi_j$)} per la giunzione con il \textbf{sort-merge}, con i record di O$_E$ e O$_I$ ordinati\\ sugli attributi di giunzione}
+\end{tabular}
 \end{document}
