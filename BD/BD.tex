@@ -17,7 +17,7 @@
 	keywordstyle=\bfseries,
 	identifierstyle=\ttfamily,
 	commentstyle=\color{mygray},
-	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION, FOR, EACH, ROW, DECLARE, BEFORE, AFTER, IF, TO, PRIVILEDGES},
+	morekeywords={database, REFERENCES, SCHEMA, AUTHORIZATION, PROCEDURE, WITH, CHECK, OPTION, FOR, EACH, ROW, DECLARE, BEFORE, AFTER, IF, TO, PRIVILEDGES, COMMIT, WORK, ROLLBACK},
 }
 
 \begin{document}
@@ -1426,8 +1426,7 @@ Per la \textbf{complessità}, consideriamo il solo numero di operazioni I/O al c
 \end{list}
 Al caso generale, possiamo osservare che nel passo di sort interno si possono ordinare NB pagine alla volta invece che una sola, il che abbassa il costo a $2\cdot$NP$\cdot(\lceil\log_2$(NP/NB)$\rceil+1)$\\\\
 Oltre che per ordinare le tuple, il sort può essere usato per le query dove compare DISTINCT, per eliminare i duplicati, oppure anche per le query contenenti GROUP BY.
-\subsection{Piani di accesso}
-\paragraph{Esecuzione di un'interrogazione}
+\section{Piani di accesso}
 \begin{enumerate}
 	\item Analisi lessicale e sintattica del comando SQL Q\\
 	\texttt{SQLCommand parseTree = Parser.parseStatement(Q);}
@@ -1457,7 +1456,6 @@ Oltre che per ordinare le tuple, il sort può essere usato per le query dove com
 	\end{center}
 	Le foglie sono le tabelle ed i nodi interni specificano le modalità con cui gli accessi alle tabelle e le operazioni relazionali sono effettuate.
 \end{multicols}
-\pagebreak
 \paragraph{Realizzazione degli operatori relazionali} Si considerano gli operatori di: proiezione, selezione, raggruppamento, join.\\
 Un \textbf{operatore può essere realizzato con algoritmi diversi}, \textbf{codificati in opportuni operatori fisici}.
 \paragraph{Operatori fisici} Gli algoritmi per realizzare gli operatori relazionali si codificano in opportuni operatori fisici. Ad esempio, \texttt{TableScan(R)} è l'operatore fisico per la scansione di R.\\
@@ -1489,4 +1487,114 @@ Nell'insieme \{f$_i$\} vi sono le funzioni di aggregazione presenti nella SELECT
 \hline
 $\bowtie_{\psi_j}$ & \makecell[l]{\texttt{NestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{nested loop} e $\psi_j$ condizione di join\\\texttt{PageNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{page nested loop}\\\texttt{IndexNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con l'\textbf{index nested loop}. L'operando interno O$_I$\\è un \texttt{IndexFilter(R, Idx, $\psi_j$)} oppure \texttt{Filter(O, $\psi'$)} con O un \texttt{IndexFilter(R, Idx, $\psi_j$)}.\\Per ogni record $r$ di O$_E$, la condizione $\psi_j$ dell'\texttt{IndexFilter} è quella di giunzione con\\gli attributi di O$_E$ sostituiti dai valori in $r$.\\\texttt{SortMerge(O$_E$, O$_I$, $\psi_j$)} per la giunzione con il \textbf{sort-merge}, con i record di O$_E$ e O$_I$ ordinati\\ sugli attributi di giunzione}
 \end{tabular}
+\section{Transazioni}
+Durante le transazioni vengono interessati il \textbf{gestore della concorrenza} e il \textbf{gestore dell'affidabilità}.\\
+Le \textbf{transazioni} rappresentano le \textbf{unità di lavoro elementare} (le insiemi di istruzioni SQL) che \textbf{modificano il contenuto di un DB}. Sintatticamente, una transazione è contornata dai comandi \texttt{BEGIN TRANSACTION} e \texttt{END TRANSACTION}, e all'interno possono comparire i comandi di \texttt{COMMIT WORK} e \texttt{ROLLBACK WORK}.
+\begin{lstlisting}
+BEGIN TRANSACTION
+UPDATE SalariImpiegati
+SET Conto = Conto - 10
+WHERE (CodiceImpiegato = 123)
+IF (Conto > 10) COMMIT WORK
+ELSE ROLLBACK WORK
+\end{lstlisting}
+\paragraph{ACID} Le transazioni devono godere delle proprietà ACID:
+\begin{list}{}{}
+	\item \textbf{Atomicità}: la transazione deve essere eseguita con la regola \textbf{tutto o niente}.
+	\item \textbf{Consistenza}: la transazione deve \textbf{lasciare il DB in uno stato consistente}, quindi \textbf{eventuali vincoli d'integrità non devono essere violati}.
+	\item \textbf{Isolamento}: ogni transazione deve essere \textbf{eseguita in maniera indipendente dalle altre}
+	\item Persistenza (\textbf{Durability}): l'\textbf{effetto di una transazione che ha fatto \texttt{COMMIT WORK} non deve essere perso}.
+\end{list}
+\paragraph{Funzioni del DBMS in breve}
+\begin{center}
+	\includegraphics[scale=0.75]{funzdbbreve.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Gestione dei dati}: cura la memorizzazione permanente dei dati ed il loro accesso
+	\item \textbf{Gestione del buffer}: cura il trasferimento dei dati da memoria di massa a memoria centrale, e il caching dei dati in memoria centrale
+	\item \textbf{Ottimizzazione delle interrogazioni}: seleziona il piano di accesso di costo ottimo con cui valutare ciascuna interrogazione
+\end{list}
+\pagebreak
+\section{Gestione dell'affidabilità}
+Una transazione è un'unità logica di elaborazione che corrisponde ad una serie di operazioni fisiche elementari (letture e scrittura) sul DB. Una \textbf{funzionalità essenziale} di un DBMS è la \textbf{protezione dei dati da malfuzionamenti e interferenze} dovute all'accesso contemporaneo ai dati da parte di più utenti.\\
+Per il \textbf{programmatore}, una \textbf{transazione} è un \textbf{programma sequenziale che il sistema deve eseguire garantendo}:
+\begin{list}{}{}
+	\item \textbf{Atomicità}: le transazioni che terminano prematuramente (\textbf{aborted transactions}) sono \textbf{trattate dal sistema come se non fossero mai iniziate}, pertanto eventuali effetti sul DB sono annullati.
+	\item \textbf{Persistenza}: le \textbf{modifiche} sulla base di dati di una transazione terminata normalmente sono permanenti, cioè \textbf{non sono alterabili} da eventuali malfunzionamenti.
+	\item \textbf{Serializzabilità}: nel caso di \textbf{esecuzioni concorrenti} di più transazioni, l'\textbf{effetto complessivo è quello di un'esecuzione seriale}.
+\end{list}
+Per aumentare l'efficiente prestazionale, tutti i DBMS utilizano un buffer temporaneo di informazioni in memoria principale, il quale viene periodicamente scritto su memoria secondaria.
+\begin{center}
+	\includegraphics[scale=0.5]{dbmsbuffer.png}
+\end{center}
+\paragraph{Transazione per il DBMS} Una transazione può eseguire molte operazioni sui dati recuperati da un DB, ma al DBMS interessano solo quelle di lettura o scrittura del DB indicate con $r_i[x]$ e $w_i[x]$.\\
+Un dato letto o scritto può essere un record, un campo di un record o una pagina. Per semplicità, supponiamo che sia una pagina.\\\\
+Un'operazione di lettura $r_i[x]$ comporta la lettura di una pagina nel buffer, se non già presente.\\
+Un'operazione di scrittura $w_i[x]$ comporta l'\textbf{eventuale lettura nel buffer di una pagina e la sua modifica nel buffer, ma non necessariamente la sua scrittura in memoria permanente}. Per questa ragione, in caso di malfunzionamento, si potrebbe perdere l'effetto dell'operazione.
+\paragraph{Malfunzionamenti}
+\begin{list}{}{}
+	\item \textbf{Fallimenti di transazioni}: non comportano la perdita di dati in memoria temporanea né persistente (es: violazione di vincoli, violazione di protezione, stallo\ldots)
+	\item \textbf{Fallimenti di sistema}: comportano la perdita di dati in memoria temporanea ma non in memoria persistente (es: comportamento anomalo del sistema, blackout, guasti hardware\ldots)
+	\item \textbf{Disastri}: comportano la perdita di dati in memoria permanente (es: danneggiamento di una periferica)
+\end{list}
+Il \textbf{gestore dell'affidabilità verifica che siano garantite le proprietà di atomicità e persistenza delle transazioni}. Responsabile di:\begin{list}{}{}
+	\item implementare i comandi di \texttt{BEGIN TRANSACTION}, \texttt{COMMIT} e \texttt{ROLLBACK}
+	\item ripristinare il sistema dopo malfunzionamenti software (\textbf{ripresa a caldo})
+	\item ripristinare il sistema dopo malfunzionamento hardware (\textbf{ripresa a freddo})
+\end{list}
+\paragraph{Primitive undo e redo} Partiamo da convenzioni notazionali: data una transazione T, indicheremo con B(T), C(T) e A(T) rispettivamente i record di begin, commit e abort relativi a T, e con U(T, O, BS, AS), I(T, O, AS) e D(T, O, BS) rispettivamente i record di update, insert e delete su un oggetto O dove BS è before state e AS è after state.\\
+\textbf{I record del log} associati ad una transazione \textbf{consentono di disfare e rifare le corrispondenti azioni} sul DB:
+\begin{list}{}{}
+	\item \textbf{Primitive di undo}: per \textbf{disfare} un'azione su un oggetto O è sufficiente ricopiare il O il valore BS (l'insert viene disfatto cancellando l'O inserito)
+	\item \textbf{Primitive di redo}: per \textbf{rifare} un'azione su un oggetto O è sufficiente ricopiare in O il valore AS (il delete viene rifatto cancellando l'O eliminato)
+\end{list}
+\paragraph{File di log} Il controllore dell'affidabilità usa \textbf{un log, dove sono indicate tutte le operazioni svolte dal DBMS}. Il file si presenta come una sequenza di record di due tipi:
+\begin{list}{}{}
+	\item \textbf{Record di transizione}: tengono traccia delle operazioni svolte da ciascuna transizione sul DBMS. Per ogni transazione, un record di begin (B), insert (I), delet (D) e update (U) e un record di commit (C) o di abort(A)
+	\item \textbf{Record di sistema}: tengono traccia delle operazioni di sistema (dump, checkpoint).\\
+	\textbf{Dump} produce una \textbf{copia completa} del DB, effettuata in mutua esclusione con tutte le altre transazioni quando il sistema non è operativo. La copia viene memorizzata in memoria stabile (backup). Al termine del dump, viene scritto nel log un record di dump che segnala l'avvenuta esecuzione dell'operazione in un dato istante. Il sistema quindi riprende il funzionamento normale.\\
+	\textbf{Checkpoint}, punto di allineamento: si scrive la marca CKP sul log per indicare che tutte le operazioni che la precedono sono state effettivamente effettuate sul DB. Un modo semplice:
+	\begin{list}{}{}
+		\item Si sospende l'attivazione di nuove transazioni
+		\item si completano le precedente e si allinea il DB (ovvero si scrivono su disco le pagine "sporche" del buffer)
+		\item si scrive la marca CKP nel log
+		\item si riprende l'esecuzione
+	\end{list}
+	Per non bloccare le transazioni, si può scrivere un BeginCKP e un EndCKP: tra di loro si copia su disco in parallelo alle normali operazioni, e le transazioni loggate nel mezzo possono essere o non essere state copiate su disco.
+\end{list}
+Contenuto:
+\begin{list}{}{}
+	\item \texttt{(T, begin)}
+	\item Per ogni operazione di modifica:
+	\begin{list}{}{}
+		\item la transazione responsabile
+		\item il tipo di ogni operazione eseguita
+		\item la nuova e vecchia versione del dato modificato\\
+		\texttt{(T, write, address, oldV, newV)}
+	\end{list}
+	\item \texttt{(T, commit)} o \texttt{(T, abort)}
+\end{list}
+\paragraph{Regole di scrittura}
+\begin{list}{}{}
+	\item \textbf{Write Ahead Log} (WAL): la parte BS di ogni record viene \textbf{scritta prima che la corrispondente operazione venga effettuata nella base di dati}.
+	\item \textbf{Commit Precedence}: la parte AS di ogni record di log viene \textbf{scritta prima di effettuare il commit della transazione}.
+\end{list}
+\paragraph{Ripresa}\begin{list}{}{}
+	\item Fallimenti di transazioni: si scrive \texttt{(T, abort)} su log e si fa l'undo
+	\item Fallimenti di sistema: DB ripristinato con il comando di \texttt{Restart} (ripartenza di emergenza), a partire dallo stato al punto di allineamento, procedendo così: le \textbf{T non terminate vengono disfatte}, e le \textbf{T terminate devono essere rifatte}.
+	\item Disastri: si riporta in linea la copia più recente del DB e la si aggiorna rifacendo le modifiche delle T terminate normalmente (ripartenza a freddo)
+\end{list}
+Per la \textbf{ripresa a caldo} ci sono quattro fasi
+\begin{enumerate}
+	\item Trovare l'ultimo checkpoint (percorrendo log a ritroso)
+	\item Costruire gli insiemi UNDO e REDO delle transazioni da disfare e rifare
+	\item Ripercorrere il log all'indietro, fino alla più vecchia delle transazioni in UNDO e REDO, disfacendo tutte le azioni delle transazioni in UNDO
+	\item Ripercorrere il log in avanti, rifacendo tutte le azioni delle transazioni REDO
+\end{enumerate}
+Nella \textbf{ripresa a freddo} si risponde ad un guasto che provoca il deterioramento del DB:
+\begin{list}{}{}
+	\item Si ripristinano i dati dal backup
+	\item Si eseguono le operazioni registrate sul giornale fino all'istante del guasto
+	\item Si esegue una ripresa a caldo.
+\end{list}
 \end{document}
