@@ -667,4 +667,68 @@ Se si conosce la lunghezza $h$ della chiave, si divide il crittogramma in porzio
 \end{list}
 %TODO Enigma
 %TODO Esercizi
+\chapter{Cifrari perfetti}
+Shannon, 1949
+\paragraph{Cifrario perfetto} Sono cifrari che ci offrono una \textbf{sicurezza incondizionata}, proteggono le informazioni con certezza assoluta indipendentemente dalla potenza di calcolo. Si rende \textbf{essenziale avere la chiave}, un'attacco \textbf{brute force non permette di decifrare}.\\
+Informalmente, un cifrario è perfetto se la \textbf{sicurezza è garantita qualunque sia l'informazione carpita dal canale di comunicazione}.\\
+Abbiamo quindi due spazi:
+\begin{list}{}{}
+	\item MSG: lo \textbf{spazio dei messaggi}
+	\item CRITTO: lo \textbf{spazio dei crittogrammi}
+\end{list}
+e due variabili aleatorie:
+\begin{list}{}{}
+	\item M: descrive il \textbf{comportamento del mittente}, con valori in MSG
+	\item C: descrive il \textbf{processo di comunicazione}, con valori in CRITTO
+\end{list}
+Ho delle probabilità:
+\begin{list}{}{}
+	\item P(M = $m$): probabilità che il mittente voglia spedire il messaggio $m$
+	\item P(M = $m$ $|$ C = $c$): probabilità condizionata che il messaggio inviato sia $m$ posto che sul canale stia transitando il crittogramma $c$
+\end{list}
+Con $\forall$ $m\in$ MSG e $\forall$ $c\in$ CRITTO.\\
+Scenario: il crittoanalista conosce tutto del sistema tranne la chiave, quindi conosce:
+\begin{list}{}{}
+	\item la distribuzione di probabilità con cui il mittente invia i messaggi
+	\item cifrario utilizzato
+	\item lo spazio delle chiavi (KEY)
+\end{list}
+\paragraph{Definizione} Un cifrario è perfetto se $\forall$ $m\in$ MSG e $\forall$ $c\in$ CRITTO, allora P(M = $m$) = P(M = $m$ $|$ C = $c$), cioè la conoscenza di $c$ non raffina la conoscenza.
+%TODO esempi
+In un cifrario perfetto, la conoscenza del crittoanalista non cambia dopo che è stato osservato un crittogramma in transito. Quindi \textbf{il messaggio ed il crittogramma appaiono del tutto scorrelati, nessuna informazione sul messaggio filtra dal crittogramma}.
+\subsection{Teorema di Shannon} In un cifrario perfetto il numero delle chiavi deve essere maggiore o uguale del numero dei messaggi possibili (cioè con probabilità non nulla di essere inviati)
+\paragraph{Dim} Per assurdo
+\begin{list}{}{}
+	\item $N_m$ = \# dei messaggi possibili, cioè $m\in$ MSG $|$ P(M = $m$) $>$ 0
+	\item $N_k$ = \# delle chiavi
+\end{list}
+\pagebreak
+Suppongo per assurdo che $N_k < N_m$. Suppongo $c\in$ CRITTO con P(C = $c$) $>$ 0. Conto i messaggi che possono corrispondere al crittogramma $\Rightarrow$ $s$ messaggi potenzialmente corrispondenti a $c$. Questi $s$ messaggi sono i messaggi che posso ottenere decifrando $c$ con ogni chiave possibile: con la chiave $k_1$ ottengo $m_1$, $k_2$ ottengo $m_2$, ma anche possibile che con $k_3$ ottenga di nuovo $m_2$ dato che non so come funziona il cifrario. Posso dire con certezza che $s \leq N_k$ e per ipotesi $N_k < N_m$\\
+Ottengo $s < N_m$ $\Rightarrow\:\exists\:m\in$ MSG con P(M = $m$) $>$ 0 $|$ P(M = $m$ $|$ C = $c$) = 0, ottenendo una conoscenza maggiore (posso escludere $m$) quindi il cifrario non è perfetto, ottenendo una \textbf{contraddizione}.
+\subsection{One-Time Pad}
+1917, Mauborgne, Vernam\\
+Usa l'alfabeto binario \{0,1\}, usato sia durante le guerre mondiali che durante la guerra fredda. L'idea è avere una chiave lunghissima consumata man mano e mai riutilizzata.\\
+MSG, CRITTO e KEY sono spazi di sequenze binarie. La regola è pubblica e usa lo xor. Quindi sia C che D usano lo xor (somma in modulo 2) per trasformare il messaggio nel crittogramma e viceversa.\\
+$m\in\{0,1\}^n$ e $k\in\{0,1\}^n$ con $n > 0$ fissato.\\
+$c = C(m, k) = m \oplus k$
+Con $n=5$, $m=10110$, $k=01011$ allora $c=11101$.\\La decifrazione $m = D(c,k) = c \oplus k = (m\oplus k)\oplus k) = m \oplus (k \oplus k) = m$ perché $k \oplus k = 0\ldots 0$\\
+\textbf{Fondamentale non riutilizzare la chiave}. Questo perché avendo $c', c''$ ottenuti con la stessa $k$ da $m',m''$, faccio $c'\oplus c'' = (m'\oplus k) \oplus (m''\oplus k) = m'\oplus m'' \oplus (k \oplus k) = m' \oplus m''$, acquisendo conoscenza (lunghi tratti di 0 significa tratti uguali nei messaggi in chiaro).
+\paragraph{Teorema} Quando il One-Time Pad è perfetto. Ipotesi:
+\begin{enumerate}
+	\item Tutti i messaggi hanno lunghezza $n$, con del padding o divisione in blocchi all'occorrenza
+	\item Tutte le sequenze di $n$ bit sono messaggi possibili (per quelle prive di senso probabilità molto bassa ma comunque $> 0$)
+	\item Chiave scelta \textbf{perfettamente a caso per ogni messaggio}
+\end{enumerate}
+Il \textbf{teorema} dice che sotto 1, 2 e 3 One-Time Pad è \textbf{un cifrario perfetto e minimale} (usa un numero minimo di chiavi)
+\subparagraph{Dim} Dimostro che è perfetto, cioè che $\forall$ $m\in$ MSG e $\forall$ $c\in$ CRITTO, allora P(M = $m$) = P(M = $m$ $|$ C = $c$)
+%TODO perché è matematica e non sto dietro
+\paragraph{Attacchi}
+\begin{list}{}{}
+	\item Bruteforce: non ha senso, ogni chiave fa ricostruire un messaggio possibile quindi non aggiunge conoscenza
+\end{list}
+Rimane il problema di generare le sequenze di bit completamente casuali.
+\paragraph{Osservazione} Rimuoviamo la seconda ipotesi nella dimostrazione. Per esempio in inglese i messaggi significativi sono circa $\alpha^n << 2^n$ con $\alpha = 1.1$\\
+Quindi $N_m = \alpha^n$, $N_k\geq N_m$ cioè $N_k\geq \alpha^n$, la chiave sarà una sequenza di $t$ bit con $t$ $|$ $2^t \geq \alpha^n$\\
+Risolvo trovando $t \geq \log_w \alpha^n = n \log_2 \alpha = 0.12\cdot n$\\\\
+Per confondere l'avversario è opportuno che coppie diverse $(m,k)$ producano lo stesso crittogramma $\Rightarrow$ \# coppie $(m,k) >>$ \# crittogrammi, cioè $\alpha^n 2^t >> 2^n$
 \end{document}
