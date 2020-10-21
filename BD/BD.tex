@@ -1597,4 +1597,176 @@ Nella \textbf{ripresa a freddo} si risponde ad un guasto che provoca il deterior
 	\item Si eseguono le operazioni registrate sul giornale fino all'istante del guasto
 	\item Si esegue una ripresa a caldo.
 \end{list}
+\paragraph{Ricapitolando} Gli algoritmi si differenziano a seconda del modo in cui si trattano le scritture sul DB e la terminazione delle transazioni: disfare-rifare, disfare-non rifare, non disfare-rifare, non disfare-non rifare.\\
+Per ipotesi, le scritture sul log sono riportate subito nella memoria permanente.
+\section{Gestione della concorrenza}
+\paragraph{Serializzazione} Uno schedule S si dice \textbf{seriale se le azioni di ciascuna transazione appaiono in sequenza} senza essere inframezzate da azioni di altre transazioni.\\
+S = \{T$_1$, \ldots, T$_n$\}\\
+Lo \textbf{schedule seriale è ottenibile se}:
+\begin{list}{}{}
+	\item Le \textbf{transazioni sono eseguite una alla volta} (scenario irrealistico)
+	\item Le \textbf{transazioni sono completamente indipendenti} l'una dall'altra (improbabile)
+\end{list}
+\subparagraph{ACID} Proprietà di isolamento delle transazioni.\\
+Il DBMS transazionale gestisce questi problemi garantendo la \textbf{proprietà di isolamento}: questa proprietà \textbf{garantisce che la transazione sia eseguita come se non ci fosse concorrenza}. Viene \textbf{assicurata facendo in modo che ciascun insieme di transazioni concorrenti sottoposte sia serializzabile}.
+\paragraph{Problematica} In un sistema reale, le \textbf{transazioni vengono eseguite in concorrenza} per questioni di efficienza e scalabilità. Tuttavia, l'esecuzione concorrente determina un \textbf{insieme di problematiche} che devono essere gestite. Un esempio:
+\begin{list}{}{}
+	\item \texttt{T1 = Read(x); x = x + 1; Write(x); COMMIT WORK}
+	\item \texttt{T2 = Read(x); x = x + 1; Write(x); COMMIT WORK}
+	\item Se \texttt{x} = 3, allora al termine delle due transazioni \texttt{x} = 5 (\textbf{esecuzione sequenziale}).\\
+	Nel caso di esecuzione concorrente invece si possono verificare tanti casi (ipotizzando \texttt{x} = 3 inizialmente):
+	\begin{list}{}{}
+		\item \textbf{Perdita di aggiornamento}
+		\begin{center}
+			\begin{tabular}{l | l}
+				T1 & T2\\
+				\hline
+				\texttt{Read(x)} & \\
+				\texttt{x = x + 1} & \\
+				& \texttt{Read(x)}\\
+				& \texttt{x = x + 1}\\
+				& \texttt{Write(x)}\\
+				& \texttt{COMMIT WORK}\\
+				& \textit{Scrive 4} \\
+				\texttt{Write(x)} & \\
+				\texttt{COMMIT WORK} & \\
+				\textit{Scrive 4} &
+			\end{tabular}
+		\end{center}
+		\item \textbf{Lettura sporca/impropria}\\
+		\texttt{T1 = Read(x); x = x + 1; Write(x); ROLLBACK WORK}\\
+		\texttt{T2 = Read(x); COMMIT WORK}
+		\begin{center}
+			\begin{tabular}{l | l}
+				T1 & T2\\
+				\hline
+				\texttt{Read(x)} & \\
+				\texttt{x = x + 1} & \\
+				\texttt{Write(x)} & \\
+				& \texttt{Read(x)}\\
+				& \texttt{COMMIT WORK}\\
+				& \textit{Legge 4} \\
+				\texttt{ROLLBACK WORK} &
+			\end{tabular}
+		\end{center}
+		\item \textbf{Letture inconsistenti}/\textbf{non riproducibili}\\
+		\texttt{T1 = Read(x); Read(x); COMMIT WORK}\\
+		\texttt{T2 = Read(x);  x = x + 1; Write(x); COMMIT WORK}
+		\begin{center}
+			\begin{tabular}{l | l}
+				T1 & T2\\
+				\hline
+				\texttt{Read(x)} & \\
+				\textit{Legge 3} & \\
+				& \texttt{Read(x)}\\
+				& \texttt{x = x + 1}\\
+				& \texttt{Write(x)}\\
+				& \texttt{COMMIT WORK}\\
+				\texttt{Read(x)} & \\
+				\texttt{COMMIT WORK} & \\
+				\textit{Legge 4}
+			\end{tabular}
+		\end{center}
+	\end{list}
+	Quindi l'\textbf{esecuzione concorrente di transazioni è essenziale per un buon funzionamento del DBMS}: deve garantire che l'esecuzione concorrente di transazioni avvenga senza interferenze in caso di accessi agli stessi dati.
+\end{list}
+\paragraph{Serialità} Un'esecuzione di un insieme di transazioni \{T$_1$, \ldots, T$_n$\} si dice \textbf{seriale} se $\forall$ coppia di transazioni T$_i$, T$_j$, tutte le operazioni di T$_i$ vengono eseguite prime di qualsiasi operazione di T$_j$ o viceversa.
+\paragraph{Serializzabilità} Un'esecuzione di un insieme di transazioni si dice \textbf{serializzabile} se produce lo stesso effetto sulla base di dati di quello ottenibile eseguendo serialmente, in un qualche ordine, le sole transazioni terminate normalmente.
+\paragraph{Controllo della concorrenza} Nella pratica i DBMS implementano tenchinche di controllo di concorrenza che garantiscono direttamente la serializzabilità delle transazioni concorrenti. Tali tecniche si dividono in due classi principali:
+\begin{list}{}{}
+	\item \textbf{Protocolli ottimistici}: \textbf{permettono l'esecuzione sovrapposta e non sincronizzata di transazioni} ed effettuano un \textbf{controllo sui possibili conflitti generati sono dopo il commit}.\\
+	Ogni transazione effettua liberamente le proprie operazioni sugli oggetti del DB secondo l'ordine temporale con cui le operazioni sono generate.\\
+	Al \textbf{commit}, viene \textbf{effettuato un controllo} per stabilire se sono stati riscontrati eventuali conflitti e, in caso, viene \textbf{effettuato il rollback delle azioni} delle transazioni e la relativa riesecuzione. In generale, un protocollo ottimistico è \textbf{basato su 3 fasi}:
+	\begin{list}{}{}
+		\item Fase di \textbf{lettura}: ogni transazione legge i valori degli oggetti del DB su cui deve operare e li memorizza in variabili locali (copie), dove sono effettuati gli eventuali aggiornamenti.
+		\item Fase di \textbf{validazione}: vengono effettuati dei controlli sulla serializzabilità nel caso che gli aggiornamenti locali delle transazioni dovessero essere propagati sul DB
+		\item Fase di \textbf{scrittura}: gli aggiornamenti delle transazioni che hanno superato la fase di validazione sono propagati definitivamente sugli oggetti del DB.
+	\end{list}
+	\item \textbf{Protocolli pessimistici}/conservativi: \textbf{tendono a ritardare l'esecuzione di transazioni che potrebbero generare conflitti}, e quindi anomalie, rispetto alla transazioni concorrente. Cercano di \textbf{prevenire}, e sono quelli usati nella pratica. Si dividono in due classi principali:
+	\begin{list}{}{}
+		\item Metodi \textbf{basati su lock}\\
+		I DBMS commerciali usano il meccanismo dei \textbf{lock}: per poter effettuare una qualsiasi operazione di lettura/scrittura su una risorsa (tabella o valore di una cella) è \textbf{necessario aver precedentemente acquisito il controllo, cioè il lock, sulla risorsa stessa}.
+		\begin{list}{}{}
+			\item \textbf{Lock in lettura}, per l'\textbf{accesso esclusivo}
+			\item \textbf{Lock in scrittura}, per la \textbf{mutua esclusione}
+		\end{list}
+		Ci possono essere lock a livello di riga, tabella o pagina (\textbf{multi granularità}), oltre che in lettura o scrittua (\textbf{multi modalità}).\\
+		Quando una risorsa è bloccata, le transazioni che ne richiedono l'accesso vengono messe in coda d'attesa: è un meccanismo efficace ma incide sulle prestazioni.
+		Un esempio di richiesta e rilascio del lock:
+		\begin{multicols}{2}
+			Codice utente
+			\begin{lstlisting}
+Transazione T0:
+	R(x)
+	W(y)
+			\end{lstlisting}
+			\columnbreak
+			Codice con lock
+			\begin{lstlisting}
+Transazione T0:
+	lockR(x)
+	R(x)
+	unlockR(x)
+	lockW(y)
+	W(y)
+	unlockW(y)
+			\end{lstlisting}
+		\end{multicols}
+		Il gestore della concorrenza del DBMS ha quindi il compito di stabilire l'ordine con cui vengono eseguite le singole operazioni per rendere serializzabile l'esecuzione di un insieme di transazioni.\\
+		\textbf{Definizione}: il protocollo di blocco a due fasi ristretto (\textbf{Strict Two Phase Locking}, 2PL) è definito dalle seguenti regole:
+		\begin{list}{}{}
+			\item Ogni transazione prima di effettuare un'operazione acquisisce il lock corrispondente.
+			\item Transazioni diverse non ottengono lock in conflitto
+			\item I lock si rilasciano al commit $\rightarrow$ \textbf{problema}: deadlock. Esempio:
+			\begin{multicols}{2}
+			\texttt{T1 = R(x); W(y); COMMIT WORK}\\
+			\texttt{T2 = R(y); W(x); COMMIT WORK}
+			\columnbreak
+			
+			\begin{tabular}{l | l}
+				T1 & T2 \\
+				\hline
+				\texttt{lockR(x)} & \\
+				& \texttt{lockR(y)} \\
+				\texttt{R(x)} & \\
+				& \texttt{R(y)} \\
+				\texttt{lockW(y)} & \\
+				& \texttt{lockW(y)} \\
+				\textit{Stallo} & \textit{Stallo}
+			\end{tabular}
+			\end{multicols}
+			Si può gestire con \textbf{tre tecniche}:
+			\begin{enumerate}
+				\item Uso dei \textbf{timeout}: \textbf{ogni operazione di una transazione ha un timeout} entro il quale deve essere completata, pena l'\textbf{abort dell'intera transazione}.\\
+\texttt{T1 = lockR(x, 4000); R(x); lockW(y, 2000); W(y); COMMIT WORK; unlock(x); unlock(y);}				
+				\item \textbf{Deadlock avoidance}: prevenire le configurazioni che potrebbero portare a deadlock: \textbf{lock/unlock di tutte le risorse contemporaneamente} oppure \textbf{utilizzo di timestamp/classi di priorità tra transazioni} (ma può portare a starvation)
+				\item \textbf{Deadlock detection}: usare \textbf{algoritmi per identificare i deadlock} e prevedere meccanismi di recovery. Ad esempio, il grafo delle richieste/risorse e abort delle transazioni coinvolte nel cicli.
+			\end{enumerate}
+		\end{list}
+		\item Metodi \textbf{basati su timestamp}\\
+		Ad ogni transazione si associa un \textbf{timestamp} che rappresenta il momento di inizio della transazione. Ogni transazione \textbf{non può leggere o scrivere un dato scritto da una transazione con timestamp maggiore} né \textbf{può scrivere su un dato già letto da una transazione con timestamp maggiore}.
+	\end{list}
+\end{list}
+\pagebreak
+\paragraph{Livelli di isolamento/consistenza per ogni transazione}
+\begin{list}{}{}
+	\item \textbf{SERIALIZABLE} assicura che:
+	\begin{list}{}{}
+		\item La transazione T legge solo i cambiamenti fatti da transazioni che hanno fatto commit
+		\item Nessun valore letto o scritto da T verrà cambiato da altre transazioni finché T non è conclusa
+		\item Se T legge un insieme di valori acceduti secondo qualche condizione di ricerca, l'insieme non viene modificato da altre transazioni finché T non è conclusa
+	\end{list}
+	\item \textbf{REPEATABLE READ} assicura che:
+	\begin{list}{}{}
+		\item La transazione T legge solo i cambiamenti fatti da transazioni che hanno fatto commit
+		\item Nessun valore letto o scritto da T verrà cambiato da altre transazioni finché T non è conclusa
+	\end{list}
+	\item \textbf{READ COMMITED} assicura che:
+	\begin{list}{}{}
+		\item La transazione T legge solo i cambiamenti fatti da transazioni che hanno fatto commit
+		\item T non vede nessun cambiamento eventualmente effettuato da transazioni concorrenti non concluse tra i valori letti all'inizio di T
+	\end{list}
+	\item \textbf{READ UNCOMMITTED}\\
+	A questo livello di isolamento una transazione T può leggere modifiche fatte ad un oggetto da una transazione in esecuzione. Ovviamente l'oggetto può essere cambiato mentre T è in esecuzione: per questo \textbf{T è soggetta a eventi fantasma}.
+\end{list}
 \end{document}
