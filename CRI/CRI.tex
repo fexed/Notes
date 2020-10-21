@@ -734,4 +734,90 @@ Rimane il problema di generare le sequenze di bit completamente casuali.
 Quindi $N_m = \alpha^n$, $N_k\geq N_m$ cioè $N_k\geq \alpha^n$, la chiave sarà una sequenza di $t$ bit con $t$ $|$ $2^t \geq \alpha^n$\\
 Risolvo trovando $t \geq \log_w \alpha^n = n \log_2 \alpha = 0.12\cdot n$\\\\
 Per confondere l'avversario è opportuno che coppie diverse $(m,k)$ producano lo stesso crittogramma $\Rightarrow$ \# coppie $(m,k) >>$ \# crittogrammi, cioè $\alpha^n 2^t >> 2^n$
+\pagebreak
+\section{Principi di Shannon}
+Principi per la resistenza agli attacchi di crittoanalisi statistica:
+\begin{list}{}{}
+	\item \textbf{Diffusione}: tutti i caratteri del testo in chiaro si devono spargere nel crittogramma.
+	\item \textbf{Confusione}: combinare testo in chiaro e chiave in modo complesso, per non permettere al crittoanalista di sapere le due sequenze analizzando il crittogramma.
+\end{list}
+\paragraph{Standard} 1972 NBS (National Bureau of Standards) $\rightarrow$ 1973 NIST (National Institute for Security and Technology)
+\begin{list}{}{}
+	\item \textbf{Sicurezza basata sulla segretezza della chiave} e non sul processo di cifratura e decifrazione (che è \textbf{pubblico})
+	\item \textbf{Algoritmo efficiente} in software e hardware
+\end{list}
+IBM propone \textbf{LUCIFER}, poi migliorato con l'NSA. Da 128 bit a 56 bit per la chiave: variazioni nella s-box.\\
+Si arriva al 1977 con il \textbf{DES}, accettato e reso pubblicamente disponibile (licenza d'uso gratuita): \textbf{Data Encryption Stantard}. Rimane fino al 1999, quando si sconsiglia il DES in favore del 3DES. Dal 2005 anche il 3DES risulta superato, al suo posto \textbf{AES} (\textbf{Advanced Encryption Standard})
+\section{Data Encryption Standard}
+Cifratura a blocchi di 64 bit e chiave segreta di 64 bit: 56 bit casuali e 8 bit di parità suddivisi in: 7 bit, bit parità, 7 bit, bit parità\ldots\\
+$r = 16$ fasi in cui si ripetono le stesse operazioni.
+\begin{multicols}{2}
+	\begin{center}
+		\includegraphics[scale=0.75]{8.png}
+	\end{center}
+	\columnbreak
+	\paragraph{Struttura del DES}
+	\begin{list}{}{}
+		\item $m$: blocco del messaggio
+		\item $c$: corrispondente blocco del crittogramma
+		\item $k$: chiave segreta con i bit di parità
+		\item
+		\item $\forall\:i=1,\ldots,16$ ho
+		\begin{list}{}{}
+			\item $S[i] = D[i-1]$
+			\item $D[i] = S[i-1]\oplus f(D[i-1], k[i-1])$\\
+			$f$: funzione \textbf{non} lineare
+		\end{list}
+	\end{list}
+\end{multicols}
+\pagebreak
+\paragraph{Fase $i$-esima del DES}
+\begin{center}
+	\includegraphics[scale=0.75]{9.png}
+\end{center}
+\paragraph{Permutazioni}
+\begin{center}
+	\includegraphics[scale=0.75]{10.png}
+\end{center}
+Le tabelle vanno lette per righe.
+\begin{list}{}{}
+	\item \textbf{Permutazione PI}: riordina i bit del messaggio $m = m_1 m_2\ldots m_{64}$ come $m_{58} m_{50}\ldots m_7$: ad esempio porta in posizione 40 (numero della cella) il bit in posizione 1 (contenuto della cella)
+	\item \textbf{Permutazione PF}: è l'inversa di PI, cioè nell'esempio riporta in posizione 1 il bit in posizione 40
+	\item \textbf{Trasposizione T}: provvede anche a scartare dalla chiave $k = k_1 k_2\ldots k_{64}$ i bit di controllo $k_8, k_16, \ldots k_64$, generando una sequenza di 56 bit che costituisce la prima sottochiave $k[0]$
+\end{list}
+\pagebreak
+\paragraph{Funzioni CT e EP}
+\begin{center}
+	\includegraphics[scale=0.75]{11.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Funzione CT}: 8 bit dell'ingresso (es: il bit 9) non sono presenti in uscita
+	\item \textbf{Funzione EP}: 16 bit di ingresso sono duplicati (es: il bit 32 è copiato nelle posizioni 1 e 47 dell'uscita)
+\end{list}
+\paragraph{S-box}
+\begin{center}
+	\includegraphics[scale=0.75]{12.png}
+\end{center}
+Tabella che definisce la sottofunzione $S_1$. Le sottofunzioni $S_2,\ldots,S_8$ sono definite in modo simile.
+\begin{center}
+	\includegraphics[scale=0.75]{13.png}
+\end{center}
+\pagebreak
+\paragraph{Permutazione P}
+\begin{center}
+	\includegraphics[scale=0.75]{14.png}
+\end{center}
+Permutazione di 32 bit che genera il blocco finale $D[i]$.
+\paragraph{Attacchi} Due metodi principali:
+\begin{enumerate}
+	\item Architetture apposite progettate per attaccare il DES
+	\item Calcolo distribuito su più macchine
+\end{enumerate}
+\subparagraph{Attacchi esaurienti}
+\textbf{Chosen Plain Text}: il crittoanalista si procura coppie $\langle m, c_1\rangle, \langle \overline{m}, c_2\rangle$\\
+Da $C(m, k)$ = $\begin{array}{l}
+	c_1 \Rightarrow k \textsl{ probabile chiave}\\
+	c_2 \Rightarrow \overline{k} \textsl{ probabile chiave}
+\end{array}$
+\subparagraph{Crittoanalisi differenziale} $2^{47}$ coppie $\langle m,c\rangle$ scelti dal crittoanalista. L'attacco costa complessivamente $2^{55}$ con $r=16$.
 \end{document}
