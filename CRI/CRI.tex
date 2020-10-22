@@ -820,4 +820,94 @@ Da $C(m, k)$ = $\begin{array}{l}
 	c_2 \Rightarrow \overline{k} \textsl{ probabile chiave}
 \end{array}$
 \subparagraph{Crittoanalisi differenziale} $2^{47}$ coppie $\langle m,c\rangle$ scelti dal crittoanalista. L'attacco costa complessivamente $2^{55}$ con $r=16$.
+\chapter{Esercizi}
+\section{Complessità e randomizazione}
+\paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
+chiave, un programma in assembler impiega un ciclo di 128 istruzioni ripetuto in media tante volte
+quanti sono i bit che costituiscono $m$. Impiegando un calcolatore che esegue un'operazione
+assembler in un tempo medio di 10ns, indicare in ordine di grandezza quanti anni sarebbero
+necessari in media per condurre un attacco esaustivo sulle chiavi per un messaggio m di 1000 bit.\\
+Indicare i calcoli eseguiti.
+\subparagraph{Svolgimento} \begin{list}{}{}
+	\item \# chiavi = $2^{46}$
+	\item \# operazioni per chiave = 128 $\cdot\:|m|$
+	\item $|m| = 1000$ bit $= 10^3$ bit
+	\item 1ns = $10^{-9}$s
+	\item $\Rightarrow t = 2^{46}\cdot128\cdot10^3\cdot10\cdot10^{-9}$s = $2^{46}\cdot2^7\cdot10^{-5}$s = $2^{53}\cdot10^{-5}$s = $2^3\cdot2^{50}\cdot10^{-5}$s e dato che $2^{10} \simeq 10^3$\\
+	$\Rightarrow\:\simeq 2^8\cdot(10^3)^5\cdot10^{-5}$s = $8\cdot10^{10}$s $\simeq$ 2500 anni
+\end{list}
+\paragraph{Esercizio 2} Si vuole generare una sequenza di bit pseudocasuali utilizzando il generatore BBS basato sulla
+legge: $$x_i = x_{i-1}^2\textsl{ mod }n\:\:\:\:\:b_i = 1 \Leftrightarrow x_{m-i}\textsl{ è dispari}$$
+\begin{enumerate}
+	\item \textbf{Scegliere} $n = 11\cdot23$ e verificare che 11 e 23 soddisfano i requisiti del BBS
+	\item Sia M la propria matricola. Porre $y =$ M mod 100 e $x_0 = y^2$ mod $n$ e \textbf{indicare} una sequenza di 10 bit generati, riportando i calcoli
+	\item \textbf{Discutere} se il generatore è crittograficamente sicuro
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item Verificare che 11 mod 4 = 3 (ok) e 23 mod 4 = 3 (ok)\\
+	Verificare che $2\lfloor\frac{11}{4}\rfloor + 1 = 2\cdot + 1 = 5$ e $2\lfloor\frac{23}{4}\rfloor + 1 = 11$ siano primi fra loro (sono primi entrambi, ok)
+	\item Usiamo M = 123456, M mod 100 = 56 e 11$\cdot$23 = 253
+	\begin{multicols}{2}
+	\begin{list}{}{}
+		\item $x_0$ = 56$^2$ mod 253 = 100 $\rightarrow$ 0
+		\item $x_1$ = 100$^2$ mod 253 = 133 $\rightarrow$ 1
+		\item $x_2$ = 133$^2$ mod 253 = 232 $\rightarrow$ 0
+		\item $x_3$ = 232$^2$ mod 253 = 188 $\rightarrow$ 0
+		\item $x_4$ = 188$^2$ mod 253 = 177 $\rightarrow$ 1
+		\item $x_5$ = 177$^2$ mod 253 = 210 $\rightarrow$ 0
+		\item $x_6$ = 210$^2$ mod 253 = 78 $\rightarrow$ 0
+		\item $x_7$ = 78$^2$ mod 253 = 12 $\rightarrow$ 0
+		\item $x_8$ = 12$^2$ mod 253 = 144 $\rightarrow$ 0
+		\item $x_9$ = 144$^2$ mod 253 = 243 $\rightarrow$ 1
+		\item $\longrightarrow$ 1000010010
+	\end{list}
+	\end{multicols}
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 3} Sia C una sequenza ottenuta rappresentando in binario ciascuna delle due cifre centrali del
+numero di matricola del candidato, prendendo per ciascuna di esse i tre bit meno significativi,
+concatenando questi due gruppi di bit e aggiungendo 1 in testa.
+\begin{enumerate}
+	\item Eseguire 37$^C$ mod 100 per esponenziazioni successive \textbf{indicando} i calcoli eseguiti
+	\item \textbf{Spiegare} perché tale metodo di calcolo è considerato efficiente
+\end{enumerate}
+\subparagraph{Svolgimento} Con M = 123456, 3 = 011 e 4 = 100\\
+C = 1011100 = 64 + 16 + 8 + 4 = 92
+\begin{enumerate}
+	\item 37$^{92}$ mod 100 = 37$^{64 + 16 + 8 + 4}$ mod 100
+	\begin{list}{}{}
+		\item 37$^{4}$ mod 100 = 69$^2$ mod 100 = \underline{61}
+		\item 37$^{8}$ mod 100 = 61$^2$ mod 100 = \underline{21}
+		\item 37$^{16}$ mod 100 = 21$^2$ mod 100 = \underline{41}
+		\item 37$^{32}$ mod 100 = 41$^2$ mod 100 = 81
+		\item 37$^{64}$ mod 100 = 81$^2$ mod 100 = \underline{61}
+		\item $\Rightarrow$ 37$^{92}$ mod 100 = $(61\cdot41\cdot21\cdot61)$ mod 100 = 81
+	\end{list}
+	\item Perché esegue un numero di moltiplicazioni logaritmico nel valore dell'esponente (dunque lineare nella dimensione)
+\end{enumerate}
+\paragraph{Esercizio 4} 
+Applicando l’algoritmo Miller-Rabin, individuare un numero N primo di tre cifre decimali con
+probabilità di errore minore di $\frac{1}{50}$, spiegando il procedimento eseguito.
+\subparagraph{Svolgimento} $N = 113$, ho $\frac{1}{4^k} < \frac{1}{50}$ per $k = 3$, quindi servono 3 testimoni $y$ scelti a caso $\in [2,112]$\\
+Pongo $y = 3$
+\begin{enumerate}
+	\item MCD(113, 3) = MCD(3, 113 mod 3) = MCD(2, 3 mod 2) = MCD(1, 0) = 1 ok
+	\item N = 113\\
+	N-1 = 112 = 2$^4\cdot$7, $w = 4$ e $z = 7$\\
+	$3^7$ mod 113 = $3^{1+2+4}$ mod 113 =
+	\begin{list}{}{}
+		\item $3^2$ mod 113 = 9
+		\item $3^4$ mod 113 = 9$^2$ mod 113 = 81
+	\end{list}
+	= $(3\cdot 9 \cdot 81)$ mod 113 = 40 $\neq 1$, bisogna proseguire nella valutazione di P2\\
+	$0 \leq i \leq w - 1 = 3$
+	\begin{list}{}{}
+		\item[$i = 0$] $3^{2^0\cdot7}$ mod 113 = $3^7$ mod 113 = 40 $\neq -1$ (40 preso dal precedente risultato)
+		\item[$i = 1$] $3^{2^1\cdot7}$ mod 113 = $(3^7)^2$ mod 113 = 40$^2$ mod 113 = 18 $\neq -1$ (40 preso dal precedente risultato)
+		\item[$i = 2$] $3^{2^2\cdot7}$ mod 113 = $(18)^2$ mod 113 98 $\neq -1$ (18 preso dal precedente risultato)
+		\item[$i = 3$] $3^{2^3\cdot7}$ mod 113 = $(98)^2$ mod 113 -1 $= -1$ ok (98 preso dal precedente risultato)
+	\end{list}
+\end{enumerate}
+Per gli altri 2 valori di $y$ il procedimento è analogo
 \end{document}
