@@ -910,4 +910,80 @@ Pongo $y = 3$
 	\end{list}
 \end{enumerate}
 Per gli altri 2 valori di $y$ il procedimento è analogo
+\section{Cifrari storici}
+\paragraph{Esercizio 1} \textbf{Decifrare} i seguenti crittogrammi
+\begin{enumerate}
+	\item YMNXJCJWHNXJNXJFXD (Cifrario Cesare, chiave $k \neq 3$)
+	\item REXETSIH ONSICESI UCIFTFID REHTLIET (Cifrario a permutazione semplice, $h = 8$)
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item Con $k = 21$ diventa THISEXERCISEISEASY
+	\item Con $\pi = \{5, 8, 7, 6, 4, 3, 2, 1\}$ diventa THISEXER CISEISNO TDIFFICU LTEITHER
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 2} Dato un cifrario affine (mod 26), si fa un attacco di tipo chosen plain-text usando il testo \textit{hahaha}. Il testo cifrato è \textit{nonono}. Determinare la funzione di cifratura.
+\subparagraph{Svolgimento} Un cifrario affine è un cifrario che associa a pos(X) = $a\cdot$pos(Y) + $b$\\
+Bisogna trovare $a,b$ $|$ pos(\textit{n}) = $a\cdot$pos(\textit{h}) + $b$ mod 26 $\wedge$ pos(\textit{o}) = $a\cdot$pos(\textit{a}) + $b$ mod 26\\con pos(\textit{n}) = 13, pos(\textit{h}) = 7, pos(\textit{o}) = 14 e pos(\textit{a}) = 0\\
+$\left\{
+\begin{array}{l}
+	13 = a\cdot7+b\textsl{ mod }26 \Leftrightarrow a = 11\\
+	14 = a\cdot0+b\textsl{ mod }26 \Leftrightarrow b = 14
+\end{array}
+\right.$ ottentendo i due parametri $a = 11$ e $b = 14$ che danno il cifrario\\pos(Y) = (11$\cdot$pos(X) + 14) mod 26
+\paragraph{Esercizio 3} Se nei cifrari affini si lavorasse in modulo 27 invece che modulo 26, quante sarebbero le chiavi possibili? E in modulo 29?
+\subparagraph{Svolgimento} Con un alfabeto di 27 caratteri, $a$ deve essere primo con 27 = $3^3$\\$\rightarrow$ $a$ può assumere i valori da 1 a 26 non multipli di 3\\$\longrightarrow$ $\phi$(27) = $\phi$($3^3$) = $2\cdot3^2$ = 18 (tramite la \textbf{funzione di Eulero} $\phi$($p^k$) = $(p-1)p^{k-1}$ con $p$ primo)\\
+$\rightarrow$ $b$ può assumere tutti i valori $\in[0, 26]$\\
+$\Rightarrow$ \# chiavi = 18$\cdot$27 - 1 = 485 (il -1 esclude la coppia $(a,b) = (1,0)$ che lascia invariato il messaggio)\\\\
+Con un alfabeto di 29 caratteri: 29 è primo, quindi $a$ può assumere tutti i valori $\in [1, 28]$ ($\rightarrow \phi(29) = 28$) e $b$ tutti i valori $\in [0, 28]$\\
+$\Rightarrow$ \# chiavi = $28\cdot29 - 1 = 811$
+\paragraph{Esercizio 4} Questo esercizio ha lo scopo di dimostrare che un cifrario affine iterato ha la stessa sicurezza di un cifrario singolo.\\
+Si considerino due cifrari affini:
+\begin{list}{}{}
+	\item $C_1(x) = (a_1\cdot x + b_1)$ mod 26
+	\item $C_2(x) = (a_2\cdot x + b_2)$ mod 26
+\end{list}
+\textbf{Dimostrare} che $\exists$ un cifrario affine $C_3$ $|$ $C_3(x) = C_2(C_1(x))$
+\subparagraph{Svolgimento}
+$C_2(C_1(x)) = (a_2\cdot C_1(x) + b_2)$ mod 26 $= (a_2\cdot(a_1 + b_1) + b_2)$ mod 26\\$= (a_1a_2x + a_2b_1 + b_2)$ mod 26 $= (a_3\cdot x + b_3)$ mod 26\\
+Con $a_3 = a_1a_2$ mod 26, $b_3 = a_2b_1 + b_2$ mod 26
+\paragraph{Esercizio 5} Il crittogramma $c$ = MBR OJFGA SWNTE CNK QJDIL NURW MBR XHMR è ottenuto cifrando $m$ = THE QUICK BROWN FOX JUMPS OVER THE GATE con un cifrario a sostituzione monoalfabetica completo.
+\begin{enumerate}
+	\item Quanta informazione relativa alla chiave si può determinare conoscendo la coppia $m, c$?
+	\item Quante chiavi differenti potrebbero essere state usate per cifrare il messaggio $m$?
+	\item \textbf{Decifrare} il crittogramma MBR TRHLRP WHE HTHV CWND PNEYNE ZNN, che è stato cifrato usando la stessa chiave usata per cifrare $m$
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item Parte della permutazione che definisce il cifrario.\\
+	Più precisamente, si trova l'immagine cifrata di 22 caratteri su 26.
+	\item 24 chiavi\\
+	Infatti mancano le corrispondenze per 4 caratteri, e se ne potrebbero costruire 4! = 24 differenti
+	\item THE WEASEL RUN AWAY FROM LONDON ZOO
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 6} Usando il metodo di Vigenère, \textbf{cifrare} il messaggio CRITTOGRAFIA impiegando come chiave le prime 4 lettere del proprio cognome. \textbf{Spiegare} inoltre come tale cifrario possa essere attaccano.
+\subparagraph{Svolgimento} Si incrocia la lettera del messaggio con la lettera del crittogramma sulla tabella di Vigenère per trovare la lettera cifrata. Ad esempio, alla colonna C e riga M corrisponde la lettera O.
+\begin{list}{}{}
+	\item \texttt{C R I T T O G R A F I A}
+	\item \texttt{M A T T M A T T M A T T}
+	\item[$\rightarrow$] \texttt{O A B M F O Z K M F B T}
+\end{list}
+Per la spiegazione, vedi appunti.
+\paragraph{Esercizio 7}
+Si deve cifrare il messaggio APPELLODIFEBBRAIO impiegando come chiave una permutazione
+arbitraria e segreta delle 26 lettere dell’alfabeto.
+\begin{enumerate}
+	\item \textbf{Mostrare} la permutazione scelta e il crittogramma ottenuto
+	\item \textbf{Calcolare} il numero di prove necessarie per condurre un attacco esauriente sulle chiavi
+	\item \textbf{Discutere} la possibilità di un attacco più efficiente confrontandolo con quello del punto 2
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item
+	\item In generale 26! - 1\\
+	Ma per decifrare il crittogramma ottenuto cifrando APPELLODIFEBBRAIO occorrono meno prove, perché il crittogramma contiene 10 lettere diverse tra loro da decifrare.\\
+	$\Rightarrow$ \# prove = $26\cdot25\cdot\ldots\cdot17$ = $\frac{26!}{16!} \simeq 2\cdot10^{13}$
+	\item Crittoanalisi statistica
+\end{enumerate}
 \end{document}
