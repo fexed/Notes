@@ -820,6 +820,83 @@ Da $C(m, k)$ = $\begin{array}{l}
 	c_2 \Rightarrow \overline{k} \textsl{ probabile chiave}
 \end{array}$
 \subparagraph{Crittoanalisi differenziale} $2^{47}$ coppie $\langle m,c\rangle$ scelti dal crittoanalista. L'attacco costa complessivamente $2^{55}$ con $r=16$.
+\subsection{Varianti del DES}
+\paragraph{Scelta indipendente delle sottochiavi di fase} \# bit 56 $\rightarrow$ 16$\cdot$48 = 768 bit\\
+Crittoanalisi differenziale $\rightarrow$ 2$^{61}$
+\paragraph{Cifratura multipla} $\forall\:k_1,k_2$ ho $C_D(C_D(n, k_1), k_2) \neq C_D(n, k_3)$, questo $\forall\:n, k_3$\\
+\# spazio delle chiavi = 2$^{112}$, non sono 112 bit di sicurezza\\ %TODO riascoltare lezione
+Sicurezza pari a quella di una chiave da 57 bit
+\subparagraph{Attacco "Meet in the Middle"} $c$ = C(C($n, k_1$), $k_2$), con $k_1,k_2$ chiavi di 56 bit $\rightarrow$ D($c, k_2$) = C($n, k_1$)\\
+Si prende una coppia $\langle n,c\rangle$
+\begin{list}{}{}
+	\item $\forall\:k_1$ calcolo e salvo C($n, k_1$) (2$^{56}$)
+	\item $\forall\:k_2$ calcolo D($c, k_2$) e lo cerco nella lista delle cifrature\\
+	Deve \textbf{esistere certamente almeno una corrispondenza} ($N$ = 2$^{56}$)
+	\item N = $2^{56}$ cifrature + O(N) decifrazioni\\
+	Quindi costo 2N $<<$ N$^2$ (costo dell'enumerazione di tutte le coppie ($k_1, k_2$))
+\end{list}
+\paragraph{3DES} TDEA = Trple Data Encryption Algorithm\\
+2TDEA, 3TDEA: 2 e 3 sono \# chiavi\begin{list}{}{}
+	\item \textbf{2TDEA}\\
+	$c$ = C(D(C($n, k_1$), $k_2$), $k_1$), con $k_1, k_2$ chiavi di 56 bit tra loro indipendenti.\\
+	$k_1 = k_2 \Rightarrow$ 2TDEA equivale ad una singola cifratura DES. CDC non è più robusto di CCC, 112 bit di sicurezza.
+	\item \textbf{3TDEA}\\
+	$c$ = C(D(C($n, k_1$), $k_2$), $k_3$), con $k_1, k_2, k_3$ chiavi di 56 bit tra loro indipendenti.\\
+	\# bit della chiave: 56$\cdot$3 = 168 bit\\
+	Vulnerabile a meet in the middle $\rightarrow$ 112 bit di sicurezza\\\pagebreak\\
+	$m = D(C(D(c, k_3), k_2) k_1) \Rightarrow C(m, k_1) = C(D(c, k_3), k_2)$
+	\begin{enumerate}
+		\item Enumero le chiavi di 56 bit e salvo la lista C$(m, k_1)$ $\forall\:k_1 \in \{0, 1\}^{56}$
+		\item $\forall\:k_2, k_3$ calcolo $C(D(c, k_3), k_2)$ e lo cerco nella lista\\
+		$2^{56} + 2^{112}$, $2^{56}$ dal punto 1 e $2^{112}$ costo di enumerazione delle coppie $k_2, k_3$
+	\end{enumerate}
+\end{list}
+\paragraph{AES} 128 bit di chiave\\
+Ogni sottochiave di fase, $w(i)$, è una sequenza di 4 byte che usa la s-box.\\
+$k = \begin{tabular}{|c|c|c|c|}
+\hline
+ & & & 1byte \\
+\hline
+ & & & \\
+\hline
+ & & & \\
+\hline
+ & & & \\
+\hline
+\multicolumn{1}{c}{w(0)} & \multicolumn{1}{c}{w(1)} & \multicolumn{1}{c}{w(2)} & \multicolumn{1}{c}{w(3)}\\
+\end{tabular}$\\
+Chiave: $w(0), w(1), w(2), w(3)$\\
+$\forall\:t\geq 4$ ho $w(t) = \left\{\begin{array}{l l}
+w(t-1)\oplus w(t-4) &\textsl{se }4\not|\:t\\
+T(w(t-1))\oplus w(t-4) &\textsl{se }4\:\:|\:t
+\end{array}\right.$ con $T$ non lineare e che usa la s-box\\\\
+Chiave alla $i$-esima fase, $1\leq i \leq 10$: $w(4i), w(4i + 1), w(4i + 2), w(4i + 3)$
+\subparagraph{Cifratura} Blocchi di 128 bit, riempita per colonne $b_{ij} \in \{0, 1\}^8$\\
+$B = \left[\begin{array}{c c c c}
+b_{00} & b_{01} & b_{02} & b_{03} \\
+b_{10} & b_{11} & b_{12} & b_{13} \\
+b_{20} & b_{21} & b_{22} & b_{23} \\
+b_{30} & b_{31} & b_{32} & b_{33} \\
+\end{array}\right]$\\
+Trasformazione iniziale: $k$ matrice della chiave, con $B$ costruisco $B\oplus k$\\
+10 fasi da 4 operazioni:
+\begin{list}{}{}
+	\item[01] \texttt{SUBISTITUTE BYTES}\\
+	Ogni byte di $B$ è trasformato usando s-box: $b_{ij} \rightarrow$ s-box$(b_{ij})$
+	\item[02] \texttt{SHIFT ROWS}
+	\item[03] \texttt{MIX COLUMNS}, non si applica nella fase 10
+	\item[04] \texttt{ADD ROUND KEY}
+	\item Alla fine delle 10 fasi, il blocco B è il crittogramma
+\end{list}
+\subparagraph{S-box} Matrice 16$\times$16 di interi $\in(0, 255) \Rightarrow$ contiene una permutazione\\
+$b_{ij} \rightarrow$ s-box$(b_{ij})\in\{0,1\}^8$\\
+$b_{ij} = b_1b_2b_3b_4|b_5b_6b_7b_8$
+\begin{list}{}{}
+	\item Riga: $b_1b_2b_3b_4$, $0\leq x \leq 15$
+	\item Colonna: $b_5b_6b_7b_8$, $0\leq y \leq 15$
+\end{list}
+Es $b_{ij} = 1000|1011$ = $8|11$, s-box$[8, 11] \rightarrow 61$ cioè $00111101$
+%TODO ultime due slide
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
