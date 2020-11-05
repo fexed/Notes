@@ -940,7 +940,7 @@ Fa uso dell'\textbf{algebra modulare}:
 \end{list}
 Le funzioni tendono a comportarsi in modo imprevedibile.
 \paragraph{Funzione di Eulero} Numero di interi minori di $n$ e coprimi con esso $$\phi(n) = |Z_n^*|$$ $n$ primo $\Rightarrow \phi(n) = n - 1$\\
-$Z_n = \{0, 1, 2, \ldots, n-1\}$, e $Z_n^*\subseteq Z_n$ è l'insieme degli elementi di $Z_n$ coprimi con $n$. Se $n$ è primo allora\\ $Z_n^* = \{1, 2, \ldots, n-1\}$. Se non è primo, calcolare $Z_n^*$ è computazionalmente difficile.\\
+$Z_n = \{0, 1, 2, \ldots, n-1\}$, e $Z_n^*\subseteq Z_n$ è l'insieme degli elementi di $Z_n$ coprimi con $n$. Se $n$ è primo allora\\ $Z_n^* = \{1, 2, \ldots, n-1\}$. Se non è primo, calcolare $Z_n^*$ è computazionalmente difficile (direttamente proporzionale al valore di $n$.\\
 \textbf{Teorema} $n$ composto $\Rightarrow \phi(n) = n\cdot(1 - \frac{1}{p_1})\cdot\ldots\cdot(1 - \frac{1}{p_k})$ con $p_1,\ldots,p_k$ fattori primi di $n$ senza molteplicità.\\
 \textbf{Teorema} $n$ semiprimo (prodotto di due primi), cioè $n = p\cdot q \Rightarrow \phi(n) = (p-1)\cdot(q-1)$\\\\
 \textbf{Teorema di Eulero} Per $n > 1$ e $\forall\:a$ primo con $n$ si ha $a^{\phi(n)} \equiv 1$ mod $n$\\
@@ -959,8 +959,53 @@ Per ogni generatore $a^k\not\equiv1$ mod $n$
 $Z_7^* = \{1, 2, 3, 4, 5, 6\}$, $\phi(7) = 6$\\
 $3^k$ mod $7$ = $3, 2, 6, 4, 5, 1$ con $1 \leq k \leq 6 = \phi(7)$\\\\
 Esistono valori di $n$ per cui $Z_n^*$ non ha generatori. Ad esempio, $Z_8^*$ non ammette generatori.\\
-\textbf{Teorema}: se $n$ è primo $\Rightarrow\:Z_n^*$ ha almeno un generatore.
-% http://pages.di.unipi.it/bernasconi/CRI/IntroRSA2020.pdf, p.20
+\textbf{Teorema}: se $n$ è primo $\Rightarrow\:Z_n^*$ ha almeno un generatore.\\
+Per $n$ primo, non tutti gli elementi di $Z_n^*$ sono suoi generatori. Ad esempio 1 non è mai generatore, e altri elementi possono non essere generatori. Per $n$ primo sappiamo che i generatori di $Z_n^*$ sono in totale $\phi(n-1)$
+\subsubsection{Problemi sui generatori rilevanti in crittografia}
+\paragraph{Determinare un generatori di $Z_n^*$ con $n$ primo}
+Si possono provare tutti gli interi in $[2, n-1]$ fino a trovare il generatore: tempo \textbf{esponenziale} nella dimensione di $n$. Il problema è computazionalmente difficile, risolto con \textbf{algoritmi randomizzati}, con alta probabilità di successo.
+\paragraph{Calcolo del logaritmo discreto} Risolvere in $x$ l'equazione $a^x \equiv b$ mod $n$ con $n$ primo.\\
+Ammette una soluzione per ogni valore di $b$ $\Leftrightarrow$ $a$ è un generatore di $Z_n^*$. Tuttavia:
+\begin{list}{}{}
+	\item non è noto a priori in che ordine sono generati gli elementi di $Z_n^*$
+	\item quindi non è noto per quale valore di $x$ si genera $b$ mod $n$
+	\item un esame diretto della successione richiede tempo esponenziale nella dimensione di $n$
+	\item non è noto un algoritmo polinomiale di soluzione
+\end{list}
+\subsubsection{Funzioni One-Way Trapdoor}
+Esistono funzioni matematiche che sembrano possedere i requisiti richiesti (proprietà di teoria dei numeri e di algebra modulare). Il loro calcolo risulta \textbf{incondizionatamente semplice} e la loro \textbf{inversione} è \textbf{semplice se si dispone di un'informazione aggiuntiva sui dati} (chiave privata). Senza questa informazione, l'inversione richiede la soluzione di un problema NP-hard, o comunque di un problema noto per cui non si conosce un algoritmo polinomiale.\\
+Alcuni esempi:
+\begin{list}{}{}
+	\item \textbf{Fattorizzazione} $n = p\cdot q$ è facile, tempo quadratico nella lunghezza della rappresentazione.\\
+	Invertire, cioè ricostruire $p$ e $q$ da $n$ richiede tempo esponenziale (per quanto noto fin'ora, anche se non vi è dimostrazione che sia NP-hard. L'esistenza di un algoritmo polinomiale è improbabile ma non da escludere)\\
+	\textbf{Trapdoor}: se si conosce $p$ o $q$, la chiave segreta, ricostruire l'altro è facile.
+	\item \textbf{Calcolo della radice in modulo} Calcolare $y = x^z$ mod $s$ con $x,z,s$ interi richiede tempo polinomiale ($\Theta(\log_2 z)$ moltiplicazioni con esponenziazioni successive)\\
+Se $s$ non è primo, invertire e calcolare $x = y^{\frac{1}{z}}$ mod $s$ richiede tempo esponenziale per quanto noto.\\
+Se $x$ è primo con $s$ e si conosce $v = z^{-1}$ mod $\phi(s)$ (chiave segreta), $x$ si può facilmente determinare con $x = y^v$ mod $s$ per il teorema di Eulero.
+	\item \textbf{Calcolo del logaritmo discreto} Calcolare $y = x^z$ mod $s$ è facile, ma invertire rispetto a $z$ cioè calcolare $z$ tale che $y = x^z$ mod $s$ dati $x,y,s$ è difficile.\\
+	Gli algoritmi noti hanno la stessa complessità della fattorizzazione, quindi si può introdurre una trapdoor.
+\end{list}
+\pagebreak
+\subsection{Crittografia a chiave pubblica}
+\paragraph{Vantaggi} \begin{list}{}{}
+	\item Se gli utenti di un sistema sono $n$, il numero complessivo di chiavi (pubbliche e private) è $2n$ invece di $n(n-1)/2$
+	\item Non è richiesto alcuno scambio segreto di chiavi
+\end{list}
+\paragraph{Svantaggi} \begin{list}{}{}
+	\item Sono sistemi molto più lenti dei cifrari simmetrici
+	\item Sono esposti ad attacchi chosen plain-text
+\end{list}
+\subsection{Cifrari ibridi}
+\begin{list}{}{}
+	\item Si usa un cifrario a chiave segreta (AES) per le comunicazioni di massa
+	\item e un cifrario a chiave pubblica per scambiare le chiavi segrete relative al primo, senza incontri fisici tra gli utenti
+	\item La trasmissione dei messaggi lunghi avviene ad alta velocità, mentre è lento lo scambio delle chiavi
+	\begin{list}{}{}
+		\item Le chiavi sono composte al massimo da qualche decina di byte
+		\item L'attacco chosen plain-text è risolto se l'informazione cifrata con la chiave pubblica (chiave segreta dell'AES) è scelta in modo da risultare imprevedibile al crittoanalista
+	\end{list}
+	\item La chiave pubblica deve essere estratta da un certificato digitale valido, per evitare attacchi man-in-the-middle (MITM)
+\end{list}
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
