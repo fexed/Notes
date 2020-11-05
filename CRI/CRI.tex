@@ -897,6 +897,70 @@ $b_{ij} = b_1b_2b_3b_4|b_5b_6b_7b_8$
 \end{list}
 Es $b_{ij} = 1000|1011$ = $8|11$, s-box$[8, 11] \rightarrow 61$ cioè $00111101$
 %TODO ultime due slide
+\chapter{Crittografia a Chiave Pubblica}
+\paragraph{One-Time Pad} 1917\\
+Non può essere decifrato senza conoscere la chiave. \textbf{Assolutamente sicuro}, ma richiede una nuova chiave segreta per ogni messaggio, che deve essere perfettamente casuale e lunga quanto il messaggio da scambiare. Diventa molto attraente per chi richiede una sicurezza assoluta ed è disposto a pagarne i costi.\\
+Ma \textbf{come si genera} e \textbf{come si scambia la chiave}?
+\section{AES} \paragraph{Advanced Encryption System} Standard per le comunicazioni riservate ma non-classificate. Pubblicamente noto e realizzabile su hardware di ogni tipo, con chiavi brevi (128/256 bit, qualche decina di caratteri)\\
+Ma come scambiare in sicurezza una chiave segreta? La chiave serve per comunicare in sicurezza, ma deve essere stabilita comunicando \textit{in sicurezza} senza poter ancora usare il cifrario.
+\subsection{Protocollo DH} Nel 1976 viene proposto un algoritmo per generare e scambiare una chiave segreta su un canale insicuro, senza necessità che le due parti si siano scambiate informazioni o incontrate in precedenza. Il \textbf{protocollo DH} è un algoritmo ancora usato nei protocolli crittografici su Internet. Diffie e Hellman propongono anche la definizione di crittografia a chiave pubblica, ma senza avere un'implementazione pratica.
+\subsection{Cifrari simmetrici} Nei \textbf{cifrari simmetrici}, la \textbf{chiave di cifratura è uguale a quella di decifrazione} (o l'una può essere facilmente calcolata dall'altra) ed è \textbf{nota solo ai due partner} che la scelgono di comune accordo e la mantengono \textbf{segreta}.
+\subsection{Cifrari asimmetrici} Nei \textbf{cifrari a chiave pubblica} l'\textbf{obiettivo} è \textbf{permettere a tutti di inviare messaggi cifrati ma abilitare solo il ricevente} (Bob) \textbf{a decifrarli}.\\
+Le \textbf{operazioni di cifratura e decifrazione sono pubbliche} e usano \textbf{due chiavi diverse}:
+\begin{list}{}{}
+	\item $k_{pub}$ per \textbf{cifrare}: \textbf{pubblica}
+	\item $k_{priv}$ per \textbf{decifrare}: \textbf{privata}, nota solo a Bob
+\end{list}
+Esiste una coppia $\langle k_{pub}, k_{priv}\rangle$ per ogni utente del sistema, scelta da questi nella sua veste di possibile destinatario.
+\paragraph{Cifratura} La \textbf{cifratura di un messaggio da spedire} a Bob è eseguita da qualunque mittente come $$c = C(m, k_{pub})$$ La chiave $k_{pub}$ e la funzione di cifratura $C(m, k)$ sono note a tutti.
+\paragraph{Decifrazione} La \textbf{decifrazione di un messaggio ricevuto} da Bob è eseguita da Bob come $$m = D(c, k_{priv})$$ La funzione di decifrazione $D(c, k)$ è nota a tutti \textbf{ma la chiave $k_{priv}$ non è disponibile agli altri}.
+\paragraph{Ruoli} Ruoli completamente diversi svolti da mittente e destinatario di un messaggio, che hanno invece ruoli intercambiabili nei cifrari simmetrici dove condividono la solita informazione (chiave segreta)
+\paragraph{Tre elementi}
+\begin{enumerate}
+	\item \textbf{Correttezza del processo di cifratura e decifrazione}\\
+	Bob deve interpretare qualunque messaggio che gli altri utenti decidano di spedirgli. Quindi \textbf{per ogni possibile messaggio $m$} $\Rightarrow D(\:C(m, k_{pub}),\:k_{priv}) = m$
+	\item \textbf{Efficienza e sicurezza del sistema}
+	\begin{list}{}{}
+		\item \textbf{Generazione casuale delle chiavi}\\La \textbf{coppia di chiavi è facile da generare} e deve risultare praticamente impossibile che due utenti scelgano la stessa chiave.
+		\item \textbf{Adottabilità del sistema}\\Dati $m$ e $k_{pub}$, è \textbf{facile per Alice calcolare il crittogramma} $c = C(m, k_{pub})$\\
+		Dati $c$ e $k_{priv}$, è \textbf{facile per Bob calcolare il messaggio} $m = D(c, k_{priv})$ 
+	\end{list}
+	\item \textbf{Sicurezza del cifrario}\\Pur conoscendo il crittogramma $c$, la chiave pubblica e le funzioni $C$ e $D$, è \textbf{difficile per il crittoanalista risalire al messaggio} $m$
+\paragraph{Cifratura} La funzione $C$ deve essere una \textbf{one-way trapdoor}: calcolare $c = C(m, k_{pub})$ deve essere \textbf{computazionalmente facile}, ma \textbf{decifrare $c$ computazionalmente difficile}. Questo a meno di un \textbf{meccanismo segreto} (\textbf{trapdoor}) rappresentato da $k_{priv}$
+\end{enumerate}
+\subsection{RSA} \paragraph{Rivest, Shamir, Adleman} Proposto come un sistema a chiave pubblica basato su una funzione \textit{facile} da calcolare e \textit{difficile} da invertire: la moltiplicazione di due primi $p$ e $q$.
+\begin{list}{}{}
+	\item Calcolare $n = p\cdot q$ è \textbf{facile}
+	\item Calcolare $p,q$ da $n$ è \textbf{difficile}, \textbf{a meno di non conoscere uno dei due fattori}.
+\end{list}
+Fa uso dell'\textbf{algebra modulare}:
+\begin{list}{}{}
+	\item Riduce lo spazio dei numeri su cui si opera, e quindi aumenta la velocità di calcolo
+	\item Rende \textbf{difficili} problemi computazionali che risultano facili o banali nell'algebra non modulare.
+\end{list}
+Le funzioni tendono a comportarsi in modo imprevedibile.
+\paragraph{Funzione di Eulero} Numero di interi minori di $n$ e coprimi con esso $$\phi(n) = |Z_n^*|$$ $n$ primo $\Rightarrow \phi(n) = n - 1$\\
+$Z_n = \{0, 1, 2, \ldots, n-1\}$, e $Z_n^*\subseteq Z_n$ è l'insieme degli elementi di $Z_n$ coprimi con $n$. Se $n$ è primo allora\\ $Z_n^* = \{1, 2, \ldots, n-1\}$. Se non è primo, calcolare $Z_n^*$ è computazionalmente difficile.\\
+\textbf{Teorema} $n$ composto $\Rightarrow \phi(n) = n\cdot(1 - \frac{1}{p_1})\cdot\ldots\cdot(1 - \frac{1}{p_k})$ con $p_1,\ldots,p_k$ fattori primi di $n$ senza molteplicità.\\
+\textbf{Teorema} $n$ semiprimo (prodotto di due primi), cioè $n = p\cdot q \Rightarrow \phi(n) = (p-1)\cdot(q-1)$\\\\
+\textbf{Teorema di Eulero} Per $n > 1$ e $\forall\:a$ primo con $n$ si ha $a^{\phi(n)} \equiv 1$ mod $n$\\
+\textbf{Piccolo teorema di Fermat} Per $n$ primo e $\forall\:a\in Z_*$ si ha $a^{n-1} \equiv 1$ mod $n$\\\\
+Come conseguenze si ha che per qualunque $a$ primo con $n$ $a \cdot a^{\phi(n)-1} \equiv 1\textsl{ mod }n$ e $a\cdot a^{-1} \equiv 1\textsl{ mod }n$ e quindi $$a^{-1} \equiv a^{\phi(n)-1}\textsl{ mod }n$$\\
+L'inverso $a^{-1}$ di $a$ mod $n$ si può calcolare per esponenziazione di $a$ se si conosce $\phi(n)$. In generale, nell'algebra modulare \textbf{l'esistenza dell'inverso non è garantita} perché $a^{-1}$ deve essere intero.\\\\
+$ax \equiv b$ mod $n$ ammette soluzione $\Leftrightarrow$ MCD($a, n$) $|$ $b$ con MCD($a, n$) soluzioni distinte.\\
+Quindi $ax \equiv b$ mod $n$ ammette \textbf{unica soluzione} $\Leftrightarrow$ MCD($a,n$) = 1 $\Leftrightarrow$ $\exists\:a^{-1}$ inverso di $a$\\
+$ax \equiv 1$ mod $n$ ammette esattamente una soluzione ($a^{-1}$) $\Leftrightarrow$ $a,n$ primi fra loro.
+\subsection{Generatori}
+$a\in Z_n^*$ è un \textbf{generatore di $Z_n^*$} se la funzione $a^k$ mod $n$ con $1 \leq k \leq \phi(n)$ \textbf{genera tutti e soli gli elementi di $Z_n^*$}.\\
+Produce come risultati tutti gli elementi di $Z_n^*$ ma in un ordine difficile da prevedere.\\
+\textbf{Teorema di Eulero} $a^{\phi(n)}$ mod $n = 1$ $\Rightarrow 1\in Z_n^*$ è un generatore per $k = \phi(n)$\\
+Per ogni generatore $a^k\not\equiv1$ mod $n$
+\paragraph{Esempio} $3$ genera $Z_7^*$\\
+$Z_7^* = \{1, 2, 3, 4, 5, 6\}$, $\phi(7) = 6$\\
+$3^k$ mod $7$ = $3, 2, 6, 4, 5, 1$ con $1 \leq k \leq 6 = \phi(7)$\\\\
+Esistono valori di $n$ per cui $Z_n^*$ non ha generatori. Ad esempio, $Z_8^*$ non ammette generatori.\\
+\textbf{Teorema}: se $n$ è primo $\Rightarrow\:Z_n^*$ ha almeno un generatore.
+% http://pages.di.unipi.it/bernasconi/CRI/IntroRSA2020.pdf, p.20
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
