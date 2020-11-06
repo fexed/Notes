@@ -895,8 +895,29 @@ $b_{ij} = b_1b_2b_3b_4|b_5b_6b_7b_8$
 	\item Riga: $b_1b_2b_3b_4$, $0\leq x \leq 15$
 	\item Colonna: $b_5b_6b_7b_8$, $0\leq y \leq 15$
 \end{list}
-Es $b_{ij} = 1000|1011$ = $8|11$, s-box$[8, 11] \rightarrow 61$ cioè $00111101$
-%TODO ultime due slide
+Es $b_{ij} = 1000|1011$ = $8|11$, s-box$[8, 11] \rightarrow 61$ cioè $00111101$\\\\
+$x$ byte $\longrightarrow_{s-box}$ $x^{-1}$ inverso moltiplicativo + composizione lineare in GF($2^8$)\\
+Galois Field, campi finiti di Galois
+\begin{list}{}{}
+	\item[02] \texttt{SHIFT ROWS}\\
+	$\begin{array}{c c c c}
+\underline{b_{00}} & b_{01} & b_{02} & b_{03} \\
+\underline{b_{10}} & b_{11} & b_{12} & b_{13} \\
+\underline{b_{20}} & b_{21} & b_{22} & b_{23} \\
+\underline{b_{30}} & b_{31} & b_{32} & b_{33} \\
+\end{array} \rightarrow \begin{array}{c c c c}
+\underline{b_{00}} & b_{01} & b_{02} & b_{03} \\
+b_{11} & b_{12} & b_{13} & \underline{b_{10}} \\
+b_{22} & b_{23} & \underline{b_{20}} & b_{21} \\
+b_{33} & \underline{b_{30}} & b_{31} & b_{32} \\
+\end{array}$
+	\item[03] \texttt{MIX COLUMNS}\\
+	$M$ matrice di $4\times 4$ byte. Ogni colonna del blocco B 
+	$B_j \rightarrow M\cdot B_j$, con $0 \leq j \leq 3$\\
+	Il nuovo $b_{ij}$ diventa un valore che dipende da tutti i byte della colonna ($b_{0j}, b_{1j}, b_{2j}, b_{3j}$)\\
+	$b_{ij} \rightarrow b_{ij}\oplus k_{ij}$
+\end{list}
+
 \chapter{Crittografia a Chiave Pubblica}
 \paragraph{One-Time Pad} 1917\\
 Non può essere decifrato senza conoscere la chiave. \textbf{Assolutamente sicuro}, ma richiede una nuova chiave segreta per ogni messaggio, che deve essere perfettamente casuale e lunga quanto il messaggio da scambiare. Diventa molto attraente per chi richiede una sicurezza assoluta ed è disposto a pagarne i costi.\\
