@@ -1331,6 +1331,15 @@ numero di matricola del candidato, prendendo per ciascuna di esse i tre bit meno
 	\item \texttt{000010}
 	\item Passando attraverso $S_1$, C dà in output \texttt{0100} (prendo i due bit esterni \texttt{00} per l'indice $x$ e i rimanenti \texttt{0001} per l'indice $y$, trovando 04 nella tabella che in binario è \texttt{0100})\\
 	Questi bit andranno rispettivamente in posizione 9, 17, 23 e 30 di D[$i$], seguendo la tabella P (01 è in posizione 9 e così via). Quindi D[9] = 0, D[17] = 1, D[23] = 0 e D[30] = 0
-	\item Con i bit in uscita da P, eseguo lo $\oplus$ (xor) con S[$i-1$], ottenendo tutti bit invertiti poiché S[$i-1$] = 111\ldots Quindi D[9] = 1, D[17] = 0, D[23] = 1 e D[30] = 1
+	\item Con S[$i-1$] eseguo lo $\oplus$ (xor) con i bit in uscita da P. Quindi D[9] = 1$\oplus$0 = 1, D[17] = 1$\oplus$1 = 0,\\D[23] = 1$\oplus$0 = 1 e D[30] = 1$\oplus$0 = 1
 \end{enumerate}
+\paragraph{Esercizio 4} La s-box del cifrario AES è composta da 16 blocchi con 8 ingressi e 8 uscite ciascuno. Qual è il numero totale di possibili funzioni che si potrebbero scegliere per costruire ciascun blocco?
+\subparagraph{Svolgimento} Per ognuna delle $2^8$ configurazioni di input, posso scegliere $2^8$ configurazioni in output. Quindi ho \# funzioni = $\left(2^8\right)^{2^8}$ = $2^{8\cdot2^8}$
+\paragraph{Esercizio 6} La proprietà di non linearità di qualsiasi cifratura a blocchi è fondamentale per la sicurezza. Infatti, si supponga di avere una cifratura lineare a blocchi $Cl$ che figra blocchi di 128 bit di testo in chiaro in 128 bit di testo cifrato, usando una chiave $k$ la cui lunghezza è irrilevante. Dunque, ogni coppia di messaggi $m_1$ e $m_2$ risulta $Cl(m_1\oplus m_2, k) = Cl(m_1, k)\oplus Cl(m_2, k)$\\
+\textbf{Descrivere} come un avversario che abbia 128 testi cifrati scelti possa decifrare qualsiasi testo cifrato senza conoscere la chiave $k$.
+\subparagraph{Svolgimento} Prendo $c$ il crittogramma di un generico $m$, $c = Cl(m, k)$. Posso rappresentare $c = \bigoplus_{i:c_i = 1} e^{(i)}$ dove $e_{(i)}$ ha un solo bit a 1 in posizione $i$, e gli altri 127 bit a 0.\\
+Per esempio $c = 1011 = 1000\oplus0010\oplus0001 = e^{(1)}\oplus e^{(3)}\oplus e^{(4)}$\\
+Sfruttiamo le proprietà delle funzioni di cifratura e decifrazione: $m = D(c,k) = D(\bigoplus_{i:c_i = 1} e^{(i)}, k) = \bigoplus_{i:c_i = 1} D(e^{(i)}, k)$\\
+Si chiede la decifrazione dei 128 testi cifrati $e^{(i)}$, $i\in[1,128]$, $f^{(i)} = D(e^{(i)}, k)$\\
+Si può decifrare qualsiasi crittogramma $c$ anche senza conoscere $k$: $m = \bigoplus_{i:c_i = 1}f^{(i)}$
 \end{document}
