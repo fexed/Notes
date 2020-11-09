@@ -1100,6 +1100,32 @@ Scegliere $p$ e $q$ molto grandi, per resistere a bruteforce.\\
 Sia $p-1$ che $q-1$ devono avere un fattore primo molto grande, sennò $n$ si fattorizza in fretta.\\
 MCD($p-1$, $q-1$) deve essere piccolo (idealmente 2). Conviene scegliere $p$ e $q$ tali che $(p-1)/2$ e $(q-1)/2$ siano coprimi.\\
 Non bisogna anche mai riutilizzare uno dei due primi per altri moduli, né sceglierli troppo vicini fra loro, sennò $n^2$ sarà circa $p^2$ o $q^2$ e $\sqrt{n}$ sarà vicino ai primi e basterà un bruteforce che cerca i fattori vicino a $\sqrt{n}$
+\paragraph{Attacchi}
+\begin{list}{}{}
+	\item \textbf{Attacchi con esponenti bassi}\\
+	Esponenti $e$ e $d$ bassi sono attraenti perché accelerano cifratura e decifrazione. Ovviamente $d$ deve essere scelto sufficientemente grande per evitare bruteforce.\\
+	Se $m$ ed $e$ sono così piccoli che $m^e < n$, allora \textbf{risulta facile trovare $\sqrt[e]{c}$ poiché $c = m^e$} e \textbf{non interviene il modulo}.
+	\item \textbf{Attacchi a tempo}\\
+	Si basano sul tempo di esecuzione dell'algoritmo di decifrazione. L'idea è determinare $d$ analizzando il tempo impiegato per decifrare.\\
+	Quando si esegue l'esponenziazione modulare, si esegue una moltiplicazione ad ogni iterazione più un'\textbf{ulteriore moltiplicazione modulare per ciascun bit uguale a 1 in $d$}. Come rimedio, si introduce un ritardo casuale per confondere l'attaccante.
+	\item \textbf{Attacco con $e$ troppo piccolo}\\
+	Se $e$ utenti scelgono lo stesso $e$ piccolo e tutti ed $e$ ricevono lo stesso messaggio $m$ ottengo\\$\begin{array}{l}
+	c_1 = m^e\textsl{ mod }n_1\\
+	c_2 = m^e\textsl{ mod }n_2\\
+	\vdots\\
+	c_e = m^e\textsl{ mod }n_e
+	\end{array} \forall\:i$ con $1\leq i\leq e$ e $m < n_i$.\\Poiché $m\cdot m\cdot\ldots\cdot m < n_1\cdot n_2\cdot\ldots\cdot n_e = n$ so che $m^e < n$. Ipotizzo $n_i$ coprimi fra loro, per il teorema cinese del resto $\exists$ e si può facilmente calcolare un unico $m'$ tale che $m' < n$ e $m'\equiv m^e$ mod $n$\\
+Dato che $m' < n$ e $m^e < n$, $m'$ mod $n = m^e$ mod $n \Rightarrow m' = m^e \Rightarrow m = \sqrt[e]{m'}$
+	\item \textbf{Attacco con lo stesso valore di $n$}\\
+	$\langle e_1, n\rangle$, $\langle e_2, n\rangle$, MCD($e_1, e_2$) = 1\\
+	$\exists\:r,s\in Z\:|\:e_1r + e_2s = 1 =$ MCD$(e_1, e_2)$ e si trovano con l'algoritmo di Euclide esteso $ax + by =$ MCD$(a,b)$\\
+	Pongo $r < 0, s > 0$, Eve intercetta $\begin{array}{l}
+	c_1 = m^{e_1}\textsl{ mod }n\\
+	c_2 = m^{e_2}\textsl{ mod }n
+	\end{array} \Rightarrow m = m^1 =$\\$=m^{re_1 + se_2} = (m^{e_1}$ mod $n)^r\cdot(m^{e_2}$ mod $n)^s$ mod $n$ = $(c_1^r\cdot c_2^s)$ mod $n = ((c_1^{-1})^{-r}\cdot c_2^s)$ mod $n$\\
+	Per $c_1^{-1}$ calcolo l'inverso di $c_1$ mod $n$. $(c_1^{-1})^{-r}$ e $c_2^s$ con quadrature successive\\
+	$\Rightarrow m = (c_1^{-1})^{-r}\cdot (c_2)^s$ mod $n$
+\end{list}
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
