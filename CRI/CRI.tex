@@ -949,7 +949,7 @@ Esiste una coppia $\langle k_{pub}, k_{priv}\rangle$ per ogni utente del sistema
 	\item \textbf{Sicurezza del cifrario}\\Pur conoscendo il crittogramma $c$, la chiave pubblica e le funzioni $C$ e $D$, è \textbf{difficile per il crittoanalista risalire al messaggio} $m$
 \paragraph{Cifratura} La funzione $C$ deve essere una \textbf{one-way trapdoor}: calcolare $c = C(m, k_{pub})$ deve essere \textbf{computazionalmente facile}, ma \textbf{decifrare $c$ computazionalmente difficile}. Questo a meno di un \textbf{meccanismo segreto} (\textbf{trapdoor}) rappresentato da $k_{priv}$
 \end{enumerate}
-\subsection{RSA} \paragraph{Rivest, Shamir, Adleman} Proposto come un sistema a chiave pubblica basato su una funzione \textit{facile} da calcolare e \textit{difficile} da invertire: la moltiplicazione di due primi $p$ e $q$.
+\section{RSA} \paragraph{Rivest, Shamir, Adleman} Proposto come un sistema a chiave pubblica basato su una funzione \textit{facile} da calcolare e \textit{difficile} da invertire: la moltiplicazione di due primi $p$ e $q$.
 \begin{list}{}{}
 	\item Calcolare $n = p\cdot q$ è \textbf{facile}
 	\item Calcolare $p,q$ da $n$ è \textbf{difficile}, \textbf{a meno di non conoscere uno dei due fattori}.
@@ -1027,6 +1027,79 @@ Se $x$ è primo con $s$ e si conosce $v = z^{-1}$ mod $\phi(s)$ (chiave segreta)
 	\end{list}
 	\item La chiave pubblica deve essere estratta da un certificato digitale valido, per evitare attacchi man-in-the-middle (MITM)
 \end{list}
+\subsection{RSA}
+Il cifrario è diviso in varie fasi.
+\paragraph{Creazione della coppia di chiavi} Il destinatario ha l'onere di creare le chiavi:
+\begin{list}{}{}
+	\item DEST sceglie $p$ e $q$ primi \textbf{molto grandi} (migliaia di bit): $n = p\cdot q$ deve avere 2048 bit, ancora più a lungo termine 3072 bit.\\
+	Si esegue in tempo polinomiale, primalità via Miller-Rabin
+	\item DEST calcola $n = p\cdot q$, $\phi(n) = (p-1)\cdot(q-1)$\\
+	Anche questo in tempo polinomiale
+	\item DEST sceglie $e < \phi(n)\:|$ MCD($e, \phi(n)$) = 1 (coprimo con $\phi(n)$)\\
+	Polinomiale
+	\item DEST calcola $d = e^{-1}$ mod $\phi(n)$\\
+	$\exists!$ perché $e$ è coprimo con $\phi(n)$\\
+	Polinomiale con algoritmo di Euclide esteso
+	\item DEST rende pubblica $k[pub]=\langle e, n\rangle$ \textbf{chiave pubblica}\\
+	Tiene private $k[priv]=\langle d\rangle$ \textbf{chiave privata}
+\end{list}
+\paragraph{Messaggio} Sequenza binaria trattata come un intero $m < n$. Se $m \geq n$, $m$ si divide in blocchi di $b = \lfloor\log_2 n\rfloor$ bit, cifrati indipendentemente, sennò ci sarebbero collisioni in fase di decifratura.\\
+Nella pratica si fissa un limite inferiore comune per la dimensione dei blocchi $b\:|\:m<2^b<n$
+\paragraph{Cifratura} Mittente si occupa di costruire $c = C(m, k[pub]) = m^e$ mod $n$ $\Rightarrow c<n$\\
+Polinomiale via quadrature successive
+\paragraph{Decifrazione} Destinatario è l'unico che può ricavare $m = D(c, k[priv]) = c^d$ mod $n$\\
+Polinomiale via quadrature successive
+\paragraph{Esempio} $p = 5, q = 11 \Rightarrow n = 55, \phi(n) = (p-1)(q-1) = 40$\\
+$e = 7$, MCD$(7, 40) = 1$ ok\\
+$d = 7^{-1}$ mod 40 = $-17$ mod $40$ = 23 mod 40 = 23
+\begin{list}{}{}
+	\item EE(7, 40) $\uparrow \langle1,\underline{-17}$
+	\item EE(40, 7) $\uparrow \langle1,3,-17\rangle$
+	\item EE(7, 5) $\uparrow \langle1,-2,+3\rangle$
+	\item EE(5, 2) $\uparrow \langle1,1,0-\lfloor5/2\rfloor\cdot1\rangle = \langle1,1,-2\rangle$
+	\item EE(2, 1) $\uparrow \langle1, 0, 1-\lceil2/1\rceil\cdot0\rangle = \langle1, 0, 1\rangle$
+	\item EE(1, 0) $\rightarrow \langle1, 1, 0\rangle$
+\end{list}
+\paragraph{Correttezza} Dim che D(C($m, k[pub]$), $k[priv]$) = $m$\\
+$c^d$ mod $n = (m^e$ mod $n)^d$ mod $n = m ^{ed}$ mod $n = m$\\
+\textbf{Teorema} $\forall\:m<n$ si ha $m^{ed}$ mod $n = m$, \textbf{dimostro} per casi:
+\begin{enumerate}
+	\item $p,q$ non dividono $m$\\
+	$\Rightarrow$ MCD($m, n$) = 1, sono coprimi\\
+	$\Rightarrow m^{\phi(n)} \equiv 1$ mod $n$ (th. Eulero)\\
+	$\Rightarrow e\cdot d \equiv 1$ mod $\phi(n)$, quindi $e\cdot d = 1 + r\cdot\phi(n)$ con $r\in N$ (def. di inverso)\\
+	$\Rightarrow m^{ed}$ mod $n = m^{1 + r\phi(n)}$ mod $n = m\cdot \left(m^{\phi(n)}\right)^r$ mod $n = m\cdot 1^r$ mod $n = m$ mod $n = m$ perché $m < n$ ok
+	\item $m,n$ non sono coprimi, suppongo $p\:|\:m$ e $q\not|\:m$ (analogo invertendo $p$ e $q$)\\
+	$\Rightarrow p\:|\:m \Rightarrow m \equiv 0$ mod $p$\\
+	$\Rightarrow \forall\:r\in N$ ho $m^r\equiv 0$ mod $p$\\
+	$\Rightarrow \forall\:r\in N$ ho $m^r - m\equiv 0$ mod $p$\\
+	$\Rightarrow$ con $r=e\cdot d$ ho $m^{ed} - m\equiv 0$ mod $p$\\
+	$\Rightarrow$ MCD($q, m) = 1$ sono coprimi\\
+	$\Rightarrow m^{\phi(q)} \equiv 1$ mod $q$\\
+	$\Rightarrow m^{ed}$ mod $q = m^{1 + r\phi(n)}$ mod $q = m\cdot m^{r(p-1)(q-1)}$ mod $q$ = $m\left(m^{q-1}\right)^{r(p-1)}$ mod $q$ =\\= $m\left(m^{\phi(q)}\right)^{r(p-1)}$ mod $q = m(1)^{r(p-1)}$ mod $q = m$ mod $q$\\
+	$\Rightarrow m^{ed} - m$ è divisibile per $p$ e per $q$, allora è divisibile anche per $n = p\cdot q$, quindi $m^{ed} - m \equiv 0$ mod $n$\\
+	$\Rightarrow m^{ed}\equiv m$ mod $n = m^{ed}\equiv m$ mod $n$ e perché $m < n$ ho $m$ mod $n$ = $m$
+	\item $p, q$ dividono $m$ non si verifica perché $m < n$
+\end{enumerate}
+\paragraph{Sicurezza} Legata alla difficoltà di fattorizzare un numero arbitrario molto grande.\\
+Fattorizzare $\Rightarrow$ forzare RSA ok, è sufficiente per forzarlo\\
+Fattorizzare $\Leftarrow$ forzare RSA, non sappiamo se fattorizzare è necessario per forzarlo.\\
+Il calcolo della radice in modulo $m = \sqrt[e]{c}$ mod $n$ difficile almeno quanto la fattorizzazione ($n$ composto)\\\\
+Calcolare $\phi(n)$ direttamente da $n$ è computazionalmente equivalente a fattorizzare $n$\\Significa che un problema si trasforma nell'altro in tempo polinomiale.
+\begin{list}{}{}
+	\item $n = pq \longrightarrow \phi(n) = (p-1)(q-1)$, due riduzioni e un prodotto, polinomiale
+	\item $\phi(n) = (p-1)(q-1) \rightarrow \phi(n) = pq - (p + q) + 1 = n - (p + q) + 1$\\$x_1 = p + q = n - \phi(n) + 1$\\
+	$\rightarrow (p - q)^2 = (p + q)^2 - 4pq = (p+q)^2 -4n = x_1^2 - 4n$\\$x_2 = p - q = \sqrt{x_1^2 - 4n}$\\
+	$\rightarrow p = \frac{x_1 + x_2}{2}, q = \frac{x_1 - x_2}{2}$, polinomiale
+\end{list}
+Ricavare $d$ direttamente da $\langle n, e\rangle$ sembra costoso quanto fattorizzare $n$. Come fattorizzare $n$ intero? È un problema difficile ma non più come un tempo: hardware più potente e algoritmi più raffinati, siamo in grado di fattorizzare in tempo subesponenziale $O(2^{\sqrt{b\cdot\log b}})$ con $b = \log_2 n + 1$, mentre il bruteforce richiede $O(n)$ cioè $O(2^b)$\\
+Possiamo fattorizzare semiprimi fino a 768 bit, con l'algoritmo GNFS. Mentre per interi con strutture particolari ci sono algoritmi di fattorizzazione particolarmente efficienti.\\
+La fattorizzazione e il logaritmo discreto non sono problemi NP-hard e si possono risolvere in tempo polinomiale su macchine quantistiche.\\
+Per avere una sicurezza in RSA pari ad un AES 128 bit devo usare un RSA con 3072 bit, per un AES 256 bit ho bisogno di RSA da 15360 bit.\\\\
+Scegliere $p$ e $q$ molto grandi, per resistere a bruteforce.\\
+Sia $p-1$ che $q-1$ devono avere un fattore primo molto grande, sennò $n$ si fattorizza in fretta.\\
+MCD($p-1$, $q-1$) deve essere piccolo (idealmente 2). Conviene scegliere $p$ e $q$ tali che $(p-1)/2$ e $(q-1)/2$ siano coprimi.\\
+Non bisogna anche mai riutilizzare uno dei due primi per altri moduli, né sceglierli troppo vicini fra loro, sennò $n^2$ sarà circa $p^2$ o $q^2$ e $\sqrt{n}$ sarà vicino ai primi e basterà un bruteforce che cerca i fattori vicino a $\sqrt{n}$
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
