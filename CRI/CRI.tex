@@ -1333,6 +1333,39 @@ numero di matricola del candidato, prendendo per ciascuna di esse i tre bit meno
 	Questi bit andranno rispettivamente in posizione 9, 17, 23 e 30 di D[$i$], seguendo la tabella P (01 è in posizione 9 e così via). Quindi D[9] = 0, D[17] = 1, D[23] = 0 e D[30] = 0
 	\item Con S[$i-1$] eseguo lo $\oplus$ (xor) con i bit in uscita da P. Quindi D[9] = 1$\oplus$0 = 1, D[17] = 1$\oplus$1 = 0,\\D[23] = 1$\oplus$0 = 1 e D[30] = 1$\oplus$0 = 1
 \end{enumerate}
+\paragraph{Esercizio 2} Si trasformi il DES complementando tutte le uscite della s-box.\\
+Sia $M$ il proprio numero di matricola. Si converta $M$ in una sequenza binaria $B$ trasformando ordinatamente in binario ogni cifra decimale di $M$ e prendendo per ciascuna i tre bit meno significativi. Si estenda $B$ fino ad avere 48 bit, aggiungendo zeri a destra: sia tale sequenza l'uscita del blocco EP del DES con chiave $k[0] = 1010\ldots10$
+\begin{enumerate}
+	\item \textbf{Indicare} la sequenza $B$
+	\item Nella fase 1 del DES, \textbf{determinare} il valore dei primi 4 bit a sinistra in uscita dalla s-box, spiegando come è stato ottenuto il risultato
+	\item \textbf{Commentare} se il DES così modificato appaia o meno palesemente meno sicuro della versione standard
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item $B =$ \texttt{101 011 000 010 101 111 000 000 000 000 000 000 000 000 000 000}
+	\item Nella $S_i$ entrano 6 bit, quindi per vedere i primi 4 bit prodotti bisogna usare la $S_1$ con i primi 6 bit di $B$, cioè con \texttt{1 0101 1}. Con i bit esterni si indicizza $x$, in questo caso con valore 3 uso la quarta riga, e con i 4 bit interni si indicizza $y$, in questo caso con valore 5, ottenendo il valore $09$, che quindi consiste nei bit \texttt{1001}. Per la modifica proposta, bisogna complementare ogni bit, ottenendo \texttt{0110}.
+	\item
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 3} Nella fase $i$-esima del DES, siano \texttt{000011} i primi 6 bit a sinistra in ingresso alla s-box.
+\begin{enumerate}
+	\item \textbf{Indicare} (con interi crescenti tra 1 e 32) la sequenza POS di posizioni dei bit di S[$i+1$] influenzati da questi 6 bit, spiegando come è stato ottenuto il risultato.
+	\item Siano $c_1 c_2\ldots$ i bit di S[$i-1$] nelle posizioni indicate in POS (le stesse quindi di S[$i+1$]). $c_1 c_2\ldots$ rappresentino in binario il numero di consonanti presenti nel nome e cognome del candidato. \textbf{Indicare} il valore dei bit di S[$i+1$] nelle posizioni POS spiegando come è stato ottenuto il risultato.
+\end{enumerate}
+\subparagraph{Svolgimento}
+\begin{enumerate}
+	\item Avendo \texttt{1 0001 1} come bit, ottengo 12 cioè \texttt{1100} come bit.\\
+	Ogni bit andrà, secondo la tabella P, rispettivamente in posizione 9, 17, 23, 31 di D[$i$], che diventerà S[$i+1$].
+	\item La sequenza data da $c$ è \texttt{1000}.\\
+	Bisogna fare lo $\oplus$ tra S[$i-1$] = \texttt{1000} e D attuale = \texttt{1100}. Quindi
+	\begin{list}{}{}
+		\item S[9] = $1\oplus1 = 0$
+		\item S[17] = $0\oplus1 = 1$
+		\item S[23] = $0\oplus0 = 0$
+		\item S[31] = $0\oplus0 = 0$
+	\end{list}
+	ottenendo \texttt{0 1 0 0} rispettivamente nelle posizioni 9, 17, 23, 31.
+\end{enumerate}
 \paragraph{Esercizio 4} La s-box del cifrario AES è composta da 16 blocchi con 8 ingressi e 8 uscite ciascuno. Qual è il numero totale di possibili funzioni che si potrebbero scegliere per costruire ciascun blocco?
 \subparagraph{Svolgimento} Per ognuna delle $2^8$ configurazioni di input, posso scegliere $2^8$ configurazioni in output. Quindi ho \# funzioni = $\left(2^8\right)^{2^8}$ = $2^{8\cdot2^8}$
 \paragraph{Esercizio 6} La proprietà di non linearità di qualsiasi cifratura a blocchi è fondamentale per la sicurezza. Infatti, si supponga di avere una cifratura lineare a blocchi $Cl$ che figra blocchi di 128 bit di testo in chiaro in 128 bit di testo cifrato, usando una chiave $k$ la cui lunghezza è irrilevante. Dunque, ogni coppia di messaggi $m_1$ e $m_2$ risulta $Cl(m_1\oplus m_2, k) = Cl(m_1, k)\oplus Cl(m_2, k)$\\
@@ -1342,4 +1375,9 @@ Per esempio $c = 1011 = 1000\oplus0010\oplus0001 = e^{(1)}\oplus e^{(3)}\oplus e
 Sfruttiamo le proprietà delle funzioni di cifratura e decifrazione: $m = D(c,k) = D(\bigoplus_{i:c_i = 1} e^{(i)}, k) = \bigoplus_{i:c_i = 1} D(e^{(i)}, k)$\\
 Si chiede la decifrazione dei 128 testi cifrati $e^{(i)}$, $i\in[1,128]$, $f^{(i)} = D(e^{(i)}, k)$\\
 Si può decifrare qualsiasi crittogramma $c$ anche senza conoscere $k$: $m = \bigoplus_{i:c_i = 1}f^{(i)}$
+\paragraph{Esercizio 7} DESX è un cifrario proposto da Rivest per proteggere il DES dagli attacchi esaurienti. DESX usa una chiave segreta $w$ di 64 bit, oltre alla chiave DES $k$ di 56 bit, e opera così: $$C_{DESX}(m, k, w) = w\oplus C_{DES}(m\oplus w, k)$$Mostrare come eseguire la decifrazione.
+\subparagraph{Svolgimento}
+$c = C_{DES}(m\oplus w, k) \Leftrightarrow c\oplus w = C_{DES}(m\oplus w, k)$\\
+$\Leftrightarrow D_{DES}(c\oplus w, k) = D_{DES}(C_{DES}(m\oplus w, k))$ ma $D_{DES}(C_{DES}(m\oplus w, k)) = m\oplus w$ perché DES è un cifrario corretto\\
+Quindi $\Leftrightarrow m\oplus w = D_{DES}(c\oplus w, k) \Leftrightarrow m = w \oplus D_{DES}(c\oplus w, k)$
 \end{document}
