@@ -1473,7 +1473,59 @@ Riempiamo il circuito con $|x|^k$ circuiti per $\triangleright$, $|x|$ circuiti 
 Il \textbf{teorema di Cook è dimostrato}.
 \paragraph{Altri problemi $\mathscr{NP}$-completi} HAM, CRICCA, commesso viaggiatore, programmazione lineare, e altri e altri ancora\ldots
 \chapter{Esercizi}
-%TODO resto
+\section{Calcolabilità}
+\paragraph{Esercizio 1} Data un'enumerazione effettiva, esiste una funzione calcolabile totale $t(i,n)$ che maggiora il tempo di calcolo di $M_i(n)$?
+\subparagraph{Svolgimento} Tale funzione non esiste.\\
+Si prenda $t(i,n) = \left\{\begin{array}{l l}
+	k&M_i(n)\downarrow\textsl{ in meno di }k\textsl{ passi}\\
+	0&\textsl{altrimenti}
+\end{array}\right.$ e si supponga per assurdo $t(i,n)$ calcolabile totale.\\
+Poniamo $T_i$ la misura \textit{esatta} del tempo di calcolo di $M_i$. $\forall\:n$, la funzione test $T_i(n)\leq^?t(i,n)$ è calcolabile totale, basta far girare $M_i(n)$ al più $t(i,n)$ passi: se l'algoritmo si è arrestato allora la risposta è positiva, altrimenti negativa.\\
+Si definisca $\psi(x) = \left\{\begin{array}{l l}
+\phi_x(x) + 1&T_x(x)\leq t(x,x)\\
+0&\textsl{altrimenti}
+\end{array}\right.$ e, per il solito ragionamento, si osservi che $\psi(x)$ è calcolabile totale.\\
+Quindi, per C-T, $\exists\:i\:|\:\psi = \phi_i$, ma ottengo $\phi_i(i) = \psi(i) = \left\{\begin{array}{l l}
+\phi_i(i) + 1&T_i(i)\leq t(i,i)\\
+0&\textsl{altrimenti}
+\end{array}\right.$ e poiché $\phi_i(i)\neq\phi_i(i)+1$ segue che $\phi_i(i) = 0$ e dunque $T_i(i) > t(i,i)$\\
+Ciò contraddice l'ipotesi $T_i(i)\leq t(i,i)$, quindi $t(i,n)$ non è calcolabile totale.
+\paragraph{Esercizio 2} Esiste una funzione calcolabile totale che determina se un dato programma $M_i$ calcolato su uno specifico dato $x$ all'interno di un calcolatore $C$ con memoria finita è in ciclo?
+\subparagraph{Svolgimento} Definiamo $h(i,x,C) = \left\{\begin{array}{l l}
+	1&M_i(x)\uparrow\textsl{ sul calcolatore }C\\
+	0&\textsl{altrimenti}
+\end{array}\right.$\\
+$h$ è totale, ma è calcolabile? Aver limitata la memoria di $C$ ci permette di \textbf{stimare il numero massimo di configurazioni} di $C$, dunque di avere una procedura che in un numero finito di passi stabilisce se $M_i(x)$ è in ciclo o meno.\\
+Infatti, se si rappresenta $C$ come una MdT possiamo indicare con $n = \#\Sigma_C$ il \textbf{numero di simboli} di $C$, $m-1 = \#Q_c$ il \textbf{numero di stati} di $C$ e $k$ il \textbf{numero di celle del nastro} di $C$. Questo implica che si possono avere al più $n^k$ \textbf{stringhe diverse} sul nastro, su cui la testina può trovarsi in al più $k$ \textbf{posizioni diverse} in al più $m$ \textbf{stati diversi}.\\
+Quindi ho un \textbf{numero massimo di configurazioni} differenti che $C$ può assumere pari a $l = k\cdot n^k\cdot m$.\\\\
+Sia $H$ la MdT a 4 nastri che all'inizio contengono:
+\begin{list}{}{}
+	\item sul primo nastro $\langle M_i\rangle$, la codifica della MdT $M_i$
+	\item sul secondo nastro $\langle x\rangle$, la codifica del dato $x$
+	\item sul terzo nastro la codifica dello stato iniziale di $M_i$
+	\item sul quarto stato la codifica in unario di $l$
+\end{list}
+$H$ simula il comportamento di $M_i(x)$ lavorando come la MdTU, e in più decrementa di una tacca il quarto nastro ogni volta che simula la computazione di $M_i(x)$. Se sul terzo nastro compare lo stato di arresto di $M_i$ e sul quarto nastro vi sono ancora tacche, allora $H$ si ferma e restituisce $h(i, x, C) = 0$, altrimenti se sul quarto nastro non vi sono più tacche ed $M_i$ non è nello stato di arresto allora $H$ si ferma e restituisce $h(i,x,C) = 1$ poiché $M_i$ è \textbf{destinata a tornare in una delle configurazioni già incontrate}.\\\\
+Bisogna notare come aver definito i nastri delle MdT infiniti a destra renda possibile la definizione di $H$. Se imponessimo un limite di spazio, in particolare al quarto nastro di $H$, sarebbe possibile trovare un calcolatore $C$ con $l$ maggiore del limite, e dunque $h(i,x,C)$ diverrebbe non calcolabile.\\
+In altre parole, se non avessimo il vincolo della memoria finita di $C$, la funzione $h(i,x)$ (a due posti invece di tre) non sarebbe calcolabile, infatti risulterebbe $h(i,i) = 1 - \chi_K(i)$ che sappiamo non essere calcolabile.
+\paragraph{Esercizio 3} Si dimostri che un insieme finito $A$ è ricorsivo se e solo se può essere generato in modo strettamente crescente, cioè esiste una funzione strettamente crescente $g$ tale che $A = Imm(g)$
+\subparagraph{Svolgimento}
+Se $A$ è ricorsivo, allora la sua funzione caratteristica è ricorsiva, dunque possiamo definire $g$ come $$\left\{\begin{array}{l l}
+g(0)&=\mu y[\chi_A(y) = 1]\\
+g(n-1)&=\mu y[\chi_A(y) = 1 \wedge g(n) < y]
+\end{array}\right.$$
+La funzione che verifica $<$ è primitiva ricorsiva, e la funzione $g$ è strettamente crescente. Per dimostrare che $A = Imm(g)$, basta ordinare in modo crescente gli elementi di $A$, cioè riordinare $A = {a_i}_i$ in modo che $a_{i_{n+1}}$ sia l'elemento di $A$ immediatamente successivo a $a_{i_n}$, e osservare che $\forall\:n$ vale $a_{i_n} = g(n)$.\\
+Cioè $A = \{a_{i_0}, a_{i_1}, \ldots, a_{i_n},\ldots\} = \{g(0), g(1),\ldots, g(n),\ldots\}$\\\\
+Se $A = Imm(g)$ con $g$ calcolabile totale strettamente crescente, per dimostrare che $A$ è ricorsivo bisogna fare vedere che $\chi_A$ è calcolabile totale. Si definisce la seguente funzione che è banalmente calcolabile totale ($B$ è un insieme finito) $$\phi_A(n) = \left\{\begin{array}{l l}
+1&n\in B = \{g(0),\ldots,g(n)\}\subset A\\
+0&\textsl{altrimenti}
+\end{array}\right.$$
+Verifico che $\phi_A = \chi_A$, cioè che la funzione appena definita è davvero la funzione caratteristica di A:
+\begin{list}{}{}
+	\item Se $n\in B$ allora $n\in A$ per definizione
+	\item Se $n\not\in B$ allora $n < g(n) < g(n+1)<\ldots$ e quindi $n\not\in A$
+\end{list}
+\paragraph{Esercizio} %TODO resto
 $\Leftarrow A\subseteq \mathbb{N}$\\
 $g$ è adesso in nostro possesso, nota per ipotesi, totale e strettamente crescente.
 Voglio far vedere che la sua funzione caratteristica è calcolabile.\\
