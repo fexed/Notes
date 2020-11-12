@@ -823,11 +823,11 @@ f(x) =
 	\right.
 \end{math}
 Poiché $\chi$ è calcolabile totale, anche $f$ lo è.\\
-Proviamo quindi a cercare il numero di $f$, ma \textbf{non lo troviamo}. Perché poniamo $i$ come indice di $f$, allora\\$\phi_i(i) = f(i) = \phi_(i) + 1$ se $i \in K$, ma non può essere. Se $i \not\in K$ non può essere $\phi_i(i) = f(i) = 0$ perché $\phi_i(i)\uparrow$
+Proviamo quindi a cercare il numero di $f$, ma \textbf{non lo troviamo}. Perché poniamo $i$ come indice di $f$, allora\\$\phi_i(i) = f(i) = \phi_i(i) + 1$ se $i \in K$, ma non può essere. Se $i \not\in K$ non può essere $\phi_i(i) = f(i) = 0$ perché $\phi_i(i)\uparrow$
 \paragraph{Osservazione} \textbf{Ricorsivi} $\subset$ \textbf{ricorsivi enumerabili} $\subset$ non \textbf{ricorsivi enumerabili}
 \paragraph{Bootstrapping} Cross-compiler: un compilatore scritto in un certo linguaggio $L$, che compila $L \rightarrow A$, con $A$ altro linguaggio. Se $L$ non gira su una determinata macchina, posso applicarlo a sé stesso: produrrà qualcosa scritto in $A$ che prende $L$ e produce $A$.\\
 $$C_L^{L\rightarrow A} (C_L^{L\rightarrow A})= C_A^{L\rightarrow A}$$
-Qeusto assomiglia alla nostra K.\\
+Questo assomiglia alla nostra K.\\
 K$_0$ = \{$(x, y)$ $|$ $\phi_y(x)\downarrow$\}: scrivo un programma che prende un altro programma in input e testa per verificare se termina su un input. Questo è il \textbf{problema della fermata} (\textbf{halting}), che detto in altri termini: dato $x$ e $y$, il programma $P_y(x)$ termina?\\
 K$_0$ non è ricorsivo. Perché $x \in K \Leftrightarrow (x, x) \in K_0$, quindi se $K_0$ fosse ricorsivo lo sarebbe anche $K$.
 \subsection{Riduzioni}
@@ -1550,7 +1550,28 @@ while (true) do
 \end{lstlisting}
 A parole: essendo $W_i \subsetneq W_j$, posso iniziare a costruire $W_{f(x)}$ generando alcuni elementi di $W_i$ con la funzione $h_i$ e inserendoli in $W_{f(x)}$. Non appena mi accorgo che la $\phi_x(x)$ termina, inizio ad emettere gli elementi di $W_j$ (alcuni magari già calcolati, per l'inclusione) in $W_{f(x)}$ con la funzione $h_j$\\
 Si noti che se $W_i$ e $W_j$ fossero disgiunti, $f$ sarebbe la caratteristica di $K$, quindi non sarebbe calcolabile.
-
+\paragraph{Esercizio 8} Si dimostri che $\textsc{const} = \{x\:|\:\phi_x$ totale e costante$\}$ non è ricorsivo
+\subparagraph{Svolgimento} Basta ridurre $K$ a $\textsc{const}$, dato che $K$ non è ricorsivo.\\
+Definisco $\psi(x,y) = \left\{\begin{array}{l l}
+1&\textsl{se }\exists\:z > y\:|\:\phi_x(x)\downarrow\textsl{ in meno di }z\textsl{ passi}\\
+\textsl{indefinita}&\textsl{altrimenti}
+\end{array}\right.$ che è calcolabile parziale, essendo la funzione semi-caratteristica di $K$.\\
+Allora, per il teorema s-m-n, esiste $f$ calcolabile totale iniettiva tale che $\phi_{f(x)}(y) = \psi(x,y)$ (con il solito trucco di scegliere uno degli indici che calcolano la $\psi$ per poi ingorarlo). Adesso:
+\begin{list}{}{}
+	\item $x\in K\Rightarrow\phi_{f(x)} = \psi(x,y) = \lambda y.1 \Rightarrow f(x)\in\textsc{const}$
+	\item $x\not\in K\Rightarrow \phi_{f(x)} = \lambda y.\textsl{indefinito}\Rightarrow f(x)\in\textsc{const}$
+\end{list}
+Quindi $\textsc{const}$ non è ricorsivo, e nemmeno ricorsivamente numerabile.\\
+In alternativa, si può verificare che $\textsc{const}$ è un insieme di indici rappresentanti funzioni (i.i.r.f.) e che non è vuoto, di conseguenza non è ricorsivo.
+\paragraph{Esercizio 9} Si dimostri che $\textsc{inf} = \{x\:|\:dom(\phi_x)$ è infinito$\}\leq_{rec}\textsc{const} = \{x\:|\:\phi_x$ totale e costante$\}$
+\subparagraph{Svolgimento} Definiamo $\psi(x,y) = \left\{ \begin{array}{l l}
+1&\textsl{se }\exists\:z > y\:|\:\phi_x(z)\downarrow\\
+\textsl{indefinita}&\textsl{altrimenti}
+\end{array}\right.$ che è calcolabile parziale. Per il teorema s-m-n, esiste $f$ calcolabile totale iniettiva tale che $\phi_{f(x)}(y) = \psi(x,y)$. Adesso:
+\begin{list}{}{}
+	\item $x\in\textsc{inf} \Rightarrow \phi_{f(x)} = \psi(x,y) = \lambda y.1 \Rightarrow f(x) \in \textsc{const}$
+	\item $x\not\in\textsc{inf} \Rightarrow \exists\:y.\phi_{f(x)}(y)$ è indefinito $\Rightarrow f(x) \not\in \textsc{const}$
+\end{list}
 \paragraph{Esercizio} %TODO resto
 $\Leftarrow A\subseteq \mathbb{N}$\\
 $g$ è adesso in nostro possesso, nota per ipotesi, totale e strettamente crescente.
