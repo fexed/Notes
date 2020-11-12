@@ -1525,6 +1525,32 @@ Verifico che $\phi_A = \chi_A$, cioè che la funzione appena definita è davvero
 	\item Se $n\in B$ allora $n\in A$ per definizione
 	\item Se $n\not\in B$ allora $n < g(n) < g(n+1)<\ldots$ e quindi $n\not\in A$
 \end{list}
+\paragraph{Esercizio 4} Si dimostri che ogni insieme ricorsivamente enumerabile non ricorsivo (quindi non vuoto) ha almeno un sottoinsieme ricorsivo infinito.
+\subparagraph{Svolgimento} Sia $f$ la funzione calcolabile totale che enumera l'insieme ricorsivamente enumerabile dato. A partire da $f$, si costruisca $\left\{\begin{array}{l l}
+g(0) & = f(0)\\
+g(n + 1) & = f(\mu k[f(k)>g(n)])
+\end{array}\right.$\\
+L'immagine di $g$ è un insieme finito e $g$ è strettamente crescente. Per l'esercizio 3, quindi, la sua immagine è un insieme ricorsivo.
+\paragraph{Esercizio 5} Si definisca $W_i=\{n\:|\:\phi_i(n)\downarrow\} = dom(\phi_i)$ e si considerino due funzioni calcolabili $\phi_i,\phi_j\:|\:\emptyset\neq W_i \subsetneq W_j$\\Si discuta dell'esistenza di una funzione calcolabile totale $f\:|\:\forall\:x\:\:W_{f(x)} = \left\{ \begin{array}{l l}
+W_i&\textsl{se }\phi_x(x)\uparrow,\textsl{ cioè se }x\not\in K\\
+W_j&\textsl{se }\phi_x(x)\downarrow,\textsl{ cioè se }x\in K
+\end{array} \right.$
+\subparagraph{Svolgimento} Al contrario di quanto sembra, una tale $f$ esiste. Sappiamo che $W_i$ è ricorsivamente enumerabile, dunque esiste una funzione calcolabile totale $h_i$ tale che $W_i = Imm(h_i)$, e similmente esiste $h_j$ tale che $W_j = Imm(h_j)$.\\
+Con la seguente procedura si generano gli infiniti elementi di $W_{f(x)}$ e, poiché è definita per ogni $x$, la $f$ è totale:
+\begin{lstlisting}
+n := 0;
+W[f(x)] := empty;
+while (phi[x](x) non converge in n passi) do
+	w[f(x)] := W[f(x)] U h[i](n);
+	n := n + 1;
+n := 0;
+while (true) do
+	w[f(x)] := W[f(x)] U h[j](n);
+	n := n + 1;
+\end{lstlisting}
+A parole: essendo $W_i \subsetneq W_j$, posso iniziare a costruire $W_{f(x)}$ generando alcuni elementi di $W_i$ con la funzione $h_i$ e inserendoli in $W_{f(x)}$. Non appena mi accorgo che la $\phi_x(x)$ termina, inizio ad emettere gli elementi di $W_j$ (alcuni magari già calcolati, per l'inclusione) in $W_{f(x)}$ con la funzione $h_j$\\
+Si noti che se $W_i$ e $W_j$ fossero disgiunti, $f$ sarebbe la caratteristica di $K$, quindi non sarebbe calcolabile.
+
 \paragraph{Esercizio} %TODO resto
 $\Leftarrow A\subseteq \mathbb{N}$\\
 $g$ è adesso in nostro possesso, nota per ipotesi, totale e strettamente crescente.
