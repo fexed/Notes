@@ -919,6 +919,7 @@ b_{33} & \underline{b_{30}} & b_{31} & b_{32} \\
 \end{list}
 
 \chapter{Crittografia a Chiave Pubblica}
+Cifrari ibridi, usati per lo \textbf{scambio delle chiavi}.
 \paragraph{One-Time Pad} 1917\\
 Non può essere decifrato senza conoscere la chiave. \textbf{Assolutamente sicuro}, ma richiede una nuova chiave segreta per ogni messaggio, che deve essere perfettamente casuale e lunga quanto il messaggio da scambiare. Diventa molto attraente per chi richiede una sicurezza assoluta ed è disposto a pagarne i costi.\\
 Ma \textbf{come si genera} e \textbf{come si scambia la chiave}?
@@ -1126,6 +1127,82 @@ Dato che $m' < n$ e $m^e < n$, $m'$ mod $n = m^e$ mod $n \Rightarrow m' = m^e \R
 	Per $c_1^{-1}$ calcolo l'inverso di $c_1$ mod $n$. $(c_1^{-1})^{-r}$ e $c_2^s$ con quadrature successive\\
 	$\Rightarrow m = (c_1^{-1})^{-r}\cdot (c_2)^s$ mod $n$
 \end{list}
+\section{Protocollo Diffie-Hellmann}
+Per esempio, RSA per scambiare la chiave e AES per proteggere la comunicazione. \begin{list}{}{}
+	\item \textbf{Alice} sceglie una chiave per AES (\texttt{k[session]}) e la cifra con la chiave pubblica RSA di Bob. Cifra il messaggio con \texttt{k[session]} e invia i due crittogrammi a Bob.\\
+	$\langle$C$_{RSA}$(\texttt{k[session]}, \texttt{k$_{Bob}$[pub]}), C$_{DES}$($m$, \texttt{k[session]})$\rangle$
+	\item \textbf{Bob} decifra il primo crittogramma con \texttt{k$_{Bob}$[prv]}, trova \texttt{k[session]} e decifra il secondo crittogramma
+\end{list}
+L'onere di creare la chiave di sessione è lasciato esclusivamente al mittente, ma la chiave deve essere generate in modo più possibile casuale.
+\paragraph{Protocollo} Alice e Bob si accordano pubblicamente su un numero primo $p$ molto grande (migliaia di bit) e su un generatore $g$ di $Z_p^* = \{1,2,\ldots,p-1\} = \{g^k$ mod $p\:|\:1\leq k \leq p-1\}$. $\exists\:g$ perché $p$ è primo.\\
+Alice e Bob possono anche scegliere di usare una coppia $\langle p,g\rangle$ già disponibili. Non è richiesto che questa coppia sia mantenuta segreta.\\
+Adesso il protocollo parte:
+\begin{center}
+\begin{tabular}{c c c}
+Alice&$\langle g,p \rangle$&Bob\\
+\hline
+\makecell{Sceglie a caso\\$1<x<p-1$\\intero positivo,\\e calcola $A=g^x$ mod $p$\\Lo manda a Bob}& &\makecell{Sceglie a caso\\$1<y<p-1$\\intero positivo,\\e calcola $B=g^y$ mod $p$\\Lo manda a Alice}\\
+
+&\makecell{$\rightarrow A\rightarrow$\\$\leftarrow B\leftarrow$}\\
+\makecell{Riceve B da Bob e calcola\\\texttt{k[session]} = $B^x$ mod $p$ = $g^{xy}$ mod $p$}& &\makecell{Riceve A da Alice e calcola\\\texttt{k[session]} = $A^y$ mod $p$ = $g^{xy}$ mod $p$}
+\end{tabular}
+\end{center}
+\paragraph{Attacchi}
+\begin{list}{}{}
+	\item \textbf{Attacchi passivi}, il protocollo è \textbf{resistente}.\\Il crittoanalista conosce $p, g, A, B$. Per calcolare \texttt{k[session]} deve trovare $x$ o $y$, ma $A = g^x$ mod $p$ e\\$B = b^y$ mod $p$.\\
+	Trovare $x,y$ conoscendo $A,B$ significa risolvere il logaritmo discreto che è un \textbf{problema difficile} quanto la fattorizzazione.
+	\item \textbf{Attacchi attivi}, il protocollo è \textbf{vulnerabile} ad attacchi del tipo MitM.
+
+\end{list}
+	\begin{center}
+\begin{tabular}{c c c}
+Alice&Eve&Bob\\
+\hline
+\makecell{$A=g^x$ mod $p\rightarrow$}& &\makecell{$\leftarrow B=g^y$ mod $p$}\\
+&\makecell{Sottrae $A,B$ dal canale\\e il sostituisce con un suo\\$E = g^z$ mod $p$\\con $1< z <p-1$\\$\leftarrow$La manda a entrambi$\rightarrow$}\\
+\makecell{\texttt{k[session]} = $E^x$ mod $p$ = $g^{xz}$ mod $p$}& &\makecell{\texttt{k[session]} = $E^y$ mod $p$ = $g^{yz}$ mod $p$}\\
+&\makecell{Conosce sia $K_A = A^z$ mod $p$\\sia $K_B = B^z$ mod $p$}\\
+\\
+&$K_A\neq K_B$&
+\end{tabular}
+\end{center}
+\section{Cifrario di Elgamal}
+Si basa sul logaritmo discreto come funzione one-way-trapdoor.\\
+Alice $\rightarrow m\rightarrow$ Bob\\
+\begin{list}{}{}
+	\item \textbf{Bob} sceglie $p$ numero primo grande e $g$ generatore per $Z_g^*$\\
+	Sceglie $2\leq x \leq p-2$ come \textbf{chiave privata}, \texttt{k[prv]} = $\langle x\rangle$\\
+	Calcola $y = g^x$ mod $p$\\
+	Pubblica \texttt{k[pub]} $=\langle p,g,y\rangle$
+	\item \textbf{Alice} $0\leq m < p$\\
+	Si procura \texttt{k[pub]} = $\langle p,g,y\rangle$\\
+	Sceglie a caso $2 \leq r \leq p-2$ \textbf{segreto}\\
+	Calcola $c = g^r$ mod $p$, cioè un numero casuale $\in Z_p^*$ perché $g$ generatore\\
+	Calcola $d = \left(m\cdot y\right)^r$ mod $p$\\
+	Invia a Bob $\langle c,d\rangle$, coppia di crittogrammi: il primo contiene protetta l'informazione su $r$, e $d$ contiene il\\ messaggio $m$
+	\item \textbf{Bob} riceve $\langle c,d\rangle$ e decifra:
+	\begin{list}{}{}
+		\item $m = \frac{d}{c^x}$ mod $p$ = $d\cdot\left(c^x\right)^{-1}$ mod $p$ (dove la frazione indica la moltiplicazione per l'inverso)
+	\end{list}
+\end{list}
+\pagebreak
+\paragraph{Correttezza} $m = \frac{d}{c^x}$ mod $p = \frac{y^r\cdot m}{c^x}$ mod $p = \frac{(g^{xr})\cdot m}{(g^r)^x}$ mod $p = m$ mod $p = m$ perché $m < p$
+\paragraph{Attacchi} Eve conosce $p,g,y,c,d$, cioè tutto tranne $x$ e $r$.\\
+Se conosce $x$ calcola $m = \frac{d}{c^x}$ mod $p$\\
+Se conosce $r$ calcola $m = \frac{d}{y^r}$ mod $p = \frac{m\cdot y^r}{y^r}$ mod $p = m$
+\chapter{Elliptic Curvce Cryptography}
+\begin{center}
+Equivalenze di costo degli attacchi\\
+\begin{tabular}{c | c | c}
+AES & RSA,DH, Elgamal & ECC\\
+\hline
+128 bit & 3072 bit (di $n$, $p$) & 256 bit\\
+256 bit & 15000 bit & 512 bit
+\end{tabular}
+\end{center}
+\paragraph{Cosa sono} Curve algebriche descritte da equazioni simili a quelle usate per il calcolo degli archi delle ellissi.\\
+1985 da Miller e Koblitz, propongono di prendere la cifratura a chiave pubblica e modificarli sostituendo solo le operazioni: invece che algebra modulare usare punti delle curve ellittiche.
+%TODO equazioni
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
