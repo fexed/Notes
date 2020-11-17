@@ -1190,7 +1190,7 @@ Alice $\rightarrow m\rightarrow$ Bob\\
 \paragraph{Attacchi} Eve conosce $p,g,y,c,d$, cioè tutto tranne $x$ e $r$.\\
 Se conosce $x$ calcola $m = \frac{d}{c^x}$ mod $p$\\
 Se conosce $r$ calcola $m = \frac{d}{y^r}$ mod $p = \frac{m\cdot y^r}{y^r}$ mod $p = m$
-\chapter{Elliptic Curvce Cryptography}
+\chapter{Elliptic Curve Cryptography}
 \begin{center}
 Equivalenze di costo degli attacchi\\
 \begin{tabular}{c | c | c}
@@ -1206,11 +1206,119 @@ AES & RSA,DH, Elgamal & ECC\\
 Se la caratteristica di $K \neq 2,3$ allora esiste la forma normale di Weierstrass $y^2 = x^3 + ax + b$ con $a,b\in K$\\\\
 La \textbf{caratteristica} di un campo è il numero di volte che io devo sommare l'elemento neutro moltiplicativo (1) per ottere l'elemento neutro additivo (0). Ad esempio, negli interi modulo $p$ primo, la caratteristica è $p$: $p\cdot 1$ mod $p = 0$\\
 In $R$ la caratteristica è 0, non esiste.\\\\
-Con caratteristica $\neq 2,3$, la curva ellittica può essere descritta da $$E_K(a,b) = \{(x,y)\in K^2\:|\:y^2 = x^3+ax+b\}\cup\{0\}$$
-Noi prenderemo $K = R$, cioè $E(a,b) = \{(x,y)\in R^2\:|\:y^2 = x^3+ax+b\}\cup\{0\}$.\\
+Con caratteristica $\neq 2,3$, la curva ellittica può essere descritta da $$E_K(a,b) = \{(x,y)\in K^2\:|\:y^2 = x^3+ax+b\}\cup\{O\}$$
+Ora prenderemo $K = R$, cioè $E(a,b) = \{(x,y)\in R^2\:|\:y^2 = x^3+ax+b\}\cup\{O\}$.\\
 La richiesta è che $x^3 + ax + b$ \textbf{non abbia radici multiple}, cioè \textbf{assumiamo che} $4a^3 + 27b^2 \neq 0$ (discriminante). Questo garantisce l'esistenza della tangente in ogni punto della curva ellittica.
 \paragraph{Simmetria orizzontale} Dato $P = (x,y) \in E(a,b)$, quindi $x,y$ soddisfano $y^2 = x^3 + ax + b \Rightarrow -P = (x,-y)\in E(a,b)$ infatti $(-y)^2 = y^2 = x^3 + ax + b$\\\\
 Per il punto all'infinito si pone O = -O
+\paragraph{Idea} Ogni retta interseca una curva in al più 3 punti:
+\begin{list}{}{}
+	\item 3 punti di intersezione (tre soluzioni reali della cubica)
+	\item 1 punto di intersezione (una soluzione reale e 2 complesse coniugate
+\end{list}
+Se una retta interseca $E(a,b)$ in 2 punti $\Rightarrow$ la interseca anche in un terzo punto: si usa per definire l'operazione "somma".\\
+$P,Q,R\in E(a,b)$, se $P$, $Q$ ed $R$ sono su una retta si pone $P+Q+R = O \Rightarrow P + Q = -R$
+\pagebreak
+\begin{multicols}{2}
+\paragraph{Metodo per sommare due punti} $P,Q\in E(a,b)$ con $Q\neq \pm P$\\
+Si considera $\overline{PQ}$, la retta per $P$ e $Q$, e si calcola il terzo punto di intersezione tra $E(a,b)$ e $\overline{PQ}$ chiamandolo $R$\\
+Si pone $P+Q = -R$ $\left\{\begin{array}{l l}
+R \in E(a,b)\\
+-R \in E(a,b)
+\end{array}\right.$
+\paragraph{Inverso} Dato $Q = -P$, ho $P + (-P) = -O = O$
+\paragraph{Somma con sé stesso} Se $Q = P$, dal punto di vista algebrico ho due radici reali uguali. La retta considerata è la tangente alla cura nel punto $P$, sempre ben definita per costruzione della curva in quanto $4a^3 + 27b^2 \neq 0$.\\
+Si prende poi l'opposto del punto di intersezione tra la tangente in $P$ e la curva $E(a,b)$ (può essere $O$)
+\paragraph{Proprietà della somma}
+\begin{list}{}{}
+	\item \textbf{Chiusura} $\forall\:P,Q\in E(a,b)$ ho $P + Q \in E(a,b)$
+	\item \textbf{Elemento neutro} $\forall\:P\in E(a,b)$ ho $P + O = O + P = P$
+	\item \textbf{Inverso} $\forall\:P\in E(a,b)\:\exists!\:Q\in E(a,b)\:|\: P + Q = O = Q + P$ e $Q = -P$\\($P = (x,y)\Rightarrow -P = (x, -y))$
+	\item \textbf{Proprietà commutativa} $\forall\:P,Q\in E(a,b)$\\ho $P + Q = Q + P$
+	\item \textbf{Proprietà associativa} $\forall\:P,Q,R\in E(a,b)$\\ho $(P + Q) + R = P + (Q + R)$
+\end{list}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}\\
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\end{multicols}
+
+\paragraph{Formulazione algebrica} $P ( x_p, y_p)$, $Q = (x_q, y_q)$, $S = P + Q$\\
+\begin{list}{}{}
+	\item[$Q \neq \pm P$] $S = (x_s, y_s)$ con $\left\{\begin{array}{l}
+	x_s = \lambda^2 - x_p - x_q\\
+	y_s = -y_p + \lambda(x_p - x_s)\\
+	\lambda = \frac{y_q - y_p}{x_q - x_p}
+	\end{array}\right.$
+	\item[$Q = P$] Stesse formule, ma $\lambda = \frac{3x_p^2 + a}{2y_p}$. Se $y_p = 0$ allora $P + P = O$
+	\item[$Q = -P$] $P + Q = O$
+\end{list}
+\subsection{Curve Ellittiche su campi finiti}
+\paragraph{Due famiglie}
+\begin{list}{}{}
+	\item \textbf{Curve Prime} $K = Z_p$ con $p$ primo\\
+	Hanno caratteristica $p$, e sono quelle che considereremo. Imporremo $p > 3$
+	\item \textbf{Curve Binarie} $K = GR(2^m)$ con $m\in N$\\
+	Ha caratteristica pari a 2, quindi non si può usare la forma di Weierstrass
+\end{list}
+$$E_p(a, b) = \{(x,y)\in Z_p^2\:|\: y^2\textsl{ mod }p = x^3 + ax + b\textsl{ mod }p \cup \{O\}$$
+Quindi in $[0, p-1]$ e ho simmetria\ldots %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{17.png}\\
+	$p = 67, a = -1, b = 1$
+\end{center}
+$P = (x,y) \in E_p(a,b) \Rightarrow -P = (x, p-y) \in E_p(a,b)$
+\paragraph{Ordine} \# punti della curva. Non c'è una formula, dipende da com'è fatta la cubica $y^2 = x^3 + ax + b$ con $x \in Z_p$, quindi $p$ valori per $x$. Ogni valore possibile di $x$ da origine a 2 punti ($y$ e $-y$ per il punto opposto).\\ Ci si aspettano quindi circa $2p$ punti per i valori di $x$, +1 per $\{O\}$, ma non è esattamente $2p + 1$ perché non tutti i numeri hanno una radice nel campo. $\frac{p-1}{2}$ sono residui quadratici.\\
+Quindi indicativamente il numero di punti è un numero molto vicino a $p$. Il \textbf{teorema di Hasse} che dice dato $N$ = ordine di una certa curva $E_p(a,b)$, allora $|N - (p+1)|\leq 2\sqrt{p}$
+\paragraph{Esempio} $y^2 \equiv x^3 + 4x + 4$ mod $5$\\
+\begin{tabular}{c | c}
+$y$&$y^2$\\
+\hline
+0&0\\
+1&1\\
+2&4\\
+3&4\\
+4&1
+\end{tabular}
+1 e 4 sono residui quadratici, ammettono una radice nel campo.
+\begin{list}{}{}
+	\item[$x= 0$] $y^2 = 4 \Rightarrow (0,2),(0,3)\in E_5(4,4)$
+	\item[$x=1$] $y^2 = 4 \Rightarrow (1,2),(1,3) \in E_5(4,4)$
+	\item[$x=2$] $y^2 = 0 \Rightarrow (2,0) \in E_5(4,4)$
+	\item[$x=3$] $y^2 = 3 \Rightarrow$ nessuna soluzione
+	\item[$x=4$] $y^2 = 4 \Rightarrow (4,2), (4,3)\in E_5(4,4)$
+	\item[$\Rightarrow$] Ordine = 8, compreso $O$
+\end{list}
+\begin{center}
+\begin{tabular}{c | c}
+Algebra modulare & Corve ellittiche\\
+\hline
+Moltiplicazione & Somma di punti\\
+Fissato K: elevamento a potenza (one-way) & \textbf{Moltiplicazione scalare} di un punto $P$ della curva per un intero $k$\\
+$y^k = y\cdot y \cdot \ldots \cdot y$, $k$ volte&$kP = P + P + \ldots + P$, $k$ volte\\
+Costo polinomiale & Costo polinomiale
+\end{tabular}
+\end{center}
+$Q = kP$ in tempo polinomiale con il metodo dei \textbf{raddoppi ripetuti}. Il problema inverso, trovare $k$ da $Q$ e $P$ è il logaritmo discreto sulle curve ellittiche, difficile.
+\pagebreak
+\subsection{Funzione one-way}
+\paragraph{Moltiplicazione scalare} Verifichiamo che è one-way:
+\begin{list}{}{}
+	\item $Q = kP$ dati $k$ e $P$ è facile, con $\Theta(\log k)$ operazioni: \textbf{raddoppi ripetuti}
+	\begin{list}{}{}
+		\item $k = \sum_{i=0}^t k_i\cdot2^i$ con $(k_t k_{t-1}\ldots k_1 k_0) = k$ e $t + 1 = \lfloor \log_2 k\rfloor + 1$ \# bit
+		\item Si calcolano i punti $2P, 4P,\ldots, 2^t P$, ciascuno come raddoppio del punto precedente: $t = \Theta(\log k)$ raddoppi
+		\item Si calcola $Q = \sum_{i\:|\:k_i = 1} (2^i P)$, $O(t) = O(\log k)$ somme
+	\end{list}
+	Avendo un algoritmo polinomiale.
+\end{list}
+L'\textbf{operazione inversa} della moltiplicazione scalare: dati $P,Q\in E_p(a,b)$ trovare il più piccolo $k\:|\: Q = kP$ $$k = \log_p Q$$
+È il \textbf{problema del logaritmo discreto per le curve ellittiche}, difficile per cui non conosciamo algoritmi polinomiali e nemmeno subesponenziali, soltanto forza bruta.
+\subsection{Protocollo DH su curve ellittiche}
+\paragraph{Preparazione} Alice e Bob scelgono una curva ellittica appropriata e un punto $B$ della curva di ordine molto grande.\\ (L'\textbf{ordine $n$ di un punto B} è \textbf{il più piccolo intero $n\:|\:nB = O$})\\
+Il punto B gioca un po' il ruolo del generatore $g$ del DH standard. Curva e punto B sono \textbf{pubblici}.
+%TODO
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
