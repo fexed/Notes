@@ -1007,7 +1007,7 @@ Se $x$ è primo con $s$ e si conosce $v = z^{-1}$ mod $\phi(s)$ (chiave segreta)
 	\item \textbf{Calcolo del logaritmo discreto} Calcolare $y = x^z$ mod $s$ è facile, ma invertire rispetto a $z$ cioè calcolare $z$ tale che $y = x^z$ mod $s$ dati $x,y,s$ è difficile.\\
 	Gli algoritmi noti hanno la stessa complessità della fattorizzazione, quindi si può introdurre una trapdoor.
 \end{list}
-\pagebreak
+
 \subsection{Crittografia a chiave pubblica}
 \paragraph{Vantaggi} \begin{list}{}{}
 	\item Se gli utenti di un sistema sono $n$, il numero complessivo di chiavi (pubbliche e private) è $2n$ invece di $n(n-1)/2$
@@ -1138,7 +1138,7 @@ L'onere di creare la chiave di sessione è lasciato esclusivamente al mittente, 
 Alice e Bob possono anche scegliere di usare una coppia $\langle p,g\rangle$ già disponibili. Non è richiesto che questa coppia sia mantenuta segreta.\\
 Adesso il protocollo parte:
 \begin{center}
-\begin{tabular}{c c c}
+\begin{tabular}{c | c | c}
 Alice&$\langle g,p \rangle$&Bob\\
 \hline
 \makecell{Sceglie a caso\\$1<x<p-1$\\intero positivo,\\e calcola $A=g^x$ mod $p$\\Lo manda a Bob}& &\makecell{Sceglie a caso\\$1<y<p-1$\\intero positivo,\\e calcola $B=g^y$ mod $p$\\Lo manda a Alice}\\
@@ -1155,35 +1155,28 @@ Alice&$\langle g,p \rangle$&Bob\\
 
 \end{list}
 	\begin{center}
-\begin{tabular}{c c c}
+\begin{tabular}{c | c | c}
 Alice&Eve&Bob\\
 \hline
 \makecell{$A=g^x$ mod $p\rightarrow$}& &\makecell{$\leftarrow B=g^y$ mod $p$}\\
 &\makecell{Sottrae $A,B$ dal canale\\e il sostituisce con un suo\\$E = g^z$ mod $p$\\con $1< z <p-1$\\$\leftarrow$La manda a entrambi$\rightarrow$}\\
 \makecell{\texttt{k[session]} = $E^x$ mod $p$ = $g^{xz}$ mod $p$}& &\makecell{\texttt{k[session]} = $E^y$ mod $p$ = $g^{yz}$ mod $p$}\\
 &\makecell{Conosce sia $K_A = A^z$ mod $p$\\sia $K_B = B^z$ mod $p$}\\
-\\
+& & \\
 &$K_A\neq K_B$&
 \end{tabular}
 \end{center}
-\section{Cifrario di Elgamal}
+\section{Cifrario di El Gamal}
 Si basa sul logaritmo discreto come funzione one-way-trapdoor.\\
-Alice $\rightarrow m\rightarrow$ Bob\\
+Alice $\rightarrow m\rightarrow$ Bob
 \begin{list}{}{}
 	\item \textbf{Bob} sceglie $p$ numero primo grande e $g$ generatore per $Z_g^*$\\
 	Sceglie $2\leq x \leq p-2$ come \textbf{chiave privata}, \texttt{k[prv]} = $\langle x\rangle$\\
-	Calcola $y = g^x$ mod $p$\\
-	Pubblica \texttt{k[pub]} $=\langle p,g,y\rangle$
-	\item \textbf{Alice} $0\leq m < p$\\
-	Si procura \texttt{k[pub]} = $\langle p,g,y\rangle$\\
-	Sceglie a caso $2 \leq r \leq p-2$ \textbf{segreto}\\
-	Calcola $c = g^r$ mod $p$, cioè un numero casuale $\in Z_p^*$ perché $g$ generatore\\
-	Calcola $d = \left(m\cdot y\right)^r$ mod $p$\\
-	Invia a Bob $\langle c,d\rangle$, coppia di crittogrammi: il primo contiene protetta l'informazione su $r$, e $d$ contiene il\\ messaggio $m$
-	\item \textbf{Bob} riceve $\langle c,d\rangle$ e decifra:
-	\begin{list}{}{}
-		\item $m = \frac{d}{c^x}$ mod $p$ = $d\cdot\left(c^x\right)^{-1}$ mod $p$ (dove la frazione indica la moltiplicazione per l'inverso)
-	\end{list}
+	Calcola $y = g^x$ mod $p$ e \textbf{pubblica} \texttt{k[pub]} $=\langle p,g,y\rangle$
+	\item \textbf{Alice} $0\leq m < p$, si procura \texttt{k[pub]} = $\langle p,g,y\rangle$\\
+	Sceglie a caso $2 \leq r \leq p-2$ \textbf{segreto} e calcola $c = g^r$ mod $p$, cioè un numero casuale $\in Z_p^*$ perché $g$ generatore\\
+	Calcola $d = \left(m\cdot y\right)^r$ mod $p$ e invia a Bob $\langle c,d\rangle$, coppia di crittogrammi: il primo contiene protetta l'informazione su $r$, e $d$ contiene il messaggio $m$
+	\item \textbf{Bob} riceve $\langle c,d\rangle$ e decifra: $m = \frac{d}{c^x}$ mod $p$ = $d\cdot\left(c^x\right)^{-1}$ mod $p$ (dove la frazione indica la moltiplicazione per l'inverso)
 \end{list}
 \pagebreak
 \paragraph{Correttezza} $m = \frac{d}{c^x}$ mod $p = \frac{y^r\cdot m}{c^x}$ mod $p = \frac{(g^{xr})\cdot m}{(g^r)^x}$ mod $p = m$ mod $p = m$ perché $m < p$
@@ -1194,7 +1187,7 @@ Se conosce $r$ calcola $m = \frac{d}{y^r}$ mod $p = \frac{m\cdot y^r}{y^r}$ mod 
 \begin{center}
 Equivalenze di costo degli attacchi\\
 \begin{tabular}{c | c | c}
-AES & RSA,DH, Elgamal & ECC\\
+AES & RSA,DH, El Gamal & ECC\\
 \hline
 128 bit & 3072 bit (di $n$, $p$) & 256 bit\\
 256 bit & 15000 bit & 512 bit
@@ -1318,7 +1311,29 @@ L'\textbf{operazione inversa} della moltiplicazione scalare: dati $P,Q\in E_p(a,
 \subsection{Protocollo DH su curve ellittiche}
 \paragraph{Preparazione} Alice e Bob scelgono una curva ellittica appropriata e un punto $B$ della curva di ordine molto grande.\\ (L'\textbf{ordine $n$ di un punto B} è \textbf{il più piccolo intero $n\:|\:nB = O$})\\
 Il punto B gioca un po' il ruolo del generatore $g$ del DH standard. Curva e punto B sono \textbf{pubblici}.
-%TODO
+\begin{center}
+	\begin{tabular}{c | c | c}
+	Alice & \textit{Canale} & Bob\\
+	\hline
+	& \makecell{$E_p(a,b)$ e $B\in E_p(a,b)$\\pubblici con B di ordine $n$} & \\
+	\makecell{\textbf{Estrae}\\$n_A < n$ casuale\\\textbf{chiave privata}} & & \makecell{\textbf{Estrae}\\$n_B < n$ casuale\\\textbf{chiave privata}}\\
+	& &\\
+	\makecell{\textbf{Calcola} la \textbf{chiave pubblica}\\$P_A = n_A\cdot B$\\}& &\makecell{\textbf{Calcola} la \textbf{chiave pubblica}\\$P_B = n_B\cdot B$\\}\\
+	& In chiaro & \\
+	& $\rightarrow P_A\rightarrow$ & \\
+	& $\leftarrow P_B\leftarrow$ & \\
+	\textbf{Riceve} $P_B$ & & \textbf{Riceve} $P_A$\\
+	& &\\
+	\makecell{\textbf{Calcola}\\$S = n_A\cdot P_B = n_A\cdot n_B\cdot B$\\\texttt{k[sessione]} = $x_S$ mod $2^{256}$} & & \makecell{\textbf{Calcola}\\$S = n_B\cdot P_B = n_B\cdot n_A\cdot B$\\\texttt{k[sessione]} = $x_S$ mod $2^{256}$}
+	\end{tabular}
+\end{center}
+\paragraph{Crittoanalista} Eve conosce la curva, il punto $B$ e intercetta $P_A$ e $P_B$ ma per calcolare $S$ deve trovare uno tra
+\begin{list}{}{}
+	\item $n_A\:|\:n_A\cdot B = P_A$
+	\item $n_B\:|\:n_B\cdot B = P_B$
+\end{list}
+quindi deve \textbf{risolvere il problema del logaritmo discreto su curve ellittiche}.\\
+Il protocollo è però soggetto ad attacchi attivi MitM.
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
@@ -1573,4 +1588,46 @@ Si può decifrare qualsiasi crittogramma $c$ anche senza conoscere $k$: $m = \bi
 $c = C_{DES}(m\oplus w, k) \Leftrightarrow c\oplus w = C_{DES}(m\oplus w, k)$\\
 $\Leftrightarrow D_{DES}(c\oplus w, k) = D_{DES}(C_{DES}(m\oplus w, k))$ ma $D_{DES}(C_{DES}(m\oplus w, k)) = m\oplus w$ perché DES è un cifrario corretto\\
 Quindi $\Leftrightarrow m\oplus w = D_{DES}(c\oplus w, k) \Leftrightarrow m = w \oplus D_{DES}(c\oplus w, k)$
+\section{Cifrari Asimmetrici}
+\paragraph{Esercizio} \begin{enumerate}
+	\item \textbf{Spiegare} in cosa consiste il cifrario RSA e \textbf{dimostrarne} la correttezza.
+	\item \textbf{Darne un esempio} di applocazione impiegando parametri numerici molto piccoli per cifrare il messaggio costituito dalle due cifra meno significative del proprio numero di matricola.
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item Si basa sulla moltiplicazione di due numeri primi, facile da eseguire ma difficile da invertire, e fa uso dell'algebra modulare che rende difficili alcuni problemi facili nell'algebra non modulare.\\
+	Scelti $p,q$ primi, la cifratura è eseguita con la chiave pubblica del destinatario, $k_{pub}$ composta da $e < (p-1)(q-1)$ coprimo con $n = pq$ e da $n$. La decifrazione è fatta dal destinatario con la proprio chiave privata $k_{priv} = d = e^{-1}$ mod $(p-1)(q-1)$. Vedi p. 43.
+	\item Usando $p = 3$, $q = 5$, cifro $m = 13$\\
+	$n = 15$, $\phi(n) = (p-1)(q-1) = 2\cdot4 = 8$ quindi posso scegliere $e = 7$ che rispetta le condizioni.\\
+	$d = 7^{-1}$ mod $8 = 7$ perché $7\cdot 7$ mod $8 = 49$ mod $8 = 1$\\
+	$c = C(m, k_{pub}) = m^e$ mod $n = 13^7$ mod $15 = 7$\\
+	$m = D(c, k_{priv}) = c^d$ mod $n = 7^7$ mod $15 = 13$
+\end{enumerate}
+\paragraph{Esercizio 2}
+\subparagraph{Svolgimento}
+\paragraph{Esercizio 3}
+\subparagraph{Svolgimento}
+\paragraph{Esercizio 4} Si consideri un cifrario RSA con $p = 7, q = 11, e = 13$
+\begin{enumerate}
+	\item \textbf{Determinare} il valore di $d$ chiave privata
+	\item Qual'è la dimensione dei blocchi per la cifratura?
+	\item \textbf{Cifrare} \texttt{100011001010}
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item $n = 77$, $\phi(n) = 60$, quindi $d = 13^{-1}$ mod $60 = 37$
+	\item I blocchi saranno di $b = \lfloor\log_2 n\rfloor = 6$ bit
+	\item Diviso in blocchi, $m =$ \texttt{100011 001010}, cioè cifro $m_1 = 35$ e $m_2 = 10$\\
+	$c_1 = m_1^e$ mod $n = 35^{13}$ mod $77 = 63$\\
+	$c_2 = m_2^e$ mod $n = 10^{13}$ mod $77 = 10$
+\end{enumerate}
+\paragraph{Esercizio 5} Si consideri un cifrario RSA con chiave pubblica $n = 55, e = 7$
+\begin{enumerate}
+	\item \textbf{Cifrare} $m = 10$
+	\item \textbf{Forzare} il cifrario trovando $p,q,d$
+	\item \textbf{Decifrare} $c = 35$
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item $c = m^e$ mod $n = 10^7$ mod $55 = 10$
+	\item $n = 55$ è il prodotto tra $p = 5$ e $q = 11$ quindi $\phi(55) = (p-1)(q-1) = 4\cdot 10 = 40$ e $d = 7^{-1}$ mod $40 = 23$
+	\item $m = c^d$ mod $n = 35^{23}$ mod $55 = 30$
+\end{enumerate}
 \end{document}
