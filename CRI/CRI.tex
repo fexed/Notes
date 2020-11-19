@@ -1058,7 +1058,7 @@ $d = 7^{-1}$ mod 40 = $-17$ mod $40$ = 23 mod 40 = 23
 	\item EE(40, 7) $\uparrow \langle1,3,-17\rangle$
 	\item EE(7, 5) $\uparrow \langle1,-2,+3\rangle$
 	\item EE(5, 2) $\uparrow \langle1,1,0-\lfloor5/2\rfloor\cdot1\rangle = \langle1,1,-2\rangle$
-	\item EE(2, 1) $\uparrow \langle1, 0, 1-\lceil2/1\rceil\cdot0\rangle = \langle1, 0, 1\rangle$
+	\item EE(2, 1) $\uparrow \langle1, 0, 1-\lfloor2/1\rfloor\cdot0\rangle = \langle1, 0, 1\rangle$
 	\item EE(1, 0) $\rightarrow \langle1, 1, 0\rangle$
 \end{list}
 \paragraph{Correttezza} Dim che D(C($m, k[pub]$), $k[priv]$) = $m$\\
@@ -1668,4 +1668,33 @@ Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o 
 	A calcolerà \texttt{k[session]} $= Y^x$ mod $p$ e B calcolerà \texttt{k[session]} $= X^y$ mod $p$\\
 	In entrambi i casi, \texttt{k[session]} = $g^{xy}$ mod $p = 6^{10}$ mod $11 = 1$
 \end{enumerate}
+\paragraph{Esercizio 9} Considerando il cifrario RSA:
+\begin{enumerate}
+	\item Discutere se è possibile scegliere un valore pari di $e$
+	\item Siano $e,e'$ due valori scelti per la chiave pubblica tali che $e'$ è ottenuto da $e$ cambiando un bit da 0 a 1. Dimostrare che MCD$(e,e')=1$
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item $e$ pari significa $e = 2\cdot f$ con $f$ dispari.\\
+	Dato che $\phi(n)$ è ottenuto con il prodotto $(p-1)(q-1)$ con $p,q$ primi, ho che entrambi i fattori sono pari, diciamo $p-1 = 2r, q-1=2s$, di conseguenza avrò MCD($2f, 4rs$) = 2 $\neq 1$
+	\item 
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 10} Nonostante il cifrario RSA sia sicuro, alcune sue implementazioni possono rendere insicura la cifratura. Si consideri ad esempio la cifratura di un messaggio $m$ di 64 bit con una chiave pubblica RSA $\langle e,n\rangle$ dove $e=3$ e $n$ è un numero da 512 bit.\begin{enumerate}
+	\item \textbf{Spiegare} perché la cifratura di $m$ è completamente insicura
+	\item \textbf{Decifrare} il crittogramma $c = 33076161$ con $n = 100082119$
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item Il motivo principale è che $n$ ha troppi pochi bit ed è attualmente fattorizzabile in tempi molto brevi.\\
+	Inoltre, un messaggio $m$ da 64 bit con $e=3$ non viene ridotto in modulo per un $n$ da 512 bit. Avrò sempre $c = m^3$.
+	\item $d = 3^{-1}$ mod $\phi(100082119)$, ma è inutile dato che il messaggio $m$ non è ridotto in modulo, posso direttamente calcolare $m = \sqrt[e]{c} = \sqrt[3]{33076161} = 321$
+\end{enumerate}
+\paragraph{Esercizio 11} Supponiamo che Eve intercetti il crittogramma $c = m^e$ mod $n$ diretto ad Alice. Si supponga inoltre che Alice sia disposta a decifrare per Eve qualsiasi crittogramma $c'$, a patto che $c'\neq c$.\\
+\textbf{Descrivere} come Eve possa decifrare $m$ in tempo polinomiale, richiedendo ad Alice la decifrazione del crittogramma $c' = cx^e$ dove $x<n$ è un intero casuale coprimo con $n$.
+\subparagraph{Svolgimento} Avendo $c' = cx^e = m^ex^e$ mod $n$ e $c = m^e$ mod $n$, ho $m' = (m^e)^d(x^e)^d$ mod $n = mx$,\\da cui ottengo $m = m'x$ mod $n$
+\paragraph{Esercizio 12} Alice vuole mandare un messaggio cifrato a Bob usando RSA, ma non conosce la chiave pubblica. Invia una mail a Bob chiedendogliela, che risponde inviando $K_{pub} = \langle e,n\rangle$.\\
+Eve intercetta il messaggio, sostituisce $e$ con un nuovo intero $e'$ coprimo con $e$, e invia la chiave modificata $k'_{pub} = \langle e',n\rangle$ ad Alice.\\
+Alice usa $k'_{pub}$ per cifrare $m$, e invia il crittogramma $c' = m^{e'}$ mod $n$ a Bob.\\
+Dato che $m$ è stato cifrato con la chiave sbagliata, Bob rimanda la propria chiave pubblica ad Alice che risponderà con il crittogramma corretto $c = m^e$ mod $n$.\\
+\textbf{Mostrare} come Eve, che conosce $e,e',c,c'$, possa risalire a $m$.
+\subparagraph{Svolgimento} 
 \end{document}
