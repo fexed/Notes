@@ -665,8 +665,33 @@ Se si conosce la lunghezza $h$ della chiave, si divide il crittogramma in porzio
 	\item nei cifrari a sostituzione monoalfabetica, i due istogrammi coincidono a meno di una permutazione delle lettere
 	\item nei cifrari a sostituzione polialfabetica, l'istogramma del crittogramma è assai più appiattito di quello del linguaggio
 \end{list}
-%TODO Enigma
-%TODO Esercizi
+\section{La Macchina Enigma} \paragraph{Automatismo} Prima evoluzione verso i sistemi automatizzati, la \textbf{macchina Enigma} ha avuto un ruolo fondamentale nella seconda guerra mondiale. Ci sono stati \textbf{molti studi dedicati a comprometterne la sicurezza}, che hanno posto le \textbf{fondamenta per la nascita dei calcolatori odierni}.\\
+Fu inventata in Germania nel 1918 per applicazioni commerciali, come estensione elettromeccanica del cifrario di Alberti.
+\paragraph{Rotori} La macchina era composta da rotori, una tastiera, una griglia di luci sopra la tastiera corrispondenti alle lettere (lampboard) e una plugboard inferiore.\\
+I rotori \textbf{non mantenevano la stessa posizione reciproca durante la cifratura}. Per ogni lettera battuta sulla tastiera:
+\begin{list}{}{}
+	\item Il primo rotore avanzava di un passo
+	\item Dopo 26 passi (\# di lettere), il primo rotore era tornato sulla posizione iniziale e il secondo rotore avanzava di un passo
+	\item Dopo una rotazione completa del secondo rotore, il terzo rotore avanzava di un passo.
+\end{list}
+Questo fa si che la corrispondenza tra caratteri cambiasse ad ogni passo, cioè \textbf{la chiave cambiava ad ogni lettera premuta}: $26\cdot26\cdot26 = 17476$ chiavi diverse.
+\paragraph{Debolezza} I rotori erano immutabili, inoltre le $26^3$ permutazioni sono sempre le stesse, applicate nello stesso ordine e note a tutti i proprietari di una macchina Enigma.\\
+Alberti prevedeva, per ogni coppia di utenti, una coppia di dischi diversa da tutte le altre.
+\paragraph{Modifiche} Possibilità di permutare tra loro i tre rotori: \# permutazioni = $3!\cdot26^3 > 10^5$\\
+Inoltre fu aggiunta la plugboard fra la tastiera e il primo rotore: consente di \textbf{scambiare fra loro i caratteri di 6 coppie scelte arbitrariamente in ogni trasmissione}. Ogni cablaggio è descritto da una sequenza di 12 caratteri (le 6 coppie da scambiare): $\left(\begin{array}{c}26\\12\end{array}\right)\simeq 10^7$ combinazioni possibili. Ogni gruppo di 12 caratteri può presentarsi in $12!$ permutazioni diverse, ma non tutte producono effetti diversi: ad esempio \textsc{ab cd ef gh ij kl} e \textsc{cd ab ef gh ij kl} producono lo stesso effetto, e con queste anche tutte le $6!$ permutazioni delle 6 coppie.\\
+Infine vanno considerati i possibili scambi tra gli elementi delle coppie che producono lo stesso effetto:\\\textsc{ab cd ef gh ij kl} e \textsc{ba cd ef hg ij kl} ad esempio, quindi dobbiamo dividere per un ulteriore fattore $2^6 = 64$
+\paragraph{Numero di chiavi} Il numero di chiavi dei rotori ($> 10^5$) si moltiplica per un fattore $\left(\begin{array}{c} 26\\12\end{array}\right)\frac{12!}{6!\cdot64} > 10^{11}$\\
+per un totale di più di $10^{16}$ chiavi (10 \textit{milioni di miliardi} di combinazioni possibili)
+\paragraph{Seconda Guerra Mondiale} 8 rotori in dotazione, da cui sceglierne 3, e 10 coppie scambiabili tramite plugboard.\\
+Elenco di chiavi giornaliere in dotazione ai reparti militari, cioè l'assetto iniziale della macchina per quel giorno. Con quell'assetto, si trasmetteva una nuova chiave di messaggio, che indicava l'assetto da usare per quella particolare trasmissione.
+\paragraph{Storia di Enigma} Era lo standard militare tedesco durante la seconda guerra mondiale. Matematici polacchi e inglesi studiarono come rompere il cifrario (\textbf{Bletchley Park}): era necessaria una \textbf{rapida decifrazione} perché il sistema è continuamente variato.
+\begin{list}{}{}
+	\item Costruzione di un simulatore di Enigma per studiarne il comportamento sotto possibili variazioni.\\
+	Alan Turing e altri.
+	\item Macchina COLOSSUS\\
+	1944
+	\item Prototipo embrionale dei successivi calcolatori elettronici.
+\end{list}
 \chapter{Cifrari perfetti}
 Shannon, 1949
 \paragraph{Cifrario perfetto} Sono cifrari che ci offrono una \textbf{sicurezza incondizionata}, proteggono le informazioni con certezza assoluta indipendentemente dalla potenza di calcolo. Si rende \textbf{essenziale avere la chiave}, un'attacco \textbf{brute force non permette di decifrare}.\\
