@@ -1664,10 +1664,21 @@ Quindi $\Leftrightarrow m\oplus w = D_{DES}(c\oplus w, k) \Leftrightarrow m = w 
 	$c = C(m, k_{pub}) = m^e$ mod $n = 13^7$ mod $15 = 7$\\
 	$m = D(c, k_{priv}) = c^d$ mod $n = 7^7$ mod $15 = 13$
 \end{enumerate}
-\paragraph{Esercizio 2}
-\subparagraph{Svolgimento}
-\paragraph{Esercizio 3}
-\subparagraph{Svolgimento}
+\paragraph{Esercizio 2} Poniamo che si scopra un algoritmo polinomiale per calcolare la funzione di Eulero. \textbf{Spiegare} in termini matematici quale influenza la scoperta avrebbe sul cifrario RSA.
+\subparagraph{Svolgimento} Si potrebbe calcolare in tempo polinomiale la chiave privata $d = e^{-1}$ mod $\phi(n)$. Il cifrario sarebbe compromesso e non più utilizzabile.
+\paragraph{Esercizio 3} Per la costruzione di una coppia di chiavi RSA si sceglie $n$ come prodotto di due primi $p,q$ considerando le seguenti possibilità:\begin{enumerate}
+	\item$p=\Theta(n^{1/2}),q=\Theta(n^{1/2})$
+	\item$p=O(n^{1/3}),q=O(n^{2/3})$
+	\item$p=\Theta(n^{1/3}),q=\Theta(n^{1/3})$
+	\item$p=O(\log n),q=O(n/\log n)$
+\end{enumerate}
+Per ciascuna di queste possibilità, \textbf{spiegare} con precisione se la scelta è corretta e consigliabile.
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item No, $p,q$ troppo vicini
+	\item Ok, $p,q$ sufficientemente grandi e distanti tra loro
+	\item No, $p\cdot q$ non è $\Theta(n)$
+	\item $p$ troppo piccolo, bruteforce avrebbe costo polinomiale
+\end{enumerate}
 \paragraph{Esercizio 4} Si consideri un cifrario RSA con $p = 7, q = 11, e = 13$
 \begin{enumerate}
 	\item \textbf{Determinare} il valore di $d$ chiave privata
@@ -1681,6 +1692,7 @@ Quindi $\Leftrightarrow m\oplus w = D_{DES}(c\oplus w, k) \Leftrightarrow m = w 
 	$c_1 = m_1^e$ mod $n = 35^{13}$ mod $77 = 63$\\
 	$c_2 = m_2^e$ mod $n = 10^{13}$ mod $77 = 10$
 \end{enumerate}
+\pagebreak
 \paragraph{Esercizio 5} Si consideri un cifrario RSA con chiave pubblica $n = 55, e = 7$
 \begin{enumerate}
 	\item \textbf{Cifrare} $m = 10$
@@ -1692,11 +1704,14 @@ Quindi $\Leftrightarrow m\oplus w = D_{DES}(c\oplus w, k) \Leftrightarrow m = w 
 	\item $n = 55$ è il prodotto tra $p = 5$ e $q = 11$ quindi $\phi(55) = (p-1)(q-1) = 4\cdot 10 = 40$ e $d = 7^{-1}$ mod $40 = 23$
 	\item $m = c^d$ mod $n = 35^{23}$ mod $55 = 30$
 \end{enumerate}
-\pagebreak
-\paragraph{Esercizio 6} Siano $x,y,n$ tre interi positivi arbitrari con $x,y < n$. Poniamo che si scopra un algoritmo di algebra modulare di complessità $O(d^2)$ per calcolare, se esiste, il logaritmo discreto di $y$ in base $x$ modulo $n$, con $d = \Theta(n)$ oppure $d = \theta(\log n)$.\\
+
+\paragraph{Esercizio 6} Siano $x,y,n$ tre interi positivi arbitrari con $x,y < n$. Poniamo che si scopra un algoritmo di algebra modulare di complessità $O(d^2)$ per calcolare, se esiste, il logaritmo discreto di $y$ in base $x$ modulo $n$, con $d = \Theta(n)$ oppure $d = \Theta(\log n)$.\\
 \textbf{Spiegare} in termini matematici, per i due suddetti valori di $d$, quale influenza la scoperta potrebbe avere sull'algoritmo DH per lo scambio segreto delle chiavi.
 \subparagraph{Svolgimento} Il crittoanalista potrebbe arrivare a conoscere $A = g^x$ mod $p$ con $g$ generatore di $Z_p^*$, o analogamente $B = g^y$ mod $p$.\\
-Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o $y$ in modo efficiente e renderebbe DH vulnerabile ad attacchi passivi.
+Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o $y$ in modo efficiente e renderebbe DH vulnerabile ad attacchi passivi.\begin{list}{}{}
+	\item[$d=\Theta(n)$] L'algoritmo ha complessità esponenziale nella dimensione dell'input (polinomiale solo nel \textit{valore} di $n$). Nessuna influenza su DH che si può sempre usare in sicurezza
+	\item[$d=\Theta(\log n)$] L'algoritmo è effettivamente polinomiale, quindi il protocollo DH non è più utilizzabile.
+\end{list}
 \paragraph{Esercizio 7} Si consideri il protocollo basato sull'algoritmo DH con $g=3, p=353$ e siano $x=97,y=233$. Calcolare $X,Y,k$
 \subparagraph{Svolgimento}
 \begin{list}{}{}
@@ -1709,7 +1724,9 @@ Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o 
 	\item \textbf{Dimostrare} che la coppia $\langle11,6\rangle$ è adatta per il protocollo DH
 	\item Posto che A,B scelgano come numeri casuali segreti $x,y$ la quarta e quinta cifra della matricola del candidato, \textbf{creare} \texttt{k[session]} \textbf{indicando i calcoli eseguiti da A e B}
 \end{enumerate}
-\subparagraph{Svolgimento} \begin{enumerate}
+\subparagraph{Svolgimento}
+\begin{multicols}{2}
+\begin{enumerate}
 	\item $p,g$ proposti pari a $p=11$ e $g=6$, sono adatti perché $p$ è primo e $g$ è un generatore di $Z_{11}^* = \{1,2,\ldots, 10\}$\\$= \{6^k$ mod $11\:|\:1\leq k \leq 10\}$
 	\begin{multicols}{2}
 	\begin{list}{}{}
@@ -1730,6 +1747,8 @@ Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o 
 	A calcolerà \texttt{k[session]} $= Y^x$ mod $p$ e B calcolerà \texttt{k[session]} $= X^y$ mod $p$\\
 	In entrambi i casi, \texttt{k[session]} = $g^{xy}$ mod $p = 6^{10}$ mod $11 = 1$
 \end{enumerate}
+\end{multicols}
+\pagebreak
 \paragraph{Esercizio 9} Considerando il cifrario RSA:
 \begin{enumerate}
 	\item Discutere se è possibile scegliere un valore pari di $e$
@@ -1737,18 +1756,18 @@ Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o 
 \end{enumerate}
 \subparagraph{Svolgimento} \begin{enumerate}
 	\item $e$ pari significa $e = 2\cdot f$ con $f$ dispari.\\
-	Dato che $\phi(n)$ è ottenuto con il prodotto $(p-1)(q-1)$ con $p,q$ primi, ho che entrambi i fattori sono pari, diciamo $p-1 = 2r, q-1=2s$, di conseguenza avrò MCD($2f, 4rs$) = 2 $\neq 1$\\
-	Avrò sempre $c = m^e$ mod $n = m$
-	\item 
+	Dato che $\phi(n)$ è ottenuto con il prodotto $(p-1)(q-1)$ con $p,q$ primi, ho che entrambi i fattori sono pari, diciamo $p-1 = 2r, q-1=2s$, di conseguenza avrò MCD($2f, 4rs$) = 2 $\neq 1$
+	\item Sia $e' = e + 2^i$ ($i$-esimo bit di $e$ è 0)\\
+	$\forall\:t\:|\:\:\: t\:|\:e$ sappiamo che $t\neq 2$ (vedi punto 1), dunque $t\not|\:2^i$\\
+	$\Rightarrow\forall\:t\:\:\:t\:|\:e,t\not|\:e'\Rightarrow$ MCD$(e,e') = 1$
 \end{enumerate}
-\pagebreak
 \paragraph{Esercizio 10} Nonostante il cifrario RSA sia sicuro, alcune sue implementazioni possono rendere insicura la cifratura. Si consideri ad esempio la cifratura di un messaggio $m$ di 64 bit con una chiave pubblica RSA $\langle e,n\rangle$ dove $e=3$ e $n$ è un numero da 512 bit.\begin{enumerate}
 	\item \textbf{Spiegare} perché la cifratura di $m$ è completamente insicura
 	\item \textbf{Decifrare} il crittogramma $c = 33076161$ con $n = 100082119$
 \end{enumerate}
 \subparagraph{Svolgimento} \begin{enumerate}
 	\item Il motivo principale è che $n$ ha troppi pochi bit ed è attualmente fattorizzabile in tempi molto brevi.\\
-	Inoltre, un messaggio $m$ da 64 bit con $e=3$ non viene ridotto in modulo per un $n$ da 512 bit. Avrò sempre $c = m^3$.
+	Inoltre, un messaggio $m$ da 64 bit con $e=3$ non viene ridotto in modulo per un $n$ da 512 bit ($m^e$ ha $64\cdot3=192$ bit). Avrò sempre $c = m^3$.
 	\item $d = 3^{-1}$ mod $\phi(100082119)$, ma è inutile dato che il messaggio $m$ non è ridotto in modulo, posso direttamente calcolare $m = \sqrt[e]{c} = \sqrt[3]{33076161} = 321$
 \end{enumerate}
 \paragraph{Esercizio 11} Supponiamo che Eve intercetti il crittogramma $c = m^e$ mod $n$ diretto ad Alice. Si supponga inoltre che Alice sia disposta a decifrare per Eve qualsiasi crittogramma $c'$, a patto che $c'\neq c$.\\
@@ -1759,5 +1778,9 @@ Eve intercetta il messaggio, sostituisce $e$ con un nuovo intero $e'$ coprimo co
 Alice usa $k'_{pub}$ per cifrare $m$, e invia il crittogramma $c' = m^{e'}$ mod $n$ a Bob.\\
 Dato che $m$ è stato cifrato con la chiave sbagliata, Bob rimanda la propria chiave pubblica ad Alice che risponderà con il crittogramma corretto $c = m^e$ mod $n$.\\
 \textbf{Mostrare} come Eve, che conosce $e,e',c,c'$, possa risalire a $m$.
-\subparagraph{Svolgimento} 
+\subparagraph{Svolgimento} $e,e'$ sono coprimi. Applicando EE (Euclide Esteso) si possono calcolare in tempo polinomiale $r,s\:|\:e\cdot r + e'\cdot s =$ MCD$(e,e')=1$\\
+$\Rightarrow m = m^{er+e's}$ mod $n = (m^{er}$ mod $n)\cdot(m^{e's}$ mod $n)$ mod $n = c^r(c')^s$ mod $n$\\
+Supponendo $r<0,s>0 \Rightarrow m = (c^{-1})^{-r}(c')^s$ mod $n$\\Eve calcola l'inverso di $c$, calcola $(c^{-1})^{-r}$ ($-r$ è positivo), calcola $(c')^s$ e ottiene $m$ dal loro prodotto ridotto in modulo.\\
+Tutti i passaggi richiedono tempo polinomiale. L'inverso di $c$ modulo $n$ esiste ed è unico se $c,n$ sono coprimi. Se non lo fossero, Eve potrebbe allora fattorizzare $n$ e forzare il cifrario.
+
 \end{document}
