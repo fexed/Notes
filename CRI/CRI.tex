@@ -1215,7 +1215,7 @@ Equivalenze di costo degli attacchi\\
 AES & RSA,DH, El Gamal & ECC\\
 \hline
 128 bit & 3072 bit (di $n$, $p$) & 256 bit\\
-256 bit & 15000 bit & 512 bit
+256 bit & 15360 bit & 512 bit
 \end{tabular}
 \end{center}
 \paragraph{Cosa sono} Curve algebriche descritte da equazioni simili a quelle usate per il calcolo degli archi delle ellissi.\\
@@ -1359,6 +1359,43 @@ Il punto B gioca un po' il ruolo del generatore $g$ del DH standard. Curva e pun
 \end{list}
 quindi deve \textbf{risolvere il problema del logaritmo discreto su curve ellittiche}.\\
 Il protocollo è però soggetto ad attacchi attivi MitM.
+\section{Scambio di messaggi cifrati}
+\paragraph{Scambio di messaggi} Si trasforma il messaggio $m$ in $P_m$ punto di una curva ellittica prima $E_p(a,b)$\\
+$y^2 \equiv x^3 + ax + b$ mod $p$, e possiamo pensare di sostituire $m$ a $x$, il problema è che il risultato potrebbe non essere un residuo quadratico. $P(m^3+am+b$ sia un residuo quadratico$)$ circa 1/2\\
+Residuo quadratico: ha radice nel campo.\\
+Tecnica con metà di possibilità di successo non va bene, serve una tecnica migliore. Ci sono algoritmi randomizzati, non sono noti algoritmi deterministici polinomiali
+\subsection{Algoritmo di Koblitz}
+Algoritmo polinomiale randomizzato che $m<p \mapsto P_m\in E_p(a,b)$\\
+Si sceglie $h$ intero $|\:(m+1)h < p$\\
+$x = m\cdot h + i$ con $0\leq i < h$ $\Rightarrow h$ tentativi per inserire $m\cdot h + i$ come ascissa e vedere se è residuo quadratico o meno.\\
+%TODO algoritmo
+\paragraph{Scambio di messaggi} Viene fissata la curva $E_p(a,b)$ e il punto $B$ di ordine elevato $n$, $B\in E_p(a,b)$\\
+Ogni utente genera \texttt{k[pub]}, \texttt{k[priv]}\begin{list}{}{}
+	\item \texttt{k[priv]} è $n_u < n$
+	\item \texttt{k[pub]} è $P_u$ = $n_u B$
+\end{list}
+Alice mittente vuole mandare un messaggio a Bob destinatario:
+\begin{list}{}{}
+	\item Alice converte $m$ messaggio in $P_m\in E_p(a,b)$, ad esempio con l'algoritmo di Koblitz\\
+	Sceglie un intero casuale $r$ e calcola $V = rB$ ($V$ è quindi un punto a caso sulla curva $E_p(a,b)$)\\
+	Calcola $W = P_m + rP_{Bob}$ e dato che $r$ è casuale, $rP_{Bob}$ è scelto a caso su $E_p(a,b)$ ($P_{Bob}$ è la chiave pubblica di Bob)\\
+	Invia a Bob $\langle V,W\rangle$
+	\item Bob riceve $\langle V,W\rangle$\\
+	Decifra $W - n_{Bob}V = (P_m + rP_{Bob}) - n_{Bob}V = P_m + rn_{Bob}B - n_{Bob}rB = P_m$\\
+	Ricava $m = \lfloor \frac{x}{h}\rfloor$\\
+\end{list}
+La sicurezza è basata sulla difficoltà del logaritmo discreto su curve ellittiche.
+\paragraph{Crittoanalista} Potrebbe decifrare in questi modi, dallo stesso costo:
+\begin{list}{}{}
+	\item Se trova $r$, decifra facendo $W - rP_{Bob} = (P_m +rP_{Bob}) - rP_{Bob}$\\
+	Ma per trovare $r$ da $V,B$, $V = rB$ bisogna risolvere il logaritmo discreto\\
+	Consente di decifrare un solo crittogramma ($r$ è one time).
+	\item Altrimenti deve trovare $n_{Bob}$ da $P_{Bob},B$\\
+	$P_{Bob} = n_{Bob}B$, logaritmo discreto\\
+	Consentirebbe di decifrare tutti i crittogrammi successivi.
+\end{list}
+\paragraph{Sicurezza} Per attaccare RSA, DH, El Gamal (algebra modulare) $O(2^{\sqrt{b\cdot\log b}})$, con $b$ = \# bit del modulo (basati su \textbf{index calculus}, sfruttano la proprietà algebrica dei campi $Z_p$)\\
+Per attaccare su curve ellittiche (logaritmo discreto su curva ellittica) $O(2^{\frac{b}{2}})$, con $b$ \# bit dell'ordine di B
 \chapter{Esercizi}
 \section{Complessità e randomizazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
@@ -1700,7 +1737,8 @@ Avere un algoritmo efficiente per la risoluzione permetterebbe di trovare $x$ o 
 \end{enumerate}
 \subparagraph{Svolgimento} \begin{enumerate}
 	\item $e$ pari significa $e = 2\cdot f$ con $f$ dispari.\\
-	Dato che $\phi(n)$ è ottenuto con il prodotto $(p-1)(q-1)$ con $p,q$ primi, ho che entrambi i fattori sono pari, diciamo $p-1 = 2r, q-1=2s$, di conseguenza avrò MCD($2f, 4rs$) = 2 $\neq 1$
+	Dato che $\phi(n)$ è ottenuto con il prodotto $(p-1)(q-1)$ con $p,q$ primi, ho che entrambi i fattori sono pari, diciamo $p-1 = 2r, q-1=2s$, di conseguenza avrò MCD($2f, 4rs$) = 2 $\neq 1$\\
+	Avrò sempre $c = m^e$ mod $n = m$
 	\item 
 \end{enumerate}
 \pagebreak
