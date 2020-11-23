@@ -1361,14 +1361,28 @@ quindi deve \textbf{risolvere il problema del logaritmo discreto su curve ellitt
 Il protocollo è però soggetto ad attacchi attivi MitM.
 \section{Scambio di messaggi cifrati}
 \paragraph{Scambio di messaggi} Si trasforma il messaggio $m$ in $P_m$ punto di una curva ellittica prima $E_p(a,b)$\\
-$y^2 \equiv x^3 + ax + b$ mod $p$, e possiamo pensare di sostituire $m$ a $x$, il problema è che il risultato potrebbe non essere un residuo quadratico. $P(m^3+am+b$ sia un residuo quadratico$)$ circa 1/2\\
-Residuo quadratico: ha radice nel campo.\\
-Tecnica con metà di possibilità di successo non va bene, serve una tecnica migliore. Ci sono algoritmi randomizzati, non sono noti algoritmi deterministici polinomiali
+$y^2 \equiv x^3 + ax + b$ mod $p$, e possiamo pensare di sostituire $m$ a $x$, il problema è che il risultato potrebbe non essere un residuo quadratico. $P(m^3+am+b$ sia un residuo quadratico$) \simeq \frac{1}{2}$\\
+\textbf{Residuo quadratico}: ha radice nel campo.\\
+Tecnica con possibilità di successo così bassa non va bene, serve una tecnica migliore. Ci sono algoritmi randomizzati, \textbf{non sono noti algoritmi deterministici polinomiali}.
 \subsection{Algoritmo di Koblitz}
 Algoritmo polinomiale randomizzato che $m<p \mapsto P_m\in E_p(a,b)$\\
 Si sceglie $h$ intero $|\:(m+1)h < p$\\
-$x = m\cdot h + i$ con $0\leq i < h$ $\Rightarrow h$ tentativi per inserire $m\cdot h + i$ come ascissa e vedere se è residuo quadratico o meno.\\
-%TODO algoritmo
+$x = m\cdot h + i$ con $0\leq i < h$ $\Rightarrow h$ tentativi per inserire $m\cdot h + i$ come ascissa e vedere se è residuo quadratico o meno.
+\begin{lstlisting}
+KOBLITZ(m,h,a,b,p){
+	for(i = 0; i < h; i++){
+		x = mh + i;
+		z = (x^3 + ax + b) mod p;
+		if (z residuo quadratico) { //Costo polinomiale
+			y = sqrt(z);
+			return Pm = (x,y);
+		}
+	}
+	return "failure";
+}
+\end{lstlisting}
+Probabilità di fallimento $\simeq\left(\frac{1}{2}\right)^h \Rightarrow$ probabilità di successo $\simeq 1 - \left(\frac{1}{2}\right)^h$\\
+Per risalire a $m$ da $x$, $\lfloor\frac{x}{h}\rfloor = \lfloor \frac{mh + i}{h}\rfloor = \lfloor m + \frac{i}{h}\rfloor = m$ perché $\frac{i}{h} < 1$
 \paragraph{Scambio di messaggi} Viene fissata la curva $E_p(a,b)$ e il punto $B$ di ordine elevato $n$, $B\in E_p(a,b)$\\
 Ogni utente genera \texttt{k[pub]}, \texttt{k[priv]}\begin{list}{}{}
 	\item \texttt{k[priv]} è $n_u < n$
