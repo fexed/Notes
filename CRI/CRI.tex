@@ -1714,18 +1714,18 @@ cert$_U$ contiene $k_U[pub]$ e la specificazione della funzione $h$ usata
 La \textbf{frequenza di controllo di questi certificati} e le modalità della loro comunicazione agli utenti sono \textbf{cruciali per la sicurezza}.\\
 Attacchi MitM possono essere evitati se si stabilisce un incontro diretto tra un utente e la CA nel momento in cui si istanza il sistema asimmetrico dell'utente.
 \chapter{Esercizi}
-\section{Complessità e randomizazione}
+\section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
 chiave, un programma in assembler impiega un ciclo di 128 istruzioni ripetuto in media tante volte
 quanti sono i bit che costituiscono $m$. Impiegando un calcolatore che esegue un'operazione
-assembler in un tempo medio di 10ns, indicare in ordine di grandezza quanti anni sarebbero
+assembler in un tempo medio di 10 ns, indicare in ordine di grandezza quanti anni sarebbero
 necessari in media per condurre un attacco esaustivo sulle chiavi per un messaggio m di 1000 bit.\\
 Indicare i calcoli eseguiti.
 \subparagraph{Svolgimento} \begin{list}{}{}
 	\item \# chiavi = $2^{46}$
 	\item \# operazioni per chiave = 128 $\cdot\:|m|$
 	\item $|m| = 1000$ bit $= 10^3$ bit
-	\item 1ns = $10^{-9}$s
+	\item 1 ns = $10^{-9}$s
 	\item $\Rightarrow t = 2^{46}\cdot128\cdot10^3\cdot10\cdot10^{-9}$s = $2^{46}\cdot2^7\cdot10^{-5}$s = $2^{53}\cdot10^{-5}$s = $2^3\cdot2^{50}\cdot10^{-5}$s e dato che $2^{10} \simeq 10^3$\\
 	$\Rightarrow\:\simeq 2^8\cdot(10^3)^5\cdot10^{-5}$s = $8\cdot10^{10}$s $\simeq$ 2500 anni
 \end{list}
@@ -2099,5 +2099,71 @@ Dato che $m$ è stato cifrato con la chiave sbagliata, Bob rimanda la propria ch
 $\Rightarrow m = m^{er+e's}$ mod $n = (m^{er}$ mod $n)\cdot(m^{e's}$ mod $n)$ mod $n = c^r(c')^s$ mod $n$\\
 Supponendo $r<0,s>0 \Rightarrow m = (c^{-1})^{-r}(c')^s$ mod $n$\\Eve calcola l'inverso di $c$, calcola $(c^{-1})^{-r}$ ($-r$ è positivo), calcola $(c')^s$ e ottiene $m$ dal loro prodotto ridotto in modulo.\\
 Tutti i passaggi richiedono tempo polinomiale. L'inverso di $c$ modulo $n$ esiste ed è unico se $c,n$ sono coprimi. Se non lo fossero, Eve potrebbe allora fattorizzare $n$ e forzare il cifrario.
-
+\pagebreak
+\section{Funzioni hash, MAC e Firma digitale}
+\paragraph{Esercizio 1} Spiegare che proprietà devono possedere le funzioni hash one-way e perché tali funzioni sono importanti nei protocolli di autenticazione e firma.
+\subparagraph{Svolgimento} Una funzione hash one-way deve essere \textbf{facile da calcolare}, \textbf{difficile da invertire} e \textbf{difficile trovare due elementi che collidono}.
+\paragraph{Esercizio 2} Si scriva un messaggio a piacere in italiano $m = m_{20}m_{19}\ldots m_0$ costituito da 21 caratteri alfabetici più lo spazio.\\
+Si consideri il sottoinsieme dell'alfabeto $C_0 = \{A,B,\ldots,L\}$.\\
+Utilizzando la chiave $k = k_5k_4k_3k_2k_1k_0$ consistente nelle 6 cifre decimale della propria matricola, si autentichi $m$ mediante il MAC di 6 bit $A(m,k) = h_5h_4h_3h_2h_1h_0$ costruito come segue:
+\begin{lstlisting}
+	j = 0
+	for (i = 0 to 5) do
+		j = k[i] + j mod 21
+		if (m[j] in C0) then h[i] = 0 else h[i] = 1
+\end{lstlisting}
+\begin{enumerate}
+	\item \textbf{Riportare} i valori di $m$ e $h_i$ per $i = 0,1,\ldots,5$ indicando i calcoli
+	\item \textbf{Spiegare} se la funzione $A$ definita sopra è adatta per l'applicazione considerata.
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+\item $m =$ \texttt{messaggio celatissimo}, $k =$ \texttt{530257}\begin{list}{}{}
+	\item[$i=0$] $j = 7 + 0$ mod $21 = 7$, $m_7 = a \Rightarrow h_0 = 0$
+	\item[$i=1$] $j = 5 + 7$ mod $21 = 12$, $m_{12} = o \Rightarrow h_1 = 1$
+	\item[$i=2$] $j = 2 + 12$ mod $21 = 14$, $m_{14} = g \Rightarrow h_2 = 0$
+	\item[$i=3$] $j = 14 + 0$ mod $21 = 14$, $m_{14} = g \Rightarrow h_3 = 0$
+	\item[$i=4$] $j = 3 + 14$ mod $21 = 17$, $m_{17} = s \Rightarrow h_4 = 1$
+	\item[$i=5$] $j = 5 + 17$ mod $21 = 1$, $m_1 = m \Rightarrow h_5 = 1$
+	\item[$\Rightarrow$] $A(m,k) =$ \texttt{110010}
+\end{list}
+\item
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 3} Sia $S$ la somma delle sei cifre decimali del numero di matricola del candidato. Sia monga $M = S + 10$.\\
+Si convertano le cifre di $M$ in binario su 4 bit, se le calcoli lo XOR e si riconverta il valore ottenuto in un numero decimale $H$ che sarà usato come hash di $M$: $h(M) = H$\\
+Per due utenti Alice e Bob di un sistema RSA, si considerino i seguenti parametri:
+\begin{list}{}{}
+	\item Alice: $p=5,q=11,e=7,d=23$
+	\item Bob: $p=7,q=13, e=5, d=29$
+\end{list}
+Alice deve spedire a Bob il messaggio $M$ cifrato e firmato in hash, impiegando le chiavi RSA e la funzione hash di cui sopra.
+\begin{enumerate}
+	\item \textbf{Spiegare} se i parametri RSA indicati sopra sono scelte in modo consistente con le regole del cifrario (a parte le dimensioni)
+	\item \textbf{Indicare} esplicitamente tutte le operazioni aritmetiche fatte da Alice e Bob nella trasmissione e verifica del messaggio $M$ e della firma.
+\end{enumerate}
+\subparagraph{Svolgimento} 
+\begin{enumerate}
+	\item Per entrambi, abbiamo $p,q$ primi ed $e$ coprimo con $\phi(pq) = (p-1)(q-1)$:
+	\begin{list}{}{}
+		\item MCD($7, 40$) = 1
+		\item MCD($5, 72$) = 1
+	\end{list}
+	Inoltre $23 = 7^{-1}$ mod $40$ e $29 = 5^{-1}$ mod $72$\\
+	Quindi i valori sono appropriati a meno delle dimensioni.
+	\item Usando il protocollo 3 \begin{list}{}{}
+		\item \textbf{Alice}\\
+		$M = 22 + 10 = 32 \rightarrow$ $H=$ \texttt{0011$\oplus$0010} $=$ \texttt{0001} $\rightarrow h(32) = 1$\\
+		Calcola il crittogramma $c_m = 32^{5}$ mod $91 = 2$ con la chiave pubblica di Bob\\
+		Calcola il crittogramma $c_H = 1^{23}$ mod $55 = 1$ con la propria chiave privata\\
+		Spedisce $c_m$ e $c_H$ a Bob
+		\item \textbf{Bob}\\
+		Riceve $c_m$ e calcola $m = 2^{29}$ mod $91 = 32$ con la propria chiave privata\\
+		Riceve $c_H$ e calcola $H_{Alice} = 1^{7}$ mod $55 = 1$ con la chiave pubblica di Alice\\
+		Calcola $H$ con il precedente calcolo, lo verifica con $H_{Alice}$ ricevuto e conclude che il messaggio è autenticato.
+	\end{list}
+\end{enumerate}
+\paragraph{Esercizio 4} Posto che si scopra un algoritmo polinomiale per calcolare la funzione di Eulero, \textbf{spiegare} in termini matematici quale influenza la scoperta avrebbe sui protocolli di firma.
+\subparagraph{Svolgimento} Come per l'RSA, la scoperta di un algoritmo polinomiale per calcolare $\phi(n)$ si potrebbe calcolare in tempo polinomiale $d = e^{-1}$ mod $\phi(n)$, rendendo chiunque capace di firmare al posto dell'utente.
+\paragraph{Esercizio 5} Sia $n = pq$ con $p,q$ primi, e sia $e$ un intero coprimo con $\phi(n)$. Si discuta se la funzione\\ $h(m_1,m_2) = m_1^em_2^e$ mod $n$ è resistente alle collisioni.
+\subparagraph{Svolgimento}
 \end{document}
