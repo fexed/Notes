@@ -311,7 +311,38 @@ Get getnext e set ricevono getresponse tutte e tre.\\
 Importante sapere IP host che manda trap (potrebbe vederlo dal pacchetto UDP), perché l'ip nell'udp può essere mascherato o cambiato ad esempio dal nat\\\\
 \texttt{sysDescr}(1) breve descrizione del sistema (stringa, \textbf{arbitraria})\\\\
 \texttt{sysObjectID}(2) identifica sia modello che costruttore, per riconoscerlo e andare nel relativo MIB o, ad esempio, mettere l'icona giusta.\\\\
-\texttt{sysUptIme}(3) da quanto è attivo l'\textbf{agent} (non è per forza identico a quello di sistema). Serve anche per poter leggere correttamente le variabili \texttt{gauge} per esempio, per fare la differenza per sapere quanto è cambiato il valore nell'ultimo minuto (ad esempio). Ma non posso aspettarmi che il nuovo valore sia maggiore (es: è saltata la corrente, oppure se il contatore ha fatto wrap (fine dei bit e ripartito da 0)) Quindi devo distinguere riavvio agent da wrap, non posso fare semplice differenza perché potrei tirare fuori numero sbagliato (es negativo, ma valore \texttt{unsigned} fa diventare grandissimo). Per sapere se si è riavviato agent o se contatore ha fatto wrap uso \texttt{sysUpTime}.
+\texttt{sysUptIme}(3) da quanto è attivo l'\textbf{agent} (non è per forza identico a quello di sistema). Serve anche per poter leggere correttamente le variabili \texttt{gauge} per esempio, per fare la differenza per sapere quanto è cambiato il valore nell'ultimo minuto (ad esempio). Ma non posso aspettarmi che il nuovo valore sia maggiore (es: è saltata la corrente, oppure se il contatore ha fatto wrap (fine dei bit e ripartito da 0)) Quindi devo distinguere riavvio agent da wrap, non posso fare semplice differenza perché potrei tirare fuori numero sbagliato (es negativo, ma valore \texttt{unsigned} fa diventare grandissimo). Per sapere se si è riavviato agent o se contatore ha fatto wrap uso \texttt{sysUpTime}.\\\\
+\texttt{sysContact}(4) chi contattare.\\\\
+\texttt{sysName}(5)\\\
+\texttt{sysLocation}(6)\\\\
+\texttt{sysServices}(7) dà info sui servizi gestiti dal sistema.\\\\
+\paragraph{Gruppo \texttt{interfaces}}\begin{list}{}{}
+	\item \texttt{ifIndex} da indice interfaccia di rete. Non sono consecutivi, se aggiungo o rimuovo porte numerazione non cambia.
+	\item \texttt{ifDescr} che descrive cosa fa l'interfaccia 
+	\item \texttt{ifType} il tipo di interfaccia, eth, wireless...
+	\item \texttt{ifMTU} la Maximu Transmission Unit
+	\item \texttt{ifSpeed} la velocità attuale dell'interfaccia
+	\item \texttt{ifPhysiAddress} indirizzo fisico, il MAC
+	\item \texttt{ifAdminStatus} indica se l'interfaccia è fisicamente presente o meno
+	\item \texttt{ifOperStatus} indica se l'interfaccia è operativa (accesa, up\ldots)
+	\item \texttt{ifLastChange} valore del \texttt{SysUptime} dell'ultima volta che l'interfaccia di rete ha cambiato stato
+	\item \texttt{ifInOctets} numero ottetti in ingresso alla porta
+	\item \texttt{ifInUcastPkts} pacchetti unicast
+	\item \texttt{ifInNUcastPkts} pacchetti non unicast
+	\item \texttt{ifInDiscards} pacchetti scartati
+	\item \texttt{ifInErrors} pacchetti in errore
+	\item \texttt{ifInUnknownProtos}
+	\item \texttt{ifOutOctets} numero ottetti in uscita alla porta
+	\item \texttt{ifOutUcastPkts} pacchetti unicast
+	\item \texttt{ifOutNUcastPkts} pacchetti non unicast
+	\item \texttt{ifOutDiscards} pacchetti scartati
+	\item \texttt{ifOutErrors} pacchetti in errore
+	\item \texttt{ifOutQlen} numero di pacchetti in coda in uscita. Dovrebbe essere 0 o quasi, altrimenti interfaccia non riesce a spedire i dati al giusto ritmo
+	\item \texttt{ifSpecific}
+\end{list}
+
+
+\paragraph{enp0s1} Perché si chiama così? Dà informazione su dove si trova la scheda
 \subsection{SNMPv2}
 Usato snmpv2 invece che v1 perché aveva problemi strutturali: il primo sono i contatori a 32bit che sono molto limitati per la tecnologia odierna (10-100Gbit il contatore si "riempie" molto velocemente). Inoltre nella v2 c'è tutto quello scartato in v1 per questioni di tempo (necesario fare protocollo in fretta)
 \paragraph{Primitive di SNMPv2} Sono tutto sommato le stesse con \texttt{GetBulk} e \texttt{Inform}
