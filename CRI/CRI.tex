@@ -1713,6 +1713,87 @@ cert$_U$ contiene $k_U[pub]$ e la specificazione della funzione $h$ usata
 \paragraph{Conclusioni} Il punto debole del meccanismo delle CA è rappresentato dai certificati revocati. La CA mettono a disposizione un archivi con i certificati non più validi.\\
 La \textbf{frequenza di controllo di questi certificati} e le modalità della loro comunicazione agli utenti sono \textbf{cruciali per la sicurezza}.\\
 Attacchi MitM possono essere evitati se si stabilisce un incontro diretto tra un utente e la CA nel momento in cui si istanza il sistema asimmetrico dell'utente.
+\section{Protocollo Zero Knowledge}
+\paragraph{Protocollo a conoscenza zero} Lo vedremo all'opera per l'identificazione. Silvio Micali, premio Turing, e Shefi Goldwasser (MIT, 1989).
+\paragraph{Obiettivo} Due utenti: \textbf{prover} e \textbf{verifier}, anche chiamati Peggy/Victor.\\
+Il protocollo è uno scambio tra P e V, composto da una serie di sfide che P deve superare per convincere V di essere in possesso di una certa informazione. Scambio di messaggi che permette a P di \textbf{dimostrare} a V, e a fine protocollo V deve ragionevolmente convincersi che P possiede l'informazione.
+\paragraph{Esempio} Peggy sostiene di poter contare i granelli di sabbia di una spiaggia solamente guardandola, e Victor vuole controllare se quanto dice Peggy è vero (\textbf{non con certezza}, ma con probabilità prossima a 1).\\
+Victor sceglie la spiaggia e ci va con Peggy. \textbf{Fase di preparazione} dove Victor chiede a Peggy di comunicare la parità dei granelli di sabbia.
+$$P \rightarrow^{b_0} V\:\:\:\:\:b_0 =\textsl{ parità dei granelli di sabbia}$$
+\pagebreak
+Dopodiché, il protcollo funziona così:
+\begin{lstlisting}
+	for (i=1 to k) { //k scelto da V
+		P si volta;
+		V sceglie un e bit (0, 1) casuale;
+		if (e==0) V toglie un granello di sabbia
+		V chiede a P il nuovo valore bi //chiede nuovamente parita granelli
+		if ((e == 0 && b[i] != b[i-1]) || //parita cambiata perche tolto granello
+			(e == 1 && b[i] == b[i-1])) //parita non cambiata
+				continua alla prossima iterazione;
+		else //P impostore
+				STOP
+	}
+	//P dice il vero con probabilita 1-(1/2)^k
+\end{lstlisting}
+La probabilità di vincere una sfida ingannando, se Peggy è disonesta, è la probabilità di indovinare il bit generato, $\frac{1}{2}$. Quindi la probabilità di vincere ingannando è di farlo per $k$ volte, cioè $\left(\frac{1}{2}\right)^k$.\\
+Quindi, la probabilità di ingannare V è $\left(\frac{1}{2}\right)^k$.\\
+La probabilità che P abbia la capacità assunta è almeno $1-\left(\frac{1}{2}\right)^k$\\
+\textbf{Evidenza sperimentale significativa}, ma \textbf{non dimostrazione rigorosa}, che P abbia la capacità/conoscenza.
+\subsection{Proprietà di un protocollo zero knowledge}
+\paragraph{Principi generali}\begin{enumerate}
+	\item \textbf{Completezza}\\
+	Se P è onesto (la sua affermazione è vera), V \textbf{accetta sempre} la dimostrazione. Cioè P deve sempre poter superare le sfide di V.
+	\item \textbf{Correttezza}\\
+	Se P è disonesto (la sua affermazione è falsa), V \textbf{può essere ingannato} con probabilità $\leq \left(\frac{1}{2}\right)^k$ con $k$ scelto da V
+	\item \textbf{Conoscenza zero}\\
+	Se l'affermazione di P è vera, il verificatore V (anche se disonesto) non può alcuna informazione se non la veridicità di questo fatto.
+\end{enumerate}
+\subsection{Protocollo di identificazione a conoscenza zero}
+\paragraph{Protocollo di Fiat-Shamir} Uno dei primi nati. P dimostra a V la sua identità senza svelare alcun'altra informazione.\\
+Basato sulla difficoltà di calcolo della radice quadrata in modulo $n$ composto.\\
+$t = s^2$ mod $n$, $n$ composto. Victor conosce $t,n$, Peggy deve convincere $V$ di conoscere $s = \sqrt{t}$. Deve succedere in tempo polinomiale, altrimenti in tempo esponenziale V può calcolarsela.
+\begin{list}{}{}
+	\item \textbf{Fase di preparazione}\\
+	P sceglie $p,q$ primi molto grandi e calcola $n = p\cdot q$ e sceglie $s < n$ segreto. Calcola $t = s^2$ mod $n$.\\
+	Tutte attività eseguibili in tempo polinomiale.
+	\item P rende nota $\langle t,n\rangle$ (chiave \textbf{pubblica}) e mantiene segreta $\langle p,q,s\rangle$ (chiave \textbf{privata})\\
+	$p,q,s$ sono calcolabili in tempo polinomiale solo conoscendo $t,n$.\\
+	Se P è la proprietaria della chiave privata, sarà in grado di convincere qualunque verificatore con probabilità $1-\left(\frac{1}{2}\right)^k$ senza che acquisica maggiori informazioni.
+	\item \textbf{Protocollo}, ripeti $k$ volte:
+	\begin{enumerate}
+		\item V chiede a P di iniziare una iterazione
+		\item P genera un intero $r<n$ casuale, ne calcola $u = r^2$ mod $n$ e comunica $u$ a V.
+		Numero casuale usato per la sfida e buttato via.
+		\item V genera il \textbf{bit casuale} $e$ e lo comunica a P
+		\item P calcola $z = r\cdot s^e$ mod $n$ e comunica $z$ a V\\
+Se $e = 0$, $z = r$. Se $e = 1$, $z = r\cdot s$ mod $n$
+		\item V	calcola $x = z^2$ mod $n$\\
+		$(rs^e)^2 = r^2(s^e)^2 = u(s^2)^e = ut^e$\\
+		Se $x = ut^e$ mod $n$ allora sfida superata, si va alla successiva.\\
+		Altrimenti STOP, P non è identificato.
+	\end{enumerate}
+	$r$ non viaggia mai in chiaro, tranne quando $e=0$ cioè $z=r$. $s$ non viaggia mai da solo, ma $r$ è legato alla sola sfida quindi non è un problema.
+\end{list}
+Tutte le volte che $e=0$ la sfida è facile da superare. Perché non si chiede sempre di usare $e=1$, cioè di usare il segreto? Ad esempio, V manda sempre $e=1$. P può imbrogliare e superare sempre. P si aspetta sempre $e=1$, al passo 2. sceglie $r$ a caso e invia a V non $u=r^2$ ma $u = \frac{r^2}{t}$ mod $n = r^2t^{-1}$ mod $n$ (assumendo che $t^{-1}$ esiste ed è unico.\\
+Al passo 4, P deve comunicare $rs^e$ ma invia sempre $z = r$ perché non conosce $s$. Ma avendo imbrogliato al passo 2., V verifica in questo modo:
+\begin{list}{}{}
+	\item $x = z^2$ mod $n$ e verificare se $x = ut^e = ut$ perché $e = 1$\\
+	$x = z^2$ mod $n = r^2$ mod $n$\\
+	$ut = \frac{r^2}{\not t}\cdot \not t$ mod $n = r^2$ mod $n$\\
+	Quindi la verifica è passata, $x=ut$
+\end{list}
+Quindi forzare a usare il segreto porta ad un facile imbroglio. Usare il bit casuale spinge P a cercare di prevedere le scelte: se prevede $e=0$ non varia il protocollo, se prevede $e=1$ prova la modifica appena vista.
+\paragraph{Completezza} Se $e=0\Rightarrow x=ut^e$ mod $n = u$ mod $n$\\
+Se $e=1\Rightarrow x= z^2$ mod $n = (rs^e)^2$ mod $n = ut$ mod $n$\\
+Quindi P supera tutte le sfide, V accetta la dimostrazione.
+\paragraph{Correttezza} Dimostrare che si può imbrogliare con probabilità al massimo $1-\left(\frac{1}{2}\right)^k$\\
+P disonesto riesce a ingannare V se prevede correttamente il bit inviato da V ad ogni iterazione (visto sopra). Poiché $e$ è generato casualmente, le previsioni di P sono corrette con probabilità $\frac{1}{2}$ ad ogni iterazione.\\
+Per $k$ iterazioni, diventa probabilità di inganno = $\left(\frac{1}{2}\right)^k$
+\section{Protocollo SSL}
+Sfrutta i concetti visti fin'ora nel corso. Oggi su usa il TLS, sviluppato sulla base dell'SSL.
+\paragraph{Secure Socket Layer} Alla base dei protocolli più diffusi nelle comunicazioni sicure. Garantisce \textbf{confidenzialità} e \textbf{affidabilità} delle comunicazioni su internet, proteggendole da intrusioni, modifiche o falsificazioni.
+%TODO ricopiare slide
 \chapter{Esercizi}
 \section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
