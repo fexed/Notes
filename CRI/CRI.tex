@@ -1792,8 +1792,133 @@ P disonesto riesce a ingannare V se prevede correttamente il bit inviato da V ad
 Per $k$ iterazioni, diventa probabilità di inganno = $\left(\frac{1}{2}\right)^k$
 \section{Protocollo SSL}
 Sfrutta i concetti visti fin'ora nel corso. Oggi su usa il TLS, sviluppato sulla base dell'SSL.
-\paragraph{Secure Socket Layer} Alla base dei protocolli più diffusi nelle comunicazioni sicure. Garantisce \textbf{confidenzialità} e \textbf{affidabilità} delle comunicazioni su internet, proteggendole da intrusioni, modifiche o falsificazioni.
-%TODO ricopiare slide
+\paragraph{Secure Socket Layer} Alla base dei protocolli più diffusi nelle comunicazioni sicure. Garantisce \textbf{confidenzialità} e \textbf{affidabilità} delle comunicazioni su internet, proteggendole da intrusioni, modifiche o falsificazioni.\\
+Sviluppato da Netscape per effettuare comunicazione sicure sul protocollo HTTP, la prima versione è del 1994: è \textbf{progettato in modo da permettere la comunicazione tra computer che non conoscono le reciproche funzionalità}.\\\\
+L'utente U desidera accedere via internet ad un servizio offerto dal sistema S.
+\paragraph{Confidenzialità} La trasmissione è cifrata mediante un sistema ibrido:
+\begin{list}{}{}
+	\item Cifrario \textbf{asimmetrico} per \textbf{costruire e scambiare le chiavi di sessione}.
+	\item Cifrario \textbf{simmetrico} che \textbf{utilizza queste chiavi per criptare i dati} nelle comunicazioni successive.
+\end{list}
+\paragraph{Autenticazione} SSL garantisce l'autenticazione dei messaggi accertanto l'identità dei due partner \textbf{attraverso un cifrario asimmetrico}, oppure \textbf{facendo uso di certificati digitali} e \textbf{inserendo nei messaggi stessi un apposito MAC} (che usa una funzione hash one-way crittograficamente sicura)
+\paragraph{Posizione} SSL si innestra tra un protocollo di trasporto affidabile (TCP/IP) e un protocollo applicativo (es. HTTP): è \textbf{completamente indipendente dal protocollo applicativo sovrastante}.\\
+Protocollo \textbf{HTTPS}: combinazione tra SSL e HTTP, utilizzato da server web sicuri (\texttt{https://}\ldots)
+\pagebreak
+\subsection{Struttura}
+\paragraph{Due livelli} SSL è organizzato su due livelli:\begin{list}{}{}	
+	\item \textbf{SSL Handshake}\\
+	Responsabile dell'instaurazione e del mantenimento dei parametri usati da SSL Record.\\
+	Permette all'utente e al sistema di \textbf{autenticarsi}, \textbf{negoziare gli algoritmi} di cifratura e firma e \textbf{stabilire le chiavi per i singoli algoritmi} crittografici e per il MAC\\
+	\textbf{Crea un canale sicuro, affidabile e autenticato tra utente e sistema}, entro il quale SSL Record fa viaggiare i messaggi divisi in blocchi opportunamente cifrati e autenticati.\\\\
+	La sessione di comunicazione è innescata da uno \textbf{scambio di messaggi preliminari} (handshake) indispensabili per la creazione del canale sicuro. Attraverso questi messaggi, S server e U client si identificano a vicenda e cooperano nella costruzioni delle chiavi segrete da impiegare nelle comunicazioni simmetriche successive. Il protocollo è \textbf{organizzato in passi}:
+	\begin{enumerate}
+		\item \textbf{U manda a S un messaggio di \texttt{client hello}}, con cui:
+		\begin{list}{}{}
+			\item \textbf{Richiede la creazione della connessione SSL}
+			\item \textbf{Specifica le prestazioni di sicurezza} che desidera siano garantite durante la connessione (cifrari e meccanismi di autenticazione che U può supportare)
+			\item \textbf{Invia una sequenza di byte casuali}
+		\end{list}
+		Un esempio di cipher suite: \texttt{SSL\_RSA\_WITH\_AES\_CBC\_SHA1}
+		\begin{list}{}{}
+			\item RSA per lo scambio di chiavi di sessione
+			\item AES per la cifratura simmetrica
+			\item CBC indica l'impiego di un cifrario di composizione a blocchi
+			\item SHA1 funzione hash one-way per il MAC
+		\end{list}
+		\item Il sistema S riceve \texttt{client hello}, seleziona una cipher suite che anch'esso è in grado di supportare e \textbf{invia ad U un messaggio di \texttt{server hello}} che specifica la sua scelta e contiene una nuova sequenza di byte casuali.\\
+		Se U non riceve il messaggio di \texttt{server hello}, interrompe la comunicazione.
+		\item \textbf{S si autentica con U inviandogli il proprio certificato digitale} e gli eventuali altri certificati della catena di certificazione dalla sua CA fino alla CA radice.\\
+		Se i servizi offerti da S devono essere protetti dagli accessi, \textbf{S può richiedere a U di autenticarsi inviando il suo certificato digitale} (avviene raramente, la maggior parte degli utenti non ha un certificato personale quindi il sistema dovrà accertarsi dell'identità dell'utente in un secondo tempo)
+		\item \textbf{S invia il messaggio di \texttt{server hello done}} con cui sancisce la fine degli accordi della cipher suite e sui paramtetri crittografici a essa associati.
+		\item Per accertare l'autenticità del certificato ricevuto da S, l'utente U controlla che:
+		\begin{list}{}{}
+			\item La data corrente sia inclusa nel periodo di validità del certificato
+			\item La CA che ha firmato il certificato sia tra quelle fidate
+			\item La firma apposta dalla CA sia autentica
+		\end{list}
+		\item L'\textbf{utente U costruisce un pre-master secret} costituito da una sequenza di byte casuali (quindi genera un numero segreto). Cifra il pre-master secret con il cifrario a chiave pubblica su cui si è accordato con S e spedisce il crittogramma ottenuto a S.\\
+		Ad esempio U cifra il pre-master secret con RSA usando la chiave pubblica presente nel certificato di S.\\
+		Il pre-master secret viene combinato da U con alcune stringhe note e con i byte casuali presenti sia nel messaggio di \texttt{client hello} che in quello di \texttt{server hello}.\\
+		A tutte le sequenze U applica delle funzioni hash one-way (SHA1 e MD5) secondo una combinazione opportuna.\\
+		Ottiene così il \textbf{master secret}.
+		\item S decifra il crittogramma contenente il pre-master secret ricevuto da U, \textbf{calcola il master secret} mediante le stesse operazioni di U (possiede le stesse informazioni).\\
+		Sia U che S conoscono: il numero casuale che U ha mandato a S, il numero casuale che S ha mandato a U (entrambi scambiati in chiaro) e il premaster secret (inviato cifrato). Quindi entrambi calcolano il master secret.
+		\item (Opzionale) Se all'utente U viene richiesto un certificato ed egli non lo possiede, il sistema interrompe l'esecuzione del protocollo.\\
+		Altrimenti U invia il proprio certificato con allegate una serie di informazioni firmate con la sua chiave privata, tra cui: il master secret e tutti i messaggi scambiati fino a quel momento (\textbf{SSL history})\\
+		S controlla il certificato di U e verifica autenticità e correttezza della SSL history. Se ci sono anomalie, la comunicazione con U è interrotta.
+		\item U costruisce e spedisce a S \texttt{finished}, poi S costruisce e spedisce a U lo stesso messaggio. Si tratta del primo messaggio protetto mediante il master secret e la cipher suite: nei due invii la struttura del messaggio è la stessa, ma cambiano le informazioni in esso contenute.\\
+		La \textbf{costruzione} avviene in due passi:
+		\begin{list}{}{}
+			\item[I] All'inizio si concatenano il master secret, tutti i messaggi di handshake scambiati fino a quel momento e l'identità del mittente (U o S)
+			\item[II] La stringa ottenuta è trasformata applicando SHA1 e MD5: si ottiene una coppia di valori che costituisce il messaggio \texttt{finished}
+		\end{list}
+		Il messaggio è diverso perché S aggiunge ai messaggi di handshake anche il messaggio \texttt{finished} appena ricevuto da U.\\
+	Il destinatario della coppia, S o U, non può invertire la computazione precedente in quanto generata da funzioni one-way. Ricostruisce l'ingresso delle due funzioni SHA1 e MD5, le ricalcola e controlla che la coppia generata coincida con quella ricevuta, come dimostrazione che la comunicazione è avvenuta correttamente.
+	\end{enumerate}
+	Il \textbf{master secret} viene usato da U e S per costruire una propria tripla contenente:
+	\begin{list}{}{}
+		\item La chiave segreta da usare nel cifrario simmetrico
+		\item La chiave per l'autenticazione del messaggio (costruzione del MAC)
+		\item La sequenza di inizializzazione per cifrare in modo aperiodico messaggi molto lunghi
+	\end{list}
+	Le triple di U e S sono diverse tra loro ma note a entrambi i partner: ciascuno usa la propria, il che aumenta la sicurezza delle comunicazioni.
+	
+	\item \textbf{SSL Record}\\
+	Livello più basso, connesso direttamente al protocollo di trasporto. Ha l'obiettivo di incapsulare i dati spediti dai protocolli dei livelli superiori, assicurando confidenzialità e integrità della comunicazione.\\
+	\textbf{Realizza fisicamente il canale} (meccanismo di rete): utilizza la cipher suite stabilita da SSL Handshake per cifrare e autenticare i blocchi di dati, prima di spedirli attraverso il protocollo di trasporto sottostante.\\
+	Il canale sicuro approntato da SSL handshake viene realizzato da SSL record: i \textbf{dati} sono \textbf{frammentati in blocchi} e \textbf{ciascun blocco} viene:
+	\begin{list}{}{}
+		\item numerato, compresso e autenticato con l'aggiunta del MAC
+		\item cifrato con il cifrario asimmetrico concordato
+		\item trasmesso dall'SSL record utilizzando il protocollo di trasporto sottostante
+	\end{list}
+	Il destinatario esegue un procedimento inverso sui blocchi:
+	\begin{list}{}{}
+		\item decifra e verifica la loro integrità attraverso il MAC
+		\item decomprime e riassembla i blocchi in chiaro
+		\item li consegna all'applicazione sovrastante
+	\end{list}
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{20.png}
+\end{center}
+\paragraph{Sicurezza} Nei passi di \texttt{hello}, i due partner creano e si inviano due sequenze casuali per la costruzione del master secret, che risulta così diverso in ogni sessione SSL.\\
+Il \textbf{crittoanalista non può riutilizzare i messaggi di handshake catturati sul canale per sostituirsi a S in una successiva comunicazione con U}.
+\paragraph{MAC dei blocchi di dati} SSL record numera in modo incrementale ogni blocco di dati e autentica il blocco attraverso un MAC.\\
+Per prevenire la modifica del blocco da parte di un crittoanalista attivo, il MAC viene calcolato come immagine hash one-way di una stringa costruita concatenando:
+\begin{list}{}{}
+	\item il contenuto del blocco
+	\item il numero del blocco nella sequenza
+	\item la chiave del MAC
+	\item alcune stringhe note e fissate a priori
+\end{list}
+Dato che i MAC sono cifrati assieme al messaggio, un crittoanalista non può alterarli senza aver forzato la chiave simmetrica di cifratura: \textbf{un attacco volto a modificare la comunicazione tra i due partner è difficile almeno quanto quello volto alla sua decrittazione}.
+\paragraph{Il sistema è autenticato} Il canale definito da SSL handshake è immune da attacchi attivi MitM poiché il sistema S viene autenticato con un certificato digitale.\\
+L'utente U può comunicare il pre-master secret al sistema S in modo sicuro attraverso la chiave pubblica presente nel certficato di S.\\
+\textbf{Solo S può decifrare quel crittogramma} e costruire il master secret, su cui si fonda la costruzione di tutte le chiavi segrete adottate nelle comunicazioni successive.\\
+Solo il sistema S, quello a cui si riferisce il certificato, potrà quindi entrare nella comunicazione con l'utente U.
+\paragraph{L'utente può essere autenticato} Il certificato di U, se richiesto, e la sua firma apposta sui messaggi scambiati nel protocollo (SSL history) consentono a S di verificare che U sia effettivamente quello che dichiara di essere e che i messaggi siano stati effettivamente spediti da esso.\\
+Se ciò non si verifica, S deduce che il protocollo è stato alterato (casualmente o maliziosamente con un attacco MitM) e interrompe la comunicazione.\\
+L'opzionalità della comunicazione ha reso l'SSL molto diffuso nelle transazioni commerciali via internet: per gli utenti, la necessità di certificazione può costituire un ostacolo pratico ed economico. L'utente può essere autenticato con altrim etodo (logi, pin\ldots)
+\pagebreak
+\paragraph{Generazione delle sequenze casuali} Le tre sequenze casuali generate da U e da S e comunicate nei messaggi di \texttt{client hello}, \texttt{server hello} e pre-master secret sono usate per creare il master secret, quindi per generare le chiavi segrete di sessione.
+\begin{list}{}{}
+
+	\item La sequenza corrispondente al pre-master secret viene
+generata da U e comunicata per via cifrata a S.
+	\item La non predicibilità di questa sequenza è cruciale per la
+sicurezza del canale SSL:\\
+	una sua cattiva generazione renderebbe il protocollo molto debole.
+\end{list}
+\paragraph{Messaggio \texttt{finished}} Contiene tutte le informazioni scambiate nel corso dell'handshake.\\
+Scopo: consente un ulteriore controllo sulle comunicazioni precedenti per garantire che:
+\begin{list}{}{}
+	\item Queste siano avvenute correttamente
+	\item U e S dispongano dello stesso master secret
+	\item Che la comunicazione non sia stata oggetto di un attacco attivo
+\end{list}
+\paragraph{SSL} Almeno sicuro quanto il più debole cipher suite supportato. Dal 200 le norme internazionali non pongono alcuna limitazione sui cifrari impiegabili (se non il alcuni paesi).\\
+Consigliato disabilitare i propri sistemi dall'impiego di cifrari ormai notoramente insicuri e chiavi troppo corte.
 \chapter{Esercizi}
 \section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
