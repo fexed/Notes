@@ -379,10 +379,12 @@ Supporta vari tipi di protocollo per lo scambio di messaggi e per il sistema di 
 	\item \textbf{Protezione dallo sniffing}: si crittano i dati
 \end{enumerate}
 \chapter{Rete Cellulare}
-GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella.\\
+Quando telefono si connette a rete mobile il gateway lo autentica.\\
+GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella. Le informazioni sono ricavate e comunicate dal provider e dal GTPC, non dal telefono. Ad esempio, il numero di cellulare è dato dal protocollo, non è memorizzato sulla SIM.\\
 Create session crea la connessione e la stabilisce.\\
 Protocollo GTP inoltre negozia i \textbf{tunnel}: permettono che cambiando cella cambiano i parametri della connessione ma la comunicazione rimane. Pacchetti incapsulati in tunnel GTP, io continuo a vedere il mio ip verso l'esterno e percepisco come se fosse rete fissa.\\\\
 Traffico è incapsulato dentro il pacchetto GTP.
+\paragraph{Analisi traffico radio} Per analizzare il traffico radio delle reti mobili (ad esempio, tramite Wireshark) su smartphone si può implementare una "VPN senza VPN": cioè i pacchetti vengono catturati dal sistema operativo per mandarli su una VPN che in realtà è la rete mobile stessa.
 \chapter{RRDtool}
 \section{RRDtool Database}
 I db relaz hanno tabelle connesse con relazioni\ldots con inserimento, cancellazione e aggiornamento. Questo non è abbastanza. Inoltre su uso questo modo la tabella cresce all'infinito, durante il monitoraggio\\
@@ -390,17 +392,17 @@ Poi DB relaz non efficienti nel fare aggregazione nel tempo dei valori. Inoltre,
 \paragraph{RRDtool} Padre di tanti DB a sede temporale. RR=Round Robin. RRD è un \textbf{file}, in un formato particolare:
 \begin{list}{}{}
 	\item \textbf{Static Header} che indica cosa contiene, ultimo timestamp di aggiunta e ultimo dato aggiunto\ldots
-	\item \textbf{Live Header}
-	\item \textbf{Round Robin Archive}
-	\item \textbf{Round Robin Archive}
+	\item \textbf{Live Header} 
+	\item \textbf{Round Robin Archive} specifica che tipo di dato mantenere per quanto tempo e con che risoluzione misurare
+	\item \textbf{Round Robin Archive}\ldots
 	\item \ldots altri RRA
 \end{list}
 \paragraph{RRD} Array circolare con numero fisso di slot di storage.
 \begin{center}
 	\includegraphics[scale=0.7]{rrdtool_rr.png}
 \end{center}
-\paragraph{Data Source} Qualsiasi cosa con numeri.
-\paragraph{Sconosciuto} Come gestire \texttt{UNKNOWN}? Unknown non è 0, è contagioso (1+unknown = unknown). RRDtool gestisce gli unknown, configurabile quanto unknown ignorare (default: 50\%)
+\paragraph{Data Source} Qualsiasi cosa con numeri, file di log, contatori SNMP\ldots
+\paragraph{Sconosciuto} Come gestire \texttt{UNKNOWN}? Unknown non è 0, è contagioso (1+unknown = unknown). RRDtool gestisce gli unknown, configurabile quanto unknown ignorare (default: 50\%) e come gestirli
 \paragraph{Archivi multipli} Tieni i dati pronti alle giuste risoluzioni\\
 Media su 5 minuti per un giorno.
 Massimo su 1h per un mese
