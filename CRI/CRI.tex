@@ -2373,8 +2373,79 @@ Alice deve spedire a Bob il messaggio $M$ cifrato e firmato in hash, impiegando 
 \paragraph{Esercizio 4} Posto che si scopra un algoritmo polinomiale per calcolare la funzione di Eulero, \textbf{spiegare} in termini matematici quale influenza la scoperta avrebbe sui protocolli di firma.
 \subparagraph{Svolgimento} Come per l'RSA, la scoperta di un algoritmo polinomiale per calcolare $\phi(n)$ si potrebbe calcolare in tempo polinomiale $d = e^{-1}$ mod $\phi(n)$, rendendo chiunque capace di firmare al posto dell'utente.
 \paragraph{Esercizio 5} Sia $n = pq$ con $p,q$ primi, e sia $e$ un intero coprimo con $\phi(n)$. Si discuta se la funzione\\ $h(m_1,m_2) = m_1^em_2^e$ mod $n$ è resistente alle collisioni.
-\subparagraph{Svolgimento}
+\subparagraph{Svolgimento} Non è resistente. Per dimostrarlo si prende $(m_1',m_2')=(m_2,m_1)$ e si ottiene una collisione con la coppia $(m_1,m_2)$, per la transitività della moltiplicazione.
+
 \pagebreak
+\paragraph{Esercizio 6} Due utenti A e B di un sistema RSA hanno scelto le seguenti chiavi: \texttt{k[pubA] = }$\langle 7,341\rangle$, \texttt{k[privA] = }$\langle43\rangle$, \texttt{k[pubB] = }$\langle5,299\rangle$, \texttt{k[privB] = }$\langle53\rangle$.\\
+A deve mandare a B il seguento messaggio $m$ cifrato e firmato in hash, impiegando RSA e la seguente funzione hash $h$:
+\begin{list}{}{}
+	\item $m$ = numero di matricola del candidato, diviso in 3 blocchi $m_1,m_2,m_3$ di due cifra ciascuno
+	\item $h(m) = (m_1+m_2+m_3)$ mod $100$
+\end{list}
+\begin{enumerate}
+	\item Spiegare se le chiavi di A e B sono scelte in modo consistente con le regole del cifrario (a parte le loro dimensioni), elencando i calcoli eseguiti.
+	\item Indicare esplicitamente tutte le operazioni aritmetiche eseguite da A e B nella trasmissione e verifica del messaggio $m$ e della firma.
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item \begin{list}{}{}
+		\item[A] $n = 341 = pq = 11\cdot31 \Rightarrow \phi(n) = 300$\\
+	MCD$(7, 300) = 1$ OK\\
+	$d = 7^{-1}$ mod $300 = 43$ OK
+	\item[B] $n = 299 = pq = 13\cdot23 \Rightarrow \phi(n) = 264$\\
+	MCD$(5, 264) = 1$ OK\\
+	$d = 5^{-1}$ mod $264 = 53$ OK
+	\end{list}
+	\item $m_1 = 53, m_2 = 02, m_3 = 57$\\
+	\textbf{Firma e Cifratura}\\
+	A calcola $h(m) = 53+2+57$ mod $100 = 14$\\
+	A calcola la firma $f = D(h(m),$ \texttt{k[privA]}$) = 14^{43}$ mod $341 = 214$\\
+	A calcola i crittogrammi $c_i = C(m_i,$ \texttt{k[pubB]}$) \Rightarrow \begin{array}{l}
+	c_1 = m_1^e\textsl{ mod }299 = 53^5\textsl{ mod }299 = 40\\
+	c_2 = m_2^e\textsl{ mod }299 = 2^5\textsl{ mod }299 = 32\\
+	c_3 = m_3^e\textsl{ mod }299 = 57^5\textsl{ mod }299 = 5\\
+	\end{array}$\\
+	\textbf{Decifrazione e verifica}\\
+	B decifra i crittogrammi $m_i = D(c_i$ \texttt{k[privB]}$) \Rightarrow \begin{array}{l}
+	m_1 = c_1^d\textsl{ mod }299 = 40^{53}\textsl{ mod }299 = 53\\
+	m_2 = c_2^d\textsl{ mod }299 = 32^{53}\textsl{ mod }299 = 2\\
+	m_3 = c_3^d\textsl{ mod }299 = 5^{53}\textsl{ mod }299 = 57\\
+	\end{array}$\\
+	B calcola $h(m) = (m_1+m_2+m_3)$ mod $100 = 14$\\
+	B verifica che $14 = C(f,$\texttt{k[pubA]}$) = 214^7$ mod $341 = 14$
+\end{enumerate}
+\paragraph{Esercizio 8}Si presenta un primo tentativo di firma elettronica basato su curve ellittiche. Si ha una curva ellittica globale, un numero primo $p$ e un \textit{generatore} B. Alice sceglie una chiave di firma privata $x_A$ e crea la chiave pubblica di verifica $Y_A = x_AB$. Per firmare il messaggio $M$:
+\begin{list}{}{}
+	\item Alice sceglie un valore $k$
+	\item Alice invia a Bob $M,k$ e la firma $F = M - kx_AB$
+	\item Bob verifica che $M = F + kY_A$
+\end{list}
+\begin{enumerate}
+	\item Dimostrare che questo schema funziona correttamente. Ovvero, che il processo di verifica produce un'uguaglianza quando la firma è valida.
+	\item Dimostrare che lo schema è inaccettabile descrivendo una semplice tecnica per creare la firma falsa di un utente su un qualsiasi messaggio.
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item $M = F + kY_A = M - kx_AB + kY_A = M - \not kx_AB + \not k(x_AB) = M$
+	\item $F = M - kx_AB = M - kY_A$\\
+	$k$ viene scelto da chi firma, e $Y_A$ è la chiave \textbf{pubblica} di chi firma
+\end{enumerate}
+\pagebreak
+\paragraph{Esercizio 9} Si presenta un tentativo di firma elettronica basato su curve ellittiche. Si ha una curva ellittica globale, un numero primo $p$ e un \textit{generatore} B. Alice sceglie una chiave di firma privata $x_A$ e crea la chiave pubblica $Y_A = x_AB$. Per firmare un messaggio $M$:
+\begin{list}{}{}
+	\item Bob sceglie un valore $k$
+	\item Bob invia ad alice $C = kB$
+	\item Alice invia a Bob $M$ e la firma $F = M - x_AC$
+	\item Bob verifica che $M = F + kY_A$
+\end{list}
+\begin{enumerate}
+	\item Dimostrare che questo schema funziona correttamente. Ovvero, che il processo di verifica produce un'uguaglianza quando la firma è valida.
+	\item Dimostrare che falsificare una firma con questo schema è difficile quanto forzare la crittografia a curva ellittica El Gamal
+\end{enumerate}
+\subparagraph{Svolgimento} \begin{enumerate}
+	\item $M = F + kY_A = M - x_AC + kY_A = M - \not x_AkB + \not kx_AB = M$
+	\item Per falsificare la firma bisogna calcolare $x_AC = x_A k B = k Y_A$\\
+	$Y_A$ pubblico, ma $k$ non è noto. Per ricavarlo da $C = kB$ occorre risolvere il logaritmo discreto su curve ellittiche.\\
+	L'alternativa consiste nel calcolare la chiave privata $x_A$ da $Y_A$, per cui occorre di nuovo risolvere il problema del logaritmo discreto su curve ellittiche.
+\end{enumerate}
 \section{Curve Ellittiche}
 \paragraph{Esercizio 1} Il punto P = (4,7) appartiene alla curva ellittica $y^2 = x^3 - 5x + 5$ sui numeri reali?
 \subparagraph{Svolgimento} Verificare se $7^2 = 4^3 - 5\cdot4 + 5 \Leftrightarrow 49 = 64-20+5 \Leftrightarrow 49 = 49$, quindi P appartiene alla curva
