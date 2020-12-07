@@ -514,7 +514,7 @@ Per classificare traffico quattro metodi:
 	\item Flag del pacchetto (DSCP)\\
 	
 	\item classificazione statistica\\
-	Di moda per un certo periodo, utilizzo del machine learning per classificare pacchetti. Si pensava che ML costasse meno rispetto analisi profonda del pacchetto
+	Di moda per un certo periodo, utilizzo del machine learning per classificare pacchetti. Si pensava che ML costasse meno rispetto analisi profonda del pacchetto. Però con ML errore statistico che rischiava, ad esempio, di bloccare traffico che non andava bloccato.
 	\item Deep Packet Inspection\\
 	Analisi del pacchetto internamente. Selective metadata extraction (HTTP URL o User-Agent) necessario per fare monitoring accurato. Lo fa il DPI toolkit senza replicarlo sulle applicazioni di monitoring.
 \end{enumerate}
@@ -522,8 +522,16 @@ Per classificare traffico quattro metodi:
 Major è protocollo di rete, minor è protocollo.\\
 Oggi molti protocolli basati su HTTP e TLS. nDPI supporta riconoscimento protocolli basato su stringhe: DNS query name, HTTP campi host/server, SSL/QUIC SNI\\
 I protocolli sono tantissimi, ma nDPI consente di raggrupparli in categorie, che possono includere migliaia di protocolli ed essere (ri)caricate dinamicamente.
+\begin{center}
+	\includegraphics[scale=0.5]{ndpiarch.png}
+\end{center}
 \paragraph{Come usare} Applicazione cattura il pacchetto e mantiene il flusso di stato, nDPI si aspetta di ricevere il pacchetto.\\
 Ogni dissettore è codificato in un differente \texttt{.c}, ognuno classifica il singolo protocollo, per modularità ed estensibilità.
+\paragraph{Flow Lifecycle} La flowtable spesso esiste già. I flussi sono tenuti ordinati da qualcuno con una quintupletta+1 (VLAN, protocollo, IP/Porta, src/dst)\\
+Applicazione va nella flowtable e cerca pacchetto precedente del flusso. Se esiste, prende l'informazione già memorizzata (cioè fin dove era rimasto nDPI su quel flusso), sennò si crea il nuovo flusso.\\
+Se dopo un tot di iterazioni non riconosce ancora il protocollo lo cataloga come sconosciuto.\\
+Il \textbf{riconoscimento} avviene \textbf{solo all'inizio del flusso}. Flussi mantenuti in hash sulla quintupletta.\\
+Costo computazionale è sia numero pacchetti che numero di flussi
 \paragraph{Traffic Classification Lifecycle} Basato sul tipo di traffico, dissectors applicati sequenzialmente iniziando con quello che più probabilmente matcherà (es HTTP dissector se traffico su TCP/80)\\
 Ogni flusso mantiene lo stato per dissector non-matching per saltarli in futuro.\\
 Analisi dura fino a match o dopo troppi tentativi (8 pacchetti solitamente)\\
