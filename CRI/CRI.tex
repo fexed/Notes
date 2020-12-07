@@ -1920,7 +1920,89 @@ Scopo: consente un ulteriore controllo sulle comunicazioni precedenti per garant
 \end{list}
 \paragraph{SSL} Almeno sicuro quanto il più debole cipher suite supportato. Dal 200 le norme internazionali non pongono alcuna limitazione sui cifrari impiegabili (se non il alcuni paesi).\\
 Consigliato disabilitare i propri sistemi dall'impiego di cifrari ormai notoriamente insicuri e chiavi troppo corte.
+\chapter{Quantum Key Exchange}
+\section{Meccanica Quantistica}
+\paragraph{Sovrapposizione} Proprietà di un sistema quantistico di trovarsi in diversi stati contemporaneamente. Combinazione lineare a coefficienti complessi degli stati possibili. Il modulo del quadrato è la probabilità che misurando si trovi quello stato.
+\paragraph{Decoerenza} La misurazione di un sistema quantistico disturba il sistema: il sistema disturbato perde la sovrapposizione degli stati e collassa in uno stato singolo.
+\paragraph{No-Cloning} Impossibilità di duplicare un sistema conservando nella copia lo stato quantico dell'originale (senza misurarlo).\\
+Impossibile copiare uno stato quantistico non noto.
+\paragraph{Entanglement} Possibilità che due o più elementi si trovino in stati quantici correlati tra loro in modo che, pur se portati a grande distanza, mantengano la correlazione.
+\section{Protcollo BB48} Bennet, Brassard\\
+Scambio di chiave mediante l'invio di fotoni polarizzati. 4 stati di \textbf{polarizzazione} (piano di oscillazione del campo elettrico):
+\begin{enumerate}
+	\item $v$ Polarizzazione verticale $\uparrow$
+	\item $h$ Polarizzazione orizzontale $\rightarrow$
+	\item $+45$ Polarizzazione +45 $\nearrow$
+	\item $-45$ Polarizzazione -45 $\searrow$
+\end{enumerate}
+$\left. \begin{array}{l l}
+	\uparrow 0\\
+	\rightarrow 1
+\end{array}\right\}$ Base di polarizzazione $+$\\
+$\left. \begin{array}{l l}
+	\nearrow 0\\
+	\searrow 1
+\end{array}\right\}$ Base di polarizzazione $\times$\\\\
+Se non so in che base è stato preparato, non posso distinguere tra le quattro polarizzazioni, ma solo tra due possibili polarizzazioni nella stessa base. Se conosco la base, non è un problema, ma se non la conosco è difficile misurare.\\
+Quindi \textbf{non è possibile distinguere fra i 4 casi}, l'\textbf{unica misura possibile è tra due stati ortogonali nella stessa base}.
+\pagebreak
+\begin{center}
+	\includegraphics[scale=0.5]{21.png}
+\end{center}
+\begin{list}{}{}
+	\item OPG: \textbf{One Photon Gun}\\
+	Un fotone alla volta con polarizzazione 90 gradi
+	\item PC: \textbf{Cella di Pokel}\\
+	Impone al fotone una certa polarizzazione tra quelle volute.
+	\item Alice sceglie casualmente (RNG$_1$) la polarizzazione del fotone tramite la cella di Pokel. Il fotone viaggia su fibra ottica.\\
+	Bob dovrà scegliere casualmente (RNG$_2$) la base attraverso il deviatore.
+	\item PBS: Beam Splitter Polarizzante\\
+	Determina la polarizzazione del fotone, risponde correttamente solamente se la base di riferimento dello strumento è la stessa del fotone (quindi scelta da Alice)
+\end{list}
+\paragraph{PBS} Ha un proprio asse di polarizzazione S, con un angolo $\theta$ con l'asse di polarizzazione F del fotone.\\
+Devia il fotone verso una delle due uscite (Assorbimento, Riflessione):
+\begin{list}{}{}
+	\item A: il fotone viene inviato all'uscita A con probabilità $\cos^2\theta$, assume polarizzazione S
+	\item R: il fotone viene inviato a R con probabilità $\sin^2\theta$, e esce con polarizzazione ortogonale a S
+\end{list}
+\begin{list}{}{Angolo:}
+	\item $\theta$ = 0, quindi fotone ha stessa polarizzazione dello strumento, il fotone esce da A con polarizzazione S (= F) ($\cos^2\theta = 1$).\\
+	Scelta la base corretta.
+	\item $\theta$ = 90, il fotone esce da R con polarizzazione ortogonale a S (= F) ($\sin^2\theta = 1$)\\
+	Scelta la base corretta.
+	\item $\theta$ = $\pm$45 $\cos^2\theta = \sin^2\theta$\\
+	$\Rightarrow$ il fotone esce con pari probabilità da A o R, e la polarizzazione cambia (S o S$^\perp$), perdendo la polarizzazione iniziale F.
+\end{list}
+Fenomeno quantistico: la lettura attraverso il PBS ha distrutto lo stato quantistico precedente.
+\begin{center}
+	\includegraphics[scale=0.3]{22.png}
+\end{center}
+Tutti i bit incerti (i 50\%) verranno ignorati per la costruzione della chiave. Useremo solo i bit misurati correttamente
+\subsection{Passi del protocollo}
+Sul canale standard si comunicano non i bit, ma si scambiano le basi: Bob dice le basi che ha usato, Alice risponde con le basi corrette. Dove hanno scelto la stessa base la comunicazione è avvenuta correttamente, dove hanno scelto basi diverse scarteranno i bit. Sceglieranno basi concordi più o meno la metà delle volte.
+\paragraph{Protocollo} \begin{enumerate}
+	\item Alice invia una sequenza $S_A$ sul canale quantistico.\\$S_A$ = sequenza di bit codificati nelle polarizzazioni dei fotoni)
+	\item Bob interpreta $S_A$ con le sue basi, che ha scelto casualmente: ottiene una sequenza $S_B$.\\
+	Coincideranno sicuramente su circa metà bit, dove le basi coincidono.
+	\item Bob, sul canale standard, comunica ad Alice non i bit ma soltanto la base (al cui interno, il bit può essere 0 o 1). Alice indica a Bob quali basi sono comuni alle sue.\\
+	Adesso entrambi sanno come sono state fatte preparazione e misura.
+	\item[$\Rightarrow$] In assenza di interferenze di Eve, Alice e Bob possiedono una sottosequenza $S_A' = S_B'$ identica formata dai bit codificati da Alice e decodificati da Bob con basi comuni.\\
+	$|S_A'|=|S_B'| \simeq \frac{|S_A|}{2}$
+	\item Alice e Bob sacrificano una porzione $S_A''$, $S_B''$ di $S_A'$, $S_B'$ in posizioni prestabilite, comunicandole sul canale standard (si passano quindi \textit{alcuni} bit di $S_A'$,$S_B'$)\\
+	La comunicazione sul canale standard può essere fatta anche chiaro ma deve essere almeno autenticata.\\
+	A meno di errori sperimentali, se Eve non c'è stato dovrebbero essere sequenze identiche. Se c'è stato Eve, potrebbero non essere coincidenti: Eve ha rotto lo stato quantistico misurandone lo stato.\\
+	Se $S_A''\neq S_B''$, allora Alice e Bob interrompono la comunicazione.\\
+	Altrimenti usano $S_A' - S_A'' = S_B' - S_B''$
+\end{enumerate}
+%TODO esempio
 
+%TODO esempio intrusione Eve
+Eve deve fare una scelta di basi.
+\paragraph{QBER} Alice e Bob stabiliscono anche il \textbf{Quantum Bit Error Rate}: percentuale prevedibile di bit errati a causa degli errori sperimentiali/rumore\ldots\\
+Nel confronto fra $S_A''$ e $S_B''$, se l'errore è $> QBER$ allora ci sono state interferenze di Eve e la chiave viene scartata. Se l'errore è $\leq$ QBER, allora concludono che non ci sono state intromissioni, ripuliscono gli errori con tecniche di correzione ricostruendo una chiave corretta in tutti i bit e usano le sequenze rimaste (identiche) come chiavi.
+\paragraph{Attacco pericoloso} Se Eve ne intercetta solo pochi di bit, l'attacco è pericoloso perché potrebbe provocare un errore inferiore a QBER e quindi l'intromissione potrebbe venire scambiata per errore sperimentale. Eve conoscerebbe qualche bit della chiave.\\
+Nell'uso di questi protocolli non si usa mai infatti $S', S''$ ma una sorta di amplificazione di privacy prendendo la sequenza comune (di cui Eve può avere qualche bit) e usando come chiave l'immagine hash crittografica della funzione.
+%TODO protocollo completo
 \chapter{Esercizi}
 \section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
