@@ -1678,4 +1678,58 @@ $x\in A$? Voglio rispondere in modo costruttivo: valuto $g(0), g(1), g(2)\ldots$
 Mi fermo sempre? Si, perché $g$ strettamente crescente, quindi $g(0) < g(1) < g(2)\ldots$ e sono certo di trovare una $g(n) > x$ per il \textbf{buon ordinamento di $\mathbb{N}$} ($\forall\:z\in\mathbb{N}$ ho che l'insieme $[0, z] \cap \mathbb{N}$ è finito), quindi il processo di enumerazione si ferma.\\
 Se $g(n-1) = x$ allora $\chi_A(x) := 1$, altrimenti $\chi_A(x) := 0$\\
 $\chi_A$ è totale? Si, un certo numero può essere $m = x$ o $m \neq x$, non ho altri casi. Quindi prendo $g(n-1) = m$\ldots Calcolabile? Si $\Rightarrow$ A è ricorsivo
+\section{Complessità}
+\paragraph{SAT} $F = \bigwedge_i C_i$ formula in CNF (Conjuctive Normal Form): un certo numero di clausole di OR unite tra loro con AND. Quindi $C_i = \bigvee_j l_{ij}$\\
+Con SAT ci chiediamo se esiste un assegnamento che rende vera la formula. Vediamo come SAT$\leq_f$ 3-SAT, dove imponiamo che le clausole abbiano esattamente 3 letterali. Partiamo da una formula con un numero arbitrario di letterali per finire in una formula con esattamente 3 letterali per clausola. Dividiamo per casi:
+\begin{list}{}{}
+	\item $C_i$ ha un letterale $, C_i = l$. Posso aggiungere $z_1, z_2$ nuove variabili\\
+	$\Rightarrow C_i' = (l\vee z_1 \vee z_2)\wedge(l\vee \overline{z_1} \vee z_2) \wedge (l\vee z_1 \vee \overline{z_2}) \wedge (l\vee \overline{z_1} \vee \overline{z_2})$
+	\item $C_i$ ha 2 letterali $, C_i = l_1 \vee l_2$ possiamo aggiungere una nuova variabile e fare in modo che indipendentemente dal valore di verità della nuova variabile l'espressione di $C_i$ non cambi\\
+	$\Rightarrow C_i' = (l_1 \vee l_2 \vee z) \wedge (l_1 \vee l_2 \vee \overline{z})$
+	\item $C_i$ ha 3 letterali $\Rightarrow C_i' = C_i$
+	\item $C_i$ ha $m$ letterali. Aggiungo $m - 3$ letterali $z_i, \ldots, z_{m-3}$\\
+	$\Rightarrow C_i' = (l_{i1} \vee l_{i2} \vee z_i) \wedge (l_{i3} \vee \overline{z_1} \vee z_3) \wedge \ldots \wedge (l_{i4} \vee \overline{z_2} \vee z_3) \wedge \ldots \wedge (l_{i m-2} \vee \overline{z_{m-4}} \vee z_{m-3}) \wedge (l_{i m-1} \vee l_{i m-2} \vee \overline{z_{m-3}})$ avendo cura di mettere un letterale e successivamente il suo negato, così che la formula mantenga l'espressione.
+\end{list}
+	Quanti and e variabili ho aggiunto? Sono in numero ragionevole, sta in logspace? Si. L'algoritmo che fa questa riduzione, che implementa F, è adatto ai nostri scopi di riduzione? Si, è una riduzione corretta da SAT a 3-SAT.\\
+	SAT è NP-Completo, quindi anche 3-SAT lo è
+\paragraph{2-SAT} Sta in $\mathscr{P}$\\
+$A \Rightarrow B \equiv \overline{A} \vee B$ perché l'unico caso in cui l'implicazione è falsa è quando il vero implica il falso.\\Quindi la formula in 2-SAT è composta da congiunti di clausole con 2 letterali $F = \bigwedge_{i=1}^m (l_{i1} \vee l_{i2})$ su $n$ variabili\\
+Partendo da una formula in CNF mi definisco un grafo $G=(V,E)$ con $V = \{$tutte variabili e loro negazioni$\}$ = $\{x_1\ldots x_n\}\cup\{\overline{x_1}\ldots\overline{x_n}\}$\\
+$(\overline{l_{i1}}, l_{i2}) \in E$ $\forall\:i$ che fa le veci di $\overline{A}\vee B$, quindi $l_{i1} \Rightarrow l_{i2}$\\
+$(\overline{l_{i2}}, l_{i1}) \in E$ $\forall\:i$, quindi $l_{i2} \Rightarrow l_{i1}$
+\begin{center}
+	\includegraphics[scale=0.5]{2.png}\\
+	\includegraphics[scale=0.5]{3.png}\\
+	$x_i \Rightarrow x_2$\\
+	$x_2 \Rightarrow x_1$
+\end{center}
+Abbiamo definito un grafo orientato a partire dall'espressione logica. 2SAT sta in P, ma per passarci da SAT servono $2^n$ nuove clausole, rendendo la riduzione esponenziale.\\
+Se esiste un arco $l\rightarrow \overline{l}$ e non esiste $\overline{l} \rightarrow l $, allora $(l = tt \Rightarrow \overline{l} = tt$ assurdo$) \Rightarrow l = ff$\\
+Se esiste $\overline{l} \rightarrow l $ e non esiste $l\rightarrow \overline{l}$ allora $(\overline{l} = tt \Rightarrow l = tt$ assurdo$) \Rightarrow l = tt$\\
+Nel caso ci siano entrambi gli archi, sono incompatibili quindi non esiste nessun assegnamento a $l$, quindi la formula originale è insoddisfacibile.\\
+Da questo si deduce l'algoritmo\\
+Se nella stessa componente totalmente connessa di $G$ trovo sia $l$ che $\overline{l}$, allora $F$ non è soddisfacibile.\\
+Qual è la complessità della ricerca di un componenti totalmente connesse di un grafo diretto? Kosaraju in $O(|E| + |V|)$
+\paragraph{Maxcut $\leq$ Qubo} \begin{list}{}{}
+	\item Maxcut: ho $G(V,E)$ indiretto voglio trovare taglio $A\cup B = V$ che massimizza il numero di archi da $A$ a $B$.
+	\item Quadratic Unconstraint Binary Optimization: assegnamento a variabili binarie $x_1,\ldots,x_n$ che massimizzi una formula del tipo $\textsl{max}\sum_{i,j} (b_ix_i + a_{ij}x_ix_j)$
+\end{list}
+Massimizzare distanza oggetti connessi da archi: se $x$ oggetto in A e $x$ connesso a $y$ allora voglio evitare di prendere $x$, così da evitare di prendere anche $y$. Ricorda lo xor.
+%TODO tabella di verità
+Algebra di Bool $x_i$ xor $x_j = x_i + x_j - 2x_ix_j$\\
+$\textsl{max}\sum_{(i,j)\in E}(x_i + x_j - 2x_ix_j)$
+\begin{list}{}{}
+	\item $x_1 = 1$ allora $i \in A$
+	\item $x_i = 0$ allora $i \in B$
+\end{list}
+\paragraph{CRICCA $\leq$ NodeCover}
+\begin{list}{}{}
+	\item CRICCA: dato un $G=(V,E)$ e $k$, ci chiediamo se esiste CRICCA con almeno $k$ vertici in $G$ (chiamando la CRICCA $K$)
+	\item NodeCover (Cover): sottoinsieme vertici $C\subseteq V$ tali che per ogni arco $(u,v)\in E$ di G o $u\in C$ o $v\in C$
+\end{list}
+Si definisce un altro grafo a partire da $G$ che è il grafo complementare: stesso insieme di vertici ma insieme degli archi è il complementare dell'insieme dato (cioè, ho un arco $(u,v)\in \overline{E} \Leftrightarrow (u,v)\not\in E$)\\
+Esiste una CRICCA con $k$ nodi in $G \Leftrightarrow$ esiste un NodeCover con al più $n-k$ nodi in $G'$ con $n = |V|$\\
+Si osserva che se un certo arco sta negli archi che coinvolgono gli elementi della cricca, che è sottoinsieme di $E$, significa che quell'arco non può stare in $\overline{E}$ cioè $(u,v)\in E_K\subseteq E_G \Rightarrow (u,v)\not\in \overline{E}$\\
+Quindi $(u,v)\not\in E \Rightarrow (u,v)\in \overline{E}$ allora $\overline{(u\in V_K \wedge v \in V_K)}$ quindi o $u \in V - V_K$ o $v in V - V_K$ con $|V-V_K|\leq n-k$\\
+Devo trovare che in $G'$ i nodi rimasti sono collegati tra loro (quindi CRICCA).
 \end{document}
