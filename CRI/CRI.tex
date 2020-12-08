@@ -1929,36 +1929,39 @@ Impossibile copiare uno stato quantistico non noto.
 \paragraph{Entanglement} Possibilità che due o più elementi si trovino in stati quantici correlati tra loro in modo che, pur se portati a grande distanza, mantengano la correlazione.
 \section{Protcollo BB48} Bennet, Brassard\\
 Scambio di chiave mediante l'invio di fotoni polarizzati. 4 stati di \textbf{polarizzazione} (piano di oscillazione del campo elettrico):
+\begin{multicols}{2}
 \begin{enumerate}
 	\item $v$ Polarizzazione verticale $\uparrow$
 	\item $h$ Polarizzazione orizzontale $\rightarrow$
-	\item $+45$ Polarizzazione +45 $\nearrow$
-	\item $-45$ Polarizzazione -45 $\searrow$
+	\item $+45$ Polarizzazione +45 gradi $\nearrow$
+	\item $-45$ Polarizzazione -45 gradi $\searrow$
 \end{enumerate}
+\columnbreak
 $\left. \begin{array}{l l}
-	\uparrow 0\\
-	\rightarrow 1
-\end{array}\right\}$ Base di polarizzazione $+$\\
+	\uparrow&0\\
+	\rightarrow&1
+\end{array}\right\}$ Base di polarizzazione $+$\\\\\\
 $\left. \begin{array}{l l}
-	\nearrow 0\\
-	\searrow 1
-\end{array}\right\}$ Base di polarizzazione $\times$\\\\
-Se non so in che base è stato preparato, non posso distinguere tra le quattro polarizzazioni, ma solo tra due possibili polarizzazioni nella stessa base. Se conosco la base, non è un problema, ma se non la conosco è difficile misurare.\\
+	\nearrow&0\\
+	\searrow&1
+\end{array}\right\}$ Base di polarizzazione $\times$
+\end{multicols}
+Se non so in che base è stato polarizzato il fotone, non posso distinguere tra le quattro polarizzazioni, ma solo tra due possibili polarizzazioni nella stessa base. Se conosco la base, non è un problema, ma se non la conosco è difficile misurare.\\
 Quindi \textbf{non è possibile distinguere fra i 4 casi}, l'\textbf{unica misura possibile è tra due stati ortogonali nella stessa base}.
 \pagebreak
 \begin{center}
 	\includegraphics[scale=0.5]{21.png}
 \end{center}
-\begin{list}{}{}
+\begin{list}{}{Componenti}
 	\item OPG: \textbf{One Photon Gun}\\
 	Un fotone alla volta con polarizzazione 90 gradi
 	\item PC: \textbf{Cella di Pokel}\\
 	Impone al fotone una certa polarizzazione tra quelle volute.
-	\item Alice sceglie casualmente (RNG$_1$) la polarizzazione del fotone tramite la cella di Pokel. Il fotone viaggia su fibra ottica.\\
-	Bob dovrà scegliere casualmente (RNG$_2$) la base attraverso il deviatore.
-	\item PBS: Beam Splitter Polarizzante\\
+	\item PBS: \textbf{Beam Splitter Polarizzante}\\
 	Determina la polarizzazione del fotone, risponde correttamente solamente se la base di riferimento dello strumento è la stessa del fotone (quindi scelta da Alice)
 \end{list}
+Alice sceglie casualmente (RNG$_1$) la polarizzazione del fotone tramite la cella di Pokel. Il fotone viaggia su fibra ottica.\\
+	Bob dovrà scegliere casualmente (RNG$_2$) la base attraverso il deviatore.
 \paragraph{PBS} Ha un proprio asse di polarizzazione S, con un angolo $\theta$ con l'asse di polarizzazione F del fotone.\\
 Devia il fotone verso una delle due uscite (Assorbimento, Riflessione):
 \begin{list}{}{}
@@ -1994,15 +1997,81 @@ Sul canale standard si comunicano non i bit, ma si scambiano le basi: Bob dice l
 	Se $S_A''\neq S_B''$, allora Alice e Bob interrompono la comunicazione.\\
 	Altrimenti usano $S_A' - S_A'' = S_B' - S_B''$
 \end{enumerate}
-%TODO esempio
-
-%TODO esempio intrusione Eve
-Eve deve fare una scelta di basi.
+\paragraph{Esempio} Esempio di comunicazione e scelta\\
+Alice
+\begin{tabular}{r c c c c c c c c}
+	$S_A$&1&0&1&1&1&0&0&\ldots\\
+	Basi di A&$+$&$\times$&$+$&$\times$&$\times$&$+$&$\times$&\ldots\\
+	Fotoni di A&$\rightarrow$&$\nearrow$&$\rightarrow$&$\searrow$&$\searrow$&$\uparrow$&$\nearrow$&\ldots
+\end{tabular}\\
+Bob
+\begin{tabular}{r c c c c c c c c}
+	Basi di B&$+$&$\times$&$+$&$+$&$+$&$\times$&$\times$&\ldots\\
+	Fotoni di B&$\rightarrow$&$\nearrow$&$\rightarrow$&$\uparrow$&$\rightarrow$&$\searrow$&$\nearrow$&\ldots\\
+	$S_B$&\textbf{1}&\textbf{0}&\textbf{1}&0&1&1&\textbf{0}&\ldots
+\end{tabular}\\
+Produrranno la sequenza che corrisponde alle basi scelte coincidenti (evidenziate in B) $S_A'=S_B' =$ 1010\ldots\\\\
+In caso di interferenza di Eve, deve fare una scelta di basi.\\
+Alice
+\begin{tabular}{r c c c c c c c c}
+	$S_A$&1&0&1&1&1&0&0&\ldots\\
+	Basi di A&$+$&$\times$&$+$&$\times$&$\times$&$+$&$\times$&\ldots\\
+	Fotoni di A&$\rightarrow$&$\nearrow$&$\rightarrow$&$\searrow$&$\searrow$&$\uparrow$&$\nearrow$&\ldots
+\end{tabular}\\
+Eve
+\begin{tabular}{r c c c c c c c c}
+	Basi di E&$+$&$+$&$+$&$\times$&$+$&$\times$&$+$&\ldots\\
+	Fotoni di E&$\rightarrow$&$\rightarrow$&$\rightarrow$&$\searrow$&$\uparrow$&$\nearrow$&$\rightarrow$&\ldots\\
+	$S_E$&1&1&1&1&0&0&1&\ldots
+\end{tabular}\\Che porterà Bob a produrre\\
+Bob
+\begin{tabular}{r c c c c c c c c}
+	Basi di B&$+$&$\times$&$+$&$+$&$+$&$\times$&$\times$&\ldots\\
+	Fotoni di B&$\rightarrow$&$\searrow$&$\rightarrow$&$\uparrow$&$\uparrow$&$\nearrow$&$\searrow$&\ldots\\
+	$S_B$&\textbf{1}&\textbf{1}&\textbf{1}&0&0&0&\textbf{1}&\ldots\\
+	Variazione & & $\Uparrow$
+\end{tabular}
 \paragraph{QBER} Alice e Bob stabiliscono anche il \textbf{Quantum Bit Error Rate}: percentuale prevedibile di bit errati a causa degli errori sperimentiali/rumore\ldots\\
 Nel confronto fra $S_A''$ e $S_B''$, se l'errore è $> QBER$ allora ci sono state interferenze di Eve e la chiave viene scartata. Se l'errore è $\leq$ QBER, allora concludono che non ci sono state intromissioni, ripuliscono gli errori con tecniche di correzione ricostruendo una chiave corretta in tutti i bit e usano le sequenze rimaste (identiche) come chiavi.
 \paragraph{Attacco pericoloso} Se Eve ne intercetta solo pochi di bit, l'attacco è pericoloso perché potrebbe provocare un errore inferiore a QBER e quindi l'intromissione potrebbe venire scambiata per errore sperimentale. Eve conoscerebbe qualche bit della chiave.\\
 Nell'uso di questi protocolli non si usa mai infatti $S', S''$ ma una sorta di amplificazione di privacy prendendo la sequenza comune (di cui Eve può avere qualche bit) e usando come chiave l'immagine hash crittografica della funzione.
-%TODO protocollo completo
+\subsection{Protocollo}
+\textbf{Canale Quantistico}\begin{lstlisting}
+SA[1,n] = sequenza iniziale di bit da cui verra estratta la chiave, rappresentata
+con uno codice a correzione di errori
+
+for i=1 to n
+	Alice:	sceglie una base a caso
+		codifica SA[i]
+		invia il fotone a Bob
+	Eve (se presente):	intercetta il fotone
+				lo misura con una sua base
+				lo invia a Bob
+				calcola SE[i]
+			(questo anche solo per qualche i)
+	Bob:	sceglie una base a caso
+		interpreta il fotone ricevuto
+		costruisce SB[i]
+\end{lstlisting}
+\textbf{Canale Standard} \begin{lstlisting}
+QBER = percentuale di errori dovuti al rumore
+h = funzione hash crittografica
+Alice e Bob:
+	1. Estraggono SA1 e SB1 corrispondenti alle basi
+	comuni.
+	Estraggono due sottosequenze di SA1 e SB1 in
+	posizioni concordate, ottenendo SA2, SB2
+	
+	2. Si scambiano SA2 e SB2. Se la percentuale di
+	bit diversi e maggiore di QBER, allora STOP
+	
+	3. Altrimenti, calcolano SA1-SA2 e SB1-SB2 e li
+	decodificano con il codice di correzione di errori.
+	Ottengono una sequenza comune SC
+	(Attenzione: Eve potrebbe conoscere alcuni bit di SC)
+	
+	4. Alice e Bob calcolano k = h(SC) e usano k come chiave.
+\end{lstlisting}
 \chapter{Esercizi}
 \section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
