@@ -538,18 +538,26 @@ Analisi dura fino a match o dopo troppi tentativi (8 pacchetti solitamente)\\
 Flusso è bidirezionale e corrisponde alla quintupletta IP+prot+porta+src+dest(+vlan)\ldots\\
 Riconoscimento avviene solamente ad inizio del flusso.\\
 nDPI funziona con i pacchetti IP.
-%TODO latenza di rete e latenza applicativa
 \paragraph{Latenza applicativa di rete} Calcolata utilizzando il TCP durante l'handshaking, monitorando con un probe in un punto della rete ma non si può dire se cho messo pià temopio andata che ritorno.\\
 Con sottrazioni trovo latenza rete e applicativa.
+\begin{multicols}{2}
+	\includegraphics[scale=0.5]{latency1.png}\\
+	\includegraphics[scale=0.5]{latency2.png}
+\end{multicols}
 \paragraph{Throughput} Metrica misura quantità dati inviati su un link in un certo istante.\\
 Quant'è il tempo? Tipicamente al secondo ma la durata del monitoring dev'essere maggiore, si guarda al secondo ma la durata dell'esperimento dev'essere maggiore. Throughout dice  indicazione idea di quanto è la banda disponibile.\\
 Misura quantità di dati inviata in istante di tempo, \textbf{conservativa della banda disponibile} cioè misurando questo ho idea di quello che faccio effettivamente passare ma non della banda reale perché parte della banda la sto usando. Quindi \textbf{il throughput non è la banda}. Il throughput tipicamente cambia, la banda no. Inoltre è una misura orientata all'applicazione.
 \paragraph{Goodput} Nei pacchetti c'è tanto overhead: ethernet, header IP, UDP\ldots fino al payload che è la \textbf{parte interessante}. Con il \textbf{goodput} si vede quanti dati effettivamente si spostano. Invece di misurare i byte inviati sul filo, vado a vedere i byte inviati di contenuto. Quando scarico un file di 1Mb ho mandato sul filo molto più di un 1Mb: header di ogni pacchetto, ACK per la connessione, RDY e FIN\ldots\\
 Goodput mostra quanti dei dati transitati sono effettivamente usati per la connessione.
-\paragraph{Latenza} Tempo che serve ad un pacchetto per andare \textbf{da sorgente a destinazione}, \textbf{monodirezionale}.
+\paragraph{Latenza} Tempo che serve ad un pacchetto per andare \textbf{da sorgente a destinazione}, \textbf{monodirezionale}.\\
+RTT (round trip time) è tempo di andata \textit{e ritorno}. La latenza non è RTT/2, ma la somma della latenza src2dst e latenza dst2src è l'RTT.
 \paragraph{Jitter} Come cambia la latenza nel tempo: varianza dell'intrapacket delay su link monodirezionale.\\
-Finché jitter è inferiore alla durata temporale del buffer lato ricezione, la comunicazione sarà ideale. Se io tengo buffer grande (1-2s) la voce la sento bene risolvendo il jitter, ma ho aumentata la latenza.
-\paragraph{Bandwith} LA banda è quella misura che stima più o meno quello che dovrebbe passare sul cavo. Viene calcolata: 
+Finché jitter è inferiore alla durata temporale del buffer lato ricezione, la comunicazione sarà ideale. Se io tengo buffer grande (1-2s) la voce la sento bene risolvendo il jitter, ma ho aumentata la latenza.\\
+Questo perché i ritardi introdotti dalla rete non sono costanti.
+\begin{center}
+	\includegraphics[scale=0.75]{jitter.png}
+\end{center}
+\paragraph{Bandwith} La banda è quella misura che stima più o meno quello che dovrebbe passare sul cavo. Viene calcolata: 
 \begin{list}{}{}
 	\item TC intervallo di misura, tipicamente 1s
 	\item BC burst committed, n max bit/s che il network accetta di trasferire nel TC
