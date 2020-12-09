@@ -568,10 +568,10 @@ Questo perché i ritardi introdotti dalla rete non sono costanti.
 \paragraph{Misure End-To-End} Nelle misure devo mettere in conto il tempo della mia applicazione per elaborare ed anche il ritardo di rete.\\
 Performance di rete $\neq$ Performance app.\\
 Bisogna fare attenzione rispetto alle misure per link, ad esempio perché traffico fa routing diverso andata-ritorno qudini rtt/2=latenza è in generale sbagliato. misure endtoend sono più vicine all'utente, si rapporta al server remoto non alla misura link link. Quella link link serve a noi per fare troubleshooting.\\
-EndToEnd e LinkLink sono in relazione, endtoend dà se c'è problema che si scorpora sul link
+EndToEnd e LinkLink sono in relazione, endtoend dà se c'è problema che si scorpora sul link. EndtoEnd da informazione dal punto di vista utente, link dà info sul singolo link utiler per troubleshooting.
 \paragraph{Approcci di monitoraggio} Sono multipli. fin'ora è una misura di tipo passivo: si cattura traffico, senza influenzare niente.\\
 Nella misura attiva inietto del traffico e vedo la reazione della rete, ad es. un ping.\\
-Ad es traceroute calcola latenza e da dove passa un certo tipo di traffico.\\
+Ad es traceroute calcola latenza e da dove passa un certo tipo di traffico. Usa un trucco sul TTL: manda pacchetti che tornano indietro a causa del TTL basso.\\
 \paragraph{Inline} Inline significa quando monitoriamo se tramite snmp connetto allo switch con lo stesso filo che snmp sta monitorando: \textbf{inline}.\\
 Offline invece è monitoring tramite altra rete: reti sdoppiate, una per monitorare e una per i servizi. Vincolata dalla struttura della rete, a volte non possibile.\\\\
 Quindi approcci attivi/passivi, inline/offline.
@@ -612,6 +612,7 @@ Negli RRD c'erano dei valori $\alpha$, $\beta$, $\gamma$ che avevamo detto di la
 	\item \textbf{Serie temporale}: serie di punti ordinati temporalmente
 	\item \textbf{Osservazione}: valore numerico osservato (nella realtà) in un momento specifico
 	\item \textbf{Previsione}: stima di un valore atteso (che non sappiamo ancora) in un momento specifico (\textit{alle 12 quanto traffico farò?})
+	\item \textbf{Anomalia} quando la \textbf{previsione} scosta dall'\textbf{osservazione}
 	\item \textbf{Forecast error}: differenza positiva/negativa nell'osservazione rispetto alla previsione. Solitamente l'errore è riportato come quadrato per avere sempre numero positivo.
 	\item \textbf{SSE}: la somma degli errori quadrati (\textbf{sum of squared errors}) di una serie \texttt{sum((osservazione$_i$ - previsione$_i$)$^2$)}\\
 	Idealmente deve essere 0, o comunque basso
@@ -633,6 +634,11 @@ $\overline{y}_x$ è chiamato livello $l_x$
 Trend $b$ su una serie temporale, fra due punti è $y_x - y_{x-1}$
 $b_x$ = $\beta\cdot(l_x - l_{x-1})$\ldots\\
 Con $\beta$ non prendo solo la media ma tengo conto anche del trend, così da avere previsioni più accurate. Quindi alla previsione si aggiunge $b_x$
+\begin{list}{}{}
+	\item Livello $l_x = \alpha\cdot y_x + (1-\alpha)\cdot(l_{x-1}+b_{x-1})$
+	\item Trend $b_x = \beta\cdot(l_x - l_{x-1}) + (a-\beta)\cdot b_{x-1}$
+	\item Previsione $\overline{y}_{x+1} = l_x + b_x$
+\end{list}
 \begin{center}
 	\includegraphics[scale=0.7]{doubexpsmo.png}
 \end{center}
@@ -642,7 +648,17 @@ Nel double exponential smoothing manca il concetto di \textbf{stagione}: quando 
 Lunghezza della stagione: numero dei data point in una stagione.\\
 Componente stagionale: deviazione da level+trend del double exponential che si ripete all'interno della stagione.\\
 $\gamma$ fornisce il concetto di stagionalità. Serve il modulo della durata della stagione, perché è in loop. Inoltre con H-W posso \textbf{predire un numero arbitrario di punti}. valori più grandi danno previsione meno conservativa. $\alpha, \beta, \gamma$ si assegnano tramite il \textbf{fitting}.
-\subparagraph{Deviazione in H-W} $d_t = \gamma\cdot |y_t - \overline{y}_t| + (1 - \gamma)\cdot d_{t-m}$\\
+\begin{list}{}{}
+	\item Livello $l_x = \alpha\cdot y_x + (1-\alpha)\cdot(l_{x-1} + b_{x-1})$
+	\item Trend $b_x = \beta\cdot (l_x - l_{x-1}) + (1-\beta)\cdot b_{x-1}$
+	\item Stagionale $s_x = \gamma\cdot (y_x - l_x) + (1-\gamma)\cdot s_{x-L}$
+	\item Previsione $\overline{y}_{x+m} = l_x + m\cdot b_x + s_{x - L + 1 + ((m-1)\textsl{ mod }L)}$
+\end{list}
+Per prevedere un numero arbitrario $m$ di punti.\\
+$\alpha,\beta$ e $\gamma$ sono i parametri di adattamento per l'algoritmo, con $0<\alpha,\beta,\gamma < 1$. Valori più grandi rendono l'algoritmo in grado di adattarsi più rapidamente e fanno in modo che le previsioni riflettano di più i cambiamenti recenti nella time serie. Valori più piccoli, invece, rendono l'algoritmo più lento all'adattamento, rendendo più importanti i valori passati nell'history.\\
+I valori per $\alpha,\beta$ e $\gamma$ possono essere determinati provando a determinare la più piccola SSE (Sum of Squared Errors) in un processo iterativo chiamato fitting (simile al ML).
+\subparagraph{Deviazione in H-W} La deviazione può essere identificata quando l'osservazione cade al di fuori delle fasce di confidenza minima e massima per un dato punto.\\
+$d_t = \gamma\cdot |y_t - \overline{y}_t| + (1 - \gamma)\cdot d_{t-m}$\\
 Fasce di confidenza con $\delta$ tra 2 e 3:
 \begin{list}{}{}
 	\item Superiore: $\overline{y}_t - \delta\cdot d_{t-m}$
@@ -651,7 +667,7 @@ Fasce di confidenza con $\delta$ tra 2 e 3:
 
 \chapter{Remote Monitoring}
 \textbf{Analisi rete remota rispetto dove siamo noi}.\\
-Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (edge), inoltre è anche "forzato" dalle parti wireless che sta diventando predominante. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
+Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (\textbf{edge computing}), inoltre è anche "forzato" dalle parti wireless che stanno diventando predominanti. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
 Diventa necessario \ldots Inote tipi traffici che nascono e muoiono in periferia senza passare dal core.\\
 Il problema è andare a spillare il traffico remoto, vedere il traffico che fluisce in questa rete. Nn sempre banale perché magari necessario modificare la rete. Quindi attenzione alla topologia, e attenzione ai tap di rete usati percHé hanno limitazioni importanti.\\
 Anche le funzionalità di monitoraggio degli apparati di rete comuni sono limitate, spesso il massimo che posso vedere sono i byte totali, ip assegnati\ldots\\
@@ -659,7 +675,8 @@ Spesso i costi per sistemi di monitoring sono importanti.\\
 Misura in remoto tramite snmp nasce subito dopo mibv2. con snmp misuro quanto ma non posso fare misure pià complicate, e non posso assegnare soglie e in base mandare allarme ma misurare in continuazione e fare i nostri calcolo.\\
 MIB RMON (MIB SNMP), risolve problema monitoraggio remoto. Consente di gestire disservizi. Inserisce un minimo di logica per generare allarmi.
 \section{RMON} Cosa fà? Primo passaggio da monitoraggio snmp a monitoraggio a pacchetti.\\
-Vedo traffico di rete remoto e metto una sonda remota.
+Vedo traffico di rete remoto e metto una sonda remota.\\
+\textbf{RMON è un MIB SNMP}.
 \subparagraph{RMON vs SNMP} SNMP controlla e configura un probe, solitamente con GUI. SNMP esegue la \textbf{richiesta periodica} (polling). L'azione è eseguita dal manager.\\
 RMON sposta un po' della logica nell'apparato, che raccoglie da sé stat e impostare allarmi direttamente sull'apparato.
 \begin{list}{}{\textbf{Gruppi RMON}}
@@ -669,19 +686,36 @@ RMON sposta un po' della logica nell'apparato, che raccoglie da sé stat e impos
 	\item Host: a livello di host quali traffici per un certo host, es. byte in out per certo host.
 	\item HostTopN: per i top N host quanto traffico fanno, quale porta più occupata. Se c'è connesso un PC è il colpevole, ma se ce ne sono N non mi è chiaro. Con HostTopN analizzo traffico della porta e trovo N computer che fanno più traffico\ldots
 	\item Matrix: mostra comunicazioni tra indirizzi
+	\item Filters: per filtrare il traffico di rete
+	\item Packet capture: per catturare un pacchetto una volta che è passato attraverso il canale
+	\item Events: per generare eventi sotto certe condizioni
+\end{list}
+\paragraph{Statistiche ethernet RMON}
+\begin{list}{}{Informazioni di basso livello}
+	\item Pacchetti: unicast, multicast e broadcast.
+	\item Eventi di drop: pacchetti droppati per sovraccarico linea/porta
+	\item Frammenti: quanti frammenti sono passati. Ci sono attacchi basati sui frammenti.
+	\item Jabbers: pacchetti ricevuti più lunghi di 1518 ottetti e con errori di allineamento
+	\item Oversized packets: pacchetti più lunghi di 1518 ottetti ma altrimenti ben formati
 \end{list}
 C'è anche una formula per capire quanto è usata una porta di rete (100x((packets x 160)+(octets x 8)))/(portspeed x timeinsec)
 \paragraph{Allarmi} Impostare soglie su contatori di RMON, soglie di due tipi: rising e falling. Quando troppo alta (rising) o bassa (falling) posso effettuare operazioni.\\
 Es troppo traffico se utilizzo sup a 80\% manda allarme.
 \paragraph{Case Study} \ldots RMON va a mappare ogni quanto misuro dati, valori di soglia
-\section{RTFM} Real-Time Flow Measurement\\
-Cambio di architettura.
+\paragraph{NBAR} Statistiche di traffico stile RMON
+\section{RTFM} Real-Time Flow Measurement
+\begin{multicols}{2}
+Cambio di architettura per andare oltre l'architettura SNMP
 \begin{list}{}{}
 	\item Meter: colui che misura, il contatore. Và messo dove passa il traffico
 	\item Reader: parla col meter e tira fuori i suoi dati. Deve essere "vicino" al meter, ma non è dentro
 	\item Manager: gestisce configurazione di meter e reader e che chiede i dati. Implementato in SNMP
 	\item Applicazione: fa i grafici, configura il manager\ldots
 \end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{rtfm.png}
+\end{center}
+\end{multicols}
 \section{Monitoraggio a flussi}
 Nel caso di SNMP agent (dove passa traffico) e manager (query all'agent). Nel caso di un problema, agent avverte manager tramite trap (cambio di stato, o superamento soglia in caso di RMON).\\
 Agent snmp non è libero di monitorare tutto, si limita al MIB.\\
@@ -689,12 +723,12 @@ Nei flussi prendo traffico di rete, lo metto insieme in base a caratt (es protoc
 Non configuro il flusso. Nel caso di NetFlow la device stessa dove passa il traffico di rete (es router) prende e spara verso collezionatore (manager) le informazioni da monitorare. In questo caso quindi i flussi sono prodotti ed emessi verso colui che deve riceverli.\\
 No concetto allarme ne abilità per agents di fare alcunché: tutta la logica è nel collezionatore.\\
 Strumentazione del probe è fatta offline.\\
-Probe sono posizionati dove fluisce il traffico.\\
+Probe sono posizionati dove fluisce il traffico, tipicamente nel router.\\
 \textbf{Cosa si misura?} Dove viene scambiato il traffico organizzato per gruppi autonomi, IP\ldots\\
 A livello applicativo quanto traffico in base a porta o protocollo\\
-Quali servizi, livelli di traffico\ldots\\
-Con i flussi non si riesce a misurare traffico nonIP, informazioni livello 2 (stato delle interfacce), traffico flitrato (firewall), statistiche per-link, statistiche per applicazioni.
-\paragraph{flusso}: insieme di pacchetti accumunati da una stessa quintupletta. Flussi sia unidirezionali che bidirezionali. Calcolati dal probe (era: agent) che qguarda traffico che passa attraverso e lo misura. Flusso creato quando vedo il primo pacchetto del flusso, probe sta fermo.\\
+Quali servizi, livelli di traffico\ldots anche rintracciare virus di rete fino agli host.\\
+Con i flussi non si riesce a misurare traffico nonIP, informazioni livello 2 (stato delle interfacce), traffico flitrato (firewall), statistiche per-link (livello di utilizzo, congestione, perdita\ldots), statistiche per applicazioni (es latenza, risposte positive/negative, errori di protocollo).
+\paragraph{Flusso}: insieme di pacchetti accumunati da una stessa quintupletta. Flussi sia unidirezionali che bidirezionali. Calcolati dal probe (era: agent) che guarda traffico che passa attraverso e lo misura. Flusso creato quando vedo il primo pacchetto del flusso, probe sta fermo.\\
 Massima durata flusso regardless lo stato della connessione: termino flusso o quando dura troppo o quando non c'è traffico per un po' di tempo.\\
 Contenuti del flusso: peers (src e dst), contatori (packets, bytes, tempo), info routing (sistema autonomo, netmask, interfaces).\\
 Possono essere uni e bidirezionali. Due flussi unidirezionali opposti sono equiv a uno bidirezionale. Flussi bid possono contenere altre info come rtt o comportamento tcp.\\
