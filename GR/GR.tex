@@ -782,12 +782,23 @@ C'è anche problema se si monitora rete abbastanza grande. Si possono mettere pi
 	\item Router occupato: 367GB traffico al giorno, 548000000 pacchetti al giorno, cioè 5900000 flussi al giorno
 	\item %TODO
 \end{list}
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.5]{netflow.png}
+\end{center}
+\columnbreak
 \paragraph{NetFlow} Flussi unidirezionali fino a v8, bidirezionali dal v9. La più comune è v5, l'ultima è v9.\\
 Analisi solo del traffico inbound e IP (non su tutte le piattaforme). IPv4 unicast e multicast. IPv6 solo su v9. La v9 è aperta, cioè integrabile con moduli personalizzati.\\
 Protocollo aperto definito da Cisco e supportato su IOS e CatIOS e su altre piattaforme Cisco.\\
 Ogni versione ha un formato di pacchetti: fino alla 8 era chiuso, dalla v9 è dinamico e aperto a estensioni.\\
 Numeri di sequenza: v1 non ha numeri di sequenza, fino alla 8 numeri di sequenza per flusso e dalla 9 numeri di sequenza per pacchetto (non flusso)\\
 Qualche versione è specifica per alcune piattaforme di Cisco.
+\end{multicols}
+\begin{center}
+	\includegraphics[scale=0.75]{netflowarch.png}\\
+	\includegraphics[scale=0.75]{netflowarch2.png}
+\end{center}
+\begin{multicols}{2}
 \paragraph{Usare i flussi} Cosa c'è dentro un flusso? Questa domanda risponde anche a cosa ci faccio con essi.
 \begin{list}{}{Nella parte di chiave: la quintupletta}
 	\item Protocollo
@@ -801,7 +812,19 @@ Qualche versione è specifica per alcune piattaforme di Cisco.
 	\item Contatori: di byte e di paccketti
 	\item Tempo: sysuptime start/end
 \end{list}
-\paragraph{Nascita e morte di un flusso} Siamo a livello 3. Il traffico deve entrare e uscire dal router, quindi interf ingr e usc: il traffico è esaminato, cioè passato al probe. Posso mettere nel pc di casa un software per sniffing, ma nel router i pacchetti passano attraverso di lui. Probe prende dati e li raggruppa, li gestisce. Si tiene una cache dei flussi attivi. Appena c'è pacchetto non conosciuto la popola.\\Al suo interno ha sistema ispezione pacchetti. In cache c'è una sorta di hashtable, come chiave ho ip porte\ldots, come valore ho \textit{almeno} i byte e i pacchetti.\\
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.6]{useflows.png}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.75]{flowcache.png}
+\end{center}
+\columnbreak
+\paragraph{Nascita e morte di un flusso} Siamo a livello 3. Il traffico deve entrare e uscire dal router, quindi interf ingr e usc: il traffico è esaminato, cioè passato al probe. Posso mettere nel pc di casa un software per sniffing, ma nel router i pacchetti passano attraverso di lui. Probe prende dati e li raggruppa, li gestisce. Si tiene una cache dei flussi attivi. Appena c'è pacchetto non conosciuto la popola.\\Al suo interno ha sistema ispezione pacchetti. In cache c'è una sorta di hashtable, come chiave ho ip porte\ldots, come valore ho \textit{almeno} i byte e i pacchetti.
+\end{multicols}
+
 Terminano quando:
 \begin{list}{}{}
 	\item La comunicazione di rete termina (es: FIN)
