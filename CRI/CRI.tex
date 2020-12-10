@@ -2072,6 +2072,42 @@ Alice e Bob:
 	
 	4. Alice e Bob calcolano k = h(SC) e usano k come chiave.
 \end{lstlisting}
+\chapter{Bitcoin} 2008: "Bitcoin: a peer to peer Electronic Cash System", Satoshi Nakamoto. Nel 2009 il "blocco genesi" (50 BTC) e la prima transazione (10 BTC). Nel 2010, la prima transazione commerciale.
+\paragraph{Indirizzo} Utente A:
+\begin{list}{}{}
+	\item \texttt{k$_A$[pub]} Si trasforma in indirizzo.\\
+	\textbf{Identificatore di A}, serve per i nuovi pagamenti ad A e per controllare la firma di A.
+	\item \texttt{k$_A$[prv]} Per \textbf{firmare le transazioni}.
+\end{list}
+Tutto dalla crittografia su curve ellittiche.
+\paragraph{Wallet} \textbf{Insieme delle credenziali} che attestano la proprietà in BTC di un utente (il portafoglio). Diverse coppie indirizzo/chiave privata associata, oltre al software per la gestione.
+\paragraph{Transazione} Una transazione è un movimento di BTC da un utente ad un altro.\\
+Semplificando, Alice vuole mandare $x$ BTC a Bob, cioè Alice prende un messaggio $m = \langle$ adr$_A$, $x$, adr$_B\rangle$, esegue l'hash $h(m) =$ SHA-256$(m)$ e lo firma $f = D(h, k_A[priv])$.\\
+Fatto questo, Alice diffonde in broadcast sulla rete $\langle m,f\rangle$\\\\
+Mancando un sistema centralizzato, il destinatario aspetta che la transazione venga convalidata. Cioè aspetta che il sistema distribuito raggiunga un consenso su quali sono le transazioni valide. Questo richiede intorno ai 10 minuti.\\
+Anche dopo i 10 minuti, quando se la transazione è valida viene aggiunta ad un blocco della blockchain, è bene aspettare ulteriore tempo perché al nuovo blocco ne vengano aggiunti altri per essere sicuri di essere sul ramo della blockchain ufficiale.\\\
+Alcuni utenti possono aggiungere blocchi in punti diversi, ma una sola catena è quella ufficiale ed è quella più lunga (con più numero di transazioni collegate su cui quindi è stato raggiunto il consenso). Le transazioni nelle altre catene (catene orfane) sono considerate non valide: chi ha pagato è come se non lo avesse fatto, e può rifare la transazione facendo in modo che finisca sulla blockchain ufficiale.\\\\
+Quindi 10m per attendere che il blocco sia aggiunto alla blockchain, e bisogna attendere che altri 6 blocchi vengano aggiunti al blocco della mia transazione. Quindi circa un'ora.
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+I bitcoin in input devono finire tutti in output. Un po' come se Bob usasse una banconota da 50 BTC, ne dà 0.5 BTC ad Alice e "si manda" 49.5 BTC di resto (a sé stesso o comunque ad un indirizzo di cui possiede la chiave privata).\\
+Il requisito è che la \textbf{somma degli input $\geq$ somma degli output}. Se è $>$, la differenza non va a chi ha pagato, ma viene trattenuta dal nodo computazionale che aggiunge il blocco alla blockchain.
+\begin{center}
+	\includegraphics[scale=0.33]{24.png}
+\end{center}
+\begin{list}{}{}
+		\item $Tr_i$: la catena di transazioni da convalidare, con una transazione finale dove mi prendo il premio e la somma di tutte le differenze input-output
+		\item $h_{i-1}$: hash del contenuto del blocco precedente
+		\item $n_i$: \textbf{nonce}, è un intero ma non lo si conosce
+	\end{list}
+	Di tutte queste informazioni viene fatto l'hash SHA-256 in modo che $h_i$ sia minore di una certa soglia fissata dal sistema. Quindi\\ \textbf{devo trovare $n_i\:|\: h_i =$ SHA-256($n_i,h_{i-1},\{Tr_i\}) <$ soglia}.\\
+Non ci sono meccanismi, và eseguita una ricerca enumerativa. La proof of work è l'$n_i$ che produce una $h_i$ con $t$ zeri iniziali. Il parametro $t$ è fissato dal sistema ed è calibrato in base alla potenza computazionale dei nodi attivi, in modo tale che in media la ricerca di $n_i$ richieda circa 10 minuti.\\
+\textbf{Trovare} il nonce è \textbf{difficile}, \textbf{verificarlo} è \textbf{facile}.
+\paragraph{Mining} Un \textbf{miner} è un \textbf{nodo che valida le transazioni e aggiunge i blocchi alla blockchain}.\\
+Ogni miner prepara il suo blocco e cerca di aggiungerlo. Chi risolve il nonce e lo diffonde per broadcast a tutti i nodi. I nodi lo controllano, controllano la validità delle transazioni ed esprimono il loro consenso cercando di creare nuovi blocchi da attaccare a questo. Si privilegia il blocco con il maggior numero di transazioni: ci possono essere più rami ma alcuni potrebbero diventare rami morti e solo quello con più transazioni diventa ufficiale.
+\paragraph{Fallimento} All'inizio tutti potevano contribuire minando, con la nascita dei mining pool (consorzi di tantissimo hardware progettato ad hoc per mining) questo non è più possibile e solo pochi minano e guadagnano dal mining.
+\paragraph{Attacchi} Attacco del 51\%: devono avere maggior potenze computazionale del mining pool più potente.
 \chapter{Esercizi}
 \section{Complessità e randomizzazione}
 \paragraph{Esercizio 1} Un sistema crittografico impiega chiavi private di 46 bit. Per decifrare un messaggio $m$ data la
