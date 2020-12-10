@@ -955,9 +955,9 @@ Si può solamente fare billing su tempo e durata.
 \begin{center}
 	\includegraphics[scale=0.75]{bitmap.png}
 \end{center}
-\paragraph{Compressed Bitmaps} Array di bit solitamente di lunghezza predefinita. Utile per specifici domini, possono essere sparse. Es. [0,12,23,500,510,522,10000] maggiorparte a 0 e solo 7 bit a 1. Inefficiente. Si possono comprimere contando il numero di ripetizioni es. 1(1), 11(0), 1(1), 10(0), 1(1), 476(0)\ldots che significa 1 bit a 1, 11 bit a 0\ldots\\
-Molte librerie come WAH, EWAH, COMPAX\ldots la maggiorparte non permettono di settare un bit arbitrario.\\
-Se si settano bit solo in avanti si può costruire la bitmap a runtime con memoria minima.\\
+\paragraph{Compressed Bitmaps} Una bitmap è un array di bit solitamente di lunghezza predefinita. Utile per specifici domini, possono essere sparse. Es. [0,12,23,500,510,522,10000] maggiorparte a 0 e solo 7 bit a 1. \textbf{Inefficiente}.\\
+Si possono comprimere contando il numero di ripetizioni es. 1(1), 11(0), 1(1), 10(0), 1(1), 476(0)\ldots che significa 1 bit a 1, 11 bit a 0\ldots\\
+Molte librerie come WAH, EWAH, COMPAX\ldots la maggiorparte non permettono di settare un bit arbitrario "indietro", ma solo in avanti. Se si settano bit solo in avanti si può costruire la bitmap a runtime con memoria minima.\\
 Vantaggio: una volta compressa si possono fare AND, OR, NOT senza fare unroll (cioè decomprimere). Una delle più popolari è \texttt{roaringbitmap.org}
 \subparagraph{Compressed Bitmap Indexes} 
 \begin{center}
@@ -968,14 +968,14 @@ Dammi tutte le righe che hanno valore 1: $C_0 = 1$ AND $C_1 = 0$ AND $C_2 = 0$ A
 Estremamente veloci, molto più delle bitree su dimensioni notevoli. Altra proprietà: per trovare indirizzi nelle netmask (tutte colonne che fanno parte della maschera settati come voglio), oppure mettere in AND due righe per prendere quelle che si intersecano su valori che voglio.
 \paragraph{Bloom Filters} I bloom filters sono strutture dati probabilistiche che rispondono alla domanda: elemento appartiene a set? Risponde con una certa probabilità.\\
 Si può rispondere a questa domanda con altre strutture dati, come hash o bitmap molto lunghe, al prezzo di un costo molto maggiore perché in quei casi si analizzano dati raw.\\
-Sono array di bit di lunghezza $m$, settando i bit usando almeno due funzioni hash indipendenti e uniformemente distribuite $h_1()$ e $h_2()$. Se voglio aggiungere $\alpha$, faccio $h_1(\alpha)$ e setto i bit che vengono fuori, poi $h_2(\alpha)$ e setto i bit. Per vedere se $\beta$ è presente, faccio le due hash e vedo se i due bit sono stati settati, allora \textbf{certa probabilità} che $\beta$ appartiene, se uno o nessuno dei due è settato allora sicuramente non appartiene.\\\\
+Sono array di bit di lunghezza $m$, settando i bit usando almeno due funzioni hash indipendenti e uniformemente distribuite $h_1()$ e $h_2()$. Se voglio aggiungere $\alpha$, faccio $h_1(\alpha)$ e setto i bit che vengono fuori, poi $h_2(\alpha)$ e setto i bit. Per vedere se $\beta$ è presente, faccio le due hash e vedo se i due bit sono stati settati, allora \textbf{certa probabilità} che $\beta$ appartiene, se uno o nessuno dei due \textbf{non} è settato allora sicuramente non appartiene.\\\\
 La probabilità non è uno svantaggio, perché permette di fare ricerche molto veloci. Essendo probabilistica \textbf{non posso avere la certezza}.
 \begin{center}
 	\includegraphics[scale=0.85]{bloomfilters.png}
 \end{center}
 Con i \textbf{counting bloom filters} rimpiazzo il vettore di bit con un intero per sapere quanti bit sono settati o quante volte è stato settato un bit. Più memoria, ma si possono rimuovere elementi (con i bloom non si può).\\
 Buoni hash sono murmur, nfv e md5.
-\paragraph{Trie} Pronunciato try, (pun su \textit{re\underline{trie}val and tree}). Albero non basato su comparazioni, ogni nodo ha etichetta.
+\paragraph{Trie} Pronunciato try, (pun su \textit{re\underline{trie}val} e \textit{tree}). Albero non basato su comparazioni, ogni nodo ha etichetta.
 \begin{center}
 	\includegraphics[scale=0.5]{tries.png}
 \end{center}
