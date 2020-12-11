@@ -869,9 +869,10 @@ Flusso contiene:
 	\item \textbf{pad2} padding
  \end{list}
 \end{multicols}
-\paragraph{Pacchetto NetFlow} In SNMP dati letti tramite polling (eccettuate le trap). Cambi di stato SNMP sono pochi, agent SNMP non fa attesa attiva ma è S.O. stesso a comunicare a SNMP quando cambia qualcosa. Es: Inotify (\texttt{wikipedia.org/wiki/Inotify}) o netlink (\texttt{wikipedia.org/wiki/Netlink}) su Linux.\\
+\paragraph{Pacchetto NetFlow} In SNMP dati letti tramite polling (eccettuate le trap). Cambi di stato SNMP sono pochi, agent SNMP non fa attesa attiva ma è S.O. stesso a comunicare a SNMP quando cambia qualcosa. Es: Inotify (\texttt{wikipedia.org/wiki/Inotify}, notifica cambiamenti a file/cartelle) o netlink (\texttt{wikipedia.org/wiki/Netlink}, notifica cambiamenti su rete e interfacce) su Linux.\\
 In NetFlow però siamo obbligati ad analizzare attivamente ogni pacchetto che passa. Inoltre buffering limitato, quindi pacchetti vanno gestiti subito. Inoltre la quantità di flussi da esportare dipende molto dal tipo di traffico. Può esserci un solo flusso su 10 gigabit, ma posso avere decide di flussi su 7 megabit.\\
-Il traffico conteggiato da NetFlow è inferiore da quello che verrebbe contato da SNMP.
+Il traffico conteggiato da NetFlow è inferiore da quello che verrebbe contato da SNMP. SNMP ne cattura di più in caso ci sia traffico multicast/broadcast. Inoltre SNMP è livello 2 (comprende il payload del livello frame) ma NetFlow è livello 3, non conta il traffico di livello frame. Ad esempio ARP non lo vedo in NetFlow perché è di livello 2.\\
+\textbf{NetFlow conta solo il traffico che passa \textit{attraverso} il router, cioè che viene instradato.}
 \paragraph{Perché serve NetFlow v9?} La v5 ha solo IPv4, poche informazioni (pacchetti e byte). Ogni volta che si deve aggiungere qualcosa bisogna rifare il formato, aggiornare software\ldots\\
 In v9 risolvono problema della flessibilità: flussi mandati con un template che indica i campi. Inoltre supporta il livello 2, traffico VLAN e altri tipi di incapuslamento come MPLS, oltre che IPv6.
 \subparagraph{Template} Mandato prima dei flussi, così da specificare al collezionatore in che modo interpretare i dati ricevuti. Specifica una maniera di mappare le info relative al flusso.\\
@@ -886,6 +887,7 @@ Può mischiare le informazioni sui flussi nel singolo record.\\
 Posso inserire nuovi campi oltre counting di pacchetti e byte: contenuto, velocità\ldots\\
 Si aggiorna \textit{ogni tanto}, all'esportazione del flusso (tipicamente scadenza timeout)\\
 Salta 24Byte perché parte da livello 3.
+\paragraph{Message Broker} Prende messaggi e li smista a seconda di caratteristiche a chi si è sottoscritto, volendo anche riformandoli in formati diversi.
 \subparagraph{Configurazione Cisco IOS} Configurato su ogni interfaccia, specificando versione e IP del collezionatore. Specifico sampling rate, durata massima e aggregazione (\\
 Si abilitano flussi basandoli sull'interfaccia.
 \subparagraph{Configurazione Juniper JunOS} Si appoggia al firewall, quando pacchetti attraversano router (eventualmente non filtrante). Router divisi in data/switching plane (hw) e control plane (sw). Sorta di loopback interno per analisi traffico, per portarlo da data a control plane. Juniper usa questa interfaccia per portare pacchetti in parte di controllo, limitata a 7000 pacchetti al secondo per evitare sovraccarico. Nello spazio utente c'è il probe che calcola i flussi ed esporta.
