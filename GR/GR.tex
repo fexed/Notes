@@ -927,7 +927,7 @@ Con sflow vedo parte del traffico ma con \textbf{più informazioni estratte dal 
 Si riesce a sapere, sugli AP, anche user e pwd. Info riguardo al traffico come gira nella rete, grazie al contesto.\\\\
 Solitamente NetFlow su router e sFlow sugli switch.
 \paragraph{Agent} Implementato in hw. Pacchetto ogni $x$, arricchito con info di contesto.\\\\
-sFlow sugli switch, RMON su switch compatibini L2/L3, NetFlow sui router $\rightarrow$ soluzioni di analisi del traffico: sorveglianza continua sulla rete\ldots
+sFlow sugli switch, RMON su switch compatibili L2/L3, NetFlow sui router $\rightarrow$ soluzioni di analisi del traffico: sorveglianza continua sulla rete\ldots
 \begin{list}{}{}
 	\item \textbf{Ambiente}\\sFlow switch, ma anche su router\\
 	NetFlow router
@@ -947,11 +947,21 @@ Importante per:
 	\item Supportato da tutti i dispositivi di rete (esclusi dispositivi a basso livello)
 \end{list}
 \begin{center}
-	\includegraphics[scale=0.75]{radius.png}
+	\includegraphics[scale=0.5]{radius.png}
 \end{center}
 Il \textbf{client} è nella \textbf{centrale dell'operatore}. Client comunica con il server che mantiene info sugli utenti e risponderà si/no per accettare l'autenticazione.\\
-Dopo accesso c'è l'accounting request start: da ora navighi e calcolo informazioni per fare "il conto". A fine si manda richiesta di stop e in base a quello si calcola  costo.\\
+Dopo accesso c'è l'accounting request start: da ora navighi e calcolo informazioni per fare "il conto". A fine si manda richiesta di stop e in base a quello si calcola  costo. Quindi c'è comunicazione costante col server RADIUS, in modo da poter interrompere comunicazione se superate eventuali soglie (e non scoprire il superamento solo al logout).\\
 Si può solamente fare billing su tempo e durata.
+\paragraph{Pacchetti} \begin{center}
+	\includegraphics[scale=0.75]{radiuspkt.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Code}: byte contenente il comando/risposta RADIUS
+	\item \textbf{Identifier}: byte che identifica il comando/risposta RADIUS
+	\item \textbf{Length}: lunghezza del pacchetto
+	\item \textbf{Authenticator}: balore usato per autenticare la risposta del server RADIUS
+	\item \textbf{Attributer}: attributi del comando/risposta
+\end{list}
 \chapter{Data Structures}
 \paragraph{Bitmap} Array di bit. Lunghezza arbitraria e aggiunta/rimozione in O(1) con operazioni su bit semplici. Memoria in base ai bit usati
 \begin{center}
@@ -1003,6 +1013,7 @@ Adesso monitoraggio \textbf{unificato}: sempre parte classica (NetFlow, SNMP, IP
 \section{eBPF}
 macchina virtuale semplice eseguita nel kernel linux\\
 codice eseguito nel kernel space
+\paragraph{Kprobe} Kernel Probe. Permette di collegare ad un qualsiasi indirizzo di memoria d'istruzione del kernel un custom hook, cioè codice utente eseguito quando viene eseguita quell'istruzione, con visibilità completa di quella funzione kernel.
 \begin{center}
 	\includegraphics[scale=0.75]{ebf.png}
 \end{center}
