@@ -296,6 +296,9 @@ Può essere usato per leggere una o più variabili. Basato su UDP, quindi dimens
 \textbf{errorIndex} indica quale delle variabili ha avuto problema. Es \texttt{noSuchName@1} indica che la prima variabile non esiste. Posso fare get con più richieste, quindi errore può essere su altra variabile (es \texttt{noSuchName@3} cioè non esiste il terzo object identifier richiesto ma indica il primo indice fallito, quindi le altre due precedenti esistono ma non vengono ritornati i valori).
 \paragraph{GetNext} Richiesta che ritorna l'object identifier successivo a quello chiesto.\\
 Non legge istance identifier richiesto ma ritorna il prossimo istance identifier rispetto all'ordine lessicografico. usata per fare discovery delle strutture e leggere le tabelle.\\Nella getNext, nosuchname significa che è finito il MIB (non esiste il successivo). Molto implementation depended, alcuni dopo l'ultimo ritornano il primo invece che noSuchName.
+\paragraph{GetBulk} Un po' l'unione di una Get e una GetNext.\\
+\texttt{non-repeaters}: di tutti gli OID specificati, indica quanti di essi sono da Get e non da GetNext (i primi \texttt{non-repeaters})\\
+\texttt{max-repetitions}: indica il numero di OID dove bisogna fare GetNext (cioè \texttt{max-repetitions} GetNext sui rimanenti)
 
 \paragraph{Set} Scrivere un valore\\
 Equivalente in sostanza alla get ma scrivo. Atomica: più valori sono scritti contemporanemante, quindi o vanno bene tutti o non scrivo niente.\\
@@ -369,7 +372,10 @@ Usato snmpv2 invece che v1 perché aveva problemi strutturali: il primo sono i c
 \paragraph{Obiettivi} Bisogna risolvere problemi di sicurezza soprattutto per la \texttt{Set}. Inoltre bisogna fare il design di un'architettura a lungo termine.\\
 Supportare implementazioni sia complesse che semplici (\textbf{scalabilità}).\\
 Il tutto \textbf{rimanendo il più semplici possibile}. Nella realtà non è stato così, e la diffusione è ancora molto limitata con la maggior parte delle reti che continuano ad usare v1 e v2.
-\paragraph{Architettura} Tanti componenti, rimovibili e intercambiabili. Vuoti se una certa implementazione non la supporta, rimovibili a seconda di cambiamenti tecnologici o di implementazione.\\
+\paragraph{Architettura} Tanti componenti, rimovibili e intercambiabili. Vuoti se una certa implementazione non la supporta, rimovibili a seconda di cambiamenti tecnologici o di implementazione.
+\begin{center}
+	\includegraphics[scale=0.75]{snmp3.png}
+\end{center}
 Supporta vari tipi di protocollo per lo scambio di messaggi e per il sistema di sicurezza (comunità, utente, "\textit{altro}")
 \paragraph{Caratteristiche più importanti} 
 \begin{enumerate}
@@ -382,6 +388,26 @@ Supporta vari tipi di protocollo per lo scambio di messaggi e per il sistema di 
 	Il ricevente conosce l'orario del messaggio ricevuto, se il messaggio ricevuto è nell'intervallo di validità e \textit{più giovane} dell'ultimo messaggio valido, allora è processato e l'orologio viene aggiornato. Quindi, ad inizio comunicazione gli orologi vengono sincronizzati.
 	\item \textbf{Protezione dallo sniffing}: si crittano i dati
 \end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.75]{snmp3arch.png}
+\end{center}
+\paragraph{Messaggi} Possedendo, tra le altre cose, il supporto all'encryption, SNMPv3 ha un formato dei messaggi completamente diverso dalle versioni precedenti. Può essere un problema, in particolare per chi scrive i device: la complessità per implementarlo è sicuramente diversa.
+\begin{center}
+	\includegraphics[scale=0.75]{snmp3msg.png}
+\end{center}
+\paragraph{Proxy Agents} Permettono ai manager di accedere ad altri agent non accessibili direttamente (es dietro firewall) o accessibili mediante protocolli non IP (es IPX)
+\begin{center}
+	\includegraphics[scale=0.75]{snmp3proxyagents.png}
+\end{center}
+Le applicazioni di management devono, solitamente, selezionare le opportune stringhe di comunità o contesto, così da abilitare il proxy a raggiungere gli agenti (non c'è trasparenza). I proxy sono importanti per l'implementazione dei firewall o per conversioni tra diverse versioni di SNMP.
+\paragraph{Agent estensibili} Il master agent è un agent vuoto, senza variabili all'interno. Il subagent è l'agent stesso, che implementa il MIB.
+\begin{center}
+	\includegraphics[scale=0.75]{snmp3agentestensibili.png}\\
+	\includegraphics[scale=0.6]{snmp3agentestensibili2.png}
+\end{center}
+SubAgent fa la open, a cui il Master risponde con la response.\\SubAgent poi comunica, con la IndexAllocate, quali OID implementa. Il Master vedrà se nessun altro ha richiesto gli stessi OID, in caso risponde al SubAgent, che risponderà registrandosi e in caso con altre capabilities.\\
+Quindi \textbf{ogni subagent specifica al master cosa implementa}.\\
+ASN1 finisce a SNMP entity, nella parte successiva c'è il protocollo AgentX, molto più semplice su TCP.
 \chapter{Rete Cellulare}
 Quando telefono si connette a rete mobile il gateway lo autentica.\\
 GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella. Le informazioni sono ricavate e comunicate dal provider e dal GTPC, non dal telefono. Ad esempio, il numero di cellulare è dato dal protocollo, non è memorizzato sulla SIM.\\
@@ -455,6 +481,9 @@ Bridge è mettere assieme due interfacce di rete\\
 Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
 Attraverso bridge-mib per la topologia di rete. Importante anche per inquadrare che impatto può avere un'allarme sul sistema. Così so sia quali sono i nodi principali ma anche l'impatto di qualche problema: se cade una macchina che collega tante altre macchine, cadono tutte, mentre se cade no nodo marginale il problema è più contenuto.
 \chapter{Cattura}
+\begin{center}
+	\includegraphics[scale=0.75]{cattura.png}
+\end{center}
 Quando cattura traffico intervengo sul traffico e me lo copio verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
 Gli sniffer necessiterebbero di diritti su
 \paragraph{Capabilities} Quando uno è SU ha diritti eccessivi rispetto a ciò che deve fare, quindi le \textbf{capabilities} sono le possibilità di spezzare i diritti di amministrazione in categorie: non c'è bisogno di essere root che fa veramente veramente tutto perché se ne può abusare. Quindi il concetto di root è spacchettato in varie possibilità: configurazione del MAC address, Net Admin\ldots\\
@@ -470,6 +499,41 @@ In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orari
 \paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
 \paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
 \paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
+\paragraph{Offset} Offset del pacchetto all'interno di Wireshark sarebbe il byte (esempio offset 12 $\rightarrow$ byte 12)
+\paragraph{BPF} Un esempio di filtro BPF compilato (TCP, in questo caso) \begin{lstlisting}
+(000) ldh      [12]
+(001) jeq      #0x86dd          jt 2 jf 7
+(002) ldb      [20]
+(003) jeq      #0x6             jt 10 jf 4
+(004) jeq      #0x2c            jt 5 jf 11
+(005) ldb      [54]
+(006) jeq      #0x6             jt 10 jf 11
+(007) jeq      #0x800           jt 8 jf 11
+(008) ldb      [23]
+(009) jeq      #0x6             jt 10 jf 11
+(010) ret      #262144
+(011) ret      #0
+\end{lstlisting}
+Di seguito un esempio UDP \begin{lstlisting}
+(000) ldh      [12]
+(001) jeq      #0x86dd          jt 2 jf 7
+(002) ldb      [20]
+(003) jeq      #0x11            jt 10 jf 4
+(004) jeq      #0x2c            jt 5 jf 11
+(005) ldb      [54]
+(006) jeq      #0x11            jt 10 jf 11
+(007) jeq      #0x800           jt 8 jf 11
+(008) ldb      [23]
+(009) jeq      #0x11            jt 10 jf 11
+(010) ret      #262144
+(011) ret      #0
+\end{lstlisting}
+\begin{list}{}{}
+	\item \texttt{jeq} Jump if equal
+	\item \texttt{jt}, \texttt{jf} Jump if true, jump if false
+	\item \texttt{ldh} Load header
+\end{list}
+Inoltre, su Linux sniffare i pacchetti equivale ad aprire un socket.
 \chapter{Monitoring}
 monitoring requirements: non è chiaro cosa fare alla rilevazione, ma è chiaro che bisogna fare qualcosa.
 \chapter{Benchmarking per dispositivi interconnessi}
