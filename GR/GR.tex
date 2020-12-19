@@ -419,7 +419,8 @@ Traffico è incapsulato dentro il pacchetto GTP.
 \section{RRDtool Database}
 I db relaz hanno tabelle connesse con relazioni\ldots con inserimento, cancellazione e aggiornamento. Questo non è abbastanza. Inoltre su uso questo modo la tabella cresce all'infinito, durante il monitoraggio\\
 Poi DB relaz non efficienti nel fare aggregazione nel tempo dei valori. Inoltre, i dati più vecchi diventano via via meno importanti.
-\paragraph{Scalabilità} Per calcolare la scalabilità, si può fare un semplice programma che esegue la computazione necessaria (ad esempio popolare il database RRD con $n$ dati). Prima e dopo la computazione si fa una \texttt{getTimeofDay()} e si fa la differenza tra i due tempi. Si calcola così quanto tempo ci impiega. 
+\paragraph{Scalabilità} Per calcolare la scalabilità, si può fare un semplice programma che esegue la computazione necessaria (ad esempio popolare il database RRD con $n$ dati). Prima e dopo la computazione si fa una \texttt{getTimeofDay()} e si fa la differenza tra i due tempi. Si calcola così quanto tempo ci impiega.\\
+Se per esempio il programma è troppo lento a gestire $n$ dati/host/agent, si possono fare $k$ thread e ognuno gestisce $n/k$ elementi.
 \paragraph{RRDtool} Padre di tanti DB a sede temporale. RR=Round Robin. RRD è un \textbf{file}, in un formato particolare:
 \begin{list}{}{}
 	\item \textbf{Static Header} che indica cosa contiene, ultimo timestamp di aggiunta e ultimo dato aggiunto\ldots
@@ -536,7 +537,32 @@ Di seguito un esempio UDP \begin{lstlisting}
 \end{list}
 Inoltre, su Linux sniffare i pacchetti equivale ad aprire un socket.
 \chapter{Monitoring}
-monitoring requirements: non è chiaro cosa fare alla rilevazione, ma è chiaro che bisogna fare qualcosa.
+\section{Monitorin requirements}
+\paragraph{Garantire la disponibilità dei servizi di rete} Bisogna mantenere l'attività del servizio anche in caso di variazioni tecnologiche o di carico. Inoltre bisogna impostare risposte automatiche o semiautomatiche in caso di anomalie: ad esempio modifiche alla configurazione in tempo reale, o attivazione di componenti ridondanti.
+\paragraph{Reazioni dinamiche a fronte di cambiamenti sulla rete o nell'ambiente} Applicare e far rispettare politiche, adattando il sistema (banda, memoria, processi\ldots) in base ai cambiamenti o al carico.
+\paragraph{Controllo della rete} Collezione e compressione delle informazioni rilevanti sulla rete, mantenimento dei database di configurazione della rete, centralizzazione del controllo sulle periferiche (central management console, dove possibile) e integrazione delle procedure di manutenzione su ambienti eterogenei.
+\paragraph{Migliorare le condizioni di lavoro degli amministratori di sistema/rete} Standardizzando e migliorando gli strumenti, identificando e implementando la graduale automazione delle funzioni di manutenzione, integrando gli strumenti nelle esistenti sequenze di operazione.
+\paragraph{Progresso attraverso la standardizzazione} Transizione delle esistenti soluzioni (spesso proprietarie) verso ambienti standardizzati.
+\section{Vari attori, varie metriche}
+\paragraph{Utenti diversi} Utenti diversi forniscono e richiedono servizi diversi (ad esempio, utenti finali vs service provider)
+\paragraph{Utenti finali} Monitoraggio delle performance delle applicazioni, verificare se le attuali condizioni di rete consentono di accedere al servizio, verificare se condizioni povere di rete sono attribuibili ad un attacco o se sono normali\ldots
+\paragraph{Service provider} Monitorare i servizi e l'attività di rete, monitorare le violazioni dei contratti, rilevazione dei problemi di rete, riprogettazione della rete e dei servizi in base al feedback utente e risultati del monitoraggio, produrre previsioni per pianificare il futuro carico di rete quindi implementando estensioni prima che sia troppo tardi\ldots
+\section{Applicazioni di analisi del traffico}
+\subsection{Richieste}
+\begin{list}{}{}
+	\item \textbf{Cosa}: misurare volume e rateo per applicazione, host e conversazione\\
+	\textbf{Perché}: identifica la crescita e occorrenze anomale
+	\item \textbf{Cosa}: raggruppare il traffico in gruppi logici (compagnia, classi di utenti\ldots), geografici (regione\ldots), subnet\ldots\\
+	\textbf{Perché}: associa il traffico con entità di business e trend di crescita per gruppo (dati aggregati non sono molto utili qua, bisogna fare analisi a livello utente)
+	\item \textbf{Cosa}: filtri ed eccezioni in base al traffico di rete\\
+	\textbf{Perché}: filtri associabili a notifiche nel caso si verifichino occorrenze anomale sulla rete
+	\item \textbf{Cosa}: time-periods personalizzabili, per supportare il reporting nei giorni lavorativi\\
+	\textbf{Perché}: analizzare i dati in base al calendario aiuta a identificare i problemi (es: DHCP che finisce gli indirizzi ogni lunedì tra le 9 e le 10 del mattino, ma il problema sparisce nel resto della settimana)
+\end{list}
+\subsection{Ulteriori problemi} \paragraph{I dispositivi di rete hanno capacità di misurazione molto limitate} Prima di tutto deve smistare i pacchetti!\\
+Limitato a pochi protocolli, misure aggregate (ad esempio per interfaccia), reti ad alta velocità rendono il lavoro ancora più difficile.\\\\
+\textbf{Costante sviluppo di nuovi servizi e applicazioni}, nella maggior parte dei casi non progettati per essere monitorati. La maggior parte del traffico in internet, inoltre, è composto da traffico progettato per essere difficile da rilevare e monitorare. Inoltre, i servizi internet moderni provengono da traffico mobile (quindi non legato ad IP e luogo), criptato e basato su porte TCP/UDP dinamiche (quindi niente fingerprinting, cioè corrispondenza 1:1 servizio:porta)
+\paragraph{Ulteriori problemi} Gli utenti richiedono le misure dei servizi, ma i dispositivi di rete forniscono misurazioni semplici e aggregate. Non si può sempre installare i dispositivi dove si vuole (cablaggio, privacy\ldots) e nuovi protocolli ogni mese, mentre protocollo di monitoraggio molto statici e lenti ad evolversi.
 \chapter{Benchmarking per dispositivi interconnessi}
 \paragraph{\texttt{RFC 1944}} Definisce come eseguire misure del traffico di rete:
 \begin{list}{-}{}
