@@ -97,8 +97,8 @@ Contenuto richieste varia durante il transito aggiungendo determinate informazio
 La grande differenza tra ISO/OSI e Internet è il processo di standardizzazione.
 \pagebreak
 \paragraph{ISO} Nella standardizzazione ISO tutte le varie aziende si accordano su come fare la rete: si creano gruppi di lavoro che si riuniscono (es. ICANN) e producono un documento di lavoro, poi vari comitati lo discutono (fino a qui \textbf{ad alto livello}).\\
-Se si mettono d'accordo, pubblicano un \textbf{Draft International Standard} (\textbf{senza implementazione}). Dopodiché, se non viene accettato, creano technical report oppure un \textbf{full standard}.\\
-La parte importante è l'assenza di implementazione fino ad avere la creazione dello standard.
+Se si mettono d'accordo, pubblicano un \textbf{Draft International Standard} (\textbf{senza implementazione}). Dopodiché, se non viene accettato creano technical report, altrimenti un \textbf{full standard}.\\
+La parte importante è l'\textbf{assenza di implementazione fino ad avere la creazione dello standard}.
 
 \begin{center}
 	\includegraphics[scale=0.7]{stdiso.png}
@@ -112,7 +112,7 @@ La parte importante è l'assenza di implementazione fino ad avere la creazione d
 Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
 \paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
 Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.\\\\
-Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va visto.\\
+Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va ricevuto.\\
 \subsection{Common problems with packet capture}
 Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere root.\\
 Container condivide kernel con host, macchina virtuale emula il kernel.\\
@@ -122,8 +122,8 @@ Metodi software: ho switch, che ha delle porte:
 port mirror: tutto traffico diretto verso tale macchina oltre a mandarglielo lo mandi anche a me su questa porta. 1:1 una porta verso una porta, 1:N tot porte switch le mandi qua.
 VLAN mirror: simile al port mirror: dammi tutto traffico tale VLAN e mandalo qua
 traffic filter/mirroring: dammi solamente traffico di tale porta tale ip\ldots\\\\\\
-Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, che posso scaricare al massimo a 1gbps, ho efficacia se traffico sta solo a 1gbps. Dovrei avere scheda di rete da 10gbps per reggere comodamente traffico e non perderlo. Scheda direte più veloce della somma delle due direzioni.\\
-Hardware: Network Tap prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende la direzione in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
+Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, con cui posso scaricare al massimo a 1gbps, ho efficacia se il traffico sta sotto 1 gbps. Dovrei avere scheda di rete da 10 gbps per reggere comodamente traffico e non perderlo. Necessito quindi di una \textbf{scheda di rete più veloce della somma delle due direzioni}.\\
+Hardware: \textbf{Network Tap} prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende le direzioni in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
 \subsection{Interoperabilità}
 Software di switch e infrastruttura di rete devono essere duraturi, perché infrastruttura di rete si cambia quando c'è veramente necessità. Altrimenti infrastruttura rimane lì. 
 \paragraph{Problema} Gestire le cose nel tempo, che rimangano interoperabili negli anni. Siccome informatica va avanti per mode, si sono posti come problema (fatta negli anni '80) dover gestire qualche sistema non attraverso la url come si fa ora, perché è un modo di fare molto volatile che cambia spesso. Allora hanno fatto standard con negoziazione alto livello: oggetto ha attributi ad alto livello, funzionali al suo funzionamento (macchinettà caffè: c'è acqua, quanti caffè fatti, se ha bicchierini\ldots).\\
@@ -261,7 +261,7 @@ linkDown per segnalare se ha perso il link, linkUp per collegamento preso
 \begin{center}
 	\includegraphics[scale=0.75]{mibcompiler.png}
 \end{center}
-\paragraph{Utilità dei MIB} Compilatore non è detto che generi linguaggio macchina ma trasforma semplicemente. I \textbf{frontend compilers} SNMP prendono i MIB e producono warning/errori e conversioni di formato SMI
+\paragraph{Utilità dei MIB} Compilatore non è detto che generi linguaggio macchina ma trasforma semplicemente. I \textbf{frontend compilers} SNMP prendono i MIB e producono warning/errori e conversioni di formato SMI\\
 %http://luca.ntop.org/sgr2018/slides/nm2017.pdf
 Quando è nato snmp fatti due standard: snmp e mib iniziale (mib-ii, rfc 1213) dove vengono descritti object più importanti per gestione internet.\\
 Vogliono controllare stack TCP/IP per vedere cosa non funziona poi monitorare porta di rete. device espongono contatori per interfaccia tramite snmp. contatori byte pacchetti sono base del monitoraggio, ma nel tempo và superato perché contatori su byte sono poco utili: non si sa bene cosa succede però. \\
@@ -364,7 +364,7 @@ Usato snmpv2 invece che v1 perché aveva problemi strutturali: il primo sono i c
 \end{list}
 \paragraph{Formato} Hanno la stessa PDU ma con modifiche all'interno, però sostanzialmente è uguale
 \paragraph{Eccezioni} A differenza degli errori di SNMPv1 sono più esplicativi. Ad esempio \texttt{noSuchName} spacchettata in \texttt{noSuchObject}, \texttt{noSuchInstance} o \texttt{endOfMibView}. Sono un \textbf{raffinamento dei codici di errore di SNMPv1} e un \textbf{miglioramento delle primitive}.
-\paragraph{Differenze principali} Più velocità con la Bulk, contatori a 64bit, errori molto più dettagliati. Ma \textbf{non risolve granché} in termini di sicurezza.
+\paragraph{Differenze principali} Più velocità con la Bulk, contatori a 64bit, errori molto più dettagliati. Ma \textbf{non risolve granché in termini di sicurezza}.
 \subsection{SNMPv3}
 \paragraph{Obiettivi} Bisogna risolvere problemi di sicurezza soprattutto per la \texttt{Set}. Inoltre bisogna fare il design di un'architettura a lungo termine.\\
 Supportare implementazioni sia complesse che semplici (\textbf{scalabilità}).\\
@@ -378,7 +378,7 @@ Supporta vari tipi di protocollo per lo scambio di messaggi e per il sistema di 
 \begin{enumerate}
 	\item \textbf{Sicurezza}\\
 	Il messaggio è autentico? Data Integrity e Authentication\\
-	Tramite una funzione hash, con chiave simmetrica faccio l'hash dei dati e calcolo un MAC (Message Autethication Code) es MD5. Pacchetto diventa User (key), MAC e Data.\\
+	Tramite una funzione hash, con chiave simmetrica faccio l'hash dei dati e calcolo un MAC (Message Autenthication Code) es MD5. Pacchetto diventa User (key), MAC e Data.\\
 	Il ricevente ricalcola l'hash e se MAC calcolato e ricevuto sono uguali allora apposto.\\
 	Il problema è la \textbf{chiave simmetrica}.
 	\item \textbf{Protezione dalla ripetizione di vecchi messaggi}\\
