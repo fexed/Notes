@@ -18,16 +18,16 @@
 \maketitle
 \tableofcontents
 \pagebreak
-\section*{Introduzione}
-\paragraph{Perché bisogna studiare la gestione?} La situazione corrente comprende: un aumento delle risorse strategiche informative, le reti di computer che da strumento di supporto sono diventate elemento chiave delle organizzazioni, l'aumento esponenziale dei dispositivi interconnessi e aumento anche della complessità e delle funzionalità.\\
-C'è quindi richiesta di servizi di rete permanenti e di qualità ottimale, oltre alla necessità di ridurre i costi per le infrastrutture di rete di un'azienda.
+\section{Introduzione}
+\paragraph{Perché bisogna studiare la gestione?} La situazione corrente comprende: un \textbf{aumento delle risorse strategiche informative}, le reti di computer che da strumento di supporto sono diventate \textbf{elemento chiave} delle organizzazioni, l'\textbf{aumento esponenziale} dei dispositivi interconnessi e aumento anche \textbf{della complessità} e delle funzionalità.\\
+C'è quindi la richiesta di servizi di rete permanenti e di qualità ottimale, oltre alla necessità di ridurre i costi per le infrastrutture di rete di un'azienda.
 \paragraph{Necessità} Gestione di reti eterogenee con l'aiuto dei computer.
-\section*{Terminologia e concetti fondamentali}
-\paragraph{Managed Objects} Il controllo, la coordinazione e il monitoraggio delle risorse avviene tramite la manipolazione dei cosiddetti \textbf{managed objects}: un MO è una visione astratta di una risorsa che presenta le proprietà dal punto di vista della gestione. Sono \textbf{rappresentazioni astratte di risorse reali}.\\
+\subsection{Terminologia e concetti fondamentali}
+\paragraph{Managed Objects} Il controllo, la coordinazione e il monitoraggio delle risorse avviene tramite la manipolazione dei cosiddetti \textbf{managed objects}: un MO è una \textbf{visione astratta di una risorsa che presenta le proprietà dal punto di vista della gestione}. Sono \textbf{rappresentazioni astratte di risorse reali}.\\
 I confini di un MO specificano quali dettagli sono accessibili ai sistemi di monitoraggio e quali sono schermati (\textbf{black box})
 
 \begin{center}
-Management-System $\leftrightarrow$ Managed Object $\leftrightarrow$ Real Object
+Management System $\leftrightarrow$ Managed Object $\leftrightarrow$ Real Object
 \end{center}
 \begin{list}{}{\textbf{Caratteristiche}}
 	\item \textbf{Attributi}: descrivono lo stato/condizione dell'MO, possono cambiare quando cambia lo stato dell'oggetto reale e possono essere manipolati attraverso operazioni di management
@@ -51,35 +51,34 @@ Una MIB deve essere conosciuta sia da chi la implementa che da chi la gestisce.
 	\item Riceve messaggi dagli agenti e li inoltra alle applicazioni interessate per la gestione
 \end{list}
 \paragraph{Management Protocol} Un protocollo di gestione implementa l'accesso a MO distanti attraverso la codifica di dati di gestione (management data)
-\section{lezione 2}
-Livello 2 consente di identificare un device sulla rete. In tutte le reti c'è la necessità di identificare la porta di rete. Ogni dispositivo ha almeno un'interfaccia di rete: loopback, che consente di far comunicare processi di rete sulla stessa macchina. \texttt{127.0.0.1} consente di parlare su stessa macchina senza trasmettere sul filo, fondamentalmente un cortocircuito.\\
+\paragraph{Livello 2} Consente di identificare un device sulla rete. In tutte le reti c'è la necessità di identificare la porta di rete. Ogni dispositivo ha almeno un'interfaccia di rete: loopback, che consente di far comunicare processi di rete sulla stessa macchina. \texttt{127.0.0.1} consente di parlare su stessa macchina senza trasmettere sul filo, fondamentalmente un cortocircuito.\\
 \texttt{ifconfig} consente di vedere le interfacce di rete disponibili su unix.\\
 Se si vuole gestire una rete è fondamentale la standardizzazione.\\\\
 Output \texttt{ifconfig}. Parte degli indirizzi, no indirizzo hw su loopback perché il traffico non esce mai (loopback sulla pila OSI è nel livello 3 Network, il MAC address è sul livello 2 Data Link, che non viene toccato da loopback). Indirizzo MAC 6 byte divisi in blocchi dai due punti. I primi 3 identificano il costruttore della scheda di rete. I successivi tre identificano la scheda di rete per il costruttore, che lo setta univocamente. Ciò garantisce univocità. Per primo blocco di tre ho 16M di dispositivi possibili. I MAC address quindi \textbf{non sono univoci}, lo sono \textit{probabilmente}. L'univocità è fondamentale sulla stessa rete. Quindi indirizzo hw identifica univocamente device sulla rete locale. divisi in due blocchi, il primo identifica costruttore della scheda di rete.\\\\
 Qualsiasi dispositivo ha indirizzo hw diverso per ciascuna porta.
-\section{Ethernet}
-Ethernet è un cavo seriale, trasmissione e ricezione. Mezzo seriale. Un filo.\\
-Quando si mandano dati non posso tutti insieme ma man mano. Non c'è collisione perché ricezione e trasmissione sono su due fili separati.\\
-Pacchetti inviati nel tempo sul filo. Vengono distinti tra loro dal \texttt{preamble}. Pacchetti inviati in una direzione: preambolo, destinazione, sorgente, tipo dei dati, dati effettivi, padding (per rendere pacchetto di 64 se pacchetto è troppo corto), CRC.\\
-Quindi per spedire pacchetto necessito di indirizzi (chi voglio e chi sono) e cosa mandare. chi sono lo so, è scritto nella scheda. Voglio conoscere indirizzo di chi voglio.\\
-Alla connessione del cavo, se DHCP manda fuori pacchetto per richiesta quindi switch lo impara, se IP statico manda pacchetto ARP quindi switch lo impara.\\
-MAC address randomizzato per privacy, spesso e volentieri sui dispositivi mobili.\\
-Possibile più di un utente sulla stessa rete con soliti indirizzi, apparati avanzati se ne accorgono.
-\section{lezione 3}
-un pacchetto è interamente creato dal computer, quindi "non ci si può fidare"\\
-Bisogna andare a livello fisico e autenticare, un po' come chiedere la carta d'identità. Metter in atto meccanismi che impediscano di inibire riconoscimento della sorgente.\\
+\subsection{Ethernet}
+L'ethernet è un cavo seriale: trasmissione e ricezione, mezzo seriale. \textbf{Un filo}.\\
+Quando si mandano dati non si possono mandare tutti insieme, ma bisogna mandarli man mano. Non c'è collisione perché ricezione e trasmissione sono su due fili separati.\\
+I pacchetti vengono inviati nel tempo sul filo. Vengono distinti tra loro dal \texttt{preamble}. I pacchetti sono inviati in una direzione: preambolo, destinazione, sorgente, tipo dei dati, dati effettivi, padding (per rendere pacchetto di 64 se pacchetto è troppo corto), CRC.\\
+Quindi per spedire pacchetto necessito degli indirizzi (mittente e destinatario) e di cosa mandare. Chi sono lo so, è scritto nella mia scheda. Voglio conoscere l'indirizzo destinatario.\\
+Alla connessione del cavo, se ho impostato il DHCP allora manda fuori pacchetto per richiesta quindi switch lo impara, se IP statico manda pacchetto ARP quindi switch lo impara.\\
+Il MAC address può essere randomizzato per privacy, e sui dispositivi mobili lo è spesso e volentieri.\\
+Possibile più di un utente sulla stessa rete con soliti indirizzi, apparati avanzati se ne possono accorgere.
+\subsection{Pacchetti}
+Un pacchetto è interamente creato dal computer, quindi "\textit{non ci si può fidare}"\\
+Bisogna andare a livello fisico e \textbf{autenticare}, un po' come chiedere la carta d'identità. Metter in atto \textbf{meccanismi che impediscano di inibire riconoscimento della sorgente}.\\
 802.1x permette di entrare in rete. Se configurato, il device prima di entrare in rete espone delle credenziali (utente, password, protocollo autenticazione\ldots)\\
-Da quel momento in poi \textbf{allegato} al pacchetto c'è il mio nome, ma le informazioni di autenticazione non fanno parte del pacchetto: pacchetti creati quando non c'era preoccupazione e interesse in fattori di sicurezza delle trasmissioni.\\
-L'informazione non è parte del pacchetto ma lo riconosce in qualche altro modo il device e \textbf{rimane nel device} (Access Point). Ciò non serve per autenticazione fisica sul cavo: so che sei tu su questo cavo. Ma è necessaria per autenticazione su mezzi condivisi (wifi).\\
-Su router MAC cambia ad ogni hop (ethernet comunicazione punto-punto), IP cambia solo se c'è NAT. Le parti da lv 3 in su non cambiano (a meno di frammentazioni\ldots)\\
-Robustezza delle reti si fa tramite la ridondanza. Tipico mettere più strade per spedire il traffico: load balancing.\\
-Vale sia per corrente elettrica che per traffico di rete.\\\\
+Da quel momento in poi \textbf{allegato al pacchetto c'è il mio nome}, ma le informazioni di autenticazione non fanno parte del pacchetto: i formati dei pacchetti sono stati creati quando non c'era preoccupazione e interesse in fattori di sicurezza delle trasmissioni.\\
+L'informazione non è parte del pacchetto, ma il riconoscimento del device è eseguito in qualche altro modo e \textbf{rimane nel device} (Access Point). Ciò \textbf{non serve per autenticazione fisica sul cavo}: so che sei tu su questo cavo. Ma è necessaria per autenticazione su mezzi condivisi (WiFi\ldots).\\
+Su router MAC cambia ad ogni hop (perché l'ethernet è un protocollo di comunicazione punto-punto), l'IP cambia solo se c'è NAT. Le parti dal livello 3 in su, a meno di frammentazione, non cambiano.\\
+La robustezza delle reti dipende dalla ridondanza. Un modo tipico è mettere più strade per spedire il traffico: \textbf{load balancing}.\\
+Vale sia per corrente elettrica che per traffico di rete.
 \subsection{Aree funzionali}
 FCAPS per gestire \textbf{qualsiasi sistema}, da giochi a sistemi di rete. Non sono mutualmente indipendenti.
 \begin{list}{}{}
 	\item \textbf{Fault Management}: error detection, isolation and repair\\
 	Se qualcuno rileva malfunzionamento (riempito disco, ram, sovraccarico CPU\ldots) lo deve notificare
-	\item \textbf{Configuration Management}: devo sapere com'è configurato il sistema. Leggere la configurazione è importante, così che le app si possano basare sulle API comuni e funzionare correttamente. Fondamentale capire la configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "questo filo qui va su questa porta qua". che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete
+	\item \textbf{Configuration Management}: devo sapere com'è configurato il sistema. Leggere la configurazione è importante, così che le app si possano basare sulle API comuni e funzionare correttamente. Fondamentale capire la configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "\textit{questo filo qui va su questa porta qua}", che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete
 	\item \textbf{Account Management}: rilevare il consumo di risorse
 	\item \textbf{Performance Management}: efficenze e statistiche, performance di sistema sia lato utente sia lato fornitore. Per l'utente è riuscire ad usare la rete, per l'operatore è il giusto compromesso tra investimento sul mezzo e contentezza utente.
 	\item \textbf{Security Management}: assicurarsi che ciò che uno fa è effettivamente possibile farlo, autoproteggendosi perché con le reti odierne posso intasare rete (volente o no) e quindi intasare internet, provocando danni
@@ -112,11 +111,9 @@ La parte importante è l'assenza di implementazione fino ad avere la creazione d
 \paragraph{ASN1} Sintassi per la definizione di strutture dati e formato di messaggi. Ha l'obiettivo di consentire a macchine dalle differenti architetture hardware di scambiare dati, essere language neutral e consentire la negoziazione della codifica di trasmissione.\\
 Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
 \paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
-Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.
-\section{lezione 4}
+Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.\\\\
 Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va visto.\\
 \subsection{Common problems with packet capture}
-\ldots\\
 Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere root.\\
 Container condivide kernel con host, macchina virtuale emula il kernel.\\
 Necessità vedere traffico. Non vorrei mettere mano sulla macchina, perché devo avere so che permette, utente, installare software\ldots\\
@@ -127,7 +124,7 @@ VLAN mirror: simile al port mirror: dammi tutto traffico tale VLAN e mandalo qua
 traffic filter/mirroring: dammi solamente traffico di tale porta tale ip\ldots\\\\\\
 Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, che posso scaricare al massimo a 1gbps, ho efficacia se traffico sta solo a 1gbps. Dovrei avere scheda di rete da 10gbps per reggere comodamente traffico e non perderlo. Scheda direte più veloce della somma delle due direzioni.\\
 Hardware: Network Tap prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende la direzione in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
-\section{Lezione}
+\subsection{Interoperabilità}
 Software di switch e infrastruttura di rete devono essere duraturi, perché infrastruttura di rete si cambia quando c'è veramente necessità. Altrimenti infrastruttura rimane lì. 
 \paragraph{Problema} Gestire le cose nel tempo, che rimangano interoperabili negli anni. Siccome informatica va avanti per mode, si sono posti come problema (fatta negli anni '80) dover gestire qualche sistema non attraverso la url come si fa ora, perché è un modo di fare molto volatile che cambia spesso. Allora hanno fatto standard con negoziazione alto livello: oggetto ha attributi ad alto livello, funzionali al suo funzionamento (macchinettà caffè: c'è acqua, quanti caffè fatti, se ha bicchierini\ldots).\\
 Attributi, cosa ti mostro io che sia rilevante per te (non quante viti ha, ma lo stato), operazioni che si possono fare su quegli attributi (accendi, spegni\ldots), comportamento. Software si occupa dell'accensione, non so com'è fatto internamente, io mi limito a chiamare l'operazione. Standardizzazione di funzionamento.
@@ -181,7 +178,7 @@ La parte importante è che sia \textbf{semplice} e funzionare sotto l'UDP, che �
 \paragraph{Separato} La parte dell'SNMP \textbf{è separata dalla parte di comunicazione} anche se aiuta l'instradamento. \textbf{Non interferisce}, come il cruscotto della macchina (SNMP) col motore (switching).
 \paragraph{Trasparente} Sta fuori dalla comunicazione, ma \textbf{deve poterla controllare} e monitorare \textbf{senza interferire}. L'idea è che se l'SNMP viene compromesso lo switch continua a funzionare.
 \paragraph{Evoluzione} Nel 1990 viene standardizzata una versione molto semplice: l'\textbf{SNMPv1}. Questa versione fu prodotta in fretta, concentrandosi sulle funzionalità base, in modo da poter entrare subito sul mercato che stava per esplodere.\\
-Nle 1991 viene pubblicata la \textbf{Management Information Base}, ovvero l'insieme degli oggetti manipolati tramite l'SNMP.\\
+Nel 1991 viene pubblicata la \textbf{Management Information Base}, ovvero l'insieme degli oggetti manipolati tramite l'SNMP.\\
 Negli anni successivi ci sono varie evoluzioni del protocollo:
 \begin{list}{}{}
 	\item \textbf{SNMPv1} supportata da tutti i dispositivi sul mercato
