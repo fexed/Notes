@@ -160,9 +160,9 @@ L'\textbf{object identifier} quindi, ovvero la sequenza di numeri, risolve il pr
 \paragraph{Basic Encoding Rules} Regole di codifica, compattano i dati in una stringa di byte da spedire sul filo. Basato su un algoritmo tag/length/value (TLV), dove ogni variabile è identificata da un tag, la lunghezza del valore in byte e il valore di quei byte. Questo permette al ricevente di ricostruire il tipo del messaggio a partire dal flusso di byte ricevuto.
 \chapter{Gestione di Rete}
 \section{Nascita}
-Gestione di rete nacque, storicamente, nel mondo della telefonia. Necessità di codificare numero, connettersi al centralino, riconoscere il numero\ldots. Standardizzazione necessaria per poter far telefonare a distanze elevate, attraverso le nazioni.\\
+Gestione di rete nacque, storicamente, nel mondo della telefonia. Necessità di codificare numero, connettersi al centralino, riconoscere il numero\ldots. Standardizzazione necessaria per poter far telefonate a distanze elevate, attraverso le nazioni.\\
 La necessità era di un protocollo \textbf{semplice}.
-\paragraph{Dati} Poi arrivò internet. Prima bisognava instradare la voce, ora vanno istradati i dati (anche voce, \texttt{VoIP}, ma pur sempre dati). Eredità di tutte le tecnologie e teorie dei tempi della telefonia (es. 5G) ma anche innovazione (es. Browser Web) ma mantenendo il paradigma che era tutto sommato efficiente.
+\paragraph{Dati} Poi arrivò internet. Prima bisognava instradare la voce, con internet vanno instradati i \textbf{dati} (anche voce, \texttt{VoIP}, ma pur sempre dati). Eredità di tutte le tecnologie e teorie dei tempi della telefonia (es. 5G) ma anche innovazione (es. browser web), pur mantenendo il paradigma esistente che era tutto sommato efficiente.
 \section{Gestione di Rete Internet}
 \paragraph{Cos'è} Sistema di protocolli e tecnologie che permettono di mettere in funzione e controllare un'infrastruttura di rete, per far sì che sia efficiente e che faccia ciò che voglio e che segnali eventuali problemi e comportamenti non previsti.
 \paragraph{Reti Geografiche} Questo discorso si applica a reti geografiche, ampie e complesse, che interconnettono un elevatissimo numero di device. Serve anche per far sì che la connessione/disconnessione di dispositivi non crei problemi, e che un utente della rete non possa creare disservizi e potenzialmente tirarla giù.
@@ -197,7 +197,7 @@ Tutti gli agent rispondono ad un manager (solitamente ridondato) $\rightarrow$ $
 L'SNMP \textbf{non distingue i dispositivi}, ma \textbf{prende le info dalla MIB} del singolo agent. Ciò che differenzia i vari sistemi operativi, i dispositivi tra loro ecc. sta tutto nella \textbf{MIB} (Management Information Base).
 \paragraph{Polling} Controllo. Il manager non comunica continuamente con gli agent, ma esegue un \textbf{polling degli agent}, contattandoli periodicamente per \textbf{ricevere le informazioni aggiornate}.\\
 L'SNMP è altamente centralizzato, quindi è compito del manager implementare tutta la funzionalità di monitori e la responsabilità, sicurezza ecc\ldots
-\paragraph{Traps} Una volta configurata, sta alla \textbf{periferica avverte il manager se qualcosa non sta funzionando come previsto}. Non informa il manager ogni volta che succede qualcosa (stampo un foglio, prendo un caffè, mi connetto all'Access Point\ldots) perché il manager verrebbe inondato di informazioni, ma \textbf{l'apparato informa il manager se ci sono cose che non funzionano}. Segue la filosofia del "\textit{Se non mandi niente va tutto bene}".\\
+\paragraph{Traps} Una volta configurata, sta alla \textbf{periferica avvertire il manager se qualcosa non sta funzionando come previsto}. Non informa il manager ogni volta che succede qualcosa (stampo un foglio, prendo un caffè, mi connetto all'Access Point\ldots) perché il manager verrebbe inondato di informazioni, ma \textbf{l'apparato informa il manager se ci sono cose che non funzionano}. Segue la filosofia del "\textit{Se non mandi niente va tutto bene}".\\
 Questo può non essere sufficiente, per esempio in caso di problema di rete la comunicazione può non andare a buon fine. In tal caso il polling può risolvere questa cosa, anche se ciò significa apprendere il verificarsi del problema in maniera non tempestiva.
 \paragraph{SMI} La struttura delle informazioni di gestione (\textbf{Structure of Management Informativo}, la seconda versione) si basa su un sottoinsieme dei datatype ASN.1 più altri sottotipi:
 \begin{list}{}{}
@@ -279,7 +279,7 @@ Per info più specifiche ci sono MIB successivi. Guardano parte di trasmissione 
 \begin{center}
 	tabella
 \end{center}
-Statistiche su stessa rifa sono a livello diverso, repeater a livello 1. Fanno stessa cosa ma livelli diversi.\\
+Statistiche su stessa riga sono a livello diverso, repeater a livello 1. Fanno stessa cosa ma livelli diversi.\\
 Per navigare tabelle necessità meccanismo efficiente rispetto a fare tante richieste. Questo perché sistemi modulari, per vedere se valore/elemento esiste.
 \paragraph{Ordine lessicografico} \texttt{walk}: lettura consecutiva di oggetti in mib.\\
 Leggo oggetti e metto ordinati per numero in ordine lessicografico. Incremento OID e se ho oggetti nel sottoalbero lo visito, da sinistra verso destra. Ricorsivamente, ogni nodo che incontro se ha figli lo visito. Con questo ordinamento si perde la struttura della tabella: \textbf{SNMP lavora solo su questo array ordinato}.
@@ -405,6 +405,10 @@ Le applicazioni di management devono, solitamente, selezionare le opportune stri
 SubAgent fa la open, a cui il Master risponde con la response.\\SubAgent poi comunica, con la IndexAllocate, quali OID implementa. Il Master vedrà se nessun altro ha richiesto gli stessi OID, in caso risponde al SubAgent, che risponderà registrandosi e in caso con altre capabilities.\\
 Quindi \textbf{ogni subagent specifica al master cosa implementa}.\\
 ASN1 finisce a SNMP entity, nella parte successiva c'è il protocollo AgentX, molto più semplice su TCP.
+\subsection{Bridge MIB}
+Bridge è mettere assieme due interfacce di rete\\
+Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
+Attraverso bridge-mib per la topologia di rete. Importante anche per inquadrare che impatto può avere un'allarme sul sistema. Così so sia quali sono i nodi principali ma anche l'impatto di qualche problema: se cade una macchina che collega tante altre macchine, cadono tutte, mentre se cade no nodo marginale il problema è più contenuto.
 \chapter{Rete Cellulare}
 Quando telefono si connette a rete mobile il gateway lo autentica.\\
 GTPC realizza autenticazione, il telefono si annuncia sulla rete (register) e disannuncia quando esce, oppure update quando cambia cella. L'annuncia comprende il MEI (identificativo univoco del telefono), IMSI (international mobile subscriber identity) e altre info, ad  esempio sul profilo tariffario (velocità max ad es). Sulla rete passano anche info su nodo di rete e identificativo della cella. Le informazioni sono ricavate e comunicate dal provider e dal GTPC, non dal telefono. Ad esempio, il numero di cellulare è dato dal protocollo, non è memorizzato sulla SIM.\\
@@ -475,10 +479,7 @@ router frammenta il pacchetto quando mtu della linea ricevente è più piccolo. 
 Frammentazione è concetto dell'IPv4\\
 TCP frammentazione non c'è ma non perché non si possa fare, ma perché un pacchetto TCP non può essere frammentato (è indicazione di errore che qualcosa nel TCP non ha funzionato). Path MTU discovery (PMTUD), pacchetti sempre più grandi finché non si trova dimensione massima con l'\textbf{obiettivo di evitare la frammentazione}. Perché meccanismi TCP permettono di farlo. UDP pacchetti vivono di vita propria quindi può succedere frammentazione.\\
 Pacchetti non unicast sono "problematici" perché riempino le porte dello switch.
-\chapter{Bridge MIB}
-Bridge è mettere assieme due interfacce di rete\\
-Risponde alla domanda: come fare per iniziare a vedere la topologia della rete e, quindi, i dispositivi collegati ad un host?\\
-Attraverso bridge-mib per la topologia di rete. Importante anche per inquadrare che impatto può avere un'allarme sul sistema. Così so sia quali sono i nodi principali ma anche l'impatto di qualche problema: se cade una macchina che collega tante altre macchine, cadono tutte, mentre se cade no nodo marginale il problema è più contenuto.
+
 \chapter{Cattura}
 \begin{center}
 	\includegraphics[scale=0.75]{cattura.png}
