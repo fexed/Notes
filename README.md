@@ -16,6 +16,8 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Calcolo Numerico: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/CN/CN.pdf)
 
+##### Crittografia: [appunti](https://github.com/fexed/Notes/blob/master/CRI/CRI.pdf)
+
 ##### Elementi di Calcolo e Complessità: [appunti](https://github.com/fexed/Notes/blob/master/ECC/ECC.pdf)
 
 ##### Gestione di Reti: [appunti](https://github.com/fexed/Notes/blob/master/GR/GR.pdf)
