@@ -495,7 +495,7 @@ Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
 \paragraph{\texttt{pcap\_open\_live}} Parametri: \texttt{deviceName} scheda di rete, \texttt{maxCaptureLen} lunghezza massima del pacchetto (sia per efficienza, sia per privacy se non ho bisogno dell'intero pacchetto), \texttt{setPromiscuosMode} per abilitare la modalità promiscua (cattura tutto il traffico sulla scheda), \texttt{pktDelay} non c'erano i thread quindi hanno pensato di mettere un tempo massimo per cui aspettare un pacchetto e in caso ritornare senza valore, \texttt{errorBuffer} sempre per ragioni storiche se la \texttt{pcap\_open\_live} fallisce il buffer contiene la ragione per cui è fallita\\
 \texttt{live}: leggo traffico di rete in tempo reale. C'è la possibilità di aprire file \texttt{pcap} per leggere traffico salvato su file.\\
 %TODO problema del pcap
-In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'rrd è registrare i dati all'orario del pacchetto, non a quello di sistema
+In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'rrd è bene registrare i dati all'orario del pacchetto, non a quello di sistema
 \paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
 \paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
 \paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
@@ -535,7 +535,7 @@ Di seguito un esempio UDP \begin{lstlisting}
 \end{list}
 Inoltre, su Linux sniffare i pacchetti equivale ad aprire un socket.
 \chapter{Monitoring}
-\section{Monitorin requirements}
+\section{Monitoring requirements}
 \paragraph{Garantire la disponibilità dei servizi di rete} Bisogna mantenere l'attività del servizio anche in caso di variazioni tecnologiche o di carico. Inoltre bisogna impostare risposte automatiche o semiautomatiche in caso di anomalie: ad esempio modifiche alla configurazione in tempo reale, o attivazione di componenti ridondanti.
 \paragraph{Reazioni dinamiche a fronte di cambiamenti sulla rete o nell'ambiente} Applicare e far rispettare politiche, adattando il sistema (banda, memoria, processi\ldots) in base ai cambiamenti o al carico.
 \paragraph{Controllo della rete} Collezione e compressione delle informazioni rilevanti sulla rete, mantenimento dei database di configurazione della rete, centralizzazione del controllo sulle periferiche (central management console, dove possibile) e integrazione delle procedure di manutenzione su ambienti eterogenei.
@@ -630,7 +630,7 @@ Analisi dura fino a match o dopo troppi tentativi (8 pacchetti solitamente)\\
 Flusso è bidirezionale e corrisponde alla quintupletta IP+prot+porta+src+dest(+vlan)\ldots\\
 Riconoscimento avviene solamente ad inizio del flusso.\\
 nDPI funziona con i pacchetti IP.
-\paragraph{Latenza applicativa di rete} Calcolata utilizzando il TCP durante l'handshaking, monitorando con un probe in un punto della rete ma non si può dire se cho messo pià temopio andata che ritorno.\\
+\paragraph{Latenza applicativa di rete} Calcolata utilizzando il TCP durante l'handshaking, monitorando con un probe in un punto della rete ma non si può dire se ho messo più tempo in andata che al ritorno.\\
 Con sottrazioni trovo latenza rete e applicativa.
 \begin{multicols}{2}
 	\includegraphics[scale=0.5]{latency1.png}\\
@@ -674,7 +674,7 @@ La media è la misura media, la deviazione standard è una misura "standard" di 
 Esempio: l'80esimo percentile è l'età in cui cade l'80\% della popolazione.\\
 Perché importante? Se devo parlare ad esempio della banda, posso calcolare economicamente parlando per vedere se quella banda è utilizzata, o per vedere se la banda che metto a disposizione è utilizzata. Quando arriva il momento di fare un upgrade, ad esempio? Oppure anche usabile per far pagare delle penalty.\\
 Il 95esimo percentile di una rete è la soglia sotto cui sono stato per il 95\% del tempo.\\
-Calcolo: data una serie di valori, si definisce il percentile (es. 80), si ordina la serie dal passo all'alto, calcolo indice che corrisponde al percentie (len(serie)*(percentile/100)), prendo l'indice intero (es int(index + 0.5))\\
+Calcolo: data una serie di valori, si definisce il percentile (es. 80), si ordina la serie dal basso all'alto, calcolo indice che corrisponde al percentie (len(serie)*(percentile/100)), prendo l'indice intero (es int(index + 0.5))\\
 Percentile = serie\_ordinata[indiceintero-1]
 \paragraph{Quartile} \begin{list}{}{Definiti così:}
 		\item $Q_1$ è il 25esimo percentile
@@ -820,7 +820,7 @@ Probe sono posizionati dove fluisce il traffico, tipicamente nel router.\\
 A livello applicativo quanto traffico in base a porta o protocollo\\
 Quali servizi, livelli di traffico\ldots anche rintracciare virus di rete fino agli host.\\
 Con i flussi non si riesce a misurare traffico nonIP, informazioni livello 2 (stato delle interfacce), traffico flitrato (firewall), statistiche per-link (livello di utilizzo, congestione, perdita\ldots), statistiche per applicazioni (es latenza, risposte positive/negative, errori di protocollo).
-\paragraph{Flusso}: insieme di pacchetti accumunati da una stessa quintupletta. Flussi sia unidirezionali che bidirezionali. Calcolati dal probe (era: agent) che guarda traffico che passa attraverso e lo misura. Flusso creato quando vedo il primo pacchetto del flusso, probe sta fermo.\\
+\paragraph{Flusso}: insieme di pacchetti accomunati da una stessa quintupletta. Flussi sia unidirezionali che bidirezionali. Calcolati dal probe (era: agent) che guarda traffico che passa attraverso e lo misura. Flusso creato quando vedo il primo pacchetto del flusso, probe sta fermo.\\
 Massima durata flusso regardless lo stato della connessione: termino flusso o quando dura troppo o quando non c'è traffico per un po' di tempo.\\
 Contenuti del flusso: peers (src e dst), contatori (packets, bytes, tempo), info routing (sistema autonomo, netmask, interfaces).\\
 Possono essere uni e bidirezionali. Due flussi unidirezionali opposti sono equiv a uno bidirezionale. Flussi bid possono contenere altre info come rtt o comportamento tcp.\\
@@ -864,7 +864,6 @@ Cosa ci possiamo fare? \begin{list}{}{}
 	Permette di gestire le risposte, un esempio è avviarla in monitoring su un'interfaccia. 
 \end{list}
 \chapter{Flussi}
-\paragraph{Flussi unidirezionali con IP src/dst come key}
 \paragraph{Flussi unidirezionali con IP, Porta e protocollo come key} Avrò più flussi perché distinguo anche i protocolli usati e le porte, quindi ho maggiore informazione sul traffico.
 \paragraph{NetFlow} Architettura a flussi, prima coniata da Cisco. Funziona diversamente da ciò che si è visto fin'ora. Abbiamo un router con un probe (sonda di rete, traduce pacchetti in flussi). La funzionalità di misura è secondaria (il router deve andare bene), ma catalogare i flussi richiede memoria. Router calcola i valori con il probe ma non ha capacità di memorizzazione: manda verso Flow Collector (un pc con un software apposito). Il collezionatore riceve flussi e fa qualcosa: es. manda dati a interfaccia web.\\
 C'è anche problema se si monitora rete abbastanza grande. Si possono mettere più collezionatori che collaborano fra loro, ognuno attaccato ad un endpoint (router verso l'esterno) della rete.
