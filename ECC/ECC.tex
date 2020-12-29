@@ -47,6 +47,7 @@ Un algoritmo è un insieme \textbf{finito} di istruzioni.
 \paragraph{Istruzioni} Elementi da un insieme di \textbf{cardinalità finita} ed ognuna ha \textbf{effetto limitato} (localmente e "\textit{poco}") sui dati (che devono essere \textbf{discreti}). Un'istruzione deve richiedere tempo finito per essere elaborata.
 \paragraph{Computazione} Successione di istruzioni finite in cui ogni passo dipende solo dai precedenti. Verificando una porzione finita dei dati (\textbf{deterministico}). Non c'è limite alla memoria necessaria al calcolo (è finita ma illimitata). Neanche il tempo è limitato (necessario al calcolo). Tanto tempo e tanta memoria quante ce ne servono.\\\\
 Un'eccezione a questa definizione di algoritmo è costituita dalle macchine concorrenti/interattive, dove gli input variano nel tempo. Inoltre vi sono formalismi che tengono conto di algoritmi probabilistici e stocastici. Altre eccezioni sono gli algoritmi non deterministici, ma per ognuno di essi esiste un algoritmo deterministico equivalente (Teorema \texttt{3.3.6})
+\paragraph{In sintesi} Un numero finito di istruzioni da un set finito di istruzioni possibili, un numero discreto di passi di tempo finito e ognuno dipendente solo dai precedenti, senza limite di passi o spazio durante l'esecuzione.
 \pagebreak
 \section{Macchina di Turing}
 Introdotta da \textbf{Alan Turing} nel 1936, confuta la speranza "\textit{non ignorabimus}" di poter risolvere qualsiasi cosa con un programma.\\
@@ -71,6 +72,8 @@ $\delta$(q, $\triangleright$) = (q', $\triangleright$, R), cioè se sono a inizi
 Può essere vista come una relazione di transizione, $\delta \subseteq (Q \times \sum) \times (Q\:\bigcup\:\{\textit{h}\}) \times \sum \times \{L,\:R,\: -\}$
 	\item q$_0 \in $ Q lo \textbf{stato iniziale} 
 \end{list}
+Quindi una \textbf{configurazione} è una quadrupla $(q, u, \sigma, v)\in((Q\cup\{h\})\times \Sigma^*\times\Sigma\times\Sigma^F)$ con $\Sigma^F = \Sigma^*\cdot(\Sigma - \{\#\})\cup\{\epsilon\}$\\
+$\sigma$ è il simbolo attualmente sotto la testina della MdT, e una notazione breve è $(q, u\underline{\sigma}v)$ o $(q,w)$ quando la posizione non è importante.\\\\
 Mappatura a coda di rondine, bigezione tra (m, n) $\rightarrow$ k, cioè $N^2 \rightarrow N$.\\
 Costruire un modello per il calcolo dopo aver posto delle condizioni affinché qualcosa si possa chiamare algoritmo.
 
@@ -335,15 +338,14 @@ La classe $C$ delle \textbf{funzioni ricorsive primitive} è la \textbf{minima c
 	$h \in C$ a $n + 1$ posti e\\
 	$g \in C$ a $n - 1$ posti\\
 	$\Rightarrow$
-	\begin{math}
-		\left\{
-		\begin{array}{l}
-			f(0, x_2, \ldots, x_n) = g(x_2, \ldots, x_n)\\
-			f(x_1 + 1, x_2, \ldots, x_n) = h(x_1, f(x_1, x_2, \ldots, x_n), x_2,\ldots, x_n)
+	$\left\{
+		\begin{array}{l l l}
+			f(0, x_2, \ldots, x_n)&= g(x_2, \ldots, x_n)&\textsl{Passo finale}\\
+			f(x_1 + 1, x_2, \ldots, x_n)&= h(x_1, f(x_1, x_2, \ldots, x_n), x_2,\ldots, x_n)&\textsl{Iterazione}
 		\end{array}
-		\right.
-	\end{math}
+		\right.$
 \end{list}
+Questo rappresenta un \textbf{ciclo for}: $x_1$, la prima variabile di $f$, è il contatore da decrementare, $g$ è il passo finale e $h$ rappresenta i passi interni del ciclo. La terminazione è garantita, e si possono definire le primitive matematiche base con le funzioni ricorsive primitive.\\
 $f \in C \Leftrightarrow$ esiste una successione $f_0,\ldots,\,f_n = f\:\:\vline\:\:\forall f_1$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
 \pagebreak
 \paragraph{Esempio} Esempio di funzioni ricorsive\\
@@ -464,6 +466,8 @@ Come trovare tali esponenti con $f$ ricorsiva primitiva.\\
 M = (Q, $\Sigma$, $\delta$, q$_0$)\\
 Q = \{q$_0$, \ldots, q$_k$), $\Sigma$ = \{$\sigma_0$, \ldots, $\sigma_n$)\\
 \textbf{Kurt G\"{o}del}: rappresentare algoritmi come numeri: \textbf{G\"{o}delizzazione} data macchina di turing M trovo $i$ che è il suo numero di G\"{o}del.
+\subsection{Numerazione di Godel} La funzione caratteristica dell'insieme dei numeri primi è ricorsiva primitiva. Gli esponenti della fattorizzazione in numeri primi di qualsiasi numero naturale sono dati da funzioni ricorsive primitive.\\
+Ne deriva che ogni sequenza di numeri naturali può essere codificata come numero naturale, usando i numeri come esponenti della fattorizzazione in numeri primi. \textbf{Questa codifica è iniettiva ma non suriettiva}, e una codifica effettiva deve essere anche suriettiva. Godel fornì una migliore codifica che era anche suriettiva, da cui deriva che le funzioni di codifica e decodifica sono ricorsive primitive. Tutte le MdT, programmi for/while, funzioni ricorsive primitive e $\mu$-ricorsive possono essere effettivamente codificate e decodificate come numeri naturali, usando i simboli sintattici come numeri naturali distinti. Le computazioni (intese come successioni di configurazioni) possono anch'esse essere codificate e decodificate.
 \subsection{Funzione di Ackermann}
 La funzione di Ackermann \textbf{non è definibile} mediante gli schemi di ricorsione primitiva definiti in precedenze, ma è totale ed ha una definizione intuitivamente accettabilissima.
 
@@ -537,7 +541,9 @@ Minima classe $\mathscr{R}$ che, allo schema fino alla ricorsione primitiva, si 
 $\psi(\overrightarrow{x}) = \mu y.[\phi(\overrightarrow{x}, y) = 0 \wedge \forall z < y\:\:\vline\:\: \phi(\overrightarrow{x}, z)\downarrow] $\\
 $\mu x.[I]$ è il minimo elemento di $I$ insieme.\\\\
 Cosa significa? Data una funzione appartenente a $\mathscr{R}$ (che ovviamente può essere una ricorsiva primitiva), la vado a calcolare sugli argomenti $\overrightarrow{x}$ della $\psi$ e su una certa $y$. Se vale 0, il risultato è $y$, altrimenti \textbf{deve} convergere e vado avanti incrementando $y$ di 1 e ricalcolando fino a che non trovo un risultato pari a 0.\\
-Quindi le $\mu$-ricorsive definiscono anche funzioni non totali, al contrario delle ricorsive primitive che definiscono solo funzioni totali.
+Quindi le $\mu$-ricorsive definiscono anche funzioni non totali, al contrario delle ricorsive primitive che definiscono solo funzioni totali.\\
+La $\mu$ corrisponde ad un \textbf{ciclo while}: inizia con $y=0$ e lo incrementa fino a che $\phi$ non è uguale a 0 (guardia del loop), ritornando $y$. Se viene piazzato un limite superiore a $y$, allora $\psi$ potrebbe essere ricorsiva primitiva e se lo è anche la $\phi$ allora la condizione di convergenza è garantita.\\
+La diagonalizzazione non può essere applicata direttamente alle funzioni $\mu$-ricorsive, perché $\phi_n(n)$ può divergere. Non tutte le funzioni $\mu$-ricorsive possono essere estese a funzioni totali: \textbf{una funzione è $\mu$-calcolabile se può essere ridefinita come $mu$-ricorsiva}.
 \subparagraph{Esempio} $\phi(x, y) = 42$ è costante, quindi ricorsiva primitiva, quindi anche $\mu$-ricorsiva.\\
 $\psi(x) = \mu y.[\phi(x, y) = 42]$ ovunque indefinita perché non tornerà mai 0 quindi $\not\exists y$.\\\\
 Quindi \textbf{terminazione e non terminazione sono cruciali}.\\
