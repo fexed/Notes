@@ -1389,7 +1389,7 @@ A causa delle dimensioni, un DB solitamente risiede sui dischi. I dati devono es
 Spesso le operazioni di I/O costituiscono il \textbf{collo di bottiglia di un sistema}, quindi è necessario \textbf{ottimizzare l'implementazione fisica del DB} attraverso:
 \begin{list}{}{}
 	\item Organizzazione efficiente delle tuple su disco
-	\item Struttura di accesso efficienti
+	\item Strutture di accesso efficienti
 	\item Gestione efficiente dei buffer in memoria
 	\item Strategie di esecuzione efficienti per le query
 \end{list}
@@ -1550,7 +1550,7 @@ Il \textbf{gestore dell'affidabilità verifica che siano garantite le proprietà
 \end{list}
 \paragraph{File di log} Il controllore dell'affidabilità usa \textbf{un log, dove sono indicate tutte le operazioni svolte dal DBMS}. Il file si presenta come una sequenza di record di due tipi:
 \begin{list}{}{}
-	\item \textbf{Record di transizione}: tengono traccia delle operazioni svolte da ciascuna transizione sul DBMS. Per ogni transazione, un record di begin (B), insert (I), delet (D) e update (U) e un record di commit (C) o di abort(A)
+	\item \textbf{Record di transizione}: tengono traccia delle operazioni svolte da ciascuna transizione sul DBMS. Per ogni transazione, un record di begin (B), insert (I), delete (D) e update (U) e un record di commit (C) o di abort(A)
 	\item \textbf{Record di sistema}: tengono traccia delle operazioni di sistema (dump, checkpoint).\\
 	\textbf{Dump} produce una \textbf{copia completa} del DB, effettuata in mutua esclusione con tutte le altre transazioni quando il sistema non è operativo. La copia viene memorizzata in memoria stabile (backup). Al termine del dump, viene scritto nel log un record di dump che segnala l'avvenuta esecuzione dell'operazione in un dato istante. Il sistema quindi riprende il funzionamento normale.\\
 	\textbf{Checkpoint}, punto di allineamento: si scrive la marca CKP sul log per indicare che tutte le operazioni che la precedono sono state effettivamente effettuate sul DB. Un modo semplice:
@@ -1672,7 +1672,7 @@ Il DBMS transazionale gestisce questi problemi garantendo la \textbf{proprietà 
 \end{list}
 \paragraph{Serialità} Un'esecuzione di un insieme di transazioni \{T$_1$, \ldots, T$_n$\} si dice \textbf{seriale} se $\forall$ coppia di transazioni T$_i$, T$_j$, tutte le operazioni di T$_i$ vengono eseguite prime di qualsiasi operazione di T$_j$ o viceversa.
 \paragraph{Serializzabilità} Un'esecuzione di un insieme di transazioni si dice \textbf{serializzabile} se produce lo stesso effetto sulla base di dati di quello ottenibile eseguendo serialmente, in un qualche ordine, le sole transazioni terminate normalmente.
-\paragraph{Controllo della concorrenza} Nella pratica i DBMS implementano tenchinche di controllo di concorrenza che garantiscono direttamente la serializzabilità delle transazioni concorrenti. Tali tecniche si dividono in due classi principali:
+\paragraph{Controllo della concorrenza} Nella pratica i DBMS implementano tecniche di controllo di concorrenza che garantiscono direttamente la serializzabilità delle transazioni concorrenti. Tali tecniche si dividono in due classi principali:
 \begin{list}{}{}
 	\item \textbf{Protocolli ottimistici}: \textbf{permettono l'esecuzione sovrapposta e non sincronizzata di transazioni} ed effettuano un \textbf{controllo sui possibili conflitti generati sono dopo il commit}.\\
 	Ogni transazione effettua liberamente le proprie operazioni sugli oggetti del DB secondo l'ordine temporale con cui le operazioni sono generate.\\
