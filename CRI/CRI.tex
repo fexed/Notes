@@ -127,7 +127,7 @@ Si scambiano pezzi di chiave tramite la rete e unendole a informazioni locali si
 	\texttt{m = D(m, k$_{prv}$)}\\
 	Si rende necessario che la C sia una one-way trapdoor: calcolare il crittogramma deve essere facile (polinomiale), ma decifrare \texttt{c} deve essere computazionalmente difficile (a meno di conoscere la trapdoor, la chiave privata).
 \end{list}
-\paragraph{RSA} Rivest, Shamir, Adleman, 1977. Propongono un sistema a chiave pubblico facile da calcolare e difficile da invertire.
+\paragraph{RSA} Rivest, Shamir, Adleman, 1977. Propongono un sistema a chiave pubblica facile da calcolare e difficile da invertire.
 \paragraph{Vantaggi}
 \begin{list}{}{}
 	\item Comunicazione molti a uno\\
@@ -334,7 +334,7 @@ Non entra in gioco come genero la sequenza, la \textbf{casualità è una proprie
 \paragraph{Conteggio delle sequenze} $\forall\: n, \exists$ sequenze casuali (secondo Kolmogorov) di lunghezza $n$\\
 \textbf{Dim}: $n$, $S = 2^n$ \# sequenze binarie di lunghezza $n$\\
 T = \# sequenze di lunghezza $n$ NON casuali. L'obiettivo è dimostrare che T $<$ S.\\
-Pongo $N$ = \# sequenze binarie di lunghezza $< n - \lceil \log_2 n\rceil = \sum_{i=0}^{n-\lceil \log n\rceil - 1} 2^i = s^{n-\lceil \log n\rceil} - 1$\\
+Pongo $N$ = \# sequenze binarie di lunghezza $< n - \lceil \log_2 n\rceil = \sum_{i=0}^{n-\lceil \log n\rceil - 1} 2^i = 2^{n-\lceil \log n\rceil} - 1$\\
 Tra queste $N$ sequenze ci sono anche i programmi che generano le T sequenze non casuali di lunghezza $n$.\\
 $\Rightarrow T\leq N < S \Rightarrow T < S$\\
 Quindi non solo esistono ma sono anche la \textbf{maggioranza}, essendo enormemente più numerose di quelle non casuali. Lo vediamo studiando il rapporto $$\frac{T}{S}\leq \frac{N}{S} = \frac{2^{n - \lceil\log n\rceil}}{2^n} - \frac{1}{2^n} < \frac{1}{2^{\lceil\log n\rceil}}\:\:\:\lim_{n\to +\infty} \frac{T}{S} = 0$$
@@ -350,7 +350,7 @@ $P$ è una sequenza binaria che rappresenta la codifica del programma complessiv
 \textbf{Paradosso quindi restituisce come risultato la prima sequenza casuale} $|\:|h| - \lceil\log_2 |h|\rceil > |P|$\\
 Quindi se $\exists$ sequenze casuali di qualsiasi lunghezza, quindi certamente ne esisterà una che soddisfa entrambe le condizioni dell'\texttt{if}, che viene generata.\\
 Ma la prima condizione mi dice che il programma rappresentato da $P$ è breve e genera $h$, quindi $h$ non è casuale perché prodotta con un programma breve.\\
-Quindi $K(h) \leq |P|$, cioè $P$ genera $h$) ma $|P| < |h| l \lceil\log_2|h|\rceil$ quindi $h$ non è casuale.\\
+Quindi $K(h) \leq |P|$, cioè $P$ genera $h$, ma $|P| < |h| - \lceil\log_2|h|\rceil$ quindi $h$ non è casuale.\\
 Ma la seconda condizione dice $h$ casuale, giungendo ad un \textbf{paradosso} dato dall'assumere l'esistenza di Random.
 \subsection{Sorgente binaria casuale}
 \paragraph{Generatore} Genera una sequenza di bit con queste proprietà:
@@ -374,13 +374,13 @@ Perché pseudocasuali? Perché sono algoritmi deterministici e brevi, quindi non
 	\item Input: seme (sequenza o valore breve)
 	\item Output: flusso di bit arbitrariamente lungo e periodico.\\
 	Al suo interno contiene una sottosequenza che si \textbf{ripete}, quindi \textbf{un generatore è tanto migliore tanto più è lungo il suo periodo}
-	\item Avengo $s$ = \# bit nel seme e $n$ lunghezza della sequenza ottenuta dal generatore, con $n >> s$, ho \textbf{una sequenza diversa per ogni seme}, con $2^s$ possibili semi.
+	\item Avendo $s$ = \# bit nel seme e $n$ lunghezza della sequenza ottenuta dal generatore, con $n >> s$, ho \textbf{una sequenza diversa per ogni seme}, con $2^s$ possibili semi.
 	\\\# sequenze diverse $2^s << 2^n$ \# sequenze possibili
 \end{list}
 \paragraph{Generatore lineare} $x_i = (a\cdot x_{i-1} + b)$ mod $n$ con $a,b,n$ interi positivi.\\
 Il seme è un valore intero iniziale casuale $x_0$, quindi quando $x_i$ = $x_0$ la sequenza si ripete.\\
 Dobbiamo avere MCD$(b,n)=1$, $(a-1)$ divisibile per ogni fattore primo di $n$ e $(a-1)$ dev'essere un multiplo di 4 se anche $n$ lo è.\\
-Servono per garantire che il generatore produca una permutazione degli interi da 0 a $m-1$
+Servono per garantire che il generatore produca una permutazione degli interi da 0 a $n-1$
 \section{Test statistici}
 Per valutare le sequenze prodotte da un generatore pseudocasuale.\\
 Si valuta se la sequenza presenta le proprietà tipiche di una sequenza casuale:
@@ -394,8 +394,9 @@ Per le applicazioni crittografiche si richiede anche il \textbf{test di prossimo
 \paragraph{Test di prossimo bit} Un generatore binario \textbf{supera} il test di prossimo bit \textbf{se non esiste un algoritmo polinomiale in grado di prevedere l'$i+1$-esimo bit della sequenza a partire dalla conoscenza degli $i$ bit precedentemente generati con probabilità maggiore di 1/2}.\\
 Quindi se si hanno a disposizione risorse polinomiale non si può prevedere il prossimo bit. I generatori che superano questo test sono detti \textbf{generatori crittograficamente sicuri}.
 \paragraph{Generatore polinomiale} Non è crittograficamente sicuro.\\
-$x_i = (a_1 x_{i-1}^t + a_2 x_{i-1}^{t-1} + \ldots + a_t x_{i-1} + a_{t-1})$ mod $n$\\
-$r_i = \frac{x_i}{n}$
+$x_i = (a_1 x_{i-1}^t + a_2 x_{i-1}^{t-1} + \ldots + a_t x_{i-1} + a_{t+1})$ mod $n$\\
+$r_i = \frac{x_i}{n}$\\
+Prima cifra decimale pari $\rightarrow$ 0, dispari $\rightarrow$ 1
 \section{Generatori crittograficamente sicuri}
 \paragraph{Come costruire generatori crittograficamente sicuri}
 Si ricorre alle \textbf{funzioni one-way}: funzioni facili da calcolare ma difficili da invertire, cioè \textbf{computabili in tempo polinomiale ($x\mapsto f(x)$)}, ma \textbf{computazionalmente difficile invertire la funzione ($y\mapsto x=f^{-1}(y)$)}. Come costruire queste funzioni?
