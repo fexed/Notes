@@ -11,6 +11,7 @@
 \usepackage{color}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \usepackage{listings}
+\usepackage{qtree}
 \lstset{
 	language=SQL,
 	breaklines=true,
@@ -66,7 +67,7 @@ Una dipendenza funzionale che poteva essere presente è la seguente: se si aggiu
 	JOIN Prenotazione ON Cliente.CodiceCliente = Prenotazione.CodiceCliente
 	JOIN Volo ON Prenotazione.CodiceVolo = Volo.Codice
 	JOIN Societa ON Cliente.CodiceCliente = Societa.CodiceCliente
-	WHERE DataeOraP.YEAR = "2021"
+	WHERE DataeOraP.YEAR = 2021
 	\end{lstlisting}
 	\item Uso di group by con having, where e sort\\
 	La classifica degli utenti privati fedeli con più di N punti su voli negli ultimi 5 anni.
@@ -80,18 +81,19 @@ Una dipendenza funzionale che poteva essere presente è la seguente: se si aggiu
 	WHERE DataeOraP.YEAR >= 2016
 	GROUP BY Cliente.CodiceCliente
 	HAVING Punti > N
-	SORT ON Punti
+	ORDER BY Punti
 	\end{lstlisting}
 	\item Uso di join, group by con having e where\\
-	La lista delle promozioni sui voli nel 2020, specificando su quanti voli è stata applicata ogni promozione.
+	La lista delle promozioni sui voli nel 2020 su più di 5 voli, specificando su quanti voli è stata applicata ogni promozione.
 	\begin{lstlisting}
 	SELECT Nome, COUNT(CodiceVolo) AS Voli
 	FROM Promozione
 	JOIN PromozioneVolo
 		ON Promozione.Codice = PromozioneVolo.CodicePromozione
 	JOIN Volo on PromozioneVolo.CodiceVolo = Volo.Codice
-	WHERE Volo.DataeOraP.YEAR = "2020"
-	GROUP BY PromozioneVolo.CodiceVolo
+	WHERE Volo.DataeOraP.YEAR = 2020
+	GROUP BY PromozioneVolo.CodicePromozione
+	HAVING Voli > 5
 	\end{lstlisting}
 	\item Uso di select annidata con quantificazione esistenziale\\La lista delle promozioni su voli che assegnano meno di N punti fedeltà.
 	\begin{lstlisting}
@@ -125,11 +127,36 @@ Una dipendenza funzionale che poteva essere presente è la seguente: se si aggiu
 	\end{lstlisting}
 	
 \end{enumerate}
-\pagebreak
 \section{Piani di accesso}
 \begin{enumerate}
 	\item Scrivere un piano di accesso logico delle query 1, 2 e 3
-	\item Scrivere un piano di accesso fisico per i tre piani di accesso logico al punto 1 che non fanno uso di indici e (opzionale) verificare se la sort prima della group by può essere evitata
-	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata
+	\begin{list}{}{}
+		\item[1.]		
+\Tree [.$\Pi_{Nome, PIVA, eMail}$ [.$\sigma_{DataeOraP.YEAR=2021}$ [.$\bowtie$ [.$\bowtie_{CodiceVolo=Codice}$ [.$\bowtie$ Cliente Prenotazione ] Volo ] Società ] ] ]
+
+		\item[2.]		
+		\Tree [.$\tau_{Punti}$ [.$\Pi_{Cognome, Nome, Punti}$ [.$\sigma_{Punti > N}$ [.$\rho_{COUNT(PuntiFedelta)\leftarrow Punti}$ [.$_{CodiceCliente}\gamma_{COUNT(PuntiFedelta)}$ [.$\sigma_{DataeOraP.YEAR \geq 2016}$ [ .$\bowtie$ [.$\bowtie$ [.$\bowtie_{CodiceVolo=Codice}$ [.$\bowtie$ Cliente Biglietto ] Volo ] Fedeltà ] Privato ] ] ] ] ] ] ]
+		\pagebreak
+		\item[3.]		
+		\Tree [.$\Pi_{Nome, Voli}$ [.$\sigma_{Voli>5}$ [.$\rho_{COUNT(CodiceVolo)\leftarrow Voli}$ [.$_{CodicePromozione}\gamma_{COUNT(CodiceVolo)}$ [.$\sigma_{DataeOraP.YEAR=2020}$ [.$\bowtie_{Volo.Codice=CodiceVolo}$ [.$\bowtie_{Promozione.Codice=CodicePromozione}$ Promozione PromozioneVolo ] Volo ] ] ] ] ] ]
+	\end{list}
+	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che non fanno uso di indici e (opzionale) verificare se la sort prima della group by può essere evitata\\1.\Tree [.Project(\{"Nome","PIVA","eMail"\}) [.NestedLoop("C.CodiceCliente=S.CodiceCliente") [.NestedLoop("P.CodiceVolo=V.Codice") [.NestedLoop("C.CodiceCliente=P.CodiceCliente") TableScan("Cliente") TableScan("Prenotazione") ] [.Filter("DataeOraP.YEAR=2021") TableScan("Volo") ] ] TableScan("Società") ] ]\\Per questioni di spazio, laddove possibile i nomi delle tabelle sono stati abbreviati con le loro iniziali.\\\\
+	\pagebreak
+	\begin{flushleft}
+		2. In questo caso la Sort prima di GroupBy può essere evitata ordinando le tabelle sugli attributi di giunzione con SortMerge.\\\Tree [.Project(\{"Cognome,Nome,COUNT(PuntiFedeltà)"\}) [.Sort(\{"COUNT(PuntiFedeltà)"\}) [.Filter("COUNT(PuntiFedeltà$>$N") [.GroupBy\\(\{"CodiceCliente"\},\{"COUNT(PuntiFedeltà)"\}) [ .SortMerge\\("C.CodiceCliente=P.CodiceCliente") [.NestedLoop\\("C.CodiceCliente=F.CodiceCliente") [.NestedLoop\\("B.CodiceVolo=V.Codice") [.NestedLoop\\("C.CodiceCliente=B.CodiceCliente") TableScan\\("Cliente") TableScan\\("Biglietto") ] [.Filter\\("DataeOraP.YEAR$>=$2016") TableScan\\("Volo") ] ] TableScan\\("Fedeltà") ] TableScan\\("Privato") ] ] ] ] ]
+	\end{flushleft}
+		\pagebreak
+	\begin{flushleft}
+		3. Anche in questo caso la Sort prima di GroupBy può essere evitata ordinando le tabelle sugli attributi di giunzione con SortMerge.\\\Tree [.Project(\{"Nome,COUNT(CodiceVolo)"\} [.Filter("COUNT(CodiceVolo)$>$5") [.GroupBy(\{"CodicePromozione"\},\{"COUNT(CodiceVolo)"\}) [.NestedLoop("PV.CodiceVolo=V.Codice") [.SortMerge("P.Codice=PV.CodicePromozione") TableScan("Promozione") TableScan("PromozioneVolo") ] [.Filter("DataeOraP.YEAR=2020") TableScan("Volo") ] ] ] ] ]
+	\end{flushleft}
+	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata\\1.\Tree [.Project(\{"Nome","PIVA","eMail"\}) [.NestedLoop("C.CodiceCliente=S.CodiceCliente") [.NestedLoop("P.CodiceVolo=V.Codice") [.NestedLoop("C.CodiceCliente=P.CodiceCliente") TableScan("Cliente") TableScan("Prenotazione") ] IndexFilter\\("Volo","DataeOraP.YEAR=2021") ] IndexScan\\("Società",\\"C.CodiceCliente=\\S.CodiceCliente") ] ]\\Per questioni di spazio, laddove possibile i nomi delle tabelle sono stati abbreviati con le loro iniziali.\\\\
+	\pagebreak
+	\begin{flushleft}
+		2. In questo caso la Sort prima di GroupBy può essere evitata ordinando le tabelle sugli attributi di giunzione con SortMerge.\\\Tree [.Project(\{"Cognome,Nome,COUNT(PuntiFedeltà)"\}) [.Sort(\{"COUNT(PuntiFedeltà)"\}) [.Filter("COUNT(PuntiFedeltà$>$N") [.GroupBy\\(\{"CodiceCliente"\},\{"COUNT(PuntiFedeltà)"\}) [ .SortMerge\\("C.CodiceCliente=P.CodiceCliente") [.NestedLoop\\("C.CodiceCliente=\\F.CodiceCliente") [.NestedLoop\\("B.CodiceVolo=V.Codice") [.NestedLoop\\("C.CodiceCliente=\\B.CodiceCliente") TableScan\\("Cliente") IndexScan\\("Biglietto",\\"C.CodiceCliente=\\B.CodiceCliente") ] IndexFilter\\("Volo",\\"DataeOraP.YEAR$>=$2016") ] IndexScan\\("Fedeltà",\\"C.CodiceCliente=\\F.CodiceCliente") ] IndexScan\\("Privato",\\"C.CodiceCliente=\\P.CodiceCliente") ] ] ] ] ]
+	\end{flushleft}
+		\pagebreak
+	\begin{flushleft}
+		3. Anche in questo caso la Sort prima di GroupBy può essere evitata ordinando le tabelle sugli attributi di giunzione con SortMerge.\\\Tree [.Project(\{"Nome,COUNT(CodiceVolo)"\} [.Filter("COUNT(CodiceVolo)$>$5") [.GroupBy(\{"CodicePromozione"\},\{"COUNT(CodiceVolo)"\}) [.NestedLoop("PV.CodiceVolo=V.Codice") [.SortMerge("P.Codice=PV.CodicePromozione") TableScan("Promozione") TableScan("PromozioneVolo") ] IndexFilter("Volo","DataeOraP.YEAR=2020") ] ] ] ]
+	\end{flushleft}
 \end{enumerate}
 \end{document}
