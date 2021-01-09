@@ -1201,7 +1201,7 @@ Alice $\rightarrow m\rightarrow$ Bob
 	Calcola $y = g^x$ mod $p$ e \textbf{pubblica} \texttt{k[pub]} $=\langle p,g,y\rangle$
 	\item \textbf{Alice} $0\leq m < p$, si procura \texttt{k[pub]} = $\langle p,g,y\rangle$\\
 	Sceglie a caso $2 \leq r \leq p-2$ \textbf{segreto} e calcola $c = g^r$ mod $p$, cioè un numero casuale $\in Z_p^*$ perché $g$ generatore\\
-	Calcola $d = \left(m\cdot y\right)^r$ mod $p$ e invia a Bob $\langle c,d\rangle$, coppia di crittogrammi: il primo contiene protetta l'informazione su $r$, e $d$ contiene il messaggio $m$
+	Calcola $d = m\cdot \left(y\right)^r$ mod $p$ e invia a Bob $\langle c,d\rangle$, coppia di crittogrammi: il primo contiene protetta l'informazione su $r$, e $d$ contiene il messaggio $m$
 	\item \textbf{Bob} riceve $\langle c,d\rangle$ e decifra: $m = \frac{d}{c^x}$ mod $p$ = $d\cdot\left(c^x\right)^{-1}$ mod $p$ (dove la frazione indica la moltiplicazione per l'inverso)
 \end{list}
 \pagebreak
@@ -1411,7 +1411,7 @@ La sicurezza è basata sulla difficoltà del logaritmo discreto su curve ellitti
 	Consentirebbe di decifrare tutti i crittogrammi successivi.
 \end{list}
 \paragraph{Sicurezza} Per attaccare RSA, DH, El Gamal (algebra modulare) $O(2^{\sqrt{b\cdot\log b}})$, con $b$ = \# bit del modulo (basati su \textbf{index calculus}, sfruttano la proprietà algebrica dei campi $Z_p$)\\
-Per attaccare su curve ellittiche (logaritmo discreto su curva ellittica) $O(2^{\frac{b}{2}})$, con $b$ \# bit dell'ordine di B
+Per attaccare su curve ellittiche (logaritmo discreto su curva ellittica) $O(2^{\frac{b}{2}})$, con $b$ = \# bit dell'ordine di B
 \chapter{Identificazione, Autenticazione e Firma Digitale}
 \paragraph{Identificazione} Un sistema di elaborazione, isolato o in rete, deve \textbf{essere in grado di accertare l'identità di un utente} che richiede di accedere ai suoi servizi.
 \paragraph{Autenticazione} Il destinatario di un messaggio deve \textbf{essere in grado di accertare l'identità del mittente e l'integrità del crittogramma ricevuto}
@@ -1698,7 +1698,7 @@ Interagisce con la CA una sola volta, e poi la gestione delle chiavi pubbliche d
 \textbf{Firma, cifratura e certificazione}
 \begin{list}{}{}
 	\item Il mittente $U$ si procura il certificato cert$_V$ di $V$
-	\item Calcola $h(m)$ e genera la firma $f = (D(h(m), k_U[priv])$
+	\item Calcola $h(m)$ e genera la firma $f = D(h(m), k_U[priv])$
 	\item Calcola il crittogramma $c = C(m, k_V[pub])$
 	\item Spedisce a $V$ la tripla $\langle$ cert$_U, c,f\rangle$\\
 cert$_U$ contiene $k_U[pub]$ e la specificazione della funzione $h$ usata	
@@ -1749,7 +1749,7 @@ La probabilità che P abbia la capacità assunta è almeno $1-\left(\frac{1}{2}\
 	\item \textbf{Correttezza}\\
 	Se P è disonesto (la sua affermazione è falsa), V \textbf{può essere ingannato} con probabilità $\leq \left(\frac{1}{2}\right)^k$ con $k$ scelto da V
 	\item \textbf{Conoscenza zero}\\
-	Se l'affermazione di P è vera, il verificatore V (anche se disonesto) non può alcuna informazione se non la veridicità di questo fatto.
+	Se l'affermazione di P è vera, il verificatore V (anche se disonesto) non può dedurre alcuna informazione se non la veridicità di questo fatto.
 \end{enumerate}
 \subsection{Protocollo di identificazione a conoscenza zero}
 \paragraph{Protocollo di Fiat-Shamir} Uno dei primi nati. P dimostra a V la sua identità senza svelare alcun'altra informazione.\\
