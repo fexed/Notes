@@ -117,12 +117,11 @@ Alcuni clienti hanno delle autorizzazioni speciali.
 	\item Uso di subquery di confronto quantificato usando una subquery\\
 	La lista degli utenti con più di metà delle autorizzazioni possibili.
 	\begin{lstlisting}
-	SELECT NomeUtente, COUNT(UtenteAutorizzazione.Utente) AS Autorizzazioni
+	SELECT NomeUtente, COUNT(UtenteAutorizzazione.Autorizzazione) AS Autorizzazioni
 	FROM Utente
 	JOIN UtenteAutorizzazione ON Utente.Codice = UtenteAutorizzazione.Utente
-	WHERE (Autorizzazioni*2) > 
-		(SELECT COUNT(*)
-		FROM Autorizzazione)
+	WHERE (Autorizzazioni*2) > (SELECT COUNT(*) FROM Autorizzazione)
+	GROUP BY Utente.Codice
 	\end{lstlisting}
 \end{enumerate}
 \pagebreak
@@ -138,14 +137,14 @@ Alcuni clienti hanno delle autorizzazioni speciali.
 		\Tree [.$\pi$\\Nome,Cognome,Notizie [.$\sigma$\\Notizie$>$10 [.$\rho$\\COUNT(*)$\leftarrow$Notizie [.A.Codice$\:\gamma\:$COUNT(*) [.$\sigma$\\DataNascita.YEAR$\geq$2000 [.$\bowtie$\\N.Autore=A.Codice Autore Notizia ] ] ] ] ] ]
 	\end{list}
 	\pagebreak
-	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che non fanno uso di indici e (opzionale) verificare se la sort prima della group by può essere evitata\\Per ragioni di spazio, laddove implicito i nomi delle tabelle sono abbreviati con le iniziali.\\\\1.\Tree [.Project(N.Titolo) [.Filter(A.Nome="Cronaca") [.NestedLoop(NA.Argomento=A.Codice) [.NestedLoop(N.Codice=NA.Argomento) TableScan(Notizia) TableScan(NotiziaArgomento) ] TableScan(Argomento) ] ] ]\\\\\\
+	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che non fanno uso di indici e (opzionale) verificare se la sort prima della group by può essere evitata\\Per ragioni di spazio, laddove implicito i nomi delle tabelle sono abbreviati con le iniziali.\\\\1.\Tree [.Project(N.Titolo) [.NestedLoop(NA.Argomento=A.Codice) [.Filter(A.Nome="Cronaca") TableScan(Argomento) ] [.NestedLoop(N.Codice=NA.Argomento) TableScan(Notizia) TableScan(NotiziaArgomento) ] ] ]\\\\\\
 		2.
 		\Tree [.Sort(COUNT(*)) [.Project(Data,COUNT(*)) [.Filter(COUNT(*)$>$5) [.GroupBy(Data,COUNT(*)) [.Filter(Data.YEAR=2020) SortScan(Notizia,Data) ] ] ] ] ]\\\\Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Notizia in fase di\\scansione.\\\\\\
 		3. \Tree [.Project(Nome,Cognome,COUNT(*)) [.Filter(COUNT(*)$>$10) [.GroupBy(A.Codice,COUNT(*)) [.Filter(DataNascita.YEAR$\geq$2000) [.NestedLoop(N.Autore=A.Codice) SortScan(Autore,Codice) TableScan(Notizia) ] ] ] ] ]\\\\Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Autore in fase di scansione.
 		\pagebreak
-	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata\\1.\Tree [.Project(N.Titolo) [.Filter(A.Nome="Cronaca") [.IndexNestedLoop(A.Codice=NA.Argomento) [.IndexNestedLoop(NA.Argomento=N.Codice) TableScan(Notizia) IndexFilter(NotiziaArgomento,\\Idx$_{\textsl{NA.Argomento}}$,\\NA.Argomento=N.Codice) ] IndexFilter(Argomento,\\Idx$_{\textsl{A.Codice}}$,\\A.Codice=NA.Argomento) ] ] ]\\\\\\
+	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata\\Per ragioni di spazio, laddove implicito i nomi delle tabelle sono abbreviati con le iniziali.\\\\1.\Tree [.Project(N.Titolo) [.Filter(A.Nome="Cronaca") [.IndexNestedLoop(A.Codice=NA.Argomento) [.IndexNestedLoop(NA.Argomento=N.Codice) TableScan(Notizia) IndexFilter(NotiziaArgomento,\\Idx$_{\textsl{NA.Argomento}}$,\\NA.Argomento=N.Codice) ] IndexFilter(Argomento,\\Idx$_{\textsl{A.Codice}}$,\\A.Codice=NA.Argomento) ] ] ]\\\\\\
 		2.
-		\Tree [.Sort(COUNT(*)) [.Project(Data,COUNT(*)) [.Filter(COUNT(*)$>$5) [.GroupBy(Data,COUNT(*)) [.Filter(Data.YEAR=2020) SortScan(Notizia,Data) ] ] ] ] ]\\\\Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Notizia in fase di\\scansione.\\\\\\
+		\Tree [.Sort(COUNT(*)) [.Project(Data,COUNT(*)) [.Filter(COUNT(*)$>$5) [.GroupBy(Data,COUNT(*)) [.IndexFilter(Notizia,Idx$_{\textsl{Data}}$,Data.YEAR=2020) SortScan(Notizia,Data) ] ] ] ] ]\\\\\\
 		3. \Tree [.Project(Nome,Cognome,COUNT(*)) [.Filter(COUNT(*)$>$10) [.GroupBy(A.Codice,COUNT(*)) [.Filter(DataNascita.YEAR$\geq$2000) [.IndexNestedLoop(N.Autore=A.Codice) SortScan(Autore,Codice) IndexFilter(Notizia,Idx$_{\textsl{N.Autore}}$,N.Autore=A.Codice) ] ] ] ] ]\\\\Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Autore in fase di scansione.
 \end{enumerate}
 \end{document}
