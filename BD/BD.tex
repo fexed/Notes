@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{makecell}
+\usepackage{amssymb}
 \graphicspath{ {./img/} }
 \usepackage{color}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -1215,9 +1216,9 @@ Si parla di dipendenza funzionale \textbf{completa} quando X $\rightarrow$ Y e $
 Se X è una superchiave, allora X determina ogni altro attributo della relazione cioè X $\rightarrow$ T. Se X è chiave, allora X $\rightarrow$ T è una dipendenza funzionale completa.
 \paragraph{Proprietà} Da un insieme F di dipendenze funzionali, in generale altre dipendenze funzionali sono "implicate" da F. Per esempio (Matricola $\rightarrow$ CodFisc, CodFisc $\rightarrow$ Cognome allora Matricola $\rightarrow$ Cognome)
 \begin{list}{}{}
-	\item \textbf{Dipendenze implicate}: sia F un insieme di DF sullo schema R, diremo che F \textbf{implica logicamente} X $\rightarrow$ Y (F $|=$ X $\rightarrow$ Y) se ogni istanza $r$ di R che soddisfa F soddisfa anche X $\rightarrow$ Y
+	\item \textbf{Dipendenze implicate}: sia F un insieme di DF sullo schema R, diremo che F \textbf{implica logicamente} X $\rightarrow$ Y (F $\vDash$ X $\rightarrow$ Y) se ogni istanza $r$ di R che soddisfa F soddisfa anche X $\rightarrow$ Y
 	\item \textbf{Dipendenze banali}: implicate dal vuoto.\\
-	Ad esempio $\{\}\:|=\:X \rightarrow Y$
+	Ad esempio $\{\}\:\vDash\:X \rightarrow Y$
 \end{list}
 Come derivare le DF implicate logicamente da F? Usando un \textbf{insieme di regole d'inferenza}.
 \paragraph{Assiomi di Armstrong} Sono in realtà regole d'inferenza:
@@ -1233,11 +1234,11 @@ Si dimostra che valgono anche le seguenti regole:
 	\item \textbf{Decomposizione D}: $\{$Z $\subseteq$ Y, X $\rightarrow$ Y$\}\vdash$ X $\rightarrow$ Z
 \end{list}
 Una derivazione di $f$ da F è una sequenza finita $f_1,\ldots,f_m$ di dipendenze, dove $f_m = f$ e ogni $f_i$ è un elemento di F oppure è ottenuta dalle precedenti dipendenze $f_1\ldots,f_{i-1}$ della derivazione usando una regola d'inferenza.
-\paragraph{Correttezza e completezza} Gli assiomi di Armstrong sono corretti e completi. Attraverso essi, si può dimostrare l'equivalenza della nozione di implicazione logica ($|=$) e di quella di derivazione ($\vdash$): \textbf{se una dipendenza è derivabile con gli assiomi di Armstrong, allora è anche implicata logicamente} (correttezza) e viceversa \textbf{se una dipendenza è implicata logicamente allora è anche derivabile dagli assiomi} (completezza).\\
+\paragraph{Correttezza e completezza} Gli assiomi di Armstrong sono corretti e completi. Attraverso essi, si può dimostrare l'equivalenza della nozione di implicazione logica ($\vDash$) e di quella di derivazione ($\vdash$): \textbf{se una dipendenza è derivabile con gli assiomi di Armstrong, allora è anche implicata logicamente} (correttezza) e viceversa \textbf{se una dipendenza è implicata logicamente allora è anche derivabile dagli assiomi} (completezza).\\
 Formalmente:
 \begin{list}{}{}
-	\item $\forall\:f\:\:\:$ F $\vdash\:f\Rightarrow$ F $|=\:f$
-	\item $\forall\:f\:\:\:$ F $|=\:f\Rightarrow$ F $\vdash\:f$
+	\item $\forall\:f\:\:\:$ F $\vdash\:f\Rightarrow$ F $\vDash\:f$
+	\item $\forall\:f\:\:\:$ F $\vDash\:f\Rightarrow$ F $\vdash\:f$
 \end{list}
 \paragraph{Chiusura di un insieme F} Dato un insieme F di DF, la \textbf{chiusura di F}, denotata con F$^+$, è\\F$^+$ = $\{$X $\rightarrow$ Y $|$ F $\vdash$ X $\rightarrow$ Y$\}$\\
 Si presenta spesso il problema di decidere se una dipendenza funzionale appartiene a F$^+$ (\textbf{problema dell'implicazione}). La sua risoluzione con l'algoritmo banale (di generare F$^+$ applicando ad F ripetutamente gli assiomi di Armstrong) ha una \textbf{complessità esponenziale} rispetto al numero di attributi dello schema.\\\\
