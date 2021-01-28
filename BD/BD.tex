@@ -1259,6 +1259,22 @@ Un algoritmo efficiente per risolverlo senza calcolare F$^+$ parte dal seguente 
 \textbf{Attributo primo}: attributo che appartiene ad almeno una chiave.\\\\
 Il problema di trovare tutte le chiavi di una relazione richiede un algoritmo di complessità esponenziale nel caso peggiore.\\
 Il problema di controllare se un attributo è primo è NP-Completo.
+\pagebreak
+\paragraph{Trovare tutte le chiavi} Per trovare tutte le chiavi di R$\langle$T,F$\rangle$ si parte da un insieme di candidati che hanno come base pari all'insieme T meno tutte le parti destre delle dipendenze funzionali in F. Ogni candidato è un sottoinsieme di T rappresentato come X::(Y), che denota dato Y = $\{$A$_1$, \ldots, A$_n\}$ tutti gli insiemi formati da X e da un qualsiasi insieme di attributi A$_i$.\\
+Quindi se Base sono gli attributi che non appaiono a destra di nessuna dipendenza, tali attributi devono apparire in ogni chiave per cui inizialmente i candidati sono Base::(T - Base).\\\\
+Ogni insieme in X::(Y) è analizzato partendo da X: se è già chiave, allora tutti gli altri insiemi X::(Y) sono scartati, altrimenti si mettono in candidati XA$_1$::(Y-A$_1$), \ldots, XA$_n$::(Y-A$_n$).\\
+Se X non contiene chiavi già trovate in precedenza, e X$^+$ = T, allora X è chiave.\\\\
+Le chiavi trovate dopo saranno per forza più lunghe, e non potranno essere contenute in una chiave già trovata. Questo si assicura aggiungendo i nuovi candidati in coda alla lista (append), mantenendo quindi la lista dei candidati ordinata per lunghezza.
+\subparagraph{Esempio} Con T = $\{$A, B, C, D, E, F$\}$ e F = $\{$C$\rightarrow$D, CF$\rightarrow$B, D$\rightarrow$C, F$\rightarrow$E$\}$\\
+La Base è inizializzata quindi con AF attributi, quindi i candidati sono AF::(BCDE).\\
+Testando AF, la sua chiusura AF$^+ = \{$A, F, E$\}\neq T$, quindi si prosegue. I candidati sono quindi AF::(BCD) - AF:
+\begin{list}{}{}
+	\item AFB$^+ = \{$A, F, B, E$\}\neq T$
+	\item AFC$^+ = \{$A, F, C, E, D, B$\} = T$ è chiave
+	\item AFD$^+ = \{$A, F, D, C, E, B$\} = T$ è chiave
+	\item AFBC non si testa, AFC è chiave
+	\item AFBD non si testa, AFD è chiave
+\end{list}
 \section{Copertura Canonica}
 \paragraph{Copertura} Due insiemi di dipendenze funzionali F e G sullo schema R sono \textbf{equivalenti} F $\equiv$ G $\Leftrightarrow$ F$^+$ = G$^+$\\
 F $\equiv$ G $\Rightarrow$ F è una \textbf{copertura} di G (e G è una copertura di F).
