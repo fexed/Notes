@@ -32,9 +32,10 @@
 Si vuole progettare un sistema di distribuzione di notizie agli utenti.\\\\
 Ogni notizia ha un titolo, autore, testo, data, ora e un'insieme di uno o più argomenti.\\\\
 Ogni argomento ha un nome e può essere di tipo Premium o Economy.\\\\
-Ogni cliente può essere Premium o Economy e iscriversi agli argomenti per cui ricevere notizie.\\Un cliente Premium può iscriversi ad ogni argomento, mentre un cliente Economy può iscriversi solo agli argomenti Economy.\\\\
-Un cliente Premium può ricevere offerte/sconti speciali.\\\\
-Alcuni clienti hanno delle autorizzazioni speciali.
+Un utente può essere un autore e poter inviare articoli, firmandoli con proprio nome e cognome.\\\\
+Ogni utente può essere Premium o Economy e iscriversi agli argomenti per cui ricevere notizie.\\Un utente Premium può iscriversi ad ogni argomento, mentre un utente Economy può iscriversi solo agli argomenti Economy.\\\\
+Un utente Premium può ricevere offerte/sconti speciali.\\\\
+Alcuni utenti hanno delle autorizzazioni speciali.
 \section{Schema Concettuale}
 \begin{center}
 	\includegraphics[scale=0.75]{Concettuale.jpg}
@@ -144,7 +145,7 @@ Alcuni clienti hanno delle autorizzazioni speciali.
 		\pagebreak
 	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata\\Per ragioni di spazio, laddove implicito i nomi delle tabelle sono abbreviati con le iniziali.\\\\1.\Tree [.Project(N.Titolo) [.IndexNestedLoop(NA.Argomento=A.Codice) [.Filter(A.Nome="Cronaca") TableScan(Argomento) ] [.IndexFilter(Idx$_{\textsl{Argomento}}$,NA.Argomento=A.Codice) [.IndexNestedLoop(NA.Argomento=N.Codice) TableScan(Notizia) IndexFilter(NotiziaArgomento,\\Idx$_{\textsl{Argomento}}$),\\NA.Argomento=N.Codice ] ] ] ]\\\\\\
 		2.
-		\Tree [.Sort(COUNT(*)) [.Project(Data,COUNT(*)) [.Filter(COUNT(*)$>$5) [.GroupBy(Data,COUNT(*)) [.IndexFilter(Notizia,Idx$_{\textsl{Data}}$,Data.YEAR=2020) SortScan(Notizia,Data) ] ] ] ] ]\\\\\\
+		\Tree [.Sort(COUNT(*)) [.Project(Data,COUNT(*)) [.Filter(COUNT(*)$>$5) [.GroupBy(Data,COUNT(*)) [.IndexFilter(Idx$_{\textsl{Data}}$,Data.YEAR=2020) SortScan(Notizia,Data) ] ] ] ] ]\\\\\\
 		3. \Tree [.Project(Nome,Cognome,COUNT(*)) [.Filter(COUNT(*)$>$10) [.GroupBy(A.Codice,COUNT(*)) [.Filter(DataNascita.YEAR$\geq$2000) [.IndexNestedLoop(N.Autore=A.Codice) SortScan(Autore,Codice) IndexFilter(Notizia,Idx$_{\textsl{Autore}}$,N.Autore=A.Codice) ] ] ] ] ]\\\\Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Autore in fase di scansione.
 \end{enumerate}
 \end{document}
