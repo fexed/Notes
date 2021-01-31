@@ -1504,6 +1504,15 @@ Nell'insieme \{f$_i$\} vi sono le funzioni di aggregazione presenti nella SELECT
 \hline
 $\bowtie_{\psi_j}$ & \makecell[l]{\texttt{NestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{nested loop} e $\psi_j$ condizione di join\\\texttt{PageNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con il \textbf{page nested loop}\\\texttt{IndexNestedLoop(O$_E$, O$_I$, $\psi_j$)} per la join con l'\textbf{index nested loop}. L'operando interno O$_I$\\è un \texttt{IndexFilter(R, Idx, $\psi_j$)} oppure \texttt{Filter(O, $\psi'$)} con O un \texttt{IndexFilter(R, Idx, $\psi_j$)}.\\Per ogni record $r$ di O$_E$, la condizione $\psi_j$ dell'\texttt{IndexFilter} è quella di giunzione con\\gli attributi di O$_E$ sostituiti dai valori in $r$.\\\texttt{SortMerge(O$_E$, O$_I$, $\psi_j$)} per la giunzione con il \textbf{sort-merge}, con i record di O$_E$ e O$_I$ ordinati\\ sugli attributi di giunzione}
 \end{tabular}
+\pagebreak
+\paragraph{Indice} Struttura dati con informazioni sulla posizione di memorizzazione delle tuple in base al valore del campo chiave. Solo per file sequenziali (ordinati)
+\begin{list}{}{}
+	\item \textbf{Indice primario} quando la chiave di ordinamento del file sequenziale coincide con la chiave di ricerca dell'indice.\\
+	$\langle$K($i$), RID($i$)$\rangle$: il primo campo è lo stesso tipo del campo chiave di ordinamento (PK), il secondo è un puntatore ad un blocco del disco.
+	\item \textbf{Indice secondario} se la chiave di ordinamento e la chiave di ricerca sono diverse.\\
+	Definito su un campo non chiave: il primo campo è dello stesso tipo del campo che non viene usato per ordinare il file ed è chiamato campo di indicizzazione, il secondo è un puntatore ad un blocco del disco.
+\end{list}
+Può essere definito su un insieme di attributi, in questo caso contiene un record per ogni combinazione di valori assunti dagli attributi e può essere usato per rispondere efficientemente ad interrogazioni che specifichino un valore per ciascun attributo.
 \section{Transazioni}
 Durante le transazioni vengono interessati il \textbf{gestore della concorrenza} e il \textbf{gestore dell'affidabilità}.\\
 Le \textbf{transazioni} rappresentano le \textbf{unità di lavoro elementare} (le insiemi di istruzioni SQL) che \textbf{modificano il contenuto di un DB}. Sintatticamente, una transazione è contornata dai comandi \texttt{BEGIN TRANSACTION} e \texttt{END TRANSACTION}, e all'interno possono comparire i comandi di \texttt{COMMIT WORK} e \texttt{ROLLBACK WORK}.
