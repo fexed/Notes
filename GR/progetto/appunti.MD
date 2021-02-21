@@ -2,14 +2,16 @@
 ## Holt-Winters
 0 < A, B, C < 1
 Più grandi -> adattamento rapido ai cambiamenti recenti
+
 Più piccoli -> algoritmo conservativo
+
 Determinati tramite più piccola SSE
 
 ### SSE
-SSE = SUM[i = 1 -> m](y[i] - y^[i])^2
+`SSE = SUM[i = 1 -> m](y[i] - y^[i])^2`
 
 ### Livello
-l[x] = A*y[x] + (1 - A)*(l[x-1] + b[x-1])
+`l[x] = A*y[x] + (1 - A)*(l[x-1] + b[x-1])`
 
 ### Trend
 b[x] = B*(l[x] - l[x-1]) + (1 - B)*b[x-1]
