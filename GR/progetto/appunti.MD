@@ -14,25 +14,25 @@ Determinati tramite più piccola SSE
 `l[x] = A*y[x] + (1 - A)*(l[x-1] + b[x-1])`
 
 ### Trend
-b[x] = B*(l[x] - l[x-1]) + (1 - B)*b[x-1]
+`b[x] = B*(l[x] - l[x-1]) + (1 - B)*b[x-1]`
 
 ### Stagionale
-s[x] = C*(y[x] - l[x]) + (1 - C)*s[x-L]
+`s[x] = C*(y[x] - l[x]) + (1 - C)*s[x-L]`
 
 ### Previsione
-y^[x+m] = l[x] + m*b[x] + s[x - L + 1 + ((m-1) % L)]
+`y^[x+m] = l[x] + m*b[x] + s[x - L + 1 + ((m-1) % L)]`
 Previsione di un numero arbitrario m di punti.
 
 ### Deviazione
-d[t] = C*|y[t] - y^[t]| + (1-C)*d[t-m]
-Superiore y^[t] - D*d[t-m]
-Inferiore y^[t] + D*d[t-m]
+`d[t] = C*|y[t] - y^[t]| + (1-C)*d[t-m]`
+- Superiore `y^[t] - D*d[t-m]`
+- Inferiore `y^[t] + D*d[t-m]`
 Con 2 < D < 3 per le fasce di confidenza
 
 ## RSI
 Quanto violentemente cambia segnale, interno del range, media mobile
 
-RSI = 100 * U/(U + D)
+`RSI = 100 * U/(U + D)`
 - U = media rialzi sul periodo
 - D = media discese sul periodo
 
