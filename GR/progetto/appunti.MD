@@ -51,6 +51,8 @@ Quindi con architettura per mantenimento serie temporale (banalmente array, ma b
 
 Il modulo si "auto-addestra" all'inserimento di un dato: prevede i prossimi e, all'inserimento del successivo, adatta A, B e C in modo da minimizzare la SSE.
 
+-> "adatta" in che modo? **Studiare** come automatizzare adattamento A, B, C
+
 -> flag per attivare-disattivare apprendimento?
 
 ## Aspetti
