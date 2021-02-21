@@ -21,6 +21,7 @@ Determinati tramite più piccola SSE
 
 ### Previsione
 `y^[x+m] = l[x] + m*b[x] + s[x - L + 1 + ((m-1) % L)]`
+
 Previsione di un numero arbitrario m di punti.
 
 ### Deviazione
