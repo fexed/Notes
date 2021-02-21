@@ -53,6 +53,17 @@ Il modulo si "auto-addestra" all'inserimento di un dato: prevede i prossimi e, a
 
 -> flag per attivare-disattivare apprendimento?
 
+## Aspetti
+#### Memorizzazione dei dati
+
+Lascerei il problema al software che va a usare la nostra libreria. Questo perché ritengo sia meglio realizzare una funzionalità "semplice" (predizione e opzionale grafico) ed evitare un aspetto complesso come la manutenzione su file dei dati.
+
+Il programma potrebbe estrapolare quindi dati da un pcap, un database rrd, un database SQL o quant'altro e usare la nostra API per produrre grafici e previsioni.
+
+#### Produzione grafici
+
+Potremmo anche usare rrdgraphv o plot o altre librerie Python già pronte, senza ovviamente stare a scrivere niente da zero.
+
 # Test
 Analisi flusso dati per tot secondi e inserimento dati per tuning A, B, C.
 
