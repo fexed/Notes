@@ -29,9 +29,10 @@ Con 2 < D < 3 per le fasce di confidenza
 
 ## RSI
 Quanto violentemente cambia segnale, interno del range, media mobile
+
 RSI = 100 * U/(U + D)
-U = media rialzi sul periodo
-D = media discese sul periodo
+- U = media rialzi sul periodo
+- D = media discese sul periodo
 
 # Idea
 Modulo Python con
