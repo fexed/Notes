@@ -44,6 +44,7 @@ Modulo Python con
 - costruzione grafici
 - "addestramento" A, B, C di Holt-Winters in base a dati inseriti da misurazioni
 - predizione punto arbitrario grazie a Holt-Winters
+- ma anche possibilità di inserimento manuale dei parametri Holt-Winters
 - calcolo RSI dato il range
 
 Quindi con architettura per mantenimento serie temporale (banalmente array, ma bisogna forse considerare anche il caso di inserimento dati a intervalli irregolari o "buchi" nelle misurazioni, quindi forse meglio matrice timestamp->valore e timestamp preso automaticamente dal modulo quando richiamo metodo inserimento valore).
