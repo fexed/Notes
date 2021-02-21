@@ -1,9 +1,8 @@
 # Elementi
 ## Holt-Winters
 0 < A, B, C < 1
-Più grandi -> adattamento rapido ai cambiamenti recenti
-
-Più piccoli -> algoritmo conservativo
+- Più grandi -> adattamento rapido ai cambiamenti recenti
+- Più piccoli -> algoritmo conservativo
 
 Determinati tramite più piccola SSE
 
