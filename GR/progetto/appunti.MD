@@ -27,6 +27,7 @@ Previsione di un numero arbitrario m di punti.
 `d[t] = C*|y[t] - y^[t]| + (1-C)*d[t-m]`
 - Superiore `y^[t] - D*d[t-m]`
 - Inferiore `y^[t] + D*d[t-m]`
+
 Con 2 < D < 3 per le fasce di confidenza
 
 ## RSI
