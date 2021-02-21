@@ -48,11 +48,14 @@ Modulo Python con
 - calcolo RSI dato il range
 
 Quindi con architettura per mantenimento serie temporale (banalmente array, ma bisogna forse considerare anche il caso di inserimento dati a intervalli irregolari o "buchi" nelle misurazioni, quindi forse meglio matrice timestamp->valore e timestamp preso automaticamente dal modulo quando richiamo metodo inserimento valore).
+
 Il modulo si "auto-addestra" all'inserimento di un dato: prevede i prossimi e, all'inserimento del successivo, adatta A, B e C in modo da minimizzare la SSE.
+
 -> flag per attivare-disattivare apprendimento?
 
 # Test
 Analisi flusso dati per tot secondi e inserimento dati per tuning A, B, C.
+
 Produrre grafici e misurare per verificare predizioni.
 
 ## Test possibili
