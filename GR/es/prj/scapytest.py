@@ -2,7 +2,11 @@
 
 from scapy.all import *
 from collections import Counter
+from datetime import datetime
 import argparse
+
+dt = datetime.now()
+pcap = str(dt.year) + str(dt.month) + str(dt.day) + "_pkts.pcap"
 
 # Params parsing
 def parse_args():
@@ -17,7 +21,7 @@ def captured(packet):
     global pkts
     global packet_counts
     pkts += 1
-    wrpcap("pkts.pcap", packet, append=True)
+    wrpcap(pcap, packet, append=True)
     try:
         key = tuple(sorted([packet[0][1].src, packet[0][1].dst]))
         packet_counts.update([key])
