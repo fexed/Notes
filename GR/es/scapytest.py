@@ -17,6 +17,7 @@ def captured(packet):
     global pkts
     global packet_counts
     pkts += 1
+    wrpcap("pkts.pcap", packet, append=True)
     try:
         key = tuple(sorted([packet[0][1].src, packet[0][1].dst]))
         packet_counts.update([key])
@@ -31,4 +32,4 @@ print("Sniffing on " + iface)
 pkts = 0
 sniff(prn=captured)
 print(str(pkts))
-print("\n".join(f"{f'{key[0]} - {key[1]}'}\t\t{count} packets" for key, count in packet_counts.items()))
+print("\n".join(f"{f'{key[0]} -> {key[1]}'}\t\t{count} packets" for key, count in packet_counts.items()))
