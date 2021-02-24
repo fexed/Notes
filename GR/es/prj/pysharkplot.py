@@ -16,17 +16,17 @@ args = parse_args()
 pcap = args.pcap
 copyfile(pcap, "tmp.pcap")
 capture = pyshark.FileCapture("tmp.pcap")
-ip = []
-counts = []
-for pkt in capture:
-	if ("IP" in pkt):
-		if (not(pkt.ip.src in ip)):
-			ip.append(pkt.ip.src)
-			counts.append(0)
-		else:
-			idx = ip.index(pkt.ip.src)
-			n = counts[idx]
-			counts[idx] = n + 1
+nums = []
+dates = []
+n = 0
+try:
+	for pkt in capture:
+		n = n + int(pkt.length)
+		nums.append(n)
+		dates.append(float(pkt.frame_info.time_epoch))
+		if ("IP" in pkt):
 			print ("\r\033[F\033[K" + pkt.ip.src + " " + str(n))
-plt.barh(ip, counts)
+except:
+	print("\r\033[F\033[K" + "Err")
+plt.plot(dates, nums)
 plt.show()

@@ -27,7 +27,7 @@ def captured(packet):
         packet_counts.update([key])
         return f"\r\033[F\033[K #{sum(packet_counts.values())}: {packet[0][1].src} > {packet[0][1].dst}"
     except:
-        return ""
+        return f"\r\033[F\033[K Err"
 
 packet_counts = Counter()
 args = parse_args()
