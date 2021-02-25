@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from shutil import copyfile
 import argparse
 from inspect import getmembers
+from datetime import datetime
 
 # Params
 def parse_args():
@@ -20,14 +21,16 @@ capture = pyshark.FileCapture("tmp.pcap")
 nums = []
 dates = []
 n = 0
+count = 0
 itr = iter(capture)
 try:
 	while True:
 		try:
 			pkt = next(itr)
-			n = n + int(pkt.length)
-			nums.append(n)
+			count = count + 1
 			dates.append(float(pkt.frame_info.time_epoch))
+			n = int(pkt.length)
+			nums.append(n)
 			if ("IP" in pkt):
 				print ("\r\033[F\033[K" + pkt.ip.src + " " + str(n))
 		except StopIteration:
@@ -38,5 +41,7 @@ except StopIteration:
 	pass
 finally:
 	del itr
+print("Pacchetti: " + str(count))
+print("Da " + str(datetime.fromtimestamp(dates[0])) + " a " + str(datetime.fromtimestamp(dates[len(dates) - 1])))
 plt.plot(dates, nums)
 plt.show()
