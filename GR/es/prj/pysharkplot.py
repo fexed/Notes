@@ -3,10 +3,12 @@
 import pyshark
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as md
 from shutil import copyfile
 import argparse
 from inspect import getmembers
-from datetime import datetime
+from datetime import datetime, timedelta
+import os
 
 # Params
 def parse_args():
@@ -22,6 +24,7 @@ nums = []
 dates = []
 n = 0
 count = 0
+errors = 0
 itr = iter(capture)
 try:
 	while True:
@@ -32,16 +35,42 @@ try:
 			n = int(pkt.length)
 			nums.append(n)
 			if ("IP" in pkt):
-				print ("\r\033[F\033[K" + pkt.ip.src + " " + str(n))
+				print ("\r\033[F\033[K" + "#" + str(count) + " " + pkt.ip.src + " " + str(n))
 		except StopIteration:
 			break
-		except:
-			print ("\r\033[F\033[K" + "Error")
+		except Exception as ex:
+			errors = errors + 1
+			print ("\r\033[F\033[K" + repr(ex))
+			pass
 except StopIteration:
 	pass
 finally:
 	del itr
 print("Pacchetti: " + str(count))
+print("\tErrori: " + str(errors))
 print("Da " + str(datetime.fromtimestamp(dates[0])) + " a " + str(datetime.fromtimestamp(dates[len(dates) - 1])))
-plt.plot(dates, nums)
+os.remove("tmp.pcap")
+
+intervals = []
+everytots = []
+start = -1
+sum = 0
+j = 0
+for i in range(len(dates)):
+	if (start == -1):
+		start = i
+		sum = sum + nums[i]
+	else:
+		elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start])
+		sum = sum + nums[i]
+		if (elapsed.total_seconds() > 30):
+			j = j + 1
+			everytots.append(sum)
+			intervals.append(datetime.fromtimestamp(dates[i]))
+			sum = 0
+			start = -1
+xfmt = md.DateFormatter('%H:%M')
+plt.gca().xaxis.set_major_formatter(xfmt)
+plt.plot(intervals, everytots)
+plt.xticks(rotation=45)
 plt.show()
