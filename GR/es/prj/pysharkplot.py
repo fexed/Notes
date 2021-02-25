@@ -26,26 +26,22 @@ n = 0
 count = 0
 errors = 0
 itr = iter(capture)
-try:
-	while True:
-		try:
-			pkt = next(itr)
-			count = count + 1
-			dates.append(float(pkt.frame_info.time_epoch))
-			n = int(pkt.length)
-			nums.append(n)
-			if ("IP" in pkt):
-				print ("\r\033[F\033[K" + "#" + str(count) + " " + pkt.ip.src + " " + str(n))
-		except StopIteration:
-			break
-		except Exception as ex:
-			errors = errors + 1
-			print ("\r\033[F\033[K" + repr(ex))
-			pass
-except StopIteration:
-	pass
-finally:
-	del itr
+while True:
+	try:
+		pkt = next(itr)
+		count = count + 1
+		dates.append(float(pkt.frame_info.time_epoch))
+		n = int(pkt.length)
+		nums.append(n)
+		if ("IP" in pkt):
+			print ("\r\033[F\033[K" + "#" + str(count) + " " + pkt.ip.src + " " + str(n))
+	except StopIteration:
+		break
+	except Exception as ex:
+		errors = errors + 1
+		print ("\r\033[F\033[K" + repr(ex))
+		pass
+del itr
 print("Pacchetti: " + str(count))
 print("\tErrori: " + str(errors))
 print("Da " + str(datetime.fromtimestamp(dates[0])) + " a " + str(datetime.fromtimestamp(dates[len(dates) - 1])))
