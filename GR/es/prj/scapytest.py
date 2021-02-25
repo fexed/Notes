@@ -1,12 +1,14 @@
 #!\bin\python3
 
 from scapy.all import *
+from scapy.utils import PcapWriter
 from collections import Counter
 from datetime import datetime
 import argparse
 
 dt = datetime.now()
 pcap = str(dt.year) + str(dt.month) + str(dt.day) + "_pkts.pcap"
+pktdump = PcapWriter(pcap, append=True, sync=True)
 
 # Params parsing
 def parse_args():
@@ -21,11 +23,12 @@ def captured(packet):
     global pkts
     global packet_counts
     pkts += 1
-    wrpcap(pcap, packet, append=True)
+    #pktdump.write(packet)
     try:
+        pktdump.write(packet)
         key = tuple(sorted([packet[0][1].src, packet[0][1].dst]))
         packet_counts.update([key])
-        return f"\r\033[F\033[K #{sum(packet_counts.values())}: {packet[0][1].src} > {packet[0][1].dst}"
+        return f"\r\033[F\033[K #{sum(packet_counts.values())}: {packet[0][1].src} -> {packet[0][1].dst}"
     except:
         return f"\r\033[F\033[K Err"
 
