@@ -19,7 +19,7 @@ def parse_args():
 args = parse_args()
 pcap = args.pcap
 copyfile(pcap, "tmp.pcap")
-capture = pyshark.FileCapture("tmp.pcap")
+capture = pyshark.FileCapture("tmp.pcap", keep_packets=False)
 nums = []
 dates = []
 n = 0
