@@ -22,17 +22,20 @@ def parse_args():
 def captured(packet):
     global pkts
     global packet_counts
-    pkts += 1
-    pktdump.write(packet)
+    pkts += 1 # Conteggio
+    pktdump.write(packet) # Scrittura su pcap
+    # BUG?: se pacchetti ricevuti troppo velocemente, pcap diviene malformato.
+    # Cioè in lettura con pyshark dà XMLSyntaxError('invalid character in attribute value, line x, column y')
+    # rendendo impossibile lettura del resto del pcap anche se ha ulteriori pacchetti.
     try:
-        return f"\r\033[F\033[K #{str(pkts)}: {packet[0][1].src} -> {packet[0][1].dst}"
+        return f"\r\033[F\033[K #{str(pkts)}: {packet[0][1].src} -> {packet[0][1].dst}" # Output
     except Exception as ex:
-        return f"\r\033[F\033[K" + repr(ex)
+        return f"\r\033[F\033[K" + repr(ex) # Output errore
 
-packet_counts = Counter()
+packet_counts = Counter() # Contatore
 args = parse_args()
-iface = args.interface
-print("Sniffing on " + iface)
+iface = args.interface # Interfaccia da cui ascoltare, default wlp1s0
+print("Sniffing on " + iface) # Output
 pkts = 0
-sniff(prn=captured)
-print(str(pkts) + " packets")
+sniff(prn=captured) # Ascolta e scrive su pcap ogni pacchetto tramite captured(packet)
+print(str(pkts) + " packets") # Riepilogo
