@@ -1,6 +1,7 @@
 #!\bin\python3
 
 import pyshark
+import APIForecast
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
@@ -69,11 +70,22 @@ for i in range(len(dates)):
 			j = j + 1
 			everytots.append(sum)
 			intervals.append(datetime.fromtimestamp(dates[i]))
+			lastdate = datetime.fromtimestamp(dates[i])
 			sum = 0
 			start = -1
+try:
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 4, 0.2, 0.5, 0.1, len(everytots) // 2)
+except ZeroDivisionError:
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, 0.2, 0.5, 0.1, len(everytots))
+for r in range(len(everytots) // 2):
+	lastdate = lastdate + timedelta(0, interval)
+	intervals.append(lastdate)
+
 xfmt = md.DateFormatter('%H:%M') # Etichette plot
 plt.gca().xaxis.set_major_formatter(xfmt) # ^
-plt.plot(intervals, everytots) # Generazione grafico
+plt.plot(intervals[0:len(everytots)], everytots) # Generazione grafico
+plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
+plt.plot(intervals, dev, ':')
 plt.xticks(rotation=45) # Ruoto etichette per visibilità
 plt.xlabel("Time")
 plt.ylabel("Bytes")
