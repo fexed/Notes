@@ -75,4 +75,7 @@ xfmt = md.DateFormatter('%H:%M') # Etichette plot
 plt.gca().xaxis.set_major_formatter(xfmt) # ^
 plt.plot(intervals, everytots) # Generazione grafico
 plt.xticks(rotation=45) # Ruoto etichette per visibilità
+plt.xlabel("Time")
+plt.ylabel("Bytes")
+plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds")
 plt.show() # Output grafico
