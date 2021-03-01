@@ -14,11 +14,14 @@ import os
 def parse_args():
 	parser = argparse.ArgumentParser(description='Simple scripts that produces a plot based on an input pcap')
 	parser.add_argument('--pcap', type=str, required=True, help='pcap from which the script reads the packets')
+	parser.add_argument('--interval', type=int, required=False, default=30, help='number of seconds of the interval')
+	#TODO: Tradurre meglio 
 	return parser.parse_args()
 
 # Pcap da cui leggere pacchetti
 args = parse_args()
 pcap = args.pcap
+interval = args.interval
 copyfile(pcap, "tmp.pcap")
 capture = pyshark.FileCapture("tmp.pcap", keep_packets=False)
 
@@ -62,7 +65,7 @@ for i in range(len(dates)):
 	else:
 		elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start]) # Guardo quanto è passato
 		sum = sum + nums[i] # Sommo i byte
-		if (elapsed.total_seconds() > 30): # Dati ogni 30s
+		if (elapsed.total_seconds() > interval): # Dati ogni interval secondi
 			j = j + 1
 			everytots.append(sum)
 			intervals.append(datetime.fromtimestamp(dates[i]))
