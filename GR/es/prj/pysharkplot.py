@@ -16,6 +16,9 @@ def parse_args():
 	parser = argparse.ArgumentParser(description='Simple scripts that produces a plot based on an input pcap')
 	parser.add_argument('--pcap', type=str, required=True, help='pcap from which the script reads the packets')
 	parser.add_argument('--interval', type=int, required=False, default=30, help='number of seconds of the interval')
+	parser.add_argument('--alpha', type=float, required=True, help='alpha parameter for Holt-Winters forecasting')
+	parser.add_argument('--beta', type=float, required=True, help='beta parameter for Holt-Winters forecasting')
+	parser.add_argument('--gamma', type=float, required=True, help='gamma parameter for Holt-Winters forecasting')
 	#TODO: Tradurre meglio 
 	return parser.parse_args()
 
@@ -23,6 +26,9 @@ def parse_args():
 args = parse_args()
 pcap = args.pcap
 interval = args.interval
+alpha = args.alpha
+beta = args.beta
+gamma = args.gamma
 copyfile(pcap, "tmp.pcap")
 capture = pyshark.FileCapture("tmp.pcap", keep_packets=False)
 
@@ -74,20 +80,28 @@ for i in range(len(dates)):
 			sum = 0
 			start = -1
 try:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 4, 0.2, 0.5, 0.1, len(everytots) // 2)
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, len(everytots) // 2)
 except ZeroDivisionError:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, 0.2, 0.5, 0.1, len(everytots))
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, alpha, beta, gamma, len(everytots))
 for r in range(len(everytots) // 2):
 	lastdate = lastdate + timedelta(0, interval)
 	intervals.append(lastdate)
+ubound = []
+lbound = []
+for i in range(len(res)):
+	ubound.append(res[i] + 2.5 * dev[i%(len(everytots)//2)])
+	lbound.append(res[i] - 2.5 * dev[i%(len(everytots)//2)])
 
 xfmt = md.DateFormatter('%H:%M') # Etichette plot
 plt.gca().xaxis.set_major_formatter(xfmt) # ^
+
 plt.plot(intervals[0:len(everytots)], everytots) # Generazione grafico
-plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
-plt.plot(intervals, dev, ':')
+#plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
+plt.plot(intervals[0:len(everytots)], ubound[0:len(everytots)], ':')
+plt.plot(intervals[0:len(everytots)], lbound[0:len(everytots)], ':')
+
 plt.xticks(rotation=45) # Ruoto etichette per visibilità
 plt.xlabel("Time")
 plt.ylabel("Bytes")
-plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds")
+plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds with Holt-Winters forecasting")
 plt.show() # Output grafico
