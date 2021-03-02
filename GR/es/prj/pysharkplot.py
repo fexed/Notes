@@ -19,7 +19,7 @@ def parse_args():
 	parser.add_argument('--alpha', type=float, required=True, help='alpha parameter for Holt-Winters forecasting')
 	parser.add_argument('--beta', type=float, required=True, help='beta parameter for Holt-Winters forecasting')
 	parser.add_argument('--gamma', type=float, required=True, help='gamma parameter for Holt-Winters forecasting')
-	#TODO: Tradurre meglio 
+	#TODO: Tradurre meglio
 	return parser.parse_args()
 
 # Pcap da cui leggere pacchetti
@@ -79,29 +79,41 @@ for i in range(len(dates)):
 			lastdate = datetime.fromtimestamp(dates[i])
 			sum = 0
 			start = -1
-try:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, len(everytots) // 2)
-except ZeroDivisionError:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, alpha, beta, gamma, len(everytots))
+
 for r in range(len(everytots) // 2):
 	lastdate = lastdate + timedelta(0, interval)
 	intervals.append(lastdate)
-ubound = []
-lbound = []
-for i in range(len(res)):
-	ubound.append(res[i] + 2.5 * dev[i%(len(everytots)//2)])
-	lbound.append(res[i] - 2.5 * dev[i%(len(everytots)//2)])
 
-xfmt = md.DateFormatter('%H:%M') # Etichette plot
-plt.gca().xaxis.set_major_formatter(xfmt) # ^
+while True:
+	try:
+		res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, len(everytots) // 2)
+	except ZeroDivisionError:
+		res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, alpha, beta, gamma, len(everytots))
 
-plt.plot(intervals[0:len(everytots)], everytots) # Generazione grafico
-#plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
-plt.plot(intervals[0:len(everytots)], ubound[0:len(everytots)], ':')
-plt.plot(intervals[0:len(everytots)], lbound[0:len(everytots)], ':')
+	ubound = []
+	lbound = []
+	for i in range(len(res)):
+		ubound.append(res[i] + 2.5 * dev[i%(len(everytots)//2)])
+		lbound.append(res[i] - 2.5 * dev[i%(len(everytots)//2)])
 
-plt.xticks(rotation=45) # Ruoto etichette per visibilità
-plt.xlabel("Time")
-plt.ylabel("Bytes")
-plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds with Holt-Winters forecasting")
-plt.show() # Output grafico
+	xfmt = md.DateFormatter('%H:%M') # Etichette plot
+	plt.gca().xaxis.set_major_formatter(xfmt) # ^
+
+	plt.plot(intervals[0:len(everytots)], everytots) # Generazione grafico
+	plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
+	plt.plot(intervals, ubound, ':')
+	plt.plot(intervals, lbound, ':')
+
+	plt.xticks(rotation=45) # Ruoto etichette per visibilità
+	plt.xlabel("Time")
+	plt.ylabel("Bytes")
+	plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds with Holt-Winters forecasting")
+	plt.show() # Output grafico
+
+	inp = input("Redo graph? Y/N ")
+	if (inp.upper() == "Y"):
+		alpha = float(input("Input alpha parameter (curr " + str(alpha) + ") "))
+		beta = float(input("Input beta parameter (curr " + str(beta) + ") "))
+		gamma = float(input("Input gamma parameter (curr " + str(gamma) + ") "))
+	else:
+		break
