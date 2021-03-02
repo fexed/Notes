@@ -107,7 +107,7 @@ while True:
 	plt.xticks(rotation=45) # Ruoto etichette per visibilità
 	plt.xlabel("Time")
 	plt.ylabel("Bytes")
-	plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds with Holt-Winters forecasting")
+	plt.title("Bytes from " + pcap + " every " + str(interval) + " seconds\\Holt-Winters forecasting (alpha = " + str(alpha) + ", beta = " + str(beta) + ", gamma = " + str(gamma) + ")")
 	plt.show() # Output grafico
 
 	inp = input("Redo graph? Y/N ")
