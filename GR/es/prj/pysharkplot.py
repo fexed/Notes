@@ -80,29 +80,31 @@ for i in range(len(dates)):
 			sum = 0
 			start = -1
 
-for r in range(len(everytots) // 2):
-	lastdate = lastdate + timedelta(0, interval)
-	intervals.append(lastdate)
+#for r in range(len(everytots) // 2):
+lastdate = lastdate + timedelta(0, interval)
+intervals.append(lastdate)
+lastdate = lastdate + timedelta(0, interval)
+intervals.append(lastdate)
 
 while True:
 	try:
-		res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, len(everytots) // 2)
+		res = APIForecast.double_exponential_smoothing(everytots, alpha, beta)
 	except ZeroDivisionError:
-		res,dev = APIForecast.triple_exponential_smoothing(everytots, 1, alpha, beta, gamma, len(everytots))
+		res = APIForecast.double_exponential_smoothing(everytots, alpha, beta)
 
-	ubound = []
-	lbound = []
-	for i in range(len(res)):
-		ubound.append(res[i] + 2.5 * dev[i%(len(everytots)//2)])
-		lbound.append(res[i] - 2.5 * dev[i%(len(everytots)//2)])
+	#ubound = []
+	#lbound = []
+	#for i in range(len(res)):
+	#	ubound.append(res[i] + 2.5 * dev[i%(len(everytots)//2)])
+	#	lbound.append(res[i] - 2.5 * dev[i%(len(everytots)//2)])
 
 	xfmt = md.DateFormatter('%H:%M') # Etichette plot
 	plt.gca().xaxis.set_major_formatter(xfmt) # ^
 
 	plt.plot(intervals[0:len(everytots)], everytots) # Generazione grafico
-	plt.plot(intervals[len(everytots):len(intervals)], res[len(everytots):len(intervals)], '--')
-	plt.plot(intervals, ubound, ':')
-	plt.plot(intervals, lbound, ':')
+	plt.plot(intervals, res, '--')
+	#plt.plot(intervals, ubound, ':')
+	#plt.plot(intervals, lbound, ':')
 
 	plt.xticks(rotation=45) # Ruoto etichette per visibilità
 	plt.xlabel("Time")

@@ -1,3 +1,5 @@
+
+
 def exponential_smoothing(series, alpha):
     result = [series[0]] # first value is same as series
     for i in range(1, len(series)):
@@ -5,6 +7,9 @@ def exponential_smoothing(series, alpha):
     # Now append the prediction
     result.append(alpha * series[i] + (1 - alpha) * result[i])
     return result
+
+
+
 
 def double_exponential_smoothing(series, alpha, beta):
     result = [series[0]]
@@ -20,11 +25,16 @@ def double_exponential_smoothing(series, alpha, beta):
         result.append(level+trend)
     return result
 
+
+
+
+
 def initial_trend(series, slen):
     sum = 0.0
     for i in range(slen):
         sum += float(series[i+slen] - series[i]) / slen
     return sum / slen
+
 
 def initial_seasonal_components(series, slen):
     seasonals = {}
@@ -41,6 +51,8 @@ def initial_seasonal_components(series, slen):
             sum_of_vals_over_avg += series[slen*j+i]-season_averages[j]
         seasonals[i] = sum_of_vals_over_avg/n_seasons
     return seasonals
+
+
 
 def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
     result = []
