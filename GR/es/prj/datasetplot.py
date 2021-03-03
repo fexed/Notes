@@ -31,7 +31,11 @@ alpha = args.alpha
 beta = args.beta
 gamma = args.gamma
 
-nums = Dataset.createDataset() # Byte
+nums = []
+for i in range(5):
+	l = Dataset.createDataset()
+	for n in l:
+		nums.append(n) # Byte
 dates = [] # Timestamps
 n = 0 # Temp (più che altro per output)
 count = 0 # Conteggio (output)
@@ -53,11 +57,11 @@ everytots = nums # Dato su ogni intervallo
 lastdate = dates[len(dates) - 1]
 
 try:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, 144)
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, 288, alpha, beta, gamma, 288)
 except ZeroDivisionError:
-	res,dev = APIForecast.triple_exponential_smoothing(everytots, len(everytots) // 2, alpha, beta, gamma, 144)
+	res,dev = APIForecast.triple_exponential_smoothing(everytots, 288, alpha, beta, gamma, 288)
 
-for f in range(144):
+for f in range(288):
 	lastdate = lastdate + timedelta(minutes=5)
 	intervals.append(lastdate)
 
