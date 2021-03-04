@@ -136,7 +136,7 @@ elif (alpha != -1): # Single Exponential
 	plt.title("Bytes from generated dataset every 5 minutes\nSingle Exponential forecasting (alpha = " + str(alpha) + ")")
 	plt.show() # Output grafico
 else: # Fitting
-	print("Fitting alpha, beta, gamma parameters for Holt-Winter forecasting")
+	print("Fitting alpha, beta, gamma parameters for Holt-Winter forecasting with Nelder-Mead algorithm")
 
 	# Parametri di partenza
 	alpha, beta, gamma = round(random.uniform(0, 1), 3), round(random.uniform(0, 1), 3), round(random.uniform(0, 1), 3)
@@ -144,7 +144,7 @@ else: # Fitting
 
 	# Parametri Nelder-Mead
 	a, g, r, s = 1., 2., -0.5, 0.5 # Parametri standard (Wikipedia)
-	step = 0.01 # Step di modifica dei parametri
+	step = 0.001 # Step di modifica dei parametri
 	noimprovthr = 10e-6 # Soglia di non miglioramento
 	noimprovbrk = 10 # Ferma dopo 10 cicli dove non migliora abbastanza
 
@@ -164,13 +164,14 @@ else: # Fitting
 	res.append([[alpha, beta, gamma], SSE(nums, prev)])
 
 	iterazioni = 0
+	data = []
 	while True:
 		# Ordinamento
 		res.sort(key = lambda x : x[1])
 		best = res[0][1]
-		print("Migliore fin'ora: " + str(best))
+		print("\r\033[F\033[K\r\033[F\033[K\r\033[F\033[K\r\033[F\033[K\r\033[F\033[K" + "{0:0=3d}".format(iterazioni) + ".\n\tBest SSE: " + "{:.6f}".format(best) + "\n\talpha = " + "{:.5f}".format(res[0][0][0]) + "\n\tbeta = " + "{:.5f}".format(res[0][0][1]) + "\n\tgamma = " + "{:.5f}".format(res[0][0][2]))
+		data.append([best, res[0][0][0], res[0][0][1], res[0][0][2]])
 
-		# TODO check max iterazioni
 		iterazioni += 1
 
 		if best < prevbest - noimprovthr:
