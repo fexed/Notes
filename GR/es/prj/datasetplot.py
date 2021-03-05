@@ -146,19 +146,22 @@ elif alpha != -1:  # Single Exponential
     plt.show()  # Output grafico
 else:  # Fitting
     print("Fitting data...")
-    alpha, beta, gamma, sse = APIForecast.fit(nums)
+    alpha, beta, gamma, SSE = APIForecast.fit(nums)
 
-    print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    # print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    SSE = sse(nums, res)
+    # SSE = sse(nums, res)
     MSE = SSE / count
     strSSE = "{:.5f}".format(SSE)
     strMSE = "{:.5f}".format(MSE)
+    stralpha = "{:.5f}".format(alpha)
+    strbeta = "{:.5f}".format(beta)
+    strgamma = "{:.5f}".format(gamma)
 
     print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
