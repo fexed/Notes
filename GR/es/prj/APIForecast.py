@@ -85,11 +85,11 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
 
 
 def fit(nums):
-    print("Fitting alpha, beta, gamma parameters for Holt-Winter forecasting with Nelder-Mead algorithm")
+    # print("Fitting alpha, beta, gamma parameters for Holt-Winter forecasting with Nelder-Mead algorithm")
 
     # Parametri di partenza
     alpha, beta, gamma = round(random.uniform(0, 1), 3), round(random.uniform(0, 1), 3), round(random.uniform(0, 1), 3)
-    print("Starting with\n\talpha = " + str(alpha) + "\n\tbeta = " + str(beta) + "\n\tgamma = " + str(gamma))
+    # print("Starting with\n\talpha = " + str(alpha) + "\n\tbeta = " + str(beta) + "\n\tgamma = " + str(gamma))
 
     # Parametri Nelder-Mead
     a, g, r, s = 1., 2., -0.5, 0.5  # Parametri standard (Wikipedia)
