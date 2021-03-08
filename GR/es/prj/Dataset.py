@@ -6,12 +6,12 @@ from random import *
 def createDataset():
     dataset = []
     for i in range(108): # 00 to 09
-        dataset.append(0)
+        dataset.append(randint(0,10))
     for i in range(48): # 09 to 13 (Work)
         elem = randint(50,70)
         dataset.append(elem)
     for i in range(12): # 13 to 14
-        elem = randint(0, 10)
+        elem = randint(0,10)
         dataset.append(elem)
     for i in range(48): # 14 to 18 (Work)
         elem = randint(50,70)
@@ -23,7 +23,7 @@ def createDataset():
         elem = randint(200,250)
         dataset.append(elem)
     for i in range(12): # 23 to 24
-        dataset.append(0)
+        dataset.append(randint(0,10))
     return dataset
 
 def dataToJson(dataset, filename):
