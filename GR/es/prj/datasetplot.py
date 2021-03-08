@@ -17,16 +17,14 @@ import os
 
 # Params
 def parse_args():
-    parser = argparse.ArgumentParser(description='Simple scripts that produces a plot based on an input dataset')
+    parser = argparse.ArgumentParser(description='Simple script that generates a plot based on an input dataset.json')
     parser.add_argument('--dataset', type=str, required=False, default="NULL", help='dataset from which the script reads the values')
-    # parser.add_argument('--interval', type=int, required=False, default=30, help='number of seconds of the interval')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
                         help='alpha parameter for Holt-Winters forecasting')
     parser.add_argument('--beta', type=float, required=False, default=-1,
                         help='beta parameter for Holt-Winters forecasting')
     parser.add_argument('--gamma', type=float, required=False, default=-1,
                         help='gamma parameter for Holt-Winters forecasting')
-    # TODO: Tradurre meglio
     return parser.parse_args()
 
 
@@ -37,26 +35,25 @@ def sse(values, predictions):
     return SSE
 
 
-# Pcap da cui leggere pacchetti
+# Arguments
 args = parse_args()
-dataset = args.dataset
-# interval = args.interval
+dataset = args.dataset  # Dataset if present
 
-nums = []  # Dati
+nums = []  # Data
 dates = []  # Timestamps
-count = 0  # Conteggio (output)
-errors = 0  # Errori (output)
+count = 0  # Counting (output)
+errors = 0  # Errors (output)
 if dataset == "NULL":
 	for i in range(5):
 	    l = Dataset.createDataset()
 	    for n in l:
-	        nums.append(n)  # Byte
-	n = 0  # Temp (più che altro per output)
+	        nums.append(n)
+	n = 0  # Temp (output)
 	now = datetime.combine(datetime.today(), time.min)
 	for n in nums:
 		count = count + 1
 		dates.append(now)
-		now = now + timedelta(minutes=5)
+		now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
 		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
 else:
 	nums = json.load(open(dataset, "r"))
@@ -68,21 +65,18 @@ else:
 		now = now + timedelta(minutes=5)
 		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
 
-print("Dati: " + str(count))  # Output
-print("-\tErrori: " + str(errors))
-print("Da " + dates[0].strftime("%Y-%m-%d %H:%M:%S") + " a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+print(str(count) + " data points")  # Output
+print("-\t" + str(errors) + " errors")
+print("-\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M:%S") + " to " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
-# TODO
+# Parameters
 alpha = args.alpha
 beta = args.beta
 gamma = args.gamma
-# previsione a seconda dei parametri inseriti
-# se -1 tutti e tre, fitting automatico
-
 lastdate = dates[len(dates) - 1]
 
-if alpha != -1 and beta != -1 and gamma != -1:  # Holt-Winters
-    res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt-Winters forecasting
+    res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)  # API
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -91,7 +85,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # Holt-Winters
     SSE = sse(nums, res)
     MSE = SSE / count
 
-    print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("Holt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
@@ -99,21 +93,21 @@ if alpha != -1 and beta != -1 and gamma != -1:  # Holt-Winters
         ubound.append(res[i] + 2.5 * dev[i % 288])
         lbound.append(res[i] - 2.5 * dev[i % 288])
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Etichette plot
+    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Plot labels
     plt.gca().xaxis.set_major_formatter(xfmt)  # ^
 
-    plt.plot(dates[0:count], nums)  # Generazione grafico
+    plt.plot(dates[0:count], nums)  # Plot generation
     plt.plot(dates, res, '--')
     plt.plot(dates, ubound, ':')
     plt.plot(dates, lbound, ':')
 
-    plt.xticks(rotation=45)  # Ruoto etichette per visibilità
+    plt.xticks(rotation=45)  # Labels rotation
     plt.xlabel("Time")
     plt.ylabel("Bytes")
     plt.title("Bytes from generated dataset every 5 minutes\nHolt-Winters forecasting (alpha = " + str(
         alpha) + ", beta = " + str(beta) + ", gamma = " + str(gamma) + ")\nSSE = " + str(SSE) + ", MSE = " + str(MSE))
-    plt.show()  # Output grafico
-elif alpha != -1 and beta != -1:  # Double Exponential
+    plt.show()  # Output
+elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Exponential forecasting
     res = APIForecast.double_exponential_smoothing(nums, alpha, beta)
 
     for f in res[len(nums):]:
@@ -122,19 +116,19 @@ elif alpha != -1 and beta != -1:  # Double Exponential
 
     print("Double Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Etichette plot
-    plt.gca().xaxis.set_major_formatter(xfmt)  # ^
+    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    plt.gca().xaxis.set_major_formatter(xfmt)
 
-    plt.plot(dates[0:count], nums)  # Generazione grafico
+    plt.plot(dates[0:count], nums)
     plt.plot(dates[count:], res[count:], '--')
 
-    plt.xticks(rotation=45)  # Ruoto etichette per visibilità
+    plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
     plt.title("Bytes from generated dataset every 5 minutes\nDouble Exponential forecasting (alpha = " + str(
         alpha) + ", beta = " + str(beta) + ")")
-    plt.show()  # Output grafico
-elif alpha != -1:  # Single Exponential
+    plt.show()
+elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     res = APIForecast.exponential_smoothing(nums, alpha)
 
     for f in res[len(nums):]:
@@ -143,21 +137,22 @@ elif alpha != -1:  # Single Exponential
 
     print("Single Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Etichette plot
-    plt.gca().xaxis.set_major_formatter(xfmt)  # ^
+    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    plt.gca().xaxis.set_major_formatter(xfmt)
 
-    plt.plot(dates[0:count], nums)  # Generazione grafico
+    plt.plot(dates[0:count], nums)
     plt.plot(dates[count:], res[count:], '--')
 
-    plt.xticks(rotation=45)  # Ruoto etichette per visibilità
+    plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
     plt.title(
         "Bytes from generated dataset every 5 minutes\nSingle Exponential forecasting (alpha = " + str(alpha) + ")")
-    plt.show()  # Output grafico
-else:  # Fitting
+    plt.show()
+else:  # No parameters specified, auto fitting with Nelder-Mead
     print("Fitting data...")
     alpha, beta, gamma, SSE = APIForecast.fit(nums)
+    MSE = SSE / count
 
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
 
@@ -165,16 +160,15 @@ else:  # Fitting
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    # SSE = sse(nums, res)
-    MSE = SSE / count
+
+    # Formatting for better output
     strSSE = "{:.5f}".format(SSE)
     strMSE = "{:.5f}".format(MSE)
     stralpha = "{:.5f}".format(alpha)
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
-
-    print("Fitted\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
-    print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("Fitted!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
+    print("Holt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
@@ -182,17 +176,17 @@ else:  # Fitting
         ubound.append(res[i] + 2.5 * dev[i % 288])
         lbound.append(res[i] - 2.5 * dev[i % 288])
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Etichette plot
-    plt.gca().xaxis.set_major_formatter(xfmt)  # ^
+    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    plt.gca().xaxis.set_major_formatter(xfmt)
 
-    plt.plot(dates[0:count], nums)  # Generazione grafico
+    plt.plot(dates[0:count], nums)
     plt.plot(dates, res, '--')
     plt.plot(dates, ubound, ':')
     plt.plot(dates, lbound, ':')
 
-    plt.xticks(rotation=45)  # Ruoto etichette per visibilità
+    plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
     plt.title("Bytes from generated dataset every 5 minutes\nHolt-Winters forecasting (fitted alpha = " + stralpha +
               ", beta = " + strbeta + ", gamma = " + strgamma + ")\nSSE = " + strSSE + ", MSE = " + strMSE)
-    plt.show()  # Output grafico
+    plt.show()
