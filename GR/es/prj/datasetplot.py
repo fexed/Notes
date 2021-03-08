@@ -18,13 +18,20 @@ import os
 # Params
 def parse_args():
     parser = argparse.ArgumentParser(description='Simple script that generates a plot based on an input dataset.json')
-    parser.add_argument('--dataset', type=str, required=False, default="NULL", help='dataset from which the script reads the values')
+    parser.add_argument('--dataset', type=str, required=False, default="NULL",
+			help='dataset from which the script reads the values')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
                         help='alpha parameter for Holt-Winters forecasting')
     parser.add_argument('--beta', type=float, required=False, default=-1,
                         help='beta parameter for Holt-Winters forecasting')
     parser.add_argument('--gamma', type=float, required=False, default=-1,
                         help='gamma parameter for Holt-Winters forecasting')
+    iter_parser = parser.add_mutually_exclusive_group(required=False)
+    iter_parser.add_argument('--iterative', dest='iter', action='store_true',
+			help='iterates the fitting process 100 times and picks the best result (default)')
+    iter_parser.add_argument('--no-iterative', dest='iter', action='store_false',
+			help='execs the fitting process just once')
+    parser.set_defaults(iter=True)
     return parser.parse_args()
 
 
@@ -150,8 +157,22 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
         "Bytes from generated dataset every 5 minutes\nSingle Exponential forecasting (alpha = " + str(alpha) + ")")
     plt.show()
 else:  # No parameters specified, auto fitting with Nelder-Mead
-    print("Fitting data...")
-    alpha, beta, gamma, SSE = APIForecast.fit(nums)
+    iter = args.iter
+    if iter: iterations = 100
+    else: iterations = 1
+    print("Fitting data...\n")
+
+    bests = []
+    for i in range(iterations):
+        print("\r\033[F\033[K" + "\tIterations: " + str(i+1))
+        alpha, beta, gamma, SSE = APIForecast.fit(nums)
+        bests.append([[alpha, beta, gamma], SSE])
+
+    bests.sort(key=lambda x : x[1])
+    alpha = bests[0][0][0]
+    beta = bests[0][0][1]
+    gamma = bests[0][0][2]
+    SSE = bests[0][1]
     MSE = SSE / count
 
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
