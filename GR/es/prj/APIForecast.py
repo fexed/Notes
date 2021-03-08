@@ -207,3 +207,30 @@ def fit(nums):
     # print("Dopo " + str(iterazioni) + " iterazioni ho trovato:\n\talpha = " +
     #      stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
     return res[0][0][0], res[0][0][1], res[0][0][2], res[0][1]
+
+
+def rsi(nums, N):
+	RSIlist = []
+	count = 0
+	prev = 0
+	sumU = 0
+	prevn = []
+	for n in nums:
+		if count < N:
+			prevn.append(n)
+			RSIlist.append(0)
+			count += 1
+		else:
+			del prevn[0]
+			prevn.append(n)
+			sumU = 0
+			sumD = 0
+			for i in range(N-1):
+				if prevn[i+1] > prevn[i]: sumU += (prevn[i+1] - prevn[i])
+				if prevn[i+1] < prevn[i]: sumD += (prevn[i] - prevn[i+1])
+			avgU = sumU/N
+			avgD = sumD/N
+			RS = avgU/avgD
+			RSI = 100 - 100/(1+RS)
+			RSIlist.append(RSI)
+	return RSIlist

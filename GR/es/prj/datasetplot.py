@@ -160,6 +160,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
         "Bytes from generated dataset every 5 minutes\nSingle Exponential forecasting (alpha = " + str(alpha) + ")")
     plt.show()
 else:  # No parameters specified, auto fitting with Nelder-Mead
+    start_time = datetime.now()
     iter = args.iter
     if iter: iterations = 100
     else: iterations = 1
@@ -179,11 +180,11 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     MSE = SSE / count
 
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+    RSI = APIForecast.rsi(res, 12)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
-
 
     # Formatting for better output
     strSSE = "{:.5f}".format(SSE)
@@ -191,7 +192,8 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     stralpha = "{:.5f}".format(alpha)
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
-    print("\nFitted!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
+    elapsed = (datetime.now() - start_time)
+    print("\nFitted in " + str(elapsed) + "!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
     print("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
@@ -207,6 +209,13 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     plt.plot(dates, res, '--')
     plt.plot(dates, ubound, ':')
     plt.plot(dates, lbound, ':')
+    RSIbottoms = []
+    RSIbottoms.append(0)
+    i = 1
+    while i < len(RSI):
+        RSIbottoms.append(RSI[i-1])
+        i += 1
+    plt.bar(dates, RSI, width=0.002, bottom=RSIbottoms)
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
