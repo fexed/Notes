@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import random
+import json
 from shutil import copyfile
 import argparse
 from inspect import getmembers
@@ -17,7 +18,7 @@ import os
 # Params
 def parse_args():
     parser = argparse.ArgumentParser(description='Simple scripts that produces a plot based on an input dataset')
-    # parser.add_argument('--dataset', type=str, required=False, default="NULL", help='dataset from which the script reads the values')
+    parser.add_argument('--dataset', type=str, required=False, default="NULL", help='dataset from which the script reads the values')
     # parser.add_argument('--interval', type=int, required=False, default=30, help='number of seconds of the interval')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
                         help='alpha parameter for Holt-Winters forecasting')
@@ -38,24 +39,34 @@ def sse(values, predictions):
 
 # Pcap da cui leggere pacchetti
 args = parse_args()
-# dataset = args.dataset
+dataset = args.dataset
 # interval = args.interval
 
-nums = []
-for i in range(5):
-    l = Dataset.createDataset()
-    for n in l:
-        nums.append(n)  # Byte
+nums = []  # Dati
 dates = []  # Timestamps
-n = 0  # Temp (più che altro per output)
 count = 0  # Conteggio (output)
 errors = 0  # Errori (output)
-now = datetime.combine(datetime.today(), time.min)
-for n in nums:
-    count = count + 1
-    dates.append(now)
-    now = now + timedelta(minutes=5)
-    print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
+if dataset == "NULL":
+	for i in range(5):
+	    l = Dataset.createDataset()
+	    for n in l:
+	        nums.append(n)  # Byte
+	n = 0  # Temp (più che altro per output)
+	now = datetime.combine(datetime.today(), time.min)
+	for n in nums:
+		count = count + 1
+		dates.append(now)
+		now = now + timedelta(minutes=5)
+		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
+else:
+	nums = json.load(open(dataset, "r"))
+	n = 0
+	now = datetime.combine(datetime.today(), time.min)
+	for n in nums:
+		count = count + 1
+		dates.append(now)
+		now = now + timedelta(minutes=5)
+		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
 
 print("Dati: " + str(count))  # Output
 print("-\tErrori: " + str(errors))
@@ -148,7 +159,6 @@ else:  # Fitting
     print("Fitting data...")
     alpha, beta, gamma, SSE = APIForecast.fit(nums)
 
-    # print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
 
     for f in res[len(nums):]:
@@ -163,6 +173,7 @@ else:  # Fitting
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
 
+    print("Fitted\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
     print("Holt-Winters fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
