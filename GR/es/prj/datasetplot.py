@@ -38,7 +38,7 @@ def parse_args():
 def sse(values, predictions):
     SSE = 0
     for n, r in zip(values, predictions):
-        SSE = SSE + (n - r) ** 2
+        SSE = SSE + ((n - r) ** 2)
     return SSE
 
 
@@ -51,6 +51,7 @@ dates = []  # Timestamps
 count = 0  # Counting (output)
 errors = 0  # Errors (output)
 if dataset == "NULL":
+	print("Generating dataset...\n")
 	for i in range(5):
 	    l = Dataset.createDataset()
 	    for n in l:
@@ -61,8 +62,9 @@ if dataset == "NULL":
 		count = count + 1
 		dates.append(now)
 		now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
-		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
+		print("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
 else:
+	print("Loading dataset...\n")
 	nums = json.load(open(dataset, "r"))
 	n = 0
 	now = datetime.combine(datetime.today(), time.min)
@@ -70,11 +72,11 @@ else:
 		count = count + 1
 		dates.append(now)
 		now = now + timedelta(minutes=5)
-		print("\r\033[F\033[K" + "#" + str(count) + " " + str(n) + "B")
+		print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
 
-print(str(count) + " data points")  # Output
-print("-\t" + str(errors) + " errors")
-print("-\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M:%S") + " to " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+print("\t" + str(count) + " data points")  # Output
+print("\t" + str(errors) + " errors")
+print("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M:%S") + " to " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
 # Parameters
 alpha = args.alpha
@@ -92,7 +94,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     SSE = sse(nums, res)
     MSE = SSE / count
 
-    print("Holt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
@@ -121,7 +123,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    print("Double Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\n\nDouble Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
@@ -142,7 +144,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    print("Single Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\n\nSingle Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
@@ -160,11 +162,11 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     iter = args.iter
     if iter: iterations = 100
     else: iterations = 1
-    print("Fitting data...\n")
+    print("\n\nFitting data...\n")
 
     bests = []
     for i in range(iterations):
-        print("\r\033[F\033[K" + "\tIterations: " + str(i+1))
+        print("\r\033[F\033[KIterations\t" + str(i+1))
         alpha, beta, gamma, SSE = APIForecast.fit(nums)
         bests.append([[alpha, beta, gamma], SSE])
 
@@ -188,8 +190,8 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     stralpha = "{:.5f}".format(alpha)
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
-    print("Fitted!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
-    print("Holt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\nFitted!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
+    print("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
