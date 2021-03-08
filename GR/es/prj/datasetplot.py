@@ -76,7 +76,8 @@ else:
 
 print("\t" + str(count) + " data points")  # Output
 print("\t" + str(errors) + " errors")
-print("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M:%S") + " to " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+print("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
+dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
 
 # Parameters
 alpha = args.alpha
