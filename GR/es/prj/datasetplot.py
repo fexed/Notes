@@ -199,16 +199,16 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     ubound = []
     lbound = []
     for i in range(len(res)):
-        ubound.append(res[i] + 2.5 * dev[i % 288])
-        lbound.append(res[i] - 2.5 * dev[i % 288])
+        ubound.append(res[i] + 2.5 * dev[i])
+        lbound.append(res[i] - 2.5 * dev[i])
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
     plt.plot(dates[0:count], nums)
-    plt.plot(dates, res, '--')
-    plt.plot(dates, ubound, ':')
-    plt.plot(dates, lbound, ':')
+    plt.plot(dates[count:], res[count:], '--')
+    plt.plot(dates[0:count], ubound[0:count], ':')
+    plt.plot(dates[0:count], lbound[0:count], ':')
     # RSIbottoms = []
     # RSIbottoms.append(0)
     # i = 1
@@ -216,7 +216,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     #     RSIbottoms.append(RSI[i-1])
     #     i += 1
     # plt.bar(dates, RSI, width=0.002, bottom=RSIbottoms)
-    plt.plot(dates, RSI)
+    plt.plot(dates[12:], RSI[12:])
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
