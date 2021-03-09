@@ -209,13 +209,14 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     plt.plot(dates, res, '--')
     plt.plot(dates, ubound, ':')
     plt.plot(dates, lbound, ':')
-    RSIbottoms = []
-    RSIbottoms.append(0)
-    i = 1
-    while i < len(RSI):
-        RSIbottoms.append(RSI[i-1])
-        i += 1
-    plt.bar(dates, RSI, width=0.002, bottom=RSIbottoms)
+    # RSIbottoms = []
+    # RSIbottoms.append(0)
+    # i = 1
+    # while i < len(RSI):
+    #     RSIbottoms.append(RSI[i-1])
+    #     i += 1
+    # plt.bar(dates, RSI, width=0.002, bottom=RSIbottoms)
+    plt.plot(dates, RSI)
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
