@@ -234,7 +234,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
 
     bests = []
     for i in range(iterations):
-        printYellow("\r\033[F\033[KIterations\t" + str(i + 1))
+        printYellow("\r\033[F\033[KIterations\t" + str(len(bests) + 1))
         alpha, beta, gamma, SSE = APIForecast.fit_triple(nums, season)
         bests.append([[alpha, beta, gamma], SSE])
 
