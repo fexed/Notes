@@ -79,7 +79,7 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
             seasonals[i%slen] = gamma*(val-smooth) + (1-gamma)*seasonals[i%slen]
             prediction = smooth+trend+seasonals[i%slen]
             result.append(prediction)
-            deviations[i%slen] = gamma*abs(val-prediction) + (1-gamma)*deviations[i%slen]
+            deviations[i%slen] = gamma*(val-prediction) + (1-gamma)*deviations[i%slen]
             deviation.append(abs(deviations[i%slen]))
     return result,deviation
 
@@ -213,23 +213,24 @@ def rsi(nums, N):
 	RSIlist = []
 	count = 0
 	prev = 0
-	sumD = 0
 	sumU = 0
-	prevn = 0
+	prevn = []
 	for n in nums:
 		if count < N:
-			if n > prevn: sumU = sumU + (n - prevn)
-			if n < prevn: sumD = sumD + (prevn - n)
-			avgU = sumU/N
-			avgD = sumD/N
+			prevn.append(n)
 			RSIlist.append(0)
 			count += 1
-			prevn = n
 		else:
-			if n > prevn: avgU = ((avgU * (N-1)) + (n - prevn))/N
-			if n < prevn: avgD = ((avgD * (N-1)) + (prevn - n))/N
+			del prevn[0]
+			prevn.append(n)
+			sumU = 0
+			sumD = 0
+			for i in range(N-1):
+				if prevn[i+1] > prevn[i]: sumU += (prevn[i+1] - prevn[i])
+				if prevn[i+1] < prevn[i]: sumD += (prevn[i] - prevn[i+1])
+			avgU = sumU/N
+			avgD = sumD/N
 			RS = avgU/avgD
 			RSI = 100 - 100/(1+RS)
 			RSIlist.append(RSI)
-			prevn = n
 	return RSIlist
