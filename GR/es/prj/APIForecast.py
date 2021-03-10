@@ -84,7 +84,7 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
     return result, deviation
 
 
-def fit_triple(nums):
+def fit_triple(nums, season):
     # Fitting alpha, beta, gamma parameters for Holt-Winter forecasting with Nelder-Mead algorithm
 
     # Starting parameters
@@ -97,18 +97,18 @@ def fit_triple(nums):
     noimprovbrk = 10  # Stop after 10 iterations without improvement
 
     noimprov = 0  # Non improvement counter
-    prev, dev = triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     prevbest = sse(nums, prev)  # Target function
     res = [[[alpha, beta, gamma], prevbest]]
 
     alpha += step
-    prev, dev = triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
     beta += step
-    prev, dev = triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
     gamma += step
-    prev, dev = triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)
+    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
 
     iterazioni = 0
@@ -141,7 +141,7 @@ def fit_triple(nums):
         if betar > 1: betar = 1
         gammar = abs(gamma0 + a * (gamma0 - res[-1][0][2]))
         if gammar > 1: gammar = 1
-        rsse = sse(nums, triple_exponential_smoothing(nums, 288, alphar, betar, gammar, 288)[0])
+        rsse = sse(nums, triple_exponential_smoothing(nums, season, alphar, betar, gammar, season)[0])
         if res[0][1] <= rsse < res[-2][1]:
             del res[-1]
             res.append([[alphar, betar, gammar], rsse])
@@ -155,7 +155,7 @@ def fit_triple(nums):
             if betae > 1: betae = 1
             gammae = abs(gamma0 + g * (gamma0 - res[-1][0][2]))
             if gammae > 1: gammae = 1
-            esse = sse(nums, triple_exponential_smoothing(nums, 288, alphae, betae, gammae, 288)[0])
+            esse = sse(nums, triple_exponential_smoothing(nums, season, alphae, betae, gammae, season)[0])
             if esse < rsse:
                 del res[-1]
                 res.append([[alphae, betae, gammae], esse])
@@ -172,7 +172,7 @@ def fit_triple(nums):
         if betac > 1: betac = 1
         gammac = abs(gamma0 + r * (gamma0 - res[-1][0][2]))
         if gammac > 1: gammac = 1
-        csse = sse(nums, triple_exponential_smoothing(nums, 288, alphac, betac, gammac, 288)[0])
+        csse = sse(nums, triple_exponential_smoothing(nums, season, alphac, betac, gammac, season)[0])
         if csse < res[-1][1]:
             del res[-1]
             res.append([[alphac, betac, gammac], csse])
@@ -190,7 +190,7 @@ def fit_triple(nums):
             if ridbeta > 1: ridbeta = 1
             ridgamma = abs(gamma1 + s * (t[0][2] - gamma1))
             if ridgamma > 1: ridgamma = 1
-            ridsse = sse(nums, triple_exponential_smoothing(nums, 288, ridalpha, ridbeta, ridgamma, 288)[0])
+            ridsse = sse(nums, triple_exponential_smoothing(nums, season, ridalpha, ridbeta, ridgamma, season)[0])
             nres.append([[ridalpha, ridbeta, ridgamma], ridsse])
         res = nres
 
