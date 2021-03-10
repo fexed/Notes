@@ -165,8 +165,8 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     ubound = []
     lbound = []
     for i in range(len(res)):
-        ubound.append(res[i] + 2.5 * dev[i % season])
-        lbound.append(res[i] - 2.5 * dev[i % season])
+        ubound.append(res[i] + 2.5 * dev[i])
+        lbound.append(res[i] - 2.5 * dev[i])
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Plot labels
     plt.gca().xaxis.set_major_formatter(xfmt)  # ^
