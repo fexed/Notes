@@ -20,9 +20,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Simple script that generates a plot based on an input dataset.json')
     data_parser = parser.add_mutually_exclusive_group(required=False)
     data_parser.add_argument('--dataset', type=str, required=False, default="NULL",
-			help='dataset from which the script reads the values')
+                             help='dataset from which the script reads the values')
     data_parser.add_argument('--pcap', type=str, required=False, default="NULL",
-			help='pcap from which the script reads the packets')
+                             help='pcap from which the script reads the packets')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
                         help='alpha parameter for Holt-Winters forecasting')
     parser.add_argument('--beta', type=float, required=False, default=-1,
@@ -31,9 +31,9 @@ def parse_args():
                         help='gamma parameter for Holt-Winters forecasting')
     iter_parser = parser.add_mutually_exclusive_group(required=False)
     iter_parser.add_argument('--iterative', dest='iter', action='store_true',
-			help='iterates the fitting process 100 times and picks the best result (default)')
+                             help='iterates the fitting process 100 times and picks the best result (default)')
     iter_parser.add_argument('--no-iterative', dest='iter', action='store_false',
-			help='execs the fitting process just once')
+                             help='execs the fitting process just once')
     parser.set_defaults(iter=True)
     return parser.parse_args()
 
@@ -55,66 +55,66 @@ dates = []  # Timestamps
 count = 0  # Counting (output)
 errors = 0  # Errors (output)
 if dataset == "NULL" and pcap == "NULL":
-	print("Generating dataset...\n")
-	for i in range(5):
-	    l = Dataset.createDataset()
-	    for n in l:
-	        nums.append(n)
-	n = 0  # Temp (output)
-	now = datetime.combine(datetime.today(), time.min)
-	for n in nums:
-		count = count + 1
-		dates.append(now)
-		now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
-		print("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
+    print("Generating dataset...\n")
+    for i in range(5):
+        l = Dataset.createDataset()
+        for n in l:
+            nums.append(n)
+    n = 0  # Temp (output)
+    now = datetime.combine(datetime.today(), time.min)
+    for n in nums:
+        count = count + 1
+        dates.append(now)
+        now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
+        print("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
 else:
-	if dataset != "NULL":
-		print("Loading dataset...\n")
-		nums = json.load(open(dataset, "r"))
-		n = 0
-		now = datetime.combine(datetime.today(), time.min)
-		for n in nums:
-			count = count + 1
-			dates.append(now)
-			now = now + timedelta(minutes=5)
-			print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
+    if dataset != "NULL":
+        print("Loading dataset...\n")
+        nums = json.load(open(dataset, "r"))
+        n = 0
+        now = datetime.combine(datetime.today(), time.min)
+        for n in nums:
+            count = count + 1
+            dates.append(now)
+            now = now + timedelta(minutes=5)
+            print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
 
-	elif pcap != "NULL":
-		# Reading from PCAP
-		cap = pyshark.FileCapture(pcap)
-		for pkt in cap:
-			dates.append(float(pkt.frame_info.time_epoch))
-			nums.append(int(pkt.length)/1000)
-			count += 1
-			print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
-		# Aggregation
-		interval = 5
-		intervals = []
-		series = []
-		start = -1
-		sum = 0
-		j = 0
-		for i in range(len(dates)):
-			if (start == -1):
-				start = i
-				sum += nums[i]
-			else:
-				elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start])
-				sum += nums[i]
-				if (elapsed.total_seconds() > interval):
-					j += 1
-					series.append(sum)
-					intervals.append(datetime.fromtimestamp(dates[i]))
-					lastdate = datetime.fromtimestamp(dates[i])
-					sum = 0
-					start = -1
-		nums = series
-		dates = intervals
+    elif pcap != "NULL":
+        # Reading from PCAP
+        cap = pyshark.FileCapture(pcap)
+        for pkt in cap:
+            dates.append(float(pkt.frame_info.time_epoch))
+            nums.append(int(pkt.length) / 1000)
+            count += 1
+            print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+        # Aggregation
+        interval = 5
+        intervals = []
+        series = []
+        start = -1
+        sum = 0
+        j = 0
+        for i in range(len(dates)):
+            if (start == -1):
+                start = i
+                sum += nums[i]
+            else:
+                elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start])
+                sum += nums[i]
+                if (elapsed.total_seconds() > interval):
+                    j += 1
+                    series.append(sum)
+                    intervals.append(datetime.fromtimestamp(dates[i]))
+                    lastdate = datetime.fromtimestamp(dates[i])
+                    sum = 0
+                    start = -1
+        nums = series
+        dates = intervals
 
 print("\t" + str(count) + " data points")  # Output
 print("\t" + str(errors) + " errors")
 print("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
-dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
+      dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
 
 # Parameters
 alpha = args.alpha
@@ -179,7 +179,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
 elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     res = APIForecast.exponential_smoothing(nums, alpha)
 
-    dates.append(lastdate+timedelta(seconds=5))
+    dates.append(lastdate + timedelta(seconds=5))
 
     print("\n\nSingle Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -198,17 +198,19 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
 else:  # No parameters specified, auto fitting with Nelder-Mead
     start_time = datetime.now()
     iter = args.iter
-    if iter: iterations = 100
-    else: iterations = 1
+    if iter:
+        iterations = 100
+    else:
+        iterations = 1
     print("\n\nFitting data...\n")
 
     bests = []
     for i in range(iterations):
-        print("\r\033[F\033[KIterations\t" + str(i+1))
-        alpha, beta, gamma, SSE = APIForecast.fit(nums)
+        print("\r\033[F\033[KIterations\t" + str(i + 1))
+        alpha, beta, gamma, SSE = APIForecast.fit_triple(nums)
         bests.append([[alpha, beta, gamma], SSE])
 
-    bests.sort(key=lambda x : x[1])
+    bests.sort(key=lambda x: x[1])
     alpha = bests[0][0][0]
     beta = bests[0][0][1]
     gamma = bests[0][0][2]
@@ -229,7 +231,8 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
     elapsed = (datetime.now() - start_time)
-    print("\nFitted in " + str(elapsed) + "!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
+    print("\nFitted in " + str(
+        elapsed) + "!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
     print("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
