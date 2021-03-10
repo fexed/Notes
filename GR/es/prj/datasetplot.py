@@ -18,8 +18,11 @@ import os
 # Params
 def parse_args():
     parser = argparse.ArgumentParser(description='Simple script that generates a plot based on an input dataset.json')
-    parser.add_argument('--dataset', type=str, required=False, default="NULL",
+    data_parser = parser.add_mutually_exclusive_group(required=False)
+    data_parser.add_argument('--dataset', type=str, required=False, default="NULL",
 			help='dataset from which the script reads the values')
+    data_parser.add_argument('--pcap', type=str, required=False, default="NULL",
+			help='pcap from which the script reads the packets')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
                         help='alpha parameter for Holt-Winters forecasting')
     parser.add_argument('--beta', type=float, required=False, default=-1,
@@ -45,12 +48,13 @@ def sse(values, predictions):
 # Arguments
 args = parse_args()
 dataset = args.dataset  # Dataset if present
+pcap = args.pcap  # PCAP if present
 
 nums = []  # Data
 dates = []  # Timestamps
 count = 0  # Counting (output)
 errors = 0  # Errors (output)
-if dataset == "NULL":
+if dataset == "NULL" and pcap == "NULL":
 	print("Generating dataset...\n")
 	for i in range(5):
 	    l = Dataset.createDataset()
@@ -64,15 +68,48 @@ if dataset == "NULL":
 		now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
 		print("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
 else:
-	print("Loading dataset...\n")
-	nums = json.load(open(dataset, "r"))
-	n = 0
-	now = datetime.combine(datetime.today(), time.min)
-	for n in nums:
-		count = count + 1
-		dates.append(now)
-		now = now + timedelta(minutes=5)
-		print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
+	if dataset != "NULL":
+		print("Loading dataset...\n")
+		nums = json.load(open(dataset, "r"))
+		n = 0
+		now = datetime.combine(datetime.today(), time.min)
+		for n in nums:
+			count = count + 1
+			dates.append(now)
+			now = now + timedelta(minutes=5)
+			print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
+
+	elif pcap != "NULL":
+		# Reading from PCAP
+		cap = pyshark.FileCapture(pcap)
+		for pkt in cap:
+			dates.append(float(pkt.frame_info.time_epoch))
+			nums.append(int(pkt.length)/1000)
+			count += 1
+			print("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+		# Aggregation
+		interval = 5
+		intervals = []
+		series = []
+		start = -1
+		sum = 0
+		j = 0
+		for i in range(len(dates)):
+			if (start == -1):
+				start = i
+				sum += nums[i]
+			else:
+				elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start])
+				sum += nums[i]
+				if (elapsed.total_seconds() > interval):
+					j += 1
+					series.append(sum)
+					intervals.append(datetime.fromtimestamp(dates[i]))
+					lastdate = datetime.fromtimestamp(dates[i])
+					sum = 0
+					start = -1
+		nums = series
+		dates = intervals
 
 print("\t" + str(count) + " data points")  # Output
 print("\t" + str(errors) + " errors")
@@ -84,6 +121,7 @@ alpha = args.alpha
 beta = args.beta
 gamma = args.gamma
 lastdate = dates[len(dates) - 1]
+count = len(nums)
 
 if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt-Winters forecasting
     res, dev = APIForecast.triple_exponential_smoothing(nums, 288, alpha, beta, gamma, 288)  # API
@@ -124,13 +162,13 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    print("\n\nDouble Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\n\nDouble Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
-    plt.plot(dates[0:count], nums)
-    plt.plot(dates[count:], res[count:], '--')
+    plt.plot(dates[:len(nums)], nums)
+    plt.plot(dates, res, '--')
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
@@ -141,17 +179,15 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
 elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     res = APIForecast.exponential_smoothing(nums, alpha)
 
-    for f in res[len(nums):]:
-        lastdate = lastdate + timedelta(minutes=5)
-        dates.append(lastdate)
+    dates.append(lastdate+timedelta(seconds=5))
 
-    print("\n\nSingle Exponential fino a " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    print("\n\nSingle Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
-    plt.plot(dates[0:count], nums)
-    plt.plot(dates[count:], res[count:], '--')
+    plt.plot(dates[:len(nums)], nums)
+    plt.plot(dates, res, '--')
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
