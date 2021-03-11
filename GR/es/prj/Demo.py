@@ -51,7 +51,9 @@ def parse_args():
     parser.add_argument('--season', type=int, required=False, default=-1,
                              help='points in a season for Holt-Winters forecasting')
     parser.add_argument('--rsi', type=int, required=False, default=2,
-                             help='poits for RSI calculation')
+                             help='points for RSI calculation')
+    parser.add_argument('--interval', type=int, required=False, default=30,
+                             help='number of seconds for aggregation')
     return parser.parse_args()
 
 
@@ -114,7 +116,7 @@ else:
                 continue
 
         # Aggregation
-        interval = 5
+        interval = args.interval
         intervals = []
         series = []
         start = -1
@@ -180,7 +182,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     plt.xticks(rotation=45)  # Labels rotation
     plt.xlabel("Time")
     plt.ylabel("Bytes")
-    plt.title("Bytes from generated dataset every 5 minutes\nHolt-Winters forecasting (alpha = " + str(
+    plt.title("Holt-Winters forecasting (alpha = " + str(
         alpha) + ", beta = " + str(beta) + ", gamma = " + str(gamma) + ")\nSSE = " + str(SSE) + ", MSE = " + str(MSE))
     plt.show()  # Output
 elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Exponential forecasting
@@ -201,7 +203,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
     plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
-    plt.title("Bytes from generated dataset every 5 minutes\nDouble Exponential forecasting (alpha = " + str(
+    plt.title("Double Exponential forecasting (alpha = " + str(
         alpha) + ", beta = " + str(beta) + ")")
     plt.show()
 elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
@@ -221,7 +223,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     plt.xlabel("Time")
     plt.ylabel("Bytes")
     plt.title(
-        "Bytes from generated dataset every 5 minutes\nSingle Exponential forecasting (alpha = " + str(alpha) + ")")
+        "Single Exponential forecasting (alpha = " + str(alpha) + ")")
     plt.show()
 else:  # No parameters specified, auto fitting with Nelder-Mead
     season = args.season
@@ -285,6 +287,6 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
-    plt.title("Bytes from generated dataset every 5 minutes\nHolt-Winters forecasting (fitted alpha = " + stralpha +
+    plt.title("Holt-Winters forecasting (fitted alpha = " + stralpha +
               ", beta = " + strbeta + ", gamma = " + strgamma + ")\nSSE = " + strSSE + ", MSE = " + strMSE)
     plt.show()
