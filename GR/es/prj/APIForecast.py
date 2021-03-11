@@ -81,11 +81,10 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
             result.append(prediction)
             deviations[i % slen] = gamma * (val - prediction) + (1 - gamma) * deviations[i % slen]
             deviation.append(abs(deviations[i % slen]))
-    ubound = []
-    lbound = []
-    for i in range(len(res)):
-        ubound.append(res[i] + 2.5 * dev[i])
-        lbound.append(res[i] - 2.5 * dev[i])
+    ubound, lbound = [], []
+    for i in range(len(result)):
+        ubound.append(result[i] + 2.5 * deviation[i])
+        lbound.append(result[i] - 2.5 * deviation[i])
     return result, deviation, ubound, lbound
 
 
