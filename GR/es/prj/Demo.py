@@ -3,35 +3,29 @@
 import pyshark
 import APIForecast
 import Dataset
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-import random
 import json
-from shutil import copyfile
 import argparse
-from inspect import getmembers
 from datetime import datetime, timedelta, time
-import os
 
 
 # Custom print and input
-def inputYellow(str):
-    CEND = '\33[0m'
-    CYELLOW = '\33[33m'
-    r = input(CYELLOW + str + CEND)
+def inputyellow(txt):
+    cend = '\33[0m'
+    cyellow = '\33[33m'
+    r = input(cyellow + txt + cend)
     return r
 
-def printYellow(str):
-    CEND = '\33[0m'
-    CYELLOW = '\33[33m'
-    print(CYELLOW + str + CEND)
+def printyellow(txt):
+    cend = '\33[0m'
+    cyellow = '\33[33m'
+    print(cyellow + txt + cend)
 
-def printGreen(str):
-    CEND = '\33[0m'
-    CGREEN  = '\33[32m'
-    print(CGREEN + str + CEND)
-
+def printgreen(txt):
+    cend = '\33[0m'
+    cgreen = '\33[32m'
+    print(cgreen + txt + cend)
 
 
 # Params
@@ -60,15 +54,15 @@ def parse_args():
 
 
 def sse(values, predictions):
-    SSE = 0
+    val = 0
     for n, r in zip(values, predictions):
-        SSE = SSE + ((n - r) ** 2)
-    return SSE
+        val = val + ((n - r) ** 2)
+    return val
 
 
-printGreen("********************************************")
-printGreen("************* DEMO ____CAPTURE *************")
-printGreen("********************************************")
+printgreen("********************************************")
+printgreen("************* DEMO     CAPTURE *************")
+printgreen("********************************************")
 
 # Arguments
 args = parse_args()
@@ -80,21 +74,21 @@ dates = []  # Timestamps
 count = 0  # Counting (output)
 errors = 0  # Errors (output)
 if dataset == "NULL" and pcap == "NULL":
-    printGreen("Generating dataset...\n")
+    printgreen("Generating dataset...\n")
     for i in range(5):
-        l = Dataset.createDataset()
-        for n in l:
+        generated = Dataset.createDataset()
+        for n in generated:
             nums.append(n)
     n = 0  # Temp (output)
     now = datetime.combine(datetime.today(), time.min)
     for n in nums:
         count = count + 1
         dates.append(now)
-        now = now + timedelta(minutes=5)  # Every 5 mins TODO: argument to specify
-        printYellow("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
+        now = now + timedelta(minutes=5)  # Every 5 mins TODO: parameter to specify
+        printyellow("\r\033[F\033[KGenerating\t" + "#" + str(count) + " " + str(n) + "B")
 else:
     if dataset != "NULL":
-        printGreen("Loading dataset...\n")
+        printgreen("Loading dataset...\n")
         nums = json.load(open(dataset, "r"))
         n = 0
         now = datetime.combine(datetime.today(), time.min)
@@ -102,17 +96,17 @@ else:
             count = count + 1
             dates.append(now)
             now = now + timedelta(minutes=5)
-            printYellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
+            printyellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(n) + "B")
 
     elif pcap != "NULL":
-        printGreen("Loading PCAP...\n")
-        # Reading from PCAP
-        cap = pyshark.FileCapture(pcap)
+        printgreen("Loading PCAP...\n")
+        cap = pyshark.FileCapture(pcap)  # Reading from PCAP
         for pkt in cap:
             dates.append(float(pkt.frame_info.time_epoch))
             nums.append(int(pkt.length) / 1000)
             count += 1
-            printYellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+            printyellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+
         # Aggregation
         interval = 5
         intervals = []
@@ -121,13 +115,13 @@ else:
         sum = 0
         j = 0
         for i in range(len(dates)):
-            if (start == -1):
+            if start == -1:
                 start = i
                 sum += nums[i]
             else:
                 elapsed = datetime.fromtimestamp(dates[i]) - datetime.fromtimestamp(dates[start])
                 sum += nums[i]
-                if (elapsed.total_seconds() > interval):
+                if elapsed.total_seconds() > interval:
                     j += 1
                     series.append(sum)
                     intervals.append(datetime.fromtimestamp(dates[i]))
@@ -137,10 +131,10 @@ else:
         nums = series
         dates = intervals
 
-printYellow("\t" + str(count) + " data points")  # Output
-printYellow("\t" + str(errors) + " errors")
-printYellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
-      dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
+printyellow("\t" + str(count) + " data points")  # Output
+printyellow("\t" + str(errors) + " errors")
+printyellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
+            dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
 
 # Parameters
 alpha = args.alpha
@@ -160,7 +154,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     SSE = sse(nums, res)
     MSE = SSE / count
 
-    printGreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    printgreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
@@ -189,7 +183,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
         lastdate = lastdate + timedelta(minutes=5)
         dates.append(lastdate)
 
-    printGreen("\n\nDouble Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    printgreen("\n\nDouble Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
@@ -208,7 +202,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
 
     dates.append(lastdate + timedelta(seconds=5))
 
-    printGreen("\n\nSingle Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    printgreen("\n\nSingle Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
@@ -225,16 +219,16 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
 else:  # No parameters specified, auto fitting with Nelder-Mead
     season = args.season
     start_time = datetime.now()
-    iter = args.iter
-    if iter:
+    itr = args.iter
+    if itr:
         iterations = 100
     else:
         iterations = 1
-    printGreen("\n\nFitting data...\n")
+    printgreen("\n\nFitting data...\n")
 
     bests = []
     for i in range(iterations):
-        printYellow("\r\033[F\033[KIterations\t" + str(len(bests) + 1))
+        printyellow("\r\033[F\033[KIterations\t" + str(len(bests) + 1))
         alpha, beta, gamma, SSE = APIForecast.fit_triple(nums, season)
         bests.append([[alpha, beta, gamma], SSE])
 
@@ -259,9 +253,9 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     strbeta = "{:.5f}".format(beta)
     strgamma = "{:.5f}".format(gamma)
     elapsed = (datetime.now() - start_time)
-    printYellow("\nFitted in " + str(
+    printyellow("\nFitted in " + str(
         elapsed) + "!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
-    printGreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
+    printgreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
     ubound = []
     lbound = []
@@ -276,14 +270,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     plt.plot(dates[count:], res[count:], '--')
     plt.plot(dates[0:count], ubound[0:count], ':')
     plt.plot(dates[0:count], lbound[0:count], ':')
-    # RSIbottoms = []
-    # RSIbottoms.append(0)
-    # i = 1
-    # while i < len(RSI):
-    #     RSIbottoms.append(RSI[i-1])
-    #     i += 1
-    # plt.bar(dates, RSI, width=0.002, bottom=RSIbottoms)
-    plt.plot(dates[12:], RSI[12:])
+    plt.plot(dates, RSI)
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
