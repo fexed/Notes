@@ -139,46 +139,49 @@ def fit_triple(nums, season):
             gamma0 += t[0][2] / (len(res) - 1)
 
         # Reflection
-        alphar = abs(alpha0 + a * (alpha0 - res[-1][0][0]))
-        if alphar > 1: alphar = 1
-        betar = abs(beta0 + a * (beta0 - res[-1][0][1]))
-        if betar > 1: betar = 1
-        gammar = abs(gamma0 + a * (gamma0 - res[-1][0][2]))
-        if gammar > 1: gammar = 1
+        alphar = alpha0 + a * (alpha0 - res[-1][0][0])
+        betar = beta0 + a * (beta0 - res[-1][0][1])
+        gammar = gamma0 + a * (gamma0 - res[-1][0][2])
         rsse = sse(nums, triple_exponential_smoothing(nums, season, alphar, betar, gammar, season)[0])
         if res[0][1] <= rsse < res[-2][1]:
             del res[-1]
+            if (alphar < 0 or alphar > 1) or (betar < 0 or betar > 1) or (gammar < 0 or gammar > 1):
+                rsse += 1000
+                rsse *= 1000
             res.append([[alphar, betar, gammar], rsse])
             continue
 
         # Expansion
         if rsse < res[0][1]:
-            alphae = abs(alpha0 + g * (alpha0 - res[-1][0][0]))
-            if alphae > 1: alphae = 1
-            betae = abs(beta0 + g * (beta0 - res[-1][0][1]))
-            if betae > 1: betae = 1
-            gammae = abs(gamma0 + g * (gamma0 - res[-1][0][2]))
-            if gammae > 1: gammae = 1
+            alphae = alpha0 + g * (alpha0 - res[-1][0][0])
+            betae = beta0 + g * (beta0 - res[-1][0][1])
+            gammae = gamma0 + g * (gamma0 - res[-1][0][2])
             esse = sse(nums, triple_exponential_smoothing(nums, season, alphae, betae, gammae, season)[0])
             if esse < rsse:
                 del res[-1]
+                if (alphae < 0 or alphae > 1) or (betae < 0 or betae > 1) or (gammae < 0 or gammae > 1):
+                    esse += 1000
+                    esse *= 1000
                 res.append([[alphae, betae, gammae], esse])
                 continue
             else:
                 del res[-1]
+                if (alphar < 0 or alphar > 1) or (betar < 0 or betar > 1) or (gammar < 0 or gammar > 1):
+                    rsse += 1000
+                    rsse *= 1000
                 res.append([[alphar, betar, gammar], rsse])
                 continue
 
         # Contraction
-        alphac = abs(alpha0 + r * (alpha0 - res[-1][0][0]))
-        if alphac > 1: alphac = 1
-        betac = abs(beta0 + r * (beta0 - res[-1][0][1]))
-        if betac > 1: betac = 1
-        gammac = abs(gamma0 + r * (gamma0 - res[-1][0][2]))
-        if gammac > 1: gammac = 1
+        alphac = alpha0 + r * (alpha0 - res[-1][0][0])
+        betac = beta0 + r * (beta0 - res[-1][0][1])
+        gammac = gamma0 + r * (gamma0 - res[-1][0][2])
         csse = sse(nums, triple_exponential_smoothing(nums, season, alphac, betac, gammac, season)[0])
         if csse < res[-1][1]:
             del res[-1]
+            if (alphac < 0 or alphac > 1) or (betac < 0 or betac > 1) or (gammac < 0 or gammac > 1):
+                csse += 1000
+                csse *= 1000
             res.append([[alphac, betac, gammac], csse])
             continue
 
@@ -188,13 +191,13 @@ def fit_triple(nums, season):
         gamma1 = res[0][0][2]
         nres = []
         for t in res:
-            ridalpha = abs(alpha1 + s * (t[0][0] - alpha1))
-            if ridalpha > 1: ridalpha = 1
-            ridbeta = abs(beta1 + s * (t[0][1] - beta1))
-            if ridbeta > 1: ridbeta = 1
-            ridgamma = abs(gamma1 + s * (t[0][2] - gamma1))
-            if ridgamma > 1: ridgamma = 1
+            ridalpha = alpha1 + s * (t[0][0] - alpha1)
+            ridbeta = beta1 + s * (t[0][1] - beta1)
+            ridgamma = gamma1 + s * (t[0][2] - gamma1)
             ridsse = sse(nums, triple_exponential_smoothing(nums, season, ridalpha, ridbeta, ridgamma, season)[0])
+            if (ridalpha < 0 or ridalpha > 1) or (ridbeta < 0 or ridbeta > 1) or (ridgamma < 0 or ridgamma > 1):
+                ridsse += 1000
+                ridsse *= 1000
             nres.append([[ridalpha, ridbeta, ridgamma], ridsse])
         res = nres
 
