@@ -1,4 +1,5 @@
 import random
+import sys
 
 
 def exponential_smoothing(series, alpha):
@@ -50,10 +51,13 @@ def initial_seasonal_components(series, slen):
 
 
 def sse(values, predictions):
-    s = 0
-    for n, r in zip(values, predictions):
-        s = s + (n - r) ** 2
-    return s
+    try:
+        s = 0
+        for n, r in zip(values, predictions):
+            s = s + (n - r) ** 2
+        return s
+    except OverflowError:
+        return sys.float_info.max
 
 
 def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
