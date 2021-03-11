@@ -59,6 +59,7 @@ args = parse_args()
 dataset = args.dataset  # Dataset if present
 pcap = args.pcap  # PCAP if present
 
+start_time = datetime.now()
 nums = []  # Data
 dates = []  # Timestamps
 count = 0  # Counting (output)
@@ -124,8 +125,10 @@ else:
                     start = -1
         nums = series
         dates = intervals
+
+elapsed = (datetime.now() - start_time)
 print("\r\033[F\033[K", end="")
-Utils.printyellow("Loaded\t" + str(count) + " data points")  # Output
+Utils.printyellow("Loaded\t" + str(count) + " data points in " + str(elapsed))  # Output
 Utils.printyellow("\t" + str(errors) + " errors")
 Utils.printyellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
                   dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
