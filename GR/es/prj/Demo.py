@@ -162,7 +162,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
         ubound.append(res[i] + 2.5 * dev[i])
         lbound.append(res[i] - 2.5 * dev[i])
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')  # Plot labels
+    xfmt = md.DateFormatter('%H:%M')  # Plot labels
     plt.gca().xaxis.set_major_formatter(xfmt)  # ^
 
     plt.plot(dates[0:count], nums)  # Plot generation
@@ -185,7 +185,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
 
     printgreen("\n\nDouble Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    xfmt = md.DateFormatter('%H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
     plt.plot(dates[:len(nums)], nums)
@@ -204,7 +204,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
 
     printgreen("\n\nSingle Exponential until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    xfmt = md.DateFormatter('%H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
     plt.plot(dates[:len(nums)], nums)
@@ -263,11 +263,11 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
         ubound.append(res[i] + 2.5 * dev[i])
         lbound.append(res[i] - 2.5 * dev[i])
 
-    xfmt = md.DateFormatter('%Y-%m-%d %H:%M')
+    xfmt = md.DateFormatter('%H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)
 
     plt.plot(dates[0:count], nums)
-    plt.plot(dates[count:], res[count:], '--')
+    plt.plot(dates, res, '--')
     plt.plot(dates[0:count], ubound[0:count], ':')
     plt.plot(dates[0:count], lbound[0:count], ':')
     plt.plot(dates, RSI)
