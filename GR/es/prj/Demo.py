@@ -48,8 +48,10 @@ def parse_args():
     iter_parser.add_argument('--no-iterative', dest='iter', action='store_false',
                              help='execs the fitting process just once')
     parser.set_defaults(iter=True)
-    parser.add_argument('--season', type=int, required=False, default=1,
+    parser.add_argument('--season', type=int, required=False, default=-1,
                              help='points in a season for Holt-Winters forecasting')
+    parser.add_argument('--rsi', type=int, required=False, default=2,
+                             help='poits for RSI calculation')
     return parser.parse_args()
 
 
@@ -102,10 +104,14 @@ else:
         printgreen("Loading PCAP...\n")
         cap = pyshark.FileCapture(pcap)  # Reading from PCAP
         for pkt in cap:
-            dates.append(float(pkt.frame_info.time_epoch))
-            nums.append(int(pkt.length) / 1000)
-            count += 1
-            printyellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+            try:
+                dates.append(float(pkt.frame_info.time_epoch))
+                nums.append(int(pkt.length) / 1000)
+                count += 1
+                printyellow("\r\033[F\033[KLoading\t" + "#" + str(count) + " " + str(int(pkt.length)) + "B")
+            except AttributeError:
+                errors += 1
+                continue
 
         # Aggregation
         interval = 5
@@ -130,8 +136,8 @@ else:
                     start = -1
         nums = series
         dates = intervals
-
-printyellow("\t" + str(count) + " data points")  # Output
+print("\r\033[F\033[K", end="")
+printyellow("Loaded\t" + str(count) + " data points")  # Output
 printyellow("\t" + str(errors) + " errors")
 printyellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
             dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
@@ -145,6 +151,7 @@ count = len(nums)
 
 if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt-Winters forecasting
     season = args.season
+    if season == -1: season = len(nums)//2  # TODO ugly
     res, dev = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)  # API
 
     for f in res[len(nums):]:
@@ -218,19 +225,22 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     plt.show()
 else:  # No parameters specified, auto fitting with Nelder-Mead
     season = args.season
+    if season == -1: season = len(nums)//2  # TODO ugly
     start_time = datetime.now()
     itr = args.iter
     if itr:
         iterations = 100
     else:
         iterations = 1
-    printgreen("\n\nFitting data...\n")
+    printgreen("\n\nFitting data...\n\n\n")
 
     bests = []
     for i in range(iterations):
-        printyellow("\r\033[F\033[KIterations\t" + str(len(bests) + 1))
         alpha, beta, gamma, SSE = APIForecast.fit_triple(nums, season)
         bests.append([[alpha, beta, gamma], SSE])
+        printyellow("\r\033[F\033[K\r\033[F\033[K\r\033[F\033[KIterations\t" + str(len(bests)))
+        printyellow("Best\talpha\tbeta\tgamma")
+        printyellow("\t" + "{:.5f}".format(alpha) + "\t" + "{:.5f}".format(beta) + "\t" + "{:.5f}".format(gamma))
 
     bests.sort(key=lambda x: x[1])
     alpha = bests[0][0][0]
@@ -240,7 +250,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     MSE = SSE / count
 
     res, dev = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
-    RSI = APIForecast.rsi(res, 12)
+    RSI = APIForecast.rsi(res, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
