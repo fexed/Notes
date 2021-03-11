@@ -155,6 +155,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     season = args.season
     if season == -1: season = len(nums)//2  # TODO ugly
     res, dev, ubound, lbound = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)  # API
+    RSI = APIForecast.rsi(res, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -169,9 +170,10 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     plt.gca().xaxis.set_major_formatter(xfmt)  # ^
 
     plt.plot(dates[0:count], nums)  # Plot generation
-    plt.plot(dates, res, '--')
-    plt.plot(dates, ubound, ':')
-    plt.plot(dates, lbound, ':')
+    plt.plot(dates[count:], res[count:], '--')
+    plt.plot(dates[0:count], ubound[0:count], ':')
+    plt.plot(dates[0:count], lbound[0:count], ':')
+    plt.plot(dates[0:count], RSI[0:count])
 
     plt.xticks(rotation=45)  # Labels rotation
     plt.xlabel("Time")
@@ -181,6 +183,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     plt.show()  # Output
 elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Exponential forecasting
     res = APIForecast.double_exponential_smoothing(nums, alpha, beta)
+    RSI = APIForecast.rsi(res, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -193,6 +196,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
 
     plt.plot(dates[:len(nums)], nums)
     plt.plot(dates, res, '--')
+    plt.plot(dates[0:count], RSI[0:count])
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
@@ -202,6 +206,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
     plt.show()
 elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     res = APIForecast.exponential_smoothing(nums, alpha)
+    RSI = APIForecast.rsi(res, args.rsi)
 
     dates.append(lastdate + timedelta(seconds=5))
 
@@ -212,6 +217,7 @@ elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
 
     plt.plot(dates[:len(nums)], nums)
     plt.plot(dates, res, '--')
+    plt.plot(dates[0:count], RSI[0:count])
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
@@ -267,10 +273,10 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     plt.gca().xaxis.set_major_formatter(xfmt)
 
     plt.plot(dates[0:count], nums)
-    plt.plot(dates, res, '--')
+    plt.plot(dates[count:], res[count:], '--')
     plt.plot(dates[0:count], ubound[0:count], ':')
     plt.plot(dates[0:count], lbound[0:count], ':')
-    plt.plot(dates, RSI)
+    plt.plot(dates[0:count], RSI[0:count])
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
