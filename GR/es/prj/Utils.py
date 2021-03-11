@@ -1,4 +1,19 @@
+# Custom print and input
+def inputyellow(txt):
+    cend = '\33[0m'
+    cyellow = '\33[33m'
+    r = input(cyellow + txt + cend)
+    return r
 
+def printyellow(txt):
+    cend = '\33[0m'
+    cyellow = '\33[33m'
+    print(cyellow + txt + cend)
+
+def printgreen(txt):
+    cend = '\33[0m'
+    cgreen = '\33[32m'
+    print(cgreen + txt + cend)
 
 
 

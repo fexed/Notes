@@ -154,7 +154,7 @@ count = len(nums)
 if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt-Winters forecasting
     season = args.season
     if season == -1: season = len(nums)//2  # TODO ugly
-    res, dev = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)  # API
+    res, dev, ubound, lbound = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)  # API
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -164,12 +164,6 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     MSE = SSE / count
 
     printgreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
-
-    ubound = []
-    lbound = []
-    for i in range(len(res)):
-        ubound.append(res[i] + 2.5 * dev[i])
-        lbound.append(res[i] - 2.5 * dev[i])
 
     xfmt = md.DateFormatter('%H:%M')  # Plot labels
     plt.gca().xaxis.set_major_formatter(xfmt)  # ^
@@ -251,7 +245,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     SSE = bests[0][1]
     MSE = SSE / count
 
-    res, dev = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
+    res, dev, ubound, lbound = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     RSI = APIForecast.rsi(res, args.rsi)
 
     for f in res[len(nums):]:
@@ -268,12 +262,6 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     printyellow("\nFitted in " + str(
         elapsed) + "!\n\talpha = " + stralpha + "\n\tbeta = " + strbeta + "\n\tgamma = " + strgamma)
     printgreen("\n\nHolt-Winters until " + dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M:%S"))
-
-    ubound = []
-    lbound = []
-    for i in range(len(res)):
-        ubound.append(res[i] + 2.5 * dev[i])
-        lbound.append(res[i] - 2.5 * dev[i])
 
     xfmt = md.DateFormatter('%H:%M')
     plt.gca().xaxis.set_major_formatter(xfmt)

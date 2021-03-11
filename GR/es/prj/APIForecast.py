@@ -81,7 +81,12 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
             result.append(prediction)
             deviations[i % slen] = gamma * (val - prediction) + (1 - gamma) * deviations[i % slen]
             deviation.append(abs(deviations[i % slen]))
-    return result, deviation
+    ubound = []
+    lbound = []
+    for i in range(len(res)):
+        ubound.append(res[i] + 2.5 * dev[i])
+        lbound.append(res[i] - 2.5 * dev[i])
+    return result, deviation, ubound, lbound
 
 
 def fit_triple(nums, season):
@@ -97,18 +102,18 @@ def fit_triple(nums, season):
     noimprovbrk = 10  # Stop after 10 iterations without improvement
 
     noimprov = 0  # Non improvement counter
-    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
+    prev, dev, ubound, lbound = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     prevbest = sse(nums, prev)  # Target function
     res = [[[alpha, beta, gamma], prevbest]]
 
     alpha += step
-    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
+    prev, dev, ubound, lbound = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
     beta += step
-    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
+    prev, dev, ubound, lbound = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
     gamma += step
-    prev, dev = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
+    prev, dev, ubound, lbound = triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
     res.append([[alpha, beta, gamma], sse(nums, prev)])
 
     iterazioni = 0
