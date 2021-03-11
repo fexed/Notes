@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as md
 import json
 import argparse
+import sys
 from datetime import datetime, timedelta, time
 import APIForecast
 import Dataset
 import Utils
-
 
 # Params
 def parse_args():
@@ -132,6 +132,28 @@ Utils.printyellow("Loaded\t" + str(count) + " data points in " + str(elapsed))  
 Utils.printyellow("\t" + str(errors) + " errors")
 Utils.printyellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
                   dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
+
+if (args.demo):
+    Utils.printgreen("Demo!")
+    season = args.season
+    if season == -1: season = len(nums) // 2
+
+    alphahw, betahw, gammahw, ssehw = APIForecast.fit_triple(nums, season)
+    alpha2, beta2, sse2 = APIForecast.fit_double(nums)
+    alpha, sse = APIForecast.fit_single(nums)
+
+    hw, dev, ub, lb = APIForecast.triple_exponential_smoothing(nums, season, alphahw, betahw, gammahw, season)
+    double = APIForecast.double_exponential_smoothing(nums, alpha2, beta2)
+    single = APIForecast.exponential_smoothing(nums, alpha)
+
+    plt.plot(nums, ':')
+    plt.plot(hw)
+    plt.plot(double)
+    plt.plot(single)
+
+    plt.show()
+
+    sys.exit(0)
 
 # Parameters
 alpha = args.alpha
