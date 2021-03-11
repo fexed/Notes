@@ -37,6 +37,9 @@ def parse_args():
                         help='points for RSI calculation')
     parser.add_argument('--interval', type=int, required=False, default=30,
                         help='number of seconds for aggregation')
+    parser.add_argument('--demo', dest='demo', action='store_true',  # TODO demo with all three forecasting methods
+                        help='activates demo mode')
+    parser.set_defaults(demo=False)
     return parser.parse_args()
 
 
@@ -193,8 +196,8 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
         alpha, beta, gamma, SSE = APIForecast.fit_triple(nums, season)
         bests.append([[alpha, beta, gamma], SSE])
         Utils.printyellow("\r\033[F\033[K\r\033[F\033[K\r\033[F\033[KIterations\t" + str(len(bests)))
-        Utils.printyellow("Best\talpha\tbeta\tgamma")
-        Utils.printyellow("\t" + "{:.5f}".format(alpha) + "\t" + "{:.5f}".format(beta) + "\t" + "{:.5f}".format(gamma))
+        Utils.printyellow("Last\talpha\tbeta\tgamma\tSSE")
+        Utils.printyellow("\t" + "{:.5f}".format(alpha) + "\t" + "{:.5f}".format(beta) + "\t" + "{:.5f}".format(gamma) + "\t" + "{:.5f}".format(SSE))
 
     bests.sort(key=lambda x: x[1])
     alpha = bests[0][0][0]
