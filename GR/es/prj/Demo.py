@@ -65,7 +65,7 @@ count = 0  # Counting (output)
 errors = 0  # Errors (output)
 if dataset == "NULL" and pcap == "NULL":
     Utils.printgreen("Generating dataset...\n")
-    for i in range(5):
+    for i in range(14):
         generated = Dataset.createDataset()
         for n in generated:
             nums.append(n)
