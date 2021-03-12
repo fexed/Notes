@@ -83,7 +83,7 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
             seasonals[i % slen] = gamma * (val - smooth) + (1 - gamma) * seasonals[i % slen]
             prediction = smooth + trend + seasonals[i % slen]
             result.append(prediction)
-            deviations[i % slen] = gamma * (val - prediction) + (1 - gamma) * deviations[i % slen]
+            deviations[i % slen] = gamma * abs(val - prediction) + (1 - gamma) * deviations[i % slen]
             deviation.append(abs(deviations[i % slen]))
     ubound, lbound = [], []
     for i in range(len(result)):
