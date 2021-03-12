@@ -63,6 +63,7 @@ def sse(values, predictions):
 def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
     result = []
     deviation = []
+    ubound, lbound = [], []
     seasonals = initial_seasonal_components(series, slen)
     deviations = seasonals
     for i in range(len(series) + n_preds):
@@ -71,6 +72,8 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
             trend = initial_trend(series, slen)
             result.append(series[0])
             deviation.append(0)
+            ubound.append(result[0] + 2.5 * deviation[0])
+            lbound.append(result[0] - 2.5 * deviation[0])
             continue
         if i >= len(series):  # we are forecasting
             m = i - len(series) + 1
@@ -79,16 +82,14 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
         else:
             val = series[i]
             last_smooth, smooth = smooth, alpha * (val - seasonals[i % slen]) + (1 - alpha) * (smooth + trend)
-            trend = beta * (smooth - last_smooth) + (1 - beta) * trend
+            last_trend, trend = trend, beta * (smooth - last_smooth) + (1 - beta) * trend
             seasonals[i % slen] = gamma * (val - smooth) + (1 - gamma) * seasonals[i % slen]
             prediction = smooth + trend + seasonals[i % slen]
             result.append(prediction)
-            deviations[i % slen] = gamma * abs(val - prediction) + (1 - gamma) * deviations[i % slen]
-            deviation.append(abs(deviations[i % slen]))
-    ubound, lbound = [], []
-    for i in range(len(result)):
-        ubound.append(result[i] + 2.5 * deviation[i])
-        lbound.append(result[i] - 2.5 * deviation[i])
+#           deviations[i % slen] = gamma * abs(val - prediction) + (1 - gamma) * deviation[-1]
+            deviation.append(gamma*abs(val - prediction) + (1-gamma)*deviation[-1])
+        ubound.append(result[-1] + 2.5 * deviation[-1])
+        lbound.append(result[-1] - 2.5 * deviation[-1])
     return result, deviation, ubound, lbound
 
 
