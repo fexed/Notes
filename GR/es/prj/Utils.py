@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
-
+from datetime import timedelta
 
 # Custom print and input
 def inputyellow(txt):
@@ -48,10 +48,27 @@ def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=
         plt.plot(dates[len(values):], predictions[len(values):], '--', label="Predictions")
 
     if not (upperbound is None):
-        plt.plot(dates[0:len(values)], upperbound[0:len(values)], ':', label="Upper bound")
+        plt.plot(dates[0:len(values)], upperbound[0:len(values)], 'g:', label="Upper bound")
+        anomalous = []
+        for i in range(len(values)):
+            if (values[i] > upperbound[i]):
+                plt.axvspan(dates[i]-timedelta(minutes=1), dates[i]+timedelta(minutes=1), facecolor='r', alpha=0.25)
+                anomalous.append(values[i])
+            else:
+                anomalous.append(0)
+#        plt.bar(dates[0:len(values)], anomalous)
+
 
     if not (lowerbound is None):
-        plt.plot(dates[0:len(values)], lowerbound[0:len(values)], ':', label="Lower bound")
+        plt.plot(dates[0:len(values)], lowerbound[0:len(values)], 'r:', label="Lower bound")
+        anomalous = []
+        for i in range(len(values)):
+            if (values[i] < lowerbound[i]):
+                plt.axvspan(dates[i]-timedelta(minutes=1), dates[i]+timedelta(minutes=1), facecolor='r', alpha=0.25)
+                anomalous.append(values[i])
+            else:
+                anomalous.append(0)
+#        plt.bar(dates[0:len(values)], anomalous)
 
     if not (rsi is None):
         plt.plot(dates[0:len(values)], rsi[0:len(values)], label="RSI")
