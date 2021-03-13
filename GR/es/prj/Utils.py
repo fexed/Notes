@@ -42,23 +42,24 @@ def TypeByNumber(number):
 def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=None, title=None):
     plt.gca().xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
 
-    plt.plot(dates[0:len(values)], values)
+    plt.plot(dates[0:len(values)], values, label="Values")
 
     if not(predictions is None):
-        plt.plot(dates[len(values):], predictions[len(values):], '--')
+        plt.plot(dates[len(values):], predictions[len(values):], '--', label="Predictions")
 
     if not (upperbound is None):
-        plt.plot(dates[0:len(values)], upperbound[0:len(values)], ':')
+        plt.plot(dates[0:len(values)], upperbound[0:len(values)], ':', label="Upper bound")
 
     if not (lowerbound is None):
-        plt.plot(dates[0:len(values)], lowerbound[0:len(values)], ':')
+        plt.plot(dates[0:len(values)], lowerbound[0:len(values)], ':', label="Lower bound")
 
     if not (rsi is None):
-        plt.plot(dates[0:len(values)], rsi[0:len(values)])
+        plt.plot(dates[0:len(values)], rsi[0:len(values)], label="RSI")
 
     plt.xticks(rotation=45)
     plt.xlabel("Time")
     plt.ylabel("Bytes")
+    plt.legend(loc="upper left")
 
     if not (title is None):
         plt.title(title)
