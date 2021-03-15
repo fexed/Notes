@@ -15,8 +15,10 @@ import Utils
 def parse_args():
     parser = argparse.ArgumentParser(description='Simple script that generates a plot based on an input dataset.json')
     data_parser = parser.add_mutually_exclusive_group(required=False)
-    data_parser.add_argument('--dataset', type=str, required=False, default="NULL",
-                             help='dataset from which the script reads the values')
+    data_parser.add_argument('--trset', type=str, required=False, default="NULL",
+                             help='dataset from which the script reads the values for training')
+    parser.add_argument('--testset', type=str, required=False, default="NULL",
+                             help='dataset from which the script reads the values for testing')
     data_parser.add_argument('--pcap', type=str, required=False, default="NULL",
                              help='pcap from which the script reads the packets')
     parser.add_argument('--alpha', type=float, required=False, default=-1,
@@ -56,7 +58,7 @@ Utils.printgreen("********************************************")
 
 # Arguments
 args = parse_args()
-dataset = args.dataset  # Dataset if present
+dataset = args.trset  # Dataset if present
 pcap = args.pcap  # PCAP if present
 
 start_time = datetime.now()
@@ -166,7 +168,7 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     season = args.season
     if season == -1: season = len(nums) // 2  # TODO ugly
     res, dev, ubound, lbound = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)  # API
-    RSI = APIForecast.rsi(res, args.rsi)
+    RSI = APIForecast.rsi(nums, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -184,9 +186,20 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     strgamma = "{:.5f}".format(gamma)
     Utils.plot(nums, dates, res, ubound, lbound, RSI, "Holt-Winters forecasting (fitted alpha = " + stralpha +
                ", beta = " + strbeta + ", gamma = " + strgamma + ")\nSSE = " + strSSE + ", MSE = " + strMSE)
+    testset = args.testset
+    if testset != "NULL":
+        nums = json.load(open(testset, "r"))
+        now = datetime.combine(datetime.today(), time.min)
+        for n in nums:
+            count = count + 1
+            dates.append(now)
+            now = now + timedelta(minutes=5)
+        RSI = APIForecast.rsi(nums, args.rsi)
+        Utils.plot(nums, dates, None, ubound, lbound, RSI, "Holt-Winters forecasting (fitted alpha = " + stralpha +
+               ", beta = " + strbeta + ", gamma = " + strgamma + ")")
 elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Exponential forecasting
     res = APIForecast.double_exponential_smoothing(nums, alpha, beta)
-    RSI = APIForecast.rsi(res, args.rsi)
+    RSI = APIForecast.rsi(nums, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)
@@ -198,7 +211,7 @@ elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Expone
                str(alpha) + ", beta = " + str(beta) + ")")
 elif alpha != -1:  # Only alpha specified, Single Exponential forecasting
     res = APIForecast.exponential_smoothing(nums, alpha)
-    RSI = APIForecast.rsi(res, args.rsi)
+    RSI = APIForecast.rsi(nums, args.rsi)
 
     dates.append(lastdate + timedelta(seconds=5))
 
@@ -232,7 +245,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
     MSE = SSE / count
 
     res, dev, ubound, lbound = APIForecast.triple_exponential_smoothing(nums, season, alpha, beta, gamma, season)
-    RSI = APIForecast.rsi(res, args.rsi)
+    RSI = APIForecast.rsi(nums, args.rsi)
 
     for f in res[len(nums):]:
         lastdate = lastdate + timedelta(minutes=5)

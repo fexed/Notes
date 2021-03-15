@@ -52,7 +52,7 @@ def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=
         anomalous = []
         for i in range(len(values)):
             if (values[i] > upperbound[i]):
-                plt.axvspan(dates[i]-timedelta(minutes=1), dates[i]+timedelta(minutes=1), facecolor='r', alpha=0.25)
+                plt.axvspan(dates[i]-timedelta(minutes=2, seconds=30), dates[i]+timedelta(minutes=2, seconds=30), facecolor='r', alpha=0.25)
                 anomalous.append(values[i])
 
 
@@ -61,7 +61,7 @@ def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=
         anomalous = []
         for i in range(len(values)):
             if (values[i] < lowerbound[i]):
-                plt.axvspan(dates[i]-timedelta(minutes=1), dates[i]+timedelta(minutes=1), facecolor='r', alpha=0.25)
+                plt.axvspan(dates[i]-timedelta(minutes=2, seconds=30), dates[i]+timedelta(minutes=2, seconds=30), facecolor='r', alpha=0.25)
                 anomalous.append(values[i])
 
     if not (rsi is None):
