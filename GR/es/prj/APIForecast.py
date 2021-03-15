@@ -78,7 +78,7 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
         if i >= len(series):  # we are forecasting
             m = i - len(series) + 1
             result.append((smooth + m * trend) + seasonals[i % slen])
-            deviation.append(deviation[i-slen])  # Unknown as we've not predicted yet
+            deviation.append(deviation[i-slen])  # Append last deviation for u-lbound in forecasting
         else:
             val = series[i]
             last_smooth, smooth = smooth, alpha * (val - seasonals[i % slen]) + (1 - alpha) * (smooth + trend)
