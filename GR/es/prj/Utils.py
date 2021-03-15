@@ -48,7 +48,7 @@ def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=
         plt.plot(dates[len(values):], predictions[len(values):], '--', label="Predictions")
 
     if not (upperbound is None):
-        plt.plot(dates[0:len(values)], upperbound[0:len(values)], 'g:', label="Upper bound")
+        plt.plot(dates, upperbound, 'g:', label="Upper bound")
         anomalous = []
         for i in range(len(values)):
             if (values[i] > upperbound[i]):
@@ -57,7 +57,7 @@ def plot(values, dates, predictions=None, upperbound=None, lowerbound=None, rsi=
 
 
     if not (lowerbound is None):
-        plt.plot(dates[0:len(values)], lowerbound[0:len(values)], 'r:', label="Lower bound")
+        plt.plot(dates, lowerbound, 'r:', label="Lower bound")
         anomalous = []
         for i in range(len(values)):
             if (values[i] < lowerbound[i]):

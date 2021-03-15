@@ -189,18 +189,19 @@ if alpha != -1 and beta != -1 and gamma != -1:  # All parameters specified, Holt
     testset = args.testset
     if testset != "NULL":
         Utils.printgreen("\n\nHolt-Winters anomaly detection on " + testset)
-        ubound, lbound = [], []
+#       ubound, lbound = [], []
         nums = json.load(open(testset, "r"))
+        datess = []
         now = datetime.combine(datetime.today(), time.min)
         count = 0
         for n in nums:
-            dates.append(now)
+            datess.append(now)
             now = now + timedelta(minutes=5)
-            ubound.append(res[count % season] + 2.5 * dev[count % season])
-            lbound.append(res[count % season] - 2.5 * dev[count % season])
+#           ubound.append(res[count % season] + 2.5 * dev[count % season])
+#           lbound.append(res[count % season] - 2.5 * dev[count % season])
             count += 1
         RSI = APIForecast.rsi(nums, args.rsi)
-        Utils.plot(nums, dates, None, ubound, lbound, RSI, "Holt-Winters forecasting (fitted alpha = " + stralpha +
+        Utils.plot(nums, datess, None, ubound[0:len(nums)], lbound[0:len(nums)], RSI, "Holt-Winters forecasting (fitted alpha = " + stralpha +
                ", beta = " + strbeta + ", gamma = " + strgamma + ")")
 elif alpha != -1 and beta != -1:  # Only alpha and beta specified, Double Exponential forecasting
     res = APIForecast.double_exponential_smoothing(nums, alpha, beta)
