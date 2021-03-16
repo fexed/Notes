@@ -39,9 +39,6 @@ def parse_args():
                         help='points for RSI calculation')
     parser.add_argument('--interval', type=int, required=False, default=30,
                         help='number of seconds for aggregation')
-    parser.add_argument('--demo', dest='demo', action='store_true',  # TODO demo with all three forecasting methods
-                        help='activates demo mode')
-    parser.set_defaults(demo=False)
     return parser.parse_args()
 
 
@@ -135,28 +132,6 @@ Utils.printyellow("\t" + str(errors) + " errors")
 Utils.printyellow("\tFrom " + dates[0].strftime("%Y-%m-%d %H:%M") + " to " +
                   dates[len(dates) - 1].strftime("%Y-%m-%d %H:%M"))
 
-if (args.demo):
-    Utils.printgreen("Demo!")
-    season = args.season
-    if season == -1: season = len(nums) // 2
-
-    alphahw, betahw, gammahw, ssehw = APIForecast.fit_triple(nums, season)
-    alpha2, beta2, sse2 = APIForecast.fit_double(nums)
-    alpha, sse = APIForecast.fit_single(nums)
-
-    hw, dev, ub, lb = APIForecast.triple_exponential_smoothing(nums, season, alphahw, betahw, gammahw, season)
-    double = APIForecast.double_exponential_smoothing(nums, alpha2, beta2)
-    single = APIForecast.exponential_smoothing(nums, alpha)
-
-    plt.plot(nums, ':')
-    plt.plot(hw)
-    plt.plot(double)
-    plt.plot(single)
-
-    plt.show()
-
-    sys.exit(0)
-
 # Parameters
 alpha = args.alpha
 beta = args.beta
@@ -237,7 +212,7 @@ else:  # No parameters specified, auto fitting with Nelder-Mead
 
     bests = []
     for i in range(iterations):
-        alpha, beta, gamma, SSE = APIForecast.fit_triple(nums, season)
+        alpha, beta, gamma, SSE = APIForecast.fit_neldermead(nums, season)
         bests.append([[alpha, beta, gamma], SSE])
         Utils.printyellow("\r\033[F\033[K\r\033[F\033[K\r\033[F\033[KIterations\t" + str(len(bests)))
         Utils.printyellow("Last\talpha\tbeta\tgamma\tSSE")
