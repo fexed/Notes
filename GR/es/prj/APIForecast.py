@@ -93,7 +93,7 @@ def triple_exponential_smoothing(series, slen, alpha, beta, gamma, n_preds):
     return result, deviation, ubound, lbound
 
 
-def fit_triple(nums, season):
+def fit_neldermead(nums, season):
     # Fitting alpha, beta, gamma parameters for Holt-Winter forecasting with Nelder-Mead algorithm
 
     # Starting parameters
