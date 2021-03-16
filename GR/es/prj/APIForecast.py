@@ -209,6 +209,10 @@ def fit_neldermead(nums, season):
     return res[0][0][0], res[0][0][1], res[0][0][2], res[0][1]
 
 
+def fit_tnc(nums, season):
+    # TODO
+
+
 def rsi(nums, N):
     RSIlist = []
     count = 0
