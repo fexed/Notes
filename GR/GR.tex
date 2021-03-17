@@ -114,16 +114,22 @@ Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa"
 Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.\\\\
 Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va ricevuto.\\
 \subsection{Common problems with packet capture}
-Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere root.\\
-Container condivide kernel con host, macchina virtuale emula il kernel.\\
-Necessità vedere traffico. Non vorrei mettere mano sulla macchina, perché devo avere so che permette, utente, installare software\ldots\\
-Quindi lo faccio da fuori, prelevandolo dallo switch.\\
-Metodi software: ho switch, che ha delle porte:
-port mirror: tutto traffico diretto verso tale macchina oltre a mandarglielo lo mandi anche a me su questa porta. 1:1 una porta verso una porta, 1:N tot porte switch le mandi qua.
-VLAN mirror: simile al port mirror: dammi tutto traffico tale VLAN e mandalo qua
-traffic filter/mirroring: dammi solamente traffico di tale porta tale ip\ldots\\\\\\
-Singolo cavo ha 2gbps (1gps in upload e 1gbps in dwnld), quindi con port mirror, con cui posso scaricare al massimo a 1gbps, ho efficacia se il traffico sta sotto 1 gbps. Dovrei avere scheda di rete da 10 gbps per reggere comodamente traffico e non perderlo. Necessito quindi di una \textbf{scheda di rete più veloce della somma delle due direzioni}.\\
-Hardware: \textbf{Network Tap} prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende le direzioni in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
+Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere \texttt{root}, o almeno avere le capabilities necessarie per vedere i pacchetti di tutti i processi in esecuzione.\\
+Lo sniffer dovrà essere all'interno di una VM (virtualizzazione del SO con un proprio kernel) o di un container (condivide kernel con l'host), in modo da intercettare il traffico loopback.
+\paragraph{Tecniche di monitoraggio}
+Spesso e volentieri, nonostante abbia la necessità di vedere il traffico, non posso mettere mano sulla macchina da monitorare: devo avere un S.O. che lo permetta, avere i diritti per installare il software necessario\ldots\\
+La soluzione è monitorare il traffico da fuori, prelevandolo dallo switch. Ci sono diversi metodi, software e hardware. \textbf{Metodi software}, riguardanti le porte dello switch:
+\begin{list}{}{}
+	\item \textbf{port mirror}: comando allo switch di inoltrare tutto il traffico da e verso un host anche su una specifica porta, su cui installo lo sniffer. Può avere più "molteplicità":\\
+	1:1, una porta verso una porta\\
+	1:N, tot porte switch le mandi qua
+	\item \textbf{VLAN mirror}: simile al port mirror, inoltra tutto il traffico di una VLAN.\\
+	Una VLAN serve a separare i traffici e non mescolare i dati, così che gli host stiano sul solito cavo senza saperlo.
+\end{list}
+\textbf{Traffic filter}/\textbf{mirroring}: filtrare il traffico ad esempio in base alla porta, all'indirizzo IP\ldots
+\paragraph{Problematiche} Uno dei problemi maggiori è dato dall'utilizzo, da parte dello sniffer, della sola parte di ricezione del cavo. Il singolo cavo ha 2 Gbps (1 Gps in upload e 1 Gbps in downlaod), quindi con il port mirror, con cui posso scaricare al massimo a 1 Gbps perché uso solo la parte di ricezione, ho risultati ottimi solo se il traffico sta sotto 1 Gbps. Dovrei avere una scheda di rete da 10 Gbps per reggere comodamente traffico e non perderlo. Necessito quindi di una \textbf{scheda di rete più veloce della somma delle due direzioni}.
+\paragraph{Hardware}\textbf{Network Tap} prende le singole direzioni del traffico e ne fa una copia. PC monitor con due schede di rete perché tap divide il filo le direzioni: una prende le direzioni in entrata e una prende le direzioni in uscita. Così scopro anche chi invia cosa. Nel port mirror non sono preservate le direzioni.
+\pagebreak
 \subsection{Interoperabilità}
 Software di switch e infrastruttura di rete devono essere duraturi, perché infrastruttura di rete si cambia quando c'è veramente necessità. Altrimenti infrastruttura rimane lì. 
 \paragraph{Problema} Gestire le cose nel tempo, che rimangano interoperabili negli anni. Siccome informatica va avanti per mode, si sono posti come problema (fatta negli anni '80) dover gestire qualche sistema non attraverso la url come si fa ora, perché è un modo di fare molto volatile che cambia spesso. Allora hanno fatto standard con negoziazione alto livello: oggetto ha attributi ad alto livello, funzionali al suo funzionamento (macchinettà caffè: c'è acqua, quanti caffè fatti, se ha bicchierini\ldots).\\
@@ -148,7 +154,6 @@ ASN1 rimane architettura, idea. La sintassi di trasferimento può essere JSON, G
 	Quando trasferisco dati da applicazione ad applicazione, devo poter indicare un campo chiave. Questo tipo di dato identifica univocamente l'oggetto che sto trasferendo all'interno dell'albero ISO
 	\item \ldots
 \end{list}
-\pagebreak
 \paragraph{ISO Registration Tree} Usato per identificare univocamente definizioni, documenti, oggetti\ldots Ha una struttura gerarchica, simile ai file system gerarchici. Tutti i nodi di un livello sono univocamente identificati da un numero. Il \textbf{percorso dalla radice al nodo} fornisce una \textbf{sequenza numerica} chiamata \textbf{Object Identifier}.\\
 Per esempio, Internet è 1.3.6.1
 \begin{center}
@@ -484,10 +489,11 @@ Pacchetti non unicast sono "problematici" perché riempino le porte dello switch
 \begin{center}
 	\includegraphics[scale=0.75]{cattura.png}
 \end{center}
-Quando cattura traffico intervengo sul traffico e me lo copio verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
+Quando cattura traffico intervengo sul traffico e me lo copio (\textbf{shallow copy}) verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
 Gli sniffer necessiterebbero di diritti su
 \paragraph{Capabilities} Quando uno è SU ha diritti eccessivi rispetto a ciò che deve fare, quindi le \textbf{capabilities} sono le possibilità di spezzare i diritti di amministrazione in categorie: non c'è bisogno di essere root che fa veramente veramente tutto perché se ne può abusare. Quindi il concetto di root è spacchettato in varie possibilità: configurazione del MAC address, Net Admin\ldots\\
-Un'app quindi dovrebbe nascere con conetto di capabilities e avere diritti minimi necessari per fare ciò che vuole/deve fare.
+Un'app quindi dovrebbe nascere con concetto di capabilities e avere diritti minimi necessari per fare ciò che vuole/deve fare.\\\\
+Una \textbf{capability} è implementata come una struttura dati privilegiata, con una sezione che specifica i diritti di accesso ed una sezione che identifica univocamente l'oggetto.
 \paragraph{Filtro} Devo indicare l'interfaccia a cui sono interessato catturare pacchetti (eventualmente tutte) e in caso che tipo di pacchetti ricevere. Così il BPF driver \textbf{non} invia all'applicazioni pacchetti non interessanti, perché anche scartare qualcosa richiede tempo.\\
 BPF e sottosistema è localizzato nel kernel. Solamente la parte del pacchetto è inoltrata, il resto (filtro e copia dei pacchetti) è nel kernel.\\
 Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
