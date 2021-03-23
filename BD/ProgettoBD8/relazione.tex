@@ -132,13 +132,14 @@ I clienti effettuano pagamenti, totali o parziali, legati ad una o più fatture 
 		\pagebreak
 	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata.\\\\ % TODO
 		1.
-		\Tree [.Project(\{Nome\}) [.Filter(Importo$\:>\:$1000) [.NestedLoop(Cliente.Codice$\:$=$\:$Pagamento.Cliente)  TableScan(Cliente) TableScan(Pagamento) ] ] ]\\\\\\
+		\Tree [.Project(\{Nome\}) [.Filter(Importo$\:>\:$1000) [.IndexNestedLoop(Cliente.Codice$\:$=$\:$Pagamento.Cliente)  TableScan(Cliente) IndexFilter(Pagamento,$\:$Idx$_1$,$\:$Cliente.Codice$\:$=$\:$Pagamento.Cliente) ] ] ]\\\\
+		Con Idx$_1$ un indice su Pagamento.Cliente\\\\\\
 		2.
 		\Tree [.Sort(\{SUM(Importo)\}) [.Project(\{Modalita,$\:$SUM(Importo)\}) [.Filter(SUM(Importo)$\:>\:$1000) [.GroupBy(\{Modalita\},$\:$\{SUM(Importo)\}) [.IndexFilter(Idx$_1$,$\:$Importo$\:>\:$500) SortScan(Pagamento,$\:$\{Modalita\}) ] ] ] ] ]\\\\
 		Con Idx$_1$ un indice su Pagamento.Importo\\\\
 		Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Pagamento sull'attributo\\Modalita in fase di scansione.\\\\\\
 		3.
-		\Tree [.Project(\{Fattura,$\:$COUNT(LegatoA.Pagamento)\}) [.Filter(COUNT(LegatoA.Pagamento)$\:>\:$10) [.GroupBy(\{Fattura\},$\:$\{COUNT(LegatoA.Pagamento)\}) [.IndexNestedLoop(LegatoA.Pagamento$\:$=$\:$Pagamento.Codice,$\:$Id$_1$) SortScan(LegatoA,$\:$\{Fattura\}) [.IndexFilter(Idx$_1$,$\:$LegatoA.Pagamento$\:$=$\:$Pagamento.Codice) IndexFilter(Pagamento,$\:$Idx$_2$,$\:$Importo$\:<\:$500) ] ] ] ] ]\\\\
+		\Tree [.Project(\{Fattura,$\:$COUNT(LegatoA.Pagamento)\}) [.Filter(COUNT(LegatoA.Pagamento)$\:>\:$10) [.GroupBy(\{Fattura\},$\:$\{COUNT(LegatoA.Pagamento)\}) [.IndexNestedLoop(LegatoA.Pagamento$\:$=$\:$Pagamento.Codice) SortScan(LegatoA,$\:$\{Fattura\}) [.IndexFilter(Idx$_1$,$\:$LegatoA.Pagamento$\:$=$\:$Pagamento.Codice) IndexFilter(Pagamento,$\:$Idx$_2$,$\:$Importo$\:<\:$500) ] ] ] ] ]\\\\
 		Con Idx$_1$ un indice su Pagamento.Codice, Idx$_2$ un indice su Pagamento.Importo\\\\
 		Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella LegatoA sull'attributo Fattura in fase di scansione, poiché NestedLoop mantiene l'ordinamento della tabella esterna.
 \end{enumerate}
