@@ -56,7 +56,10 @@ I clienti effettuano pagamenti, totali o parziali, legati ad una o più fatture 
 	\item Pagamento(\underline{Codice}, Cliente*, Importo, Modalità, Data)
 	\item LegatoA(\underline{Pagamento*}, \underline{Fattura*}, Tipo)
 \end{list}
-$\forall$ tupla $s\:\in$ Segue e per la tupla $p\:\in$ Pratica associata, si ha che $\exists$ tupla $r\:\in$ Ruolo con $s$[Persona] = $r$[Persona] $\wedge$ $p$[Titolare] = $r$[Organizzazione]
+\begin{list}{}{\textbf{Vincoli non catturati graficamente}}
+	\item $\forall$ tupla $s\:\in$ Segue e per la tupla $p\:\in$ Pratica associata, si ha che $\exists$ tupla $r\:\in$ Ruolo con $s$[Persona] = $r$[Persona] $\wedge$ $p$[Titolare] = $r$[Organizzazione]\\
+	Cioè ogni persona che segue una pratica ha un ruolo nell'organizzazione titolare di tale pratica.
+\end{list}
 \pagebreak
 \section{Query SQL}
 \begin{enumerate}
@@ -128,8 +131,8 @@ $\forall$ tupla $s\:\in$ Segue e per la tupla $p\:\in$ Pratica associata, si ha 
 		\Tree [.Sort(\{SUM(Importo)\}) [.Project(\{Modalita,$\:$SUM(Importo)\}) [.Filter(SUM(Importo)$\:>\:$1000) [.GroupBy(\{Modalita\},$\:$\{SUM(Importo)\}) [.Filter(Importo$\:>\:$500) SortScan(Pagamento,$\:$\{Modalita\}) ] ] ] ] ]\\\\
 		Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella Pagamento sull'attributo\\Modalita in fase di scansione.\\\\\\
 		3.
-		\Tree [.Project(\{Fattura,$\:$COUNT(LegatoA.Pagamento)\}) [.Filter(COUNT(LegatoA.Pagamento)$\:>\:$10) [.GroupBy(\{Fattura\},$\:$\{COUNT(LegatoA.Pagamento)\}) [.NestedLoop(LegatoA.Pagamento$\:$=$\:$Pagamento.Codice) SortScan(LegatoA,$\:$\{Fattura\})  [.Filter(Importo$\:<\:$500) TableScan(Pagamento) ] ] ] ] ]\\\\
-		Posso evitare la Sort prima della GroupBy ordinando immediatamente la tabella LegatoA sull'attributo Fattura in fase di scansione, poiché NestedLoop mantiene l'ordinamento della tabella esterna.
+		\Tree [.Project(\{Fattura,$\:$COUNT(LegatoA.Pagamento)\}) [.Filter(COUNT(LegatoA.Pagamento)$\:>\:$10) [.GroupBy(\{Fattura\},$\:$\{COUNT(LegatoA.Pagamento)\}) [.Sort(\{Fattura\}) [.NestedLoop(LegatoA.Pagamento$\:$=$\:$Pagamento.Codice) [.Filter(Importo$\:<\:$500) TableScan(Pagamento) ] TableScan(LegatoA) ] ] ] ] ]\\\\
+		Potrei evitare la Sort prima della GroupBy ordinando immediatamente la tabella LegatoA sull'attributo Fattura in fase di scansione se usata come tabella esterna, poiché NestedLoop mantiene l'ordinamento della tabella esterna durante l'operazione di join.
 		\pagebreak
 	\item Scrivere un piano di accesso fisico efficiente per i tre piani di accesso logico al punto 1 che fanno uso di due indici (o comunque del numero massimo di indici possibili) e (opzionale) verificare se la sort prima della group by può essere evitata.\\\\ % TODO
 		1.
