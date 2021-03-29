@@ -1002,22 +1002,26 @@ Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.
 Magari esportare solo unidirezionali. Diverso da aggregazione, possono coesistere e solitamente filtraggio applicato prima dell'aggregazione.
 \paragraph{Esempi di intrusione} Flussi con pacchetti o ottetti eccessivi conteggio\\Src con tante destinazioni (host scanning) o con tante porte dest su stesso host (port scanning)
 \subsection{sFlow}
-Flow da non associare a NetFlow. NetFlow: insieme di pacchetti con caratteristiche in comune (a meno di aggregazione). NetFlow nasce per girare intralan, sui router per traffico che passa attraverso. Con probe software, ma anche hardware.\\
-NetFlow è nato soprattutto per la parte geografica, non per la LAN. Se voglio sapere quello che succede in rete, il traffico non passa dal router: non vedrò con NetFlow ciò che passa in casa.\\
-8 porte gigabit: 16 gigabit di traffico (8 gigabit andata e 8 gigabit ritorno). Diventa complicato analizzarlo.\\
-Devo \textbf{deduplicare}: dividerlo a metà per le due direzioni.\\
-Su una rete reale il traffico da analizzare è troppo: costerebbe di più l'infrastruttura. Inoltre sonde software richiedono lavoro: versioni diverse, librerie\ldots e non è detto che si possa installare probe.\\
-Entra in campo sFlow. Ci si orienta verso di esso perché aumentando i problemi aumentano i costi. Aumentando porte devo aumentare potenza e memorizzazione. Ma devo partire dal perché voglio analizzare: visibilità di rete per sapere se ci sono problemi, come stanno andando le cose. La domanda è la visibilità. sFlow non pretende di vedere tutto sempre, non pretende di essere veloce quanto la rete, si analizza 1 pacchetto ogni $x$ (\textbf{Campionamento}: $x$ random, non fisso, sennò rischio di sincronizzarmi con traffico periodico e vedere sempre il solito), più pacchetti si analizzano più preciso sono ma se la rete è troppo veloce si campiona di più.\\
-\textbf{Perdita controllata}.
-\paragraph{Architettura} Probe campiona traffico, pacchetti campionati mandati all'sFlow collector in formato sFlow, periodicamente il probe manda al collezionatore le statistiche SNMP MIB-II all'interno dei pacchetti sFlow. Pacchetti usati per scalare il traffico. Il sampling è fatto per porta, per avere una visibilità per porta.\\
+NetFlow nasce per router e traffico instradato, ossia nelle reti geografiche e non per le reti LAN. Si potrebbe mettere una sonda per analizzare ogni device, ma si avrebbe una cospicua quantità di traffico da analizzare, oltre che ad un aumentato costo dei dispositivi di rete, la scalabilità\ldots\\
+NetFlow è nato soprattutto per la parte geografica, non per la LAN. Se voglio sapere quello che succede in rete, il traffico non passa dal router (non vedrò con NetFlow ciò che passa in casa), ma si può applicare anche alle LAN.\\
+sFlow segue questi principi:
+\begin{list}{}{}
+	\item Non vuole essere veloce quanto la rete monitorata.\\
+	Anche se riuscisse a rilevare tutto il traffico, avrebbe problemi a gestire i flussi generati.\\
+	Se ho 8 porte gigabit, ognuna ha 16 gigabit di traffico (8 gigabit andata e 8 gigabit ritorno) e diventa difficile gestirlo. Devo \textbf{deduplicare}: dividerlo a metà per le due direzioni.\\
+	\item Effettua il \textbf{sampling} sui pacchetti, sapendo che più pacchetti vede più i suoi report saranno precisi.\\
+	Il sampling è effettuato su tutte le porte, in modo da avere la stessa proporzione, ma con intervallo casuale, così da non rischiare di avere un traffico periodico e analizzare solo quello.
+	\item La \textbf{perdita} dei pacchetti è \textbf{controllata}, cioè si sa perché quei pacchetti vengono persi.
+\end{list}
+\paragraph{Architettura} Si basa su un \textbf{probe} che campiona il traffico: i pacchetti campionati sono mandati all'\textbf{sFlow collector} in formato sFlow, periodicamente il probe manda al collezionatore le statistiche SNMP MIB-II all'interno dei pacchetti sFlow.\\
+I pacchetti sono usati per scalare il traffico. Il sampling è fatto per porta, per avere visibilità su ognuna.\\
 La differenza è che \textbf{il probe manda il pacchetto ogni $n$ con l'header sFlow e lo manda al collezionatore, senza analizzarlo}. Ci permette di andare veloci.\\\\
 \texttt{RFC 3176}, definisce formato pacchetti (UDP, non SNMP) e un MIB SNMP per accedere i dati. Architettura simile a NetFlow: probe manda \textbf{pacchetti} al collezionatore.\\
 probe fondamentalmente sniffer che cattura 1 ogni $x$ pacchetti (tipicamente $x = 400$ e incapsula con info sFlow.\\
 Errore statistico $\leq 196\cdot\sqrt{\frac{1}{\textsl{numero dei sample}}}$\\
-Scalabile (aumento il rateo di sampling).\\\\
-sFlow $\neq$ NetFlow\\
-Flussi sFlow e flussi NetFlow \textbf{non hanno niente in comune}. In sFlow un campione è un flusso, in NetFlow un flusso è una quintupla con contatori.\\
-Oltre a vedere il pacchetto può mostrare anche info sul contesto agendo sullo switch\\
+Scalabile (aumento il rateo di sampling).
+\paragraph{sFlow $\neq$ NetFlow} Flussi sFlow e flussi NetFlow \textbf{non hanno niente in comune}. In sFlow un flusso è un pacchetto, in NetFlow un flusso è una quintupla con contatori.\\
+Oltre a vedere il pacchetto può mostrare anche info sul contesto agendo sullo switch.\\
 AS source e destination relative ad ip src/dst in netflow\\
 in sflow ho as del router che lo invia e as che lo deve ricevere\\
 Con sflow vedo parte del traffico ma con \textbf{più informazioni estratte dal contesto}\\
@@ -1025,6 +1029,7 @@ Si riesce a sapere, sugli AP, anche user e pwd. Info riguardo al traffico come g
 Solitamente NetFlow su router e sFlow sugli switch.
 \paragraph{Agent} Implementato in hw. Pacchetto ogni $x$, arricchito con info di contesto.\\\\
 sFlow sugli switch, RMON su switch compatibili L2/L3, NetFlow sui router $\rightarrow$ soluzioni di analisi del traffico: sorveglianza continua sulla rete\ldots
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item \textbf{Ambiente}\\sFlow switch, ma anche su router\\
 	NetFlow router
@@ -1035,6 +1040,7 @@ sFlow sugli switch, RMON su switch compatibili L2/L3, NetFlow sui router $\right
 	\item \textbf{Monitoraggio}\\sFlow monitoraggio statistico\\
 	NetFlow monitoragglio accurato (senza packet loss)
 \end{list}
+\end{multicols}
 \subsection{Radius} \textbf{Remote Authentication Dial In User Service}, protocollo comune. \textbf{Lato operatore}\\
 Importante per:
 \begin{list}{}{}
