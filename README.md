@@ -34,7 +34,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Programmazione 2: [appunti Java :white_check_mark:](https://github.com/fexed/Notes/blob/master/PR2/PR2_Java.pdf), [appunti OCaML :white_check_mark:](https://github.com/fexed/Notes/blob/master/PR2/PR2_OCaML.pdf), [SecureDataContainer (progetto Java)](https://github.com/fexed/SecureDataContainer), [LangInterpreter (progetto OCaML)](https://github.com/fexed/LangInterpreter)
 
-##### Reti di Calcolatori: [appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf), ([WordQuizzle (progetto)](https://github.com/fexed/WordQuizzle))
+##### Reti di Calcolatori: [appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [appunti laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf), [WordQuizzle (progetto)](https://github.com/fexed/WordQuizzle)
 
 ##### Sistemi Operativi e Laboratorio: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/SOL/SOL.pdf), [laboratorio](https://github.com/fexed/SOL_LAB), [ObjectStore (progetto)](https://github.com/fexed/ObjectStore/releases/tag/1.0)
 
