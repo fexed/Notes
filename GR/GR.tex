@@ -988,17 +988,20 @@ Salta 24Byte perché parte da livello 3.
 \subparagraph{Configurazione Cisco IOS} Configurato su ogni interfaccia, specificando versione e IP del collezionatore. Specifico sampling rate, durata massima e aggregazione (\\
 Si abilitano flussi basandoli sull'interfaccia.
 \subparagraph{Configurazione Juniper JunOS} Si appoggia al firewall, quando pacchetti attraversano router (eventualmente non filtrante). Router divisi in data/switching plane (hw) e control plane (sw). Sorta di loopback interno per analisi traffico, per portarlo da data a control plane. Juniper usa questa interfaccia per portare pacchetti in parte di controllo, limitata a 7000 pacchetti al secondo per evitare sovraccarico. Nello spazio utente c'è il probe che calcola i flussi ed esporta.
+\subsection{IPFIX}
 \paragraph{NetFlow generico: IPFIX} A inizio 2000 perché NetFlow è di Cisco\\
 \textbf{IPFIX} definito dalla IETF.\\
 Basato su NetFlow v9, abilità di definire nuovi campi del flusso attraverso un formato standard (OID, Object Identifier). Dopo aver definito il "PEN?" specifico OID univoci per me e in generale.\\
 Protocollo di trasporto (SCTP, Stream Control Transport Protocol) orientato allo stream, connection-oriented, vincoli rilassati così da non perdere eventualmente troppo tempo a riempire il pacchetto. Opzionalmente supporta TCP/UDP.\\
 Attualmente: bozza di specifica del protocollo.\\
 \textbf{Fondamentalmente}, IPFIX = NetFlow v9 su SCTP con qualche differenza extra.
-\paragraph{Aggregazione flussi} Flussi raw ok esporto e via. Spesso dobbiamo rispondere a domande diverse: quanto traffico certo protocollo? Quando verso Google?\\
-Una volta che ho i flussi dentro il router posso esportarli raw o aggregarli: accorpare fra loro flussi a seconda di criteri stabiliti (es: IP, maschero le altre colonne come se non ci fossero ad esempio con valore fittizio 0 e sommando eventuali contatori). \textbf{Risparmio spazio e trasmissione}. Perdo informazione, non posso separare flussi aggregati.\\
+\subsection{Flow Aggregation e Filtering}
+\paragraph{Aggregazione flussi} I flussi raw ok esporto e via, ma sono limitanti. Spesso dobbiamo rispondere a domande diverse: quanto traffico certo protocollo? Quando verso Google?\\
+Una volta che ho i flussi dentro il router posso esportarli raw o aggregarli: accorpare fra loro flussi a seconda di criteri stabiliti (es: IP, maschero le altre colonne come se non ci fossero ad esempio con valore fittizio 0 e sommando eventuali contatori). \textbf{Risparmio spazio e trasmissione}. Perdo informazione, perché non posso separare successivamente i flussi ormai aggregati.\\
 Permette di trovare forme tipiche per rispondere a domande tipo: porte più usate, chi parla con chi\ldots\\
-Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.
-\paragraph{Filtraggio flussi} Scartare flussi basandosi su criteri: furata, src/dest, porte\ldots\\
+Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.\\
+Se l'aggregazione la fa il probe (\textbf{probe aggregation}), si migliora l'utilizzo della memoria da parte del probe NetFlow ma il collector non potrà risalire ai singoli flussi. Se l'aggregazione la fa il collector (\textbf{collector aggregation}) allora svolgerà più lavoro, ma potrà risalire ai singoli flussi.
+\paragraph{Filtraggio flussi} Scartare flussi basandosi su criteri: durata, src/dest, porte\ldots\\
 Magari esportare solo unidirezionali. Diverso da aggregazione, possono coesistere e solitamente filtraggio applicato prima dell'aggregazione.
 \paragraph{Esempi di intrusione} Flussi con pacchetti o ottetti eccessivi conteggio\\Src con tante destinazioni (host scanning) o con tante porte dest su stesso host (port scanning)
 \subsection{sFlow}
@@ -1104,7 +1107,7 @@ Performance in $O(w)$ dove $w$ è lunghezza dell'albero.
 Struttura dati di riferimento per subnetting match su IPv4/IPv6.\\
 codice su \texttt{github.com/ntop/nDPI/blob/dev/src/lib/third\_party/src/ndpi\_patricia.c}
 \paragraph{Entropia} Entropia misura usata per misurare come i dati sono distribuiti su un certo range. Più alta entropia più dati sono sparpagliati.\\
-Formula \texttt{csrc.nist.gov/csrc/media/publications\ldots}\\
+Formula %TODO
 Esempio per usarla: grado di quanto sono distribuiti i dati\\
 Esempio di uso sul TLS: entropia dei byte prima e dopo crittografia cambia ma è sempre compresa fra delle soglie per dati omogenei. Tramite entropia si può capire il tipo di dato.
 \chapter{Network Traffic Monitoring su Container}
