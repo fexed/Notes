@@ -14,7 +14,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Architettura degli Elaboratori: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/AE/architettura_appunti.pdf), ([D-RISC compiler :white_check_mark:](https://github.com/fexed/D-RISCcompiler))
 
-##### Basi di Dati: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/BD/BD.pdf), [Progetto](https://github.com/fexed/Notes/blob/master/BD/ProgettoBD8/relazione.pdf)
+##### Basi di Dati: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/BD/BD.pdf), [progetto](https://github.com/fexed/Notes/blob/master/BD/ProgettoBD8/relazione.pdf)
 
 ##### Calcolo Numerico: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/CN/CN.pdf)
 
