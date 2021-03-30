@@ -86,8 +86,8 @@ Aree funzionali \textbf{per gestire qualsiasi sistema}, da giochi a sistemi di r
 \end{list}
 \subsection{Interagire con management objects}
 Primitive: \texttt{get}, \texttt{set}, \texttt{create}, \texttt{delete}\\
-Quando faccio richiesta ad un protocollo mi aspetto una risposta: richiesta -- risposta\\
-Il contenuto della richieste varia durante il transito aggiungendo determinate informazioni. Es: SMS durante il transito aggiunge numero mittente per poter comunicare a destinatario chi inviava.
+Quando faccio richiesta ad un protocollo mi aspetto una risposta: richiesta $\rightarrow$ risposta\\
+Il contenuto della richieste varia durante il transito aggiungendo determinate informazioni, per esempio: ad un SMS durante il transito si aggiunge numero mittente per poter comunicare a destinatario chi inviava.
 \subsection{Servizi}
 \paragraph{Confermati} Faccio richiesta $\rightarrow$ mi aspetto risposta.\\Es: Telegram/Whatsapp
 \paragraph{Non confermati} Faccio richiesta e fine.\\Es: SMS
@@ -97,11 +97,9 @@ Il contenuto della richieste varia durante il transito aggiungendo determinate i
 \pagebreak
 \subsection{Standardizzazione}
 La grande differenza tra ISO/OSI e Internet è il processo di standardizzazione.
-\pagebreak
 \paragraph{ISO} Nella standardizzazione ISO tutte le varie aziende si accordano su come fare la rete: si creano gruppi di lavoro che si riuniscono (es. ICANN) e producono un documento di lavoro, poi vari comitati lo discutono (fino a qui \textbf{ad alto livello}).\\
-Se si mettono d'accordo, pubblicano un \textbf{Draft International Standard} (\textbf{senza implementazione}). Dopodiché, se non viene accettato creano technical report, altrimenti un \textbf{full standard}.\\
-La parte importante è l'\textbf{assenza di implementazione fino ad avere la creazione dello standard}.
-
+Se si mettono d'accordo, pubblicano un \textbf{Draft International Standard} (\textbf{senza implementazione}). Dopodiché, se il draft non viene accettato creano un \textbf{technical report}, altrimenti si produce il \textbf{full standard}.\\
+La parte importante è l'\textbf{assenza di implementazione fino alla creazione dello standard}.
 \begin{center}
 	\includegraphics[scale=0.7]{stdiso.png}
 \end{center}
@@ -270,28 +268,27 @@ linkDown per segnalare se ha perso il link, linkUp per collegamento preso
 \end{center}
 \paragraph{Utilità dei MIB} Compilatore non è detto che generi linguaggio macchina ma trasforma semplicemente. I \textbf{frontend compilers} SNMP prendono i MIB e producono warning/errori e conversioni di formato SMI\\
 %http://luca.ntop.org/sgr2018/slides/nm2017.pdf
-Quando è nato snmp fatti due standard: snmp e mib iniziale (mib-ii, rfc 1213) dove vengono descritti object più importanti per gestione internet.\\
-Vogliono controllare stack TCP/IP per vedere cosa non funziona poi monitorare porta di rete. device espongono contatori per interfaccia tramite snmp. contatori byte pacchetti sono base del monitoraggio, ma nel tempo và superato perché contatori su byte sono poco utili: non si sa bene cosa succede però. \\
-Obiettivi mib-ii: info base su errori, pochi e semplici control objects (su/giù, errori, pacchett/byte ingresso/uscita), cerca il più possibile di evitare info ridondanti, \textbf{non deve assolutamente interferire con le operazioni} devono essere separati e non rallentare o inficiare in nessuna maniera prestazioni dei dispositivi.\\
-Si implementa in hardware, \texttt{eth-tool}. Non si mette a contare i pacchetti, ma è direttamente l'hardware a rispondere. Se chiedo numero pacchetti in un minuto, lui delega all'hardware di contare, quindi il carico non cambia in base al traffico di rete.\\\\
-Sono circa 170 oggetti, negli anni alcune def sono troppo semplici, e presuppone IPv4 (IPv6 gestito in mib separati).
+Quando è nato l'SNMP sono stati fatti due standard: SNMP e MIB iniziale (MIB-II, \texttt{RFC 1213}) dove vengono descritti gli object più importanti per la gestione di internet.\\
+Vogliono controllare stack TCP/IP per vedere cosa non funziona e poi monitorare porta di rete. I device espongono dei contatori per ogni interfaccia tramite SNMP: contare i byte e i pacchetti \textbf{è la base del monitoraggio}, ma nel tempo vanno superati perché i contatori su byte sono poco utili.\\
+Obiettivi MIB-II: informazioni di base sugli errori, pochi e semplici control objects (porte su/giù, errori, pacchetti e byte ingresso/uscita), cerca il più possibile di evitare info ridondanti, \textbf{non deve assolutamente interferire con le operazioni}, devono essere separati e non rallentare o inficiare in nessuna maniera prestazioni dei dispositivi.\\
+Si implementa in hardware, \texttt{eth-tool}. Non si mette a contare i pacchetti, ma è direttamente l'hardware a rispondere con le informazioni. Se chiedo numero pacchetti in un minuto, lui delega all'hardware di contare, quindi il carico non cambia in base al traffico di rete.\\
+Sono circa 170 oggetti, negli anni alcune def sono divenute troppo semplici e presuppone IPv4 (IPv6 gestito in MIB separati).
 \begin{center}
 	schema dei MIB-II (1.3.6.1.2)\\
 	Albero serve a identificare oggetti.
 \end{center}
-\paragraph{Composizione} Diviso in gruppi: sistema, interfacce, arptable, componenti stack IP. Anche una parte relativa all'agent SNMP: quante query, errori\ldots\\
-La parte trasmissione è aperta, tanti sottoalberi: com'è connesso computer dipende dalla tecnologia, quindi è estensibile a seconda delle nuove tecnologie e cambia nel tempo.\\
-Quindi negli anni viene modificato ma è tutto sommato integro sin dalla nascita. Ci sono sovrapposizione fra i MIB\\
-Per info più specifiche ci sono MIB successivi. Guardano parte di trasmissione a vari livelli, quindi qualche informazione si può ripetere.
+\paragraph{Composizione MIB-II} Diviso in gruppi: sistema, interfacce, arptable, componenti stack IP. Anche una parte relativa all'agent SNMP: quante query, quanti errori\ldots\\
+La parte trasmissione è aperta, tanti sottoalberi: com'è connesso un computer dipende dalla tecnologia, quindi è estensibile a seconda delle nuove tecnologie e cambia nel tempo. Negli anni viene modificato ma è tutto sommato integro sin dalla nascita. Ci sono sovrapposizioni fra i MIB, però.\\
+Per info più specifiche ci sono i MIB successivi. Essi guardano la parte di trasmissione a vari livelli, quindi qualche informazione si può ripetere.
 \begin{center}
 	tabella
 \end{center}
-Statistiche su stessa riga sono a livello diverso, repeater a livello 1. Fanno stessa cosa ma livelli diversi.\\
-Per navigare tabelle necessità meccanismo efficiente rispetto a fare tante richieste. Questo perché sistemi modulari, per vedere se valore/elemento esiste.
-\paragraph{Ordine lessicografico} \texttt{walk}: lettura consecutiva di oggetti in mib.\\
+Le statistiche sulla stessa riga sono a livello diverso, repeater a livello 1. Fanno la stessa cosa ma livelli diversi.\\
+Per navigare le tabelle si necessita di un meccanismo efficiente rispetto a fare tante richieste. Questo perché sistemi modulari, per vedere se valore/elemento esiste.
+\paragraph{Ordine lessicografico} \texttt{walk}: lettura consecutiva di oggetti in MIB.\\
 Leggo oggetti e metto ordinati per numero in ordine lessicografico. Incremento OID e se ho oggetti nel sottoalbero lo visito, da sinistra verso destra. Ricorsivamente, ogni nodo che incontro se ha figli lo visito. Con questo ordinamento si perde la struttura della tabella: \textbf{SNMP lavora solo su questo array ordinato}.
-\paragraph{Trap} Unica operazione iniziata dall'agent, che manda direttamente al manager informazioni. Maniera asincrona per informare manager di qualche avvenimento, tipicamente un cambio di stato.\\
-\texttt{ifAdminStatus} su \texttt{linkDown} equivale proprio a scollegare fisicamente la scheda di rete. L'\textbf{administrative} è il ciclo di vita, l'\texttt{operational} è operativa. \texttt{ifOperStatus} su \texttt{linkDown} è lo stato e significa che la connessione è caduta.
+\paragraph{Trap} Unica operazione iniziata dall'agent, che manda direttamente al manager informazioni. Maniera asincrona per informare manager di qualche avvenimento, tipicamente un cambio di stato.\\ L'\textbf{administrative} è il ciclo di vita, l'\textbf{operational} è il ciclo operativo.
+\texttt{ifAdminStatus} su \texttt{linkDown} equivale proprio a scollegare fisicamente la scheda di rete. \texttt{ifOperStatus} su \texttt{linkDown} è lo stato operativo, e significa che la connessione è caduta.
 \paragraph{Estensione dei MIB} Un MIB si può estendere con comandi arbitrari. Ad esempio \texttt{extend test1 /bin/echo "Hello, World!"} eseguirà lo script indicato ogni volta che si esplorerà \texttt{test1} all'interno del MIB \texttt{NET-SNMP-EXTEND-MIB}. Lo script è eseguibile da chiunque abbia accesso alla community a cui è assegnato, quindi bisogna stare attenti alla sicurezza.
 \subsection{Primitive}
 Due tipi di valori, scalari e tabellari.
@@ -370,12 +367,11 @@ Usato snmpv2 invece che v1 perché aveva problemi strutturali: il primo sono i c
 	\item \texttt{Inform} è una sorta di \texttt{Trap} informata perché riceve una \texttt{response}. Altra differenza è che la \texttt{Inform} la può mandare sia un Manager (che può informare un Manager di livello superiore, per esempio) che un Agent
 \end{list}
 \paragraph{Formato} Hanno la stessa PDU ma con modifiche all'interno, però sostanzialmente è uguale
-\paragraph{Eccezioni} A differenza degli errori di SNMPv1 sono più esplicativi. Ad esempio \texttt{noSuchName} spacchettata in \texttt{noSuchObject}, \texttt{noSuchInstance} o \texttt{endOfMibView}. Sono un \textbf{raffinamento dei codici di errore di SNMPv1} e un \textbf{miglioramento delle primitive}.
-\paragraph{Differenze principali} Più velocità con la Bulk, contatori a 64bit, errori molto più dettagliati. Ma \textbf{non risolve granché in termini di sicurezza}.
+\paragraph{Eccezioni} A differenza degli errori di SNMPv1, le eccezioni sono più esplicative. Ad esempio \texttt{noSuchName} spacchettata in \texttt{noSuchObject}, \texttt{noSuchInstance} o \texttt{endOfMibView}. Sono un \textbf{raffinamento dei codici di errore di SNMPv1} e un \textbf{miglioramento delle primitive}.
+\paragraph{Differenze principali} Più velocità con la \texttt{Bulk}, contatori a 64 bit, errori molto più dettagliati. Ma \textbf{non risolve granché in termini di sicurezza}.
 \subsection{SNMPv3}
-\paragraph{Obiettivi} Bisogna risolvere problemi di sicurezza soprattutto per la \texttt{Set}. Inoltre bisogna fare il design di un'architettura a lungo termine.\\
-Supportare implementazioni sia complesse che semplici (\textbf{scalabilità}).\\
-Il tutto \textbf{rimanendo il più semplici possibile}. Nella realtà non è stato così, e la diffusione è ancora molto limitata con la maggior parte delle reti che continuano ad usare v1 e v2.
+\paragraph{Obiettivi} Bisogna risolvere problemi di sicurezza soprattutto per la \texttt{Set}. Inoltre bisogna rendere SNMP un'architettura a lungo termine, adatta a supportare implementazioni sia complesse che semplici (\textbf{scalabilità}). Tutto questo \textbf{rimanendo il più semplici possibile}.\\\\
+Nella realtà non è stato così, e la diffusione di SNMPv3 è ancora molto limitata con la maggior parte delle reti che continuano ad usare v1 e v2.
 \paragraph{Architettura} Tanti componenti, rimovibili e intercambiabili. Vuoti se una certa implementazione non la supporta, rimovibili a seconda di cambiamenti tecnologici o di implementazione.
 \begin{center}
 	\includegraphics[scale=0.75]{snmp3.png}
