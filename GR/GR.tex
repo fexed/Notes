@@ -57,42 +57,44 @@ Se si vuole gestire una rete è fondamentale la standardizzazione.\\\\
 Output \texttt{ifconfig}. Parte degli indirizzi, no indirizzo hw su loopback perché il traffico non esce mai (loopback sulla pila OSI è nel livello 3 Network, il MAC address è sul livello 2 Data Link, che non viene toccato da loopback). Indirizzo MAC 6 byte divisi in blocchi dai due punti. I primi 3 identificano il costruttore della scheda di rete. I successivi tre identificano la scheda di rete per il costruttore, che lo setta univocamente. Ciò garantisce univocità. Per primo blocco di tre ho 16M di dispositivi possibili. I MAC address quindi \textbf{non sono univoci}, lo sono \textit{probabilmente}. L'univocità è fondamentale sulla stessa rete. Quindi indirizzo hw identifica univocamente device sulla rete locale. divisi in due blocchi, il primo identifica costruttore della scheda di rete.\\\\
 Qualsiasi dispositivo ha indirizzo hw diverso per ciascuna porta.
 \subsection{Ethernet}
-L'ethernet è un cavo seriale: trasmissione e ricezione, mezzo seriale. \textbf{Un filo}.\\
-Quando si mandano dati non si possono mandare tutti insieme, ma bisogna mandarli man mano. Non c'è collisione perché ricezione e trasmissione sono su due fili separati.\\
-I pacchetti vengono inviati nel tempo sul filo. Vengono distinti tra loro dal \texttt{preamble}. I pacchetti sono inviati in una direzione: preambolo, destinazione, sorgente, tipo dei dati, dati effettivi, padding (per rendere pacchetto di 64 se pacchetto è troppo corto), CRC.\\
-Quindi per spedire pacchetto necessito degli indirizzi (mittente e destinatario) e di cosa mandare. Chi sono lo so, è scritto nella mia scheda. Voglio conoscere l'indirizzo destinatario.\\
-Alla connessione del cavo, se ho impostato il DHCP allora manda fuori pacchetto per richiesta quindi switch lo impara, se IP statico manda pacchetto ARP quindi switch lo impara.\\
+L'ethernet è un cavo seriale: trasmissione e ricezione a mezzo seriale. \textbf{Un filo}.\\
+Quando si mandano dati non si possono mandare tutti insieme, ma bisogna mandarli un po' per volta. Non c'è collisione perché la ricezione e la trasmissione sono su due fili separati.\\
+I pacchetti vengono inviati nel tempo sul filo, vengono distinti fra loro dal \texttt{preamble}, un'intestazione. I pacchetti sono inviati con una direzione: preambolo, destinazione, sorgente, tipo dei dati, dati effettivi, padding (per rendere pacchetto di 64 se pacchetto è troppo corto), CRC.\\
+Quindi per spedire un pacchetto necessito degli indirizzi (mittente e destinatario) e dei dati da mandare. Chi sono lo so, è scritto nella mia scheda, ma devo conoscere l'indirizzo destinatario.\\
+Alla connessione del cavo, se ho impostato il DHCP allora manda fuori un pacchetto per la richiesta DHCP, quindi lo switch impara il mio indirizzo. Se ho impostato l'IP statico, manda un pacchetto ARP quindi lo switch lo impara lo stesso.\\
 Il MAC address può essere randomizzato per privacy, e sui dispositivi mobili lo è spesso e volentieri.\\
-Possibile più di un utente sulla stessa rete con soliti indirizzi, apparati avanzati se ne possono accorgere.
+Può essere possibile avere più di un utente sulla stessa rete con i soliti indirizzi, apparati avanzati se ne possono accorgere.
 \subsection{Pacchetti}
-Un pacchetto è interamente creato dal computer, quindi "\textit{non ci si può fidare}"\\
+Ogni pacchetto è interamente creato dal computer, quindi "\textit{non ci si può fidare}".\\
 Bisogna andare a livello fisico e \textbf{autenticare}, un po' come chiedere la carta d'identità. Metter in atto \textbf{meccanismi che impediscano di inibire riconoscimento della sorgente}.\\
-802.1x permette di entrare in rete. Se configurato, il device prima di entrare in rete espone delle credenziali (utente, password, protocollo autenticazione\ldots)\\
-Da quel momento in poi \textbf{allegato al pacchetto c'è il mio nome}, ma le informazioni di autenticazione non fanno parte del pacchetto: i formati dei pacchetti sono stati creati quando non c'era preoccupazione e interesse in fattori di sicurezza delle trasmissioni.\\
-L'informazione non è parte del pacchetto, ma il riconoscimento del device è eseguito in qualche altro modo e \textbf{rimane nel device} (Access Point). Ciò \textbf{non serve per autenticazione fisica sul cavo}: so che sei tu su questo cavo. Ma è necessaria per autenticazione su mezzi condivisi (WiFi\ldots).\\
-Su router MAC cambia ad ogni hop (perché l'ethernet è un protocollo di comunicazione punto-punto), l'IP cambia solo se c'è NAT. Le parti dal livello 3 in su, a meno di frammentazione, non cambiano.\\
+\texttt{802.1x} permette di entrare in rete. Se configurato, il device prima di entrare in rete espone delle credenziali (utente, password, protocollo autenticazione\ldots). Da quel momento in poi \textbf{allegato ad ogni pacchetto c'è il mio nome}, ma \textbf{le informazioni di autenticazione non fanno parte del pacchetto}: i formati dei pacchetti sono stati creati quando non c'era preoccupazione e interesse in fattori di sicurezza delle trasmissioni. Il riconoscimento del device è eseguito in qualche altro modo e \textbf{rimane nel device} (Access Point). Ciò \textbf{non serve per autenticazione fisica sul cavo} (mezzo unico per un utente, so che sei tu) ma è necessaria per autenticazione su mezzi condivisi (ad esempio, wireless).\\
+Sui router il MAC cambia ad ogni hop (perché l'ethernet è un protocollo di comunicazione punto-punto), l'IP cambia solo se c'è NAT. Le parti dal livello 3 in su, a meno di frammentazione, non cambiano.\\
 La robustezza delle reti dipende dalla ridondanza. Un modo tipico è mettere più strade per spedire il traffico: \textbf{load balancing}.\\
 Vale sia per corrente elettrica che per traffico di rete.
-\subsection{Aree funzionali}
-FCAPS per gestire \textbf{qualsiasi sistema}, da giochi a sistemi di rete. Non sono mutualmente indipendenti.
+\pagebreak
+\subsection{FCAPS}
+Aree funzionali \textbf{per gestire qualsiasi sistema}, da giochi a sistemi di rete. Non sono mutualmente indipendenti.
 \begin{list}{}{}
-	\item \textbf{Fault Management}: error detection, isolation and repair\\
-	Se qualcuno rileva malfunzionamento (riempito disco, ram, sovraccarico CPU\ldots) lo deve notificare
-	\item \textbf{Configuration Management}: devo sapere com'è configurato il sistema. Leggere la configurazione è importante, così che le app si possano basare sulle API comuni e funzionare correttamente. Fondamentale capire la configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "\textit{questo filo qui va su questa porta qua}", che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete
-	\item \textbf{Account Management}: rilevare il consumo di risorse
-	\item \textbf{Performance Management}: efficenze e statistiche, performance di sistema sia lato utente sia lato fornitore. Per l'utente è riuscire ad usare la rete, per l'operatore è il giusto compromesso tra investimento sul mezzo e contentezza utente.
-	\item \textbf{Security Management}: assicurarsi che ciò che uno fa è effettivamente possibile farlo, autoproteggendosi perché con le reti odierne posso intasare rete (volente o no) e quindi intasare internet, provocando danni
+	\item \textbf{Fault Management}: un fault è un evento che ha molta rilevanza, e l'obiettivo è l'error detection, isolation, repair e log.\\
+	Se qualcuno rileva un malfunzionamento (riempito disco, ram, sovraccarico CPU\ldots) lo deve \textbf{notificare}.
+	\item \textbf{Configuration Management}: sapere com'è configurato il sistema. Leggere la configurazione è importante, così che le app si possano basare sulle API comuni e funzionare correttamente. Fondamentale capire la configurazione perché permette di definire l'amministrazione, servizi\ldots, possibile riconoscere anche le adiacenze e "\textit{questo filo qui va su questa porta qua}", che impatto ho se stacco questo cavo, o si rovina? Informazioni sufficenti per amministrare la rete.\\
+	Quindi raccogliere e conservare informazioni sulle configurazioni dei dispositivi, per poter semplificare la loro configurazione, tenere traccia delle modifiche fatte alla configurazione e pianificare espansioni e scalabilità futura.
+	\item \textbf{Account Management}: l'obiettivo è rilevare il consumo di risorse e statistiche di utilizzo per utente. Questo è utile sia per tenere traccia dell'utilizzo della rete sia per poter tassare gli utenti in base al loro utilizzo della rete. Ma anche in assenza di questa necessità, tenere traccia dell'utilizzo di ogni utente è utile.
+	\item \textbf{Performance Management}: efficienze e statistiche, performance di sistema sia lato utente sia lato fornitore. Per l'utente è riuscire ad usare la rete, per l'operatore è il giusto compromesso tra investimento sul mezzo e contentezza utente. L'obiettivo è assicurare che le performance di rete rimangano accettabili, solitamente attraverso SNMP e monitoraggio attivo, oppure anche configurando alert quando si verificano problemi.
+	\item \textbf{Security Management}: controllare l'accesso alla rete, autoproteggendosi perché con le reti odierne posso intasare rete (volente o no) e quindi intasare internet, provocando danni anche ingenti. Verificare, autenticare, crittografare\ldots\\
+	Importante anche raccogliere informazioni di sicurezza e analizzarle periodicamente.
 \end{list}
-\subsection{Interagire con management object}
-Primitive: get, set, create, delete\\
+\subsection{Interagire con management objects}
+Primitive: \texttt{get}, \texttt{set}, \texttt{create}, \texttt{delete}\\
 Quando faccio richiesta ad un protocollo mi aspetto una risposta: richiesta -- risposta\\
-Contenuto richieste varia durante il transito aggiungendo determinate informazioni. Es: SMS durante il transito aggiunge numero mittente per poter comunicare a destinatario chi inviava.
+Il contenuto della richieste varia durante il transito aggiungendo determinate informazioni. Es: SMS durante il transito aggiunge numero mittente per poter comunicare a destinatario chi inviava.
 \subsection{Servizi}
 \paragraph{Confermati} Faccio richiesta $\rightarrow$ mi aspetto risposta.\\Es: Telegram/Whatsapp
 \paragraph{Non confermati} Faccio richiesta e fine.\\Es: SMS
 \begin{center}
 	\includegraphics[scale=0.7]{timediag.png}
 \end{center}
+\pagebreak
 \subsection{Standardizzazione}
 La grande differenza tra ISO/OSI e Internet è il processo di standardizzazione.
 \pagebreak
