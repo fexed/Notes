@@ -814,29 +814,6 @@ Cambio di architettura per andare oltre l'architettura SNMP
 	\includegraphics[scale=0.5]{rtfm.png}
 \end{center}
 \end{multicols}
-\section{Monitoraggio a flussi}
-In SNMP, nel caso si verifichi un problema, l'agent avverte il manager tramite una trap (cambio di stato, o superamento soglia in caso di RMON\ldots). L'agent SNMP non è libero di monitorare tutto, si limita al MIB.\\\\
-Con i flussi, invece, \textbf{aggrego il traffico di rete in base a determinate caratteristiche} (quintupletta: protocollo, ip src, porta src, ip dst, porta dst, eventualmente + VLAN). \textbf{Non configuro il flusso}. Nel caso di NetFlow è il device stesso, il \textbf{probe}, dove passa il traffico di rete (es router), a prendere e spedire al collezionatore (\textbf{manager}) le informazioni da monitorare. In questo caso quindi \textbf{i flussi sono prodotti ed emessi verso colui che deve riceverli}.\\
-Non esiste il concetto di allarme, né c'è l'abilità per gli agents di fare alcunché: tutta la logica è nel collezionatore.\\
-Strumentazione del probe è fatta offline. I probe sono posizionati dove fluisce il traffico, tipicamente nel router.
-\paragraph{Cosa si misura?} Dove viene scambiato il traffico organizzato per gruppi autonomi, IP\ldots\\
-A livello applicativo, si misura quanto traffico in base ad una porta o un protocollo, quali servizi, livelli di traffico\ldots anche utile per rintracciare virus di rete fino agli host che li hanno originati.
-\paragraph{Problematiche} Con i flussi \textbf{non si riesce a misurare traffico non IP}, informazioni di livello 2 (lo stato delle interfacce), il traffico flitrato (firewall), statistiche per-link (livello di utilizzo, congestione, perdita\ldots), statistiche per applicazioni (es latenza, risposte positive/negative, errori di protocollo).
-\subsection{Flusso} Un flusso è un insieme di pacchetti accomunati da una stessa quintupletta, sia unidirezionali che bidirezionali. Calcolati dal probe (che fa le veci dell'agent in SNMP) che guarda il traffico che passa attraverso di sé e lo misura. Il flusso è creato quando si vede il primo pacchetto di un nuovo flusso, il probe sta fermo.\\
-Un flusso ha durata massima qualunque sia lo stato della connessione: termino il flusso quando dura troppo o quando non c'è traffico per un po' di tempo.
-\paragraph{Contenuti del flusso} Peers (src e dst), contatori (packets, bytes, tempo), informazioni di routing (sistema autonomo, netmask, interfaces).\\
-Possono essere unidirezionali o bidirezionali, e due flussi unidirezionali opposti sono equivalenti ad uno bidirezionale. I flussi bidirezionali possono contenere altre info come rtt o comportamento del TCP.
-\paragraph{Problemi vari} Di seguito i principali.\\
-\begin{list}{}{\textbf{Overhead vs accuratezza}}
-	\item Più misure $\rightarrow$ più dati
-	\item Maggiore aggregazione dei flussi $\rightarrow$ minore granularità
-	\item Overhead su router, switch e host
-\end{list}
-\begin{list}{}{\textbf{Security vs data sharing}}
-	\item I flussi devono andare ai collezionatori su cammini protetti
-	\item La privacy va rispettata
-	\item Le misure del traffico devono essere mantenute protette per non rivelare a terze parti informazioni di rete importanti
-\end{list}
 
 \chapter{ScaPy}
 Manipolazione di pacchetti in maniera semplice. Con Pcap si legge e invia, ma gestisce i pacchetti raw e non permette di manipolarli, funge da specie di socket. Wireshark è molto utile ma è un tool a sé state, ma se serve fare cose in batch non è molto utile. Wireshark può essere collegato tramite API a PyShark, ma è sola lettura. ScaPy permette sia di inviare che di ricevere.
@@ -866,7 +843,32 @@ Cosa ci possiamo fare? \begin{list}{}{}
 	Permette di gestire le risposte, un esempio è avviarla in monitoring su un'interfaccia. 
 \end{list}
 \chapter{Flussi}
-\paragraph{Flussi unidirezionali con IP, Porta e protocollo come key} Avrò più flussi perché distinguo anche i protocolli usati e le porte, quindi ho maggiore informazione sul traffico.
+\section{Monitoraggio a flussi}
+In SNMP, nel caso si verifichi un problema, l'agent avverte il manager tramite una trap (cambio di stato, o superamento soglia in caso di RMON\ldots). L'agent SNMP non è libero di monitorare tutto, si limita al MIB.\\\\
+Con i flussi, invece, \textbf{aggrego il traffico di rete in base a determinate caratteristiche} (quintupletta: protocollo, ip src, porta src, ip dst, porta dst, eventualmente + VLAN). \textbf{Non configuro il flusso}. Nel caso di NetFlow è il device stesso, il \textbf{probe}, dove passa il traffico di rete (es router), a prendere e spedire al collezionatore (\textbf{manager}) le informazioni da monitorare. In questo caso quindi \textbf{i flussi sono prodotti ed emessi verso colui che deve riceverli}.\\
+Non esiste il concetto di allarme, né c'è l'abilità per gli agents di fare alcunché: tutta la logica è nel collezionatore.\\
+Strumentazione del probe è fatta offline. I probe sono posizionati dove fluisce il traffico, tipicamente nel router.
+\paragraph{Cosa si misura?} Dove viene scambiato il traffico organizzato per gruppi autonomi, IP\ldots\\
+A livello applicativo, si misura quanto traffico in base ad una porta o un protocollo, quali servizi, livelli di traffico\ldots anche utile per rintracciare virus di rete fino agli host che li hanno originati.
+\paragraph{Problematiche} Con i flussi \textbf{non si riesce a misurare traffico non IP}, informazioni di livello 2 (lo stato delle interfacce), il traffico flitrato (firewall), statistiche per-link (livello di utilizzo, congestione, perdita\ldots), statistiche per applicazioni (es latenza, risposte positive/negative, errori di protocollo).
+\subsection{Flusso} Un flusso è un insieme di pacchetti accomunati da una stessa quintupletta, sia unidirezionali che bidirezionali. Calcolati dal probe (che fa le veci dell'agent in SNMP) che guarda il traffico che passa attraverso di sé e lo misura. Il flusso è creato quando si vede il primo pacchetto di un nuovo flusso, il probe sta fermo.\\
+Un flusso ha durata massima qualunque sia lo stato della connessione: termino il flusso quando dura troppo o quando non c'è traffico per un po' di tempo.
+\paragraph{Contenuti del flusso} Peers (src e dst), contatori (packets, bytes, tempo), informazioni di routing (sistema autonomo, netmask, interfaces).\\
+Possono essere unidirezionali o bidirezionali, e due flussi unidirezionali opposti sono equivalenti ad uno bidirezionale. I flussi bidirezionali possono contenere altre info come rtt o comportamento del TCP.
+\paragraph{Problemi vari} Di seguito i principali.
+\begin{multicols}{2}
+\begin{list}{}{\textbf{Overhead vs accuratezza}}
+	\item Più misure $\rightarrow$ più dati
+	\item Maggiore aggregazione dei flussi $\rightarrow$ minore granularità
+	\item Overhead su router, switch e host
+\end{list}
+\columnbreak
+\begin{list}{}{\textbf{Security vs data sharing}}
+	\item I flussi devono andare ai collezionatori su cammini protetti
+	\item La privacy va rispettata
+	\item Le misure del traffico devono essere mantenute protette per non rivelare a terze parti informazioni di rete importanti
+\end{list}
+\end{multicols}
 \subsection{NetFlow} Architettura a flussi, prima coniata da Cisco. Funziona diversamente da ciò che si è visto fin'ora. Abbiamo un router con un probe (sonda di rete, traduce pacchetti in flussi). La funzionalità di misura è secondaria (il router deve andare bene), ma catalogare i flussi richiede memoria. Router calcola i valori con il probe ma non ha capacità di memorizzazione: manda verso Flow Collector (un pc con un software apposito). Il collezionatore riceve flussi e fa qualcosa: es. manda dati a interfaccia web.\\
 C'è anche problema se si monitora rete abbastanza grande. Si possono mettere più collezionatori che collaborano fra loro, ognuno attaccato ad un endpoint (router verso l'esterno) della rete.
 \paragraph{Spazio} Lo spazio richiesto dipende dal traffico. Qualche valore solito:
