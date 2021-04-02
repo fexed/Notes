@@ -762,19 +762,16 @@ Fasce di confidenza con $\delta$ tra 2 e 3:
 \end{list}
 
 \chapter{Remote Monitoring}
-\textbf{Analisi rete remota rispetto dove siamo noi}.\\
-Importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (\textbf{edge computing}), inoltre è anche "forzato" dalle parti wireless che stanno diventando predominanti. Dal core ci passa si traffico ma è sempre minore. Il core diventa meno importante perché comunicaz in perferia.\\
-Diventa necessario \ldots Inote tipi traffici che nascono e muoiono in periferia senza passare dal core.\\
-Il problema è andare a spillare il traffico remoto, vedere il traffico che fluisce in questa rete. Nn sempre banale perché magari necessario modificare la rete. Quindi attenzione alla topologia, e attenzione ai tap di rete usati percHé hanno limitazioni importanti.\\
-Anche le funzionalità di monitoraggio degli apparati di rete comuni sono limitate, spesso il massimo che posso vedere sono i byte totali, ip assegnati\ldots\\
-Spesso i costi per sistemi di monitoring sono importanti.\\
-Misura in remoto tramite snmp nasce subito dopo mibv2. con snmp misuro quanto ma non posso fare misure pià complicate, e non posso assegnare soglie e in base mandare allarme ma misurare in continuazione e fare i nostri calcolo.\\
-MIB RMON (MIB SNMP), risolve problema monitoraggio remoto. Consente di gestire disservizi. Inserisce un minimo di logica per generare allarmi.
-\section{RMON} Cosa fà? Primo passaggio da monitoraggio snmp a monitoraggio a pacchetti.\\
-Vedo traffico di rete remoto e metto una sonda remota.\\
+\paragraph{Analisi di una rete remota} Questo aspetto è importante perché tutta la parte interessata dalle informazioni sta alla periferia di internet (\textbf{edge computing}), inoltre è anche un comportamento "forzato" dalle parti wireless che stanno diventando predominanti. Dal nucleo della rete ci passa del traffico ma è sempre minore rispetto al traffico totale della rete. Il core diventa meno importante perché la maggior parte della comunicazione avviene in perferia. Inoltre ci sono tipi di traffico che nascono e muoiono in periferia senza passare dal core.
+\paragraph{Come fare?} Il problema è andare a leggere il traffico remoto, cioè vedere il traffico che fluisce nella rete remota. Non è sempre banale, perché magari diventa necessario modificare la rete. Quindi bisogna fare attenzione alla topologia e ai tap di rete usati perché hanno limitazioni importanti.\\
+Anche le funzionalità di monitoraggio degli apparati di rete comuni sono limitate, spesso il massimo che posso vedere sono i byte totali, IP assegnati e poco altro. Spesso i costi per costruire i sistemi di monitoring sono importanti.
+\section{RMON}
+L'idea di misurare in remoto tramite SNMP nasce subito dopo il MIB-II. Con SNMP posso fare solo misure semplici e non posso assegnare soglie e in base a quelle mandare un allarme ma solo misurare in continuazione e fare da noi i nostri calcoli.
+\paragraph{MIB RMON} RMON è un MIB SNMP, risolve il problema del monitoraggio remoto. Consente di gestire disservizi ed implementa un minimo di logica per generare allarmi.\\
+Si tratta di un primo passaggio da monitoraggio SNMP a monitoraggio a pacchetti: vede il traffico di rete remoto e mette una sonda remota.\\
 \textbf{RMON è un MIB SNMP}.
-\subparagraph{RMON vs SNMP} SNMP controlla e configura un probe, solitamente con GUI. SNMP esegue la \textbf{richiesta periodica} (polling). L'azione è eseguita dal manager.\\
-RMON sposta un po' della logica nell'apparato, che raccoglie da sé stat e impostare allarmi direttamente sull'apparato.
+\paragraph{RMON vs SNMP} SNMP controlla e configura un probe, solitamente con GUI. SNMP esegue la \textbf{richiesta periodica} (polling). L'azione è eseguita dal manager.\\
+RMON \textbf{sposta un po' della logica nell'apparato}, che raccoglie da solo statistiche e imposta gli allarmi direttamente su sé stesso.
 \begin{list}{}{\textbf{Gruppi RMON}}
 	\item Statistics: vedo info che SNMP non dà precisamente, es pacchetti droppati
 	\item History: dati i contatori (es. quante volte una porta cambia stato) consente di non andare sullo switch e leggere e scrivermeli ma chiedere la storia recente del contatore. Memoria piccola, 3-5-10 misure, poche. RMON legge un po' nel passato, SNMP legge sempre e solo in real-time
@@ -800,18 +797,18 @@ $$\textsl{usage}=\frac{100\cdot\left[\left(\textsl{packets} \cdot 160\right)+\le
 Es troppo traffico se utilizzo sup a 80\% manda allarme.
 \paragraph{Case Study} \ldots RMON va a mappare ogni quanto misuro dati, valori di soglia
 \paragraph{NBAR} Statistiche di traffico stile RMON
-\section{Real-Time Flow Measurement}
+\section{Real-Time Flow Measurement} Un esempio di architettura nata dal progresso nell'analisi del traffico di reti remote stimolato da RMON.
 \begin{multicols}{2}
-Cambio di architettura per andare oltre l'architettura SNMP
+Vero e proprio cambio di architettura per superare quella SNMP
 \begin{list}{}{}
-	\item Meter: colui che misura, il contatore. Và messo dove passa il traffico
-	\item Reader: parla col meter e tira fuori i suoi dati. Deve essere "vicino" al meter, ma non è dentro
-	\item Manager: gestisce configurazione di meter e reader e che chiede i dati. Implementato in SNMP
-	\item Applicazione: fa i grafici, configura il manager\ldots
+	\item \textbf{Meter}: colui che misura, il contatore. Và messo dove passa il traffico
+	\item \textbf{Reader}: parla col meter e tira fuori i suoi dati. Deve essere "vicino" al meter, ma non è dentro
+	\item \textbf{Manager}: gestisce configurazione di meter e reader e che chiede i dati. Implementato in SNMP
+	\item \textbf{Applicazione}: fa i grafici, configura il manager\ldots
 \end{list}
 \columnbreak
 \begin{center}
-	\includegraphics[scale=0.5]{rtfm.png}
+	\includegraphics[scale=0.75]{rtfm.png}
 \end{center}
 \end{multicols}
 
