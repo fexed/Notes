@@ -773,29 +773,28 @@ Si tratta di un primo passaggio da monitoraggio SNMP a monitoraggio a pacchetti:
 \paragraph{RMON vs SNMP} SNMP controlla e configura un probe, solitamente con GUI. SNMP esegue la \textbf{richiesta periodica} (polling). L'azione è eseguita dal manager.\\
 RMON \textbf{sposta un po' della logica nell'apparato}, che raccoglie da solo statistiche e imposta gli allarmi direttamente su sé stesso.
 \begin{list}{}{\textbf{Gruppi RMON}}
-	\item Statistics: vedo info che SNMP non dà precisamente, es pacchetti droppati
-	\item History: dati i contatori (es. quante volte una porta cambia stato) consente di non andare sullo switch e leggere e scrivermeli ma chiedere la storia recente del contatore. Memoria piccola, 3-5-10 misure, poche. RMON legge un po' nel passato, SNMP legge sempre e solo in real-time
-	\item Alarm: 
-	\item Host: a livello di host quali traffici per un certo host, es. byte in out per certo host.
-	\item HostTopN: per i top N host quanto traffico fanno, quale porta più occupata. Se c'è connesso un PC è il colpevole, ma se ce ne sono N non mi è chiaro. Con HostTopN analizzo traffico della porta e trovo N computer che fanno più traffico\ldots
-	\item Matrix: mostra comunicazioni tra indirizzi
-	\item Filters: per filtrare il traffico di rete
-	\item Packet capture: per catturare un pacchetto una volta che è passato attraverso il canale
-	\item Events: per generare eventi sotto certe condizioni
+	\item \textbf{Statistics}: informazioni sulle interfacce, più precise di SNMP
+	\item \textbf{History}: fornisce uno piccolo storico dei contatori, 3-5-10 misure. RMON quindi può leggere un po' nel passato, SNMP legge sempre e solo in real-time
+	\item \textbf{Alarm}: soglie per il controllo degli eventi anomali
+	\item \textbf{Host}: statische per ogni host della rete
+	\item \textbf{HostTopN}: statistiche per i primi N host della rete.\\Con HostTopN ad esempio analizzo traffico della porta e trovo N computer che fanno più traffico sulla porta.
+	\item \textbf{Matrix}: matrice dei flussi, mostra comunicazioni tra indirizzi
+	\item \textbf{Filters}: per filtrare il traffico di rete
+	\item \textbf{PacketCapture}: per catturare un pacchetto una volta che è passato attraverso il canale
+	\item \textbf{Events}: per generare eventi sotto certe condizioni
 \end{list}
 \paragraph{Statistiche ethernet RMON}
 \begin{list}{}{Informazioni di basso livello}
-	\item Pacchetti: unicast, multicast e broadcast.
-	\item Eventi di drop: pacchetti droppati per sovraccarico linea/porta
-	\item Frammenti: quanti frammenti sono passati. Ci sono attacchi basati sui frammenti.
-	\item Jabbers: pacchetti ricevuti più lunghi di 1518 ottetti e con errori di allineamento
-	\item Oversized packets: pacchetti più lunghi di 1518 ottetti ma altrimenti ben formati
+	\item \textbf{Pacchetti}: unicast, multicast e broadcast.
+	\item Eventi di \textbf{drop}: pacchetti droppati per sovraccarico linea/porta
+	\item \textbf{Frammenti}: quanti frammenti sono passati. Ci sono attacchi basati sui frammenti.
+	\item \textbf{Jabbers}: pacchetti ricevuti più lunghi di 1518 ottetti e con errori di allineamento
+	\item \textbf{Oversized} packets: pacchetti più lunghi di 1518 ottetti ma altrimenti ben formati
 \end{list}
 C'è anche una formula per capire quanto è usata una porta di rete
 $$\textsl{usage}=\frac{100\cdot\left[\left(\textsl{packets} \cdot 160\right)+\left(\textsl{octets} \cdot 8\right)\right]}{\textsl{portspeed} \cdot \textsl{timeinsec}}$$
 \paragraph{Allarmi} Impostare soglie su contatori di RMON, soglie di due tipi: rising e falling. Quando troppo alta (rising) o bassa (falling) posso effettuare operazioni.\\
 Es troppo traffico se utilizzo sup a 80\% manda allarme.
-\paragraph{Case Study} \ldots RMON va a mappare ogni quanto misuro dati, valori di soglia
 \paragraph{NBAR} Statistiche di traffico stile RMON
 \section{Real-Time Flow Measurement} Un esempio di architettura nata dal progresso nell'analisi del traffico di reti remote stimolato da RMON.
 \begin{multicols}{2}
