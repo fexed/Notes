@@ -990,10 +990,10 @@ Protocollo di trasporto (SCTP, Stream Control Transport Protocol) orientato allo
 Attualmente: bozza di specifica del protocollo.\\
 \textbf{Fondamentalmente}, IPFIX = NetFlow v9 su SCTP con qualche differenza extra.
 \subsection{Flow Aggregation e Filtering}
-\paragraph{Aggregazione flussi} I flussi raw ok esporto e via, ma sono limitanti. Spesso dobbiamo rispondere a domande diverse: quanto traffico certo protocollo? Quando verso Google?\\
-Una volta che ho i flussi dentro il router posso esportarli raw o aggregarli: accorpare fra loro flussi a seconda di criteri stabiliti (es: IP, maschero le altre colonne come se non ci fossero ad esempio con valore fittizio 0 e sommando eventuali contatori). \textbf{Risparmio spazio e trasmissione}. Perdo informazione, perché non posso separare successivamente i flussi ormai aggregati.\\
+\paragraph{Aggregazione flussi} Con i flussi raw posso essere limitato. Li esporto e via, ma spesso dobbiamo rispondere a domande diverse: quanto traffico fa un certo protocollo? Quanto traffico ho verso Googl?\ldots\\
+Una volta che ho i flussi dentro il router posso esportarli raw o aggregarli: \textbf{accorpare fra loro flussi a seconda di criteri} stabiliti (es: IP, maschero le altre colonne come se non ci fossero ad esempio con valore fittizio 0 e sommando eventuali contatori). \textbf{Risparmio spazio e trasmissione} ma perdo dell'informazione, perché non posso separare successivamente i flussi ormai aggregati.\\
 Permette di trovare forme tipiche per rispondere a domande tipo: porte più usate, chi parla con chi\ldots\\
-Una volta aggregati i dati, se fatta bene, risparmio molto spazio nella cache.\\
+Una volta aggregati i dati, se l'aggregazione è fatta bene, risparmio molto spazio nella cache.\\
 Se l'aggregazione la fa il probe (\textbf{probe aggregation}), si migliora l'utilizzo della memoria da parte del probe NetFlow ma il collector non potrà risalire ai singoli flussi. Se l'aggregazione la fa il collector (\textbf{collector aggregation}) allora svolgerà più lavoro, ma potrà risalire ai singoli flussi.
 \paragraph{Filtraggio flussi} Scartare flussi basandosi su criteri: durata, src/dest, porte\ldots\\
 Magari esportare solo unidirezionali. Diverso da aggregazione, possono coesistere e solitamente filtraggio applicato prima dell'aggregazione.
@@ -1005,7 +1005,7 @@ sFlow segue questi principi:
 \begin{list}{}{}
 	\item Non vuole essere veloce quanto la rete monitorata.\\
 	Anche se riuscisse a rilevare tutto il traffico, avrebbe problemi a gestire i flussi generati.\\
-	Se ho 8 porte gigabit, ognuna ha 16 gigabit di traffico (8 gigabit andata e 8 gigabit ritorno) e diventa difficile gestirlo. Devo \textbf{deduplicare}: dividerlo a metà per le due direzioni.\\
+	Se ho 8 porte gigabit, ognuna ha 16 gigabit di traffico (8 gigabit andata e 8 gigabit ritorno) e diventa difficile gestirlo. Devo \textbf{deduplicare}: dividerlo a metà per le due direzioni.
 	\item Effettua il \textbf{sampling} sui pacchetti, sapendo che più pacchetti vede più i suoi report saranno precisi.\\
 	Il sampling è effettuato su tutte le porte, in modo da avere la stessa proporzione, ma con intervallo casuale, così da non rischiare di avere un traffico periodico e analizzare solo quello.
 	\item La \textbf{perdita} dei pacchetti è \textbf{controllata}, cioè si sa perché quei pacchetti vengono persi.
@@ -1038,6 +1038,7 @@ sFlow sugli switch, RMON su switch compatibili L2/L3, NetFlow sui router $\right
 	NetFlow monitoragglio accurato (senza packet loss)
 \end{list}
 \end{multicols}
+\pagebreak
 \subsection{Radius} \textbf{Remote Authentication Dial In User Service}, protocollo comune. \textbf{Lato operatore}\\
 Importante per:
 \begin{list}{}{}
