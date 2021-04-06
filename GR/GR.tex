@@ -448,13 +448,9 @@ Una cosa interessante che fa RRDtool. La \textbf{derivata} da indicazione di qua
 Inoltre la derivata su altre misure possono anche essere molto ampie senza che sia allarmante: download/upload, ad esempio. Dipende molto da cosa misuro: derivata su più intervalli o solo sulla precedente misura?\\
 Però il color-coding: verde ok, giallo mh e rosso male male, è ottimo. Keep it simple, seplicativa e semplice è meglio di troppi valori disaggregati.\\\\
 Nella pratica, l'\textbf{anomaly detection} consiste nel fare una istantanea del sistema monitorato in due momenti diversi e vedere quanto differiscono i due momenti, interpretando le differenze.
-\paragraph{Holt-Winters} Media mobile stagionale. \begin{list}{}{Parametri:}
-	\item $\alpha$
-	\item $\beta$
-	\item Periodo di analisi
-\end{list}
-All'interno dell'array di valori si crea le bande.
-\begin{list}{}{tutti valori letti dalla scheda di rete}
+\paragraph{Holt-Winters} Media mobile stagionale. Parametri: $\alpha$, $\beta$, $\gamma$, periodo di analisi (stagionalità).
+All'interno dell'array di valori si crea le bande per il forecasting.\\\\
+\begin{list}{}{Tutti valori letti dalla scheda di rete}
 	\item ifindex: identifica l'interfaccia
 	\item ifdescr: descrizione interfaccia (ad es: eth0 ma anche descrizioni significative)
 	\item iftype: tipo interfaccia (ethernet, \ldots)
@@ -478,22 +474,19 @@ All'interno dell'array di valori si crea le bande.
 	\item ifoutqlen: stessa info del comando \texttt{netstat} e simili, info sulle code in uscita
 	\item ifspecific:
 \end{list}
-router frammenta il pacchetto quando mtu della linea ricevente è più piccolo. ma può essere che mittente mandi pacchetti frammentati quando qualcuno chiede a lui di mandare pacchetto troppo lungo rispetto mtu.\\
-Frammentazione è concetto dell'IPv4\\
-TCP frammentazione non c'è ma non perché non si possa fare, ma perché un pacchetto TCP non può essere frammentato (è indicazione di errore che qualcosa nel TCP non ha funzionato). Path MTU discovery (PMTUD), pacchetti sempre più grandi finché non si trova dimensione massima con l'\textbf{obiettivo di evitare la frammentazione}. Perché meccanismi TCP permettono di farlo. UDP pacchetti vivono di vita propria quindi può succedere frammentazione.\\
-Pacchetti non unicast sono "problematici" perché riempino le porte dello switch.
+Il router \textbf{frammenta un pacchetto quando l'MTU della linea ricevente è più piccolo} della dimensione del pacchetto. Ma può sucedere che sia direttamente il mittente a mandare pacchetti frammentati quando qualcuno gli chiede di mandare pacchetti troppo lunghi rispetto all'MTU. La \textbf{frammentazione è un concetto dell'IPv4}.\\
+Su TCP la frammentazione non esiste ma non perché non si possa fare, ma perché \textbf{un pacchetto TCP non può essere frammentato} (è indicazione di errore che qualcosa nel TCP non ha funzionato): \textbf{Path MTU Discovery} (PMTUD), si inviano pacchetti sempre più grandi finché non si trova dimensione massima con l'\textbf{obiettivo di evitare la frammentazione}. Questo perché i meccanismi del TCP permettono di farlo, mentre in UDP i pacchetti vivono di vita propria quindi può succedere frammentazione.\\
+Pacchetti non unicast sono "problematici" perché riempiono le porte dello switch.
 
 \chapter{Cattura}
 \begin{center}
 	\includegraphics[scale=0.75]{cattura.png}
 \end{center}
-Quando cattura traffico intervengo sul traffico e me lo copio (\textbf{shallow copy}) verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi ethernet copia pacchetto al BPF driver che, tramite filtri, manda copie agli sniffer.\\
-Gli sniffer necessiterebbero di diritti su
-\paragraph{Capabilities} Quando uno è SU ha diritti eccessivi rispetto a ciò che deve fare, quindi le \textbf{capabilities} sono le possibilità di spezzare i diritti di amministrazione in categorie: non c'è bisogno di essere root che fa veramente veramente tutto perché se ne può abusare. Quindi il concetto di root è spacchettato in varie possibilità: configurazione del MAC address, Net Admin\ldots\\
-Un'app quindi dovrebbe nascere con concetto di capabilities e avere diritti minimi necessari per fare ciò che vuole/deve fare.\\\\
-Una \textbf{capability} è implementata come una struttura dati privilegiata, con una sezione che specifica i diritti di accesso ed una sezione che identifica univocamente l'oggetto.
-\paragraph{Filtro} Devo indicare l'interfaccia a cui sono interessato catturare pacchetti (eventualmente tutte) e in caso che tipo di pacchetti ricevere. Così il BPF driver \textbf{non} invia all'applicazioni pacchetti non interessanti, perché anche scartare qualcosa richiede tempo.\\
-BPF e sottosistema è localizzato nel kernel. Solamente la parte del pacchetto è inoltrata, il resto (filtro e copia dei pacchetti) è nel kernel.\\
+Durante la cattura del traffico, intervengo direttamente su di esso e me lo copio (\textbf{shallow copy}) verso l'applicazione che cattura ciò che sarebbe destinato ad altri. Quindi l'ethernet copia il pacchetto al \textbf{BPF driver} che, tramite filtri impostanti dall'applicazione, manda copie agli sniffer. Gli sniffer necessiterebbero di diritti superutente.
+\paragraph{Capabilities} Quando uno è SU spesso possiede diritti eccessivi rispetto a ciò che deve fare, quindi entrano in gioco le \textbf{capabilities}. Ho la possibilità di spezzare i diritti di amministrazione in categorie, le capabilities: non c'è bisogno di essere root che fa veramente veramente tutto perché se ne può abusare, quindi il concetto di root è spacchettato in varie possibilità come la configurazione del MAC address, Net Admin, ecc\ldots Un'app quindi dovrebbe nascere con concetto di capabilities e avere diritti minimi necessari per fare ciò che vuole/deve fare.\\
+Una \textbf{capability} è \textbf{implementata come una struttura dati privilegiata}, con una sezione che specifica i diritti di accesso ed una sezione che identifica univocamente l'oggetto.
+\paragraph{Filtro BPF} Devo indicare l'interfaccia di cui vorrei catturare i pacchetti (eventualmente tutte) e, in caso, che tipo di pacchetti ricevere. Così il \textbf{BPF driver non invia all'applicazioni pacchetti non interessanti}, perché anche scartare qualcosa richiede tempo.\\
+Il BPF e il suo sottosistema è localizzato nel kernel. Solamente la parte del pacchetto è inoltrata, il resto (filtro e copia dei pacchetti) è nel kernel.\\
 Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
 \section{\texttt{libpcap}}
 \paragraph{\texttt{pcap\_open\_live}} Parametri: \texttt{deviceName} scheda di rete, \texttt{maxCaptureLen} lunghezza massima del pacchetto (sia per efficienza, sia per privacy se non ho bisogno dell'intero pacchetto), \texttt{setPromiscuosMode} per abilitare la modalità promiscua (cattura tutto il traffico sulla scheda), \texttt{pktDelay} non c'erano i thread quindi hanno pensato di mettere un tempo massimo per cui aspettare un pacchetto e in caso ritornare senza valore, \texttt{errorBuffer} sempre per ragioni storiche se la \texttt{pcap\_open\_live} fallisce il buffer contiene la ragione per cui è fallita\\
