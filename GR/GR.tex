@@ -491,8 +491,7 @@ Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
 \section{\texttt{libpcap}}
 \paragraph{\texttt{pcap\_open\_live}} Parametri: \texttt{deviceName} scheda di rete, \texttt{maxCaptureLen} lunghezza massima del pacchetto (sia per efficienza, sia per privacy se non ho bisogno dell'intero pacchetto), \texttt{setPromiscuosMode} per abilitare la modalità promiscua (cattura tutto il traffico sulla scheda), \texttt{pktDelay} non c'erano i thread quindi hanno pensato di mettere un tempo massimo per cui aspettare un pacchetto e in caso ritornare senza valore, \texttt{errorBuffer} sempre per ragioni storiche se la \texttt{pcap\_open\_live} fallisce il buffer contiene la ragione per cui è fallita\\
 \texttt{live}: leggo traffico di rete in tempo reale. C'è la possibilità di aprire file \texttt{pcap} per leggere traffico salvato su file.\\
-%TODO problema del pcap
-In realtime bisogna controllare il tempo del pacchetto con il mio tempo. L'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'rrd è bene registrare i dati all'orario del pacchetto, non a quello di sistema
+In realtime bisogna confrontare il timestamp del pacchetto con il mio timestamp: l'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'RRD o nelle statistiche in generale è bene registrare i dati all'orario del pacchetto, non a quello di sistema (cioè di quando è stato rilevato)
 \paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
 \paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
 \paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
@@ -530,7 +529,6 @@ Di seguito un esempio UDP \begin{lstlisting}
 	\item \texttt{jt}, \texttt{jf} Jump if true, jump if false
 	\item \texttt{ldh} Load header
 \end{list}
-Inoltre, su Linux sniffare i pacchetti equivale ad aprire un socket.
 \chapter{Monitoring}
 \section{Monitoring requirements}
 \paragraph{Garantire la disponibilità dei servizi di rete} Bisogna mantenere l'attività del servizio anche in caso di variazioni tecnologiche o di carico. Inoltre bisogna impostare risposte automatiche o semiautomatiche in caso di anomalie: ad esempio modifiche alla configurazione in tempo reale, o attivazione di componenti ridondanti.
@@ -654,16 +652,15 @@ Questo perché i ritardi introdotti dalla rete non sono costanti.
 	\item BE burst excess, parte che trasporta in eccesso se ha disponibilità proverà a trasportarne di più 
 	\item MaxR maximum data rate: (BC + BE)/TC = ((BC + BE)/BC)*CIR
 \end{list}
-\paragraph{Misure End-To-End} Nelle misure devo mettere in conto il tempo della mia applicazione per elaborare ed anche il ritardo di rete.\\
-Performance di rete $\neq$ Performance app.\\
-Bisogna fare attenzione rispetto alle misure per link, ad esempio perché traffico fa routing diverso andata-ritorno qudini rtt/2=latenza è in generale sbagliato. misure endtoend sono più vicine all'utente, si rapporta al server remoto non alla misura link link. Quella link link serve a noi per fare troubleshooting.\\
-EndToEnd e LinkLink sono in relazione, endtoend dà se c'è problema che si scorpora sul link. EndtoEnd da informazione dal punto di vista utente, link dà info sul singolo link utiler per troubleshooting.
-\paragraph{Approcci di monitoraggio} Sono multipli. fin'ora è una misura di tipo passivo: si cattura traffico, senza influenzare niente.\\
-Nella misura attiva inietto del traffico e vedo la reazione della rete, ad es. un ping.\\
-Ad es traceroute calcola latenza e da dove passa un certo tipo di traffico. Usa un trucco sul TTL: manda pacchetti che tornano indietro a causa del TTL basso.\\
-\paragraph{Inline} Inline significa quando monitoriamo se tramite snmp connetto allo switch con lo stesso filo che snmp sta monitorando: \textbf{inline}.\\
-Offline invece è monitoring tramite altra rete: reti sdoppiate, una per monitorare e una per i servizi. Vincolata dalla struttura della rete, a volte non possibile.\\\\
-Quindi approcci attivi/passivi, inline/offline.
+\paragraph{Misure End-To-End} Nell'eseguire le misure devo mettere in conto il tempo che impiega la mia applicazione per elaborare i dati ed anche il ritardo di rete: performance di rete $\neq$ performance applicativa.\\
+Bisogna fare attenzione rispetto alle misure per link, ad esempio perché il traffico può fare percorsi diversi in andata e ritorno, quindi $\textsl{latenza di rete} = \frac{\textsl{RTT}}{2}$ è in generale sbagliato.\\
+Le misure end to end sono più vicine all'utente, che si rapporta al server remoto non alla misura link to link. Quella link to link serve a "noi" per fare troubleshooting. End to end e link to link sono però in relazione: la misura end to end indica se c'è problema che poi andremo a scorporare sul link to link. L'end to end quindi da informazione dal punto di vista utente, il link to link dà informazione sul singolo link utile per troubleshooting.
+\paragraph{Approcci di monitoraggio} Sono multipli. Fin'ora è una misura di tipo passivo: si cattura il traffico e lo si analizza, senza influenzare niente.\\
+Nella misura attiva, inietto del traffico e vedo la reazione della rete, come un \texttt{ping}.\\
+Ad esempio, il traceroute calcola la latenza e da dove passa un certo tipo di traffico usando un trucco sul TTL: manda pacchetti che tornano indietro a causa del TTL basso, con TTL 1 per il primo pacchetto per il primo hop, TTL 2 per il secondo per il secondo hop\ldots
+\paragraph{Inline} \textbf{Inline} significa che monitoriamo tramite SNMP lo stesso filo con cui sono connesso allo switch con.\\
+\textbf{Offline} invece è monitorare tramite un'altra rete: reti sdoppiate, una per monitorare e una per i servizi. Questo approccio è vincolato dalla struttura della rete, a volte non possibile.\\
+Quindi \textbf{approcci attivi/passivi, inline/offline}.
 \section{Calcolo delle serie temporali}
 Posso fare una misura mettendo una soglia assoluta, ma posso anche impostare queste soglie a seconda del comportamento della rete.\\
 La media è la misura media, la deviazione standard è una misura "standard" di cosa è normale e di cosa è molto grande ($>$ media + devstd) o molto piccolo ($<$ media - devstd)
