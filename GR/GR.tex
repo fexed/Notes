@@ -107,12 +107,7 @@ La parte importante è l'\textbf{assenza di implementazione fino alla creazione 
 \begin{center}
 	\includegraphics[scale=0.7]{stdietf.png}
 \end{center}
-\section{Abstract syntax notation one}
-\paragraph{ASN1} Sintassi per la definizione di strutture dati e formato di messaggi. Ha l'obiettivo di consentire a macchine dalle differenti architetture hardware di scambiare dati, essere language neutral e consentire la negoziazione della codifica di trasmissione.\\
-Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
-\paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
-Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.\\\\
-Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me) Prima di iniziare a guardare il traffico, il traffico va ricevuto.\\
+
 \subsection{Common problems with packet capture}
 Perché \texttt{root}? Perché scavalco ciò che fa un'applicazione, perché vedo tutto il traffico indipendentemente dall'applicazione. Per questo devo essere \texttt{root}, o almeno avere le capabilities necessarie per vedere i pacchetti di tutti i processi in esecuzione.\\
 Lo sniffer dovrà essere all'interno di una VM (virtualizzazione del SO con un proprio kernel) o di un container (condivide kernel con l'host), in modo da intercettare il traffico loopback.
@@ -138,7 +133,14 @@ Attributi, cosa ti mostro io che sia rilevante per te (non quante viti ha, ma lo
 \paragraph{Agent} Gira dentro la macchina gestita e fa cosa chiede manager e solo quello.
 \paragraph{Paradigma} Agent gira nella macchina monitorata, e un solo manager raccoglie dati e visualizza.
 \paragraph{Come realizzarlo} Bisogna negoziare rappresentazione dati. Per lavorare col web hanno risolto problema scambio dati convertendo tutto a stringhe. Questo modo di fare non ha grandi problemi, ma è inefficiente. Grande quantità di dati per poche informazioni (\texttt{true} scritto invece di un bit). Poco efficiente per tanti dati, chiaro ma non compatto. La URL è breve. Tra due macchine posso scambiarmi dati in maniera binaria, ma bisogna mettersi d'accordo. Se io a 16 bit parlo con una a 64 bit non ci capiamo, quindi bisogna accordarci (Little Endian e Big Endian).
-\paragraph{ASN1} Sintassi astratta, implementata dai linguaggi. Quando iniziano a parlare due macchine negoziano rappresentazione e codifica.
+\paragraph{Endian} Come si ordinano i dati in spedizione, per sapere qual è il più significativo.\\
+Bit più significativo a sx è big-endian, ormai poco usato. Altrimenti è little-endian.\\\\
+Nel monitorare il traffico di rete c'è il problema di come riceverlo. Non sempre siamo nel posto giusto. Se voglio vedere cosa fa altro dispositivo/sottorete a livello di traffico, come faccio? Opzioni: o possiamo mettere la mano sul pc (wireshark) o posso fare finta di essere il pc (chiedendo allo switch, non intrusivamente, di mandare il traffico verso pc pure a me).\\
+Prima di iniziare a guardare il traffico, il traffico va ricevuto.
+\subsection{Abstract syntax notation one}
+\paragraph{ASN1} Sintassi astratta, implementata dai linguaggi. Quando iniziano a parlare due macchine negoziano rappresentazione e codifica.. Sintassi per la definizione di strutture dati e formato di messaggi. Ha l'obiettivo di consentire a macchine dalle differenti architetture hardware di scambiare dati, essere language neutral e consentire la negoziazione della codifica di trasmissione.\\
+Come spostare le informazioni? Vari costruttori all'inizio lo facevano "in casa" senza interoperabilità. Col tempo si è reso necessario costruire qualcosa per scambiare le informazioni in maniera interoperabile.
+\pagebreak
 \begin{center}
 	\includegraphics[scale=0.7]{asn1.png}
 \end{center}
@@ -491,7 +493,7 @@ Nel mondo linux, la cattura dei pacchetti equivale ad aprire un socket.
 \section{\texttt{libpcap}}
 \paragraph{\texttt{pcap\_open\_live}} Parametri: \texttt{deviceName} scheda di rete, \texttt{maxCaptureLen} lunghezza massima del pacchetto (sia per efficienza, sia per privacy se non ho bisogno dell'intero pacchetto), \texttt{setPromiscuosMode} per abilitare la modalità promiscua (cattura tutto il traffico sulla scheda), \texttt{pktDelay} non c'erano i thread quindi hanno pensato di mettere un tempo massimo per cui aspettare un pacchetto e in caso ritornare senza valore, \texttt{errorBuffer} sempre per ragioni storiche se la \texttt{pcap\_open\_live} fallisce il buffer contiene la ragione per cui è fallita\\
 \texttt{live}: leggo traffico di rete in tempo reale. C'è la possibilità di aprire file \texttt{pcap} per leggere traffico salvato su file.\\
-In realtime bisogna confrontare il timestamp del pacchetto con il mio timestamp: l'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'RRD o nelle statistiche in generale è bene registrare i dati all'orario del pacchetto, non a quello di sistema (cioè di quando è stato rilevato)
+In realtime bisogna confrontare il timestamp del pacchetto con il mio timestamp: l'orario contenuto nel pacchetto è quello della sua ricezione, quindi nell'RRD o nelle statistiche in generale è bene registrare i dati all'orario del pacchetto, non a quello di sistema (cioè di quando è stato rilevato). Se leggo un pcap devo fare affidamento sull'orario del pacchetto nel pcap, non sull'orario di sistema.
 \paragraph{\texttt{pcap\_compile}} Compila l'espressione del filtro
 \paragraph{\texttt{pcap\_setfilter}} Trasferisce nel kernel l'espressione compilata
 \paragraph{\texttt{pcap\_next}} Prende il prossimo pacchetto catturato
