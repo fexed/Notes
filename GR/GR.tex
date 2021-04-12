@@ -240,7 +240,7 @@ L'istance identifier è il valore della colonna indice.
 In questo caso, per prendere il valore della terza istanza di \texttt{mask}: \texttt{1.3.1.2.9} $\rightarrow$ \texttt{5}.
 \begin{multicols}{2}
 \begin{list}{}{Altri esempi:}
-	\item \texttt{1.3.1.1.1} $\rightarrow$ \texttt{1}
+	\item \texttt{1.3.1.3.6} $\rightarrow$ \texttt{3}
 	\item \texttt{1.3.1.2.1} $\rightarrow$ \texttt{2}
 	\item \texttt{1.3.1.3.1} $\rightarrow$ \texttt{2}
 	\item 
@@ -262,9 +262,14 @@ END
 I nomi servono solo per gli umani, perché sulla rete passano gli object identifier.
 \paragraph{Module Identity} Non aggiunge informazione ma indica la versione, questo perché negli anni le reti cambiano ma l'infrastruttura rimane fissa almeno in parte. I device a lungo termine (ad esempio lettori di badge) devono convivere con i nuovi: eterogeneità nelle velocità di elaborazione, protocolli\ldots\\
 Non posso togliere oggetto, perché magari versioni precedenti lo usano. Se voglio eliminarlo posso indicarne lo \texttt{STATUS}: obsolete, current o deprecated.
-\paragraph{Object Type} \texttt{nome OBJECT-TYPE, SYNTAX, UNITS}\ldots
-\paragraph{Notification Type} Invio anche oggetti interessati alle trap\\
-linkDown per segnalare se ha perso il link, linkUp per collegamento preso
+\paragraph{Object Identity} \texttt{nome OBJECT-IDENTITY, STATUS, DESCRIPTION, REFERENCE ::= <ObjectIdentifier>}\\
+Definisce e registra un valore su un OID, permette l'allocazione di qualsiasi nodo sull'albero di registrazione.\\
+\texttt{STATUS} definisce se il nodo allocato è obsoleto, corrente o deprecato, mentre il \texttt{REFERENCE} opzionale è usato per riferire informazioni aggiuntive (tipo link HTML)
+\paragraph{Object Type} \texttt{nome OBJECT-TYPE, SYNTAX, UNITS, STATUS}\ldots\texttt{::= <ObjectIdentifier>}\\
+Macro per la definizione di object types e tabelle concettuali. \texttt{INDEX} e \texttt{AUGMENTS} sono permesse solo nella definizione di tabelle. \texttt{SYNTAX} definisce il tipo, ad esempio \texttt{Integer32} o \texttt{SEQUENCE OF Integer32}.
+\paragraph{Notification Type} \texttt{nome NOTIFICATION-TYPE, OBJECTS, STATUS}\ldots\texttt{::= <ObjectIdentifier>}\\
+Macro per la registrazione di un evento, con \texttt{OBJECT} posso anche inviare oggetti interessati insieme alla trap.\\
+\texttt{linkDown} per segnalare se ha perso il link, \texttt{linkUp} per collegamento preso.
 \begin{center}
 	\includegraphics[scale=0.75]{mibcompiler.png}
 \end{center}
@@ -276,17 +281,15 @@ Obiettivi MIB-II: informazioni di base sugli errori, pochi e semplici control ob
 Si implementa in hardware, \texttt{eth-tool}. Non si mette a contare i pacchetti, ma è direttamente l'hardware a rispondere con le informazioni. Se chiedo numero pacchetti in un minuto, lui delega all'hardware di contare, quindi il carico non cambia in base al traffico di rete.\\
 Sono circa 170 oggetti, negli anni alcune def sono divenute troppo semplici e presuppone IPv4 (IPv6 gestito in MIB separati).
 \begin{center}
-	schema dei MIB-II (1.3.6.1.2)\\
+	\includegraphics[scale=0.45]{mibii.png}\\
 	Albero serve a identificare oggetti.
 \end{center}
 \paragraph{Composizione MIB-II} Diviso in gruppi: sistema, interfacce, arptable, componenti stack IP. Anche una parte relativa all'agent SNMP: quante query, quanti errori\ldots\\
 La parte trasmissione è aperta, tanti sottoalberi: com'è connesso un computer dipende dalla tecnologia, quindi è estensibile a seconda delle nuove tecnologie e cambia nel tempo. Negli anni viene modificato ma è tutto sommato integro sin dalla nascita. Ci sono sovrapposizioni fra i MIB, però.\\
-Per info più specifiche ci sono i MIB successivi. Essi guardano la parte di trasmissione a vari livelli, quindi qualche informazione si può ripetere.
-\begin{center}
-	tabella
-\end{center}
+Per info più specifiche ci sono i MIB successivi. Essi guardano la parte di trasmissione a vari livelli, quindi qualche informazione si può ripetere.\\
 Le statistiche sulla stessa riga sono a livello diverso, repeater a livello 1. Fanno la stessa cosa ma livelli diversi.\\
 Per navigare le tabelle si necessita di un meccanismo efficiente rispetto a fare tante richieste. Questo perché sistemi modulari, per vedere se valore/elemento esiste.
+\pagebreak
 \paragraph{Ordine lessicografico} \texttt{walk}: lettura consecutiva di oggetti in MIB.\\
 Leggo oggetti e metto ordinati per numero in ordine lessicografico. Incremento OID e se ho oggetti nel sottoalbero lo visito, da sinistra verso destra. Ricorsivamente, ogni nodo che incontro se ha figli lo visito. Con questo ordinamento si perde la struttura della tabella: \textbf{SNMP lavora solo su questo array ordinato}.
 \paragraph{Trap} Unica operazione iniziata dall'agent, che manda direttamente al manager informazioni. Maniera asincrona per informare manager di qualche avvenimento, tipicamente un cambio di stato.\\ L'\textbf{administrative} è il ciclo di vita, l'\textbf{operational} è il ciclo operativo.
