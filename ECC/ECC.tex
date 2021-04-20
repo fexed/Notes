@@ -50,7 +50,7 @@ Un'eccezione a questa definizione di algoritmo è costituita dalle macchine conc
 \paragraph{In sintesi} Un numero finito di istruzioni da un set finito di istruzioni possibili, un numero discreto di passi di tempo finito e ognuno dipendente solo dai precedenti, senza limite di passi o spazio durante l'esecuzione.
 \pagebreak
 \section{Macchina di Turing}
-Introdotta da \textbf{Alan Turing} nel 1936, confuta la speranza "\textit{non ignorabimus}" di poter risolvere qualsiasi cosa con un programma.\\
+Introdotta da \textbf{Alan Turing} nel 1936, confuta la speranza \textit{"non ignorabimus"} di poter risolvere qualsiasi cosa con un programma.\\
 Turing originariamente la presenta supponendo di aver un impiegato precisissimo ma stupido, con una pila di fogli di carta ed una penna, ed un foglio di carta con le istruzioni che esegue con estrema diligenza. Non capisce quello che fa, e si chiama "\textbf{computer}".
 
 \paragraph{Struttura matematica} Una Macchina di Turing (MdT) è una quadrupla:
@@ -59,21 +59,26 @@ M = (Q, $\sum$, $\delta$, q$_0$)
 \end{center}
 \begin{list}{}{}
 	\item \textbf{Q} = \{q$_i$\} è l'\textbf{insieme finito degli stati} in cui si può trovare la macchina.\\
-	Indicheremo con lo stato speciale \textit{h} la fine corretta della computazione, \textit{h} non $\in$ Q.
-	\item $\sum$ = \{$\sigma$, $\sigma$'\ldots\} è l'insieme finito di \textbf{simboli}. 
+	Indicheremo con lo stato speciale \textit{h} $\not\in$ Q la fine corretta della computazione.
+	\item $\sum$ = \{$\sigma$, $\sigma$'\ldots\} è l'\textbf{insieme finito di simboli}.\\
 	Ci sono elementi che devono per forza esistere:
 	\begin{list}{}{}
 		\item \textbf{\#} carattere \textbf{bianco}, vuoto
 		\item $\triangleright$ carattere di inizio della memoria, chiamato \textbf{respingente}, che funziona come un inizio file
+		\item L, R, - $\not\in\sum$ per indicare di spostare il cursore, rispettivamente, a sinistra, destra o rimanere fermo.
 	\end{list}
 	\item $\delta$ $\subseteq$ (Q $\times \sum$) $\rightarrow$ (Q' $\bigcup$ \{\textit{h}\}) $\times \sum$' $\times$ \{L, R, -\} è \textbf{funzione di transizione}.\\
-	Mantiene determinismo perché funzione, ad un elemento associa un solo elemento (la transizione è univoca). Transizioni finite perché prodotto cartesiano di insiemi finiti.\\
+	Mantiene determinismo perché funzione, ad un elemento associa un solo elemento (la transizione è univoca), e le transizioni finite perché prodotto cartesiano di insiemi finiti. Imponiamo la condizione di funzione cioè che $\forall\:(q, \sigma)\rightarrow (q', \sigma', D'), (q, \sigma)\rightarrow (q'', \sigma'', D'')\Rightarrow q'=q'', \sigma'=\sigma',' D'=D''$\\
 $\delta$(q, $\triangleright$) = (q', $\triangleright$, R), cioè se sono a inizio file possono solo andare a destra.\\
 Può essere vista come una relazione di transizione, $\delta \subseteq (Q \times \sum) \times (Q\:\bigcup\:\{\textit{h}\}) \times \sum \times \{L,\:R,\: -\}$
 	\item q$_0 \in $ Q lo \textbf{stato iniziale} 
 \end{list}
 Quindi una \textbf{configurazione} è una quadrupla $(q, u, \sigma, v)\in((Q\cup\{h\})\times \Sigma^*\times\Sigma\times\Sigma^F)$ con $\Sigma^F = \Sigma^*\cdot(\Sigma - \{\#\})\cup\{\epsilon\}$\\
 $\sigma$ è il simbolo attualmente sotto la testina della MdT, e una notazione breve è $(q, u\underline{\sigma}v)$ o $(q,w)$ quando la posizione non è importante.\\\\
+Una MdT può essere così rappresentata
+\begin{center}
+	\includegraphics[scale=0.75]{mdt.png}
+\end{center}
 Mappatura a coda di rondine, bigezione tra (m, n) $\rightarrow$ k, cioè $N^2 \rightarrow N$.\\
 Costruire un modello per il calcolo dopo aver posto delle condizioni affinché qualcosa si possa chiamare algoritmo.
 
@@ -82,10 +87,10 @@ Costruire un modello per il calcolo dopo aver posto delle condizioni affinché q
 	\item $\sum^0$ = \{$\epsilon$\}, con $\epsilon =$ parola vuota, che non contiene caratteri
 	\item $\sum^{i+1} = \sum \cdot \sum^i = \{\sigma \cdot u \:\:\vline\:\: \sigma \in \sum \:\wedge\: u \in \sum^i\}$
 	\item $\sum^* = \bigcup_{i \in N}\sum^i$, insieme di tutte le possibili combinazioni di simboli
-	\item $\sum^f = \sum^* \:\cdot\: (\sum \:-\: \{\#\} \:\bigcup\: \{\epsilon\})$, cioè linsieme di tutte le stringhe che terminano con un carattere non bianco ma può terminare con la stringa vuota
+	\item $\sum^f = \sum^* \:\cdot\: (\sum \:-\: \{\#\} \:\bigcup\: \{\epsilon\})$, cioè l'insieme di tutte le stringhe che terminano con un carattere non bianco ma che possono terminare con la stringa vuota
 \end{list}
 \paragraph{Esempio} $\sum_B = \{0, 1\} \longrightarrow \sum_B^* = \{\epsilon, 0, 1, 01, 10, 010, 110010, \ldots\}$ tutti i numeri binari
-
+\pagebreak
 \subsection{Transizioni}
 La \textbf{situazione corrente} di una macchina di Turing può essere scritto come $(q, u, \sigma, v)$ dove:
 \begin{list}{}{}
@@ -100,9 +105,8 @@ Può anche essere più comodamente espressa come $(q, u \:\underline{\sigma}\: v
 Una computazione è una transizione $(q, x) \longrightarrow (q', \omega)$. Una macchina di Turing parte \textbf{sempre} da $(q_0, \underline{\triangleright} x)$.\\
 Ogni computazione può esprimere il numero di passi necessari, ad esempio $\gamma \longrightarrow^n \gamma'$.\\
 $\forall \:\:computazione\:\: \gamma \Rightarrow \gamma \longrightarrow^0 \gamma$. Inoltre se $\gamma \longrightarrow \gamma' \wedge \gamma' \longrightarrow^n \gamma''$ allora $\gamma \longrightarrow^{n+1} \gamma''$
-
-\pagebreak
-
+\paragraph{Convergenza e divergenza} Diremo che la computazione $(q_0, w)\rightarrow^n(q',w')$ \textit{termina} (cioè \textbf{converge} $\downarrow$) $\Leftrightarrow q' = h$ e che \textit{non termina} (cioè \textbf{diverge} $\uparrow$) $\Leftrightarrow\:\forall\:q', w'\:|\:(q_0, w) \rightarrow^n (q', w')\:\exists\: q'', w''\:|\:(q', w')\rightarrow^n(q'', w'')$\\\\
+Possiamo specificare la macchina M con cui eseguiamo la computazione con $\rightarrow^n_M$, usando M($w$) per specificare che la macchina M inizia la computazione da $(q_0,\underline{\triangleright}w)$, cioè che applichiamo M a $w$.
 \paragraph{Esempio} Macchina di Turing che esegue la semplice somma di due semplici numeri romani.
 \begin{multicols}{2}
 \begin{center}
@@ -160,7 +164,7 @@ Una \textbf{sintassi astratta} è una sintassi non concreta, cioè che non tiene
 \begin{list}{}{\textbf{Sintassi}}
 	\item Expr $\rightarrow$ E ::= x $\vline\:$ n $\vline\:$ E + E $\vline\:$ E $\cdot$ E $\vline\:$ E - E
 	\item Bexpr $\rightarrow$ B ::= tt $\vline\:$ ff $\vline\:$ E $<$ E $\vline\:$ $\neg$B $\vline\:$ B $\vee$ B
-	\item Comm $\rightarrow$ C ::= skip $\vline\:$ x $=$ E $\vline\:$ C;C $\vline\:$ if B then C else C $\vline\:$ for i = E to E do C $\vline\:$ while B do C
+	\item Comm $\rightarrow$ C ::= \texttt{skip} $\vline\:$ x $=$ E $\vline\:$ C;C $\vline\:$ \texttt{if} B \texttt{then} C \texttt{else} C $\vline\:$ \texttt{for} i = E \texttt{to} E \texttt{do} C $\vline\:$ \texttt{while} B \texttt{do} C
 \end{list}
 \begin{list}{}{Abbiamo una serie di insiemi da definire ulteriormente}
 	\item x $\in$ Var, l'insieme delle \textbf{variabili}
@@ -171,10 +175,10 @@ Una \textbf{sintassi astratta} è una sintassi non concreta, cioè che non tiene
 	Si dice "a dominio finito", indicata dal $fin$ sotto la freccia, per indicare che il dominio Var ha cardinalità finita. Var dominio è quindi un sottoinsieme di Var insieme delle variabili che sarebbe infinito.\\
 	La memoria si può aggiornare, diventando $\sigma'$ = $\sigma[$x$\:\mapsto\:$n$]$.\\Ad esempio, $\sigma'(y)$ = n se y = x, altrimenti $\sigma'(y)$ = $\sigma(y)$
 \end{list}
-\pagebreak
+Chiameremo \texttt{WHILE} il linguaggio definito dalla grammatica BNF definita sopra, e \texttt{FOR} il linguaggio risultante dall'omissione del comando \texttt{while} B \texttt{do} C nella definizione.
 \subsection{Funzioni di Valutazione}
 \begin{list}{}{Inoltre, per valutare le espressioni generate dalla grammatica, servono delle \textbf{funzioni di valutazione}. Esse \textbf{trovano il significato di ogni espressione}}
-	\item Funzione di valutazione delle espressioni\\$\mathscr{E}$ : Expr $\times$ (Var $\rightarrow N$) $\rightarrow N$\\La sua \textbf{semantica denotazionale} è la seguente
+	\item \textbf{Funzione di valutazione delle espressioni}\\$\mathscr{E}$ : Expr $\times$ (Var $\rightarrow N$) $\rightarrow N$\\La sua \textbf{semantica denotazionale} è la seguente
 	\begin{multicols}{2}
 	\begin{list}{}{}
 		\item $\mathscr{E}[$x$]_\sigma$ = $\sigma$(x)
@@ -182,7 +186,7 @@ Una \textbf{sintassi astratta} è una sintassi non concreta, cioè che non tiene
 		\item $\mathscr{E}[$E$_1$ $\pm$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ $\pm$ $\mathscr{E}[$E$_2]_\sigma$
 	\end{list}
 	\end{multicols}
-	Importante notare come gli operatori $+$, $-$, $\cdot$ \textit{dentro} le espressioni siano dei \textbf{semplici token denotazionali}, mentre sono gli operatori \textit{valutati} ad eseguire il vero e proprio calcolo. Per chiarire questo aspetto, facciamo un esempio. Valutiamo con la nostra funzione $\mathscr{E}[$E$_1$ $+$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ \textit{più} $\mathscr{E}[$E$_2]_\sigma$. Se non definiamo l'operatore "\textit{più}", allora se poniamo $\sigma$(x) = 25 la valutazione
+	Importante notare come gli operatori $+$, $-$, $\cdot$ \textit{dentro} le espressioni siano dei \textbf{semplici token denotazionali}, mentre sono gli operatori \textit{valutati} ad eseguire il vero e proprio calcolo. Per chiarire questo aspetto, facciamo un esempio. Valutiamo con la nostra funzione $\mathscr{E}[$E$_1$ $+$ E$_2]_\sigma$ = $\mathscr{E}[$E$_1]_\sigma$ \textit{più} $\mathscr{E}[$E$_2]_\sigma$. \textbf{Se non definiamo l'operatore} "\textit{più}", ponendo $\sigma$(x) = 25 la valutazione
 	\begin{list}{}{}
 		\item $\mathscr{E}[$3 + x$]_\sigma$ = $\mathscr{E}[$3$]_\sigma$ \textit{più} $\mathscr{E}[$x$]_\sigma$ = 3 \textit{più} 25 = 42
 	\end{list}
@@ -192,7 +196,8 @@ Una \textbf{sintassi astratta} è una sintassi non concreta, cioè che non tiene
 	\end{list}
 	Ovviamente utilizzeremo la valutazione specificata in precedenza e gli operatori aritmetici assumeranno il loro significato standard.\\
 	L'unica eccezione è l'operatore $-$, che nel nostro caso sarà il \textbf{meno limitato} dal simbolo $\dot{-}$, la cui unica differenza è che non può dare un risultato inferiore a 0. Ad esempio, 5 $\dot{-}$ 7 = 0
-	\item Funzione di valutazione di espressioni booleane\\$\mathscr{B}$ : Bexpr $\times$ (Var $\rightarrow N$) $\rightarrow$ \{tt, ff\}\\
+	\pagebreak
+	\item \textbf{Funzione di valutazione di espressioni booleane}\\$\mathscr{B}$ : Bexpr $\times$ (Var $\rightarrow N$) $\rightarrow$ \{tt, ff\}\\
 	La cui \textbf{semantica denotazionale} è la seguente
 	\begin{multicols}{2}
 	\begin{list}{}{}
@@ -217,13 +222,13 @@ dove FV(C) sono le \textbf{variabili del programma} e con FV(C) $\subset$ dom($\
 Definiamo quindi un \textbf{insieme di transizioni ($\Gamma$, $\rightarrow$)} tramite delle \textbf{regole di inferenza} del tipo $\frac{premesse}{conclusione}$. In assenza di premesse, $-$, la regola di inferenza si dice \textbf{assioma}.
 \begin{multicols}{2}
 	$$\frac{-}{(skip, \sigma) \rightarrow \sigma}$$
-	$$\frac{-}{(x = E, \sigma) \rightarrow \sigma[x\:\mapsto\:n]}\mathscr{E}[E]_\sigma = n$$
+	$$\frac{-}{(x = E, \sigma) \rightarrow \sigma[x\:\mapsto\:n]}\textsl{ se }\mathscr{E}[E]_\sigma = n$$
 	$$\frac{(C_1, \sigma) \rightarrow (C_1', \sigma')}{(C_1;C_2, \sigma) \rightarrow (C_1';C_2, \sigma')}$$
-	$$\frac{-}{(if\:\: B\:\: then\:\: C_1\:\: else\:\: C_2, \sigma) \rightarrow(C_1, \sigma)}\mathscr{B}[B]_\sigma = tt$$
-	$$\frac{-}{(if\:\: B\:\: then\:\: C_1\:\: else\:\: C_2, \sigma) \rightarrow(C_2, \sigma)}\mathscr{B}[B]_\sigma = ff$$
-	$$\frac{-}{(for\:\: i = E_1\:\: to\:\: E_2\:\: do\:\: C, \sigma) \rightarrow \sigma}\mathscr{B}[E_2 < E_1]_\sigma = tt$$
+	$$\frac{-}{(if\:\: B\:\: then\:\: C_1\:\: else\:\: C_2, \sigma) \rightarrow(C_1, \sigma)}\textsl{ se }\mathscr{B}[B]_\sigma = tt$$
+	$$\frac{-}{(if\:\: B\:\: then\:\: C_1\:\: else\:\: C_2, \sigma) \rightarrow(C_2, \sigma)}\textsl{ se }\mathscr{B}[B]_\sigma = ff$$
+	$$\frac{-}{(for\:\: i = E_1\:\: to\:\: E_2\:\: do\:\: C, \sigma) \rightarrow \sigma}\textsl{ se }\mathscr{B}[E_2 < E_1]_\sigma = tt$$
 \end{multicols}
-	$$\frac{-}{(for\:\: i = E_1\:\: to\:\: E_2\:\: do\:\: C, \sigma) \rightarrow (i = n_1;\:\:C;\:\:for\:\: i = n_1 + 1\:\:to\:\:n_2\:\:do\:\:C, \sigma)}\mathscr{B}[E_2 < E_1]_\sigma = ff\: \wedge\: \mathscr[E_1]_\sigma = n_1 \wedge\: \mathscr[E_2]_\sigma = n_2$$
+	$$\frac{-}{(for\:\: i = E_1\:\: to\:\: E_2\:\: do\:\: C, \sigma) \rightarrow (i = n_1;\:\:C;\:\:for\:\: i = n_1 + 1\:\:to\:\:n_2\:\:do\:\:C, \sigma)}\textsl{ se }\mathscr{B}[E_2 < E_1]_\sigma = ff\: \wedge\: \mathscr[E_1]_\sigma = n_1 \wedge\: \mathscr[E_2]_\sigma = n_2$$
 	$$\frac{-}{(while\:\:B\:\:do\:\:C, \sigma) \rightarrow (if\:\:B\:\:then\:\:C;\:\:while\:\:B\:\:do\:\:C,\sigma)} $$
 \section{Calcolabilità}
 \subsection{T-Calcolabile}
@@ -262,7 +267,6 @@ In particolare, se ho i dati in un formato A allora posso codificarli nel format
 	\end{tabular}\\
 	Codifica a coda di rondine
 \end{center}
-\columnbreak
 \paragraph{Codifica} ($x$, $y$) $\mapsto$ $\frac{1}{2}$($x^2 + 2xy + y^2 + 3x + y$)\\
 Es. (3, 1) $\mapsto$ $\frac{1}{2}$($9 + 6 + 1 + 9 + 1$) = $\frac{26}{2}$ = 13
 \paragraph{Decodifica} $n$ $\mapsto$ ($n - \frac{1}{2}k(k + 1)$, $k - (n - \frac{1}{2}k(k+1))$) con $k = \lfloor\frac{1}{2}(\sqrt{1 + 8n} -1)\rfloor$\\\\
@@ -270,7 +274,6 @@ Es 8 $\mapsto$ ($8 - 6$, $6 - 8 + 3$) = ($2$, $1$)\\
 $k = \lfloor\frac{1}{2}\sqrt{1 + 8\cdot 8} - 1\rfloor = 3$\\
 $\frac{k(k+1)}{2} = 6$
 \end{multicols}
-\pagebreak
 \section{Notazione}
 Una \textbf{funzione} $f$ è $\subset$ A $\times$ B, con A spazio di partenza e B codominio. Quindi $f$(a) = b si può esprimere anche con (a, b) $\in$ $f$, con a $\in$ A e b $\in$ B.
 \begin{list}{}{}
@@ -306,7 +309,7 @@ Ad esempio, $f$ = $\emptyset$ è calcolata da \texttt{while(true) do skip} ma an
 		Base della programmazione funzionale
 	\end{enumerate}
 \end{enumerate}
-\pagebreak
+
 \section{Funzioni ricorsive primitive}
 Per formalizzare i vari modi con cui possiamo esprimere le funzioni, usiamo quella che si chiama \textbf{$\lambda$-notazione}. Queste espressioni individuano gli argomenti all'interno di un'espressione che descrive una funzione, scritta seguendo un'opportuna sintassi.
 $$\lambda <\textsl{variabili}>.<\textsl{espressione}>$$
