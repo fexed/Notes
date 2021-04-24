@@ -24,7 +24,7 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Fisica: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/FIS/FIS.pdf)
 
-##### Gestione di Reti: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/GR/GR.pdf)
+##### Gestione di Reti: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/GR/GR.pdf), [APIForecast (progetto)](https://github.com/fexed/APIForecast)
 
 ##### Introduzione all'Intelligenza Artificiale: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/IIA/IIA.pdf)
 
