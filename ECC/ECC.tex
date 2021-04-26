@@ -471,12 +471,12 @@ M = (Q, $\Sigma$, $\delta$, q$_0$)\\
 Q = \{q$_0$, \ldots, q$_k$), $\Sigma$ = \{$\sigma_0$, \ldots, $\sigma_n$)
 \pagebreak
 \subsection{Numerazione di Godel} 
-\textbf{Kurt G\"{o}del}, rappresentare algoritmi come numeri: \textbf{G\"{o}delizzazione} data macchina di turing M trovo $i$ che è il suo numero di G\"{o}del.\\
+\textbf{Kurt G\"{o}del}, rappresentare algoritmi come numeri: \textbf{G\"{o}delizzazione}, cioè data una MdT M trovo $i$ che è il suo \textbf{numero di G\"{o}del}.\\
 La funzione caratteristica dell'insieme dei numeri primi è ricorsiva primitiva. Gli esponenti della fattorizzazione in numeri primi di qualsiasi numero naturale sono dati da funzioni ricorsive primitive.\\
 Ne deriva che ogni sequenza di numeri naturali può essere codificata come numero naturale, usando i numeri come esponenti della fattorizzazione in numeri primi. \textbf{Questa codifica è iniettiva ma non suriettiva}, e una codifica effettiva deve essere anche suriettiva. G\"{o}del fornì una migliore codifica che era anche suriettiva, da cui deriva che le funzioni di codifica e decodifica sono ricorsive primitive. Tutte le MdT, programmi \texttt{for}/\texttt{while}, funzioni ricorsive primitive e $\mu$-ricorsive possono essere effettivamente codificate e decodificate come numeri naturali, usando i simboli sintattici come numeri naturali distinti. Le computazioni (intese come successioni di configurazioni) possono anch'esse essere codificate e decodificate.\\\\
 Data M = (Q, $\sum$, $\delta$, $q_0$) MdT con Q = \{$q_0$, \ldots, $q_n$\} e $\sum$ = \{$\sigma_0$, \ldots, $\sigma_m$\}, ogni quintupla $(q_i, \sigma_j, q_k, \sigma_l, D)\in\delta$ è codificata come $p_0^{i+1}\cdot p_1^{j+1}\cdot p_2^{k+1}\cdot p_3^{l+1}\cdot p_4^{m_D}$ con $p_0<\ldots<p_4$ sono numeri primi. Se consideriamo i simboli di direzione come simboli veri e propri, allora L = $\sigma_{m+2}$, R = $\sigma_{m+3}$, --- = $\sigma_{m+4}$ e poniamo $m_D\in\{m_L=m+2, m_R=m+3, m_-=m+4\}$\\\\
 Grazie al teorema della fattorizzazione unica, ad ogni quintupla è associato un solo intero e viceversa, che rende la funzione iniettiva.\\
-Possimao ordinare l'insieme delle quintuple che caratterizza M, ottenendo una successione di quintuple codificate con un numero: abbiamo una successione $a_0a_1\ldots a_n$ di numeri naturali tali che $a_i\neq a_j$ se $i\neq j$. Codificando questa successione otteniamo un altro numero, $i$ detto \textbf{indice associato alla MdT M}.\\\\
+Possiamo ordinare l'insieme delle quintuple che caratterizza M, ottenendo una successione di quintuple codificate con un numero: abbiamo una successione $a_0a_1\ldots a_n$ di numeri naturali tali che $a_i\neq a_j$ se $i\neq j$. Codificando questa successione otteniamo un altro numero, $i$ detto \textbf{indice associato alla MdT M}.\\\\
 La funzione non è suriettiva, ma il problema può essere aggirato: decodificando $i$, se ottengo una MdT bene, altrimenti $i$ non è un indice e lo butto, oppure restituisco un valore speciale.\\\\
 Tutte le funzioni definibili mediante gli schemi di ricorsione primitiva sono totali, e data una funzione ricorsiva primitiva si può scrivere un programma \texttt{FOR} che dati gli stessi argomenti produce lo stesso risultato, e viceversa.\\
 Abbiamo trovato il formalismo definitivo, che esprime tutte le funzioni calcolabili? \textbf{No}, perché esiste la funzione di Ackermann: totale, con una definizione accettabile ma che non è definibile mediante gli schemi di ricorsione primitiva.
@@ -538,32 +538,34 @@ Per la \textbf{funzione caratteristica} $\chi_I(n) =$
 \paragraph{Esiste un formalismo che esprime tutte e sole le funzioni totali calcolabili?} \textbf{No}\\
 Dobbiamo necessariamente avere a che fare con funzioni parziali, ma perché "no"?\\
 \textbf{Qualunque formalismo o esprime solo funzioni totali ma non tutte, oppure esprime anche funzioni parziali}. La dimostrazione è fondamentale per la teoria della calcolabilità: prende il nome di \textbf{diagonalizzazione}.
-\subparagraph{Dimostazione} Fissiamo il formalismo delle funzioni ricorsive primitive, posso prendere l'algoritmo di G\"{o}del per numerarle. Quindi avrò $f_0$, $f_1$, \ldots, $f_n$, \ldots\\
-Definisco $g(n) = f_n(n) + 1$ (\textit{diagonalizzazione} viene da usare lo stesso indice per indice e parametro).\\
-Se $g$ è una ricorsiva primitiva, allora è numerabile. Diciamo che $g$ ha come numero $i$: $f_i(n) = g(n) = f_n(n) + 1$\\
-Se diagonalizzo avrò $f_i(i) = g(i) = f_i(i) + 1$ ma \textbf{non può essere} che $f_i(i) = f_i(i) + 1$\\
+\subparagraph{Dimostazione} Fissato il formalismo delle funzioni ricorsive primitive, posso prendere l'algoritmo di G\"{o}del per numerarle: avrò le funzioni $f_0$, $f_1$, \ldots, $f_n$, \ldots così numerate.\\
+Definisco $g(n) = f_n(n) + 1$ (\textit{diagonalizzazione} viene da usare lo stesso indice per indice e parametro): effettivamente calcolabile perché basta prendere l'algoritmo $n$-esimo, applicarlo a $n$ e sommare 1 al risultato. Inoltre, $g$ è totale.\\
+Se $g$ è una ricorsiva primitiva, allora è numerabile: diciamo che $g$ ha come numero $i$, cioè $f_i(n) = g(n) = f_n(n) + 1$\\
+Se diagonalizzo avrò $f_i(i) = g(i) = f_i(i) + 1$ ma \textbf{non può succedere} che $f_i(i) = f_i(i) + 1$\\
 $\Rightarrow g$ non è ricorsiva primitiva.\\\\
 Se io prendo le funzioni parziali, posso applicare lo stesso ragionamento?\\
 $\phi(x) = \psi_x(x) + 1$\\
 Diciamo come prima che $\phi(x)$ ha indice $i$, quindi $\psi_i(x) = \phi(x) = \psi_x(x) + 1$\\
-Se $\psi_i(x)$ diverge, allora $\psi_x(x)$ diverge e anche $\psi_x(x) + 1$ diverge, quindi sono uguali. Non si applica il ragionamento della diagonalizzazione nel caso delle funzioni parziali.
+Se $\psi_i(x)$ diverge, allora $\psi_x(x)$ diverge e anche $\psi_x(x) + 1$ diverge, quindi sono uguali. Non si applica il ragionamento della diagonalizzazione nel caso delle funzioni parziali.\\
+Quindi il discorso \textbf{si applica ad ogni formalismo che definisca solo funzioni totali}.
 \section{$\mu$-ricorsive}
-Minima classe $\mathscr{R}$ che, allo schema fino alla ricorsione primitiva, si aggiunge:
+Minima classe $\mathscr{R}$ che, allo schema fino alla ricorsione primitiva, aggiunge:
 \paragraph{Minimizzazione} $\phi(\overrightarrow{x}, y) \in \mathscr{R}$\\
-$\psi(\overrightarrow{x}) = \mu y.[\phi(\overrightarrow{x}, y) = 0 \wedge \forall z < y\:\:\vline\:\: \phi(\overrightarrow{x}, z)\downarrow] $\\
-$\mu x.[I]$ è il minimo elemento di $I$ insieme.\\\\
-Cosa significa? Data una funzione appartenente a $\mathscr{R}$ (che ovviamente può essere una ricorsiva primitiva), la vado a calcolare sugli argomenti $\overrightarrow{x}$ della $\psi$ e su una certa $y$. Se vale 0, il risultato è $y$, altrimenti \textbf{deve} convergere e vado avanti incrementando $y$ di 1 e ricalcolando fino a che non trovo un risultato pari a 0.\\
+$\psi(\overrightarrow{x}) = \mu y.[\phi(\overrightarrow{x}, y) = 0 \wedge \forall z \leq y\:\:\vline\:\: \phi(\overrightarrow{x}, z)\downarrow] $\\\\
+$\mu x.[I]$ è il minimo elemento di $I$ insieme.
+\pagebreak
+\paragraph{} Cosa significa? Data una funzione $\phi \in \mathscr{R}$ (che ovviamente può essere una ricorsiva primitiva), la vado a calcolare sugli argomenti $\overrightarrow{x}$ della $\psi$ e su una certa $y$. Se vale 0, il risultato è $y$, altrimenti \textbf{deve} convergere e vado avanti incrementando $y$ di 1 e ricalcolando fino a che non trovo un risultato pari a 0.\\
 Quindi le $\mu$-ricorsive definiscono anche funzioni non totali, al contrario delle ricorsive primitive che definiscono solo funzioni totali.\\
 La $\mu$ corrisponde ad un \textbf{ciclo while}: inizia con $y=0$ e lo incrementa fino a che $\phi$ non è uguale a 0 (guardia del loop), ritornando $y$. Se viene piazzato un limite superiore a $y$, allora $\psi$ potrebbe essere ricorsiva primitiva e se lo è anche la $\phi$ allora la condizione di convergenza è garantita.\\
-La diagonalizzazione non può essere applicata direttamente alle funzioni $\mu$-ricorsive, perché $\phi_n(n)$ può divergere. Non tutte le funzioni $\mu$-ricorsive possono essere estese a funzioni totali: \textbf{una funzione è $\mu$-calcolabile se può essere ridefinita come $mu$-ricorsiva}.
+La diagonalizzazione non può essere applicata direttamente alle funzioni $\mu$-ricorsive, perché $\phi_n(n)$ può divergere. Non tutte le funzioni $\mu$-ricorsive possono essere estese a funzioni totali: \textbf{una funzione è $\mu$-calcolabile se può essere ridefinita come $\mu$-ricorsiva}.
 \subparagraph{Esempio} $\phi(x, y) = 42$ è costante, quindi ricorsiva primitiva, quindi anche $\mu$-ricorsiva.\\
-$\psi(x) = \mu y.[\phi(x, y) = 42]$ ovunque indefinita perché non tornerà mai 0 quindi $\not\exists y$.\\\\
+$\psi(x) = \mu y.[\phi(x, y) = 42]$ ovunque indefinita perché non tornerà mai 0 quindi $\not\exists\:y$.\\\\
 Quindi \textbf{terminazione e non terminazione sono cruciali}.\\
 Se la definisco per casi? Ad esempio 
 \begin{math}
 	f(x) = \left\{
 	\begin{array}{c c}
-	\mu y.[y < g(x)\:\:\vline\:\: h(x, y) = 0] & \textsl{se}\:\exists\:\textsl{tale} y\\
+	\mu y.[y < g(x)\:\:\vline\:\: h(x, y) = 0] & \textsl{se}\:\exists\:\textsl{tale}\:y\\
 	0 & \textsl{altrimenti}
 	\end{array}
 	\right.
@@ -575,7 +577,10 @@ Per ragioni storiche, una relazione $I \subset N^n$ è \textbf{ricorsiva} (sinon
 Inoltre, come già detto, $I$ è ricorsiva primitiva $\Leftrightarrow$ $\chi_I$ è ricorsiva primitiva.
 \section{Tesi di Church-Turing}
 \textbf{Le funzioni intuitivamente calcolabili sono tutte e sole le T-calcolabili}.\\
-In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di non considerare il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa \textit{classe di elementi}. Ci limiteremo a dire algoritmo, Macchia di Turing\ldots$\,$ indifferentemente, poiché grazie a questa tesi possiamo dire che un algoritmo è equivalente qualsiasi sia il linguaggio in cui è scritto.
+In realtà è un'ipotesi, ma è così forte che viene presa come tesi. Ci permette di non considerare il formalismo con cui formalizziamo gli algoritmi, poiché tutti i formalismi rappresentano la stessa \textit{classe di elementi}. Ci limiteremo a dire algoritmo, Macchina di Turing\ldots$\,$ indifferentemente, poiché grazie a questa tesi possiamo dire che un algoritmo è equivalente qualsiasi sia il linguaggio in cui è scritto.\\
+Questa tesi postula che la nozione di calcolabilità \textit{intuitiva} è robusta, ma cade se si rilascia anche una sola delle ipotesi fatte sulla natura degli algoritmi.\\\\
+Da qui in avanti parleremo di \textbf{funzioni calcolabili} senza specificare il formalismo con cui le definiamo.\\
+Quante sono? Ce ne sono di non calcolabili? Se ce ne sono, sono interessanti?
 \subsection{Risultati}
 Indichiamo con $\phi_i$ è la \textbf{funzione calcolata dall'$i$-esimo algoritmo} M$_i$
 \begin{list}{}{}
@@ -640,22 +645,23 @@ Esistono funzioni \textit{non} calcolabili, molte di più di quelle calcolabili.
 Quindi indichiamo con $\phi_i$ la funzione (in generale, parziale) calcolata dall'algoritmo M$_i$ e $i$ \textbf{indice della macchina}. Come detto prima, può darsi che per $i \neq j$ sia $\phi_i = \phi_j$ ma sicuramente M$_i \neq$ M$_j$.
 \subsection{Teorema 2: Ogni funzione calcolabile $\phi_i$ ha infiniti (numerabili) indici}
 Anche detto \textbf{padding lemma}.\\
-Non solo, posso costruire un insieme infinito di indici A$_i$ tale che $\forall\:j$ in A$_i$ $\phi_j = \phi_i$ mediante una funzione ricorsiva primitiva.
+Non solo, posso costruire un insieme infinito di indici A$_i$ tale che $\forall\:j \in$ A$_i \Rightarrow \phi_j = \phi_i$ mediante una funzione ricorsiva primitiva.
 \paragraph{Dimostrazione} Sia $M_i$ un programma \texttt{P}. Prendo \texttt{P;skip}, poi \texttt{P;skip;skip}\ldots metto tanti \texttt{;skip} quanti voglio. Posso generare un numero infinito di programmi che calcolano tutti la stessa funzione.
 \subsection{Teorema 3: Forma Normale}
 Prendendo un qualsiasi algoritmo, posso riscriverlo in una \textbf{forma canonica}/\textbf{normale}, che non è per forza migliore ma è una forma specifica e da noi \textbf{privilegiata}.\\
-$\exists$ un predicato $T(i, x, y)$ e una funzione $U(y)$ ricorsive primitive calcolabili totali tali che $\forall$ funzione calcolabile $i$, $x$.$\phi_i(x)$ = $\mu$y.[$U(T(i, x, y))$]\\
-\textbf{Corollario}: tutte le funzioni T-calcolabili sono anche $\mu$-calcolabili. Non solo, ma $\mu$y corrisponde al \texttt{while}, e $T$, $U$ a due programmi \texttt{for}. Quindi ogni funzione calcolabile può essere ottenuta da due programmi scritti con il linguaggio \texttt{for} ed una sola applicazione del linguaggio \texttt{while}.
+$\exists$ un predicato $T(i, x, y)$ e una funzione $U(y)$ ricorsive primitive calcolabili totali tali che $\forall$ funzione calcolabile $i$, $x$.$\phi_i(x)$ = $\mu$y.[$U(T(i, x, y))$]
 \paragraph{Dimostrazione} Devo costruire il predicato T e la funzione U.\\
 $T(i, x, y)$ è detto \textbf{predicato di Kleene} ed è \textbf{vero $\Leftrightarrow$ $y$ è la codifica di una computazione di M$_i$($x$) terminante}.\\
-Per calcolare, $T$ prende $i$ e recupera M$_i$. Comincia a scandire i valori $y$, li decodifica e, uno alla volta dato $x$ ingresso, controlla se il risultato è una computazione terminante. Definisce $U$ in modo che $U(y) = z$, con $z$ risultato della computazione (ciò che rimane sul nastro della MdT corrispondente).\\
-C'è un solo $y$ nelle macchine deterministiche, se c'è.
-\pagebreak
+Per calcolare, $T$ prende $i$ e recupera M$_i$. Comincia a scandire i valori $y$, li decodifica e, uno alla volta dato $x$ ingresso, controlla se il risultato è una computazione terminante. Definisce $U$ in modo che $U(y) = z$, con $z$ risultato della computazione (ciò che rimane sul nastro della MdT corrispondente, cioè la macchina terminante M$_i$($x$) = $c_0c_1\ldots c_n$ con $c_n=(h,\triangleright z \underline{\#})$).\\
+C'è un solo $y$ nelle macchine deterministiche, se c'è, quindi T e U sono calcolabili per la tesi di Church-Turing. Inoltre il procedimento termina sempre, quindi T e U sono totali.\\
+Se considerassimo le MdT non deterministiche, potrebbero esserci più computazioni che terminano in $h$, per cui $\mu$ (l'operatore di minimizzazione) darebbe come risultato il minimo intero che ne codifica una.\\\\
+Un immediato \textbf{corollario} del teorema di forma normale è che tutte le funzioni T-calcolabili sono anche $\mu$-calcolabili. Non solo, ma $\mu$y corrisponde al \texttt{while}, e $T$, $U$ a due programmi \texttt{for}. Quindi ogni funzione calcolabile può essere ottenuta da due programmi scritti con il linguaggio \texttt{for} ed una sola applicazione del linguaggio \texttt{while}.
 \subsection{Teorema 4: Teorema di enumerazione}
-$\exists\: z$ tale che $\forall$ $i$, $x$ $\phi_z(i, x) = \phi_i(x)$. Quindi $z$ è \textbf{MdT universale}. $z$ interprete, $i$ è programma.\\
+$\exists\: z\:|\:\forall$ $i$, $x\:\:\:\phi_z(i, x) = \phi_i(x)$. Quindi $z$ è \textbf{MdT universale}. $z$ interprete, $i$ è programma.\\
 Fra tutti gli algoritmi, ce ne sono infiniti numerabili in grado di eseguire tutti gli altri algoritmi.\\
-\paragraph{Dimostrazione} $\phi_i(x) = \mu y.U(T(i, x, y)$ per il terzo teorema. Quindi $\phi_i(x)$ è un algoritmo, avrà un indice per Church-Turing che indicheremo con $z$.\\
-Diciamo $\phi_i(x) = \phi_z(i, x) = \mu y.U(T(i, x, y))$ (senza $y$ come argomento perché quantificata, non libera ma legata, una sorta di \textit{variabile di lavoro}). Applico la transitività dell'uguaglianza e ho finito, $\phi_i(x) = \phi_z(i, x)$.
+\paragraph{Dimostrazione} $\phi_i(x) = \mu y.U(T(i, x, y))$ per il terzo teorema. Quindi $\phi_i(x)$ è un algoritmo, avrà un indice per Church-Turing che indicheremo con $z$.\\
+Diciamo $\phi_i(x) = \phi_z(i, x) = \mu y.U(T(i, x, y))$ (senza $y$ come argomento perché quantificata, non libera ma legata, una sorta di \textit{variabile di lavoro}). Applico la transitività dell'uguaglianza e ho finito, $\phi_i(x) = \phi_z(i, x)$.\\
+Più intuitivamente: M$_z$ recupera la descrizione di M$_i$ e la applica a $x$.
 \section{Macchina di Turing Universale}
 Ottimo modello per le macchine Von Neumann.
 \paragraph{Due insiemi} Utili per la rappresentazione\\
@@ -678,6 +684,7 @@ Adesso possiamo codificare le quintuple $\in \delta$. $\delta(q_{i_p}, \sigma_{j
 $$s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cK(q)cK(\sigma)cK(D)c$$
 con $c$ che funge da \textbf{separatore}, \textbf{tra la codifica di uno stato e la codifica di un simbolo}.\\
 $s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cdcdcd$ se $\delta(q_{i_p}, \sigma_{i_q})$ è indefinita
+\pagebreak
 \paragraph{Esempio} $\overline{M} = \{\{q_2\}, \{\sigma_1, \sigma_3, \sigma_5\}, \delta, q_2\}$, con $i_1 = 2$, $j_1 = 1$, $j_2 = 3$, $j_3 = 5$
 \begin{list}{}{}
 	\item $q_2 \rightarrow q_{i_1}$
