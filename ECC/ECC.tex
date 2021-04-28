@@ -718,11 +718,12 @@ Scrivi $x$ sul nastro di M$_i$ cioè prepara la configurazione iniziale (q$_0$, 
 Questo è un algoritmo, quindi ha indice per C-T. Diciamo che l'indice è $n = s(i, x)$. $s$ è calcolabile totale, e $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$ è vera.\\
 Per l'iniettività? Da $n$ genero diversi indici $i$ di macchine che calcolano la stessa funzione. Appena trovo un indice che non avevo già visto e maggiore di quelli già visti, lo uso per porlo come indice della funzione che sto costruendo.
 \subsection{Teorema di Espressività}
-Un formalismo F è Turing-Equivalente $\Leftrightarrow$ 
+Un formalismo F è Turing-Equivalente, cioè \textbf{calcola tutte e sole le funzioni T-calcolabili} $\Leftrightarrow$ 
 \begin{list}{-}{}
 	\item Ha un algoritmo universale (Teorema di Enumerazione)
-	\item Ha il teorema del parametro
+	\item Vale il Teorema del Parametro
 \end{list}
+\pagebreak
 Supponiamo un programma che calcola prodotto con somme successive
 \begin{verbatim}
 P := 0;
@@ -756,27 +757,29 @@ P := P + w;
 y := y - 1;
 while ...
 \end{verbatim}
-Scrive sul nastro \texttt{P := P + w;}\\
-\ldots\\
+Scrive sul nastro \texttt{P := P + w;}\ldots\\
 Sul nastro c'è \texttt{P := 0; P := P + w; P := P + w;}, che è il programma specializzato.
 \subsection{Teorema di Ricorsione/Kleene 2}
 Operazioni che si possono fare sugli algoritmi che ci lasciano all'interno delle funzioni calcolabili\\
-$\forall$ $f$ calcolabile totale $\exists$ $n$ $\vline$ $\phi_n = \phi_{f(n)}$. Posso trasformare il mio programma in maniera da ottenerne uno perfettamente equivalente. $n$ si dice \textbf{punto fisso}.
-\subparagraph{Dimostrazione} Definiamo la seguente funzione calcolabile "diagonale"\\
-$\psi(u, z) = \left\{
+$\forall$ $f$ calcolabile totale $\exists$ $n$ $\vline$ $\phi_n = \phi_{f(n)}$ ($n$ si dice \textbf{punto fisso})\\
+Posso trasformare il mio programma in maniera da ottenerne uno perfettamente equivalente, come fanno i compilatori: $f$ trasforma gli indici, cioè dato $n$ (quindi $P_n$ programma) lo trasforma in $f(n)$ (cioè $P_{f(n)}$ programma). Considerando il punto fisso, la trasformazione di $f$ non cambia la funzione calcolata, cioè $P_n$ e $P_{f(n)}$ sono equivalenti con la stessa semantica (qua l'accezione di punto fisso è leggermente diversa, intesa come "punto fisso" rispetto alla semantica).\\
+Questo teorema fornisce la "base" della \textbf{semantica denotazionale}.
+\subparagraph{Dimostrazione} Definiamo la seguente funzione calcolabile "diagonale":\\
+$$\psi(u, z) = \phi_{d(u)}(z) = \left\{
 \begin{array}{c c}
 	\phi_{\phi_u(u)}(z) & \textsl{se } \phi_u(u)\downarrow\\
 	\textsl{indefinita} & \textsl{altrimenti}
 \end{array}
-\right.$
-$\psi$ è calcolabile, quindi per C-T ha un indice $\psi(u, z) = \phi_{s(i, u)}(z) = \phi_i(u, z)$ e posso applicare il teorema del parametro $= \phi_{d(u)}(z)$ con $d(u) = \lambda u.s(i, u)$ calcolabile totale e iniettiva e indipendente da $f$. Ma $f$ è calcolabile totale, quindi anche $f(d(x))$ è calcolabile totale. Quindi ha indice per C-T $= \phi_v(x)$.\\
-Quindi $\phi_{d(v)} = \phi_{\phi_v(v)}$\\
-$d(v) = n$ e $d$ è iniettiva quindi $\phi_n = \phi_{d(v)} = \phi_{\phi_v(v)} = \phi_{f(d(v))} = \phi_{f(n)}$ quindi $n$ è punto fisso.\\
+\right. (1)$$
+$\psi$ è calcolabile, quindi per C-T ha un indice $\psi(u, z) = \phi_{s(i, u)}(z) = \phi_i(u, z)$ e posso applicare $s$--$m$--$n$ ottenendo $\psi(u, z) = \phi_{d(u)}(z)$ (con $d(u) = \lambda u.s(i, u)$ calcolabile totale e iniettiva e indipendente da $f$).\\Ma $f$ è calcolabile totale, quindi anche $f(d(u))$ è calcolabile totale. Quindi ha indice per C-T $$f(d(u))= \phi_v(u)\:\:\:\:\:\:(2)$$
+Quindi $\phi_{d(v)} = \phi_{\phi_v(v)}$ e poniamo $$d(v) = n\:\:\:\:\:\:(3)$$ e $d$ è iniettiva quindi $$\phi_n =_3 \phi_{d(v)} =_1 \phi_{\phi_v(v)} =_2 \phi_{f(d(v))} =_3 \phi_{f(n)}$$
+Quindi $n$ è punto fisso.
+\paragraph{}
 \begin{tabular}{c c c}
 	\textbf{Dom} & $f$ & \textbf{Imm}\\
 	$N$ & $\lambda x.2x$ & \{$2n\:\:|\:\: n \in N$\}\\
 	\{$2n\:\:|\:\: n \in N$\} & $\lambda x.\frac{x}{2}$ & $N$
-\end{tabular}\\
+\end{tabular}\\\\
 I è ricorsiva primitiva $\Leftrightarrow \chi_i(x) = 1$ se $x \in I$, 0 altriementi è calcolabile totale\\
 A = $\{(i, x, k)$ $|$ $\exists\: y,n$ con $(y, n, x < k) \wedge \phi_i(x)\downarrow$ in $n$ passi\}. Limita spazio e tempo\\
 B = $\{(i, x, k, z)$ $|$ $\exists\: n < k \wedge \phi_i(x) = z$ in $n$ passi\}. Anche qua limito il numero di passi, ma non la memoria\\
@@ -791,7 +794,6 @@ I è \textbf{ricorsivamente enumerabile} $\Leftrightarrow$ è \textbf{dominio di
 	Se non terminano, ripeto: faccio un passo in $i$\ldots finché non termino in una delle due macchine.
 \end{list}
 Ricorsivamente enumerabile perché vogliamo enumerare i suoi elementi, tirandone fuori uno alla volta.
-\pagebreak
 \paragraph{Teorema di equivalenza fra caratterizzazioni}
 $I$ è ricorsivamente enumerabile $\Leftrightarrow$ $I = \emptyset \vee I = \textsl{imm}(f)$, con $f$ calcolabile totale.
 \begin{multicols}{2}
@@ -823,6 +825,7 @@ Indice di colonna tiene traccia dell'argomento\\
 	 Se non termina, $f(<m, n>) = \overline{n}$.\\
 	 Per esempio $\phi_i(2)$ per 4 passi. Converge? Se non converge, allora $f(<4, 2>) = \overline{n}$. Se converge, pongo $f(<4, 2>) = 2$
 \end{enumerate}
+\pagebreak
 \section{K e Riduzioni}
 \subsection{Insieme K}
 \textbf{K} = \{$x$ $|$ $\phi_x(x)\downarrow$\} insieme degli algoritmi applicati a sé stessi e convergenti.
