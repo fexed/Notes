@@ -1075,15 +1075,21 @@ La dimostrazione, intuitivamente, consiste per $M'$ nel copiare il nastro d'ingr
 \begin{list}{}{}
 	\item $M$ a $k$ nastri I/O richiede spazio $\sum_{i=2}^{k-1} |w_i| \Leftrightarrow (q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$
 \end{list}
+Questo perché il numero delle celle usate dai nastri non diminuisce mai: nel primo nastro perché è di sola lettura, nell'ultimo perché è di sola scrittura e nei $k-2$ nastri di lavoro perché i caratteri bianchi a destra non scompaiono mai.\\\\
 Ad esempio, per $k = 3$ avrò un unico nastro di lavoro, quindi lo spazio occupato dalla macchina sarà quello del nastro di lavoro (come detto prima, ignoriamo l'occupazione in spazio dei nastri input e output).
-\paragraph{} $M$ decide $I$ in spazio $f \Leftrightarrow \forall\: x\:\:M$ richiede spazio $\leq f(|x|)$
-\subparagraph{SPACE($f$)} = $\{I\: |\:\exists\: M$ che decide $I$ in spazio $f\}$
+\paragraph{$M$} decide $I$ in spazio $f \Leftrightarrow \forall\: x\:\:M$ richiede spazio $\leq f(|x|)$
+\paragraph{SPACE($f$)} = $\{I\: |\:\exists\: M$ che decide $I$ in spazio $f\}$
+\paragraph{} Ignoriamo lo spazio occupato dai nastri di input e output perché altrimenti avremmo complessità in spazio almeno lineari: questo perché il nastro in input misura sempre $|x| + 1$ contenendo $\triangleright x$, mentre il nastro in output contiene un "bit", un segnale per accettare o rifiutare, nel caso dei problemi $I$ di decisione considerati, quindi non rilevante nelle misure.\\
+Esistendo classi interessanti e importanti che sono sub-lineari nello spazio, come visti successivamente, ci interessano misure più fini.
 \paragraph{Teorema} Posso ridurre linearmente lo spazio.\\
-$I \in$ SPACE$(f) \Rightarrow \forall\:\epsilon\in R_+\: I \in$ SPACE$(2 + \epsilon\cdot f(n))$
+$I \in$ SPACE$(f) \Rightarrow \forall\:\epsilon\in R^+\:\: I \in$ SPACE$(2 + \epsilon\cdot f(n))$
 $$\textsl{PSPACE} = \bigcup_{k\geq 1} \textsl{SPACE}(n^k)$$
 $$\textsl{LogSPACE} = \bigcup_{k\geq 1} \textsl{SPACE}(k\cdot\log(n))$$
+Come per $\mathscr{P}$, anche queste classi sono invarianti rispetto al modello di calcolo usato.\\
+Abbiamo inoltre che $\textsl{LogSPACE}\subsetneq\textsl{PSPACE}$
+\pagebreak
 \paragraph{Teorema} $\textsl{LogSPACE} \subseteq \mathscr{P}$
-\subparagraph{Dim} Sia $I \in \textsl{LogSPACE} \Rightarrow \exists\: M$ di tipo I/O\ldots\\
+\subparagraph{Dim} Sia $I \in \textsl{LogSPACE} \Rightarrow \exists\: M$ di tipo I/O che $\forall\:x\in I$ decide $x$ in spazio $O(\log|x|)$\\
 Quante \textbf{configurazioni diverse posso avere sul nastro di lavoro}? Dipende da quanti simboli ho sulla macchina. Poniamo $x$ input e la sua lunghezza $|x| = n$, avrò $\#\Sigma^{\log(n)}$ nastri diversi, cioè il numero di simboli (cardinalità di $\Sigma$) alla $\log (n)$. Inoltre posso avere il cursore in $\log(n)$ posizioni diverse in ciascun stato (che sono $\# Q$). Inoltre il cursore sta anche nell'input, in $|x|$ posizioni diverse. Quindi le configurazioni diverse del nastro di lavoro sono 
 $$n\cdot\log(n)\cdot\# Q\cdot\#\Sigma^{\log(n)}$$
 Per dimostrare che $\textsl{LogSPACE} \subseteq \mathscr{P}$ devo trovare $k$ tale che $n\cdot\log(n)\cdot\# Q\cdot\#\Sigma^{\log(n)} \leq n^k$. Applico il $\log$ da entrambi i membri
@@ -1108,11 +1114,12 @@ Per esempio per costruire una macchina che decideva se una data stringa fosse pa
 N = (Q, $\Sigma$, $\Delta$, $q_0$) \textbf{MdT non deterministica}
 \begin{list}{}{}
 	\item \textbf{Relazione di transizione} $\Delta \subseteq (Q\times\Sigma)\times(Q\times\{\textsl{si, no}\}\times\Sigma\times\{Q, L, -\})$\\
-	Possono essere presenti più quintuple associate allo stesso stato ed allo stesso simbolo, quindi molte configurazioni $(q', u'\sigma'v')$ raggiungibili da $(q, u\sigma v)$
+	Possono essere presenti più quintuple associate allo stesso stato ed allo stesso simbolo, quindi molte configurazioni $(q', u'\sigma'v')$ raggiungibili da $(q, u\sigma v)$ in un solo passo
 	\item \textbf{Stato iniziale} $\gamma = (q, u\sigma v) \rightarrow (q', u'\sigma'v')$
-	\item \textbf{Computazione} $M(x) \rightarrow\gamma_1\rightarrow\ldots\rightarrow\gamma_n$ cioè $M(x) \rightarrow^n\gamma_n$
+	\item \textbf{Computazione} $M(x) \rightarrow\gamma_1\rightarrow\ldots\rightarrow\gamma_n$ cioè $M(x) \rightarrow^n\gamma_n$, un \textbf{cammino} (non un albero!)
 \end{list}
 La potenza del non determinismo si vede nel modo in cui si accetta: \textbf{basta che ci sia un cammino che porti alla soluzione} perché il problema sia risolto.
+\pagebreak
 \paragraph{DNA Computing} Calcolo eseguito ricombinando fra loro sequenze biologiche invece che per passi come da tradizione.
 \paragraph{Come decide un problema una macchina non deterministica} Di seguito la definizione.\\
 N decide I $\Leftrightarrow$ $\forall\: x \in I \Rightarrow \exists$ computazione $M(x) \rightarrow^* (\textsl{si, }w)$\\
@@ -1124,16 +1131,20 @@ Il contrario è che \textbf{tutte rifiutino}, allora $x \not\in I$\\
 Numerando gli archi di decisione identifico una computazione tramite la successione di numeri. Data una certa $\sigma$ ho tante quintuple in $\Delta$, le enumero e le ordino in qualche modo. Prendo la $n_1$ scelta dallo stato iniziale, la $n_2$ scelta dallo stato risultante\ldots\\
 Nell'esempio, una scelta Si è identificata dalla computazione $(2, 0, 0)$, un'altra da $(2, 0, 3, 1)$.
 \subsection{Misure di complessità non deterministica}
-\paragraph{Tempo} $N$ decide $I$ in \textbf{tempo non deterministico} $f(|x|)$ (più semplicemente $f$) $\Leftrightarrow$
+\paragraph{Tempo} $N$ MdT non deterministica decide $I$ in \textbf{tempo non deterministico} $f(|x|)$ (più semplicemente $f$) $\Leftrightarrow$
 \begin{list}{}{}
-	\item $N$ decide $I$
-	\item $\forall\: x \in I\:\:\:\exists\: t\:|\:N(x)\rightarrow^t(\textsl{si, }w)$ e $t \leq f(|x|)$
+	\item $N$ decide $I$, e
+	\item $\forall\: x \in I\:\:\:\exists\: t\:|\:N(x)\rightarrow^t(\textsl{si, }w) \wedge t \leq f(|x|)$
 \end{list}
 $\textsl{NTIME}(f) = \{I \:|\:\exists\:N$ che decide $I$ in tempo non deterministico $f\}$\\
-$\mathscr{NP} = \bigcup_{k\geq 1}\textsl{NTIME}(n^k)$
+Quindi una MdT non deterministica accetta $x$ in tempo non deterministico $f$ se e solo se c'è \textbf{almeno} una computazione che termina in \textit{si} in $t \leq f(|x|)$ passi. Invece, non accetta $x$ se \textbf{tutte} le sue computazioni lunghe al massimo $f(|x|)$ terminano in \textit{no}.\\
+C'è nuovamente asimmetria: non basta che per un elemento $x\not\in I$ ci sia una computazione che porta in \textit{no} in meno di $f(|x|)+1$ passi, ma devono farlo \textbf{tutte}. L'asimmetria tra il decidere $I$ e $\overline{I}$ è rafforzata dal richiedere che ciò venga svolto in tempo $f(|x|)$.\\
+Questo perché \textbf{affinché $N$ decida $I$ basta che per \textit{ogni} $x$ ci sia \textit{almeno una} computazione che lo accetta}.
+$$\mathscr{NP} = \bigcup_{k\geq 1}\textsl{NTIME}(n^k)$$
+Abbiamo che $\mathscr{P}\subseteq\mathscr{NP}$ dato che ogni MdT deterministica è anche non deterministica.
+\pagebreak
 \paragraph{Teorema} Se $I \in \textsl{NTIME}(f) \Rightarrow I \in \textsl{TIME}(c^f)   $ con $c \geq 1$ che \textbf{dipende soltanto dalla macchina} in $\textsl{TIME}(f)$.\\ In altre parole: se $I$ è deciso da $N$ a $k$ nastri in tempo non deterministico $f(n)$, allora $\exists\:M$ a $k+1$ nastri che decide $I$ in $O(c^{f(x)})$, $c \geq 1$ che dipende solo da $N$\\
 In altre parole $\textsl{NTIME}(f) \subseteq \textsl{TIME}(c^f)$
-\pagebreak
 \subparagraph{Dim} Il grado di diramazione massimo, o il \textbf{grado di non determinismo}, è 
 \begin{list}{}{}
 	\item $d = \textsl{max}\{\textsl{grado}(q, \sigma)\:|\:q\in Q, \sigma \in \Sigma\}$
