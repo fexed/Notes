@@ -1234,11 +1234,14 @@ $\exists\:f$ calcolabile totale $|\:\textsl{TIME}(f) = \textsl{TIME}(2^f)$\\
 \textbf{Intuitivamente}: c'è un insieme di programmi che sono altrettanto efficienti/veloci su una macchina lenta che su una macchina nuova.\\
 Questo cozza con un risultato del teorema di gerarchia, che arrivava a dire (a grandi linee)\\$\textsl{TIME}(f(n)) \subsetneq \textsl{TIME}(f(2n + 1)^3)$ perché avrei $\textsl{TIME}(f^2) = \textsl{TIME}(f) \subsetneq \textsl{TIME}(f^3)$, ma quindi avrei una situazione assurda del tipo $A = B < C$, come può essere $A = C$? Ma il teorema di gerarchia vale. Ciò che cambia è che nel teorema della lacuna $f$ non è richiesta appropriata. Questo ci dice che \textbf{non possiamo fare a meno delle funzioni di misura appropriate}, o di classi di funzioni con vincoli a come misuriamo il consumo delle risorse in modo che il teorema di gerarchia valga.
 \subsection{Teoria della Complessità Astratta}
-Si svincola dal tipo di risorsa misurata.\\
-$\phi$ è misura $\Leftrightarrow$ \begin{list}{}{}
-	\item $\phi(\psi, x)$ converge $\Leftrightarrow \psi(x)$ converge
-	\item $\forall\:\psi, x, k$ è decidibile se $\phi(\psi, x) = k$, cioè sapere esattamente il risultato
+Si svincola dal tipo di risorsa misurata e dal modello di calcolo.\\
+Una funzione $\phi$ è una misura di complessità se restituisce un numero naturale avendo come ingressi una funzione $\psi$ e $x$ parametro di $\psi$. Inoltre soddisfa entrambi i seguenti assioni: \begin{list}{}{}
+	\item $\phi(\psi, x)$ è definita (converge) $\Leftrightarrow \psi(x)$ è definita (converge)\\
+	Questo assioma ci dice che $\phi$ misura la complessità del calcolo di $\psi(x)$.
+	\item $\forall\:\psi, x, k$ è decidibile se $\phi(\psi, x) = k$\\
+	Questo assioma assicura che si può davvero misurare la complessità del calcolo di $\psi(x)$.
 \end{list}
+Quindi se $\phi$ misurasse il numero di passi, riotterremmo la definizione di complessità in tempo, mentre se misurasse il numero di celle riotterremmo quella in spazio.
 \subsection{Tesi di Cook-Karp}
 \begin{list}{-}{}
 	\item $\mathscr{P}$ sono i problemi \textbf{trattabili}
@@ -1251,8 +1254,8 @@ Ci sono algoritmi esponenziali al caso pessimo, ma efficientissimi nei casi più
 Ma non sempre posso sapere qual è il caso medio di un problema.
 \subsection{Riduzione efficiente}
 $I$ si riduce efficientemente a $J \Leftrightarrow (x\in I \Leftrightarrow f(x)\in J$ con $f \in \textsl{logspace})$ e si può scrivere $I \leq J$\\
-Otteniamo che $\leq$ classificano $\textsl{logspace}$ e una qualunque classe $\mathscr{E} \subset \{\mathscr{P}, \mathscr{NP}, \textsl{EXP}, \textsl{PSPACE}, \textsl{NPSPACE}\}$\\
-Se prendo una $\mathscr{D} \subset \mathscr{E}$, allora $\leq$ classificano $\mathscr{D}$ ed $\mathscr{E}$ (quindi ad esempio $\mathscr{P}$ ed $\mathscr{NP}$)\\
+Otteniamo che $\leq$ classificano $\textsl{logspace}$ e una qualunque classe $\mathscr{E} \in \{\mathscr{P}, \mathscr{NP}, \textsl{EXP}, \textsl{PSPACE}, \textsl{NPSPACE}\}$\\
+Se prendo una $\mathscr{D} \subseteq \mathscr{E}$, allora $\leq$ classificano $\mathscr{D}$ ed $\mathscr{E}$ (quindi ad esempio $\mathscr{P}$ ed $\mathscr{NP}$)\\
 Dato che $\textsl{logspace}\leq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classificano $\mathscr{D}$ ed $\mathscr{E}$. Lo si dimostra così, tramite le proprietà della classificazione di una famiglia di riduzioni:
 \begin{enumerate}
 	\item $\textsl{id} \in \textsl{logspace}$, banalmente
@@ -1266,7 +1269,7 @@ Dato che $\textsl{logspace}\leq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classif
 Quindi $\leq_{\textsl{logspace}}$ \textbf{sono riduzioni efficienti} e \textbf{classificano} $\mathscr{P}$ ed $\mathscr{NP}$\\
 Una delle conseguenze è che se trovo un problema completo dentro $\mathscr{P}$ (cioè che tutti i problemi di $\mathscr{P}$ si riducono a lui e lui $\in\mathscr{P}$) allora in qualche modo ho rappresentato la difficoltà massima e $\mathscr{P}$ non ha problemi più difficili perché tutti i problemi si riducono a lui.\\
 Poiché riesco a trovare soluzioni tra problemi in $\mathscr{P}$, questo vuol dire che le soluzioni di tutti i problemi all'interno di una classe hanno una struttura matematicamente analoga tra loro.
-\section{Espressioni Booleane}
+\section{Richiami di logica}
 Ponendo $x_1,\ldots,x_n \in X$ \textbf{variabili} e la \textbf{grammatica} $$B\longrightarrow tt\:|\:ff\:|\:x\:|\:\neg B\:|\:B_1 \vee B_2\:|\:B_1 \wedge B_2$$ con $tt$, $ff$, $x$ e $\neg x$ chiamati \textbf{letterali} $l_1,\ldots$.\\
 Diciamo che $V : X' \longrightarrow \{T, F\}$ con $X' \subset X$ è un \textbf{assegnamento booleano}.\\
 B è \textbf{chiusa} se \textbf{non ha variabili}. Un assegnamento booleano è \textbf{buono} se \textbf{lega tutte le variabili di B}.
@@ -1282,7 +1285,6 @@ $B$ è in \textbf{forma normale disgiuntiva} $\Leftrightarrow$ $B = \mathlarger{
 Inoltre $\forall\:B\:\:\exists\:B'$ in forma normale (una delle due) $|\:(V\vDash B \Leftrightarrow V\vDash B')$.\\
 Questo si ottiene avendo, da $B$ con $O(n)$ simboli, un $B'$ con $O(2^n)$ simboli.\\\\
 \textbf{Considereremo espressioni solo in forma normale congiuntiva}.
-\pagebreak
 \section{Alcuni problemi}
 \subsection{Problema SAT}
 Anche chiamato \textbf{problema della soddisfacibilità}. La formulazione è semplice:
@@ -1321,7 +1323,6 @@ Adesso devo dimostrare che se c'è un cammino hamiltoniano allora esiste un asse
 \end{array}	 \right.$
 \end{list}
 Finito. Ho definito una permutazione che rispetta il fatto che gli archi siano ben rappresentati.\\Manca di dimostrare che $f \in \textsl{logspace}$.
-\pagebreak
 \paragraph{} Dobbiamo costruire una macchina di tipo I/O, così sappiamo misurare lo spazio necessario (somma dello spazio usato dai nastri di lavoro). Naturalmente l'alfabeto della nostra macchina conterrà: simboli di verità, connettivi logici, parentesi, e due caratteri 0 e 1. Perché gli indici delle variabili sono rappresentati in binario.\\
 L'input è la successione degli archi. La macchina scrive in binario il numero di nodi $n$ sul nastro di lavoro. Poi avrò tre ulteriori nastri di lavoro, poiché nelle formule 1|5 compaiono 3 indici: un nastro per $i$, uno per $j$ e uno per $k$.\\
 Per scorrere le clausole farà scorrere da 1 a $n$ gli indici sui nastri di lavoro. Quando ha scritto le quattro formule 1|4, comincia a scrivere sull'output l'ultima formula, la 5. Scorrerà il nastro input anche questa volta per verificare la clausola, finendo ad un certo punto.\\
@@ -1340,6 +1341,7 @@ $\exists\:V\vDash B = \mathlarger{\bigwedge_{i=1}^n} C_i \Leftrightarrow f(B) = 
 \end{list}
 Da questo ottengo che se c'è una cricca c'è un assegnamento booleano, viceversa se c'è un assegnamento booleano c'è una cricca, quindi è una riduzione.\\
 Appartiene a $\textsl{logspace}$ perché posso usare lo stesso meccanismo della rappresentazione binaria e mantenendo gli indici sui nastri di lavoro.
+\pagebreak
 \section{Funzioni Booleane}
 $$V \vDash B \Leftrightarrow f(V(x_1), \ldots, V(x_n)) = tt\:\:\: f: X \rightarrow \{0, 1\}$$
 $f$ si \textbf{costruisce mediante un circuito booleano}, cioè un grafo $G = (N, A)$ \textbf{aciclico}, con 
@@ -1382,6 +1384,7 @@ Le variabili di $f(C)$ includono tutte le variabili di $C$, cioè $X$, unito ad 
 \end{list}
 Usando $x \wedge ff$ come esempio, mettendo come nodi $h = x$, $g = \wedge$ e $k = ff$, ottengo la formula $$g \wedge \neg k \wedge (\neg h \vee x) \wedge (h \wedge \neg x) \wedge(\neg g \vee h) \wedge (\neg g \vee k) \wedge (\neg h \vee \neg k \vee g)$$
 Vediamo che $[g] = ff\:\:\forall\:V$
+\begin{multicols}{3}
 \begin{list}{}{}
 	\item $g \wedge$ $\longrightarrow V(g) = tt$ 
 	\item $\neg k \wedge$ $\longrightarrow V(k) = ff$
@@ -1391,6 +1394,7 @@ Vediamo che $[g] = ff\:\:\forall\:V$
 	\item $(\neg g \vee k) \wedge$ $\longrightarrow V(k) = tt$ ottenendo un assurdo
 	\item $(\neg h \vee \neg k \vee g)$
 \end{list}
+\end{multicols}
 \section{Tabella di computazione}
 Prendiamo un problema $I \in \mathscr{P} \Leftrightarrow \exists\:M\:\:|\:\:\forall\:x \in I M(x)\longrightarrow_t ($si/no, $w)$ con $t \leq |x|^k$\\
 Ho la configurazione iniziale $\underline{\triangleright}a_1\ldots a_n$, copo un certo passo ho $\triangleright\underline{a_1}\ldots a_n$ e così via.\\
@@ -1401,7 +1405,6 @@ Posso immaginare di mettere il tutto in una matrice:$\begin{array}{c c c c}
 \triangleright\\
 \end{array}$\\
 Ad ogni riga $i$ ho il passo di computazione e la configurazione al passo $i$: ho rappresentato l'intera computazione in una matrice. Possiamo dare a questa \textbf{tabella di computazione} un \textbf{formato standard}.
-\pagebreak
 \paragraph{Tabella di computazione} Una matrice quadrata $T[i, j]$ con $1 \leq i,j \leq |x|^k$ se $M(x)$ termina in $|x|^k - 2$ passi. \textbf{Condizioni}:
 \begin{enumerate}
 	\item La macchina termina in meno di $|x|^k - 2$ passi, come detto
