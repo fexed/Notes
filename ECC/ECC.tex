@@ -1103,10 +1103,8 @@ Come conseguenza, scopriamo che \textbf{lo spazio limita il tempo}, perché se p
 Riesce perché: \textbf{aggiungere nastri}, \textbf{avere I/O}, \textbf{aumentare la parola} su cui lavorano le macchine (quindi \textbf{compattare} simboli) sono tutte \textbf{operazioni algoritmicamente effettive}: si possono fare con algoritmi. Ciò fornisce un bel vantaggio.\\
 Però sorge un \textbf{problema}: dobbiamo decidere un insieme (quindi risolvere un problema) che \textbf{sappiamo essere decidibile} e calcolare una funzione che \textbf{sappiamo essere calcolabile}, ma non riusciamo a individuare una struttura matematica e delle proprietà tramite le quali risolverlo \textit{facilmente}.\\
 Per esempio per costruire una macchina che decideva se una data stringa fosse palindroma, \textbf{abbiamo sfruttato una proprietà} delle stringa: che essa sia leggibile da destra a sinistra e da sinistra a destra. In questo caso era banale, ma ci sono problemi per cui non conosciamo la struttura e ciò rende la vita difficile.
-\paragraph{Esempio} %TODO
-
 \subsection{Spazio degli stati}
-\begin{list}{}{Lo spazo degli stati di una MdT può essere}
+\begin{list}{}{Lo spazio degli stati di una MdT può essere}
 	\item \textbf{Generato esplicitamente}, 
 	\item \textbf{Generato implicitamente}, guess \& try
 \end{list}
@@ -1342,7 +1340,7 @@ $\exists\:V\vDash B = \mathlarger{\bigwedge_{i=1}^n} C_i \Leftrightarrow f(B) = 
 Da questo ottengo che se c'è una cricca c'è un assegnamento booleano, viceversa se c'è un assegnamento booleano c'è una cricca, quindi è una riduzione.\\
 Appartiene a $\textsl{logspace}$ perché posso usare lo stesso meccanismo della rappresentazione binaria e mantenendo gli indici sui nastri di lavoro.
 \pagebreak
-\section{Funzioni Booleane}
+\subsubsection*{Funzioni Booleane}
 $$V \vDash B \Leftrightarrow f(V(x_1), \ldots, V(x_n)) = tt\:\:\: f: X \rightarrow \{0, 1\}$$
 $f$ si \textbf{costruisce mediante un circuito booleano}, cioè un grafo $G = (N, A)$ \textbf{aciclico}, con 
 \begin{list}{}{}
@@ -1364,14 +1362,12 @@ $f$ si \textbf{costruisce mediante un circuito booleano}, cioè un grafo $G = (N
 	\item $(i, j) \in A$
 \end{list}
 \paragraph{Esempio} $(x \vee (x \wedge y)) \vee ((x \wedge y) \wedge \neg(y \vee z))$
-%TODO grafo
 \subsection{Circuit SAT}
 $$\exists\:V\:\:|\:\:[C]_V = tt ?$$ con $[C]_V = [n]_V$ con $n$ porta di uscita. Questo problema $\in \mathscr{NP}$\\
 \textbf{Circuit Value}: se $C$ non ha variabili, $[C]_\emptyset = tt$? Questo è il problema della soddisfacibilità, per verificare se dato un assegnamento il circuito è soddisfatto o meno.\\
-\textbf{Circuit Value} $\in \mathscr{P}$ perché tengo sul nastro input la rappresentazione del grafo, cioè l'insieme delle coppie che formano gli archi e la sorta di ogni nodo (porta).\\
-Sui nastri di lavoro tengo i valori dei vari livelli di porte, ma non ho ripetizioni quindi è polinomiale\\\\ %TODO rivedere
-Notiamo che \textbf{Circuit Value $\leq$ Circuit SAT}, perché SAT è la versione più generale di value. Value è la versione di SAT in cui non ho bisogno della funzione di assegnamento.\\\\
-Più interessante è scopire che Circuit SAT $\leq_{\textsl{logspace}}$ SAT. Intuitivamente è vero, costruiamo la riduzione.\\
+\textbf{Circuit Value} $\in \mathscr{P}$, perché tengo sul nastro input la rappresentazione del grafo, cioè l'insieme delle coppie che formano gli archi e la sorta di ogni nodo (porta). Sui nastri di lavoro tengo i valori dei vari livelli di porte, ma non ho ripetizioni quindi è polinomiale: non bisogna farsi confondere dal fatto che il numero totale delle porte può essere esponenziale rispetto alla profondità del circuito (cioè al livello della porta d'uscita), perché la taglia del circuito è data dal numero $n$ di porte.\\\\
+Notiamo che \textbf{Circuit Value $\leq$ Circuit SAT}, perché SAT è la versione più generale di Value.\\Value è la versione di SAT in cui non ho bisogno della funzione di assegnamento.\\\\
+Più interessante è scoprire che Circuit SAT $\leq_{\textsl{logspace}}$ SAT. Intuitivamente è vero, costruiamo la riduzione.\\
 Significa che $\forall$ circuito con variabili $\in X$, dobbiamo trovare una $f \in \textsl{logspace}\:\:|\:\:[C]_V = tt \Leftrightarrow\exists\:V'\supseteq V\:\:\:V'\vDash f(C)$\\
 $V(x) = tt \Rightarrow V'(x) = tt$ e $f(C) = \bigwedge B_k$\\
 Le variabili di $f(C)$ includono tutte le variabili di $C$, cioè $X$, unito ad una variabile per ogni porta,\\cioè $X \cup \{x_i = i\:|\:i \in N\}$
@@ -1382,9 +1378,9 @@ Le variabili di $f(C)$ includono tutte le variabili di $C$, cioè $X$, unito ad 
 	\item Se $s(i) = \wedge \Rightarrow (i$ è vero$ \Leftrightarrow h \wedge k)$ con  $(h,i), (k,i)\in A$ , espandendola diventa $\neg(i \vee h) \wedge (\neg i \vee k) \wedge (\neg h \vee \neg k \vee i)$
 	\item Se $s(i) = \vee \Rightarrow (i$ è vero$ \Leftrightarrow h \vee k)$ con  $(h,i), (k,i)\in A$ , espandendola diventa $(\neg i \vee h \vee k) \wedge (\neg h \vee i) \wedge (\neg k \vee i)$
 \end{list}
-Usando $x \wedge ff$ come esempio, mettendo come nodi $h = x$, $g = \wedge$ e $k = ff$, ottengo la formula $$g \wedge \neg k \wedge (\neg h \vee x) \wedge (h \wedge \neg x) \wedge(\neg g \vee h) \wedge (\neg g \vee k) \wedge (\neg h \vee \neg k \vee g)$$
-Vediamo che $[g] = ff\:\:\forall\:V$
-\begin{multicols}{3}
+\pagebreak
+\paragraph{} Usando $x \wedge ff$ come esempio, mettendo come nodi $h = x$, $g = \wedge$ e $k = ff$, ottengo la formula $$g \wedge \neg k \wedge (\neg h \vee x) \wedge (h \wedge \neg x) \wedge(\neg g \vee h) \wedge (\neg g \vee k) \wedge (\neg h \vee \neg k \vee g)$$
+ Vediamo che $[g] = ff\:\:\forall\:V$
 \begin{list}{}{}
 	\item $g \wedge$ $\longrightarrow V(g) = tt$ 
 	\item $\neg k \wedge$ $\longrightarrow V(k) = ff$
@@ -1394,7 +1390,6 @@ Vediamo che $[g] = ff\:\:\forall\:V$
 	\item $(\neg g \vee k) \wedge$ $\longrightarrow V(k) = tt$ ottenendo un assurdo
 	\item $(\neg h \vee \neg k \vee g)$
 \end{list}
-\end{multicols}
 \section{Tabella di computazione}
 Prendiamo un problema $I \in \mathscr{P} \Leftrightarrow \exists\:M\:\:|\:\:\forall\:x \in I M(x)\longrightarrow_t ($si/no, $w)$ con $t \leq |x|^k$\\
 Ho la configurazione iniziale $\underline{\triangleright}a_1\ldots a_n$, copo un certo passo ho $\triangleright\underline{a_1}\ldots a_n$ e così via.\\
@@ -1433,7 +1428,6 @@ Su una tabella di computazione T di una macchina di Turing $M$ che decide $I$ in
 \end{list}
 Una tabella di computazione, quadrata, ha $|x|^k$ righe/colonne. Siccome si ferma in $|x|^k - 2$ passi, abbiamo la sicurezza che la prima colonna è composta da tutti $\triangleright$ e l'ultima è composta da tutti $\#$ perché non si può usare più spazio che tempo.\\
 La prima riga, oltre il respingente, avrà i caratteri $x_1\:x_2\:\ldots\:x^n$ e dopo tutti caratteri bianchi $\#$. Le righe rappresentano i passi di computazione, fino a che ad un certo punto (in una certa riga = un certo passo di computazione) in un certo carattere si troverà uno stato di accettazione $\sigma_h$. Questo stato di accettazione viene portato, nei passi successivi, in seconda posizione (subito dopo il respingente) e da quella riga in poi sono tutte uguali, per cui l'ultima riga sarà $\triangleright\:\sigma'_h\:\ldots\:\#$
-\pagebreak
 \paragraph{Esempio} MdT che verifica se una stringa è palindroma. Esempio: la stringa \texttt{abba}, 16 passi per verificare, quindi 18 righe e colonne
 \begin{center}
 \begin{math}
@@ -1513,6 +1507,7 @@ Il \textbf{linguaggio generato dalla grammatica} è l'insieme $L(G) = \{w\in\Sig
 \subparagraph{Esempio} $S \rightarrow () | (S) | SS$ genera il linguaggio delle parentesi bilanciate, tipo $S \Rightarrow (S) \Rightarrow (SS) \Rightarrow (()())$
 \paragraph{Verificare} Data una grammatica libera $G$, $L(G) = \emptyset$? Questo problema viene spesso considerato il capostipite dei problemi $\mathscr{P}$-completi.\\
 Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  cioè che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.
+\pagebreak
 \section{SAT è $\mathscr{NP}$-completo}
 Passiamo attraverso Circuit SAT, dimostrando che Circuit SAT è $\mathscr{NP}$-completo. Devo prendere un problema\\$I \in \mathscr{NP}$ e costruire $f\in\textsl{logspace}\:|\:x\in I\Leftrightarrow f(x) = C$ ed $\exists\:V\:|\:[C]_V = tt$\\\\
 $x \in I$ vuol dire che $\exists$ una macchina non deterministica $N$ ed $\exists$ una computazione $N(x)\longrightarrow^t($si, $w)$ con $t\leq |x|^k$\\
