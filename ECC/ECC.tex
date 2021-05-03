@@ -40,13 +40,14 @@ Illustra \textbf{cosa può essere calcolato da un computer} senza limitazioni di
 \end{list}
 \paragraph{Astrazione} Utilizzeremo \textbf{termini astratti per descrivere la possibilità di eseguire un programma ed avere un risultato}. Questa astrazione è un \textbf{modello} che non tiene conto di dettagli al momento irrilevanti.\\
 Un po' come l'equazione per dire quanto ci mette il gesso a cadere che non tiene conto delle forze di attrito dell'aria.
-\paragraph{Problema della Decisione} Un problema è risolto se si conosce una \textbf{procedura} che permette di decidere con un numero \textbf{finito} di operazioni di decedere se una proposizione logica è vera o falsa.
+\paragraph{Problema della Decisione} Un problema è risolto se si conosce una \textbf{procedura}, che con un numero \textbf{finito} di operazioni, permette di decidere se una proposizione logica è vera o falsa.
 
 \section{Algoritmo}
-Un algoritmo è un insieme \textbf{finito} di istruzioni.
-\paragraph{Istruzioni} Elementi da un insieme di \textbf{cardinalità finita} ed ognuna ha \textbf{effetto limitato} (localmente e "\textit{poco}") sui dati (che devono essere \textbf{discreti}). Un'istruzione deve richiedere tempo finito per essere elaborata.
-\paragraph{Computazione} Successione di istruzioni finite in cui ogni passo dipende solo dai precedenti. Verificando una porzione finita dei dati (\textbf{deterministico}). Non c'è limite alla memoria necessaria al calcolo (è finita ma illimitata). Neanche il tempo è limitato (necessario al calcolo). Tanto tempo e tanta memoria quante ce ne servono.\\\\
-Un'eccezione a questa definizione di algoritmo è costituita dalle macchine concorrenti/interattive, dove gli input variano nel tempo. Inoltre vi sono formalismi che tengono conto di algoritmi probabilistici e stocastici. Altre eccezioni sono gli algoritmi non deterministici, ma per ognuno di essi esiste un algoritmo deterministico equivalente (Teorema \texttt{3.3.6})
+\paragraph{Algoritmo} Insieme \textbf{finito} di istruzioni.
+\paragraph{Istruzioni} Elementi da un insieme di \textbf{cardinalità finita}, ognuna ha \textbf{effetto limitato} (localmente e "\textit{poco}") sui dati,che devono essere \textbf{discreti}. Un'istruzione deve richiedere tempo finito per essere elaborata.
+\paragraph{Computazione} \textbf{Successione di istruzioni finite} (\textbf{passi discreti}) in cui \textbf{ogni passo dipende solo dai precedenti}. Ogni passo dipende da una \textbf{porzione finita dei dati} in modo \textbf{deterministico}.\\
+Non c'è limite alla memoria necessaria al calcolo (è finita ma illimitata). Neanche il tempo è limitato (necessario al calcolo). Tanto tempo e tanta memoria quante ce ne servono.
+\paragraph{Eccezioni} Un'eccezione a questa definizione di algoritmo è costituita dalle macchine concorrenti/interattive, dove gli input variano nel tempo. Inoltre vi sono formalismi che tengono conto di algoritmi probabilistici e stocastici. Altre eccezioni sono gli algoritmi non deterministici, ma per ognuno di essi esiste un algoritmo deterministico equivalente.
 \paragraph{In sintesi} Un numero finito di istruzioni da un set finito di istruzioni possibili, un numero discreto di passi di tempo finito e ognuno dipendente solo dai precedenti, senza limite di passi o spazio durante l'esecuzione.
 \pagebreak
 \section{Macchina di Turing}
@@ -60,17 +61,17 @@ M = (Q, $\sum$, $\delta$, q$_0$)
 \begin{list}{}{}
 	\item \textbf{Q} = \{q$_i$\} è l'\textbf{insieme finito degli stati} in cui si può trovare la macchina.\\
 	Indicheremo con lo stato speciale \textit{h} $\not\in$ Q la fine corretta della computazione.
-	\item $\sum$ = \{$\sigma$, $\sigma$'\ldots\} è l'\textbf{insieme finito di simboli}.\\
+	\item $\Sigma$ = \{$\sigma$, $\sigma$'\ldots\} è l'\textbf{insieme finito di simboli}.\\
 	Ci sono elementi che devono per forza esistere:
 	\begin{list}{}{}
 		\item \textbf{\#} carattere \textbf{bianco}, vuoto
 		\item $\triangleright$ carattere di inizio della memoria, chiamato \textbf{respingente}, che funziona come un inizio file
-		\item L, R, - $\not\in\sum$ per indicare di spostare il cursore, rispettivamente, a sinistra, destra o rimanere fermo.
+		\item L, R, - $\not\in\Sigma$ per indicare di spostare il cursore, rispettivamente, a sinistra, destra o rimanere fermo.
 	\end{list}
-	\item $\delta$ $\subseteq$ (Q $\times \sum$) $\rightarrow$ (Q' $\bigcup$ \{\textit{h}\}) $\times \sum$' $\times$ \{L, R, -\} è \textbf{funzione di transizione}.\\
+	\item $\delta$ $\subseteq$ (Q $\times\: \Sigma$) $\rightarrow$ (Q' $\bigcup$ \{\textit{h}\}) $\times\:\Sigma' \times$ \{L, R, -\} è \textbf{funzione di transizione}.\\
 	Mantiene determinismo perché funzione, ad un elemento associa un solo elemento (la transizione è univoca), e le transizioni finite perché prodotto cartesiano di insiemi finiti. Imponiamo la condizione di funzione cioè che $\forall\:(q, \sigma)\rightarrow (q', \sigma', D'), (q, \sigma)\rightarrow (q'', \sigma'', D'')\Rightarrow q'=q'', \sigma'=\sigma',' D'=D''$\\
 $\delta$(q, $\triangleright$) = (q', $\triangleright$, R), cioè se sono a inizio file possono solo andare a destra.\\
-Può essere vista come una relazione di transizione, $\delta \subseteq (Q \times \sum) \times (Q\:\bigcup\:\{\textit{h}\}) \times \sum \times \{L,\:R,\: -\}$
+Può essere vista come una relazione di transizione, $\delta \subseteq (Q \times\:\Sigma) \times (Q\:\bigcup\:\{\textit{h}\}) \times\:\Sigma \times \{L,\:R,\: -\}$
 	\item q$_0 \in $ Q lo \textbf{stato iniziale} 
 \end{list}
 Quindi una \textbf{configurazione} è una quadrupla $(q, u, \sigma, v)\in((Q\cup\{h\})\times \Sigma^*\times\Sigma\times\Sigma^F)$ con $\Sigma^F = \Sigma^*\cdot(\Sigma - \{\#\})\cup\{\epsilon\}$\\
@@ -82,14 +83,14 @@ Una MdT può essere così rappresentata
 Mappatura a coda di rondine, bigezione tra (m, n) $\rightarrow$ k, cioè $N^2 \rightarrow N$.\\
 Costruire un modello per il calcolo dopo aver posto delle condizioni affinché qualcosa si possa chiamare algoritmo.
 
-\subsection{$\sum$}
+\subsection{$\Sigma$}
 \begin{list}{}{}
-	\item $\sum^0$ = \{$\epsilon$\}, con $\epsilon =$ parola vuota, che non contiene caratteri
-	\item $\sum^{i+1} = \sum \cdot \sum^i = \{\sigma \cdot u \:\:\vline\:\: \sigma \in \sum \:\wedge\: u \in \sum^i\}$
-	\item $\sum^* = \bigcup_{i \in N}\sum^i$, insieme di tutte le possibili combinazioni di simboli
-	\item $\sum^f = \sum^* \:\cdot\: (\sum \:-\: \{\#\} \:\bigcup\: \{\epsilon\})$, cioè l'insieme di tutte le stringhe che terminano con un carattere non bianco ma che possono terminare con la stringa vuota
+	\item $\Sigma^0$ = \{$\epsilon$\}, con $\epsilon =$ parola vuota, che non contiene caratteri
+	\item $\Sigma^{i+1} = \Sigma \cdot \Sigma^i = \{\sigma \cdot u \:\:\vline\:\: \sigma \in \Sigma \:\wedge\: u \in \Sigma^i\}$
+	\item $\Sigma^* = \bigcup_{i \in N}\sum^i$, insieme di tutte le possibili combinazioni di simboli
+	\item $\Sigma^f = \Sigma^* \:\cdot\: (\Sigma \:-\: \{\#\} \:\bigcup\: \{\epsilon\})$, cioè l'insieme di tutte le stringhe che terminano con un carattere non bianco ma che possono terminare con la stringa vuota
 \end{list}
-\paragraph{Esempio} $\sum_B = \{0, 1\} \longrightarrow \sum_B^* = \{\epsilon, 0, 1, 01, 10, 010, 110010, \ldots\}$ tutti i numeri binari
+\paragraph{Esempio} $\Sigma_B = \{0, 1\} \longrightarrow \Sigma_B^* = \{\epsilon, 0, 1, 01, 10, 010, 110010, \ldots\}$ tutti i numeri binari
 \pagebreak
 \subsection{Transizioni}
 La \textbf{situazione corrente} di una macchina di Turing può essere scritto come $(q, u, \sigma, v)$ dove:
@@ -105,7 +106,7 @@ Può anche essere più comodamente espressa come $(q, u \:\underline{\sigma}\: v
 Una computazione è una transizione $(q, x) \longrightarrow (q', \omega)$. Una macchina di Turing parte \textbf{sempre} da $(q_0, \underline{\triangleright} x)$.\\
 Ogni computazione può esprimere il numero di passi necessari, ad esempio $\gamma \longrightarrow^n \gamma'$.\\
 $\forall \:\:computazione\:\: \gamma \Rightarrow \gamma \longrightarrow^0 \gamma$. Inoltre se $\gamma \longrightarrow \gamma' \wedge \gamma' \longrightarrow^n \gamma''$ allora $\gamma \longrightarrow^{n+1} \gamma''$
-\paragraph{Convergenza e divergenza} Diremo che la computazione $(q_0, w)\rightarrow^n(q',w')$ \textit{termina} (cioè \textbf{converge} $\downarrow$) $\Leftrightarrow q' = h$ e che \textit{non termina} (cioè \textbf{diverge} $\uparrow$) $\Leftrightarrow\:\forall\:q', w'\:|\:(q_0, w) \rightarrow^n (q', w')\:\exists\: q'', w''\:|\:(q', w')\rightarrow^n(q'', w'')$\\\\
+\paragraph{Convergenza e divergenza} Diremo che la computazione $(q_0, w)\rightarrow^n(q',w')$ \textit{termina} (cioè \textbf{converge} $\downarrow$) $\Leftrightarrow q' = h$ e che \textit{non termina} (cioè \textbf{diverge} $\uparrow$) $\Leftrightarrow\:\forall\:q', w'\:|\:(q_0, w) \rightarrow^n (q', w')\:\exists\: q'', w''\:|\:(q', w')\rightarrow(q'', w'')$\\\\
 Possiamo specificare la macchina M con cui eseguiamo la computazione con $\rightarrow^n_M$, usando M($w$) per specificare che la macchina M inizia la computazione da $(q_0,\underline{\triangleright}w)$, cioè che applichiamo M a $w$.
 \paragraph{Esempio} Macchina di Turing che esegue la semplice somma di due semplici numeri romani.
 \begin{multicols}{2}
@@ -234,7 +235,7 @@ Definiamo quindi un \textbf{insieme di transizioni ($\Gamma$, $\rightarrow$)} tr
 \subsection{T-Calcolabile}
 Dati $\Sigma$ alfabeto della macchina, $\Sigma_0$ alfabeto di input e $\Sigma_1$ alfabeto di output, con \#, $\triangleright \not\in \Sigma_0 \cup \Sigma_1 \subset \Sigma$
 \begin{center}
-M=(Q, $\Sigma$, $\delta$, q$_0$) calcola $f$ : $\Sigma_0^* \longrightarrow \Sigma_1^*$ $\Leftrightarrow$ ($\forall w \in \Sigma_0^* \wedge f(w) = x \Rightarrow M(w) \rightarrow_{fin}$ (h, $\triangleright$z)$)$
+M=(Q, $\Sigma$, $\delta$, q$_0$) calcola $f$ : $\Sigma_0^* \longrightarrow \Sigma_1^*$ $\Leftrightarrow$ ($\forall w \in \Sigma_0^* \wedge f(w) = z \Rightarrow M(w) \rightarrow_{fin}$ (h, $\triangleright z))$
 \end{center}
 Si dice che la \textbf{funzione} $f$ è \textbf{T-Calcolabile}.\\
 Cioè, esiste una macchina di Turing che per ogni stringa finita in input arriva, con un numero finito di passi, all'arresto lasciando sul nastro la stringa di output corretta. Notare come non viene data nessuna interpretazione al risultato della $f$.
