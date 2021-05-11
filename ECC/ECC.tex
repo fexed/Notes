@@ -1024,16 +1024,17 @@ $O(f) = \{g\:|\:\exists\: r \in R$ per cui $g(n) < r\cdot f(n)\}$ salvo un pezzo
 \subsection{Teorema di Riduzione del Numero di Nastri}
 \paragraph{Teorema} Teorema che dimostra che usando una macchina parallela si "guadagna" tempo in modo quadratico.\\
 $\forall\:M$ a $k$ nastri che decide I in $O(f)$ deterministica $\Rightarrow\exists\:M'$ a 1 nastro che decide $I$ in $O(f^2)$
-\paragraph{Dim}: da $_k\gamma$ (a $k$ nastri) $\longrightarrow (_1q, \triangleright \triangleright' u_1 \overline{\sigma_1} v_1 \triangleleft' \triangleright' u_2 \overline{\sigma_2} v_2 \triangleleft'\ldots \triangleright' u_k \overline{\sigma_k} v_k \triangleleft')$ usando le "parentesi $\triangleright'$ e $\triangleleft'$ per separare i $k$ nastri sul nastro singolo .\\
-$\sigma_i \longrightarrow \overline{\sigma_i}$
+\paragraph{Dim}: Costruisco $M'$ per simulare $M$.
+
 \begin{enumerate}
+	\item Da $_k\gamma$ di $M$ (cioè a $k$ nastri), simulo ogni configurazione in di $M$\\$(q, \triangleright u_1 \sigma_1 v_1, \triangleright u_2 \sigma_2 v_2, \ldots, \triangleright u_k \sigma_k v_k)$ con quelle di $M'$ così fatte $(q', \triangleright \triangleright' u_1 \overline{\sigma_1} v_1 \triangleleft' \triangleright' u_2 \overline{\sigma_2} v_2 \triangleleft'\ldots \triangleright' u_k \overline{\sigma_k} v_k \triangleleft')$ usando le "parentesi $\triangleright'$ e $\triangleleft'$ per separare i $k$ nastri sul nastro singolo e usando \#$\Sigma$ nuovi simboli $\overline{\sigma_i}$ per ricordare la posizione su ogni nastro.
 	\item Sistemare il nastro iniziale generando la configurazione iniziale di M: $(q_0,\underline{\triangleright} \triangleright' x \triangleleft' \triangleright' \triangleleft' \ldots \triangleright' \triangleleft' )$\\Bastano $2k + \#\Sigma$ nuovi stati: si trova il primo \#, si torna indietro cambiando stato e si codifica il simbolo $\neq$ \# che c'è, sostituirlo con \#, spostarsi a destra scrivendo il simbolo ricordato. Ripetere gli ultimi due passi per $|x| - 1$ volte, mentre andare fino al primo \# richiede $|x| + 1$ passi e un nuovo stato. Ora si scrive $\triangleright'$ sulla casella \# corrente, si torna sulla prima vuota muovendosi a destra scrivendo $k-1$ coppie $\triangleright'\triangleleft'$ usando altri $2\cdot(k-1)$ stati.
 	\item Per simulare una mossa di $M$, $M'$ scorre il nastro da sinistra a destra per scovare i caratteri correnti, quelli sovralineati: avanti e indietro una volta.\\
 	Riscorro il nastro per scrivere i nuovi simboli e fissare i nuovi correnti: avanti e indietro seconda volta (con una cascata di spostamenti a destra se bisogna spostare un $\triangleleft'$ a destra.
+	\item Infine quando $M$ si ferma, si ferma anche $M'$ eventualmente rimuovendo le "parentesi" $\triangleright' \triangleleft'$ e sostituendo i $\overline{\sigma_i}$ con i corrispondenti $\sigma_i$
 \end{enumerate}
-\paragraph{Non si può usare più spazio che tempo} Non si possono vedere più caselle di quanti passi si fanno.\\ Inoltre per simulare un passo ci vogliono al massimo 4K passi.\\
-Il nastro contiene al massimo $K = k\cdot (2 + f(|x|)) + 1$ con $|x|$ = taglia$(x)$\\
-2 per le parentesi di ogni nastro, 1 per il respingente iniziale.\\\\
+Ricordando che \textbf{non si può usare più spazio che tempo}, cioè non si possono vedere più caselle di quanti passi si fanno, per simulare un passo ci vogliono al massimo 4$K$ passi.\\
+Il nastro contiene al massimo $K = k\cdot (2 + f(|x|)) + 1$ con $|x|$ = taglia$(x)$, con $+2$ per le parentesi $\triangleright' \triangleleft'$ e $+1$ per $\triangleright$\\\\
 $M$ fa $f(|x|)$ passi, $M'$ fa $f(|x|) \cdot 4K$ quindi $f(|x|) \cdot \not k \cdot (\not 2 + f(|x|)) + \not 1)$ con la roba cancellata perché non dipende dall'input ma dalla macchina.\\
 Quindi $M$ fa $O(f)$ mentre $M'$ fa $O(f^2)$
 \paragraph{Conseguenze} Miglioramenti accettabili "algoritmicamente", come aggiungere nastri o processori che operino in parallelo, non cambiano le funzioni calcolate e non modificano il tempo richiesto se non polinomialmente: le MdT sono stabili anche rispetto alla testi di Cook-Karp.
@@ -1048,7 +1049,7 @@ $M'$ farà $|x|+2$ passi per condensare l'input + $6\cdot \lceil \frac{f(|x|)}{m
 \paragraph{Risultati} Quindi se ho un algoritmo che decide un problema in tempo deterministico $f(n)$, allora l'algoritmo $\in$ TIME$(f(n))$ e posso costruirne un altro che lo calcola in tempo deterministico $\epsilon f(n) + n + 2$, questo per ogni $\epsilon$: posso accelerare l'algoritmo \textbf{linearmente} quanto voglio.\\
 Quindi se $f = c\cdot n$ posso eliminare $c$ e mettere $\epsilon = \frac{1}{c}$, se $f = c_1n^k + \ldots + c_{k-1}n + c_k$ posso rendere $c_1 = 1$ e ignorare gli addendi con esponenti minori di $k$ perché vengono dominati da $n$ sufficientemente grande, giustificando l'uso di $O(n^k)$.\\
 Questo teorema \textbf{consente di usare gli ordini di grandezza per approssimare} senza \textit{fare niente di male}. Inoltre si possono eliminare le costanti (dipendenti dalle macchine su cui si calcola) perché macchine più potenti tendono a farle rimpicciolire e valori grandi di $|x| = n$ tendono a ridurre l'\textit{importanza} delle costanti.
-\paragraph{} Grazie a questi risultati definisco $\mathscr{P}$, la classe dei problemi decidibili in tempo polinomiale deterministico, come $$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|n|^k) $$
+\paragraph{} Grazie a questi risultati definisco $\mathscr{P}$, la classe dei problemi decidibili in tempo polinomiale deterministico, come $$\mathscr{P} = \bigcup_{k \geq 1} \textsl{TIME}(|x|^k) $$
 \paragraph{Ricapitolando}
 \subparagraph{} M richiede tempo $t$ per decidere $I$ $\Leftrightarrow$ $M(x) = (q_0, \triangleright x, \triangleright, \ldots, \triangleright) \rightarrow^t (h, w_1, \ldots, w_k)$ con $h \in \{\textsl{si, no}\}$
 \subparagraph{} M decide $I$ in tempo $f$ $\Leftrightarrow$ $\forall\:x\in I\:\:M(x) \rightarrow^t (\textsl{si}, w_1, \ldots, w_k)$ cioè M richiede tempo $t$ per deciderlo, con $t \leq f(|x|)$
@@ -1153,7 +1154,7 @@ In altre parole $\textsl{NTIME}(f) \subseteq \textsl{TIME}(c^f)$
 Per ogni stato $q \in Q$ e ogni simbolo $\sigma \in \Sigma$ ordino totalmente, ottenendo così che ogni computazione è una sequenza di scelte lunga $t$, indicabili come una sequenza di $t$ numeri naturali nell'intervallo $[0\ldots d-1]$. Una macchina $M$ che simula $N$ produce una successione di scelte partendo sempre dal principio. Per esempio riproduce la scelta 20300 e magari arriva in uno stato di accettazione. Se ci arriva, bene \textbf{ho finito}.\\
 Se non ci arriva prende il prossimo numero $t+1$ in base $d$, nell'esempio 20301.\\
 Se supera il numero di archi la stringa aumenta di un carattere e faccio 00, 01, 02\ldots poi 10, 11, 12\ldots\\
-Sarà dell'ordine di $d^{f(n)}$ con $c = d$.\\
+Il numero delle successioni da visitare sarà dell'ordine di $d^{f(n)}$ con $c = d$.\\
 Ho una perdita esponenziale. Ma aggiungere il non determinismo non cambia le classi dei problemi.
 \paragraph{Spazio} $N$ decide $I$ in \textbf{spazio non deterministico} $f(|x|)$ (più semplicemente $f$) $\Leftrightarrow$
 \begin{list}{}{}
