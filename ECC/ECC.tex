@@ -350,7 +350,7 @@ La classe $C$ delle \textbf{funzioni ricorsive primitive} è la \textbf{minima c
 		\right.$
 \end{list}
 Questo rappresenta un \textbf{ciclo for}: $x_1$, la prima variabile di $f$, è il contatore da decrementare, $g$ è il passo finale e $h$ rappresenta i passi interni del ciclo. La terminazione è garantita, e si possono definire le primitive matematiche base con le funzioni ricorsive primitive.\\
-$f \in C \Leftrightarrow$ esiste una successione $f_0,\ldots,\,f_n = f\:\:\vline\:\:\forall f_1$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
+$f \in C \Leftrightarrow$ esiste una successione $f_0,\ldots,\,f_n = f\:\:\vline\:\:\forall f_i$ è ottenuto con i casi base oppure $f_i$ è ottenuto con i casi iterativi da $f_j$ con $j < i$
 \pagebreak
 \paragraph{Esempio} Esempio di funzioni ricorsive\\
 $f_1 = \lambda x.x$\\
@@ -1398,8 +1398,8 @@ Le variabili di $f(C)$ includono tutte le variabili di $C$, cioè $X$, unito ad 
 	\item $(\neg h \vee \neg k \vee g)$
 \end{list}
 \section{Tabella di computazione}
-Prendiamo un problema $I \in \mathscr{P} \Leftrightarrow \exists\:M\:\:|\:\:\forall\:x \in I M(x)\longrightarrow_t ($si/no, $w)$ con $t \leq |x|^k$\\
-Ho la configurazione iniziale $\underline{\triangleright}a_1\ldots a_n$, copo un certo passo ho $\triangleright\underline{a_1}\ldots a_n$ e così via.\\
+Prendiamo un problema $I \in \mathscr{P} \Leftrightarrow \exists\:M\:\:|\:\:\forall\:x \in I\:\:M(x)\longrightarrow_t ($si/no, $w)$ con $t \leq |x|^k$\\
+Ho la configurazione iniziale $\underline{\triangleright}a_1\ldots a_n$, dopo un certo passo ho $\triangleright\underline{a_1}\ldots a_n$ e così via.\\
 Posso immaginare di mettere il tutto in una matrice:$\begin{array}{c c c c}
 \underline{\triangleright} &a_1&\ldots & a_n\\
 \triangleright&\underline{a_1}&\ldots& a_n\\
@@ -1482,7 +1482,7 @@ Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. 
 La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$.\\
 Ogni gruppo di $m$ input di $\overline{C}$ proviene da un circuito $\overline{C}$ a sua volta, perché è il gruppo di bit di una cella, e così via\ldots\\
 Riempio la tabella binaria, con $\overline{C}_\triangleright$ e $\overline{C}_\#$ circuiti costanti che fanno le veci del respingente e del carattere bianco.\\
-Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra incastrando le une con le entrate delle altre. Ogni cella riceve input dalle tre celle sottostanti (il segnale fluisce verso l'altro nel grafo dei circuiti). La prima riga, invece, riceve input da $x$.
+Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra incastrando le une con le entrate delle altre. Ogni cella riceve input dalle tre celle sottostanti (il segnale fluisce verso l'alto nel grafo dei circuiti). La prima riga, invece, riceve input da $x$.
 \begin{center}
 	\begin{math}
 		\begin{array}{c | c c c | c}
@@ -1500,7 +1500,7 @@ Con gli indici scorro la matrice avanti e indietro (due for annidati), 3 nastri 
 Quindi sto in $\textsl{logspace}$.\\
 Abbiamo visto come realizzare un'intuizione avuta all'inizio: la MdT ha un approccio hardware alla computabilità (e di conseguenza alla complessità), ma solo ora abbiamo visto un processo diretto di trasformazione di una computazione in un circuito.
 \subsection{Monotone Circuit Value} \paragraph{Circuito Monotono} Circuito dove non compare il NOT ($\neg$). Mentre tutti gli altri operatori logici sono monotoni, nel senso che mantengono l'informazione, il $\neg$ la butta via. Ma d'altra parte, senza il $\neg$ non si possono esprimere tutte le formule.\\
-Il problema di calcolare il valore in un circuito monotono è un problema $in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.\\\\
+Il problema di calcolare il valore in un circuito monotono è un problema $\in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.\\\\
 Nel grafo del circuito, riscritto dall'alto verso il basso e da sinistra verso destra, lo riscrivo mantenendo però un "cambio di stato" quando incontro un $\neg$. I nodi successivi saranno quindi invertiti secondo le leggi di DeMorgan, ad esempio $\vee$ diventa $\wedge$.
 \paragraph{Grammatica} $G = (N, \Sigma, P, S)$
 \begin{list}{}{}
@@ -1513,7 +1513,7 @@ Una certa stringa si trasforma secondo la $G$, cioè $\gamma A\beta \Rightarrow_
 Il \textbf{linguaggio generato dalla grammatica} è l'insieme $L(G) = \{w\in\Sigma^+ \:|\:S\Rightarrow^* w\}$ cioè tutte le stringhe $w$ generate da $S$ tramite la grammatica $G$ in un numero qualsiasi di passi ($\Rightarrow^*$)
 \subparagraph{Esempio} $S \rightarrow () | (S) | SS$ genera il linguaggio delle parentesi bilanciate, tipo $S \Rightarrow (S) \Rightarrow (SS) \Rightarrow (()())$
 \paragraph{Verificare} Data una grammatica libera $G$, $L(G) = \emptyset$? Questo problema viene spesso considerato il capostipite dei problemi $\mathscr{P}$-completi.\\
-Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  cioè che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.
+Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  ciò che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.
 \pagebreak
 \section{SAT è $\mathscr{NP}$-completo}
 Passiamo attraverso Circuit SAT, dimostrando che Circuit SAT è $\mathscr{NP}$-completo. Devo prendere un problema\\$I \in \mathscr{NP}$ e costruire $f\in\textsl{logspace}\:|\:x\in I\Leftrightarrow f(x) = C$ ed $\exists\:V\:|\:[C]_V = tt$\\\\
