@@ -1321,14 +1321,15 @@ Adesso devo dimostrare che se c'è un cammino hamiltoniano allora esiste un asse
 \begin{list}{}{}
 	\item[$\Leftarrow$] $\forall\:j\:\:\exists!\:i\:|\:V(x_{ij}) = tt$, così definiamo la valutazione. Cioè per ogni posizione del cammino $i$ c'è un solo nodo $j$, quindi solo un $x_{ij}$ è vera per ogni $i$.\\
 	Nello stesso modo $\forall\:i\:\:\exists!\:j\:|\:V(x_{ij}) = tt$, cioè ogni nodo $j$ è in una sola posizione del cammino, quindi una sola $i$ per cui $x_{ij}$ è vera.\\
-	Grazie anche alla 5, che garantisce che ci sia il cammino, ho definito la $V$
+	Quindi V rappresenta una permutazione $\Pi(1),\ldots,\Pi(n)$ dei nodi di G e grazie alla 5, che garantisce che ci sia il cammino perché garantisce la presenza degli archi, $f(G)$ ha un cammino hamiltoniano se è soddisfatta.
 	\item[$\Rightarrow$] Ho un cammino, composto da $(\Pi(1), \Pi(2), \ldots, \Pi(n))$, quindi definisco la $V(x_{ij}) = \left\{\begin{array}{l}
 	tt\:\:\text{ se }\Pi(j) = i\\
 	ff\:\:\text{ se }\Pi(j) \neq i
-\end{array}	 \right.$
+\end{array}	 \right.$\\
+	Soddisfa $f(G)$ perché il nodo $j$ è l'$i$-esimo di un cammino hamiltoniano.
 \end{list}
 Finito. Ho definito una permutazione che rispetta il fatto che gli archi siano ben rappresentati.\\Manca di dimostrare che $f \in \textsl{logspace}$.
-\paragraph{} Dobbiamo costruire una macchina di tipo I/O, così sappiamo misurare lo spazio necessario (somma dello spazio usato dai nastri di lavoro). Naturalmente l'alfabeto della nostra macchina conterrà: simboli di verità, connettivi logici, parentesi, e due caratteri 0 e 1. Perché gli indici delle variabili sono rappresentati in binario.\\
+\paragraph{Dim} Dobbiamo costruire una macchina di tipo I/O, così sappiamo misurare lo spazio necessario (somma dello spazio usato dai nastri di lavoro). Naturalmente l'alfabeto della nostra macchina conterrà: simboli di verità, connettivi logici, parentesi, e due caratteri 0 e 1. Perché gli indici delle variabili sono rappresentati in binario.\\
 L'input è la successione degli archi. La macchina scrive in binario il numero di nodi $n$ sul nastro di lavoro. Poi avrò tre ulteriori nastri di lavoro, poiché nelle formule 1|5 compaiono 3 indici: un nastro per $i$, uno per $j$ e uno per $k$.\\
 Per scorrere le clausole farà scorrere da 1 a $n$ gli indici sui nastri di lavoro. Quando ha scritto le quattro formule 1|4, comincia a scrivere sull'output l'ultima formula, la 5. Scorrerà il nastro input anche questa volta per verificare la clausola, finendo ad un certo punto.\\
 Perché è in $\textsl{logspace}$? $\mathlarger{\sum_{i=2}^5} |w_i|$, ma $i$ arriva fino ad $n$ che rappresentato in binario richiede $\log n$. Quindi abbiamo 5 nastri di $\log n$, quindi $\mathlarger{\sum_{i=2}^5} |w_i| = 5\log n$ cioè $f\in \textsl{SPACE}(5\cdot\log n)$
@@ -1344,6 +1345,7 @@ $\exists\:V\vDash B = \mathlarger{\bigwedge_{i=1}^n} C_i \Leftrightarrow f(B) = 
 	\item $N$ è l'insieme delle occorrenze dei letterali $l$ in $B$
 	\item $A = \{(i, j)\:|\: i\in C_k \Rightarrow (j\not\in C_k \wedge i \neq \neg j)\}$ cioè metto un arco tra due nodi solo se non sono all'interno dello stesso letterale né se sono uno il negato dell'altro.
 \end{list}
+Essendo B in forma normale congiuntiva, ottengo che è soddisfacibile se c'è almeno un letterale vero in ogni congiunto. Quindi $B$ soddisfacibile $\Leftrightarrow$ $f(B)$ ha una cricca di ordine pari ai  congiunti.\\
 Da questo ottengo che se c'è una cricca c'è un assegnamento booleano, viceversa se c'è un assegnamento booleano c'è una cricca, quindi è una riduzione.\\
 Appartiene a $\textsl{logspace}$ perché posso usare lo stesso meccanismo della rappresentazione binaria e mantenendo gli indici sui nastri di lavoro.
 \pagebreak
