@@ -1470,18 +1470,21 @@ $I\in\mathscr{P} \Rightarrow \exists\:M$ che decide $x$ in $|x|^k = n^k \Rightar
 Allora \textbf{costruiamo la tabella di computazione}, aggiungendo ad $M$ $\Sigma \times Q \cup \{h\}$ nuovi simboli. Chiamo $\Sigma'$ il nuovo alfabeto.\\
 Ciascun simbolo $\rho \in \Sigma'$ viene mappato in una stringa di bit, successioni di 0/1 $(s_1,\ldots,s_m)\in\{tt, ff\}^m$, con\\$m = \lceil\log_2(\#\Sigma')\rceil$ cioè numero di bit necessari per rappresentare i $\#\Sigma'$ simboli contenuti in $\Sigma'$.\\
 Posso codificare il respingente e il carattere bianco come preferisco, ad esempio $\triangleright = tt\ldots tt$ e $\# = ff\ldots ff$\\
-Ogni elemento della tabella quindi diventa una sequenza di $m$ bit: $T(i, j) = s_{i,j,1}, s_{i,j,2},\ldots,s_{i,j,m}$, cioè $m$ simboli ciascuno che codifica anche la riga $i$ e la colonna $j$.\\
+Ogni elemento della tabella quindi diventa una sequenza di $m$ bit: $T(i, j) = s_{i,j,1}, s_{i,j,2},\ldots,s_{i,j,m}$, cioè $m$ simboli ciascuno che codifica anche la riga $i$ e la colonna $j$. Allora $T(i,j)$ dipende solamente dalle sequenze di bit nella riga precedente nelle colonne $j-1,j$ e $j+1$.\\
 $T(i,j) = f\left( \begin{array}{l l l l}
-	s_{i-1,j-1,2}, & s_{i-1,j-1,2}, &\ldots, &s_{i-1,j-1,m},\\
-	s_{i-1,j,2}, &s_{i-1,j,2}, &\ldots, &s_{i-1,j,m},\\
-	s_{i-1,j+1,2}, &s_{i-1,j+1,2},&\ldots, &s_{i-1,j+1,m}
+	s_{i-1,j-1,1}, & s_{i-1,j-1,2}, &\ldots, &s_{i-1,j-1,m},\\
+	s_{i-1,j,1}, &s_{i-1,j,2}, &\ldots, &s_{i-1,j,m},\\
+	s_{i-1,j+1,1}, &s_{i-1,j+1,2},&\ldots, &s_{i-1,j+1,m}
 \end{array}
 \right)$
 perché dipende solamente da $\begin{array}{l}
 T(i-1, j-1)\\T(i-1,j)\\T(i-1,j+1)
 \end{array}$\\
 Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. Prendo questa tabella e la codifico in binario, ottenendo un'altra tabella in cui invece dei simboli ho 0/1. \textbf{Ottengo un circuito}.\\
-La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$.\\
+La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$, cioè la sua taglia è fissa.
+\begin{center}
+	\includegraphics[scale=0.75]{4.png}
+\end{center}
 Ogni gruppo di $m$ input di $\overline{C}$ proviene da un circuito $\overline{C}$ a sua volta, perché è il gruppo di bit di una cella, e così via\ldots\\
 Riempio la tabella binaria, con $\overline{C}_\triangleright$ e $\overline{C}_\#$ circuiti costanti che fanno le veci del respingente e del carattere bianco.\\
 Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra incastrando le une con le entrate delle altre. Ogni cella riceve input dalle tre celle sottostanti (il segnale fluisce verso l'alto nel grafo dei circuiti). La prima riga, invece, riceve input da $x$.
@@ -1497,10 +1500,24 @@ Al centro avrò le varie porte del circuito, che si alimentano l'un l'altra inca
 		\end{array}
 	\end{math}
 \end{center}
+Definisco $f$ da $I$ a Circuit Value, che trasforma la tabella di computazione $T$ di $I$ in un circuito $C_I$ composto da una copia di $\overline{C}$ per ogni $T(i,j)$. Bastano $(|x|^k - 1) \cdot (|x|^k - 2)$ copie: la prima riga è fissata con gli input $x$ e la prima e l'ultima colonna sono fissate con $\triangleright$ e $\#$: non occorre copiarle, basta "inserirle staticamente".\\
+Le uscite di $\overline{C}_{i-1,j-1}, \overline{C}_{i-1,j}, \overline{C}_{i-1,j+1}$ sono gli ingressi di $\overline{C}_{i,j}$ e gli ingressi di $C_I$ sono quelli di $T(1,j),T(i,1),T(i,|x|^k)$, determinati da $x$ o fissi. L'uscita di $C_I$ è una delle uscite di $\overline{C}_{|x|^k, 2}$, per definizione della tabella di computazione (risultato sempre in $T(|x|^k, 2)$).
+\begin{center}
+	\includegraphics[scale=0.75]{5.png}
+\end{center}
+Verifichiamo che $C_I = f(x)$ ha valore $tt \Leftrightarrow x\in I$, per induzione sul numero di passi della computazione $i$, cioè l'indice di riga di $T$.\\
+Se $i = 1$, banale.\\
+Ipotesi induttiva: $i-1$ è ben calcolato e dipendente soltanto dai tre precedenti, cioè $\forall\:j\:\:\overline{C}_{i-1,j}$ ha uscite $r_1,\ldots,r_m \Leftrightarrow T(i-1,j) = \rho'$ e $\rho'\in\Sigma'$ è codificato proprio come $r_1,\ldots,r_m$.\\
+Devo dimostrare che $\overline{C}_{i,j}$ ha uscite $s_1,\ldots,s_m \Leftrightarrow T(i,j)=\rho$ codificato come $s_i,\ldots,s_m$. Le uscite $s_i$ sono calcolate da $\overline{C}_{i-1,j-1}, \overline{C}_{i-1,j}, \overline{C}_{i-1,j+1}$ in accordo alla $\delta$ di M, esattamente come $T(i,j)$ è stato calcolato dai valori di\\$T(i-1,j-1),T(i-1,j),T(i-1,j+1)$, quindi basta applicare l'ipotesi induttiva.\\
+Immediato dedurre che $\overline{C}_{|x|^k,2}=tt\ldots tt \Leftrightarrow T(|x|^k,2) = \sigma_{SI}$, cioè $x\in I \Leftrightarrow f(x) = tt\ldots tt$, analogo per $\sigma_{NO}$\\\\
 Verifichiamo che $f$ stia in $\textsl{logspace}$. Per verificare questo è necessario considerare l'indice di riga, colonna e la dimensione della matrice. Gli indici li rappresento in binario, con $\lceil\log_2(|x|)\rceil$ bit.\\
-Con gli indici scorro la matrice avanti e indietro (due for annidati), 3 nastri di lavoro.\\
-Quindi sto in $\textsl{logspace}$.\\
-Abbiamo visto come realizzare un'intuizione avuta all'inizio: la MdT ha un approccio hardware alla computabilità (e di conseguenza alla complessità), ma solo ora abbiamo visto un processo diretto di trasformazione di una computazione in un circuito.
+$x$ è esaminata fino a $|x|^k$ e viene mantenuto $k$ in binario su un nastro di lavoro, scrivendo la codifica di $x$.\\
+Gli elementi della prima e l'ultima colonna sono $2\cdot|x|^k$ circuiti costanti.\\
+$(|x|^k-1)\cdot(|x|^k-2)$ copie del circuito $\overline{C}$, dipendente solo da $M$ e con costo fisso, associando a ciascuna copia gli indici della casella di computazione corrispondente, tutti $<|x|^k$ e rappresentati in binario.\\
+Occupo quindi $O(\log|x|)$, quindi sto in $\textsl{logspace}$.
+\pagebreak
+\paragraph{} Abbiamo visto come realizzare un'intuizione avuta all'inizio: la MdT ha un approccio hardware alla computabilità (e di conseguenza alla complessità), ma solo ora abbiamo visto un processo diretto di trasformazione di una computazione in un circuito.\\
+Si suggeriva di vedere ogni algoritmo come una macchina, che poteva crescere al crescere di $x$: lo vediamo nella pratica con $C_I$ costruito prima, tratto dalla definizione delle tabelle di computazione. Crescono le dimensioni del circuito ma non cambiano i componenti $\overline{C}$, né la "forma".
 \subsection{Monotone Circuit Value} \paragraph{Circuito Monotono} Circuito dove non compare il NOT ($\neg$). Mentre tutti gli altri operatori logici sono monotoni, nel senso che mantengono l'informazione, il $\neg$ la butta via. Ma d'altra parte, senza il $\neg$ non si possono esprimere tutte le formule.\\
 Il problema di calcolare il valore in un circuito monotono è un problema $\in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.\\\\
 Nel grafo del circuito, riscritto dall'alto verso il basso e da sinistra verso destra, lo riscrivo mantenendo però un "cambio di stato" quando incontro un $\neg$. I nodi successivi saranno quindi invertiti secondo le leggi di DeMorgan, ad esempio $\vee$ diventa $\wedge$.
