@@ -1518,9 +1518,15 @@ Occupo quindi $O(\log|x|)$, quindi sto in $\textsl{logspace}$.
 \pagebreak
 \paragraph{} Abbiamo visto come realizzare un'intuizione avuta all'inizio: la MdT ha un approccio hardware alla computabilità (e di conseguenza alla complessità), ma solo ora abbiamo visto un processo diretto di trasformazione di una computazione in un circuito.\\
 Si suggeriva di vedere ogni algoritmo come una macchina, che poteva crescere al crescere di $x$: lo vediamo nella pratica con $C_I$ costruito prima, tratto dalla definizione delle tabelle di computazione. Crescono le dimensioni del circuito ma non cambiano i componenti $\overline{C}$, né la "forma".
-\subsection{Monotone Circuit Value} \paragraph{Circuito Monotono} Circuito dove non compare il NOT ($\neg$). Mentre tutti gli altri operatori logici sono monotoni, nel senso che mantengono l'informazione, il $\neg$ la butta via. Ma d'altra parte, senza il $\neg$ non si possono esprimere tutte le formule.\\
-Il problema di calcolare il valore in un circuito monotono è un problema $\in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.\\\\
-Nel grafo del circuito, riscritto dall'alto verso il basso e da sinistra verso destra, lo riscrivo mantenendo però un "cambio di stato" quando incontro un $\neg$. I nodi successivi saranno quindi invertiti secondo le leggi di DeMorgan, ad esempio $\vee$ diventa $\wedge$.
+\paragraph{Circuito Monotono} Circuito dove non compare il NOT ($\neg$). Mentre tutti gli altri operatori logici sono monotoni, nel senso che mantengono l'informazione, il $\neg$ la butta via. Ma d'altra parte, senza il $\neg$ non si possono esprimere tutte le formule.\\
+Il problema di calcolare il valore in un circuito monotono è un problema $\in \mathscr{P}$, perché è un caso particolare del Circuit Value. C'è però una riduzione Circuit Valute $\leq$ Monotone Circuit Value.
+\paragraph{Monotone Circuit Value è $\mathscr{P}$-completo} Basta dimostrare che Circuit Value $\leq_{logspace}$ Monotone Circuit Value, cioè trasformare un circuito qualunque in uno monotono equivalente.\\
+Per farlo, vengono applicate le leggi di DeMorgan partendo dalle porte di uscita e scendendo fino alle porte d'ingresso. Si mantiene un "cambio di stato" quando si incontra un $\neg$: i nodi successivi vengono invertiti secondo DeMorgan, con i $tt$ in ingresso che se necessario rimpiazzano i $ff$ e viceversa, aggiungendone di nuove se necessario.\\
+Il tutto è eseguibile in $\textsl{LogSpace}$ perché basta visitare le porte una sola volta, rappresentandole come $(i,j)$ con $i$ e $j$ indici di livello e di "colonna" rappresentati in binario.
+\begin{center}
+	\includegraphics[scale=0.75]{6.png}\\
+	Due circuiti equivalenti, il \textbf{b} è monotono.
+\end{center}
 \paragraph{Grammatica} $G = (N, \Sigma, P, S)$
 \begin{list}{}{}
 	\item $N$ \textbf{alfabeto}, insieme di simboli non terminali
@@ -1529,22 +1535,28 @@ Nel grafo del circuito, riscritto dall'alto verso il basso e da sinistra verso d
 	\item $S \in N$ \textbf{simbolo distinto}
 \end{list}
 Una certa stringa si trasforma secondo la $G$, cioè $\gamma A\beta \Rightarrow_G \gamma\alpha\beta$ se $A \rightarrow \alpha \in P$ senza nessun vincolo (\textbf{grammatica libera da contesto})\\
-Il \textbf{linguaggio generato dalla grammatica} è l'insieme $L(G) = \{w\in\Sigma^+ \:|\:S\Rightarrow^* w\}$ cioè tutte le stringhe $w$ generate da $S$ tramite la grammatica $G$ in un numero qualsiasi di passi ($\Rightarrow^*$)
-\subparagraph{Esempio} $S \rightarrow () | (S) | SS$ genera il linguaggio delle parentesi bilanciate, tipo $S \Rightarrow (S) \Rightarrow (SS) \Rightarrow (()())$
-\paragraph{Verificare} Data una grammatica libera $G$, $L(G) = \emptyset$? Questo problema viene spesso considerato il capostipite dei problemi $\mathscr{P}$-completi.\\
-Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  ciò che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.
+Il \textbf{linguaggio generato dalla grammatica} è l'insieme $L(G) = \{w\in\Sigma^+ \:|\:S\Rightarrow^* w\}$ cioè tutte le stringhe $w$ generate da $S$ tramite la grammatica $G$ in un numero qualsiasi di passi ($\Rightarrow^*$)\\
+\textbf{Esempio} $S \rightarrow () | (S) | SS$ genera il linguaggio delle parentesi bilanciate, tipo $S \Rightarrow (S) \Rightarrow (SS) \Rightarrow (()())$
+\paragraph{Esempi} Data una grammatica libera $G$, $L(G) = \emptyset$? Questo problema viene spesso considerato il capostipite dei problemi $\mathscr{P}$-completi.\\
+Si costruisce una tabella simile alla tabella di computazione, in ogni riga ci metto  ciò che la grammatica produce a partire dalla precedente fino alla fine. Passare da una riga alla successiva è determinato solamente dalla $G$.\\\\
+Dato un insieme di variabili $X$ e una congiunzione di un numero finito di formule di Horn $H$, HORN è il problema di decidere se $x\in X$ è deducibile da $H$, cioè HORN = $\{H, x\:|\:H\vdash x\}$.\\
+Una formula di Horn è del tipo $x_1\wedge\ldots\wedge x_k \Rightarrow y$ con $y, x_i \in X$.\\
+Anche HORN $\in \mathscr{P}$
 \pagebreak
-\section{SAT è $\mathscr{NP}$-completo}
-Passiamo attraverso Circuit SAT, dimostrando che Circuit SAT è $\mathscr{NP}$-completo. Devo prendere un problema\\$I \in \mathscr{NP}$ e costruire $f\in\textsl{logspace}\:|\:x\in I\Leftrightarrow f(x) = C$ ed $\exists\:V\:|\:[C]_V = tt$\\\\
-$x \in I$ vuol dire che $\exists$ una macchina non deterministica $N$ ed $\exists$ una computazione $N(x)\longrightarrow^t($si, $w)$ con $t\leq |x|^k$\\
-Da $N$ posso ottenere una $N'$ \textit{equivalente} (cioè se N termina con si anche N' termina con si, analogo per il no) che calcola esattamente la stessa cosa, il cui grado di diramazione (grado di non determinismo) = 2\\
-Come farlo? Se la macchina in uno stato $q$ che va in $q'$ posso sdoppiare lo stato di arrivo $q'$ in $q'_1, q'_2$. Se ho $n > 2$ scelte, prendo la prima scelta e considero tutte le altre come se fossero un singolo nuovo stato. In questo nuovo stato, prendo il primo degli $n-1$ stati rimanenti e considero i successivi come un singolo nuovo stato e così via.\\
+\subsection{SAT è $\mathscr{NP}$-completo}
+Passiamo attraverso Circuit SAT, dimostrando che Circuit SAT è $\mathscr{NP}$-completo e, poiché Circuit SAT $\leq_{logspace}$ SAT, allora Circuit SAT $\mathscr{NP}$-completo $\Rightarrow$ SAT $\mathscr{NP}$-completo: ovvero che $\forall\:I\in\mathscr{NP}$ si ha $I \leq_{logspace}$ Circuit SAT.\\\\
+Devo prendere un problema $I \in \mathscr{NP}$ e costruire $f\in\textsl{logspace}\:|\:x\in I\Leftrightarrow f(x) = C$ ed $\exists\:V\:|\:[C]_V = tt$
+\paragraph{Dim} $x \in I$ vuol dire che $\exists$ una macchina non deterministica $N$ ed $\exists$ almeno una computazione $N(x)\longrightarrow^t($si, $w)$ con $t\leq |x|^k$\\
+Da $N$ posso ottenere una $N'$ \textit{equivalente} (cioè se N termina con si anche N' termina con si, analogo per il no) che calcola esattamente la stessa cosa, il cui grado di diramazione (grado di non determinismo) = 2 \textbf{Come farlo}?\\
+Se la macchina in uno stato $q$ che va in $q'$ posso sdoppiare lo stato di arrivo $q'$ in $q'_1, q'_2$. Se ho $n > 2$ scelte, prendo la prima scelta e considero tutte le altre come se fossero un singolo nuovo stato. In questo nuovo stato, prendo il primo degli $n-1$ stati rimanenti e considero i successivi come un singolo nuovo stato e così via.\\
 Posso farlo in tempo polinomiale (basta ricopiare gli stati) e il rallentamento della nuova macchina è dovuto al numero di nuovi stati ma sempre polinomiale.\\\\
-Se la prima scelta la codifico con $ff$, la seconda scelta la codifico con $tt$, allora la computazione $N(x)\longrightarrow^t($si, $w)$ è rappresentata da una successione di bit $b_0 b_1\ldots b_{|x|^n - 1}$. $T_{ij}$ non dipenderà solamente dalle tre celle superiori della tabella di computazione, ma anche dal bit $b_i$\\
-Costruisco il circuito $\overline{C}$ con $3m$ input e $m$ output, ma stavolta con un bit ulteriore in input. Ho ottenuto $\overline{C_n}$ che ci serve per riempire la tabella, a costo costante che dipende solo dalla $\Delta'$ di $N'$.\\
-Riempiamo il circuito con $|x|^k$ circuiti per $\triangleright$, $|x|$ circuiti per $\#$, e $|x|^{k-2}\times|x|^k$ copie di $\overline{C_n}$ opportunamente connesse.\\
+Se la prima scelta la codifico con $ff$, la seconda scelta la codifico con $tt$, allora la computazione $N(x)\longrightarrow^t($si, $w)$ è rappresentata da una successione di bit $b_0 b_1\ldots b_{|x|^n - 1}$. $T_{ij}$ non dipenderà solamente dalle tre celle superiori della tabella di computazione, ma anche dal bit $b_i$: per le macchine non deterministiche non ho una tabella di computazione, ma fissata la successione di scelte $B$ la si può costruire in funzione della macchina $N$, del dato $x$ e anche della successione $B$.\\
+Costruisco il circuito $\overline{C}$ con $3m + 1$ input e $m$ output, stavolta con un bit ulteriore in input: $T(i,j)$ dipende, oltre che da $T(i-1,j-1)$, $T(i-1,j)$, $T(i-1,j+1)$, anche da $b_{i-1}$ che è la scelta fatta al passo precedente. Come per Circuit Value, la prima e l'ultima riga sono fissate.\\
+Ho ottenuto $\overline{C_n}$ che ci serve per riempire la tabella, a costo costante che dipende solo dalla $\Delta'$ di $N'$, in perfetta analogia alla dimostrazione della $\mathscr{P}$-completezza di Circuit Value.\\
+Riempiamo il circuito con $|x|^k$ circuiti per $\triangleright$, $|x|$ circuiti per $\#$, e $|x|^{k-2}\times|x|^k$ copie di $\overline{C_n}$ opportunamente connesse.\\\\
+Possiamo costruire un circuito $f(x)\in\textsl{LogSpace}$ con come porte input le scelte non deterministiche codificate in $B$ e i valori della riga $T(1,j)$ ottenuti da $x$ ingresso.\\
 Il \textbf{teorema di Cook è dimostrato}.
-\paragraph{Altri problemi $\mathscr{NP}$-completi} HAM, CRICCA, commesso viaggiatore, programmazione lineare, e altri e altri ancora\ldots
+\paragraph{Altri problemi $\mathscr{NP}$-completi} HAM, CRICCA, commesso viaggiatore, programmazione lineare intera, e altri e altri ancora\ldots
 \chapter{Esercizi}
 \section{Calcolabilità}
 \paragraph{Esercizio 1} Data un'enumerazione effettiva, esiste una funzione calcolabile totale $t(i,n)$ che maggiora il tempo di calcolo di $M_i(n)$?
