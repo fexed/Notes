@@ -597,7 +597,7 @@ D'ora in avanti parliamo solo di funzioni calcolabili, quindi $\phi_i$ \textit{�
 $t(i, n)$ = \begin{math}
 \left\{
 \begin{array}{l l}
-	k & \text{se }M_i(n)\downarrow \text{in meno di }i\text{ passi}\\
+	k & \text{se }M_i(n)\downarrow \text{in meno di }k\text{ passi}\\
 	0 & \text{altrimenti}
 \end{array}
 \right.
@@ -799,10 +799,16 @@ Ricorsivamente enumerabile perché vogliamo enumerare i suoi elementi, tirandone
 \paragraph{Teorema di equivalenza fra caratterizzazioni}
 $I$ è ricorsivamente enumerabile $\Leftrightarrow$ $I = \emptyset \vee I = \textsl{imm}(f)$, con $f$ calcolabile totale.
 \begin{multicols}{2}
-\subparagraph{Dim} Il primo caso è banale (la funzione caratteristica dà sempre 0, ricorsiva)\\
-$I \neq \emptyset$, $I = \textsl{dom}(\phi_i)$ costruisco la $f$\\
-Indice di riga tiene traccia del numero di passi\\
-Indice di colonna tiene traccia dell'argomento\\
+\subparagraph{Dim} 
+Il primo caso, $I = \emptyset$, è banale: la funzione caratteristica dà sempre 0, ricorsiva, e quindi risulta\\$I =$ Imm$(\lambda x.\textsl{indefinita})$\\\\
+Nel caso $I \neq \emptyset$, $I = \textsl{dom}(\phi_i)$ costruisco la $f$ calcolata dalla $\phi_i$ con la tabella a fianco, dove:
+\begin{list}{}{}
+	\item[$m$] L'indice di riga tiene traccia del numero di passi di $\phi_i(n)$
+	\item[$n$] L'indice di colonna tiene traccia dell'argomento
+\end{list}
+\columnbreak
+\begin{center}
+
 \begin{tabular}{c || c | c | c | c | c | c}
 	 & 0 & 1 & 2 & 3 & 4 & 5 \\
 	 \hline
@@ -816,17 +822,14 @@ Indice di colonna tiene traccia dell'argomento\\
 	 4 & 6 & 11 & 16 & & & \\
 	 \hline
 	 5 & 10 & 15 & & & &
-	\end{tabular}\\\\
+\end{tabular}
+
+\end{center}
 \end{multicols}
-\textbf{Passi}:
-\begin{enumerate}
-	\item Calcola $\phi_i$ con la tabella sopra\\
-	1 passo su 0, 2 passi su 0\ldots finché non si arresta.\\
-	Trovo $(m, n)$ per cui $\phi_i(<m, n>)\downarrow$ con $<m, n>$ codifica di $(m, n)$. Chiamo $<m, n> = \overline{n} \in I$ perché appartiene al dominio.
-	 \item Calcola $\phi_i(n)$ per $m$ passi. Termina? Allora $<m, n> \in I$ e $f(<m, n>) = n$.\\
-	 Se non termina, $f(<m, n>) = \overline{n}$.\\
-	 Per esempio $\phi_i(2)$ per 4 passi. Converge? Se non converge, allora $f(<4, 2>) = \overline{n}$. Se converge, pongo $f(<4, 2>) = 2$
-\end{enumerate}
+
+Più precisamente: in $(m,n)$ si eseguono $m$ passi del calcolo di $\phi_i(n)$. Si esegue finché non si trova qualche valore di $m$ e dell'argomento, sia $\overline{n}$, per cui il calcolo si arresta (cioè $\phi_i(\overline{n})\downarrow$ in $m$ passi $\Rightarrow \overline{n}\in I$)\\\\
+A questo punto, chiamo $\langle m,n\rangle$ il valore della codifica della coppia $(m,n)$. Si riesegue un altro procedimento a coda di colomba eseguendo $\phi_i(n)$ per $m$ passi: se si arresta, allora si pone $f(\langle m,n\rangle) = n$ (ovviamente $n\in\textsl{dom}(\phi_i) = I$), altrimenti si pone $f(\langle m, n\rangle) = \overline{n}$ (e per quanto detto prima $\overline{n}\in I$).\\
+Si itera incrementando la codifica di $\langle m,n\rangle$, generando così tutti gli elementi di $I$.
 \pagebreak
 \section{K e Riduzioni}
 \subsection{Insieme K}
@@ -1261,9 +1264,9 @@ Ma non sempre posso sapere qual è il caso medio di un problema.
 $I$ si riduce efficientemente a $J \Leftrightarrow (x\in I \Leftrightarrow f(x)\in J$ con $f \in \textsl{logspace})$ e si può scrivere $I \leq J$\\
 Otteniamo che $\leq$ classificano $\textsl{logspace}$ e una qualunque classe $\mathscr{E} \in \{\mathscr{P}, \mathscr{NP}, \textsl{EXP}, \textsl{PSPACE}, \textsl{NPSPACE}\}$\\
 Se prendo una $\mathscr{D} \subseteq \mathscr{E}$, allora $\leq$ classificano $\mathscr{D}$ ed $\mathscr{E}$ (quindi ad esempio $\mathscr{P}$ ed $\mathscr{NP}$)\\
-Dato che $\textsl{logspace}\leq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classificano $\mathscr{D}$ ed $\mathscr{E}$. Lo si dimostra così, tramite le proprietà della classificazione di una famiglia di riduzioni:
+Dato che $\textsl{logspace}\subseteq\mathscr{P} \Rightarrow \leq_\mathscr{P}$ classificano $\mathscr{D}$ ed $\mathscr{E}$. Lo si dimostra così, tramite le proprietà della classificazione di una famiglia di riduzioni:
 \begin{enumerate}
-	\item $\textsl{id} \in \textsl{logspace}$, banalmente
+	\item $\textsl{id} \in \textsl{logspace}$, banalmente perché non scrive niente sul nastro di lavoro.
 	\item $f, g \in \textsl{logspace} \Rightarrow f(g)\in \textsl{logspace}$\\
 	$f \in \textsl{logspace} \Rightarrow \exists\:M$ che opera in $\textsl{logspace}$, analogamente per la $g$ avrò $M'$. La nuova macchina può considerare l'ultimo nastro di $M$ come nastro di lavoro di $M'$ e calcolare così la composizione delle due. Questa nuova macchina sta in $\textsl{logspace}$? Se prendo ad esempio $f = \textsl{id}$ ho input e output lungo $n$, e la somma dei nastri di lavoro è $n$, quindi lineare e non logaritmica. Allora si fa partire $M'$ in modo da richiedere a $M$ i dati di lavoro e usarli all'occorrenza sostituendoli sempre su una sola casella. Otteniamo così il $\textsl{logspace}$
 	\item $I\leq J$, $J \in \mathscr{D} \Rightarrow I \in \mathscr{D}$\\
@@ -1481,7 +1484,7 @@ perché dipende solamente da $\begin{array}{l}
 T(i-1, j-1)\\T(i-1,j)\\T(i-1,j+1)
 \end{array}$\\
 Abbiamo la tabella di computazione che decide $x$, accettandolo o rifiutandolo. Prendo questa tabella e la codifico in binario, ottenendo un'altra tabella in cui invece dei simboli ho 0/1. \textbf{Ottengo un circuito}.\\
-La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo è \textbf{costante}, indipendente da $x$, cioè la sua taglia è fissa.
+La $f$ sopra indicata è una funzione booleana, quindi $\exists$ un circuito $\overline{C}$ che la realizza. Questo circuito avrà $m$ uscite e $3\cdot m$ ingressi. $\overline{C}$ dipende dall'input $x$? No, perché dipende soltanto dalla $\delta$ e dai $3m$ valori in ingresso. Quindi il suo costo di costruzione è \textbf{costante}, indipendente da $x$, cioè la sua taglia è fissa. Importante notare che $m$ dipende solo da $\Sigma$.
 \begin{center}
 	\includegraphics[scale=0.75]{4.png}
 \end{center}
@@ -1644,7 +1647,7 @@ Definisco $\psi(x,y) = \left\{\begin{array}{l l}
 Allora, per il teorema s-m-n, esiste $f$ calcolabile totale iniettiva tale che $\phi_{f(x)}(y) = \psi(x,y)$ (con il solito trucco di scegliere uno degli indici che calcolano la $\psi$ per poi ingorarlo). Adesso:
 \begin{list}{}{}
 	\item $x\in K\Rightarrow\phi_{f(x)} = \psi(x,y) = \lambda y.1 \Rightarrow f(x)\in\textsc{const}$
-	\item $x\not\in K\Rightarrow \phi_{f(x)} = \lambda y.\textsl{indefinito}\Rightarrow f(x)\in\textsc{const}$
+	\item $x\not\in K\Rightarrow \phi_{f(x)} = \lambda y.\textsl{indefinito}\Rightarrow f(x)\not\in\textsc{const}$
 \end{list}
 Quindi $\textsc{const}$ non è ricorsivo, e nemmeno ricorsivamente numerabile.\\
 In alternativa, si può verificare che $\textsc{const}$ è un insieme di indici rappresentanti funzioni (i.i.r.f.) e che non è vuoto, di conseguenza non è ricorsivo.
