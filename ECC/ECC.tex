@@ -642,7 +642,27 @@ I seguenti risultati sono \textbf{invarianti rispetto all'enumerazione scelta}.
 Le $f$ calcolabili sono \#$N$. Anche le $f$ calcolabili totali sono \#$N$.\\
 Esistono funzioni \textit{non} calcolabili, molte di più di quelle calcolabili.
 \paragraph{Dimostrazione} Sono almeno \#$N$ perché posso costruire una macchina che per qualsiasi input lascia un numero naturale sul nastro, quindi di queste ce ne sono almeno quanti sono i numeri naturali. Non sono più di \#$N$ perché le MdT si possono enumerare (es. G\"{o}del).\\\\
-Quindi indichiamo con $\phi_i$ la funzione (in generale, parziale) calcolata dall'algoritmo M$_i$ e $i$ \textbf{indice della macchina}. Come detto prima, può darsi che per $i \neq j$ sia $\phi_i = \phi_j$ ma sicuramente M$_i \neq$ M$_j$.
+Inoltre, per dimostrare che le funzioni non calcolabili esistono e sono molte di più, si usa un procedimento simile a quello di Cantor. Si crea una tabella dove enumeriamo sulle righe tutte le funzioni calcolabili, e in colonna il risultato per ogni valore:
+\begin{center}
+
+\begin{tabular}{c || c | c | c | c | c | c}
+	 & $f_i(0)$ & $f_i(1)$ & $f_i(2)$ & $f_i(3)$ & $f_i(4)$ & \ldots \\
+	 \hline
+	 \hline
+	 $f_0$ & 0 & 1 & 0 & 0 & 1 & \ldots \\
+	 \hline
+	 $f_1$ & 1 & 1 & 1 & 0 & 0 & \ldots \\
+	 \hline
+	 $f_2$ & 1 & 0 & 0 & 0 & 1 & \ldots \\
+	 \hline
+	 $f_3$ & 0 & 1 & 1 & 0 & 0 & \ldots \\
+	 \hline
+	 \vdots & & & & & & \ldots
+\end{tabular}
+\end{center}
+Ora possiamo prendere la diagonale $\delta$, che nell'esempio avrà valori $\delta = 0 1 0 0 \ldots$. La complementiamo, $\overline{\delta} = 1 0 1 1 \ldots$ ottenendo una nuova funzione che è diversa da tutte le altre in almeno un punto (poiché prendiamo da ogni funzione il risultato diagonale e lo complementiamo, analogamente possiamo aggiungere 1, l'importante è che lo si renda diverso).\\
+Abbiamo ottenuto una funzione diversa da tutte le altre, che non appare nella lista delle funzioni calcolabili: di conseguenza, $\overline{\delta}$ non è calcolabile.
+\paragraph{Notazione} Quindi indichiamo con $\phi_i$ la funzione (in generale, parziale) calcolata dall'algoritmo M$_i$ e $i$ \textbf{indice della macchina}. Come detto prima, può darsi che per $i \neq j$ sia $\phi_i = \phi_j$ ma sicuramente M$_i \neq$ M$_j$.
 \subsection{Teorema 2: Ogni funzione calcolabile $\phi_i$ ha infiniti (numerabili) indici}
 Anche detto \textbf{padding lemma}.\\
 Non solo, posso costruire un insieme infinito di indici A$_i$ tale che $\forall\:j \in$ A$_i \Rightarrow \phi_j = \phi_i$ mediante una funzione ricorsiva primitiva.
@@ -687,7 +707,6 @@ Adesso possiamo codificare le quintuple $\in \delta$. $\delta(q_{i_p}, \sigma_{j
 $$s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cK(q)cK(\sigma)cK(D)c$$
 con $c$ che funge da \textbf{separatore}, \textbf{tra la codifica di uno stato e la codifica di un simbolo}.\\
 $s_{p,q} = cK(q_{i_p})cK(\sigma_{j_q})cdcdcd$ se $\delta(q_{i_p}, \sigma_{i_q})$ è indefinita
-\pagebreak
 \paragraph{Esempio} $\overline{M} = \{\{q_2\}, \{\sigma_1, \sigma_3, \sigma_5\}, \delta, q_2\}$, con $i_1 = 2$, $j_1 = 1$, $j_2 = 3$, $j_3 = 5$
 \begin{list}{}{}
 	\item $q_2 \rightarrow q_{i_1}$
@@ -709,6 +728,7 @@ Dato che $\exists\:z\:\:\vline\:\:\forall\:i,x$ si ha $\phi_z(i, x) = \phi_i(x)$
 	\item $(s, \underline{\triangleright}w) \longrightarrow_n^M (h, u\underline{a}v) \Rightarrow (s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_m^U (h, \tau(uav)\underline{\#})$
 	\item $(s_U, \underline{\triangleright}\rho(M)\tau(w)) \longrightarrow_n^U (h, u'a'v')$ dovrebbe succedere che $a' = \#$ e $v' = \epsilon$, ma anche che $u' = \tau(uav)$. Se succede\\$\Rightarrow (s, \underline{\triangleright}w) \longrightarrow_m^M (h, uav)$
 \end{list}
+\pagebreak
 \section{Teoremi}
 \subsection{Teorema del parametro (s--m--n)}
 $\exists$ $s$ calcolabile, totale, iniettiva $\vline$ $\forall$ $i$, $x$ $\lambda y.\phi_i(x, y) = \phi_{s(i, x)}(y)$\\
@@ -725,7 +745,6 @@ Un formalismo F è Turing-Equivalente, cioè \textbf{calcola tutte e sole le fun
 	\item Ha un algoritmo universale (Teorema di Enumerazione)
 	\item Vale il Teorema del Parametro
 \end{list}
-\pagebreak
 Supponiamo un programma che calcola prodotto con somme successive
 \begin{verbatim}
 P := 0;
@@ -786,7 +805,7 @@ I è ricorsiva primitiva $\Leftrightarrow \chi_i(x) = 1$ se $x \in I$, 0 altriem
 A = $\{(i, x, k)$ $|$ $\exists\: y,n$ con $(y, n, x < k) \wedge \phi_i(x)\downarrow$ in $n$ passi\}. Limita spazio e tempo\\
 B = $\{(i, x, k, z)$ $|$ $\exists\: n < k \wedge \phi_i(x) = z$ in $n$ passi\}. Anche qua limito il numero di passi, ma non la memoria\\
 $f(i, x)$ rimpiazza $k$, con $f$ calcolabile totale
-\subsection{Ricorsivamente Enumerabile}
+\section{Ricorsivamente Enumerabile}
 I è \textbf{ricorsivamente enumerabile} $\Leftrightarrow$ è \textbf{dominio di una funzione calcolabile}, cioè $\exists\: i\:\:|\:\: I = \textsl{dom}(\phi_i)$
 \begin{list}{}{}
 	\item $I$ è ricorsivo $\Rightarrow$ $I$ è ricorsivamente enumerabile\\
@@ -797,7 +816,8 @@ Ricordiamo: $I$ è ricorsivo $\Leftrightarrow$ la sua funzione caratteristica è
 	Se non terminano, ripeto: faccio un passo in $i$\ldots finché una delle due macchine non termina.
 \end{list}
 Ricorsivamente enumerabile perché vogliamo enumerare i suoi elementi, tirandone fuori uno alla volta.
-\paragraph{Teorema di equivalenza fra caratterizzazioni}
+\pagebreak
+\subsection{Teorema di equivalenza fra caratterizzazioni}
 $I$ è ricorsivamente enumerabile $\Leftrightarrow$ $I = \emptyset \vee I = \textsl{imm}(f)$, con $f$ calcolabile totale.
 \begin{multicols}{2}
 \subparagraph{Dim} 
@@ -827,11 +847,10 @@ Nel caso $I \neq \emptyset$, $I = \textsl{dom}(\phi_i)$ costruisco la $f$ calcol
 
 \end{center}
 \end{multicols}
-
-Più precisamente: in $(m,n)$ si eseguono $m$ passi del calcolo di $\phi_i(n)$. Si esegue finché non si trova qualche valore di $m$ e dell'argomento, sia $\overline{n}$, per cui il calcolo si arresta (cioè $\phi_i(\overline{n})\downarrow$ in $m$ passi $\Rightarrow \overline{n}\in I$)\\\\
-A questo punto, chiamo $\langle m,n\rangle$ il valore della codifica della coppia $(m,n)$. Si riesegue un altro procedimento a coda di colomba eseguendo $\phi_i(n)$ per $m$ passi: se si arresta, allora si pone $f(\langle m,n\rangle) = n$ (ovviamente $n\in\textsl{dom}(\phi_i) = I$), altrimenti si pone $f(\langle m, n\rangle) = \overline{n}$ (e per quanto detto prima $\overline{n}\in I$).\\
+Più precisamente: in $(m,n)$ si eseguono $m$ passi del calcolo di $\phi_i(n)$. Si esegue: 1 passo in 0, 2 passi in 0, 1 passo in 1, 3 passi in 0\ldots finché non si trova qualche valore di $m$ e dell'argomento $n$ per cui il calcolo si arresta (cioè $\phi_i(\langle m,n\rangle)\downarrow$ in $m$ passi $\Rightarrow \langle m,n\rangle\in I$). , chiamo $\langle m,n\rangle$ il valore della codifica della coppia $(m,n)$ (Ad esempio, $\langle 2,1\rangle = 4$)\\\\
+A questo punto ho un valore $\overline{n}\in I$.\\
+Si riesegue un altro procedimento a coda di colomba eseguendo $\phi_i(n)$ per $m$ passi: se si arresta, allora si pone $f(\langle m,n\rangle) = n$ (ovviamente $n\in\textsl{dom}(\phi_i) = I$), altrimenti si pone $f(\langle m, n\rangle) = \overline{n}$ (e per quanto detto prima $\overline{n}\in I$).\\
 Si itera incrementando la codifica di $\langle m,n\rangle$, generando così tutti gli elementi di $I$.
-\pagebreak
 \section{K e Riduzioni}
 \subsection{Insieme K}
 \textbf{K} = \{$x$ $|$ $\phi_x(x)\downarrow$\} insieme degli algoritmi applicati a sé stessi e convergenti.
