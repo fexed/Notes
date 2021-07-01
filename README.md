@@ -38,4 +38,4 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ##### Sistemi Operativi e Laboratorio: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/SOL/SOL.pdf), [laboratorio](https://github.com/fexed/SOL_LAB), [ObjectStore (progetto)](https://github.com/fexed/ObjectStore/releases/tag/1.0)
 
-##### Sviluppo Applicazioni Mobili: [appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/SAM/SAM.pdf), [Coffee Monitor 2.0 (progetto)](https://github.com/fexed/CoffeeMonitor/releases/tag/2.0)
+##### Sviluppo Applicazioni Mobili: [appunti 🗑️](https://github.com/fexed/Notes/blob/master/SAM/SAM.pdf), [Coffee Monitor 2.0 (progetto)](https://github.com/fexed/CoffeeMonitor/releases/tag/2.0)
