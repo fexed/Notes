@@ -1,0 +1,58 @@
+\documentclass[10pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{multicol}
+\usepackage[bookmarks]{hyperref}
+\usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\graphicspath{ {./img/} }
+\usepackage{listings}
+\usepackage{makecell}
+\lstdefinestyle{customasm}{
+  belowcaptionskip=1\baselineskip,
+  frame=line,
+  xleftmargin=\parindent,
+  language=[x86masm]Assembler,
+  basicstyle=\ttfamily,
+  commentstyle=\itshape\color{purple!40!black},
+}
+\lstset{escapechar=@,style=customasm}
+\lstnewenvironment{C}
+  {\lstset{language=C++,frame=none}}
+  {}
+\begin{document}
+\title{Algorithm Engineering}
+\author{Federico Matteoni}
+\date{A.A. 2021/22}
+\renewcommand*\contentsname{Index}
+
+\maketitle
+\begin{multicols}{2}
+\tableofcontents
+\end{multicols}
+\pagebreak
+\section{Introduction}
+Teacher: Paolo Ferragina\\
+Exam: written + oral. Midterms in November and December, with exercises.\\
+Classes will be recorded on Microsoft Teams. Also the book "The Magic of Algorithms" is very important: you must be used to talk about these things, not just be able to solve exercises.
+\paragraph{Course} \textbf{Design} and \textbf{analysis} of algorithms but also insights about \textbf{implementation}, with reference to libraries and considerations about what happens when using certain algorithms. The case of use is \textbf{big data}.
+\paragraph{Algorithm} Knuth's definition: "\textit{a finite, definite, effective procedure that takes some input and returns an output, with the output being the answer to the problem you want to solve}." So, a finite sequence of steps, not only a finite numbers of operations but also the algorithms must \textbf{terminate}. \texttt{while (true) do ...} will go on forever, so it's not an algorithm. Definite means that the steps are definite in an unambiguous way. Effective means that every step is basic, atomic, something that we can execute in small or constant time, constant is not a very precise word (seconds? Milliseconds?) so we will accept the "small time" rough definition. Also, the mapping input $\rightarrow$ output must always be correct, which is the biggest difference with IA. An algorithm outputs the correct output for each input.
+\paragraph{RAM} Random Access Machine, CPU $\leftrightarrow$ M, classical computing model (Von Neumann machine), the memory can read any place in constant time.\\
+We will make a more sophisticated step. But without presenting very complicated models. We need a good balance, not perfect but a better approximation than the RAM.
+\paragraph{} Algorithm A and find function $T_A(n)$ that describes the time complexity of A. $n = $ input size, number of items that the algorithm has to process. Hours, seconds, milliseconds based on the machine, but we approximate the time taken with the number of steps. Also, the number of steps depends on the number of items but also on the items itselves. So we usually analyze the worst case scenario, or less often the average scenario. Analyzing the worst case scenario we can figure out the worst or "maximum" number of steps. \textbf{Asymptotic analysis}.\\
+We want to exploit the characteristics of the various types of memory.\\\\
+We will count not steps but the I/O ops, with a 2 level memory model: the first model is the fast (cache + RAM) and the second level is the mass memory. In small memory situations, the first level can be interpreted as cache and the second level as internal memory, other times the first level is the internal memory and the second level is unbound slow memory.
+\begin{list}{}{}
+	\item Spatial Locality: access near items
+	\item Temporal Locality, or small working set: far apart items used often so we can exploit their presence in the cache.
+\end{list}
+\paragraph{Poly vs Exp time complexity} Let's say we have three algorithms: $n$, $n^2$, $2^n$ in time complexity respectively. Let's express the time complexity fixing $t$ time and counting how many items we can process in $t$ time. In the first case is linear, so $n = t$, the second is $n = \sqrt{t}$ and the third is $n = \log_2 t$. If we have a $k$ times faster machine, we can imagine using the original machine for $k$ more times. $n = kt, n = \sqrt{kt}, n = \log_s kt$. The linear algorithm has full advantage of the $k$ times faster machine, the second algorithm has a small advantage of a multiplication factor $\sqrt{k}$ and the last a negligible advantage of a sum factor of $\log_2 k$, which is basically none.
+\paragraph{Analysis} $A[1, n]$ integer array of which we want to compute the sum. The number of steps is $n$.\\
+First situation: first we load $B$ items and process thems, then the next $B$ items $\Rightarrow$ \# I/O = $n/B$, which we will see often and is called the \textbf{scan cost}, because we need to see each element, in batches of $B$ elements. So $B$ is the size of the memory page.\\
+But we can follow a different approach: we take the first item of each batch of $B$ elements, then the second items and so on, which will take $n$ steps, but this will be possibly slower because this method takes more I/Os ops, $n$ I/O ops. The larger the jumps the more I/O ops we do. The model doesn't distinguish between local and random I/Os.
+\paragraph{Binary Search} Array of $n$ elements. We pick the middle element, we go to left/right, middle element of the section and so on. The time complexity is $T(n) = O(\log_2 n)$, but we have a lot of I/Os and big jumps, so elements in different and far pages. We have $log_2 n/B$, because at a certain point the subarray where we search is smaller than a page, so we have $\log_2 n$ steps $- \log_2 B$ the last steps inside the page, and for the properties of the logarithms we have $\log_2 n/B$. So the larger the page the smaller the number of I/Os.  One consideration: $n$ is the number of items, $B$ is in kilobytes. So if we consider integers of 8 bytes, we have $B/$size items, and with $B =$ 32 kb = $2^{15}$ kb we have circa 4000 times, or $2^{15}/2^3 = 2^{12}$.\\
+How can we improve the search? We can consider the $B^+$-trees. We split the array into the page size $B$ and the array is sorted in ascendent order. The splits are called leaves, and each leaf has a key (one of the elements). We have a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on.\\ %numero di elementi da rivedere
+Fetch a page, binary search and follow the pointer. Number of I/Os is $\log_B n/B$ and the number of steps is a binary search for every page, so $(\log_B n/B)$ pages $\cdot \log_2 B$
+\end{document}
