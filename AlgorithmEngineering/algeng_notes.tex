@@ -55,4 +55,52 @@ But we can follow a different approach: we take the first item of each batch of 
 \paragraph{Binary Search} Array of $n$ elements. We pick the middle element, we go to left/right, middle element of the section and so on. The time complexity is $T(n) = O(\log_2 n)$, but we have a lot of I/Os and big jumps, so elements in different and far pages. We have $log_2 n/B$, because at a certain point the subarray where we search is smaller than a page, so we have $\log_2 n$ steps $- \log_2 B$ the last steps inside the page, and for the properties of the logarithms we have $\log_2 n/B$. So the larger the page the smaller the number of I/Os.  One consideration: $n$ is the number of items, $B$ is in kilobytes. So if we consider integers of 8 bytes, we have $B/$size items, and with $B =$ 32 kb = $2^{15}$ kb we have circa 4000 times, or $2^{15}/2^3 = 2^{12}$.\\
 How can we improve the search? We can consider the $B^+$-trees. We split the array into the page size $B$ and the array is sorted in ascendent order. The splits are called leaves, and each leaf has a key (one of the elements). We have a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on.\\ %numero di elementi da rivedere
 Fetch a page, binary search and follow the pointer. Number of I/Os is $\log_B n/B$ and the number of steps is a binary search for every page, so $(\log_B n/B)$ pages $\cdot \log_2 B$
+\paragraph{Analysis}
+$n = (1 + \epsilon)M$ with $\epsilon > 0$ data outside of the memory. So $M$ is totally full and $\epsilon M$ is stored in the unbound memory.\\
+The first point is we want to find $P($accessing the disk$)$, with a totally random algorithm, is $= \frac{\epsilon M}{n} = \frac{\epsilon\not M}{(1 + \epsilon)\not M} = P(\epsilon)$\\\\
+The second point is the average time of a step. $\sum_x P(X = x)\cdot x$ with $X$ the variable of which we compute the average with that formula. $X$ is time, in this case. The time is $1$ in case of computing, and varies in case of accessing the memory. So we have the multiply the cost of access times the probability (of computing, going internal, going to the disk). Internal memory access costs 1, while on disk is larger and we say that the cost is $c$. So the average, with let's say $a$ probability of memory access, $= (1 - a)\cdot 1 + a(P(\epsilon)\cdot c + (1 - P(\epsilon))\cdot 1)$ but $0 < a < 1$ and $1 - P(\epsilon)$ are very small, so we can rewrite as $= a\cdot P(\epsilon)\cdot c = a \cdot \frac{\epsilon}{1 + \epsilon} \cdot c + O(1)$. If $a = 0$ then no memory access so the cost is constant. The larger is $a$ the more memory access, the more the term is important, which is exactly what we want to capture. Usually, $a = 0.3 = 30\%$ and $c = 10^6$ the gap between accessing the disk and accessing the internal memory.\\
+So $\frac{\epsilon}{1 + \epsilon}\cdot 0.3 \cdot 10^6 = \frac{\epsilon}{1 + \epsilon} \cdot 300000$. If $P(\epsilon) = 0.001$ the avg time of a step is $0.001 \cdot 300000 = 300$, so the disk has a lot of impact even with only a thousandth of memory access being on disk: the avg cost is 300 and not 1.
+\paragraph{Sorting and permuting} Given an array $S[1, m]$ and a permutation $\pi$, the permutation problem asks to permute $S$ according to $\pi$. For example $S = [A, B, C, D], \pi = [3, 1, 2, 4]$ then $\pi$ tells that the $\pi[0] = 3$ item goes to the first position. So $S_\pi = [C, A, B, D]$.
+\begin{lstlisting}
+for i = 1 to n:
+	S'[i] = S[pi[i]]
+\end{lstlisting}
+Which costs $\Theta(n)$\\
+\begin{tabular}{c | c | c}
+ & PERM & SORT \\
+\hline
+RAM & $n$ & $n\log n$\\
+\hline
+2-level memory & min\{$n$, $C_{sort}$\} & $C_{sort}$
+\end{tabular}\\
+Solving the permuting in a scan + sort kind of way, -altrimenti- we have to do a disk access per value.\\
+\begin{list}{}{}
+	\item scan S : $\langle$S[i], i$\rangle$ which is $\langle$item, position$\rangle$\\
+	Which creates $\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
+	This costs $O(n/B)$
+	\item scan $\pi$ : $\langle\pi$[i], i$\rangle$ which is $\langle$src, dst$\rangle$\\
+	Which creates $\langle$3, 1$\rangle$ $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$4, 4$\rangle$\\
+	This costs $O(n/B)$
+	\item sort by first component of the sequence $\langle\pi$[i], i$\rangle$\\
+	Which creates $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$3, 1$\rangle$ $\langle$4, 4$\rangle$\\
+	We take the item in source and move to destination
+	\item parallel scan
+	$\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
+	$\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$3, 1$\rangle$ $\langle$4, 4$\rangle$\\
+	Which creates $\langle$A, 2$\rangle$ $\langle$B, 3$\rangle$ $\langle$C, 1$\rangle$ $\langle$D, 4$\rangle$\\
+	\item sort by second component\\
+	Which creates $\langle$C, 1$\rangle$ $\langle$A, 2$\rangle$ $\langle$B, 3$\rangle$ $\langle$D, 4$\rangle$\\
+	\item scan\\
+	Which creates [C, A, B, B]\\
+	This costs $O(n/B)$
+\end{list}
+The I/O cost is 4 scan + 2 sort $= O(n/B) + 2\cdot O(C_{sort})$ sorting cannot cost less than $n/B$ because we can't improve that, so $O(C_{sort})$\\\\
+So we have proposed upper-bounds = algorithms for the sorting and the permuting problem. The permuting problem can be solved in $O(n/B) +$ sorting I/Os. Moving $n$ items takes $\Theta(n)$ I/Os.\\
+Sorting $n$ items in a two level memory of size $M$ for internal memory and $B$ for the disk page size, costs $O(n/B \cdot \log_{M/B} n/M)$ with $L = \log_{M/B} n/M$, and often written as $\overline{O}(n/B)$ which means that is a scan.\\
+$L$ consists of the base $M/B$ and the argument $n/B$ which means that with a larger memory I'd like it to be faster, with bigger $M$ the argument decreases and the base increases so the logarithm shrinks a lot. With a bigger $B$ page size, $n/B$ decreases but the base increases.\\
+$M/B =$ how many pages I can keep in the internal memory. Let's say $n = 2^{40}$, $M = 8$Gb $= 2^{33}$ and $B = 32$Kb $= 2^{15}$\\\\ %...calculations...
+Let's see when is sorting preferred to moving items or viceversa\\
+$n/B \log_{M/B} n/M < n$\\ %...calcs
+We have $B = 1$ in the RAM model. In practical situations with disk, sorting $<$ moving. If $B = 1$, in the RAM model, $M = O(1)$, then sorting is worse than moving.
+\paragraph{Sorting} Let's consider binary merge sort, which in the worst case costs $O(n\cdot \log_2 n)$. Let's evaluate the I/Os in the case that $n >> M$ so the array can't be stored entirely in internal memory. Since it's based on the merge procedure, we can evaluate the cost of the merge and multiply by the number of levels. It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $l/B$ I/Os. So it takes $O(n/B \log_2 n)$ I/Os.
 \end{document}
