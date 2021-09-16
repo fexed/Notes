@@ -38,23 +38,31 @@ Teacher: Paolo Ferragina\\
 Exam: written + oral. Midterms in November and December, with exercises.\\
 Classes will be recorded on Microsoft Teams. Also the book "The Magic of Algorithms" is very important: you must be used to talk about these things, not just be able to solve exercises.
 \paragraph{Course} \textbf{Design} and \textbf{analysis} of algorithms but also insights about \textbf{implementation}, with reference to libraries and considerations about what happens when using certain algorithms. The case of use is \textbf{big data}.
-\paragraph{Algorithm} Knuth's definition: "\textit{a finite, definite, effective procedure that takes some input and returns an output, with the output being the answer to the problem you want to solve}." So, a finite sequence of steps, not only a finite numbers of operations but also the algorithms must \textbf{terminate}. \texttt{while (true) do ...} will go on forever, so it's not an algorithm. Definite means that the steps are definite in an unambiguous way. Effective means that every step is basic, atomic, something that we can execute in small or constant time, constant is not a very precise word (seconds? Milliseconds?) so we will accept the "small time" rough definition. Also, the mapping input $\rightarrow$ output must always be correct, which is the biggest difference with IA. An algorithm outputs the correct output for each input.
-\paragraph{RAM} Random Access Machine, CPU $\leftrightarrow$ M, classical computing model (Von Neumann machine), the memory can read any place in constant time.\\
-We will make a more sophisticated step. But without presenting very complicated models. We need a good balance, not perfect but a better approximation than the RAM.
-\paragraph{} Algorithm A and find function $T_A(n)$ that describes the time complexity of A. $n = $ input size, number of items that the algorithm has to process. Hours, seconds, milliseconds based on the machine, but we approximate the time taken with the number of steps. Also, the number of steps depends on the number of items but also on the items themselves. So we usually analyze the worst case scenario, or less often the average scenario. Analyzing the worst case scenario we can figure out the worst or "maximum" number of steps. \textbf{Asymptotic analysis}.\\
-We want to exploit the characteristics of the various types of memory.\\\\
-We will count not steps but the I/O ops, with a 2 level memory model: the first model is the internal fast memory (cache + RAM) and the second level is the mass memory (disk). In small memory situations, the first level can be interpreted as cache and the second level as internal memory, other times the first level is the internal memory and the second level is unbound slow memory.
-\begin{list}{}{}
-	\item Spatial Locality: access near items
-	\item Temporal Locality, or small working set: far apart items used often so we can exploit their presence in the cache
+\subsection{Algorithms} 
+\paragraph{Algorithms} Knuth's definition: "\textit{a finite, definite, effective procedure that takes some input and returns an output, with the output being the answer to the problem you want to solve}."\begin{list}{}{}
+	\item \textbf{Finite}: a \textbf{finite sequence of steps}, not only a finite numbers of operations but also \textbf{the algorithm must terminate}. \texttt{while (true) do ...} will go on forever, so it's not an algorithm. The number of steps must be \textit{very definite and reasonable}, which relates to the efficiency of the algorithm.
+	\item \textbf{Definite}: the steps are definite in an unambiguous way.
+	\item \textbf{Effective}: every step is basic, atomic, something that we can execute in small or constant time, constant is not a very precise word (seconds? Milliseconds?) so we will accept the "small time" rough definition. Also, the mapping input $\rightarrow$ output must always be correct, which is the biggest difference with IA. An algorithm outputs the correct output for each input.
 \end{list}
-\paragraph{Poly vs Exp time complexity} Let's say we have three algorithms: $n$, $n^2$, $2^n$ in time complexity respectively. Let's express the time complexity fixing $t$ time and counting how many items we can process in $t$ time. In the first case is linear, so $n = t$, the second is $n = \sqrt{t}$ and the third is $n = \log_2 t$. If we have a $k$ times faster machine, we can imagine using the original machine for $k$ more times. $n = kt, n = \sqrt{kt}, n = \log_s kt$. The linear algorithm has full advantage of the $k$ times faster machine, the second algorithm has a small advantage of a multiplication factor $\sqrt{k}$ and the last a negligible advantage of a sum factor of $\log_2 k$, which is basically none.
-\paragraph{Analysis} $A[1, n]$ integer array of which we want to compute the sum. The number of steps is $n$.\\
-First situation: first we load $B$ items and process thems, then the next $B$ items $\Rightarrow$ \# I/O = $n/B$, which we will see often and is called the \textbf{scan cost}, because we need to see each element, in batches of $B$ elements. So $B$ is the size of the memory page.\\
+\paragraph{RAM} Random Access Machine, CPU $\leftrightarrow$ M, classical computing model (Von Neumann machine), the memory can read any place in constant time.\\
+We will make a more sophisticated step. But without presenting very complicated models. We need a good balance, not a perfect but a \textit{better} approximation than the RAM.
+\paragraph{Analysis} Let's take an algorithm A and let's find a function $T_A(n)$ that describes the time complexity of A. $n$ is the input size, the number of items that the algorithm has to process. The time that A will take will be in hours, seconds or milliseconds based on the machine, but we approximate that time taken with the number of steps that are computed. Also, the number of steps depends not only on the number of items but on the items themselves, too. So we usually analyze the worst case scenario, or less often the average scenario. By analyzing the worst case scenario we can figure out the worst or "maximum" number of steps. \textbf{Asymptotic analysis}.\\
+We want to exploit the characteristics of the various types of memory.\\\\
+We will count not all the steps but the I/O ops, with a \textbf{2-level memory model}: the \textbf{first level} is the \textbf{internal fast memory} (cache + RAM) and the \textbf{second level} is the \textbf{mass unbound memory} (disk). In small memory situations, the first level can be interpreted as cache and the second level as internal memory, other times the first level is the internal memory and the second level is unbound slow memory.
+\begin{list}{}{}
+	\item \textbf{Spatial Locality}: access near items
+	\item \textbf{Temporal Locality}, or small working set: far apart items used often so we can exploit their presence in the cache
+\end{list}
+\paragraph{Poly vs Exp time complexity} Let's say we have three algorithms with $n$, $n^2$ and $2^n$ in time complexity respectively. Let's express the time complexity fixing $t$ time and counting how many items we can process in $t$ time. In the first case is linear, so $n = t$, the second is $n = \sqrt{t}$ and the third is $n = \log_2 t$. If we have a $k$ times faster machine, we can imagine that we are using the original machine for $k$ more times, or $k$ original machines in parallel. So in this case $n = kt, n = \sqrt{kt}$ and $n = \log_s kt$. The linear algorithm takes full advantage of the $k$ times faster machine, the second algorithm has a small advantage of a multiplication factor $\sqrt{k}$ and the last a negligible advantage of a sum factor of $\log_2 k$, which is basically none.
+\paragraph{Example} $A[1, n]$ integer array of which we want to compute the sum. The number of items, then, is $n$.\\
+First situation: first we load $B$ items and process them, then the next $B$ items and so on\ldots $\Rightarrow$ \# I/O = $n/B$, which we will see often and is called the \textbf{scan cost}, because we need to see each element, in batches of $B$ elements. So \textbf{$B$ is the size of the memory page}.\\
 But we can follow a different approach: we take the first item of each batch of $B$ elements, then the second items and so on, which will take $n$ steps, but this will be possibly slower because this method takes more I/Os ops, $n$ I/O ops. The larger the jumps the more I/O ops we do. The model doesn't distinguish between local and random I/Os.
-\paragraph{Binary Search} Array of $n$ elements. We pick the middle element, we go to left/right, middle element of the section and so on. The time complexity is $T(n) = O(\log_2 n)$, but we have a lot of I/Os and big jumps, so elements in different and far pages. We have $log_2 n/B$, because at a certain point the subarray where we search is smaller than a page, so we have $\log_2 n$ steps $- \log_2 B$ the last steps inside the page, and for the properties of the logarithms we have $\log_2 n/B$. So the larger the page the smaller the number of I/Os.  One consideration: $n$ is the number of items, $B$ is in kilobytes. So if we consider integers of 8 bytes, we have $B/$size items, and with $B =$ 32 kb = $2^{15}$ kb we have circa 4000 times, or $2^{15}/2^3 = 2^{12}$.\\
-How can we improve the search? We can consider the $B^+$-trees. We split the array into the page size $B$ and the array is sorted in ascendent order. The splits are called leaves, and each leaf has a key (one of the elements). We have a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on.\\ %numero di elementi da rivedere
-Fetch a page, binary search and follow the pointer. Number of I/Os is $\log_B n/B$ and the number of steps is a binary search for every page, so $(\log_B n/B)$ pages $\cdot \log_2 B$
+\paragraph{Binary Search} Array of $n$ elements. We pick the middle element, we go to left/right, middle element of the section and so on. The time complexity is $T(n) = O(\log_2 n)$, but we have a lot of I/Os and big jumps, so elements in different and far pages. We have $log_2 \frac{n}{B}$, because at a certain point the sub array where we search will be smaller than a page, so we have $\log_2 n$ steps $- \log_2 B$ the last steps inside the page, and for the properties of the logarithms we have $\log_2 \frac{n}{B}$. So the larger the page the smaller the number of I/Os. One consideration: $n$ is the number of items, $B$ is in kilobytes. So if we consider integers of 8 bytes, we have $\frac{B}{size}$ items, and with $B =$ 32 KB = $2^{15}$ KB we have circa 4000 times, or $2^{15}/2^3 = 2^{12}$.\\
+How can we improve the search? We can consider the $B^+$-trees. We split the array into the page size $B$ and the array is sorted in ascendant order. The splits are called leaves, and each leaf has a key (one of the elements). We have a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on.\\ %numero di elementi da rivedere
+Fetch a page, binary search and follow the pointer. Number of I/Os is $\log_B \frac{n}{B}$ and the number of steps is a binary search for every page, so $(\log_B \frac{n}{B})$ pages $\cdot \log_2 B$
+\begin{center}
+	\includegraphics[scale=0.25]{2.png}
+\end{center}
 \paragraph{Analysis}
 $n = (1 + \epsilon)M$ with $\epsilon > 0$ data outside of the memory. So $M$ is totally full and $\epsilon M$ is stored in the unbound memory.\\
 The first point is we want to find $P($accessing the disk$)$, with a totally random algorithm, is $= \frac{\epsilon M}{n} = \frac{\epsilon\not M}{(1 + \epsilon)\not M} = P(\epsilon)$\\\\
@@ -72,15 +80,17 @@ Which costs $\Theta(n)$\\
 RAM & $n$ & $n\log n$\\
 \hline
 2-level memory & min\{$n$, $C_{sort}$\} & $C_{sort}$
-\end{tabular}\\
+\end{tabular}
+\pagebreak
+
 Solving the permuting in a scan + sort kind of way, -altrimenti- we have to do a disk access per value.\\
 \begin{list}{}{}
 	\item scan S : $\langle$S[i], i$\rangle$ which is $\langle$item, position$\rangle$\\
 	Which creates $\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
-	This costs $O(n/B)$
+	This costs $O(\frac{n}{B})$
 	\item scan $\pi$ : $\langle\pi$[i], i$\rangle$ which is $\langle$src, dst$\rangle$\\
 	Which creates $\langle$3, 1$\rangle$ $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$4, 4$\rangle$\\
-	This costs $O(n/B)$
+	This costs $O(\frac{n}{B})$
 	\item sort by first component of the sequence $\langle\pi$[i], i$\rangle$\\
 	Which creates $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$3, 1$\rangle$ $\langle$4, 4$\rangle$\\
 	We take the item in source and move to destination
@@ -92,7 +102,7 @@ Solving the permuting in a scan + sort kind of way, -altrimenti- we have to do a
 	Which creates $\langle$C, 1$\rangle$ $\langle$A, 2$\rangle$ $\langle$B, 3$\rangle$ $\langle$D, 4$\rangle$\\
 	\item scan\\
 	Which creates [C, A, B, B]\\
-	This costs $O(n/B)$
+	This costs $O(\frac{n}{B})$
 \end{list}
 The I/O cost is 4 scan + 2 sort $= O(\frac{n}{B}) + 2\cdot O(C_{sort})$ sorting cannot cost less than $\frac{n}{B}$ because we can't improve that, so $O(C_{sort})$\\\\
 So we have proposed upper-bounds = algorithms for the sorting and the permuting problem. The permuting problem can be solved in $O(\frac{n}{B}) +$ sorting I/Os. Moving $n$ items takes $\Theta(n)$ I/Os.\\
@@ -113,8 +123,8 @@ S = 1, 7, 5, 3, 2, with M = 3 items. The memory is divided in two parts: a min h
 Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $T = \#$ items read. The phase has processed $T + M$ items, $T$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $T$ items are written out. So $T$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to U and H. P(item read goes to $U$) = $1/2$, a totally random situation. By changing the probability we change how much sorted is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = T/2$. Given that $|U| = M$, then on average $E[|U|] = \frac{T}{2} = M$ so average $T = 2M$
 \paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots
 \paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, by merging we need $3B$ for reading the memory (one for the first run, one on the second run and one page on the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if a load immediately all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$, $k$ pages for $k$ runs plus an output page. So $k = \frac{M}{B} - 1$ which we can approximate with $\frac{M}{B}$. Each run generates $l/B$ I/Os, and the merged run is long $kl$ elements.\\
-So every run is of $M$ elements which take $\frac{M}{B}$ I/Os, for $n/M$ runs. So the total cost is $O(n/M \cdot \frac{M}{B}) = O(n/B)$ for creating runs. ?So $\log_k n/M$?.\\
-The cost of mergesort is $O(n/B + n/B\cdot\log_k n/M)$ which we have seen with $k = \frac{M}{B}$.\\
+So every run is of $M$ elements which take $\frac{M}{B}$ I/Os, for $n/M$ runs. So the total cost is $O(n/M \cdot \frac{M}{B}) = O(\frac{n}{B})$ for creating runs. ?So $\log_k n/M$?.\\
+The cost of mergesort is $O(\frac{n}{B} + \frac{n}{B}\cdot\log_k n/M)$ which we have seen with $k = \frac{M}{B}$.\\
 With improve B, M by compression. So 3, 5, 10 is written as 3 (the first item) and storing the gaps (gap encoding) so 2, 5,\ldots with variable length encoders.\\\\
 Let's rewrite the bound
 $$\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{M}$$
