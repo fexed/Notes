@@ -39,7 +39,64 @@ This course's goals is to make sense of the huge amounts of data, take something
 The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually is the computational bottleneck.\\
 ML is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
 Solve general problem $min_{x\in S}f(x)$, with Poloni solve $min_{x\in R^n}||Ax - b||_2$ which is easier and can be solved exactly.
-\paragraph{Quick recap of linear algebra} See other notes
+\paragraph{Quick recap of linear algebra}
+\begin{list}{}{}
+	\item \textbf{Matrix - Vector multiplication}, with $A\in R^{4\times 3}, c\in R^3, b\in R^4$
+	$$\left[\begin{array}{c c c}
+		A_{11} & A_{12} & A_{13}\\
+		\vdots & \vdots & \vdots\\
+		A_{41} & A_{42} & A_{43}
+	\end{array}\right]\cdot \left[\begin{array}{c}
+		c_1\\c_2\\c_3
+	\end{array}\right] = \left[\begin{array}{c}
+		b_1\\b_2\\b_3\\b_4
+	\end{array}\right]\:\:\:\:\:\:\begin{array}{l}
+		b_i = \sum_{j=1}^4 A_{ij}c_j\\
+		A_{11}c_1 + A_{12}c_2 + A_{13}c_3 = b_1
+	\end{array}$$
+	or linear combination of the columns
+	$$\left[\begin{array}{c}
+	A_{11}\\A_{21}\\A_{31}\\A_{41}
+	\end{array}\right]c_1 + \left[\begin{array}{c}
+	A_{12}\\A_{22}\\A_{32}\\A_{42}
+	\end{array}\right]c_2 + \left[\begin{array}{c}
+	A_{13}\\A_{23}\\A_{33}\\A_{43}
+	\end{array}\right]c_3 + \left[\begin{array}{c}
+	A_{14}\\A_{24}\\A_{34}\\A_{44}
+	\end{array}\right]c_4 = \left[\begin{array}{c}
+	b_1\\b_2\\b_3\\b_4
+	\end{array}\right]$$
+	with $c_1, c_2, c_3$ and $c_4$ called coordinates.
+	\item \textbf{Basis}: tuple of vectors $v_1, v_2, \ldots, v_n\:|\:$ you can write all vectors $b$ in a certain space as a linear combination $v_1\alpha_1 + v_2\alpha_2 + \ldots + v_n\alpha_n$ with \textbf{unique} $a_1,\ldots,a_n$. The canonical basis is 
+	$$c_1 = \left[\begin{array}{c}
+	1\\0\\0\\0
+	\end{array}\right]\:\:\:c_2 = \left[\begin{array}{c}
+	0\\1\\0\\0
+	\end{array}\right]\:\:\:c_3 = \left[\begin{array}{c}
+	0\\0\\1\\0
+	\end{array}\right]\:\:\:c_4 = \left[\begin{array}{c}
+	0\\0\\0\\1
+	\end{array}\right]$$
+	and, for example $$\left[\begin{array}{c}
+	3\\5\\7\\9
+	\end{array}\right] = \left[\begin{array}{c}
+	1\\0\\0\\0
+	\end{array}\right]\cdot 3 + \left[\begin{array}{c}
+	0\\1\\0\\0
+	\end{array}\right]\cdot 5 + \left[\begin{array}{c}
+	0\\0\\1\\0
+	\end{array}\right]\cdot 7 + \left[\begin{array}{c}
+	0\\0\\0\\1
+	\end{array}\right]\cdot 9$$
+	\item \textbf{Image} $Im A$ = set of vectors $b$ that we can reach with $A$
+	\item \textbf{Kernel} $Ker A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
+	\item \textbf{Invertible} $A$ if this problem has exactly one solution.\\
+	$\forall\:b\in R^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix$\:|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
+	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A \ b}.
+	\item \textbf{Cost}, with $A\in R^{m\times n}, B\in R^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
+	In particular, $A, B$ squared $\Rightarrow AB$ costs $O(m^3)$. With $A, v$ vector $\Rightarrow$ $Av$ costs $O(m^2)$. Faster alternatives are not worth it usually. And remember that $AB \neq BA$ generally, and also that $CA = CB \not\Rightarrow A = B$ with $C$ matrix.\\
+	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
+\end{list}
 \paragraph{} Why a real valued function? Strong assumption, given $x'$ and $x''$, I can always tell which one I like best (\textbf{total order} of R). Often more than one objective function, with contrasting and/or incomparable units (ex: loss function vs regularity in ML).\\
 But $R^k$ with $k > 1$ has no total order $\Rightarrow$ no \textit{best} solution, only non-dominated ones.\\
 Two practical solutions: maximize return with budget on maximum risk or maximize...\\
