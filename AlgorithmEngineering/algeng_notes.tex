@@ -132,5 +132,49 @@ We don't know how items are consumed on the disks, given $D$ disks. With $k = 2,
 $$\Theta\left(\frac{n}{BD}\cdot\log_{\frac{M}{B}}\frac{n}{BD}\right)$$
 For 1 disk is $O(\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{B})$\\
 For $D$ disks we can consider one big disk with $B' = D\cdot B$ page size, so the heads of the disks are fixed together and move together. We do not change the algorithm, so the complexity is simply $O(\frac{n}{B'}\cdot\log_{\frac{M}{B'}}\frac{n}{B}) = O(\frac{n}{DB}\cdot\log_{\frac{M}{DB}}\frac{n}{DB})$ but with D in the base of the logarithm makes the value larger, but the impact is small and the simplicity of the method makes it worth it. This is called \textbf{disk striping}.
-\paragraph{Binary Decision Trees} The leaves there are permutations.
+\paragraph{Binary Decision Trees} Every node a comparison left branch $a<b$, right $a>b$ and it represents an algorithm. The leaves there are permutations, total number of leaves is $n!$. The question is how big should be the tree so that it's a sorting algorithm, it grows by $2^t$ nodes for level $t$, so $2^t > n!$ and we have the lower bound.
+\paragraph{Lower bounds} About sorting\\
+There are also lower bounds about permuting, an extra for the oral.\\
+Binary decision trees proved lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages. The main idea is that whenever i fetch a page I fetch $B$ items, not just two, so many comparisons. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
+The memory $M$ consists of several items, we bring the page of size $B$ in internal memory and we have $M-B$ other items in the memory. One I/O executes many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. How many comparisons? We can assume that the items in memory are sorted, so the item brought can go in 4 position (before the first, between the first two\ldots). In general, the $B$ items can enter the $M-B$ items in $n$ ways. The memory consists of $M$ cells, so $n = \left(\begin{array}{c}
+M\\B
+\end{array}\right)\cdot B!$ with $B!$ because we have to account for the shuffling.\\
+So two situations \begin{enumerate}
+	\item A new read, a read of an input page for the first time\\
+	\# new reads = $\frac{n}{B}$
+	\item An old read, all other read-cases\\
+	$t - \frac{n}{B}$
+\end{enumerate}
+$t$ I/Os, can be a new or an old read. Either one of the $\frac{n}{B}$ pages for the first time or any other page (or one of those pages for the second/third/\ldots time)\\
+Two kinds of nodes, one node refers to a new I/O the other to an old I/O.\\
+In a new I/O we have $\left(\begin{array}{c}
+M\\B
+\end{array}\right)\cdot B!$ options, we have to account for the shuffling, in the second case we have $\left(\begin{array}{c}
+M\\B
+\end{array}\right)$ options.\\
+So in any path $\frac{n}{B}$ are new and $t - \frac{n}{B}$ are old. So how many steps or levels $t$ are needed to guarantee that the number of leaves is $\geq n!$? Every node is no longer binary and can be one of two kinds. Still a decision tree. So in every step we have $\frac{n}{B}$ new I/Os and $t - \frac{n}{B}$ old I/Os.\\
+\# permutations that the algorithm can distinguish is $$= \left( \left(\begin{array}{c}
+M\\B
+\end{array}\right)\cdot B!\right)^{\frac{n}{B}}\cdot \left(\begin{array}{c}
+M\\B
+\end{array}\right)^{t - \frac{n}{B}} = \left(\begin{array}{c}
+M\\B
+\end{array}\right)^{t}\cdot \left(B!\right)^{\frac{n}{B}} \geq n!$$
+To compute, consider that $\log\left(\begin{array}{c}
+M\\B
+\end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multiway merge sort bound. $t = \Omega(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M})$
+\paragraph{Two sorting paradigms} The following:
+\begin{list}{}{}
+	\item merge-based paradigm: partition (computationally free, $O(1)$), recursion, recombination (merge, $O(\frac{n}{B})$)
+	\item distribution/partitioning-based paradigm: partition (costly part, $O(n)$), recursion, recombination (doesn't exist)
+\end{list}
+How can we design a multi way quick sort? We can't take one pivot, because that'll be binary. We can take many pivot but we have to guarantee a good usage of internal memory, but more importantly we need that the partition have to balanced: with $k$ pivot I'd like that every partition has $\frac{n}{k}$ items. This requires a theorem.\\
+Let's refresh the quick sort. %TODO
+\paragraph{Time complexity of quick sort is $O(n\log n)$} By introducing a random variable $X_{u,v} = \left\{\begin{array}{c c}
+1&if S[u]\textsl{ compared to}S[v]\\0&else
+\end{array}\right.$ and we want $E[\sum_{u=1}^m\sum_{v>u}^m X_{u,v}$ %TODO calcs
+$=\sum_u \sum_v P(S[u]$ compares to $S[v])$, let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part. With just one pivot and two parts, then S[u] is compared to S[v] only when one of them is the pivot. So $P(S[u]$ compares to $S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
+Case $a$ %TODO
+, case $b$ no comparison because they'll go to different partitions. Case $c$ is that either $u'$ or $v'$ is taken as pivot, so there's the comparison.\\ %TODO
+$T(n) = O(n) + [T(n_<)$ or $T(n_>)]$ choice of going to the left or to the right, probability. Let's analyze that probabilities.
 \end{document}
