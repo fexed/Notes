@@ -177,4 +177,26 @@ $=\sum_u \sum_v P(S[u]$ compares to $S[v])$, let's focus on the probability that
 Case $a$ %TODO
 , case $b$ no comparison because they'll go to different partitions. Case $c$ is that either $u'$ or $v'$ is taken as pivot, so there's the comparison.\\ %TODO
 $T(n) = O(n) + [T(n_<)$ or $T(n_>)]$ choice of going to the left or to the right, probability. Let's analyze that probabilities.
+\paragraph{3-way partitioning} Made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (swaps impacts on memory and comparison on CPU), but the problem here is mispredictions on the CPU, modern CPU do look-ahead and if it badly predicts the future ifs it has to break the stack and go back. So with fewer comparisons it's better. 10\% circa speed-up factor.\\
+%TODO disegno
+\paragraph{Bounded Quick Sort} Bounding the recursive calls. Transform the deepness of the tree (the number of recursive calls) from $n$ to $\log n$, but the time complexity remains $n^2$ in the worst case.\\
+This trick is removing tail recursion. Techinques applied by compilers, we'll do by hand.\\
+%TODO immagini e pseudocodice
+Generic call, between positions $i$ and $j$. If $j - i$ is $> n_0$ (so if is sufficiently small, the array is in cache so we go fast) then we do insertion sort. In the other case, with $\frac{i+j}{2}$ being the middle element, we do the partitioning assuming the the pivot on the left part of the middle and left partition of the pivot is smaller so contains less than half elements. So $i \leq p < \frac{i+j}{2}$, then recurse on the left because it has fewer elements, so we do $i = p + 1$, and do the same. Else, recurse on the right partition $j = p-1$
+\paragraph{Multi Way Quicksort} Key idea: array $S$ to be sorted, doesn't fit in internal memory: we want to partition $S$ among $k$ buckets $B_1,B_2,B_3,\ldots,B_k$. Every bucket is associated to a pivot: $k-1$ pivots, a logical pivot $s_0 = -\infty$ at the beginning, $s_{k+1} = \infty$ at the end and $s_1,s_2,s_3,\ldots,s_{k-1}$ between the buckets.\\
+$B_i=\{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$, so the "right" pivot is part of the bucket ($s_i \in B_i$). The goal is having balanced $B_i \forall\:i$, so $|B_i| = \frac{n}{k}$.\\
+The idea is similar to marge sort but in reverse: we assume that in memory $M$ we have $k$ buckets of size $B$, so we want to guarantee that $k\cdot B \leq M$. We sample at random $(k-1)$ pivots from $S$ (done with a scan $O(\frac{n}{B})$ I/Os). Not easy, sampling at random, we will see. We sort the the pivots $s_1 < s_2 < \ldots < s_{k-1}$, with 0 I/Os because those are all in internal memory. But we cannot assume that the buckets in memory can contain the $S$'s buckets. So we fetch $B$ items from $S$ and distribute the items according to the pivots and do until a bucket is full. When a page is full, we write it as the first page of the corresponding buckets (according to the pivot). This takes $O(\frac{n}{B})$ I/Os.
+\begin{enumerate}
+	\item Pick at random $(a + 1)k - 1$ samples from $S$, the pivots $\Rightarrow A$
+	\item Sort the samples in $A$
+	\item $s_i = A[(a+1)i]$\\
+	Until the last block has $a$ items
+	\begin{center}
+		\includegraphics[scale=0.5]{3.png}
+	\end{center}
+	We sampled $(a+1)(k-1) + a = (a+1)k -1$ items
+\end{enumerate}
+If $a = 0$ the number of samples is $k-1$, no oversampling, fast sort ($O(k\log k)$) but no room to play around with the items. If $a > 0$ the sorting costs $O((ak)\log (ak))$. We chose $a = \Theta(\log k)$, only a logarithmic oversampling to get the balance $$a + 1 = 12\ln k$$ Balanced $\Rightarrow |B_i| < 4\cdot\frac{n}{k}$
+\paragraph{Proof} By contradiction. We want to estimate $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k})$ and prove that $\leq \frac{1}{2}$ so that on average two extractions are enough to guarantee that one is correct.\\
+%TODO see proof on notes
 \end{document}
