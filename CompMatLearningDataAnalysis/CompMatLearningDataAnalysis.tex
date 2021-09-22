@@ -121,4 +121,33 @@ Faster if $r$ larger $\Rightarrow$ $r = \frac{D}{2} + \epsilon = x'_\pm = x_- + 
 %TODO
 \paragraph{Norms}
 \paragraph{Eigenvalues and eigenvectors}
+\paragraph{Semidefinite}
+\paragraph{Recall theorem} $\lambda_{min}(x^T x) \leq x^T Q x \leq \lambda_{max}(x^T x)$ for all symmetric $Q$ so $\lambda_{min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{max}$\\
+Slightly different form $\lambda_{min} \leq z^T Q z \leq \lambda_{max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
+$$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\alpha^2}$$
+\paragraph{Generalization for complex matrices} $||x||^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
+% fine recap lin alg
+\paragraph{Singular Value Decomposition} Each $A\in R^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_i$ on the diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
+The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
+Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
+\sigma_1\\ & \sigma_2\\ & & \ddots\\ & & & \sigma_m
+\end{array} \right]\left[\begin{array}{c}
+v_1^T\\v_2^T\\\vdots\\v_m^t
+\end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
+Geometric idea: there is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
+$\{\sigma_i\}$: singular values of $A$, defined uniquely for each $A$\\
+Rectangular SVD: each $A\in R^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in R^{m\times m}$, $V \in R^{n\times n}$ are orthogonal and $\Sigma\in R^{m\times n}$ is diagonal, so $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{min(m, n)} \geq 0$\\
+So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
+$= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
+$= u_i\sigma_1 v_1^T + \ldots + u_{min(m, n)} \sigma_{min(m, n)} v_{min(m, n)}^T$\\
+In Matlab, \texttt{svd(A, 'econ')} costs $max(m,n)\cdot min(m,n)^2$, still cubic but linear in the largest dimension. the full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $max(m,n)\times max(m,n)$, so it will cost more in time and memory.\\\\
+The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots$ so at one point a $\sigma_r > \sigma_{r+1} = \ldots = \sigma_{min(m,n)} = 0$\\
+Given $A = U\Sigma V^T$ we can compute $A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proved that the eigenvalues of $A^T A$ Are the squares of the singular values of $A$ plus additional zeroes for dimension reasons.
+$$||A||_2 = ||U\Sigma V^T||_2 = ||\Sigma V^T||_2 = ||\Sigma||_2 = \Sigma_1$$
+$$||A|| = max_{||z|| = 1} ||\Sigma V^T|| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1||z|| = \sigma_1$$
+$$||A||_F = ||U\Sigma U^T|| = \ldots = \Sigma_1$$
+\paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
+we are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $min_{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
+The optimal solution of $min_{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$ where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
+\paragraph{Matrix Norms}
 \end{document}
