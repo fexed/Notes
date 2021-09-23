@@ -45,10 +45,22 @@ When can we use ML? Be aware of the opportunity and awareness. ML is useful when
 \textbf{Predictive} task, classification and regression: function approximation\\
 \textbf{Descriptive} task, cluster analysis and association rules: find subsets or groups of unclassified data.
 \begin{center}
-	\includegraphics[scale=0.25]{1.png}
+	\includegraphics[scale=0.5]{1.png}
 \end{center}
-\paragraph{Supervised learning} %TODO def
-\paragraph{Learning algorithm} Basing on data, task and model: heuristic search through the hypothesis space $H$ of the \textbf{best hypothesis}. I. e. the best approximation of the unknown target function, typically searching ofr the $h$ with the minimum \textit{error}. $H$ may not coincide with the set of all possbile function and the search cannot be exhaustive, we need to make \textbf{assumpitons} (\textbf{inductive bias}).
+\pagebreak
+\paragraph{Supervised learning} Given a set of training examples as $\langle$input, output$\rangle$ = $\langle x,d\rangle$ (\textbf{labeled examples}) for an unknown function $f$, find a \textit{good approximation} of $f$, an hypothesis $h$ that can be used for making predictions on unseen data $x'$.\\
+The target $d$ can be:
+\begin{list}{}{}
+	\item Discrete value, for \textbf{classification tasks}.\\
+	$f(x) \in \{1,2,\ldots,k\}$\\
+	Patterns, feature vectors, are seen as members of a class and the goal is to assign the new patterns observed to the correct class (or label)\\
+	If the number of possible classes is two, then $f$ is a \textit{boolean function} and the task is called \textbf{binary classification} or \textbf{concept learning}: true or false, positive or negative, 0 or 1\ldots\\
+	If the number of classes is greater that two then is a \textbf{multi-class classification task}.
+	\item Real continuous value, for \textbf{regression tasks}.\\
+	The patterns are seen as sets of variables (real values), and the task is a curve fitting task. The process aims to estimate a real-value function based of a finite set of noisy samples $\langle x, f(x) +$ random noise$\rangle$
+\end{list}
+\paragraph{Unsupervised learning} No teacher. The training set is a set of unlabeled data $\langle x\rangle$. Examples: clustering, finding natural groupings in a set of data.
+\paragraph{Learning algorithm} Basing on data, task and model: heuristic search through the hypothesis space $H$ of the \textbf{best hypothesis}. I. e. the best approximation of the unknown target function, typically searching for the $h$ with the minimum \textit{error}. $H$ may not coincide with the set of all possible function and the search cannot be exhaustive, we need to make \textbf{assumpitons} (\textbf{inductive bias}).
 \paragraph{Learning} Also called:
 \begin{list}{}{}
 	\item Inference, in statistics
@@ -68,7 +80,8 @@ After introducing data, task, model and learning algorithm we will focus on: ind
 Such assumptions are needed to obtain an useful model for the ML aims, i.e. a model with generalization capabilities.\\
 We can imagine learning a discrete function with discrete inputs assuming \textbf{conjunctive rules}, so using a \textbf{language bias} to work with a restricted hypothesis space.
 \paragraph{Version Space} An hypothesis $h$ is consistent with the TR if $h(x) = d(x)$ for each training example $\langle x, d(x)\rangle$.\\
-The \textbf{version space} $VS_{H, TR}$ is the subset of $H$ of the hypothesis consistent with all the training examples in the TR.
+The \textbf{version space} $VS_{H, TR}$ is the subset of $H$ of the hypothesis consistent with all the training examples $\langle x, d(x)\rangle$ in the TR.\\
+It's possible to do an exhaustive search in an efficient way, using clever algorithms. This means finding the set of all the hypothesis $h$ consistent with the TR set. 
 \paragraph{Unbiased Learner} The language bias (ex: using only conjunctive rules, may be too restrictive: if the target concept is not in $H$ it cannot be represented in $H$. We can use an $H$ that expresses every teachable concept (among propositions), that means that $H$ is the set of all possible subsets of $X$: the power set $P(X)$. If $n = 10$ binary inputs, then $|X| = 2^{10} = 1024$ and $|P(X)| = 2^{1024} = 10^{308}$ possible concepts, which is much more than the number of the atoms in the universe.\\
 An unbiased learner is unable to generalize: the only examples that are unambiguously classified by an unbiased learner represented with the VS are the training examples themselves. Each unobserved instance will be classified positively by exactly half of the hypothesis in the VS and negative by the other half. Indeed: $\forall\: h$ consistent with $x_i$, $\exists\:h'$ identical to $h$ except $h'(x_i) \neq h(x_i)$, $h\in$ VS $\Rightarrow h'\in$ VS (because they are identical on the TR)\\\\
 Why prefer the search bias? In ML we use flexible approaches (expressive hypothesis spaces with universal capability of the models, for example neural networks or decision trees. We avoid the language bias, so we do not exclude a priori the unknown target function, but we focus on the search bias (ruled by the learning algorithm).
@@ -81,6 +94,10 @@ Why prefer the search bias? In ML we use flexible approaches (expressive hypothe
 	\end{array}\right.$
 \end{list}
 \paragraph{Learning and generalization} Learning: search for a \textbf{good function} in a function space from known data (typically minimizing an error/loss). \textbf{Good} with respect to generalization error: it measures how accurately the model predicts over novel samples of data (\textbf{measured over \underline{new} data}).\\
-Generalization is the crucial point of ML.
+Generalization is the crucial point of ML. Performance in ML is the generalization accuracy or \textit{predictive accuracy} estimated by the error on the test set.
+\paragraph{ML issues} Inferring general functions from known data is an ill posed problem, which means that in general the solution is not unique because we can't expect the exact solution with finite data. What can we represent? And so, what can we learn?\\
+Learning phase: building the model including training. The prediction phase is evaluating the learned function over new never-seen-before samples (generalization capability). Inductive learning hypothesis: any $h$ that approximates $f$ well on training examples will also approximate $f$ well on new unseen instances $x$.\\
+\textbf{Overfitting}: a learner overfits data if it outputs an hypothesis $h\in H$ having true/generalization error (risk) $R$ and empirical (training) error $E$, but there's another $h'\in H$ with $E' > E$ and $R' < R$, which means that $h'$ is the better one despite having a worse fitting.
+\paragraph{Statistical Learning Theory} Under what mathematical conditions is a model able to generalize?
 
 \end{document}
