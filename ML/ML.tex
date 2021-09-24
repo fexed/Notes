@@ -98,6 +98,53 @@ Generalization is the crucial point of ML. Performance in ML is the generalizati
 \paragraph{ML issues} Inferring general functions from known data is an ill posed problem, which means that in general the solution is not unique because we can't expect the exact solution with finite data. What can we represent? And so, what can we learn?\\
 Learning phase: building the model including training. The prediction phase is evaluating the learned function over new never-seen-before samples (generalization capability). Inductive learning hypothesis: any $h$ that approximates $f$ well on training examples will also approximate $f$ well on new unseen instances $x$.\\
 \textbf{Overfitting}: a learner overfits data if it outputs an hypothesis $h\in H$ having true/generalization error (risk) $R$ and empirical (training) error $E$, but there's another $h'\in H$ with $E' > E$ and $R' < R$, which means that $h'$ is the better one despite having a worse fitting.
-\paragraph{Statistical Learning Theory} Under what mathematical conditions is a model able to generalize?
-
+\paragraph{Statistical Learning Theory} Under what mathematical conditions is a model able to generalize? We want to investigate the generalization capability of a model, measured as a risk or test error, the role of the model complexity and the role of the number of data.\\
+\textbf{Formal Setting}: approximate a function $f(x)$, with $d$ target ($d = f(x) +$ noise), minimizing the \textbf{risk function} $$R = \int L(d, h(x))\:dP(x,d)$$ which is the \textbf{true error over all the data}, given:
+\begin{list}{}{}
+	\item a value $d$ from the teacher and the probability distribution $P(x,d)$
+	\item a loss function $L(h(x),d) = (d - h(x))^2$
+\end{list}
+We search for $h\in H\:|\: min\:R$, but we only have the finite data set $TR = (x_p, d_p)$ with $p = 1\ldots l$. Looking for $h$ means minimizing the empirical risk (the training error $E$), finding the best values for the model free parameters $$R_{emp} = \frac{1}{l}\sum_{p=1}^l (d_p - h(x_p))^2$$
+The inductive principle is the \textbf{ERM}, Empirical Risk Minimization: can we use $R_{emp}$ to approximate $R$?
+\paragraph{Vapnik-Chervoneniks dim and SLT} Given the VC dimension (simply VC), a measure of complexity of $H$ and by that we mean its flexibility to fit data.\\
+The VC-bound states that it holds with probability $\frac{1}{\delta}$ that $$R \leq R_{emp} + \epsilon\left(\frac{1}{l}, \textsl{VC},\frac{1}{\delta}\right)$$
+\begin{list}{}{}
+	\item $\epsilon$ is a function called VC-confidence, that grows with VC and decreases with higher $l$ and $\delta$
+	\item $R_{emp}$ decreases using complex models (with high VC)
+	\item $\delta$ is the confidence, and it rules the probability that the bound holds.\\
+	$\delta = 0.01 \Rightarrow$ the bound holds with probability $0.99$
+\end{list}
+Intuitively:
+\begin{list}{}{}
+	\item Higher $l$ (data) $\Rightarrow$ lower VC confidence and bound closer to $R$
+	\item A too simple model, meaning with low VC, can be not sufficient due to high $R_{emp}$ (\textbf{underfitting})
+	\item An higher VC with fix $l \Rightarrow$ lower $R_{emp}$ but VC and hence $R$ may increase (\textbf{overfitting})
+\end{list}
+\paragraph{Structural risk minimization} Minimize the bound! There are different bounds formulations according to different classes of $f$, of tasks\ldots\\
+In other words, we can make a good approximation of $f$ from examples, provided that we have a good number of data and the complexity of the model is suitable for the task.
+\paragraph{Complexity control} The Statistical Learning Theory allows for a formal framing of the problem of generalization and overfitting, providing an analytic upper bound to the risk $R$ for the prediction over all the data, regardless of the type of learning algorithm or the details of the model. So \textbf{the machine learning is well founded}, the learning risk can be analytically limited and only a few concepts are fundamental. This leads to new models (such as the Support Vector Machine) and other methods that directly consider the control of the complexity in the construction of the model.
+\paragraph{Validation} Central role for the applications and the project. Two aims:
+\begin{list}{}{}
+	\item \textbf{Model Selection}: estimating the performance (\textbf{generalization error}) of different models in order to choose the best one. This includes searching for the best hyperparameters of the model.\\
+	It returns a model.
+	\item \textbf{Model Assessment}: with the final model, estimating/evaluating its prediction error/risk (\textbf{generalization error}) over new test data.\\
+	It returns an estimation.
+\end{list}
+\textbf{Golden rule}: keep the two goals separated and use different datasets for each one.\\\\
+In an ideal world, we'd have a large training set, a large validation set for model selection and a very large external unseen data test set. With finite and often small data sets we have just an estimation of the generalization performance. We have to use some techniques: hold-out and k-fold cross validation, for example.
+\begin{list}{}{}
+	\item \textbf{Hold-Out}: we partition the dataset $D$ into \textbf{training set} TR, \textbf{validation/selection set} VL and \textbf{test set} TS.\\
+	All three are disjoint: TR is used to run the training algorithm, VL can be used to select the best model (hyperparameters tuning) and the \textbf{TS is only used for model assessment}.
+	\begin{center}
+		\includegraphics[scale=0.5]{2.png}
+	\end{center}
+	\item \begin{multicols}{2}
+	\textbf{K-Fold}: this technique can make use of insufficient data. We split the dataset $D$ into $k$ mutually esclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$.\\
+	This can be applied to both VL and TS splitting. Can be computationally very expensive and there's the issue of choosing the number of folds $k$.
+	\begin{center}
+		\includegraphics[scale=0.5]{3.png}
+	\end{center}
+	\end{multicols}
+\end{list}
+\paragraph{Classification accuracy} %TODO slide 154 di ML-21-INTRO-first-lectures-v0.11.pdf
 \end{document}
