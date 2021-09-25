@@ -148,7 +148,42 @@ Command trace: a function of time into commands (past, present, future)\\
 History at time $t$: percepts up to $t$ and commands up to $t-1$\\\\
 Casual trasduction: a function from history to commands. Transduction comes from finite state transducers, where both new states and commands are emitted. Casual because only previous and current percepts and previous commands can be considered. A controller ideally implements a casual transduction.
 %TODO command/agent function
-%TODO 23/04 class
+\paragraph{Problem Solving as search} The dominant approach to AI is formulating a task as a search in a state space. The paradigm is as follows:
+\begin{list}{}{}
+	\item Define a goal (a set of states, a boolean test function\ldots)
+	\item Formulate the task as a search problem: define a representation for states and define legal actions and transition functions
+	\item Find a solution (a sequence of actions) by means of a search process
+	\item Execute the plan
+\end{list}
+This is a basic technique in AI: search happens inside the agent, it's the planning stage before acting. It's different from searching the world, when an agent may have to act in the world and interleave an action with planning.\\
+Search is a general paradigm, underlying much of the artificial intelligence field. An agent is usually given only a description of what it should achieve, not an algorithm to solve it. The only possibility is to search for a solution. Searching can be computationally very hard (NP-Complete).\\
+Humans are able to solve specific instances by using their knowledge about the problem. This extra knowledge is called heuristic knowledge.
+\paragraph{Assumptions in classic problem solving} Problem solving agents are goal driven agents, that work under simplified assumptions made in the design process.
+\begin{list}{}{}
+	\item States are treated as black boxes: we only need to know the heuristic value and whether they are a goal by applying the boolean goal function. The internal structure doesn't matter from the point of view of search algorithms. \textbf{Atomic representations}.
+	\item The agent has \textbf{perfect knowledge} of the state (full accessibility), no uncertainty in sensors.
+	\item Actions are \textbf{deterministic}
+\end{list}
+\paragraph{Problem formulation} A problem is defined formally by five components:
+\begin{list}{}{}
+	\item Initial state
+	\item Possible actions in state $s$, $\textsl{Actions}(s)$
+	\item Transition model: a function $\textsl{Result}: \textsl{State}\times\textsl{Action}\rightarrow \textsl{State}$\\
+	$\textsl{Result}(s,a) = s'$, a \textbf{successor} state
+	\item Goal states are defined by a boolean function\\
+	$\textsl{Goal-Test}(s) \rightarrow\{\textsl{true}, \textsl{false}\}$
+	\item $\textsl{Path-cost}$ function, that assigns a numeric cost to each path. The sum of the cost of the actions on the path $c(s, a, s')$
+\end{list}
+\paragraph{Graphs for searching} A directed graph consists of a set $N$ of nodes and a set $A$ of arcs, which are ordered pairs of nodes. Node $n_2$ is a neighbor/successor of $n_1$ if $\exists\:(n_1, n_2)\in A$, and a path is a sequence of nodes $(n_0,\ldots,n_k)$ such that $(n_{i-1}, n_i)\in A$ with length $k$.\\The cost of the path is the sum of the costs of its arcs $\textsl{cost}((n_0,\ldots,n_k)) = \sum_{i=1}^k \textsl{cost}((n_{i-1}, n_i))$
+\paragraph{Search algorithms} A problem is given as input to a search algorithm. A solution to a problem is a path (actions sequence) that leads from the initial state to a goal state.\\
+Solution quality is measured by the path cost function: an optimal solution has the lowest path cost among all solutions. Different strategies (algorithms) for searching the state space may be characterized by:
+\begin{list}{}{}
+	\item Their time and space complexity, completeness, optimality\ldots
+	\item Uninformed search methods vs informed/heuristic search methods, which use an heuristic evaluation function of the nodes
+	\item Direction of search (forward or backwards)
+	\item Global vs local search methods
+\end{list}
+% CSP-1.pdf p. 16
 \paragraph{CSP} Formal definition\\
 A Constraint Satisfaction Problem consists of three components: $CSP = \langle$\\ %TODO
 Partial assignment of values\\
