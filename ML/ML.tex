@@ -146,12 +146,86 @@ In an ideal world, we'd have a large training set, a large validation set for mo
 	\end{center}
 	\end{multicols}
 \end{list}
-\paragraph{Classification accuracy} %TODO slide 154 di ML-21-INTRO-first-lectures-v0.11.pdf
+\paragraph{Confusion Matrix} \begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		Actual/Predicted & \textbf{Positive} & \textbf{Negative}\\
+		\hline
+		\textbf{Positive} & TP & FN\\
+		\hline
+		\textbf{Negative} & FP & TN\\
+		\hline
+	\end{tabular}
+\end{center}
+\textbf{Specificity} = $\frac{\textsl{TN}}{\textsl{FP} + \textsl{TN}}$, and \textbf{true negative rate} $= 1 - \textsl{FPR}$\\
+\textbf{Sensitivity} = $\frac{\textsl{TP}}{\textsl{TP} + \textsl{FN}}$, also known as \textbf{true positive rate} or \textbf{recall}\\
+\textbf{Precision} = $\frac{\textsl{TP}}{\textsl{TP} + \textsl{FP}}$\\
+\textbf{Accuracy}: \% of correctly classified patterns = $\frac{\textsl{TP + TN}}{\textsl{total}}$. Note that, for example, a 50\% accuracy on a binary classifier is equivalent to a random predictor.
+\paragraph{ROC Curve} We plot \textbf{specificity} on \textbf{x-axis} and \textbf{sensitivity} on the \textbf{y-axis}. The diagonal corresponds to the worst classifier, the random guesser. Better curves have greater Area Under the Curve (AUC)
+\paragraph{Linear Models} Mainstay of statistics.
+\subparagraph{Univariate Linear Regression} Simple linear regression: we start with 1 input variable $x$ and 1 output variable $y$. We assume a model $h_w(x)$ expressed as $out = w_1x + w_0$ where $w$ are real-valued coefficients or \textbf{free parameters}, also called \textbf{weights}.\\
+Given that the $w$s are continuous valued, we have an infinite hypothesis space but a nice solution from classical math. We can learn with this basic tool and, although simple, it includes many relevant concepts of modern ML and many methods in the field are based on this.\\
+\textbf{Least Mean Square}: learning means finding $w$ such that it minimizes the error/empirical loss, with best data fitting on the training set with $l$ examples.\\
+So given a set of $l$ training examples $(x_p, y_p)$ with $p = 1,\ldots,l$, we have to find $h_w(x)$ in the form $w_1x + w_0$ that minimizes the expected loss on the training data. For the loss, we use the square of errors: \textbf{least mean square}, find $w$ to \textbf{minimize} the residual sum of squares.
+$$Loss(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2 = \sum_{p=1}^l (y_p - (w_1x_p + w_0))^2$$
+To have the mean, divide by $l$. How to solve? Local minimum as stationary point, so the gradient $\frac{\partial E(w)}{\partial w_i} = 0$ with $i = 1,\ldots,$ dim\_input $+1 = 1,\ldots, n+1$. For the simple linear regression (2 free parameters):
+$$\frac{\partial E(w)}{\partial w_0} = 0\:\:\:\:\frac{\partial E(w)}{\partial w_1} = 0$$
+$$\frac{\partial E(w)}{\partial w_0} = -2(y - h_w(x))\:\:\:\:\frac{\partial E(w)}{\partial w_1} = -2(y - h_w(x))\cdot x$$
+\subparagraph{Classification} The same models used for regression can be used for classification: \textbf{categorical targets} $y$ or $d$, for example 0/1, -1/+1\ldots\\
+We use an hyperplane ($wx$) assuming negative or positive values. We exploit such models to decide if a point $x$ belongs to the positive or the negative zone of the hyperplane to classify it. So we want to learn $w$ such that we get a good classification accuracy. The decision boundary is $x^Tw = w^Tx = w_0 + w_1x_1 + w_2x_2 = 0$ and we can introduce a threshold function which can be written in many ways: \begin{list}{}{}
+	\item $h(x) = \left\{\begin{array}{c l}
+	1 & \textsl{if }wx + w_0 \geq 0\\
+	0 & \textsl{else}
+\end{array}	 \right.$
+	\item $h(x) = \textsl{sign}(wx + w_0)$
+	\item \ldots
+\end{list}
+$w_0$ is called \textbf{threshold} or \textbf{bias}. $h(x) = w^Tx + w_0 \geq 0 \Leftrightarrow w^Tx \geq -w_0$
+\paragraph{Learning Algorithms} Introducing 2 learning algorithms, both based on LSM and used for the linear model on regression and classification tasks. We start redefining the learning problem and the loss for them (in the case of $l$ data and multidimensional inputs).\\\\
+\textbf{Learning problem for classification tasks}: given a set of $l$ training examples $(x_p, y_p)$ and a loss function $L$, with $y_p \in \{0,1\}$ or $y_p \in \{-1, +1\}$, find the weight vector $w$ that minimizes expected loss on the training data $$R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(x_p), y_p)$$
+The expected loss can be approximated by a smooth function. We can make the optimization problem easier by replacing the original objective function $L$ (0/1 loss) with a smooth, differentiable function: for example, the MSE loss (mean squared error).
+\begin{center}
+	\includegraphics[scale=0.75]{4.png}
+\end{center}
+No classification error minimizing either 0/1 loss or MSE loss. Given $l$ training examples $(x_p, y_p)$, find $w$ that minimizes the residual sum of squares $$E(w)= \sum_{p=1}^l (y_p - x_p^T w)^2 = ||y - Xw||^2$$
+We can't use $h(x)$ in $E(w)$, as for regression, because $h(x) = \textsl{sign}(w^T x)$ is non-differentiable. Also, this is a quadratic function so the minimum always exists (but may not be unique). $X$ is a $l\times n$ matrix with a row for each $x_p$.
+\subparagraph{Direct Approach with a normal equation} Differentiating $E(w)$ with respect to $w$ to get the \textbf{normal equation} $$(X^T X)w = X^T y$$
+In the derivation we also find that $$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (x_p)_j \cdot (y_p - x_p^T w)$$
+If $X^T X$ is not singular, then the unique solution is given by $$w = (X^T X)^{-1}X^T y = X^+ y$$ with $X^+$ being the Moor-Penrose pseudoinverse. Else the solutions are infinite, so we can choose the \textbf{min norm}$(w)$ solution.\\
+The \textbf{Singular Value Decomposition} can be used for computing the pseudoinverse of a matrix ($X^+$). With\\ $X = U\Sigma V^T \Rightarrow X^+ = V\Sigma^+ U^T$ replacing every non-zero entry by its reciprocal. We can apply SVD directly to compute $w = X^+ y$, obtaining the minimal norm (on $w$) solution of least squares problem.
+$$\frac{\partial E(w)}{\partial w_j} = \frac{\partial \sum_{p=1}^l (y_p - x_p^T w)^2}{\partial w_j} = \ldots = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$$
+\paragraph{Gradient Descent} The derivation suggests an approach based on an iterative algorithm based on\\$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$. The \textbf{gradient} is the \textbf{ascent direction}. We can move toward the minimum with a gradient descent $\Delta w = -$ gradient of $E(w)$. \textbf{Local search}: we begin with a initial weight vector and modify it iteratively to minimize the error function. The gradient vector is
+$$\Delta w = -\frac{\partial E(w)}{\partial w} = \left[\begin{array}{c}
+-\frac{\partial E(w)}{\partial w_1}\\\vdots\\-\frac{\partial E(w)}{\partial w_n}
+\end{array}\right] = \left[\begin{array}{c}
+\Delta w_1\\\vdots\\\Delta w_n
+\end{array} \right]$$
+Allowing us to work in a multi dimensional space without the need to visualize it. Hence, the iterative approach will move using a learning rule based on a "delta" of $w$ proportional to the opposite of the local gradient. The movements will be made according to $$w_{new} = w + \eta\cdot\Delta w$$
+The simple algorithm is as follows:
+\begin{enumerate}
+	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta w = -$ gradient of $E(w) = -\frac{\partial E(w)}{\partial w}$ (or for each $w_i$)
+	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)\\
+	$\eta$ is the step size or \textbf{learning rate}
+	\item Repeat from $2$ until convergence or $E(w)$ sufficiently small
+\end{enumerate}
+\subparagraph{Batch version} The gradient is the sum over all the $l$ patterns. Provides a more precise evaluation of the gradient over $l$ data. We upgrade the weight after the sum
+$$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$$
+\subparagraph{Online/Stochastic version} We upgrade the weights with the error that is computed for each pattern. Hence, the second pattern output is based on weights already updated from the first and so on. In makes progress with each example it sees. Can be faster, but needs smaller $\eta$
+$$\frac{\partial E_p(w)}{\partial w_j} = -2(y_p - x_p^T w)(x_p)_j = -\Delta_p w_j$$
+\subparagraph{Gradient Descent as error correction delta rule} The error correction rule, also called Widrow-Hoff or delta rule, changes $w_j$ proportionally to the error (target $y$ $-$ output)
+$$\Delta w_j = 2 \sum_{p=1}^l (x_p)_j (y_p - x_p^T w)$$
+$$w_{new} = w + \eta\cdot\Delta w$$
+We improve by learning on previous errors.\\\\
+Gradient descent is a simple and effective local search approach to a LMS solution. It allows to search through an infinite hypothesis space, can be easily applied for continuous $H$ and differentiable losses and isn't only for linear models (also neural networks and deep learning models).\\
+Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ldots)
+\paragraph{Linear models}\begin{list}{}{}
+	\item \textbf{Language bias}: $H$ is a set of linear functions.
+	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
+\end{list}
+Shows that even for a simple model there are many possibilities. We still need a principled approach.
+\subparagraph{Limitations} In geometry, two set of points are linearly separable in $n$-dimensional space if they can be separated by a $(n-1)$-dimensional hyperplane. In 2 dimensions, if they can be separated by a line, in 3 dimensions, by a plane\ldots\\
+The linear decision boundary can provide exact solutions only for linearly separable sets of points.
 
-% 24/09
-\paragraph{} $E(w) = \Sum_{p=1}^l (y_p - x_p^T w)^2$\\
-$\frac{\gradient E(w)}{\gradient W_j} = \ldots$ %TODO calc and first half of class
-\paragraph{Gradient Descent: final discussion}
-\paragraph{Linear models} Language bias: $H$ is a set of linear functions.\\Search Bias: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain\ldots\\ %TODO
-To extend: polynomial regression.
+% up until p. 55 of ML-21-linear-knn-v0.1.pdf
 \end{document}
