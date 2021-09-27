@@ -197,8 +197,15 @@ The idea is similar to marge sort but in reverse: we assume that in memory $M$ w
 	We sampled $(a+1)(k-1) + a = (a+1)k -1$ items
 \end{enumerate}
 If $a = 0$ the number of samples is $k-1$, no oversampling, fast sort ($O(k\log k)$) but no room to play around with the items. If $a > 0$ the sorting costs $O((ak)\log (ak))$. We chose $a = \Theta(\log k)$, only a logarithmic oversampling to get the balance $$a + 1 = 12\ln k$$ Balanced $\Rightarrow |B_i| < 4\cdot\frac{n}{k}$
-\paragraph{Proof} By contradiction. We want to estimate $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k})$ and prove that $\leq \frac{1}{2}$ so that on average two extractions are enough to guarantee that one is correct.\\
-%TODO see proof on notes
+\paragraph{Proof} By contradiction. We want to estimate $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k})$ and prove that it is $\leq \frac{1}{2}$ so that on average two extractions are enough to guarantee that one is correct.\\
+$B_i = \{S[j]\:|\: s_{i-1} < S[j] \leq S_i\}$ by definition. $A_{sort}$  contains samples from $S$.\\
+$S_{sort}$ is composed of $\frac{k}{2}$ cells of size $\frac{2n}{k}$: $t_0, t_1, \ldots, t_\frac{k}{2}$.\\
+Some pieces of $t_i$ will be totally covered by a bucket $B_j$, because since $B_i$ has size of at least $\frac{4n}{k}$ it's not possible for it to be totally included into a $t_i$. $B_j$ has twice the size, so at least one $t_i$ will be totally covered by it. So this means that $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k}) \leq P(\exists\: t_j\:|\: t_j$ is covered entirely by some $B_i)$. So the element before the beginning of $B_i$, which is $s_{i-1}$, it's contained in some point of some $t_{j-1}$ and the last element, $s_i$, is in some part of $t_{j+1}$.
+\begin{center}
+	\includegraphics[scale=0.75]{4.png}
+\end{center}
+This means that the $a$ samples are distributed in that part, between $s_{i-1}$ and $s_i$: part in $t_{j-1}$, part in $t_j$ and part in the beginning of $t_{j+1}$. How many samples inside $t_j$, the block covered by $B_i$? They are surely $< a+1$, so\\$P(\exists\: t_j\:|\: t_j$ is covered entirely by some $B_i) \leq P(\exists\:t_j\:|\:t_j$ contains less than $a+1$ samples$)$\\
+We now apply the \textbf{union bound}: the probability of existence is upper bounded by the number of possibilities times the probability of one of the events. So $P(\exists\:t_j\:|\:t_j$ contains less than $a+1$ samples$) \leq \frac{k}{2}\cdot P(t_1$ contains less than $a+1$ samples$)$. We need to estimate the latter, how many samples will go to $t_1$. $P($sample occurs in $t_1) = \frac{\frac{2n}{k}}{n} = \frac{2}{k}$, and the average number of samples in $t_1$, given $X_i = 1$ if the $i$th item is in $t_1$, is $X =$ \# of samples in $t_1 = \sum_{i = 1}^{(a+1)k - 1} X_i$. So $E[X] = E[\sum_i X_i] = \sum_{i = 1}^{(a+1)k - 1} E[X_1] = ((a+1)k - 1)\frac{2}{k} \geq 2(a+1) - 1$ because $k \geq 2$ and $2(a+1) - 1 \geq \frac{3}{2}(a+1)$.
 \paragraph{} %TODO first part of 22/9 lecture
 $P(p\in D) = $ positive events / total number $= \frac{|D|}{n} < \frac{m}{n} \leq \frac{\frac{n}{2}}{n} = 1$\\
 %TODO algorithm and proof of 22/9
