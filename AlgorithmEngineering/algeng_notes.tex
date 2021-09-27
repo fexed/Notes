@@ -202,4 +202,41 @@ If $a = 0$ the number of samples is $k-1$, no oversampling, fast sort ($O(k\log 
 \paragraph{} %TODO first part of 22/9 lecture
 $P(p\in D) = $ positive events / total number $= \frac{|D|}{n} < \frac{m}{n} \leq \frac{\frac{n}{2}}{n} = 1$\\
 %TODO algorithm and proof of 22/9
+$n$ is known, streaming model, $M= 2$, $n = 8$ items which are $[a, b, c, d, e, f, g, h]$, $P = [.5, .5, 0, .5, 1, 0, 1, 1] \leftarrow Rand(0,1)$\\
+$P($sample $i_j) = \frac{m - s}{n - k + 1}$ with $s$ being\\ %TODO
+\begin{list}{}{}
+	\item $s = 0, j = 1$ extracts a probability ($.5$) and compare $P$ against the $P($sample $i_j)$\\
+	$P = .5 \leq \frac{2 - 0}{8 - 1 + 1} = \frac{1}{4}$, first item not picked
+	\item $s = 0, j = 2, P = .5 \leq \frac{2 - 0}{8 - 2 + 1} = \frac{2}{7}$, not picked
+	\item $s = 0, j = 3, P = 0 \leq \frac{2 - 0}{8 - 3 + 1} = \frac{1}{3}$, $c$ is picked
+	\item $s = 1, j = 4, P = .5 \leq \frac{2 - 1}{8 - 4 + 1} = \frac{1}{5}$, not picked
+	\item $s = 1, j = 5, P = 1 \leq \frac{2 - 1}{8 - 5 + 1} = \frac{1}{4}$, not picked
+	\item $s = 1, j = 6, P = 0 \leq \frac{2 - 1}{8 - 6 + 1} = \frac{1}{3}$, $f$ is picked
+	\item $M = 2$ and we've picked two items, the end
+\end{list}
+In the reservoir sampling, still streaming model but $n$ is unknown. $S = [a, b, c, d, e, f, g, h, i\ldots]$, $M = 3$. Reservoir initialized with first $M$ items, $R = [a, b, c]$. Each value in $S$ has an integer $\_, \_, \_, 2, 4, 1, 2, 3, 1$, with the last $1$ is the $h$ position, always drawn from the interval $[1, j]$. The number assigned are always smaller than the position $j$.
+\begin{list}{}{}
+	\item We consider the item $d$, extracts position $2 < 3 = M$ and substitutes $b$ in the reservoir, $R = [a, d, c]$
+	\item $e$, position $4 > 3$ nothing changes
+	\item $f$, position $1 < 3$ and substitutes $a$, $R =  [f, d, c]$
+	\item $g$, $R = [f, g, c]$
+	\item $h$, $R = [f, g, h]$
+	\item $i$, $R = [i, g, h]$
+\end{list}
+\paragraph{Disk Striping} $D > 1$. Several disks, the pages of the disks are linked: first page of all $D$ disks are a single page. So it's considered as a single disk with $B' = D\cdot B$\\
+In sorting, the bound is $O(\frac{n}{DB}\cdot\log_{\frac{M}{DB}} \frac{n}{M})$ over $D$ disks with disk striping. The lower bound is $\Omega(\frac{n}{DB}\cdot\log_{\frac{M}{B}} \frac{n}{M})$
+$$\frac{\frac{n}{DB}\cdot\log_{\frac{M}{DB}} \frac{n}{M}}{\frac{n}{DB}\cdot\log_{\frac{M}{B}} \frac{n}{M}} \geq 1$$
+$$\frac{\log_2 \frac{n}{M}}{\log_2 \frac{M}{DB}}\cdot \frac{\log_2 \frac{M}{B}}{\log_2 \frac{n}{M}}$$
+$$\frac{\log_2 \frac{M}{B}}{\log_2 \frac{M}{B} - \log_2 D}$$
+$$\frac{1}{1 - \frac{\log_2 D}{\log_2 \frac{M}{B}}}$$
+$$\frac{1}{1 - \log_{\frac{M}{B}} D}$$
+$\frac{M}{B}$ tipically thousands, $D$ at most 10-20, so $\log_{\frac{M}{B}} D < 1$. $M\to\infty \Rightarrow 1$ optimal. $M\to DB \Rightarrow \infty$, very very slow.
+\paragraph{Randomized data structures}
+\subparagraph{TREAP} From binary search TREe + hEAP.\\
+Every node is two part: a part is the key and the other is the priority. Binary search tree according to the key and a heap according to the priority. To distinguish, letters for the key and numbers for the priority and max heap.\\
+Left part the keys will be smaller than the root, the right will be larger. The left and right tree, being a maximum heap, have smaller priorities. So the root has the maximum priority.\\
+Let's consider the following TREAP:\\
+3-sided range query\\
+%TODO cost
+%TODO relocate
 \end{document}
