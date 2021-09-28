@@ -246,4 +246,38 @@ Let's consider the following TREAP:\\
 3-sided range query\\
 %TODO cost
 %TODO relocate
+$h$ height of the treap, $n$ if just a path or $\log n$ if balanced. $h = O(\log n)$ on average. Let's prove it. $A_k^i = \left\{ \begin{array}{c}
+1 \textsl{if }x_i\textsl{ is a proper ancestor of }x_k\\
+0 \textsl{otherwise}
+\end{array}\right.$ and $depth(x_k) = \sum_{i=1}^k A_k^i$ which counts the proper ancestors of $x_k$. $E[depth(x_k)] = E(\sum_{i=1}^k A_k^i] = \sum_{i=1}^k E[A_k^i]$ and the expected of a indicator variable is the probability of it being 1 so $= \sum_{i=1}^k P(A_k^i = 1)$ which is the probability of $x_i$ being on the path to $x_k$. We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted. So $\sum_{i=1}^k P(A_k^i = 1)$ we consider $x_i < x_k$ or vice versa, is totally symmetric. So $priority(x_i) > priority(x_k)$\\
+Theorem: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
+Various cases:
+\begin{enumerate}
+	\item $x_r$ with largest priority, so $x_r,\ldots, x_i,\ldots, x_k$, so $x_r$ becomes the root of the treap and the $x_i,\ldots, x_k$ go to the right subtree. So we consider the subtree.\\
+	Same for $x_r$ with largest priority and $x_i,\ldots, x_k,\ldots, x_r$. $x_r$ still root and $x_i,\ldots,x_k$ in the left subtree.\\
+	So we restrict the attention to the $X(i,k)$ set.
+	\item $x_i$ has the largest priority $\Rightarrow x_i$ is the root of the treap and $x_k$ goes to the right, so $x_i$ is the ancestor.
+	\item $x_j$ has the largest priority, where $x_j\neq x_i$ and $x_j \in X(i,k)$, it's one of the items $\Rightarrow x_j$ to the root, $x_i$ to the left and $x_k$ to the right. So $x_i$ is surely \textbf{not an ancestor} of $x_k$.
+\end{enumerate}
+$P(x_i$ ancestor of $x_k) = P(x_i$ has the largest priority of $X(i,k))$ and because the priorities are picked are random $= \frac{1}{|X(i,k)|} = \frac{1}{k - i + 1}$ if $i < k$ or $\frac{1}{i - k + 1}$ if $i > k$. Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$\\
+$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} = \sum_{i = 1}^{k-1} \frac{1}{k-i + 1} + \sum_{i = k+1}^n \frac{1}{i - k + 1}$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$)\\
+Keys are inserted in random order so that priority = order, so average depth is $O(\log n)$.
+\paragraph{Skip list} We have a list of items $L_0 = -\infty \rightarrow 3 \rightarrow 6 \rightarrow 7 \rightarrow 10 \rightarrow 15 \rightarrow 16 \rightarrow +\infty$ with $\pm\infty$ logical marks. The search in lists is very bad, the idea is to create levels of lists. List of level $L_1 = -\infty \ldots +\infty$ with vertical pointers.
+\begin{center}
+	\includegraphics[scale=0.5]{5.png}
+\end{center}
+We can promote $k$ items to $L_1$, $k + \frac{n}{k} \Rightarrow k = \sqrt{n}$. The item are promoted randomly. For every item in $L_0$, it is promoted with probability = $\frac{1}{2}$ (coin toss, tails promotes heads doesn't), promoting $\frac{n}{2}$ items on average. This can be done for more levels.
+\begin{center}
+	\includegraphics[scale=0.5]{6.png}
+\end{center}
+We search for the topmost list, compare and go to the correct portion in the list below. At every step I scan the list if the element I'm looking for is larger and go to the list below if it's smaller. The deletion removes the column of items, in every list that item appears.\\
+Insertion: first you find the position in $L_0$, you insert and then toss the coin. To identify the left/right part in the upper levels,\\\\ %TODO
+$L =$ \# of levels of the skip list on $n$ items $= max_k L(k)$ with $L(k) =$ level of the $k$th item.\\
+$P(L(k) \geq l) = $ the probability of extracting $l$ tails and those are independent coin tosses $= \left(\frac{1}{2}\right)^l$.\\
+$P(L \geq l) = P(max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdot\left(\frac{1}{2}\right)^l = \frac{n}{2^l}$ for the union bound.
+\begin{enumerate}
+	\item $l \leq \log_2 n \rightarrow \frac{n}{2^l} \geq \frac{n}{2^{\log n}} = \frac{n}{n} = 1$ so the inequality is not significant, because a probability is always $\leq 1$
+	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
+\end{enumerate}
+$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$
 \end{document}
