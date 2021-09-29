@@ -187,4 +187,25 @@ The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ w
 $\sigma_1 >> \sigma_2,\ldots$ then $A$ very close to rank 1.\\
 $\sigma_1, \sigma_2 >> \sigma_3,\ldots$ then $A$ very close to rank 2, and so on.
 %TODO last half of 28/09
+%TODO convergence rates pictorially images
+\paragraph{Improving dichotomic searc} Quadratic interpol has superlinear convergence if started "close enough".\\
+$f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$ with $p = \frac{1 + \sqrt{5}}{2}$ esponent of superlinear convergence.\\$x_0$ is the starting point of the algorithm.\\\\
+Four conditions $\Rightarrow$ can fit a cubic polynomial and use its minima. Theoretically pays: quadratic convergence ($p = 2$) and seems to work well in practice.
+\paragraph{Newton's method} More derivatives, so same information with less points. Construct a second order model $Q_i(x) = Q_{x^i}(x) = f(x^i) + f'(x^i)(x - x^i) + f''(x^i)\frac{(x - x^i)^2}{2}$ and then minimize it.\\\\
+$L'_i(x) = L'_{x^i}(x) = f'(x^i) + f''(x^i)(x - x^i) = f'(x)$ and solve $L'_i(x) = 0 \Rightarrow x = x^i - \frac{f'(x^i)}{f''(x^i)}$
+\begin{verbatim}
+	procedure x = NM(f, x, e)
+		while(|f'(x)| > e) do
+			x = x - f'(x)/f''(x)
+\end{verbatim}
+Numerally delicate: what if $f''(x) = 0$? Converges at all only if started close enough. If we get within a short enough distance $\delta$, then it will converges extremely fast with $p = 2$.
+\paragraph{Global optimization} Unless strong assumptions are made, we can't say much about global optimization.\\
+The obvious one would be unimodal, but not easy to verify/construct. Workable alternative: $f$ convex ($\Rightarrow$ unimodal).
+\paragraph{Convexity} $f'$ monotone non decreasing and $f'' \geq 0$. But convexity $\not\Rightarrow C^1$. Some functions are convex and a few operators preserve convexity. Many models are purposely constructed convex $\Rightarrow$  \textbf{Spatial branch-and-Bound approach}: sift through all $X = [x_-, x_+]$ using clever guide, convex lower approximation \underline{$f$} of nonconvex $f$ on $X$.
+\begin{center}
+	\includegraphics[scale=0.5]{2.png}
+\end{center}
+"Easily" find local $=$ global minimum $\overline{x}$ giving \underline{$f$}$(\overline{x}) \leq f_* \leq f(\overline{x})$. If gap $f(\overline{x}) - \underline{f}(\overline{x})$ too large, we partition $X$ and iterate. If on some partition $\underline{f}\overline{x}) \geq$ best $f$-value so far, partition killed.\\
+In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much nonconvex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the nonconvexities.
+\paragraph{Multivariate} $f$ L-c, no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. Curse of dimensionality: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B&B can give global optimum. If $f$ black-box (tipically, no derivatives), many heuristics can give good solutions, probably not optimal.
 \end{document}
