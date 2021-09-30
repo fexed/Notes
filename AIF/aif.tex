@@ -286,13 +286,42 @@ We also use $C_{x_1,\ldots,x_k} =$ rel to denote a constraint with scope = $x_1,
 Searching efficiently: heuristics, intelligent backtracking\ldots\\
 Exploiting the structure of the problem: independent sub-problems, tree structured constraint, tere decomp, exploiting symmetry.
 %CSP-1.pdf done
-\paragraph{Constraint hyper-graphs}
-\paragraph{Related concepts} Problem reduction techniques, enforcing local consistency and constraint propagation/inference.
-\subparagraph{Problem reduction} $P_1$ reduced to $P_2$ when $P_1$ is equivalent to $P_2$, domains of variables in $P_2$ are subsets of those in $P_1$ and the constraints in $P_2$ are at least as restrective as those in $P_1$.\\
+\paragraph{Constraint hyper-graphs} Binary CSP = CSP with unary and binary constraints only. May be represented as an undirected graph $(V, E)$: nodes corresponds to variables $V$ and edges corresponds to binary constraints between variables $(E = V\times V)$. Edges are undirected arcs (can be seen as pair of arcs).\\
+Node $x$ is adiacent to node $y$ is $(x, y)\in E$. A graph is connected if there's a path among any two nodes.\\\\
+In general, every CSP is associated with a constraint hyper-graph, a generalization of graphs: an hyper-node may connect more than two nodes. The constraint hyper-graph of a CSP $\langle X, D, C\rangle$ is a hyper-graph in which each node represent a variable in $C$ and each hyper-node represents a higher order constraint in $C$
+\begin{center}
+	\includegraphics[scale=0.75]{5.png}
+\end{center}
+\subparagraph{Dual Graph transformation} Alternate way to convert a $n$-ary CSP to a binary one:
+\begin{enumerate}
+	\item Create a new graph in which there is one variable for each constraint in the original graph
+	\item If two constraints share variables, they are connected by an arc corresponding to the constraint that the shared variables receive the same value
+\end{enumerate}
+Example: $Dom(x) = Dom(y) = Dom(z) = \{1,2,3\}$ with $C_1 = \{(x,y,z), x + y = z\} = \{(1,2,3), (2,1,3), (1,1,2)\}$ and $C_2 = \{(x,y), x < y\} = \{(1,2), (1,3), (2,3)\}$.
+This will become $Dom(C_1) = \{(1,2,3), (2,1,3), (1,1,2)\}, Dom(C_2)=\{(1,2), (1,3), (2,3)\}$ and $R_{x,y} =$ constraint that $x$ and $y$ will receive the same values
+\begin{center}
+	\includegraphics[scale=0.75]{6.png}
+\end{center}
+\paragraph{Related concepts} \begin{list}{}{}
+	\item \textbf{Problem reduction techniques}: techniques for transforming CSP into an equivalent problem easier to solve or recognizable as insoluble
+	\item \textbf{Enforcing local consistency}: the process of enforcing local consistency properties in a constraint graph causes inconsistent values to be eliminated. Different types of local consistency properties have been studied.
+	\item \textbf{Constraint propagation/inference}: constraints are used to reduce the number of legal values for a variable, which in turn can reduce the legal value for another variable and so on\ldots
+\end{list}
+\subparagraph{Problem reduction} Reducing a problem means removing those constraints which appear in no solution tuples.\\
+A CSP problem $P_1$ is reduced to $P_2$ when $P_1$ is equivalent to $P_2$, domains of variables in $P_2$ are subsets of those in $P_1$ and the constraints in $P_2$ are at least as restrictive as those in $P_1$.\\
 These conditions guarantees that a solution in $P_2$ is also a solution in $P_1$.\\
-\textbf{Strategies}
-\subparagraph{Local Consistency properties}
-\paragraph{Node/domain consistency}
+\textbf{Problem reduction strategies} are of two types: removing redundant values from the domains of the variables or tightening the constraints so that fewer compound labels satisfy them (examples: if $x < y$ and $D_x = \{3,4,5\}, D_y = \{1, 2,4\}$ then those can be reduced to $D_x=\{3\}, D_y=\{4\}$.\\
+Constraints are sets, this means removing redundant compound labels from the set. If the domain of any variable or any constraint is reduced to an empty set, then the problem is \textbf{unsolvable}.\\
+Problem reduction is also called consistency checking or maintenance, since it relies on establishing local consistency properties.\\\\
+\textbf{Local consistency properties}: node consistency, arc consistency, path consistency, k-consistency, forward checking.\\
+All these operations do not change the set of solutions, do not necessarily solve a problem but, used with search, will make the search more efficient by pruning the search tree.
+\begin{list}{}{} 
+	\item \textbf{Node/Domain consistency}: a node is consistent if all the values in its domain satisfy unary constraints on the associated variable. A constraint network is node-consistent if all the nodes are consistent.\\
+	Given a unary constraint on $x_i$, $C_i = \langle(x_i), R_i\rangle$ then node consistency $D_i \subseteq R_i$ and can be enforced by reducing the domains of the variables $D_i \leftarrow D_i \cap R_i$ (this is the NC-1 algorithm, $O(d\cdot n)$)
+	\item \textbf{Arc consistency}: a variable is arc-consistent if every value in its domain satisfies the binary constraints of this variable with other variable. $x_i$ is arc-consistent with respect to $x_j$ if for every value in its domain $D_i$ there is some value in the domain $D_j$ that satisfies the binary constraint on the arc $(x_i, x_j)$\\
+	Example, $X = \{x, y\}$, $D_x = D_y = \{0,1,2,3,4,5,6,7,8,9\}$ and constraint $\langle(x,y), x=y^2\rangle$. Considering arc $x \rightarrow y$, it can be made consistent by reducing $D_x$ to $\{0,1,4,9\}$. Considering $y \rightarrow x$, can be made consistent by reducing $D_y$ to $\{0,1,2,3\}$, making the entire edge consistent.
+\end{list}
+%CSP-2.pdf, p. 19
 \paragraph{Arc Consistency Algorithm (AC-3)} Maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent with respect to $x_j$. If this step leaves $D_i$ unchanged, the algorithm just moves on to the next arc. If $D_i$ is made smaller, then we need to add to teh queue all arcs $(x_k, x_j)$ where $x_k$ is a neighbor of $x_i \neq x_j$. If $D_i$ becomes empty, then we conclude that the CSP has no solution.\\
 When there are no more arcs to consider, we have finished.
 \paragraph{Generalized Arc Consistency} GAC, extension of AC-3.
