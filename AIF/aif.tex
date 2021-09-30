@@ -145,9 +145,14 @@ Bot sensors and %TODO
 Agents act in time. $T$ is a set of time points, with start at 0, totally ordered, discrete and each $t$ has a next time $t+1$.\\
 Percept trace/stream: function of time into percepts (past, present, future)\\
 Command trace: a function of time into commands (past, present, future)\\
-History at time $t$: percepts up to $t$ and commands up to $t-1$\\\\
-Casual trasduction: a function from history to commands. Transduction comes from finite state transducers, where both new states and commands are emitted. Casual because only previous and current percepts and previous commands can be considered. A controller ideally implements a casual transduction.
-%TODO command/agent function
+History at time $t$: percepts up to $t$ and commands up to $t-1$
+\paragraph{Causal Trasduction} Function from history to commands. Transduction comes from \textit{finite state transducers}, where both new states and commands are emitted. "Causal" because only previous and current percepts and previous commands can be considered. A controller ideally implements a causal transduction.\\
+But complete history is usually unavailable, only the memory of it. The belief state of an agent at time $t$ is all the information that the agent remembers from the previous times. The behavior of an agent can be described by two functions:
+\begin{list}{}{}
+	\item \textbf{Belief State function} $\textsl{remember}:S\times P\rightarrow S$ with $S$ being the set of belief states and $P$ the set of percepts
+	\item \textbf{Command function} $\textsl{command}:S\times P \rightarrow C$ with $C$ being the set of commands.
+\end{list}
+The controller implements both, an approximation of the causal transduction.
 \paragraph{Problem Solving as search} The dominant approach to AI is formulating a task as a search in a state space. The paradigm is as follows:
 \begin{list}{}{}
 	\item Define a goal (a set of states, a boolean test function\ldots)
@@ -157,38 +162,113 @@ Casual trasduction: a function from history to commands. Transduction comes from
 \end{list}
 This is a basic technique in AI: search happens inside the agent, it's the planning stage before acting. It's different from searching the world, when an agent may have to act in the world and interleave an action with planning.\\
 Search is a general paradigm, underlying much of the artificial intelligence field. An agent is usually given only a description of what it should achieve, not an algorithm to solve it. The only possibility is to search for a solution. Searching can be computationally very hard (NP-Complete).\\
-Humans are able to solve specific instances by using their knowledge about the problem. This extra knowledge is called heuristic knowledge.
+Humans are able to solve specific instances by using their knowledge about the problem. This extra knowledge is called \textbf{heuristic knowledge}.
 \paragraph{Assumptions in classic problem solving} Problem solving agents are goal driven agents, that work under simplified assumptions made in the design process.
 \begin{list}{}{}
 	\item States are treated as black boxes: we only need to know the heuristic value and whether they are a goal by applying the boolean goal function. The internal structure doesn't matter from the point of view of search algorithms. \textbf{Atomic representations}.
 	\item The agent has \textbf{perfect knowledge} of the state (full accessibility), no uncertainty in sensors.
-	\item Actions are \textbf{deterministic}
+	\item Actions are \textbf{deterministic}, so that the agent know the consequences of its actions.
 \end{list}
+The state space is generated incrementally: can be infinite, so may not fit in memory.
 \paragraph{Problem formulation} A problem is defined formally by five components:
 \begin{list}{}{}
-	\item Initial state
-	\item Possible actions in state $s$, $\textsl{Actions}(s)$
-	\item Transition model: a function $\textsl{Result}: \textsl{State}\times\textsl{Action}\rightarrow \textsl{State}$\\
-	$\textsl{Result}(s,a) = s'$, a \textbf{successor} state
-	\item Goal states are defined by a boolean function\\
+	\item \textbf{Initial state}
+	\item \textbf{Possible actions} in state $s$, $\textsl{Actions}(s)$
+	\item \textbf{Transition model}: a function $\textsl{Result}: \textsl{State}\times\textsl{Action}\rightarrow \textsl{State}$\\
+	$\textsl{Result}(s,a) = s'$, a \textbf{successor state}
+	\item \textbf{Goal states} are defined by a boolean function\\
 	$\textsl{Goal-Test}(s) \rightarrow\{\textsl{true}, \textsl{false}\}$
 	\item $\textsl{Path-cost}$ function, that assigns a numeric cost to each path. The sum of the cost of the actions on the path $c(s, a, s')$
 \end{list}
-\paragraph{Graphs for searching} A directed graph consists of a set $N$ of nodes and a set $A$ of arcs, which are ordered pairs of nodes. Node $n_2$ is a neighbor/successor of $n_1$ if $\exists\:(n_1, n_2)\in A$, and a path is a sequence of nodes $(n_0,\ldots,n_k)$ such that $(n_{i-1}, n_i)\in A$ with length $k$.\\The cost of the path is the sum of the costs of its arcs $\textsl{cost}((n_0,\ldots,n_k)) = \sum_{i=1}^k \textsl{cost}((n_{i-1}, n_i))$
+\paragraph{Graphs for searching} A (directed) graph consists of a set $N$ of nodes and a set $A$ of arcs, which are ordered pairs of nodes. Node $n_2$ is a neighbor/successor of $n_1$ if $\exists\:(n_1, n_2)\in A$, and a path is a sequence of nodes $(n_0,\ldots,n_k)$ such that $(n_{i-1}, n_i)\in A$ with length $k$.\\The cost of the path is the sum of the costs of its arcs $\textsl{cost}((n_0,\ldots,n_k)) = \sum_{i=1}^k \textsl{cost}((n_{i-1}, n_i))$.\\
+A \textbf{solution} is a path from a start node to a goal node and an \textbf{optimal solution} is one with minimum cost.
 \paragraph{Search algorithms} A problem is given as input to a search algorithm. A solution to a problem is a path (actions sequence) that leads from the initial state to a goal state.\\
-Solution quality is measured by the path cost function: an optimal solution has the lowest path cost among all solutions. Different strategies (algorithms) for searching the state space may be characterized by:
+\textbf{Solution quality} is measured by the path cost function and an optimal solution has the lowest path cost among all solutions. Different strategies (algorithms) for searching the state space may be characterized by:
 \begin{list}{}{}
 	\item Their time and space complexity, completeness, optimality\ldots
 	\item Uninformed search methods vs informed/heuristic search methods, which use an heuristic evaluation function of the nodes
 	\item Direction of search (forward or backwards)
 	\item Global vs local search methods
 \end{list}
-% CSP-1.pdf p. 16
-\paragraph{CSP} Formal definition\\
-A Constraint Satisfaction Problem consists of three components: $CSP = \langle$\\ %TODO
-Partial assignment of values\\
-A constraint on a set of variables is a set of possible assignments for those variables.\\
-%Examples
+\subparagraph{Generic search algorithm}
+\begin{verbatim}
+	input:
+		a graph
+		a set of nodes
+		boolean function goal(n) that tests if n is a goal node
+	
+	frontier := {s | s is a start node}
+	while frontier is not empty:
+		select and remove path (n0, ..., nk) from frontier
+		if goal(nk):
+			return (n0, ..., nk)
+		for each neighbor n of nk
+			add (n0, ..., nk, n) to frontier
+	end while
+	return fail
+\end{verbatim}
+\subparagraph{Other algorithms} With $b$ max number of successors, $d$ depth of solution and $m$ max distance of solution. \begin{list}{}{}
+	\item \textbf{Breadth and Depth search} Respectively:
+		\begin{center}
+			\includegraphics[scale=0.75]{4.png}
+		\end{center}
+		\textbf{Breadth search}: complete, optimal, time $O(b^d)$, space $O(b^d)$\\
+		\textbf{Depth search}: not complete, time $O(b^m)$, space $O(bm)$
+	\item \textbf{Depth bounded search}: supposes to know the distance of the solution, performs depth-first up to a limit without giving up completeness
+	\item \textbf{Iterative deepening}: tries depth limit 1, then 2, then 3 and so on, freeing memory from one iteration to the next.
+	\item \textbf{Uniform cost search}: at each stage, selects a path on the frontier with lowest cost.\\
+	The frontier is priority queue ordered by path cost, so the first path to goal is the least-cost path. When arc costs are equal is equivalent to breadth-first search.\\
+	This strategy is complete, provided that the branching factor is finite and there is some $\epsilon > 0$ such that all the costs are $> \epsilon$. It's also optimal, since it guarantees that the paths with lower costs are found first.
+\end{list}
+\subparagraph{Heuristic search} The idea is to not ignoring the goal when selecting the paths. Often there's extra knowledge that can be used to guide the search: \textbf{heuristics}, provided by an heuristic function $h:N\rightarrow R \Rightarrow h(n)$ is the estimate of the cost of the shortest path from node $n$ to the goal node.\\
+$h$ needs to be efficiently to compute. An \textbf{admissible heuristic} $h^*(n)$ is a non-negative heuristic function that \textbf{under-estimates} the minimum cost of a path from a node $n$ to a goal: $\forall\:n\:\:\:h(n) \leq h^*(n)$\\\\
+\textbf{Best first search} selects the most promising node on the frontier according to the heuristic function.
+\subparagraph{$A^*$ search} With an heuristic function in the form $f(n) = g(n) + h(n)$ with:
+\begin{list}{}{}
+	\item $g(n)$ being the cost of path leading to $n$ (so the previous path up until $n$, $\textsl{cost}(n)$)
+	\item $h(n)$ is an admissible heuristic (so, $h(n) \geq 0$)
+\end{list}
+Then $f(n)$ estimates the total path cost of going from a start node to a goal via $n$. The special cases are $h = 0$ (lowest cost search) and $g = 0$ (greedy best first).\\
+Properties of $A^*$:\begin{list}{}{}
+	\item Complete
+	\item Always finds an optimal solution, if the branching factor is finite and arc costs are bounded above 0 (which means that $\exists\:\epsilon > 0\:|$ arc costs are $> \epsilon$)
+	\item Optimiziations are possibile when searching graphs
+	\item The operate some sort of graph pruning:
+	\begin{list}{}{}
+		\item \textbf{Cycle pruning}: doesn't add nodes to the frontier with states already encountered along the path (easy)
+		\item \textbf{Multiple-path pruning}: maintains an explored set of nodes that are at the end of paths that have been expanded. When an $n$ is selected, if its state is already in the explored set, it's discarded.
+	\end{list}
+	\item Memory requirement is exponential ($O(b^d)$). Can be mitigated in some ways:
+	\begin{list}{}{}
+		\item $IDA^*$: performs repeated depth-bounded searches with value of $f(n)$ used as bound
+		\item Recursive best-first, similar to branch \& bound
+		\item $SMA^*$ (simplified memory-bounded $A^*$)
+		\item Beam search, keeps in frontier only the best $k$ paths, with $k$ being the beam width (gives up optimality)
+	\end{list}
+\end{list}
+\subparagraph{Consistent heuristics} An heuristic that statisfies the monotone restriction guarantees consistency $h(n) \leq \textsl{cost}(n, n') + h(n')$\\
+Consistency $\Rightarrow$ admissibility. With the monotone restriction, the $f$-values of the paths selected from the frontier are monotonically non-decreasing.
+\paragraph{Features} Often better to describe states in terms of features: \textbf{factored representation}, more natural and efficient than explicitly enumerating states. Often, features are not independent and there are constraints that specify legal combinations of assignments. We can exploits these constraints to solve tasks.\\
+Constraint satisfaction is about generating assignments that satisfy a set of hard constraints and how to optimize a collection of soft constraints (preferences).
+\paragraph{CSP} \textbf{Constraint Satisfaction Problem}, formal definition.
+A Constraint Satisfaction Problem $CSP = \langle X, D, C\rangle$ consists of three components: \begin{list}{}{}
+	\item A finite set of \textbf{variables}, $X = \{x_1, \ldots, x_n\}$
+	\item A \textbf{finite domain} for each variable, $D = \{D_1, \ldots, D_n\}$ with each $D_i = \{v_1, \ldots, v_k\}$ containing values assignable to $x_i$.\\
+	$\textsl{Dom}$ is a function that maps every variable in $X$ to a set of objects of arbitrary type. $\textsl{Dom}(x) = D_x$
+	\item A \textbf{set of constraints} that restrict the values the variables can simultaneously take, $C$
+\end{list}
+Task: assign a value from the associated domain to each variable satisfying all the constraints. \textbf{NP-hard} in worst cases, but general heuristics exist and structures can be exploited for efficiency.\\\\
+A \textbf{(partial) assignment} of values to a set of variables (\textbf{compound label}) is a set of pairs $A=\{\langle x_i, v_i\rangle, \ldots\}$ with $v_i \in D_{x_i}$. A \textbf{complete assignment} is an assignment to all the variables of the problem. Can be projected to a smaller partial assignment by restricting the variables to a subset (projection, with the following notation: $\pi_{x_1,\ldots,x_k} A$, with $\pi$ being the projection operator of relational algebra)\\
+Each constant in $C$ can be represented as a pair $\langle$ scope, rel$\rangle$: scope is a tuple of variables participating in the constraint, and rel is a relation that defines the allowable combinations of values for those variables, taken from the respective domains. The relation can be represented as: an explicit list of all tuples of values that satisfy the constraint (explicit relation), or an implicit relation (an object that supports two operations: testing if a tuple is a member of the relation and enumerating the members of the relation).\\
+We also use $C_{x_1,\ldots,x_k} =$ rel to denote a constraint with scope = $x_1,\ldots,x_k$, so the constraint $C=\langle(x_1,\ldots,x_k),$ rel$\rangle$
+\paragraph{CSP solution} To solve a CSP problem seen as a search problem, we need to define a state space and the notion of a solution.
+\begin{list}{}{}
+	\item \textbf{State}: assignment of values to some or all the variables.\\
+	Partial if values are assigned only to some of the variables, complete if every variable is assigned.
+	\item \textbf{Solution}: a complete and consistent assignment.\\
+	An assignment is consistent if it satisfies all the constraints: $\textsl{Satisfies}(\{\langle x_1,v_1\rangle, \ldots, \langle x_k, v_k\rangle\}, C_{x_1,\ldots, x_k})$ for any constraint in $C$
+\end{list}
+%TODO Examples
 %Map coloring
 %Queens
 %job-shop
@@ -198,12 +278,14 @@ A constraint on a set of variables is a set of possible assignments for those va
 	\item Problem size (number of variables and constraints)
 	\item Type of variables and constraints
 	\item Structure of the constraint graph
-	\item Thightness of the problems (measured in terms of the solution tuples over the number of all distinct compund labels of all variables)
+	\item Tightness of the problems (measured in terms of the solution tuples over the number of all distinct compund labels of all variables)
+	\item Quality of solutions
+	\item Partial solutions
 \end{list}
-\paragraph{CSP solving techniques} Problem reduction techniques/inference/constraint propagation: techninques fro transofrming CSP into a equivalento problem easier to solve or recognizable as insoluble.\\
-Searching efficiently: heuristicks, intelligent backtracking\ldots\\
+\paragraph{CSP solving techniques} Problem reduction techniques/inference/constraint propagation: techniques for transforming CSP into an equivalent problem easier to solve or recognizable as insoluble.\\
+Searching efficiently: heuristics, intelligent backtracking\ldots\\
 Exploiting the structure of the problem: independent sub-problems, tree structured constraint, tere decomp, exploiting symmetry.
-\paragraph{Constraint hypergraphs}
+\paragraph{Constraint hyper-graphs}
 \paragraph{Related concepts} Problem reduction techniques, enforcing local consistency and constraint propagation/inference.
 \subparagraph{Problem reduction} $P_1$ reduced to $P_2$ when $P_1$ is equivalent to $P_2$, domains of variables in $P_2$ are subsets of those in $P_1$ and the constraints in $P_2$ are at least as restrective as those in $P_1$.\\
 These conditions guarantees that a solution in $P_2$ is also a solution in $P_1$.\\
@@ -213,4 +295,26 @@ These conditions guarantees that a solution in $P_2$ is also a solution in $P_1$
 \paragraph{Arc Consistency Algorithm (AC-3)} Maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent with respect to $x_j$. If this step leaves $D_i$ unchanged, the algorithm just moves on to the next arc. If $D_i$ is made smaller, then we need to add to teh queue all arcs $(x_k, x_j)$ where $x_k$ is a neighbor of $x_i \neq x_j$. If $D_i$ becomes empty, then we conclude that the CSP has no solution.\\
 When there are no more arcs to consider, we have finished.
 \paragraph{Generalized Arc Consistency} GAC, extension of AC-3.
+\paragraph{CSP as search: simplifications}
+\paragraph{Backtracking search algorithm}
+\subparagraph{Heuristics}
+\subparagraph{Choosing the next variable}\begin{list}{}{}
+	\item \textbf{MRV} (minimnum remaining values): variable with fewest "legal" remaining values
+	\item \textbf{Degree heuristic}: variable involved in the largest number of constraints
+\end{list}
+\subparagraph{Choosing value} \begin{list}{}{}
+	\item \item \textbf{Least constaint variable}: rules out the fewest schoices
+\end{list}
+\subparagraph{Interleaving search and inference} One of the simplest form of inference progpagation is forward checking: efficient constraint propagation, weaker than other forms. Whenever $X$ is assigned, FC process establishes arc consinstency of $X$ for the arcs conencting neighbor nodes. For each unassigned $Y$ connected to $X$, delete form $Y$ domain any value inconsistent with the value assigned to $X$.
+\paragraph{Constraint learning} When the search is at a contradiction, we know that some subset of the conflict set is responsible. Constaint learning is the idea of finding a minimum set of variables from teh conflct set that causes the problem: the no-good set. We record the no-good set either by adding a new costraint to teh CSP or by keeping a seaorate cache of no-goods. This way we do not repeat the no-good state.
+\paragraph{Local search} Require a complete state formulation, keep in memory only current state to improve it iteratively and do not guarantee to find solution even if it exists (not complete).\\
+Used when space too large and need to be very efficient, provide a solution but not importanto to produce solution path and know in advance that a solution exists.
+\subparagraph{Heuristic Local Search} Inject heuristics in the selection of the variable and the value by the means of an evaluation function. \textbf{Iterative best improvement}: choose the successor that most improves the current state according to an evaluation function $f$
+\subparagraph{Stochastic Local Search} Adds randomness, escapes local minima\ldots\\
+\textbf{Variants} \begin{list}{}{}
+	\item Most improving step
+	\item Two stage choice
+	\item Any conflict
+\end{list}
+\subparagraph{CSP: Min-Conflict Heuristic}
 \end{document}
