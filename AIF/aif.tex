@@ -347,4 +347,22 @@ Used when space too large and need to be very efficient, provide a solution but 
 	\item Any conflict
 \end{list}
 \subparagraph{CSP: Min-Conflict Heuristic}
+%TODO first part of 1/10 lecture
+\paragraph{Independent sub-problems: complexity}
+\paragraph{The structure of problems: tree} In a tree-structured graph, two node are connected by only one path: we can choose any variable as root of the tree. Chosen a variable as root, the tree induces a topological sort on the variables: chieldren of a node are listed after their parent
+\subparagraph{Directional arc consistency} %TODO def
+\paragraph{Reducing graphs to trees} For example, assigning a value to the node we want to remove and removing inconsistent values for other variables, then solve with tree-csp-solver.\\
+In general not easy.
+\subparagraph{Cutset conditioning} Domain splitting strategy, trying with different assignments: choose subset S of CSP's variabile such that the constraint graph becomes a tree: S is cycle cutset. For each consistent assignmetn to variabiles in S: remove from the domains of remaining vars any vals that are inconsistent, if the remaining CSP has a solution, return it together with the current assignment of S.\\
+Time $O(d^c(n-c)d^2)$ where $c$ is size of cycle cutset and $d$ size of the domain. We have to try each of the $d^c$ coimbinations of values for the cvaraibles in $S$ and for each combination we must solve a tree problem of size $(n-c)$
+\paragraph{Tree decomposition} The approach consists in a tree decomposition of the contrasint graph into a set of connected sub-roboelkms. Each of them is solved intdepentendly\ldots\\ %TODO with image
+\begin{list}{}{}
+	\item every var in the original problem appears in at least one of the sub-problems
+	\item if two var connectd by a constraint they must appear together at least in one of the sub problem along with the constraint
+	\item if a variabile appears in two subproblems in the tree, it must appear in every subproblem along the path connecting those subproblems
+\end{list}
+1-2 ensure that all vars and constraints are represented. Condition 3 ensure that any given pvar must have same value in every subproblem.
+\subparagraph{Solving a decomposed problem} %TODO
+\paragraph{Simmetry} important factor for reducing complexity of CSP problems. Value simmetry: the values does not really matter: different colors, but there are 6 equivalent ways of satisfying the constraints. If $S$ is as solution to coloring $n$ var, there are $n!$ solutions.\\
+\textbf{Simmetry breaking constraints}: we impost an arbitrary ordering constraints that requires the values to be in alphabetical order. Breaking value simmetry has proved to be important and effective on many problems.
 \end{document}

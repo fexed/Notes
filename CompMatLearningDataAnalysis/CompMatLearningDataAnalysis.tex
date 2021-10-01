@@ -207,5 +207,23 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 \end{center}
 "Easily" find local $=$ global minimum $\overline{x}$ giving \underline{$f$}$(\overline{x}) \leq f_* \leq f(\overline{x})$. If gap $f(\overline{x}) - \underline{f}(\overline{x})$ too large, we partition $X$ and iterate. If on some partition $\underline{f}\overline{x}) \geq$ best $f$-value so far, partition killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much nonconvex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the nonconvexities.
-\paragraph{Multivariate} $f$ L-c, no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. Curse of dimensionality: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B&B can give global optimum. If $f$ black-box (tipically, no derivatives), many heuristics can give good solutions, probably not optimal.
+\paragraph{Multivariate} $f$ L-c, no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. Curse of dimensionality: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (tipically, no derivatives), many heuristics can give good solutions, probably not optimal.
+\subparagraph{Unconstraint global optimization} Local much better: most (not all) convergence results are dimension indepenteent and not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or detrivatives computation incresses with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependnency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.\\\\
+We have a vector space\ldots\\
+\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in R^n$ origin and $d\in R^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ tomography of $f$ from $x$ along $d$.\\
+$\phi_{x,d}$ can always be pictured, but infinitely many: which $x,d$?\begin{list}{}{}
+	\item $||d||$ only changes the scale: $\phi_{x,\beta d}(\alpha) = \phi_{x,d}(\beta \alpha)$ so often convenient to use normalised direction ($||d|| = 1$)
+	\item Simplest case: restriction along $i$-th coordinate\\
+	$f_x^i(\alpha) = f(x_1,\ldots,x_{i-1},\alpha,x_{i+1},\ldots,x_n) = \phi_{0,u^i}(\alpha)$ with $||u^i|| = 1$
+	\item When $x,d$ clear from context, then $\phi(\alpha)$
+\end{list}
+\paragraph{Simple Functions} \begin{list}{}{}
+	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c$\\
+	$b \in R^n, c\in R$\\
+	Tomography $f(x) = \langle b,x\rangle, x = 0, ||d||=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha||b||cos(\theta)$\\
+	Plotting this gives a line, increasing because "$b$ same direction as $d$", more collinear $\Rightarrow$ steeper. Collinear means steepest line, less collinear means less steap. 90° angle means a flat line. Decreasing if opposite directions.\\
+	min $f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
+	\item \textbf{Quadratic} %TODO formula
+\end{list}
+
 \end{document}
