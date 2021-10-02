@@ -321,33 +321,135 @@ All these operations do not change the set of solutions, do not necessarily solv
 	\item \textbf{Arc consistency}: a variable is arc-consistent if every value in its domain satisfies the binary constraints of this variable with other variable. $x_i$ is arc-consistent with respect to $x_j$ if for every value in its domain $D_i$ there is some value in the domain $D_j$ that satisfies the binary constraint on the arc $(x_i, x_j)$\\
 	Example, $X = \{x, y\}$, $D_x = D_y = \{0,1,2,3,4,5,6,7,8,9\}$ and constraint $\langle(x,y), x=y^2\rangle$. Considering arc $x \rightarrow y$, it can be made consistent by reducing $D_x$ to $\{0,1,4,9\}$. Considering $y \rightarrow x$, can be made consistent by reducing $D_y$ to $\{0,1,2,3\}$, making the entire edge consistent.
 \end{list}
-%CSP-2.pdf, p. 19
-\paragraph{Arc Consistency Algorithm (AC-3)} Maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent with respect to $x_j$. If this step leaves $D_i$ unchanged, the algorithm just moves on to the next arc. If $D_i$ is made smaller, then we need to add to teh queue all arcs $(x_k, x_j)$ where $x_k$ is a neighbor of $x_i \neq x_j$. If $D_i$ becomes empty, then we conclude that the CSP has no solution.\\
-When there are no more arcs to consider, we have finished.
-\paragraph{Generalized Arc Consistency} GAC, extension of AC-3.
-\paragraph{CSP as search: simplifications}
-\paragraph{Backtracking search algorithm}
-\subparagraph{Heuristics}
+\paragraph{Arc Consistency Algorithm (AC-3)} It maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent with respect to $x_j$: \begin{list}{}{}
+	\item If this step leaves $D_i$ unchanged, the algorithm just moves on to the next arc
+	\item If $D_i$ is made smaller, then we need to add to the queue all arcs $(x_k, x_j)$ where $x_k$ is a neighbor of $x_i \neq x_j$
+	\item If $D_i$ becomes empty, then we conclude that the CSP has no solution
+\end{list}
+When there are no more arcs to consider, we have finished: we are left with a CSP equivalent to the original but smaller.\\
+With a CSP of $n$ variables, each with domain size at most $d$ and $c$ binary constraints (arcs):
+\begin{list}{}{}
+	\item Checking consistency of an arc can be done in $O(d^2)$ time
+	\item Each arc $(x_i, x_j)$ can be inserted in the queue only $d$ times (because $x_i$ has at most $d$ values to delete)
+	\item We have $c$ arcs to consider, so complexity is $O(c\cdot d^3)$, polynomial time
+\end{list}
+The AC-4 algorithm is an improved version of AC-3, based on the notion of support that doesn't need to consider all the incoming arcs. More information is kept, but complexity is $O(c\cdot d^2)$.
+\subparagraph{Example} $A, B, C \in \{1,2,3,4\}, A < B, A > C$\\
+\begin{center}
+\begin{tabular}{c c c}
+	Queue & Arc & Arc domain\\
+	\hline
+	$\{(A,B), (B, A), (A, C), (C, A)\}$ & & \\
+	$\{(B, A), (A, C), (C, A)\}$ & $(A,B)$ & $A \in \{1,2,3,\not 4\}$ \\
+	$\{(A,C), (C, A)\}$ & $(B, A)$ & $B \in \{\not 1, 2, 3, 4\}$\\
+	$\{(C, A)\}$ & $(A, C)$ & $A \in \{\not 1, 2, 3\}$\\
+	$\{(B,A), (C, A)\}$ & & \\
+	$\{(C, A)\}$ & $(B, A)$ & $B \in \{\not 2, 3, 4\}$\\
+	$\{\}$ & $(C, A)$ & $C \in \{1, 2, \not 3,\not 4\}$\\
+\end{tabular}
+\end{center}
+At the end $A\in\{2,3\}, B\in\{3,4\}, C\in\{1,2\}$
+\paragraph{Directional Arc Consistency} DAC is defined with reference to a total ordering of the variables. A CSP is DAC under an ordering of the variables if and only if for every label $\langle x, a\rangle$ which satisfies the constraints on $x$ there exists a compatible label $\langle y,b\rangle$ for every label $y$ which is after $xc$ according to the ordering.\\
+In the algorithm for establishing DAC (DAC-1) each arc is examined exactly once, by proceeding from last to the first in the ordiering, so the complexity is $O(c\cdot d^2)$. AC cannot always be achieved by running DAC-1 in both directions.
+\paragraph{Generalized Arc Consistency} GAC, extension of AC-3 to handle $n$-ary constraints rather than just binary. A variable $x_i$ is GAC with respet to a $n$-ary constraint if for every value $v$ in the domain of $x_i$ there exists a tuple of values that is a member of the constraint and has its $x_i$ component equal to $v$.\\
+For example, if $X, y, Z \in \{0,1,2,3\}$ and $X < Y < Z$, to make $C$ consistent we would have to eliminate $2, 3$ from the domain of $X$ because the constraint cannot be satisfied with $X=2$ or $X=3$.
+\paragraph{Path Consistency} Arc consistency tightens down the domains using the arcs (binary constraints). Path consistency is a stronger notion: tightens the binary constraints by using implicit constraints that are inferred by looking at the triples of variables. A path of length 2 between variables $x_i, x_j$ is path-consistent with respect to a third intermediate variable $x_m$ if for every consistent assignment $\{x_i = a, x_j = b\}$ there is an assignment to $x_m$ that satisfies the constraints on $(x_i, x_m)$ and $(x_m, x_j)$. In relational algebra $R_{i,j}\subseteq\pi_{i,j}(R_{i,m}\bowtie D_m\bowtie R_{m,j})$\\
+To achieve path consistency, $R_{i,j}\leftarrow R_{i,j}\cap\pi_{i,j}(R_{i,m}\bowtie D_m\bowtie R_{m,j})$ (algorithm name: PC-2). If all path of length 2 are made consistent, then all paths of any length are consistent.\\
+Called path consistency because you can think of it as a path from $x_i$ to $x_j$ with $x_m$ in the middle.
+\paragraph{Combining search and problem reduction} Problem reduction techniques are used in combination with search. The more effort one spends on problem reduction, the less effort one needs in searching.
+\begin{center}
+	\includegraphics[scale=0.75]{7.png}
+\end{center}
+Most problems cannot be resolved by reduction alone, we must search for solutions and combine problem reduction with search. In this context we talk about \textbf{constraint propagation} or \textbf{inference}. A classical incremental formulation of CSP as a search problem is:
+\begin{list}{}{}
+	\item States are partial assignments
+	\item Initial state: empty assignment
+	\item Goal state: complete assignment that satisfy all constraints
+	\item Actions: assign to a specific unassigned variable $x_i$ a value $\in D_i$
+\end{list}
+Branching factor: $d$, with $d$ maximum cardinality of the domains. Number of leaves: $d^n$, with $n$ number of variables. $n$ finite $\Rightarrow$ space graph finite.
+\paragraph{CSP as search: simplifications} We can exploit \textbf{commutativity}. A problem is commutative if the order of application of any given set of action has no effect on the outcome. In this case, the order of the variable assignments does not change the result.\\
+We can consider a single variable for assignment at each step, so the branching factor is $d$ and the number of leaves id $d^n$. We can also exploit depth limited search: \textbf{backtracking search} with depth limit $n$.\\
+Search strategies:
+\begin{list}{}{}
+	\item \textbf{Generate and Test}: generate a full solution and test it, not the best
+	\item \textbf{Anticipated Control}: after each assignment we check the constraint, if some is violated we backtrack to previous choices (undoing the assignment)
+\end{list}
+\paragraph{Backtracking search algorithm}  %TODO code
+\paragraph{Heuristics and search strategies}
+\begin{list}{}{}
+	\item \texttt{SELECT-UNASSIGNED-VARIABLE}: which variable should be assigned next?
+	\item \texttt{ORDER-DOMAIN-VALUES}: in which order should the values be tried?
+	\item \texttt{INFERENCE}: what inference should be performed at each step?\\
+	Techniques for \textbf{constraint propagation} (local consistency enforcement) can be used
+	\item \texttt{BACKTRACKING}: where to back up to? When the search ends up in an assignment that violates a constraint, can the search avoid repeating this failure? Forms of \textbf{intelligent backtracking}
+\end{list}
 \subparagraph{Choosing the next variable}\begin{list}{}{}
 	\item \textbf{MRV} (minimnum remaining values): variable with fewest "legal" remaining values
 	\item \textbf{Degree heuristic}: variable involved in the largest number of constraints
 \end{list}
 \subparagraph{Choosing value} \begin{list}{}{}
-	\item \item \textbf{Least constaint variable}: rules out the fewest schoices
+	\item \textbf{Least constaint variable}: prefer the variable rules out the fewest choices
 \end{list}
-\subparagraph{Interleaving search and inference} One of the simplest form of inference progpagation is forward checking: efficient constraint propagation, weaker than other forms. Whenever $X$ is assigned, FC process establishes arc consinstency of $X$ for the arcs conencting neighbor nodes. For each unassigned $Y$ connected to $X$, delete form $Y$ domain any value inconsistent with the value assigned to $X$.
-\paragraph{Constraint learning} When the search is at a contradiction, we know that some subset of the conflict set is responsible. Constaint learning is the idea of finding a minimum set of variables from teh conflct set that causes the problem: the no-good set. We record the no-good set either by adding a new costraint to teh CSP or by keeping a seaorate cache of no-goods. This way we do not repeat the no-good state.
-\paragraph{Local search} Require a complete state formulation, keep in memory only current state to improve it iteratively and do not guarantee to find solution even if it exists (not complete).\\
-Used when space too large and need to be very efficient, provide a solution but not importanto to produce solution path and know in advance that a solution exists.
-\subparagraph{Heuristic Local Search} Inject heuristics in the selection of the variable and the value by the means of an evaluation function. \textbf{Iterative best improvement}: choose the successor that most improves the current state according to an evaluation function $f$
-\subparagraph{Stochastic Local Search} Adds randomness, escapes local minima\ldots\\
-\textbf{Variants} \begin{list}{}{}
-	\item Most improving step
-	\item Two stage choice
-	\item Any conflict
+Note that in choosing the variable, a fail-first strategy helps in reducing the amount of search by pruning large parts of the tree earlier. In the choice of value, a fail-last approach works best in CSP where the goal is to find \textit{any} solution. This is not effective if we are looking for all solutions or no solution exists.
+\subparagraph{Interleaving search and inference} One of the simplest form of inference propagation is \textbf{forward checking}: efficient constraint propagation, weaker than other forms. Whenever $X$ is assigned, FC process establishes arc consistency of $X$ for the arcs connecting neighbor nodes. For each unassigned $Y$ connected to $X$, delete from $Y$'s domain any value inconsistent with the value assigned to $X$.
+\subparagraph{Constraint learning} When the search is at a contradiction, we know that some subset of the conflict set is responsible. Constraint learning is the idea of finding a minimum set of variables from the conflict set that causes the problem: the no-good set. We record the no-good set either by adding a new constraint to CSP or by keeping a separate cache of no-goods. This way we do not repeat the no-good state.
+
+\paragraph{Local search} Requires a complete state formulation, keep in memory only current state to improve it iteratively and does not guarantee to find a solution even if it exists (\textbf{not complete}).\\
+Used when space too large for systematic search and we need to be very efficient. Also when we need to provide a solution but it's not important to produce solution path. Also when we know in advance that a solution exists.
+\subparagraph{Local search methods for CSP} Complete state formulation: we start with a complete random assignment, and we try to fix it until all the constraints are satisfied.\\
+Local methods are very efficient for large scale problems where the solutions are densely distributed in the space. A basic algorithm is:
+\begin{verbatim}
+function Local_search(V, Dom, C) returns a complete & consistent assignment
+Inputs: V: a set of variables
+Dom: a function such that Dom(x) is the domain of variable x
+C: set of constraints to be satisfied
+Local: A (complete assignement) an array of values indexed by variables in V
+
+repeat until termination
+for each variable x in V do # random initialization or random restart
+A[x] := a random value in Dom(x)
+while not stop_walk( ) & A is not a satisfying assignment do # local search
+Select a variable y and a value w in Dom(y), w != A[y] # a successors
+A[y] := w # change a variable
+if A is a satisfying assignment then return A # solution found
+\end{verbatim}
+this can be specialized, two extreme versions are: \textbf{random sampling} (no walking done to improve solution, so \texttt{stop\_walk} always \texttt{true}, just generating random assignments and testing them) or \textbf{random walk} (no restarting is done, so \texttt{stop\_walk} always \texttt{false})
+\subparagraph{Heuristic Local Search} Inject heuristics in the selection of the variable and the value by the means of an evaluation function (in CSP, $f$ = \# violated constraints or conflicts, perhaps with weights).\\
+\textbf{Iterative best improvement}: choose the successor that most improves the current state according to an evaluation function $f$. Moves to best successor even if worse than current state, may be stuck in loops, not complete.
+\subparagraph{Stochastic Local Search} Adds randomness, escapes local minima:\begin{list}{}{}
+	\item \textbf{Random restart} is a global random move: the search starts from a completely different part of the search state
+	\item \textbf{Random walk} is a local random move: random steps are taken interleaved with the optimizing steps
 \end{list}
-\subparagraph{CSP: Min-Conflict Heuristic}
-%TODO first part of 1/10 lecture
+There are possible variants \begin{list}{}{}
+	\item Most improving step: selects a variable-value pair that makes the best improvement. Needs to evaluate all of them, needing strategies for efficient computation
+	\item Two stage choice: select the variable that participates in most conflicts, then the value that minimizes conflicts (or a random value)
+	\item Any conflict: choose a conflicting variable at random, select the value that minimizes conflicts (or a random value)
+\end{list}
+\paragraph{CSP: Min-Conflict Heuristic} All the local search techniques are candidate for CSP, some have proved especially effective. Min-conflict heuristics is widely used and also quite simple:
+\begin{list}{}{}
+	\item select a variable at random among the conflicting variables
+	\item select the value that results in the \textbf{minimum number of conflicts} with other variables
+\end{list}
+%TODO algorithm
+\subparagraph{Improvements} Usually many plateaux, possible improvements:
+\begin{list}{}{}
+	\item \textbf{Tabu Search}: local search has no memory, the idea is keeping a small list of the last $t$ steps and forbidding the algorithm to change the value of a variable whose value was changed recently. This is meant to prevent cycling among assignments, and $t$ is called \textbf{tenure}
+	\item \textbf{Constraint Weighting}: concentrates the search on important constraints. We assign a numeric weight to each constraint, initially 1. The weight is incremented each time the constraint is violated: goal is choose the variable and value which minimizes the weights of the violated constraints.
+\end{list}
+\subparagraph{Alternatives}\begin{list}{}{}
+	\item \textbf{Simulated Annealing}: allows downhill moves at the beginning of the algorithm and slowly \textit{freezes} this possibility
+	\item \textbf{Population based methods}
+	\begin{list}{}{}
+		\item \textbf{Local Beam Search}: proceed with the $k$ best successors according to the evaluation function
+		\item \textbf{Stochastic Local Beam Search}: selects $k$ of the individuals at random with a probability that depends on the evaluation function
+		\item \textbf{Genetic Algorithms}\ldots
+	\end{list}
+\end{list}
+\subparagraph{Online search} Another advantage of local search methods is that they can be used in an online setting when the problem changes dynamically.
+\subparagraph{Evaluating randomized algorithms} Randomized algorithms are difficult to evaluate since they output a different result and a different execution time each time they run. We take the runtime distribution, which shows the number of runs in which the algorithm solved the problem within a given number of steps.\\
+A randomized algorithm can be run multiple times with random restart, increasing the probability of success. An algorithm that succeeds with probability $p$ run $n$ times will found a solution with probability $1 - (1-p)^n$ with $(1-p)^n$ the probability of failing $n$ times.
+%TODO CSP-4.pdf
 \paragraph{Independent sub-problems: complexity}
 \paragraph{The structure of problems: tree} In a tree-structured graph, two node are connected by only one path: we can choose any variable as root of the tree. Chosen a variable as root, the tree induces a topological sort on the variables: chieldren of a node are listed after their parent
 \subparagraph{Directional arc consistency} %TODO def
