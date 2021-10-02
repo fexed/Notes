@@ -224,14 +224,54 @@ Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ld
 	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
 \end{list}
 Shows that even for a simple model there are many possibilities. We still need a principled approach.
-\subparagraph{Limitations} In geometry, two set of points are linearly separable in $n$-dimensional space if they can be separated by a $(n-1)$-dimensional hyperplane. In 2 dimensions, if they can be separated by a line, in 3 dimensions, by a plane\ldots\\
+\subparagraph{Limitations} In geometry, two set of points are linearly separable in an $n$-dimensional space if they can be separated by a $(n-1)$-dimensional hyper-plane. In 2 dimensions, if they can be separated by a line, in 3 dimensions, by a plane\ldots\\
 The linear decision boundary can provide exact solutions only for linearly separable sets of points.
-
-% up until p. 55 of ML-21-linear-knn-v0.1.pdf
-\paragraph{Learning Timing} \textbf{Eager}: analyze data and construct an explicit hypothesis\\
-\textbf{Lazy}: store tr data and wait test data point, then construct an ad hoc hypothesis.
-\paragraph{K-NN}
-\paragraph{Voronoi Diagram} Each cell scosnist of point closer to $x$ than any other patterns. The segments are all points in plan equidistanto to two patterns. It is implicitly used by K-NN.
+\subparagraph{Extending the linear model} We can use transformed inputs, such as $x, x^2, x^3\ldots$ with a non-linear relationship between inputs and output, maintaining the learning machinery used so far. $$h_w(x) = w_0 + w_1 x + w_2 x^2 + \ldots + w_M x^M = \sum_{j=0}^M w_j x^j$$ \textbf{Linear basis expansion} (LBE) $$h_w(x) = \sum_{k=0}^K w_k\phi_k(x)$$ Augments the input vector with additional variables which are transformations of $x$ according to a function $\phi_k : R^n \rightarrow R$, so number of parameters $K > n$: linear in the parameters, so we can use the same learning algorithms as before.\\
+Which $\phi$? Towards the dictionary approaches. Pro: can model more complicated relationships than linear, so it's more expressive. Cons: with large basis of functions, we easily risk overfitting, hence we require controlling the complexity (as in flexibility of the model to fit the data). How to do that? Many approaches:
+\begin{list}{}{}
+	\item \textbf{Ridge Regression} (or \textbf{Tikhonov Regularization}): smoothed model.\\
+	Add constraints to the sum of value of $|w_j|$, penalizing models with high values of $|w|$ (so favoring sparse models, using less terms due to weights $w_j = 0$ or close)
+	$$Loss(w) = \sum_{p=1}^l (y_p - x_p^T w)^2 + \lambda||w||^2$$ with $\lambda$ being the regularization hyper-parameter. It implements the control of the model complexity, leading to a model with less VC-dim with a trade-off controlled through a single parameter, $\lambda$.\\
+	This uses $||\:||_2$
+	\item Lasso uses $||\:||_1$
+	\item Elastic nets uses both $||\:||_1$ and $||\:||_2$
+\end{list}
+\paragraph{Learning Timing} \begin{list}{}{}
+	\item \textbf{Eager}: analyze data and construct an explicit hypothesis
+	\item \textbf{Lazy}: store tr data and wait test data point, then construct an ad hoc hypothesis.
+\end{list}
+\paragraph{k-NN}
+The algorithm is simple: store the training data and given and input $x$ find the $k$ nearest training examples $x_i$, then output the mean label.
+\subparagraph{Voronoi Diagram} Each cell consists of point closer to $x$ than any other patterns. The segments are all points in plan equidistant to two patterns. It is implicitly used by K-NN.
+\subparagraph{K-NN vs linear} Two extremes of the ML panorama:
+\begin{center}
+	\begin{tabular}{c c}
+		Linear & K-NN\\
+		Rigid (low variance) & flexible (high variance)\\
+		Eager & Lazy\\
+		Parametric & Instance-Based
+	\end{tabular}
+\end{center}
+\subparagraph{Bayes Error Rate} If we know the density $P(x,y)$, we classify the most probable class, using the conditional distribution as: output the class $v\:|\:$ is $max\:P(v\:|\:x)$.\\
+The error rate of this classifier (called the Bayes classifier) is called the Bayes error rate: the minimum achievable error rate given the distribution of the data. K-NN directly approximates this solution (majority vote in a nearest neighborhood) except that conditional probability is relaxed to conditional probability withing a neighbordhood and probabilities are estimated by training sample proportions
+\subparagraph{Inductive bias of K-NN} The assumed distance tells us which are the most similar examples. The classification is assumed similar to the classification of the neighbors according to the assumed metric.
+\subparagraph{Limitations} The computational cost is deferred to the prediction phase: makes the local approximation to the target function for each new example to be predicted.\\
+Moreover, high retrieval cost: computationally intensive, in time, for each new input because computes the distance from the test sample to all stored vectors, so high cost in space too (all training data).\\
+It provides a good approximation if we can find a significant set of data close to any $x$. Can fail when we have a lot of input variables (high $n$, high dimensionality) due to the curse of dimensionality:
+\begin{list}{}{}
+	\item Hard to find nearby points in high dimensions\\
+	K-NN can fail in high dimensions because it becomes difficult to gather $K$ observation close to a target point $x_q$: near neighborhoods tend to be spatially large and estimates are no longer local
+	\begin{center}
+		\includegraphics[scale=0.75]{5.png}
+	\end{center}
+	\item Low sampling density for high-dim data\\
+	Sampling density is proportional to $l^{\frac{l}{d}}$ with $l$ data and $d$ data dim. If 100 points are needed to estimate a function in $R$ (1 dim), then $100^{10}$ are needed in $R^{10}$
+	\item Irrelevant features: the curse of noisy\\
+	If the target depends only on a few features in $x$, we could retrieve a similar pattern with the similarity dominated by the large number of irrelevant features.\\
+	This grows with dimensionality.\\
+	We may weight features according to the relevance, or adopt feature selection approaches (eliminating some variables)
+\end{list}
+% ML-21-NN-part1-v.0.1.pdf
 \paragraph{Artificial Neuron} Input from external source or other units, with weights $w$ as free parameters: can be modified by learning. The unit $i$ computes $f(\sum_j w_{ij}x_j)$ with $w_{ij}$ the weight from input $j$ to unit $i$. $f$ is called \textbf{activation function}: linear, threshold or logistic (sigmoid).
 \paragraph{Perceptron} A neuron that uses a threshold as activation function. Can be composed and connected to build a network.
 \subparagraph{Xor} $x_1 \oplus x_2 = x_1\cdot \overline{x_2} + \overline{x_1}\cdot x_2$. Let $h_1 = x_1\cdot x_2, h_2 x_1 + x_2$ then $x_1 \oplus x_2 = \overline{h_1} \cdot h_2$ with $\wedge = \cdot$ and $\vee = +$.\\
