@@ -259,45 +259,128 @@ The error rate of this classifier (called the Bayes classifier) is called the Ba
 Moreover, high retrieval cost: computationally intensive, in time, for each new input because computes the distance from the test sample to all stored vectors, so high cost in space too (all training data).\\
 It provides a good approximation if we can find a significant set of data close to any $x$. Can fail when we have a lot of input variables (high $n$, high dimensionality) due to the curse of dimensionality:
 \begin{list}{}{}
-	\item Hard to find nearby points in high dimensions\\
+	\item \textbf{Hard to find nearby points} in high dimensions\\
 	K-NN can fail in high dimensions because it becomes difficult to gather $K$ observation close to a target point $x_q$: near neighborhoods tend to be spatially large and estimates are no longer local
 	\begin{center}
 		\includegraphics[scale=0.75]{5.png}
 	\end{center}
-	\item Low sampling density for high-dim data\\
+	\item \textbf{Low sampling density} for high-dim data\\
 	Sampling density is proportional to $l^{\frac{l}{d}}$ with $l$ data and $d$ data dim. If 100 points are needed to estimate a function in $R$ (1 dim), then $100^{10}$ are needed in $R^{10}$
-	\item Irrelevant features: the curse of noisy\\
+	\item Irrelevant features: the \textbf{curse of noisy}\\
 	If the target depends only on a few features in $x$, we could retrieve a similar pattern with the similarity dominated by the large number of irrelevant features.\\
 	This grows with dimensionality.\\
 	We may weight features according to the relevance, or adopt feature selection approaches (eliminating some variables)
 \end{list}
 % ML-21-NN-part1-v.0.1.pdf
-\paragraph{Artificial Neuron} Input from external source or other units, with weights $w$ as free parameters: can be modified by learning. The unit $i$ computes $f(\sum_j w_{ij}x_j)$ with $w_{ij}$ the weight from input $j$ to unit $i$. $f$ is called \textbf{activation function}: linear, threshold or logistic (sigmoid).
-\paragraph{Perceptron} A neuron that uses a threshold as activation function. Can be composed and connected to build a network.
+\paragraph{Neural Networks} Models used to:
+\begin{list}{}{}
+	\item Study and model biological systems and learning processes (biological realism is essential)
+	\item Introduce effective machine learning systems and algorithms (often losing a strict biological realism, but machine learning, computational and algorithmic properties are essential)
+\end{list}
+For us: \textbf{Artificial Neural Networks} (ANN): a flexible machine learning tool in the sens of approximating functions (builds a mathematical function $h(x)$ with special properties). A neural network:
+\begin{list}{}{}
+	\item Can learn from examples
+	\item Are universal approximators (\textbf{Theorem of Cybenko}): flexible approaches for arbitrary functions (including non-linear)
+	\item Can deal with noisy and incomplete data, with a graceful degradation of performance
+	\item Can handle continuous real and discrete data for both regression and classification tasks
+	\item It's a \textbf{paradigm}: it encompasses a wide set of models.
+\end{list}
+\paragraph{Artificial Neuron} Input from external source or other units, with weights $w$ as free parameters: can be modified by the learning process. The unit $i$ computes $f(\sum_j w_{ij}x_j)$ with $w_{ij}$ the weight from input $j$ to unit $i$. $f$ is called \textbf{activation function}: linear, threshold or logistic (sigmoid). The weighted sum ($\sum_j w_{ij}x_j$) is called net input to unit $i$, or $net_i$.
+\begin{center}
+	\includegraphics[scale=0.75]{6.png}
+\end{center}
+Three types of activation functions:
+\begin{list}{}{}
+	\item \textbf{Linear}, or identity: $f(x) = x$
+	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = sign(x)$
+	\item \textbf{Logistic}: $f(x) = \frac{1}{1 + e^{-\alpha x}}$
+\end{list}
+\paragraph{Perceptron} A neuron that uses a threshold as activation function. Can be composed and connected to build a network: \textbf{MLP}, Multi Layer Perceptron 
 \subparagraph{Xor} $x_1 \oplus x_2 = x_1\cdot \overline{x_2} + \overline{x_1}\cdot x_2$. Let $h_1 = x_1\cdot x_2, h_2 x_1 + x_2$ then $x_1 \oplus x_2 = \overline{h_1} \cdot h_2$ with $\wedge = \cdot$ and $\vee = +$.\\
 So two layers are sufficient, but single layer cannot model all functions due to limits of single perceptron and the linear separable problems.
 \paragraph{Learning for one unit model} \begin{enumerate}
 	\item \textbf{Adaline}, adaptive linear neuron: LMS direct solution and gradient descent solution
 	\item \textbf{Perceptron}, non linear: only classificiation\\
-	Minimize number of misclassified patterns %TODO
+	Minimize number of misclassified patterns, find $w\:|\:sign(w^Tx) = d$. Online algorithm, a step can be made for each input pattern.
 	\begin{enumerate}
-		\item initialize weights
-		\item pick learning rate $\eta$ (between 0 and 1)
-		\item until stopping condition (es weights don't change)
+		\item Initialize weights
+		\item Pick learning rate $\eta$ (between 0 and 1)
+		\item Until stopping condition (es weights don't change)\\
+		For each training pattern $(x, d)$ compute output activation $out = sign(w^T x)$.\\
+		If $out = d$ don't change weights, if $out \neq d$ update weights $w_{new} = w + \eta\cdot d\cdot x$ adding $+\eta x$ if $wx\leq 0$ and $d = +1$ or $-\eta x$ if $wx > 0$ and $d = -1$.\\Different form $w_{new} = w + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot x$
 	\end{enumerate}
-	For each training pattern $(x, d)$ compute output activation $out = sign(w^T x)$. If $out = d$ don't change weights, if $out \neq d$ update weights $w_{new} = w + \eta\cdot d\cdot x$ adding $+\eta x$ if $wx\leq 0$ and $d = +1$ or $-\eta x$ if $wx > 0$ and $d = -1$. Different form $w_{new} = w + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot x$
+	\textbf{Delta Rule}: the form $w_{new} = w + \eta\cdot d\cdot x$ is the \textbf{Hebbian learning} form, while the form $w_{new} = w + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot x$ is the \textbf{error correction learning} form. It's a recall from LMS: a error correction/delta/Widrow-Hoff/Adaline/LMS rule that changes the $w$ proportionally to the error (target $d -$ output).\\
+	In terms of neurons, the adjustment made to a synaptic weight is proportional to the product of error signal and the input signal that excite the synapse. Easy to compute when errors signal $\delta$ is directly measurable (meaning that we know the desired response for each unit).
 \end{enumerate}
-\paragraph{Perceptron convergence theorem}
-\subparagraph{Preliminaries}
-\subparagraph{Proof}
+\paragraph{Perceptron Convergence theorem} A perceptron can represent linear decision boundaries, so it can solve linearly separable problems. Also, it can always learn the solution with the perceptron learning algorithm.\\
+The \textbf{perceptron convergence theorem} is a milestone: a biologically inspired model with well-defined and proved computational capabilities and proved by a theorem. It states that \textbf{the perceptron is guarateed to converge} (classifying correctly all the input patterns) \textbf{in a finite number of steps if the problem is linearly separable}. This independently of the starting point, although the final solution is not unique and it depends on the starting point.
+\subparagraph{Preliminaries} We focus on positive patterns, assuming $(x_i, d_i)\in$ TR set with $d_i = +1$ or $-1$. We also omit $^T$ for the dot product $w^T x$ (sometimes).\\
+Linearly separable $\Rightarrow\exists\: w^*$ solution $|\:d_i(w^* x_i)\geq \alpha = \hbox{min}_i\:d_i(w^*x_i) > 0$, henche $w^*(d_ix_i)\geq \alpha$.\\
+With $x_i' = (d_ix_i)$ then $w^*$ solution $\Leftrightarrow w^*$ solution of $(x_i', +1)$\\
+This because $w^*$ solves $\Rightarrow d_i(w^*x_i) \geq \alpha \Rightarrow (w^*d_ix_i)\geq\alpha\Rightarrow (w^*x_i')\geq\alpha \Rightarrow w^*$ solution of $(x_i', +1)$.\\
+And if $w^*$ is a solution of $(x_i', +1)\Rightarrow(w^*d_ix_i)\geq \alpha\Rightarrow d_i(w^*x_i)\geq \alpha\Rightarrow w^*$ solves for $x_i$\\\\
+Also assuming $w(0) = 0$ (at step $0$), $\eta = 1$ and $\beta = \hbox{max}_i |x_i|^2$ where $|\:|$ is the euclidean norm.\\
+After $q$ errors (all false negatives), $w(q) = \sum_{j=1}^q x_{ij}$ with $_{ij}$ denoting the patterns belonging to the subset of misclassified patterns.
+\subparagraph{Proof} The basic idea is that we can find lower and upper bound to $|w|$ as a function of $q^2$ steps (lower bound) and $q$ steps (upper bound) $\Rightarrow$ we can find the number of steps $q\:|$ the algorithm converges.\\
+Lower bound on $|w(q)|$ is $w^* w(q) = w^*\sum_{j=1}^q x_{ij}\geq q\alpha$ recalling that $\alpha=\hbox{min}_i\:(w^*x_i)$. With Cauchy-Schwartz we know that $(wv)^2 \leq |w|^2|v|^2$ where $|w|^2 = ||w||_2 ^2$.\\
+$|w^*|^2|w(q)|^2 \geq (w^*w(q))^2 \geq (q\alpha)^2 \Rightarrow |w(q)|^2 \geq \frac{(q\alpha)^2}{|w^*|^2}$. Also $|w(q)|^2 = |w(q-1)+ x_{iq}|^2 = |w(q-1)|^2 + 2w(q-1)x_{iq} + |x_{iq}|^2$ because $|a + b|^2 = |a|^2 + 2ab + |b|^2$\\
+For the $q$-th error, $2w(q-1)x_{iq} < 0$, so $|w(q)|^2 \leq |w(q-1)|^2 + |x_{iq}|^2$ and by iteration $w(0) = 0$ we have $|w(q)|^2 \leq \sum_{j=1}^q |x_{ij}|^2 \leq q\beta$ with $\beta = \hbox{max}_i |x_i|^2$.\\\\
+So we have an upper bound $q\beta$ and a lower bound $\frac{(q\alpha)^2}{|w^*|^2}$, so $$q\beta\geq |w(q)|^2\geq \frac{(q\alpha)^2}{|w^*|^2}$$ $$q\beta\geq q^2\alpha'$$ $$\beta\geq q\alpha'$$ $$q \leq \frac{\beta}{\alpha'}$$
+\paragraph{Differences}
+	$$w_{new} = w + \eta(d-\hbox{out})x$$
+Apparently similar but:
+\begin{multicols}{2}
+	\begin{list}{}{\textbf{LMS algorithm}}
+		\item LSM rule derived without threshold activation functions
+		\item Hence for training $\delta = d - w^Tx$
+		\item Can still be used for classification using\\$h(x) = sign(w^T x)$, LTU
+		\item Minimizes $E(w)$ with out = $w^Tx$
+		\item Asymptotic convergence also for not linear separable problems
+		\item Not always zero classification errors
+		\item Can be extended to network of units (NN) using the gradient based approach
+	\end{list}
+	\begin{list}{}{\textbf{Perceptron learning algorithm}}
+		\item Perceptron uses out $= sign(w^Tx)$
+		\item versus $\delta = d - sign(w^Tx)$
+		\item
+		\item Minimizes misclassifications (out = $sign(w^Tx)$)
+		\item Always converges in a finite number of steps for a linear separable problem to a perfect classifier\\
+		Else it doesn't converge
+		\item 
+		\item Difficult to be extended to network of units (NN)
+	\end{list}
+\end{multicols}
 \paragraph{Activation functions}
-\paragraph{Excercise} Compute the gradient
-\paragraph{Gradient descent algorithm}
-\paragraph{Neural Network} In a MLP architecture: units connected by wighted links, organized in layers:
 \begin{list}{}{}
-	\item input layer, source of the input $x$
-	\item hidden layer, projects onto another hidden or an output layer
+	\item \textbf{Linear}, or identity: $f(x) = x$
+	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = sign(x)$
+	\item \textbf{Logistic}: $f(x) = \frac{1}{1 + e^{-\alpha x}}$\\
+	This is a non-linear squashing function like the sigmoidal logistic function: it assumes a continuous range of values in the bounded interval $[0,1]$. It has the property of being a smoothed differentiable threshold function, with $\alpha$ being the slope parameter of the sigmoid function.
+	\item \textbf{Radial basis}: $f(x) = e^{-\alpha x^2}$
+	\item \textbf{Softmax}
+	\item \textbf{Stochastic neurons}, where the output is +1 with probability $P(net)$ or -1 with $1-P(net) \Rightarrow$ Boltzmann machines and other models rooted in statistical mechanics.
+\end{list}
+For the derivatives, a step function has no derivative, which is exactly why it isn't used. The sigmoids have\\$\frac{df_\sigma(x)}{dx} = f_\sigma(x) (1-f_\sigma(x))$ and $\frac{df_{tanh}(x)}{dx} = 1 - f_{tanh}(x)^2$ for $\alpha = 1$.\\
+The sigmoid logistic function has the property of being a smoothed \textit{differentiable} threshold function. Hence, we can derive a Least (Mean) Square algorithm, by computing the gradient of the mean square loss function as for the linear units (also for a classifier).\\
+From $\sigma(x) = x^Tw$ to $\sigma(x) = f_\sigma(x^Tw)$ where $f_\sigma$ is a logistic function. Find $w$ that minimizes the residual sum of squares $$E(w) = \sum_p (d_p - \sigma(x_p))^2 = \sum_p (d_p - f_\sigma(x_p^Tw))^2$$
+$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\hbox{net}(x_p))\hbox{ for 1 unit and patterns }p = 1\ldots l$$
+\paragraph{Gradient descent algorithm} 
+The same as for linear units using the new delta rule $w_{new} = w + \eta\cdot\delta_p\cdot x_p$ where $\delta_p = (d_p - f_\sigma(net(x_p)))f'_\sigma(net(x_p)) = (d_p-out(x_p))f'_\sigma$
+\paragraph{Neural Network} In an MLP architecture: units connected by weighted links, organized in layers:
+\begin{list}{}{}
+	\item input layer, source of the input $x$. Copies the source external input patterns $x$, without computing $net$ and $f$.
+	\item hidden layer, projects onto another hidden or an output layer, computing.
 \end{list}
 Can be viewed as network of units o flexible function:
 $$h(x) = f_k\left(\sum_j w_{kj}f_j\left(\sum_i w_{ji}x_i\right)\right)$$
+As for notation, given
+\begin{center}
+	\includegraphics[scale=0.6]{7.png}
+\end{center}
+We have that the index $t$ denotes a generic unit, can be either $k$ or $j$. $u$ denotes a generic input component, either $i$ or $j$.\\
+$x$ is a generic input from an external source (input vector) or from other units according to the position of the unit in the network. If we load the pattern $x$ in the input layer, we can use the notation with $o$ for both the inputs and the hidden units outputs. Hence, inside the network, the input to each unit $t$ from any source $u$ (through the connection $w_{tu}$) is typically denoted as $o_u$.
+\subparagraph{Architectures}
+\begin{list}{}{}
+	\item \textbf{Standard feedforward NN} %TODO ML-21-NN-part1-v.0.1.pdf p.55
+\end{list}
 \end{document}
