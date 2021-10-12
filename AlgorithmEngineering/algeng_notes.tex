@@ -280,4 +280,17 @@ $P(L \geq l) = P(max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdo
 	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
 \end{enumerate}
 $P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$
+
+%Lecture of 22/10
+\paragraph{Variable byte econding} Idea is that given a variable $i$ there's a binary representation $B(i)$, for example $i = 2$, then $B(i) = 10$. We use 1 bit out of 8 to make the code prefix free. So $B(i)$ is splitted in blocks of 7 bits, $B(i) = \underline{\textit{000}1101}\:\underline{1001111}$. The most importanti 7 bits become a byte of $\textbf{1}0001101$ and the other $\textbf{0}101111$. Continuation bit is one if the encoding continues and 0 if the encoding ends.\\
+Wasteful because we never have the initial byte of the representation (most significal bits) can never be all zero.\\
+Not used in practice, lets see how to avoid the waste of space. 1 byte: 128 values ($2^7$), with 2 bytes we have 14 bits and $2^{14}$ values and so on. Using one or two bytes we can encode $2^7 + 2^{14}$ different values. This is done as follows: suppose to have $0\leq i < 2^7 + 2^{14}$. If $i < 2^7 \Rightarrow$ one byte with continuation bit $= 0$. If $2^7 \leq i < 2^7 + 2^{14}$ I encode $i-2^7$ in two bytes. Clearly $0\leq i - 2^7 < 2^{14}$.\\
+Reasoning in the same way with 3 bytes we can encode up to $2^7 + 2^{14} + 2^{21}$ different integers.
+\paragraph{$(s, c)$ dense codes} Again byte oriented. $s$ stoppers and $c$ continuers.\\
+We had every value with last bit $0$ was a stopper, while every value with continuation bit $1$ was a continuer. This means that the values in range $[0, 127]$ were all stoppers, and in range $[128, 255]$ are continuers.\\
+We have chosen to have $s$ stoppers and $c$ continuers. We must have $s + c = 256$. With one byte necessarily a stopper, so $s$ possible values. With 2 bytes, first continuer second stopper so total number is $cs$ possible values.\\With three bytes, 2 continuers and last stopper so $c^2 s$ possible values. Using up to three bytes the total number of possible values is $s + cs + c^2s = s(1 + c + c^2)$ which is a geometric progression of ration $c$ $=s\frac{c^3 - 1}{c-2}$. In general using up to $k$ bytes we can encode $s\frac{(c^k - 1)}{c-1}$ different values.\\\\
+Suppose we are encoding all positive integers $(\geq 0)$. Given $i$, how many bytes necessary to encode it? I have to find the value $k\:|\:s\frac{c^{k-1} - 1}{c-1}\leq i < s\frac{c^k-1}{c-1}$, cannot be encoded with $k-1$ bytes but can be encoded with $k$ bytes. Found $k$ we can conclude that $i$ will be encoded with $k$ bytes.
+\subparagraph{Example} $s+c = 8$ so the combinations are $s, c = 4$, $s = 6, c = 2$, $s = 5, c = 3$.\\
+%TODO
+I need $k=4$ blocks, with 4 blocks we encode values in $[65, 200]$. 100 is the $100-65 = 35$th value encoded with $k=4$ blocks.
 \end{document}

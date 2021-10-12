@@ -270,4 +270,31 @@ $\phi_{x,d}$ can always be pictured, but infinitely many: which $x,d$?\begin{lis
 So $B=u_1\sigma_1 v^t$ from SVD of $\overline{A}$ will give me the rank-1 matrix with minimum $||\overline{A}-B||_F^2 = \sum_{i,j}(\overline{A_{i,j}} - B_{i,j})^2$. Suppose now you can only keep a 2D projection of your data. What is the best plane (i.e. minimum sum of squares of errors)? Blue crosses on a plane through the origin = linear combination of tw vectors ($\overline{A}$ = real data, $B$ = plotted data, all cols multiples of the same 2 vectors $\Rightarrow$ rank-2\\
 min$||\overline{A}-B|| = $
 
+% 12/10
+\paragraph{Least Squares problem} $min_{x\in R^n} ||Ax - B||_2$ given $A \in R^{m\times n}$ and $b \in R^m$ with $m\geq n$.\\
+$min_{x\in R^n} ||Ax - B||_2 \Leftrightarrow min_{x\in R^n} ||Ax - B||^2_2$ are obtain in the same $x$.\\
+$= min(Ax-b)^T(Ax-b) = min(x^TA^T-b^T)(Ax-b) = min x^TA^TAx - b^TAx - x^TA^Tb + b^Tb$ and $b^TAx, x^TA^Tb$ are $\langle b, Ax\rangle = \langle Ax,b\rangle$. So\\
+$= min x^TA^TAx - 2b^TAx - b^Tb = x^TQx + q^Tx + c = f(x)$ a quadratic problem. minimum unique if function is convex so unique minimum exists $\Leftrightarrow A^TA > 0$ (positive definite) $\Leftrightarrow A$ has full column rank, all column are linearly independent.\\
+Minimum of $f(x)$ obtain when grad $f(x) = 0$.\\
+grad $f(x) = 2A^TAx - 2A^Tb = 2Qx + q$\\
+Hessian $f = 2A^TA$\\
+So if $\not 2 A^TAx = \not 2 A^Tb$ which is a $n\times m\cdot m \times n = n\times m \cdot m \times 1$ which gives a $n\times n = n \times 1$, a square linear system, $A^TA$ is invertbile (because is positive definite), so $x = (A^TA)^{-1} (A^Tb)$ a quick formula for the solution, obtained intuitively form multiplying $Ax = b$ on the left with $A^T$. This formula is our first algorithm to solve the Least Squares problem, also called the \textbf{normal equation}.
+\subparagraph{Algorithm}
+\begin{enumerate}
+	\item form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
+	\item form $A^Tb$, costs $2mn$ flops lower order terms
+	\item solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
+\end{enumerate}
+If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD. Optimizations:
+\begin{enumerate}
+	\item $A^TA$ symmetric so can compute only upper triangle then mirror the rest so from $2mn^2$ becomes $mn^2$
+	\item cheap already
+	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
+\end{enumerate}
+$x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or Moore-Penrose pseudoinverse. The definition is valid only when $A$ has full column rank.\\
+%TODO note
+If $x_1$ sol of $min||Ax - b_1||$ and $x_2$ sol of $min||Ax - b_2||$ then $x_1+x_2$ sol of $min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
+$y \in R^{1\times m}$ row vector "target"\\
+The problem is $min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
+\paragraph{QR factorization of a matrix} given $x\in R^n$ find orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1$ with $e_1$ has 1 in top position and all zeroes.
 \end{document}

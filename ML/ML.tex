@@ -10,18 +10,30 @@
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \usepackage{makecell}
-\lstdefinestyle{customasm}{
-  belowcaptionskip=1\baselineskip,
-  frame=line,
-  xleftmargin=\parindent,
-  language=[x86masm]Assembler,
-  basicstyle=\ttfamily,
-  commentstyle=\itshape\color{purple!40!black},
+\definecolor{backcolour}{RGB}{255,255,255}
+\definecolor{codegreen}{RGB}{27,168,11}
+\definecolor{codeblue}{RGB}{35,35,205}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{205,35,56}
+\lstdefinestyle{myPython}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{codeblue},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\small\ttfamily,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=2pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	language=python
 }
-\lstset{escapechar=@,style=customasm}
-\lstnewenvironment{C}
-  {\lstset{language=C++,frame=none}}
-  {}
 \begin{document}
 \title{Machine Learning}
 \author{Federico Matteoni}
@@ -380,7 +392,86 @@ As for notation, given
 We have that the index $t$ denotes a generic unit, can be either $k$ or $j$. $u$ denotes a generic input component, either $i$ or $j$.\\
 $x$ is a generic input from an external source (input vector) or from other units according to the position of the unit in the network. If we load the pattern $x$ in the input layer, we can use the notation with $o$ for both the inputs and the hidden units outputs. Hence, inside the network, the input to each unit $t$ from any source $u$ (through the connection $w_{tu}$) is typically denoted as $o_u$.
 \subparagraph{Architectures}
-\begin{list}{}{}
-	\item \textbf{Standard feedforward NN} %TODO ML-21-NN-part1-v.0.1.pdf p.55
+\begin{list}{}{} %TODO ML-21-NN-part1-v.0.1.pdf p.55
+	\item \textbf{Feedforward NN} Standard architecture of the NNs. Direction: input $\longrightarrow$ output\\
+	\item \textbf{Recurrent NN} adds feedback loops connections to the network topology. These self-loop connections provide the network with dynamical properties, leaving a "memory" of the past computations inside the model. This allows us to extend the representation capability of the model to the processing of sequences and structured data.
 \end{list}
+\subparagraph{Flexibility} The hypothesis space is a \textbf{continuous space} of all the functions that can be represented by assigning the weight values of the given architecture. Depending on the class of values produced by the output units (discrete or continuous), the model can deal, respectively, with classification tasks (sigmoidal output $f$) or regression tasks (linear output $f$). Also multi-class and multi-regression, with multiple output units.
+\subparagraph{Universal approximation} The flexibility is theoretically grounded (Cybenko 1989, Hornik et al. 1993\ldots). In short, a single hidden-layer network with logistic activation functions can approximate (arbitrary well) every continuous function, provided enough units in the hidden layer.\\
+A MLP network can approximate (arbitrarily well) every input-output mapping, provided enough units in the hidden layers.\\\\
+Existence theorem: given $\epsilon$, $\exists\:h(x)\:|\:|f(x) - h(x)|< \epsilon\:\:\forall\:x$ in the hypercube.\\\\
+With this fundamental result (MLP can represent \textit{any} function), two issues arise: how to learn by neural network and how to decide its architecture.\\
+The \textbf{expressive power} of a NN is strongly influenced by the number of units and their configuration (architecture). The number of units can be related to the discussion of the VC-dim, specifically: the network capabilities are influenced by the number of parameters $w^*$, which is proportional to the number of units. Further studies also report the dependencies on their value sizes.\\\\
+Es: weights = 0 $\Rightarrow$ minimal VC-dim, small weights $\Rightarrow$ linear part of the activation function,\\high values weights $\Rightarrow$ more complex model.\\
+The universal approximation theorem is a fundamental contribution, showing that one hidden layer is sufficient in general, but it doesn't assure that a "small number" of units would do the work. For many function families it's possible to find boundaries on that number, but also cases for which a single hidden layer network would require an exponential number of units (in $n$ input dimension).\\
+More layers can help, but is it possible to efficiently train deep networks?
+\subparagraph{Learning Algorithm} The learning algorithm allows adapting the weights $w$ of the model in order to obtain the best approximation of the target function. Often realized in terms of minimization of and error/loss function on the training dataset. Same problem as other models: given a set of $l$ training examples $(x_p, d_p)$ and a loss measure $L$ (ex. the MSE $L(h(x_p), d_p) = (d_p - h_w(x_p))^2$), find the weight vector $w$ that minimizes the expected error on the training data $$E(w) = R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(x_p), d_p)$$
+\textbf{Credit assignment problem}: which credit to the hidden units? Not easy when the error signal is not directly measurable: we don't know the error (delta) or the desired response for the hidden units, which is useful for changing their weights. Supposed too difficult, but the backpropagation algorithm brought a renaissance of the NN field.\\
+\textbf{Loading problem}, NP-complete: given a network and a set of examples, is there a set of weights so that the network will be consistent with the examples?\\\\
+In practice, networks can be trained in a reasonable amount of time, although optimal solutions are not guaranteed. How to solve? Key steps:
+\begin{list}{}{}
+	\item Credit assignment problem: how to change the hidden layer weights?
+	\item Gradient descent approach can be extended to MLP (provided that loss and activations are differentiable functions, to find the delta for every unit in the network)
+\end{list}
+\paragraph{Backpropagation algorithm} We need a differentiable loss, differentiable activation functions and a network to follow the information flow.\\
+Find $w$ by computing the gradient of the error function $$E(w) = R_{emp} = \frac{1}{l}\sum_{p=1}^l (h(x_p) - d_p)^2$$
+It has nice properties: easy because of the \textbf{compositional} form of the model, and keeps track only of the quantities local of each unit (local variables), so the \textbf{modularity} of the units is preserved.
+\begin{lstlisting}[style=myPython]
+def backprop():
+	# 1. Initialize all the weights w in the network and eta
+	# 2. Compute out and e_tot
+	while e_tot < epsilon:  # with epsilon desired value or other criteria
+		for w_i in w:
+			d_w_i = - (gradient of e_tot respect to w_i)  # step (1)
+			w_new = w + eta*d_w_i + ...  # step (2)
+		# Compute out and e_tot
+	end
+\end{lstlisting}
+\subparagraph{Step (1)} $$\Delta w = - \frac{\partial E_{tot}}{\partial w} = - \sum_p \frac{\partial E_p}{\partial w} = \sum_p \Delta_p w$$
+\paragraph{Issues in training neural networks} Heuristic guidelines in setting the backward propagation (backprop) algorithm. Generally, the models are over-parametrized, the optimization problem is not convex and is potentially unstable. We will discuss few of the issues. A good interpretation is to see backprop as a path trough the loss/weight space. The path depends on: data, neural network, starting point (initial weight values), rate of convergence, final point (stopping rule). This defines a control for the search over the hypothesis space. The basic algorithm, once again, is:
+\begin{enumerate}
+	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta w = -$ gradient of $E(w) = -\frac{\partial E(w)}{\partial w}$ (or for each $w_i$)
+	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)\\
+	$\eta$ is the step size or \textbf{learning rate}
+	\item Repeat from $2$ until convergence or $E(w)$ sufficiently small
+\end{enumerate}
+But now the $\Delta w =-\frac{\partial E(w)}{w}$ were obtained through backprop derivation/algorithm for any weight in the network. At step 2, to compute the error, we first apply inputs to the network computing an output (\textbf{forward phase}), then we retro-propagate the deltas for the gradient (\textbf{backward phase}). So how to choose the $w_{initial}, \eta$ and the convergence?
+\subparagraph{Starting values} In the basic algorithm, $w_{initial}$. The weights are initialized with random values close to zero. To be avoided: all zero, high values or all equal (symmetry), because this hampers the training. For standardized data, values $in [-0.7, +0.7]$. There are other heuristics: $range \cdot \frac{2}{fanin}$ with $fanin$ being the number of inputs to a hidden unit, or orthogonal matrices\ldots
+\subparagraph{Multiple minima} The loss is not convex, has local minima. This affects the results, which depends on the starting weight values, hence: try a number of random starting configurations (5-10 or more \textbf{training runs} or \textbf{trials}). Useful taking the mean results (mean of errors) and looking at the variance to evaluate the model and then, if only one response is needed: we can choose the solution giving the lowest (penalized) validation error or we can take advantage of different end points and outputting a mean of the outputs (\textbf{committee approach}).\\
+A "good" local minima is often sufficient: in ML we don't need the global or local minimum on $R_{emp}$, as we are searching the minimum of $R$ (which we can't compute). Often we stop early, in a point of non-zero gradient so being neither a local nor a global minima for the training error. The neural network builds a variable size hypothesis space, so VC-dim increases during training and the training error decreases toward zero (or global minimum) while the neural network becomes too complex. We \textbf{stop before this condition of overtraining}, avoiding overfitting.
+\subparagraph{Online/batch} Batch version: sum all the gradients of each pattern over an epoch and then update the weights ($\Delta w$ after each epoch of $l$ patterns). Online/stochastic: upgrade $w$ for each pattern $p$, making progress with each example it sees. Faster but need smaller $\eta$.\begin{multicols}{2}
+\textbf{Batch}
+\begin{enumerate}
+	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta w = -$ gradient of $E(w)$ on the entire training set (\textbf{epoch})
+	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)
+	\item Repeat from $2$ until convergence
+\end{enumerate}
+More accurate estimation of gradient
+\columnbreak
+\textbf{Online}
+\begin{enumerate}
+	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
+	\item For each pattern $p$\begin{enumerate}
+		\item Compute $\Delta_p w = -$ gradient of $E(w)$
+		\item Compute $w_{new} = w + \eta\cdot\Delta_p w$
+	$\eta$ is the step size or \textbf{learning rate}
+	\end{enumerate}
+	\item Repeat from $2$ until convergence
+\end{enumerate}
+Since the gradient of a single data point can be considered a noisy approximation to the overall gradient, this is also called stochastic gradient descent.
+\end{multicols}
+Many variations exists, for example stochastic gradient descent with minibatch.
+\subparagraph{Learning rate} With batch training we have more accurate estimation of gradient, higher $\eta$. With online we have training faster but potentially unstable, lower $\eta$. So high vs low $\eta \Leftarrow$ fast but unstable vs slow but stable. Typically $\eta \in [0.01, 0.5]$.\\
+The learning curve, plotting the errors during training, allows to check the behavior in the early phases of the model design. Of course the absolute value depends also on model capability and other hyperparameters, but $\eta$ plays a big role in the curve quality. It's useful to have the mean of the gradients over the epoch: uniform approach (Least \textbf{Mean} Square). Some improvements: momentum (Nesterov), variable and adaptive learning rates, varying depending on the layers (in deep networks)\ldots\\
+With momentum it becomes $\Delta w_{new} = -\eta\frac{\partial E(w)}{w} \underline{+ \alpha\Delta w_{old}}$, saving $\Delta w_{new}$ in $\Delta w_{old}$ for the next step. Becomes faster in plateaus but damps in oscillations (inertia effect, allows higher $\eta$)\\
+Can be used in online by considering the previous example, $\Delta w_{p-1}$ as $\Delta w_{old}$.\\
+It smooths the gradient over different examples. A variant is to evaluate the gradient after the momentum is applied (so using $\overline{w} = w + \alpha\Delta w_{old}$), improves the rate of convergence for the batch mode (not online!).\\
+The variable learning rate starts high and decays linearly for each step until iteration $\tau$, using $\alpha = \frac{s}{\tau}$ with $s$ current step so that $\eta_s = (1-\alpha)\eta_0 + \alpha\eta_\tau$, then stops and uses a fixed small $\eta_\tau$. Set up as $\eta_\tau = 1\%$ of $\eta_0$ and $\tau$ as few hundred steps. $\eta_0$ same no instability/no stuck trade off.\\
+With adaptive learning rate, it's automatically adapted during training possibly avoiding/reducing the fine tuning phase via hyperparameters selection.
+% ML-21-NN-part2-v0.12.pdf p.42
+\subparagraph{Stopping criteria} When to stop training? Basic: error. The best metric if we know the tolerance of data. Other: max tolerance instead of mean, number of missclassified, no more relevant weight changes or no more significat error decreasing.\\
+In any case stop after too many epochs, but avoid stopping at an arbitrary fixed number of epochs, and not necessarily stop with very low training error.\\
+Control of complexity is the main aim to achieve best generalization capability.
 \end{document}
