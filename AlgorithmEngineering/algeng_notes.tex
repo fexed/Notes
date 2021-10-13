@@ -10,18 +10,30 @@
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \usepackage{makecell}
-\lstdefinestyle{customasm}{
-  belowcaptionskip=1\baselineskip,
-  frame=line,
-  xleftmargin=\parindent,
-  language=[x86masm]Assembler,
-  basicstyle=\ttfamily,
-  commentstyle=\itshape\color{purple!40!black},
+\definecolor{backcolour}{RGB}{255,255,255}
+\definecolor{codegreen}{RGB}{27,168,11}
+\definecolor{codeblue}{RGB}{35,35,205}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{205,35,56}
+\lstdefinestyle{myPython}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{codeblue},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\small\ttfamily,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=2pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	language=python
 }
-\lstset{escapechar=@,style=customasm}
-\lstnewenvironment{C}
-  {\lstset{language=C++,frame=none}}
-  {}
 \begin{document}
 \title{Algorithm Engineering}
 \author{Federico Matteoni}
@@ -68,10 +80,11 @@ $n = (1 + \epsilon)M$ with $\epsilon > 0$ data outside of the memory. So $M$ is 
 The first point is we want to find $P($accessing the disk$)$, with a totally random algorithm, is $= \frac{\epsilon M}{n} = \frac{\epsilon\not M}{(1 + \epsilon)\not M} = P(\epsilon)$\\\\
 The second point is the average time of a step. $\sum_x P(X = x)\cdot x$ with $X$ the variable of which we compute the average with that formula. $X$ is time, in this case. The time is $1$ in case of computing, and varies in case of accessing the memory. So we have the multiply the cost of access times the probability (of computing, going internal, going to the disk). Internal memory access costs 1, while on disk is larger and we say that the cost is $c$. So the average, with let's say $a$ probability of memory access, $= (1 - a)\cdot 1 + a(P(\epsilon)\cdot c + (1 - P(\epsilon))\cdot 1)$ but $0 < a < 1$ and $1 - P(\epsilon)$ are very small, so we can rewrite as $= a\cdot P(\epsilon)\cdot c = a \cdot \frac{\epsilon}{1 + \epsilon} \cdot c + O(1)$. If $a = 0$ then no memory access so the cost is constant. The larger is $a$ the more memory access, the more the term is important, which is exactly what we want to capture. Usually, $a = 0.3 = 30\%$ and $c = 10^6$ the gap between accessing the disk and accessing the internal memory.\\
 So $\frac{\epsilon}{1 + \epsilon}\cdot 0.3 \cdot 10^6 = \frac{\epsilon}{1 + \epsilon} \cdot 300000$. If $P(\epsilon) = 0.001$ the avg time of a step is $0.001 \cdot 300000 = 300$, so the disk has a lot of impact even with only a thousandth of memory access being on disk: the avg cost is 300 and not 1.
-\paragraph{Sorting and permuting} Given an array $S[1, m]$ and a permutation $\pi$, the permutation problem asks to permute $S$ according to $\pi$. For example $S = [A, B, C, D], \pi = [3, 1, 2, 4]$ then $\pi$ tells that the $\pi[0] = 3$ item goes to the first position. So $S_\pi = [C, A, B, D]$.
-\begin{lstlisting}
+\section{Sorting}
+\paragraph{Permuting problem} Given an array $S[1, m]$ and a permutation $\pi$, the permutation problem asks to permute $S$ according to $\pi$, creating $[S[\pi[1]], S[\pi[2]],\ldots,S[\pi[m]]$. For example $S = [A, B, C, D], \pi = [3, 1, 2, 4]$ then $\pi$ tells that the $\pi[0] = 3$ item goes to the first position. So $S_\pi = [C, A, B, D]$
+\begin{lstlisting}[style=myPython]
 for i = 1 to n:
-	S'[i]=S[pi[i]]
+	S1[i] = S[pi[i]]
 \end{lstlisting}
 Which costs $\Theta(n)$\\
 \begin{tabular}{c | c | c}
@@ -83,7 +96,7 @@ RAM & $n$ & $n\log n$\\
 \end{tabular}
 \pagebreak
 
-Solving the permuting in a scan + sort kind of way, -altrimenti- we have to do a disk access per value.\\
+Solving the permuting in a scan + sort kind of way, otherwise we have to do a disk access per value.\\
 \begin{list}{}{}
 	\item scan S : $\langle$S[i], i$\rangle$ which is $\langle$item, position$\rangle$\\
 	Which creates $\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
@@ -112,7 +125,16 @@ $\frac{M}{B} =$ how many pages I can keep in the internal memory. Let's say $n =
 Let's see when is sorting preferred to moving items or viceversa
 $$\frac{n}{B} \log_{\frac{M}{B}} \frac{n}{M} < n \Leftrightarrow \log_{\frac{M}{B}} \frac{n}{M} < B$$\\
 We have $B = 1$ in the RAM model, $B = 32$Kb in the 2-level model compared to $\log_{\frac{M}{B}}\frac{n}{M} = 2$ or $3$. In practical situations with disk, sorting is better than moving numbers. If $B = 1$, in the RAM model, $M = O(1)$, then sorting is worse than moving.
-\paragraph{Sorting} Let's consider binary merge sort, which in the worst case costs $O(n\cdot \log_2 n)$. Let's evaluate the I/Os in the case that $n >> M$ so the array can't be stored entirely in internal memory. Since it's based on the merge procedure, we can evaluate the cost of the merge and multiply by the number of levels. It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $\frac{l}{B}$ I/Os. So it takes $O(\frac{n}{B} \log_2 n)$ I/Os.\\
+\paragraph{Sorting} Let's consider binary merge sort, which in the worst case costs $O(n\cdot \log_2 n)$.
+\begin{lstlisting}[style=myPython]
+def MergeSort(S, i, j):
+	if (i < j):  # sort if at least two items, otherwise already sorted
+		m = (i+j)/2
+		MergeSort(S, i, m-1)  # split into two halves
+		MergeSort(S, m, j)
+		Merge(S, i, m, j)  # most of the cost is here
+\end{lstlisting}
+Let's evaluate the I/Os in the case that $n >> M$ so the array can't be stored entirely in internal memory. Since it's based on the merge procedure, we can evaluate the cost of the merge and multiply by the number of levels. It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $\frac{l}{B}$ I/Os. So it takes $O(\frac{n}{B} \log_2 n)$ I/Os.\\
 Sorting = computing the sorted permutation + implement the sorted permutation. So we can say that sorting $\geq$ permuting, is at least difficult as\ldots. In the RAM model the $\geq$ is $>$, strict, because sorting is $n\cdot\log n$ and computing is the real issue, because implement is linear. In the 2-level memory model they are almost equivalent. This considering \textbf{atomic items}, integers o non-splittable strings.\\
 The mismatch is the base of the logarithm. The binary merge sort is $O(\frac{n}{B} \log_2 \frac{n}{M})$: partitioning the array in blocks of size $M$, the size of the memory, called runs. Can we generate runs longer than M in few I/Os? On average we will be able to create runs of size $2M$, which saves 1 full scan of data (which, for large data, is a lot of time saved).
 \paragraph{Snow plow algorithm} Sort item that you can, leave item that you cannot.\\
@@ -120,6 +142,19 @@ S = 1, 7, 5, 3, 2, with M = 3 items. The memory is divided in two parts: a min h
 \begin{center}
 	\includegraphics[scale=0.5]{1.png}
 \end{center}
+\begin{lstlisting}[style=myPython]
+U = unsorted array of M items
+H = min-heap over items of U
+U = {}
+while H != {}:
+	min = minimum from H
+	min -> output run
+	next = next item from input sequence
+	if next < min:
+		next -> U
+	else:
+		next -> H
+\end{lstlisting}
 Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $T = \#$ items read. The phase has processed $T + M$ items, $T$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $T$ items are written out. So $T$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to U and H. P(item read goes to $U$) = $1/2$, a totally random situation. By changing the probability we change how much sorted is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = T/2$. Given that $|U| = M$, then on average $E[|U|] = \frac{T}{2} = M$ so average $T = 2M$
 \paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots
 \paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, by merging we need $3B$ for reading the memory (one for the first run, one on the second run and one page on the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if a load immediately all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$, $k$ pages for $k$ runs plus an output page. So $k = \frac{M}{B} - 1$ which we can approximate with $\frac{M}{B}$. Each run generates $l/B$ I/Os, and the merged run is long $kl$ elements.\\
@@ -280,6 +315,7 @@ $P(L \geq l) = P(max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdo
 	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
 \end{enumerate}
 $P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$
+
 
 %Lecture of 22/10
 \paragraph{Variable byte econding} Idea is that given a variable $i$ there's a binary representation $B(i)$, for example $i = 2$, then $B(i) = 10$. We use 1 bit out of 8 to make the code prefix free. So $B(i)$ is splitted in blocks of 7 bits, $B(i) = \underline{\textit{000}1101}\:\underline{1001111}$. The most importanti 7 bits become a byte of $\textbf{1}0001101$ and the other $\textbf{0}101111$. Continuation bit is one if the encoding continues and 0 if the encoding ends.\\
