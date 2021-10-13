@@ -471,7 +471,59 @@ It smooths the gradient over different examples. A variant is to evaluate the gr
 The variable learning rate starts high and decays linearly for each step until iteration $\tau$, using $\alpha = \frac{s}{\tau}$ with $s$ current step so that $\eta_s = (1-\alpha)\eta_0 + \alpha\eta_\tau$, then stops and uses a fixed small $\eta_\tau$. Set up as $\eta_\tau = 1\%$ of $\eta_0$ and $\tau$ as few hundred steps. $\eta_0$ same no instability/no stuck trade off.\\
 With adaptive learning rate, it's automatically adapted during training possibly avoiding/reducing the fine tuning phase via hyperparameters selection.
 % ML-21-NN-part2-v0.12.pdf p.42
-\subparagraph{Stopping criteria} When to stop training? Basic: error. The best metric if we know the tolerance of data. Other: max tolerance instead of mean, number of missclassified, no more relevant weight changes or no more significat error decreasing.\\
+\subparagraph{Stopping criteria} When to stop training? Basic: error. The best metric if we know the tolerance of data. Other: max tolerance instead of mean, number of misclassified, no more relevant weight changes or no more significant error decreasing.\\
 In any case stop after too many epochs, but avoid stopping at an arbitrary fixed number of epochs, and not necessarily stop with very low training error.\\
 Control of complexity is the main aim to achieve best generalization capability.
+\subparagraph{Overfitting and regularization} Typically, stopping at the global minimum of $R_{emp}(w)$ is likely to be an overfitting solution. The control of complexity is our main aim to achieve the best generalization capability. For instance, we need to add some \textbf{regularization}: can be achieve directly (\textbf{penalty term}) or indirectly (\textbf{early stopping}). Model selection with cross validation on empirical data to find the trade-off.\\
+In neural networks, we start learning with small random weights (breaking the symmetry!). As optimization proceeds, hidden units tend to saturate, increasing the effective number of free parameters (hence increasing the VC-dim). As we discussed, this is a variable-sized hypothesis space (changes during training).
+\begin{center}
+	\includegraphics[scale=0.5]{8.png}
+\end{center}
+How to act on the overtraining?
+\begin{enumerate}
+	\item Early stopping: using a validation set to determine when to stop (vague indication: when the validation error increases, so use more than one epoch before estimating (\textbf{patience}))\\
+	Since the effective number of parameters grows during the training, halting the process effectively limits the complexity.
+	\item Regularization on the loss: we can optimize the loss considering the weights values.\\
+	Related to Tikhonov, so well principled approach: add a penalty term to the error function: $Loss(w) = \sum_p (d_p - f(x_p))^2 \underline{+\lambda||w||^2}$ with $||w||^2 = \sum_i w_i^2$\\
+	The effect is a weight decay, basically $w_{new} = w + \eta\cdot\Delta w - 2\lambda w$.\\
+	$\lambda$ is the \textbf{regularization parameter}, generally very low (0.01) and selected in the model selection phase. Applied on the linear model it's the ridge regression.\\
+	More sophisticated penalty terms have been developed (ex: weight elimination, Haykin).
+	Misunderstandings:
+	\begin{list}{}{}
+		\item Regularization is not a technique to control the stability of the training convergence but controls the \textbf{complexity of the model}, measured by VC-dim and related to the number of weights and values of the weights in the neural networks
+		\item Early stopping needs a validation set to decide when to stop, which sacrifices some data. The regularization is a principled approach, as it allows the VL curve to follow the TR curve so that early stopping is not needed.\\
+		But you can use both!
+	\end{list}
+	Typically the bias ($w_0$) is omitted because its inclusion causes the results to be not independent from target shift/scaling. May be included with its own regularization coefficient.\\
+	Typically it's applied in the batch version. So for online/mini batch we need to take into account possible effects over many steps, so it's better to use $\lambda\cdot\frac{mb}{l}$ with $l$ being the number of total patterns.\\
+	Other techniques: \textbf{dropout}.
+	\item Pruning methods
+\end{enumerate}
+\subparagraph{Number of units} This is related to the control of complexity but also to the input dimension and the size of the TR set. In general, this is a model selection issue. The number of units, along with the regularization parameters, can be selected with the model selection phase (cross-validation).\\
+Too few units $\Rightarrow$ underfitting, viceversa too many units $\Rightarrow$ overfitting. The number can be high with proper regularization.
+\begin{list}{}{}
+	\item \textbf{Constructive approaches}: the learning algorithm decides the number of hidden units, starting with small networks and adding new units.\\
+	Incremental approach: algorithms that build a network starting with a minimal configuration and add new units and connections during training. Examples: Tower, Tiling Upstart for classification and Cascade Correlation for both regression and classification.\begin{list}{}{}
+		\item The \textbf{Cascade Correlation} algorithm starts with N0, a network without hidden units, which is trained and evaluated. If N0 cannot solve the problem, go to N1: a hidden unit is added such that the correlation between the output of the unit and the residual error of N0 is maximized (by training its weights).\\
+		After training, the weights of the new unit are frozen and the remaining weights are restrained. If the obtained network N1 cannot solve the problem, new hidden units are progressively added, which are connected with all the inputs and previously installed units. The process continues until the residual errors of the output layer satisfy a specified stopping criteria.\\
+		This method dynamically builds up a neural network and terminates once a sufficient amount of hidden units has been found to solve the given problem. Specifically, it works by interleaving the minimization of the total error function (LMS) by simple backpropagation training of the output layer and the maximization of the (non-normalized) correlation (the covariance) of the new inserted hidden (candidate) units with the residual error. With $E_{p,k} = (o_{p,k} - d_{p,k})$ residual error, with $o_{p,k}$ output, $p$ pattern and $k$ output unit
+		$$S = \sum_k\:\vline\sum_p(o_p - mean_p(o_{p,k}))(E_{p,k} - mean_p(E_{p,k}))\vline$$
+		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\hbox{with }h\hbox{ candidate index}$$
+		\begin{center}
+			\includegraphics[scale=0.5]{9.png}
+		\end{center}
+		The role of hidden units is to reduce the residual output error (solves a specific sub-problem and becomes a permanent "feature detector").\\
+		Typically, since the maximization of the correlation is obtained using a gradient descent technique on a surface with several maxima, a pool of hidden units is trained and the best one selected to avoid local maxima. It's also greedy: easy to converge may also find a minimal number of units but may lead to overfitting.
+\end{list}
+	\item \textbf{Pruning methods}: start with a large network and progressively delete weights or units.
+\end{list}
+\subparagraph{Input scaling and output representation} Preprocessing can have large effects: normalization (via standardization and rescaling), categorical inputs, handling missing data\ldots\\
+For the output, one or more linear units for regression. For classification, one unit (binary classification) or one of $k$ (multioutput):
+\begin{list}{}{}
+	\item sigmoid (choose the threshold to assign to class)
+	\item rejection zone
+	\item one-of-$k$ encoding (winner class chosen by taking the highest value among the outputs)
+	\item Often symmetric logistic (tanh) learn faster
+	\item Softmax for 0/1 targets, sum to 1 can be interpreted as probability of belonging to class $i$ among $k$ classes.
+\end{list}
 \end{document}
