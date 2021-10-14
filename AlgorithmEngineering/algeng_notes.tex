@@ -135,7 +135,8 @@ def MergeSort(S, i, j):
 		Merge(S, i, m, j)  # most of the cost is here
 \end{lstlisting}
 Let's evaluate the I/Os in the case that $n >> M$ so the array can't be stored entirely in internal memory. Since it's based on the merge procedure, we can evaluate the cost of the merge and multiply by the number of levels. It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $\frac{l}{B}$ I/Os. So it takes $O(\frac{n}{B} \log_2 n)$ I/Os.\\
-Sorting = computing the sorted permutation + implement the sorted permutation. So we can say that sorting $\geq$ permuting, is at least difficult as\ldots. In the RAM model the $\geq$ is $>$, strict, because sorting is $n\cdot\log n$ and computing is the real issue, because implement is linear. In the 2-level memory model they are almost equivalent. This considering \textbf{atomic items}, integers o non-splittable strings.\\
+Sorting = computing the sorted permutation + implement the sorted permutation. So we can say that sorting $\geq$ permuting, is at least difficult as permuting.\\
+In the RAM model the $\geq$ is $>$, it's strict, because sorting is $n\cdot\log n$ and computing is the real issue, because implement is linear. In the 2-level memory model they are almost equivalent. This considering \textbf{atomic items}, integers o non-splittable strings.\\
 The mismatch is the base of the logarithm. The binary merge sort is $O(\frac{n}{B} \log_2 \frac{n}{M})$: partitioning the array in blocks of size $M$, the size of the memory, called runs. Can we generate runs longer than M in few I/Os? On average we will be able to create runs of size $2M$, which saves 1 full scan of data (which, for large data, is a lot of time saved).
 \paragraph{Snow plow algorithm} Sort item that you can, leave item that you cannot.\\
 S = 1, 7, 5, 3, 2, with M = 3 items. The memory is divided in two parts: a min heap, items that are still unsorted, and an unsorted part, the snow that we cannot clean. Start from the memory with everything unsorted: min heap empty and only unsorted items. We put $M$ unsorted items, so 1, 7, 5 in the unsorted part. We sort the unsorted items and move to the min heap, with the unsorted part left empty. We pick the minimum element and write it out of the memory. We have emptied a position, and we can fetch another item in the unsorted part, the 3. The new item is compared to the minimum. 3 is larger than the current minimum, so is written inside the min heap, which is now 3, 5, 7. We write again out the minimum, 3, and fetch another item. 2 is smaller than 3, so it goes in the unsorted part. At some point the min heap will be empty, the unsorted part will be full and we restart the phase. We pay 1 I/O as soon as we write out $B$ items.
@@ -155,11 +156,12 @@ while H != {}:
 	else:
 		next -> H
 \end{lstlisting}
-Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $T = \#$ items read. The phase has processed $T + M$ items, $T$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $T$ items are written out. So $T$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to U and H. P(item read goes to $U$) = $1/2$, a totally random situation. By changing the probability we change how much sorted is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = T/2$. Given that $|U| = M$, then on average $E[|U|] = \frac{T}{2} = M$ so average $T = 2M$
+Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $\tau = \#$ items read. The phase has processed $\tau + M$ items, $\tau$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $\tau$ items are written out. So $\tau$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to $U$ and $H$. $P($item read goes to $U) = \frac{1}{2}$, a totally random situation. By changing the probability we change "how much sorted" is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = \tau/2$ because we have $\tau$ items that go to $U$ with probability $\frac{1}{2}$.\\
+Given that $|U| = M$, then on average $E[|U|] = \frac{\tau}{2} = M$ so average $\tau = 2M$
 \paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots
-\paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, by merging we need $3B$ for reading the memory (one for the first run, one on the second run and one page on the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if a load immediately all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$, $k$ pages for $k$ runs plus an output page. So $k = \frac{M}{B} - 1$ which we can approximate with $\frac{M}{B}$. Each run generates $l/B$ I/Os, and the merged run is long $kl$ elements.\\
-So every run is of $M$ elements which take $\frac{M}{B}$ I/Os, for $n/M$ runs. So the total cost is $O(n/M \cdot \frac{M}{B}) = O(\frac{n}{B})$ for creating runs. ?So $\log_k n/M$?.\\
-The cost of mergesort is $O(\frac{n}{B} + \frac{n}{B}\cdot\log_k n/M)$ which we have seen with $k = \frac{M}{B}$.\\
+\paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, by merging we need $3B$ for reading the memory (one for the first run, one on the second run and one page on the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if a load immediately all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$, $k$ pages for $k$ runs plus an output page. So $k = \frac{M}{B} - 1$ which we can approximate with $\frac{M}{B}$. Each run generates $\frac{1}{B}$ I/Os, and the merged run is long $k\cdot\frac{M}{B}$ elements.\\
+So every run is of $M$ elements which take $\frac{M}{B}$ I/Os, for $\frac{n}{M}$ runs. So the total cost is $O(\frac{n}{\not M} \cdot \frac{\not M}{B}) = O(\frac{n}{B})$ for creating runs. So the merge tree has $\frac{n}{M}$ leaves and every node has $k$ runs to merge from the lower level, making it $\log_k \frac{n}{M}$ levels high.\\
+The cost of mergesort is $O(\frac{n}{B} + \frac{n}{B}\cdot\log_k \frac{n}{M})$ which we have seen with $k = \frac{M}{B}$. It's the cost of creating the runs ($\frac{n}{B}$) plus the cost of merging (every merge is linear, total length divided by $B$, by the number of merge operations which is the levels of the tree)\\
 With improve B, M by compression. So 3, 5, 10 is written as 3 (the first item) and storing the gaps (gap encoding) so 2, 5,\ldots with variable length encoders.\\\\
 Let's rewrite the bound
 $$\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{M}$$
@@ -167,20 +169,23 @@ We don't know how items are consumed on the disks, given $D$ disks. With $k = 2,
 $$\Theta\left(\frac{n}{BD}\cdot\log_{\frac{M}{B}}\frac{n}{BD}\right)$$
 For 1 disk is $O(\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{B})$\\
 For $D$ disks we can consider one big disk with $B' = D\cdot B$ page size, so the heads of the disks are fixed together and move together. We do not change the algorithm, so the complexity is simply $O(\frac{n}{B'}\cdot\log_{\frac{M}{B'}}\frac{n}{B}) = O(\frac{n}{DB}\cdot\log_{\frac{M}{DB}}\frac{n}{DB})$ but with D in the base of the logarithm makes the value larger, but the impact is small and the simplicity of the method makes it worth it. This is called \textbf{disk striping}.
-\paragraph{Binary Decision Trees} Every node a comparison left branch $a<b$, right $a>b$ and it represents an algorithm. The leaves there are permutations, total number of leaves is $n!$. The question is how big should be the tree so that it's a sorting algorithm, it grows by $2^t$ nodes for level $t$, so $2^t > n!$ and we have the lower bound.
-\paragraph{Lower bounds} About sorting\\
-There are also lower bounds about permuting, an extra for the oral.\\
-Binary decision trees proved lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages. The main idea is that whenever i fetch a page I fetch $B$ items, not just two, so many comparisons. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
+\paragraph{Binary Decision Trees} Every node $(a,b)$ generates a comparison, the left branch is followed if $a<b$ and the right if $a>b$: it represents an algorithm. The leaves are sorted permutations according to the path of comparisons, total number of leaves is $n!$. The question is how big should be the tree so that it's a sorting algorithm, so to reach a number of leaves that's at least $n!$? It grows by $2^t$ nodes for every level $t$, so $2^t > n!$ and we have the lower bound.\\
+The left subtree, where the comparison is $a < b$, simply generates (by following a path) all the permutations in which $a$ comes before $b$, whatever number of elements are between them. The right path, vice versa, generates permutations where $b$ comes before $a$.
+\paragraph{Lower bounds} There are also lower bounds about permuting, an extra for the oral.\\
+Binary decision trees proved lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages. The main idea is that whenever I fetch a page I fetch $B$ items, not just two, so we can do many comparisons before loading another page. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
 The memory $M$ consists of several items, we bring the page of size $B$ in internal memory and we have $M-B$ other items in the memory. One I/O executes many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. How many comparisons? We can assume that the items in memory are sorted, so the item brought can go in 4 position (before the first, between the first two\ldots). In general, the $B$ items can enter the $M-B$ items in $n$ ways. The memory consists of $M$ cells, so $n = \left(\begin{array}{c}
 M\\B
-\end{array}\right)\cdot B!$ with $B!$ because we have to account for the shuffling.\\
+\end{array}\right)\cdot B!$ with $B!$ because we have to account for the shuffling, so it needs to be counted only once. We have $\left(\begin{array}{c}
+M\\B
+\end{array}\right)$ because every item from $B$ can be inserted in one slot of $M$ possible slots, so $B$ slots out of $M$.\\
+
+\pagebreak
 So two situations \begin{enumerate}
 	\item A new read, a read of an input page for the first time\\
 	\# new reads = $\frac{n}{B}$
-	\item An old read, all other read-cases\\
-	$t - \frac{n}{B}$
+	\item An old read, all other read-cases, $t - \frac{n}{B}$
 \end{enumerate}
-$t$ I/Os, can be a new or an old read. Either one of the $\frac{n}{B}$ pages for the first time or any other page (or one of those pages for the second/third/\ldots time)\\
+$t$ I/Os, can be a new or an old read. Either one of the $\frac{n}{B}$ pages for the first time or any other page (or one of those pages for the second/third/\ldots time).\\
 Two kinds of nodes, one node refers to a new I/O the other to an old I/O.\\
 In a new I/O we have $\left(\begin{array}{c}
 M\\B
@@ -196,29 +201,48 @@ M\\B
 M\\B
 \end{array}\right)^{t}\cdot \left(B!\right)^{\frac{n}{B}} \geq n!$$
 To compute, consider that $\log\left(\begin{array}{c}
-M\\B
-\end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multiway merge sort bound. $t = \Omega(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M})$
+a\\b
+\end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multi way merge sort bound. $t = \Omega(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M})$
 \paragraph{Two sorting paradigms} The following:
 \begin{list}{}{}
 	\item merge-based paradigm: partition (computationally free, $O(1)$), recursion, recombination (merge, $O(\frac{n}{B})$)
-	\item distribution/partitioning-based paradigm: partition (costly part, $O(n)$), recursion, recombination (doesn't exist)
+	\item distribution/partitioning-based paradigm: partition (costly part, $O(n)$), recursion, recombination ($\not\exists$)
 \end{list}
 How can we design a multi way quick sort? We can't take one pivot, because that'll be binary. We can take many pivot but we have to guarantee a good usage of internal memory, but more importantly we need that the partition have to balanced: with $k$ pivot I'd like that every partition has $\frac{n}{k}$ items. This requires a theorem.\\
 Let's refresh the quick sort. %TODO
-\paragraph{Time complexity of quick sort is $O(n\log n)$} By introducing a random variable $X_{u,v} = \left\{\begin{array}{c c}
-1&if S[u]\textsl{ compared to}S[v]\\0&else
-\end{array}\right.$ and we want $E[\sum_{u=1}^m\sum_{v>u}^m X_{u,v}$ %TODO calcs
-$=\sum_u \sum_v P(S[u]$ compares to $S[v])$, let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part. With just one pivot and two parts, then S[u] is compared to S[v] only when one of them is the pivot. So $P(S[u]$ compares to $S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
-Case $a$ %TODO
-, case $b$ no comparison because they'll go to different partitions. Case $c$ is that either $u'$ or $v'$ is taken as pivot, so there's the comparison.\\ %TODO
-$T(n) = O(n) + [T(n_<)$ or $T(n_>)]$ choice of going to the left or to the right, probability. Let's analyze that probabilities.
-\paragraph{3-way partitioning} Made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (swaps impacts on memory and comparison on CPU), but the problem here is mispredictions on the CPU, modern CPU do look-ahead and if it badly predicts the future ifs it has to break the stack and go back. So with fewer comparisons it's better. 10\% circa speed-up factor.\\
-%TODO disegno
+\paragraph{Time complexity of quick sort is $O(n\log n)$} Let's prove it by introducing a random variable\\ $X_{u,v} = \left\{\begin{array}{c l}
+1&\hbox{if }S[u]\hbox{ is compared to }S[v]\\0&else
+\end{array}\right.$ and we want the average number of comparisons $$E\left[\sum_{u=1}^m\sum_{v>u}^m X_{u,v}\right] = \sum_{u=1}^m\sum_{v>u}^m E\left[X_{u,v}\right] = $$
+The average of an indicator value (which $X_{u,v}$ is) is the sum of all possible values times their probability $$= \sum_{u=1}^m\sum_{v>u}^m \left(1\cdot P(S[u]\hbox{ is compared to }S[v]) + 0\cdot P(S[u]\hbox{ is not compared to }S[v])\right) = $$
+$$=\sum_u \sum_v P(S[u]\hbox{ is compared to }S[v])$$
+Let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part and when one of the elements is a pivot. With just one pivot and two parts, then $S[u]$ is compared to $S[v]$ only when one of them is the pivot. So $P(S[u]\hbox{ is compared to}S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
+\begin{list}{}{}
+	\item Case $a$: the pivot is smaller or greater than both items, so both items go to the same partition: not significative because they can be compared in the next time 
+	\item Case $b$: the pivot is between the two items, so no comparison because they'll go to different partitions.
+	\item Case $c$: is that one of the two items is taken as pivot, so \textbf{there's the comparison}.
+\end{list}
+So the probability is the number of times that $c$ can happen (two items, so $2$) divided by the total number of events possible, $b + c$, which is any item choosen between the two elements included, so $S[v] - S[u] + 1$. So $P(S[u]\hbox{ is compared to }S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$) = \frac{2}{S[v] - S[u] + 1}$\\
+\paragraph{$k$th ranked item} In unsorted array $S$: is the item that, taken $S$, would go to the $k$th place is $S$ would be sorted. The obvious way of finding out would be to sort and pick the item in the position $k$, but you'd be paying $n\cdot\log n$. This problem can be solved in linear time $O(n)$ on average: same base as quick sort with just one recursive call. Pick a random pivot and do a three-way partition: a partition of $n_<$ smaller elements than the pivot, a partition of $n_=$ elements of the same value as the pivot and a partition of $n_>$ larger elements than the pivot. Of course the left and right partition, of respectively smaller and bigger elements, are unsorted (the middle partition is of equal elements so is trivially sorted) but if the elements falls into the middle partition we can immediately know which elements it is. For example, $[3,2,0,\vline7,7,7,\vline10,8,9]$, if $k$ is 4 we can answer that, being that there are $3$ elements in the left partition, the 4th ranked element is a 7. Then if $k$ falls in the $=$ partition, I'm done. If it falls in one of the other two, I cannot know but we can already discard some items: if the pivot is in the $<$ part we recurse on that part, otherwise if the pivot is on the $>$ part we recurse over there (in this case, dropping from $k$ the items that are smaller, so $k = k - n_= - n_<$). Only one recursive call.\\
+$T(n) = O(n) + [T(n_<)$ or $T(n_>)]$ choice of going to the left or to the right, probability. Let's analyze that probabilities. Supposing that $n_= = \frac{n}{3}$, a balanced partitioning, with the pivot falling among the $n_=$ items (the middle partition). So this is the good case: the pivot is between the position $\frac{n}{3}$ and $\frac{2}{3}n$, and happens with probability $\frac{1}{3}$. The bad case is the pivot falling into the left or right partition.\\
+In the good case $n_< \leq \frac{2}{3}n$ and $n_> \leq 	\frac{2}{3}n$. So $$T(n) = O(n) + (P(\hbox{good case})\cdot T() + P(\hbox{bad case})\cdot T()) \Leftrightarrow$$
+$$\Leftrightarrow T(n) = O(n) + \left(\frac{1}{3}\cdot T\left(\frac{2}{3}n\right) + \frac{2}{3}\cdot T(n - 1)\right) \Leftrightarrow$$
+$$\Leftrightarrow T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) + \frac{2}{3}\cdot T(n) \Leftrightarrow$$
+$$\Leftrightarrow \frac{1}{3}T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) \Leftrightarrow$$
+$$\Leftrightarrow T(n) \leq O(n) + T\left(\frac{2}{3}n\right)$$
+\paragraph{Dual Pivot (2012)} 3-way partitioning made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (swaps impacts on memory and comparison on CPU), but the problem here is mispredictions on the CPU, modern CPU do look-ahead in the computing and if it badly predicts the future ifs it has to break the stack and go back. So with fewer comparisons it's better, it reduces the mispredictions. 10\% circa speed-up factor.\\
+The pivots maintain an invariant: the first partition, until index $l-1$, are items smaller than the first pivot ($p$), then there's a partition of items $p\leq \ldots \leq q$ with $q$ being the second pivot and this partition starts at $l$ and ends at $k-1$. Then there's a partition of items that are still to be processed from index $k$ to $g$, and at the end a partition of elements $> q$.
+\begin{center}
+	\includegraphics[scale=1]{7.png}
+\end{center}
+We take $S[k]$ and compare it to $p$. If $S[k]<p$ then swap (insert $S[k]$ in position $l$ and increase $l$). Else, we compare $S[k]$ with $q$. If $S[k]\leq q$ we don't have to do anything, it's already in the correct position. Else, $S[k] > q$: we start from $g$ and go back until we find an element $\leq q$ and we swap $S[k]$ with that element.
 \paragraph{Bounded Quick Sort} Bounding the recursive calls. Transform the deepness of the tree (the number of recursive calls) from $n$ to $\log n$, but the time complexity remains $n^2$ in the worst case.\\
-This trick is removing tail recursion. Techinques applied by compilers, we'll do by hand.\\
-%TODO immagini e pseudocodice
-Generic call, between positions $i$ and $j$. If $j - i$ is $> n_0$ (so if is sufficiently small, the array is in cache so we go fast) then we do insertion sort. In the other case, with $\frac{i+j}{2}$ being the middle element, we do the partitioning assuming the the pivot on the left part of the middle and left partition of the pivot is smaller so contains less than half elements. So $i \leq p < \frac{i+j}{2}$, then recurse on the left because it has fewer elements, so we do $i = p + 1$, and do the same. Else, recurse on the right partition $j = p-1$
-\paragraph{Multi Way Quicksort} Key idea: array $S$ to be sorted, doesn't fit in internal memory: we want to partition $S$ among $k$ buckets $B_1,B_2,B_3,\ldots,B_k$. Every bucket is associated to a pivot: $k-1$ pivots, a logical pivot $s_0 = -\infty$ at the beginning, $s_{k+1} = \infty$ at the end and $s_1,s_2,s_3,\ldots,s_{k-1}$ between the buckets.\\
+The trick is removing tail recursion. Techniques applied by compilers, we'll do by hand.\\
+\begin{center}
+	\includegraphics[scale=1]{8.png}
+\end{center}
+Generic call, between positions $i$ and $j$. If $j - i > n_0$ (so if is sufficiently small, the array is in cache so we go fast) then we do insertion sort.\\
+In the other case, with $\frac{i+j}{2}$ being the middle element, we do the partitioning: assuming the pivot on the left of the middle ($i \leq p < \frac{i+j}{2}$), the left partition of the pivot is smaller so contains less than half elements. So $i \leq p < \frac{i+j}{2}$, then recurse on the left because it has fewer elements, but we do not recurse on the right because it has a lot of elements so after the recursive call on the left we simply move $i$ by doing $i = p + 1$. Else, with $p$ on the right part, recurse on the right partition and then do $j = p-1$
+\paragraph{Multi Way Quicksort} Key idea, given that we have a long array $S$ to be sorted so doesn't fit in internal memory: we want to partition $S$ among $k$ buckets $B_1,B_2,B_3,\ldots,B_k$. Every bucket is associated to a pivot: $k-1$ pivots, a logical pivot $s_0 = -\infty$ at the beginning, $s_{k+1} = \infty$ at the end and $s_1,s_2,s_3,\ldots,s_{k-1}$ between the buckets.\\
 $B_i=\{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$, so the "right" pivot is part of the bucket ($s_i \in B_i$). The goal is having balanced $B_i \forall\:i$, so $|B_i| = \frac{n}{k}$.\\
 The idea is similar to marge sort but in reverse: we assume that in memory $M$ we have $k$ buckets of size $B$, so we want to guarantee that $k\cdot B \leq M$. We sample at random $(k-1)$ pivots from $S$ (done with a scan $O(\frac{n}{B})$ I/Os). Not easy, sampling at random, we will see. We sort the the pivots $s_1 < s_2 < \ldots < s_{k-1}$, with 0 I/Os because those are all in internal memory. But we cannot assume that the buckets in memory can contain the $S$'s buckets. So we fetch $B$ items from $S$ and distribute the items according to the pivots and do until a bucket is full. When a page is full, we write it as the first page of the corresponding buckets (according to the pivot). This takes $O(\frac{n}{B})$ I/Os.
 \begin{enumerate}
