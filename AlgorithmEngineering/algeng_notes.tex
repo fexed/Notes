@@ -10,6 +10,11 @@
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \usepackage{makecell}
+\usepackage{qtree}
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usepgflibrary{shapes}
+\usepgfplotslibrary{fillbetween}
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
 \definecolor{codeblue}{RGB}{35,35,205}
@@ -34,6 +39,8 @@
 	tabsize=2,
 	language=python
 }
+\newcommand*\triangled[1]{\tikz[baseline=(char.base)]{
+            \node[regular polygon, regular polygon sides=3,draw,inner sep=1pt] (char) {#1};}}
 \begin{document}
 \title{Algorithm Engineering}
 \author{Federico Matteoni}
@@ -268,7 +275,8 @@ We now apply the \textbf{union bound}: the probability of existence is upper bou
 \paragraph{} %TODO first part of 22/9 lecture
 $P(p\in D) = $ positive events / total number $= \frac{|D|}{n} < \frac{m}{n} \leq \frac{\frac{n}{2}}{n} = 1$\\
 %TODO algorithm and proof of 22/9
-$n$ is known, streaming model, $M= 2$, $n = 8$ items which are $[a, b, c, d, e, f, g, h]$, $P = [.5, .5, 0, .5, 1, 0, 1, 1] \leftarrow Rand(0,1)$\\
+
+$n$ is known, streaming model, $M = 2$, $n = 8$ items which are $[a, b, c, d, e, f, g, h]$, $P = [.5, .5, 0, .5, 1, 0, 1, 1] \leftarrow Rand(0,1)$\\
 $P($sample $i_j) = \frac{m - s}{n - k + 1}$ with $s$ being\\ %TODO
 \begin{list}{}{}
 	\item $s = 0, j = 1$ extracts a probability ($.5$) and compare $P$ against the $P($sample $i_j)$\\
@@ -297,18 +305,126 @@ $$\frac{\log_2 \frac{M}{B}}{\log_2 \frac{M}{B} - \log_2 D}$$
 $$\frac{1}{1 - \frac{\log_2 D}{\log_2 \frac{M}{B}}}$$
 $$\frac{1}{1 - \log_{\frac{M}{B}} D}$$
 $\frac{M}{B}$ tipically thousands, $D$ at most 10-20, so $\log_{\frac{M}{B}} D < 1$. $M\to\infty \Rightarrow 1$ optimal. $M\to DB \Rightarrow \infty$, very very slow.
-\paragraph{Randomized data structures}
-\subparagraph{TREAP} From binary search TREe + hEAP.\\
-Every node is two part: a part is the key and the other is the priority. Binary search tree according to the key and a heap according to the priority. To distinguish, letters for the key and numbers for the priority and max heap.\\
-Left part the keys will be smaller than the root, the right will be larger. The left and right tree, being a maximum heap, have smaller priorities. So the root has the maximum priority.\\
-Let's consider the following TREAP:\\
-3-sided range query\\
-%TODO cost
-%TODO relocate
-$h$ height of the treap, $n$ if just a path or $\log n$ if balanced. $h = O(\log n)$ on average. Let's prove it. $A_k^i = \left\{ \begin{array}{c}
-1 \textsl{if }x_i\textsl{ is a proper ancestor of }x_k\\
-0 \textsl{otherwise}
-\end{array}\right.$ and $depth(x_k) = \sum_{i=1}^k A_k^i$ which counts the proper ancestors of $x_k$. $E[depth(x_k)] = E(\sum_{i=1}^k A_k^i] = \sum_{i=1}^k E[A_k^i]$ and the expected of a indicator variable is the probability of it being 1 so $= \sum_{i=1}^k P(A_k^i = 1)$ which is the probability of $x_i$ being on the path to $x_k$. We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted. So $\sum_{i=1}^k P(A_k^i = 1)$ we consider $x_i < x_k$ or vice versa, is totally symmetric. So $priority(x_i) > priority(x_k)$\\
+\section{Randomized data structures}
+\subsection{Treap} From binary search TREe and hEAP.\\
+Every node is divided in two part: one part is the key and the other is the priority. A treap is a binary search tree according to the key and a heap according to the priority. To distinguish, letters for the key and numbers for the priority and we consider a maximum heap.\\
+Taken a node, in the left subtree the keys will be smaller than the root, the right will have larger keys. The left and right tree, being a maximum heap, have smaller priorities: so the root has the maximum priority.\\
+Let's consider the following Treap:
+\begin{center}
+\Tree [.M,9 [.H,8 [.G,3 ] [.I,6 ] ] [.T,7 [.R,5 [.O,4 ] ] ] ]
+\end{center}
+The keys are given, but the priorities are extracted at random. So the idea is that whenever you have a key to insert, you draw at random a number that you associate to the key as a priority. The randomized priorities makes the Treap balanced on average.
+\paragraph{3-Sided Range Query} We build a graph with the keys on the $x$ axis and the priorities on the $y$ axis.
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[axis lines=middle,axis equal,grid=none,xticklabels={G,H,I,L,M,N,O,P,Q,R,S,T},xtick={1,2,3,4,5,6,7,8,9,10,11,12}]
+		\addplot[mark=*] coordinates{(5,9)};
+		\addplot[mark=*] coordinates{(2,8)};
+		\addplot[mark=*] coordinates{(1,3)};
+		\addplot[mark=*] coordinates{(3,6)};
+		\addplot[mark=*] coordinates{(12,7)};
+		\addplot[mark=*] coordinates{(10,5)};
+		\addplot[mark=*] coordinates{(7,4)};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+A typical query is indicated by $[a,b] \times [c,\infty]$, with $[a,b]$ on the $x$ axis and $[c,\infty]$ on the $y$ axis. The $x$ axis so is bounded, for example by $[L, P]$, and for example $[5, \infty]$ makes the priority of the query we are looking for start from $5$ upward. So the example becomes:
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[axis lines=middle,axis equal,grid=none,xticklabels={G,H,I,L,M,N,O,P,Q,R,S,T},xtick={1,2,3,4,5,6,7,8,9,10,11,12}]
+		\addplot[red, mark=*] coordinates{(5,9)};
+		\addplot[mark=*] coordinates{(2,8)};
+		\addplot[mark=*] coordinates{(1,3)};
+		\addplot[mark=*] coordinates{(3,6)};
+		\addplot[mark=*] coordinates{(12,7)};
+		\addplot[mark=*] coordinates{(10,5)};
+		\addplot[mark=*] coordinates{(7,4)};
+		\addplot +[blue, mark=none] coordinates {(4, 0) (4, 11)};
+		\addplot +[blue, mark=none] coordinates {(8, 0) (8, 11)};
+		\addplot +[blue, mark=none] coordinates {(0, 5) (13, 5)};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+The data structure should return the $M,9$ point, marked in the plot, because it's the only point in the set the resides in the query.\\
+The root has highest priority, so in the plane is the top point. The left subtree is the subplot on the lower-left side of the root point, and the right subtree is the lower-right subplot
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[axis lines=middle,axis equal,grid=none,xticklabels={G,H,I,L,M,N,O,P,Q,R,S,T},xtick={1,2,3,4,5,6,7,8,9,10,11,12}]
+		\addplot[mark=*] coordinates{(5,9)};
+		\addplot[mark=*] coordinates{(2,8)};
+		\addplot[mark=*] coordinates{(1,3)};
+		\addplot[mark=*] coordinates{(3,6)};
+		\addplot[mark=*] coordinates{(12,7)};
+		\addplot[mark=*] coordinates{(10,5)};
+		\addplot[mark=*] coordinates{(7,4)};
+		\addplot +[black, mark=none] coordinates {(4, 0) (4, 11)};
+		\addplot +[black, mark=none] coordinates {(8, 0) (8, 11)};
+		\addplot +[black, mark=none] coordinates {(0, 5) (13, 5)};
+		\addplot +[blue, mark=none] coordinates {(5, 0) (5, 11)};
+		\addplot +[blue, mark=none] coordinates {(0, 9) (13, 9)};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+Then you recurse: find the root in the left subtree (topmost point) and create two other subplots \textbf{but limited to this subplot}. Example in the left subplot:
+\begin{center}
+	\begin{tikzpicture}
+		\begin{axis}[axis lines=middle,axis equal,grid=none,xticklabels={G,H,I,L,M,N,O,P,Q,R,S,T},xtick={1,2,3,4,5,6,7,8,9,10,11,12}]
+		\addplot[mark=*] coordinates{(5,9)};
+		\addplot[mark=*] coordinates{(2,8)};
+		\addplot[mark=*] coordinates{(1,3)};
+		\addplot[mark=*] coordinates{(3,6)};
+		\addplot[mark=*] coordinates{(12,7)};
+		\addplot[mark=*] coordinates{(10,5)};
+		\addplot[mark=*] coordinates{(7,4)};
+		\addplot +[black, mark=none] coordinates {(4, 0) (4, 11)};
+		\addplot +[black, mark=none] coordinates {(8, 0) (8, 11)};
+		\addplot +[black, mark=none] coordinates {(0, 5) (13, 5)};
+		\addplot +[black, mark=none] coordinates {(5, 0) (5, 11)};
+		\addplot +[black, mark=none] coordinates {(0, 9) (13, 9)};
+		\addplot +[blue, mark=none] coordinates {(2, 0) (2, 9)};
+		\addplot +[blue, mark=none] coordinates {(0, 8) (5, 8)};
+		\end{axis}
+	\end{tikzpicture}
+\end{center}
+This was the approach in computational geometry, but the data structures are exactly the same.\\
+So we start from the root, and we check if it's in the 3-sided range query. In this case is in the query, so we return it as a result. Since the root is inside the query, we go both left and right: this corresponds to going to the left and right subtree in the treap. In the left subtree, we recurs: is the root in the query? In this case, no but the height (priority) is still larger than the "bottom", the $c$ value, we go down. But we don't go to the left subtree (it's totally discarded) we go to the right subtree. If we went to the right subtree from the topmost root, that point it's still not in the query and still above $c$. Being in the right subtree, this time we go its left subtree and discard its right subtree. Basically we move toward the $b$ value when we are on the right and toward $a$ when we are on the left.\\
+When we arrive in a node below the $c$ value we know that, being a maximum heap, everything below that has a lower priority so we can drop everything.\\
+As for the \textbf{complexity}, we want to evaluate how much "wasted work" is done, as in how many nodes outside the query we evaluate. The number of points is equal to the depth of the tree, because we go only left or only right and always down one level, so given $h$ height of the treap, the number of extra points we check is $O(h)$, one node extra per level at most. Inside the query we evaluate both left and right subtrees, but those are all "good" points that go into the result, so it's no wasted work. The particular case happens when we check the node just above $c$ and in the query zone: for each of those nodes we check both subtrees, all of them will have priority $< c$ and will be cut out, but we check them. Those subtrees are at most twice the number of points of the result, the number of occurrencies. So the total number of work wasted is $h$ to the left $+ h$ to the right $2\cdot$occurrencies. The total cost then is $O(h +$ the number of occurrencies$)$. Of course the occurrencies cannot be avoided, as we have to list them.\\
+The extra cost, $h$, is typically $\log n$ if the treap is balanced with $n$ being the number of points.
+\paragraph{Rotation} Considering 
+\begin{center}
+\Tree [.$y$ [.$x$ [.\triangled{$\alpha$} ] [.\triangled{$\beta$} ] ] [.\triangled{$\gamma$} ] ]
+\end{center}
+In the right rotation, node $x$ goes up and node $y$ goes down. $\alpha$ was the left subtree of $x$ and remains that, same for $\gamma$ that remains the right subtree of node $y$. $\beta$ cannot remain linked to $x$ , so $\beta$ will be relocated as the left subtree of $y$.
+\begin{center}
+\Tree [.$x$ [.\triangled{$\alpha$} ] [.$y$ [.\triangled{$\beta$} ] [.\triangled{$\gamma$} ] ] ]
+\end{center}
+We claim that this relocation still guarantees the balancing of the treap. We can pick a node $k$ inside $\beta$
+$$\hbox{key}(x) \leq \hbox{key}(k) \leq \hbox{key}(y)$$
+because it's in the right subtree of $x$ (therefore, larger key) but it's inside the left subtree of $y$ (therefore, smaller key). When we go to $\beta$ as left subtree of $y$ after the rotation, so $y$ inside the right subtree of $x$, we have that a node $k$ inside $\beta$ satisfies the same condition: it's still in the left subtree of $y$, therefore has smaller key, and still in the right subtree of $x$, therefore greater key. So the relocation preserves the conditions.\\
+It's constant time, $O(1)$, because we change a constant number of pointers.
+\paragraph{Search($k$)} It's just the search in the binary search tree. Based on the searched key, we go on the left if it's smaller and on the right if it's larger, so priority is not needed. Cost is $O(h)$ with $h$ being the height of the tree.
+\paragraph{Insertion($k, p$)} For example inserting $(S,6)$. We start by searching for the position of $S$ in the tree. Bigger than M, smaller than T, larger than R and empty so that's the spot.
+\begin{center}
+\Tree [.M,9 [.H,8 [.G,3 ] [.I,6 ] ] [.T,7 [.R,5 [.O,4 ] [.S,6 ] ] ] ]
+\end{center}
+It's still a binary search tree but it's not an heap because the priority 6 doesn't satisfy the condition. So like in the heap we have to check the balance: S,6 needs to go up but we have to preserve the heap property so we apply a rotation, in this case a left rotation because it's the right child.
+\begin{center}
+\Tree [.M,9 [.H,8 [.G,3 ] [.I,6 ] ] [.T,7 [.S,6 [.R,5 [.O,4 ] ] ] ] ]
+\end{center}
+So it's a search plus rotation to reestablish the heap property. The rotation is constant, but in the worst case there are $h$ rotations. So the cost is again $O(h)$.
+\paragraph{Delete($k$)} The deletion is trivial when we delete leaves. But for example let's remove T: we can make it a leaf by setting the priority to $-\infty$. So deletion is just: search for $k$, set the priority to $-\infty$ and then apply rotations to reestablish the heap property, then delete. Again, $O(h)$.\\
+Of course in this particular case T has just one child, so we could remove it and link S as right subtree of M, but the procedure above handles every possible case.
+\paragraph{Merge$(T_1,T_2)$} $\forall\:x\in T_1$ and $\forall\:y\in T_2$ we have $\hbox{key}(x)<\hbox{key}(y)$.\\
+We create a root with a logical key between the maximum key of $T_1$ and the minimum key of $T_2$ and $-\infty$ as the priority. The problem is the priority: it's a binary search tree (both $T_i$ are, and the chosen key mantains that condition) but the $-\infty$ priority breaks the heap condition. But we know we can apply rotations to reestablish the condition: the root goes down until it reaches the leaf level, where it can be dropped. When this happens, the rest of the "stuff" will be a treap. So again it's $O(h)$: creating the node it's constant and the rotations are $O(h)$.\\
+The reverse operation is the split.
+\paragraph{Split($k, T$)} Splitting $T$ according to the key $k$ means creating a treap $T_{<k}$ with keys $< k$ and another treap $T_{>k}$ with keys $> k$. This assuming $k\not\in T$. The split is trivial when the key is the root, so I need to put myself in a situation where $k$ occupies the root. So we first insert $k,\infty$, so that it goes to the root. At insertion, $k,\infty$ will be a leaf, so we rotate to reestablish the heap priority, arriving in a situation where we have $k,\infty$ as root with a left and a right subtree. The left subtree will be $T_{<k}$ and the right subtree will be $T_{>k}$ so the we delete the root. This costs $O(h)$ for insertion, $O(h)$ for rotations and constant for deleting the root, overall $O(h)$.
+\paragraph{On average, a treap is balanced} By drawing the priorities at random, the average treap is balanced. $h$ height of the treap, it's $n$ if it's just a path or $\log n$ if it's balanced, but $h = O(\log n)$ on average. Let's prove it.\\
+Let's create an indicator variable $A_k^i = \left\{ \begin{array}{c l}
+1&\hbox{if }x_i\hbox{ is a proper ancestor of }x_k\\
+0&\hbox{otherwise}
+\end{array}\right.$\\
+$depth(x_k) = \sum_{i=1}^k A_k^i$ which counts the proper ancestors of $x_k$. $E[depth(x_k)] = E(\sum_{i=1}^k A_k^i] = \sum_{i=1}^k E[A_k^i]$ and the expected of a indicator variable is the probability of it being 1 so $= \sum_{i=1}^k P(A_k^i = 1)$ which is the probability of $x_i$ being on the path to $x_k$. We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted. So $\sum_{i=1}^k P(A_k^i = 1)$ we consider $x_i < x_k$ or vice versa, is totally symmetric. So $priority(x_i) > priority(x_k)$\\
 Theorem: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
 Various cases:
 \begin{enumerate}
@@ -321,7 +437,7 @@ Various cases:
 $P(x_i$ ancestor of $x_k) = P(x_i$ has the largest priority of $X(i,k))$ and because the priorities are picked are random $= \frac{1}{|X(i,k)|} = \frac{1}{k - i + 1}$ if $i < k$ or $\frac{1}{i - k + 1}$ if $i > k$. Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$\\
 $\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} = \sum_{i = 1}^{k-1} \frac{1}{k-i + 1} + \sum_{i = k+1}^n \frac{1}{i - k + 1}$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$)\\
 Keys are inserted in random order so that priority = order, so average depth is $O(\log n)$.
-\paragraph{Skip list} We have a list of items $L_0 = -\infty \rightarrow 3 \rightarrow 6 \rightarrow 7 \rightarrow 10 \rightarrow 15 \rightarrow 16 \rightarrow +\infty$ with $\pm\infty$ logical marks. The search in lists is very bad, the idea is to create levels of lists. List of level $L_1 = -\infty \ldots +\infty$ with vertical pointers.
+\subsection{Skip lists} We have a list of items $L_0 = -\infty \rightarrow 3 \rightarrow 6 \rightarrow 7 \rightarrow 10 \rightarrow 15 \rightarrow 16 \rightarrow +\infty$ with $\pm\infty$ logical marks. The search in lists is very bad, the idea is to create levels of lists. List of level $L_1 = -\infty \ldots +\infty$ with vertical pointers.
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
 \end{center}
@@ -329,19 +445,57 @@ We can promote $k$ items to $L_1$, $k + \frac{n}{k} \Rightarrow k = \sqrt{n}$. T
 \begin{center}
 	\includegraphics[scale=0.5]{6.png}
 \end{center}
-We search for the topmost list, compare and go to the correct portion in the list below. At every step I scan the list if the element I'm looking for is larger and go to the list below if it's smaller. The deletion removes the column of items, in every list that item appears.\\
-Insertion: first you find the position in $L_0$, you insert and then toss the coin. To identify the left/right part in the upper levels,\\\\ %TODO
-$L =$ \# of levels of the skip list on $n$ items $= max_k L(k)$ with $L(k) =$ level of the $k$th item.\\
-$P(L(k) \geq l) = $ the probability of extracting $l$ tails and those are independent coin tosses $= \left(\frac{1}{2}\right)^l$.\\
+\paragraph{Search} We search for the topmost list, compare and go to the correct portion in the list below. At every step I scan the list if the element I'm looking for is larger and go to the list below if it's smaller.
+\paragraph{Deletion} The deletion removes the column of items, in every list that item appears. In the worst case we reconstruct $\log n$ lists.
+\paragraph{Insertion} First you find the position in $L_0$ (search, beginning from the topmost list), you insert and then toss the coin to insert in the upper list. To identify the left/right part in the upper list, we look for the latest item for every level that I have seen before going down during the search phase, in a sense that's the frontier to the item to be inserted.
+\begin{center}
+	\includegraphics[scale=0.5]{9.png}
+\end{center}
+So keep track of the items that go down and adjust the pointers of those items.
+\paragraph{Height of the skip list} $L =$ \# of levels of the skip list on $n$ items $= max_k L(k)$ with $L(k) =$ level of the $k$th item. So the height of the skip list, the levels of the skip list, is the maximum level among the items.\\
+$P(L(k) \geq l) = $ the probability of extracting $l$ tails (independent coin tosses) $= \left(\frac{1}{2}\right)^l$.\\
 $P(L \geq l) = P(max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdot\left(\frac{1}{2}\right)^l = \frac{n}{2^l}$ for the union bound.
 \begin{enumerate}
 	\item $l \leq \log_2 n \rightarrow \frac{n}{2^l} \geq \frac{n}{2^{\log n}} = \frac{n}{n} = 1$ so the inequality is not significant, because a probability is always $\leq 1$
 	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
 \end{enumerate}
-$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$
+$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$\\\\
+In the search process we have, with high probability, $O(\log n)$ "down steps". For the number of "right steps", let's observe the process in reverse: from the bottom we go to the left for as many right pointers we find, but we god up as soon as we find a downward pointer. How many right pointers before a vertical pointer on average? We go left when we don't have a vertical pointer, which means with probability $\frac{1}{2}$ because of the coin toss, so it's a sequence of heads terminate by a tail (which means going up) so on average we have $2$ right steps. Every level is independent, so it applies to every level.\\
+So $O(\log n)$ down steps and $O(\log n)$ right steps for the search process, so the total cost of search is $O(\log n)$. Insertion is a search plus a constant number of pointers change, deletion is a search plus a constant number of pointers change so everything is $\log n$.
+\section{Set Intersection}
+From a mathematical point of view we have $A,B\subseteq N$ and we want to compute $A \cap B$ fast. With $|A| = n, |B| = m$, in the case of unsorted sets, the comparison has complexity of $O(n\cdot m)$. We assume sorted sets, so we first sort $A$ and $B$ and then apply one of the algorithms that we'll see.
+\subsection{Merge Based Intersection}
+Based on the merge procedure seen in merge sort. For example $A = \underline{1},5,8,9,\ldots$ and $B = \underline{2}, 5, 9,\ldots$ with pointers on $1\in A$ and $2\in B$, the first elements. In the merge sort we do the comparison and write the minimum, advance the pointer in the corresponding list and go on. In the example we would end up with $1, 2, 5, 5, 8,\ldots$ But we want to simplify this. In this algorithm, whenever two items are compared, the minimum one is discarded and if the items are equal then it goes into the intersection.\\
+It's linear in both lists, so the complexity is $O(n + m)$. This approach is optimal whenever $n$ is in the same order of $m$, or equal.
+\subsection{Binary Search} Assuming $n > m$. We take an element from $B$ and binary search in $A$, for each element of $B$. Every search takes $\log n$, so this costs $O(m\cdot\log n)$. This approach is better than the previous, of $O(n + m)$ complexity, when $m\log n < n \Leftrightarrow m < \frac{n}{\log n}$. So it's better up to a very long $B$, which means that doing a continuous binary search is better than the merge based intersection.\\
+This is true in theory, in practice scanning (the merge based intersection) is typically very fast.
+\subsection{Mutual Partitioning} Still $n > m$. Let's say we take the first item of $B$, binary search over $A$ and find that it's between two certain values in $A$. When we pick the second item of $B$, in the binary search we start from scratch, but it's nonsensical because the second item is larger than the previous item of $B$, so we can search only in the last right partition of $A$ that's left. This way we always go to the right, but if the first item is at the beginning of $A$ we don't advance very much so we try to balance the partitioning: instead of picking the first element of $B$, we pick the middle element in position $\frac{m}{2}$. That middle element is found to occur between two elements in $A$, and this splits $A$ into $A_1$, until the left element included, and $A_2$ from the right element included. This also splits $B$ into two parts: the left half until the middle element excluded, $B_1$, and the right half from the middle element excluded, $B_2$.\\
+After $\log n$ steps, the binary search, we have turned $A \cap B$ into two problems: $A_1 \cap B_1$ and $A_2 \cap B_2$, over which we can recurse.\\
+We have that $|B_1| = |B_2| = \frac{m}{2}$, with a $\pm 1$ in case of odd $m$. Those two partitions will be again divided, and so on. So we make $\log m$ recursive steps. So the complexity $T(n, m) = O(\log n)$ (for the binary search) $+ T(n_1, \frac{m}{2})$ (for recursion over $A_1 \cap B_1$) $+ T(n_1, \frac{m}{2})$ (for recursion over $A_2\cap B_2$). To solve this we have to make some assumptions:
+\begin{list}{}{}
+	\item If the partitioning is fully unbalanced (the middle element of $B$ goes either all the way to the left or all the way to the right of $A$)\\
+	 It's a good case because, although we keep all $A$ we still drop half of $B$. We either have $A_1 = \emptyset$ or $A_2 = \emptyset$ but still dropping $\frac{m}{2}$ elements. So in this case $n,m \rightarrow n, \frac{m}{2}\rightarrow n, \frac{m}{4}\ldots$ supposing that every step is fully unbalanced. We have all $n$, so the cost is guided by the binary search over $A$ with $|A| = n$ which we do $\log m$ times, so the total cost is $O(\log n \cdot \log m)$\\
+	 The worst case is the opposite of this one, which is the best case.
+	 \item If the item of $B$ that we search ends up in the middle of $A$, so $|A_1| = |A_2| = \frac{n}{2}$ and $T(n, m) = O(\log n) + T(\frac{n}{2}, \frac{m}{2}) + T(\frac{n}{2}, \frac{m}{2})$ which if solved gives $T(n, m) = O(m(1 + \log\frac{n}{m}))$\\
+	 We will comment on how this is an optimal bound and how we cannot do less comparisons than this one.
+\end{list}
+A theorem states that if we have $s(n)$ solutions, a comparison based algorithm must execute $\Omega(\log_2 S(n))$ comparisons. In this scenario, $|B| = m$ can intersect $|A| = n$ in $\left(\begin{array}{c}
+n\\m
+\end{array}\right)$ ways: all the possibile ways in which we can take $m$ items out of $n$ items. Inputting this as $s(n)$ gives the $T(n, m) = O(m(1 + \log\frac{n}{m}))$ seen before.
+\subsection{Doubling/Exponential/Galloping Search} Let's take $A, B$ and assumes that they intersect up until the 12, in position $a_{i_{j-1}}$ $b_{j-1}$. We have
+\begin{list}{}{}
+	\item $A = -- 12, 16, 19, 20, 25, 27, 30, 31, 34, 38, 40, 41, 44, 45, 47, 50, 60,\ldots$
+	\item $B = -- 12, 41$
+\end{list}
+We compare the $41\in B$ with 16, 19, 25 and then 60 $\in A$, respectively with step $1, 2, 4, 8, 16$. So we don't go one-by-one but we jump exponentially, we go on until the element (41) is larger. When it's smaller, with 60, we stop. We discard the elements we skip until we encounter the larger element: now we know that $41$, our element, is between this element and the previous element we compared with (34), so the longer the jump the more we discard.\\
+41 is $b_j$, compared with $a_{i_{j-1}} + 2^k$ and we go ahead until $a_{i_{j-1}} + 2^{k-1} < b_j \leq a_{i_{j-1}} + 2^k$\\
+When the element is found (let's say in position $a_f \leq a_{i_{j-1}} + 2^k$), the search for the next element, $b_{j+1}$ will start from $a_{f+1}$. Also we always have $a_{i_{j-1}} \leq b_{j-1} < a_{i_{j-1} +1}$.
+\paragraph{Complexity} Let's see how much work is done in a repetitive way. $\Delta_j = min\{n, 2^k\}$, because if $2^k > n$ we would jump outside the array, so $\Delta_j \leq 2^k$. Also, whenever I search for $b_j$ we find it in the element $a_{i_j}$: we can say that $a_{i_{j-1}} + 2^{k-1} < a_{i_j} \leq a_{i_{j-1}} + 2^k$, so $2^{k-1} < i_j - i_{j-1} \leq 2^k$ which means $2^k < 2(i_j - i_{j-1})$. So we have that $\Delta_j < 2(i_j - i_{j-1})$\\
+$\sum_{j=1}^m \Delta_j < 2\sum_{j=1}^m (i_j - i_{j-1})$ which is a telescopic sum: $i_1 - i_0 + i_2 - i_1 + i_3 - i_2 + \ldots + i_m - i_{m-1}$, where we can simplify all the elements except for $i_0 = 0$ and $i_m$. So we have $\sum_{j=1}^m \Delta_j < 2 i_m$, and $i_m$ is the position of the last element of $B$ inside $A$, which cannot be greater than $m$, so $i_m \leq n$, which means $\sum_{j=1}^m \Delta_j \leq 2n$\\
+The algorithm does $\log_2 \Delta_j$ jumps plus the binary search inside the last portion (when we encounter the greater element): that portion is surely smaller than $\Delta_j$. So the algorithm costs $\sum_{j=1}^m O(\log_2\Delta_j + \log_2 \Delta_j)$, so $\sum_{j=1}^m O(\log_2\Delta_j) = O\left(\sum_{j=1}^m\log_2\Delta_j\right)$. The Jensen inequality says that this can be upper bounded by $O\left(m\cdot\log_2\frac{\sum\Delta_j}{m}\right) = O(m\cdot\log\frac{2n}{m})$
 
 
-%Lecture of 22/10
+%Lecture of 12/10
 \paragraph{Variable byte econding} Idea is that given a variable $i$ there's a binary representation $B(i)$, for example $i = 2$, then $B(i) = 10$. We use 1 bit out of 8 to make the code prefix free. So $B(i)$ is splitted in blocks of 7 bits, $B(i) = \underline{\textit{000}1101}\:\underline{1001111}$. The most importanti 7 bits become a byte of $\textbf{1}0001101$ and the other $\textbf{0}101111$. Continuation bit is one if the encoding continues and 0 if the encoding ends.\\
 Wasteful because we never have the initial byte of the representation (most significal bits) can never be all zero.\\
 Not used in practice, lets see how to avoid the waste of space. 1 byte: 128 values ($2^7$), with 2 bytes we have 14 bits and $2^{14}$ values and so on. Using one or two bytes we can encode $2^7 + 2^{14}$ different values. This is done as follows: suppose to have $0\leq i < 2^7 + 2^{14}$. If $i < 2^7 \Rightarrow$ one byte with continuation bit $= 0$. If $2^7 \leq i < 2^7 + 2^{14}$ I encode $i-2^7$ in two bytes. Clearly $0\leq i - 2^7 < 2^{14}$.\\
