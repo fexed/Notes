@@ -565,25 +565,37 @@ For example, $\delta(14) = \begin{array}{c c c}
 $\delta$-code is advantageous with large numbers.$$|\delta(x)| = |\gamma(|\hbox{bin}(x)|)| + |\hbox{bin}(x)| = \left(2\log_2 |\hbox{bin}(x)| + 1\right) \left(\log_2 x + 1\right) = 2\log_2(\log_2 x + 1) + 1 + (\log_2 x + 1)=$$
 $$= 2\log_2\log_2 x + \log_2 x + 2 \Rightarrow p(x) = \frac{1}{2x(\log_2 x)^2}$$
 
-\paragraph{Rice Encoding} Depends on a parameter $k$, given $x \geq 0$ computes $q = \lfloor\frac{x}{2^k}\rfloor$ and $r = x - q2^k$ with $0\leq r \leq 2^k$. For example, given $x=13, k=2$, we have $q = 3, r = 1$.\\
+\paragraph{Rice encoding} Depends on a parameter $k$, given $x \geq 0$ computes $q = \lfloor\frac{x}{2^k}\rfloor$ and $r = x - q2^k$ with $0\leq r \leq 2^k$. For example, given $x=13, k=2$, we have $q = 3, r = 1$.\\
 The Rice encoding is the unary encoding of $q+1$ ($U(q+1)$) followed by the binary encoding of $r$ on $k$ bits ($B(r)$) which can always be encoded in $\leq k$ bits because $r \leq 2^k$, so we can use always $k$ bits. In our example $R_2(13) = 0001\:01$, while with $k=3$ we have $R_3(13) = 01\:101$ (because $q=1$ and $r=5$).
 \subparagraph{Geometric distribution} $p$ successes and $1-p$ failures, the geometric distribution is $P($the first success is after $x$ experiments$)$. $P(1) = p, P(2) = (1-p)p,\ldots,P(x) = (1-p)^{x-1}p$.\\
 Also $2^k$ is almost equal to $\frac{\ln 2}{p}$\\\\
 $R_k$ is optimal for the geometric distribution.\\
 The problem with Rice is the unary encoding, which is hard to process (bit by bit)
 
-\paragraph{P for delta} For a bounded set of integers, in the range of $0\leq x < 2^w$, so a $w$ bits sized word. Assuming that most of the integers are small, in the range $0\leq x < 2^b - 1$, so can be represented with $b << w$ bits. For example, $w = 32, b = 4$.\\
+\paragraph{P for delta encoding} For a bounded set of integers, in the range of $0\leq x < 2^w$, so a $w$ bits sized word. Assuming that most of the integers are small, in the range $0\leq x < 2^b - 1$, so can be represented with $b << w$ bits. For example, $w = 32, b = 4$.\\
 I can represent my sequence with two arrays of bits, the first array has every integer of $b$ bits and the second has $w$ bits integers. For every symbol, if it's small enough I represent it in the first array with $b$ bits, otherwise I'll put a special escape value in the first array and the symbol is stored in the second array with $w$ bits.
-%Lecture of 12/10
-\paragraph{Variable byte econding} Idea is that given a variable $i$ there's a binary representation $B(i)$, for example $i = 2$, then $B(i) = 10$. We use 1 bit out of 8 to make the code prefix free. So $B(i)$ is splitted in blocks of 7 bits, $B(i) = \underline{\textit{000}1101}\:\underline{1001111}$. The most importanti 7 bits become a byte of $\textbf{1}0001101$ and the other $\textbf{0}101111$. Continuation bit is one if the encoding continues and 0 if the encoding ends.\\
+
+\paragraph{Variable Byte encoding} Idea is that given a variable $i$ there's a binary representation $B(i)$, for example $i = 2$, then $B(i) = 10$. We use 1 bit out of 8 to make the code prefix free. So $B(i)$ is splitted in blocks of 7 bits, $B(i) = \underline{\textit{000}1101}\:\underline{1001111}$. The most importanti 7 bits become a byte of $\textbf{1}0001101$ and the other $\textbf{0}101111$. Continuation bit is one if the encoding continues and 0 if the encoding ends.\\
 Wasteful because we never have the initial byte of the representation (most significal bits) can never be all zero.\\
 Not used in practice, lets see how to avoid the waste of space. 1 byte: 128 values ($2^7$), with 2 bytes we have 14 bits and $2^{14}$ values and so on. Using one or two bytes we can encode $2^7 + 2^{14}$ different values. This is done as follows: suppose to have $0\leq i < 2^7 + 2^{14}$. If $i < 2^7 \Rightarrow$ one byte with continuation bit $= 0$. If $2^7 \leq i < 2^7 + 2^{14}$ I encode $i-2^7$ in two bytes. Clearly $0\leq i - 2^7 < 2^{14}$.\\
 Reasoning in the same way with 3 bytes we can encode up to $2^7 + 2^{14} + 2^{21}$ different integers.
 \paragraph{$(s, c)$ dense codes} Again byte oriented. $s$ stoppers and $c$ continuers.\\
 We had every value with last bit $0$ was a stopper, while every value with continuation bit $1$ was a continuer. This means that the values in range $[0, 127]$ were all stoppers, and in range $[128, 255]$ are continuers.\\
-We have chosen to have $s$ stoppers and $c$ continuers. We must have $s + c = 256$. With one byte necessarily a stopper, so $s$ possible values. With 2 bytes, first continuer second stopper so total number is $cs$ possible values.\\With three bytes, 2 continuers and last stopper so $c^2 s$ possible values. Using up to three bytes the total number of possible values is $s + cs + c^2s = s(1 + c + c^2)$ which is a geometric progression of ration $c$ $=s\frac{c^3 - 1}{c-2}$. In general using up to $k$ bytes we can encode $s\frac{(c^k - 1)}{c-1}$ different values.\\\\
+We have chosen to have $s$ stoppers and $c$ continuers. We must have $s + c = 256$, so for example even $[0,50]$ stoppers and $[51, 255]$ continuers is acceptable. With one byte we necessarily have a stopper, so $s$ possible values because there are $s$ stoppers.\\
+With 2 bytes, first one is a continuer and the second a stopper so total number is $cs$ possible values.\\
+With three bytes, 2 continuers and the last a stopper so $c^2 s$ possible values.\\
+Using up to three bytes the total number of possible values is $s + cs + c^2s = s(1 + c + c^2)$ which is a geometric progression of ratio $c$ so $=s\frac{c^3 - 1}{c-2}$.\\
+In general using up to $k$ bytes we can encode $s\frac{(c^k - 1)}{c-1}$ different values.\\
 Suppose we are encoding all positive integers $(\geq 0)$. Given $i$, how many bytes necessary to encode it? I have to find the value $k\:|\:s\frac{c^{k-1} - 1}{c-1}\leq i < s\frac{c^k-1}{c-1}$, cannot be encoded with $k-1$ bytes but can be encoded with $k$ bytes. Found $k$ we can conclude that $i$ will be encoded with $k$ bytes.
-\subparagraph{Example} $s+c = 8$ so the combinations are $s, c = 4$, $s = 6, c = 2$, $s = 5, c = 3$.\\
-%TODO
-I need $k=4$ blocks, with 4 blocks we encode values in $[65, 200]$. 100 is the $100-65 = 35$th value encoded with $k=4$ blocks.
+\subparagraph{Example} $s+c = 8$ so the combinations are $s, c = 4$, $s = 6, c = 2$, $s = 5, c = 3$. Let's use $(s,c) = (5,3)$ and define $000,001,010,011,100$ as stoppers and $101,110,111$ as continuers.\\
+If I use one block, it can only consist of a stopper, so the values $0,1,2,3,4$, so $5$ values in total.\\
+With 2 blocks, one continuer and one stopper, so each continuer can be paired with each stopper: $3$ continuers $\cdot 5$ stoppers is $15$ values in total. This way we encode the next integers, so the values $5,6\ldots,19$. This makes $5+15 = 20$ values encodable with $2$ $3$-bit blocks.\\\\
+Supposing we have to encode $100$ with $(5,3)$ dense code. We have to find $k\:|\:s\frac{c^{k-1}-1}{c-1}\leq 100 < s\frac{c^k-1}{c-1}$ is satisfied.\begin{list}{}{}
+	\item $k=2 \Leftrightarrow 5\frac{3^{2-1}-1}{3-1}\leq 100 < 5\frac{3^2-1}{3-1} \Leftrightarrow 5 \leq 100 < 20$
+	\item $k=3 \Leftrightarrow 5\frac{3^{3-1}-1}{3-1}\leq 100 < 5\frac{3^3-1}{3-1} \Leftrightarrow 20 \leq 100 < 65$
+	\item $k=4 \Leftrightarrow 5\frac{3^{4-1}-1}{3-1}\leq 100 < 5\frac{3^4-1}{3-1} \Leftrightarrow 65 \leq 100 < 200$
+\end{list}
+I need $k=4$ blocks, with 4 blocks we encode values in $[65, 200]$. 100 is the $100-65 = 35$th value encoded with $k=4$ blocks.\\
+With two blocks we encode $5+15 = 20$ values, with three blocks we have another $45$ values so $65$ total values, with the fourth blocks we add $135$ more values, for a total of $200$ values.\\
+Each codeword with exactly $4$ blocks ($cccs$) encodes at most $3^3\cdot 5 = 135$ values with $(5,3)$ dense encoding.
 \end{document}
