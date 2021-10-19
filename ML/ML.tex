@@ -151,7 +151,7 @@ In an ideal world, we'd have a large training set, a large validation set for mo
 		\includegraphics[scale=0.5]{2.png}
 	\end{center}
 	\item \begin{multicols}{2}
-	\textbf{K-Fold}: this technique can make use of insufficient data. We split the dataset $D$ into $k$ mutually esclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$.\\
+	\textbf{K-Fold}: this technique can make use of insufficient data. We split the dataset $D$ into $k$ mutually exclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$.\\
 	This can be applied to both VL and TS splitting. Can be computationally very expensive and there's the issue of choosing the number of folds $k$.
 	\begin{center}
 		\includegraphics[scale=0.5]{3.png}
@@ -526,4 +526,66 @@ For the output, one or more linear units for regression. For classification, one
 	\item Often symmetric logistic (tanh) learn faster
 	\item Softmax for 0/1 targets, sum to 1 can be interpreted as probability of belonging to class $i$ among $k$ classes.
 \end{list}
+\section{Model Selection and Model Assessment}
+\subsection{Bias-Variance} A bias-variance decomposition provides an useful framework to understand the validation issue, showing how difficult is the estimation of a model's performance, again showing the need of a trade-off between fitting capabilities (\textbf{bias}) and model flexibility (\textbf{variance}).
+\begin{center}
+	\includegraphics[scale=0.75]{10.png}
+\end{center}
+\subsection{Motivations} We are looking for the best solution, with minimal test error, looking for a balance between fitting (accuracy on training data) and model complexity. The \textbf{training set is not a good estimate of test error}.\\
+Assuming that we have a set of tuning parameters $\Theta$, implicit or explicit, that varies the model complexity, we wish to find the value of $\Theta$ that minimizes test error: \textbf{methods for estimating the expected error} for a model (or each model of a class of models, or event a set of models\ldots)
+\subsection{Validation}
+We can approximate the estimation analytically:
+\begin{list}{}{}
+	\item AIC, BIC, Bayesian Information Criterion (limited to linear models)
+	\item MDL
+	\item Structural Risk Minimization and VC-Dimension
+\end{list}
+In practice, we can approximate the estimation on the data set by resampling, a direct estimation of error via cross-validation (hold-out, K-fold\ldots), bootstrap\ldots
+\paragraph{Two aims} \begin{list}{}{}
+	\item \textbf{Model Selection}: estimating the performance of different learning models in order to choose the best one (to generalize), which includes looking for the best hyperparameters of the model.\\
+	It \textbf{returns a model}.
+	\item \textbf{Model Assessment}: after choosing the final model (or class of models), estimating/evaluating the generalization error on \textbf{new test data}.\\
+	It \textbf{returns an estimation value}.
+\end{list}
+The gold rule is to keep a separation between goals and to use separate data sets: \textbf{hold out}, if data set is sufficient, for example 50\% TR, 25\% VL and 25\% TS (\textbf{disjoint sets!})
+	\begin{center}
+		\includegraphics[scale=0.5]{11.png}
+	\end{center}
+The TR is the \textbf{training set}, VL is the \textbf{validation}/selection \textbf{set} (used to perform the \textbf{model selection}) and the TS is the \textbf{test set} (used for the model assessment).\\
+If the test set is used repeatedly in the design cycle we would be doing model selection, and not reliable assessment. \textbf{Blind test set} concept: \textit{if you see the solution it's not a test}. In that case the test error would be an overoptimistic evaluation of the true test error. It's very easy to obtain very high classification accuracy over random tasks even when using the test set only implicitly.
+\begin{center}
+	\includegraphics[scale=0.5]{12.png}
+\end{center}
+\paragraph{Grid Search} For the model selection: hyperparameters can be set by searching in a hyperparameters space. Try every hyperparameter-value combination and record the result. The best result will corresponds to the best hyperparameter values.\\
+The cost can be high (cartesian product between sets of values per each hyperparameter: what if 6 hyperparameters each with tens of possible different values?), so can be useful to fix some hyperparameter value before: more levels of grid search, where we do a first coarse grid search to find good intervals of values, then a finer grid-search can be performed over smaller intervals.
+\paragraph{K-fold Cross Validation} Split the data set $D$ into $k$ mutually exclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$. No unique model, but we get a variance (std. dev.) over different folds for the class of models or algorithm.
+\begin{center}
+	\includegraphics[scale=0.5]{3.png}
+\end{center}
+The issue is to find $k$ and that it can be very computationally expensive but in can be combined with validation set,  double-$k$-fold cross-validation\ldots
+\paragraph{Double cross-validation} After dividing the data set into $k$ mutually exclusive subsets $D_1,\ldots, D_k$, for each $D_i$: do another \textbf{internal} cross-validation using the other $k-1$ subsets.
+\begin{center}
+	\includegraphics[scale=0.75]{13.png}
+\end{center}
+It doesn't provide a model but an estimation of the risk, because can provide a different model per external step cycle.
+\paragraph{Example with $k$-fold CV} Split data in TR and TS.\\
+For the \textbf{model selection}, use $k$-fold CV over TR, obtaining new TR and VL in each fold, to find the best hyperparameters of the model.\\
+\textbf{Train} the final model on the whole, original, TR.\\
+Perform the \textbf{model assessment} by evaluating it on the external TS.\\\\
+There are more combination and more ways of doing this.
+\paragraph{Particular cases} 
+\subparagraph{Lucky/unlucky sampling} Can we avoid to be sensible to the particular partitioning of the examples?
+\begin{list}{}{}
+	\item \textbf{Stratification}: the process of grouping examples into relatively homogeneous subgroups. For example, partitioning in a way that every class (in a classification task) is represented in approximately the same proportions as in the full data set.\\
+	\item  \textbf{Repeated} hold-out or $k$-fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
+\end{list}
+\subparagraph{Very few data} In this case it's difficult to say if the sampling is representative or not. We can use stratification.\\
+To avoid (or to be considered during evaluation): missing classes or features in training data, special classes, known outliers that can affect the results\ldots\\
+Also the blind test set can be misleading if: is from a different distribution, measured with a different scale/tolerance, uncleaned, unprocessed\ldots
+\subparagraph{When to stop?} Best to avoid stopping the NN training by fixing an arbitrary number of epochs: if it's too small it may be to early (underfitting), too high may be too late (overfitting), may not old for all the configuration in a cross-validation\ldots\\
+Also selecting the number of epochs by model selection it's not the best practice: better than a fixed number, but still not accurate.
+\subparagraph{Early Stopping} Should be part of the model selection as well. Tricky: uses part of the data just to decide when to stop, also complex with CV.\\
+How to select the best model with early stopping for the final retraining (ex: different stop point for each validation set in a CV)? You could take the average number of epochs, but varying the data for retraining after model selection could lead to a different (best) stop point. So it's better to consider the average of the TR error at the best point and use it to gain the same level of fitting on the retraining. Else you need a VL every time you train.
+\subparagraph{Random initialization} Different $w_{initial} \Rightarrow$ different models: how to chose one for the final model? You can compute the mean and variance of error/accuracy across the different trials, so that a random case would be in this range.
+\section{Statistical Learning Theory}  %TODO ML-21-SLT1-v.0.1File
 \end{document}

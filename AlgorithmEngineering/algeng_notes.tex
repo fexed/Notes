@@ -623,4 +623,72 @@ The values in the $h$ column are increasing, because the values of the sequence 
 \subparagraph{Decompress}
 We need a data structure supporting the operation SELECT($H, i$), which returns the position of the $i$th $1$ in $H$. For example, SELECT($H, 5$) should return $11$. Of course, $0< i \leq n$\\
 Assuming we want to find $S[5]$. Until now, with the other codes, we needed to decompress the whole sequence in order to get a single element. With this code we can access a single element from the compressed data. For the least significant bits we simply select the $5$th group of $l=2$ bits in $L$, which is $00$ and we get this in $O(1)$. The $5$th elements corresponds to the $5$th $1$ in $H$, and we get that position with the SELECT operation stated before (SELECT$(H,5)= 11$) but we need to know the bucket as well. To find the bucket it belongs, we simply count the number of $0$ that are before that $1$, and to count them knowing that it's the $11$th position and the $5$th $1$, we simply do $11-5=6$. So we have that the $5$th element is in the $6$th buckets and $h=3$, so the most significant bits are $110$. Putting it all together, we get $110\:00 = 24$ which is correct.
+\paragraph{Exercises}
+\begin{list}{}{}
+	\item \textbf{Do one level of recursion of interpolative code on} $S = 11,14,16,19,20,21,22$\\
+	We begin with $l=1,r=7,min=11,max=22$, the middle element is the one in index $\lfloor\frac{7+1}{2}\rfloor = 4$ which is $19$, so it must be $(min+m-l) = 11+4-l = 14 \leq x \leq 19 = 22-7+4 = (max+m-r)$, and $19-14 = 5$ so it can be encoded with 3 bits: $19$ will be encoded with $101$.\\
+	The left part is $11,12,16$ with $l=1, r = 3, min = 11, max = S[4]-1 = 18$, the middle element is $\lfloor \frac{3+1}{2}\rfloor = 2$ which is $14$ and must be $12\leq x\leq 17$, so we need $3$ bits: $14$ is encoded as $010$.\\
+	The right part is $20,21,22$ with $l=5, r = 7, min = S[4]+1 = 20, max = 22$, the middle is $\lfloor \frac{7+5}{2}\rfloor = 6$ which is $21$, must be $21\leq x \leq 21$, so 0 bits. 
+	\item \textbf{$\delta$-code and Rice code with $k=3$} on $S(1,6,15,18,21,24,30)$\\
+	$S'=(1,5,9,3,3,3,6)$, with $\delta(x) = \gamma(|bin(x)|)\:bin(x)$ and $\gamma(y)=0\ldots0 bin(y)$ with $|bin(y)-1|$ zeroes, so:\begin{list}{}{}
+		\item $\delta(1) = 11$
+		\item $\delta(5) = 011101$
+		\item $\delta(9) = 001001001$
+		\item $\delta(3) = 01011$
+		\item $\delta(6) = 011110$
+	\end{list}
+	As for Rice, with $k=3$ and remembering $q = \lfloor\frac{x-1}{2^k}\rfloor$ and $r = (x-1) - q2^k$ with $R_k(x) = unary(q+1)\:bin(r)$ and $U(x)=00\ldots01$ with $x-1$ zeroes, so:
+	\begin{list}{}{}
+		\item $R_3(1) = 1000$ with $q = \lfloor\frac{1}{2^3}\rfloor = 0$ and $r = 1-1 -0\cdot2^3 = 0$
+		\item $R_3(5) = 1100$ with $q = 0$ and $r = 4$
+		\item $R_3(9) = 01000$ with $q = 1$ and $r = 0$
+		\item $R_3(3) = 1010$ with $q = 0$ and $r = 2$
+		\item $R_3(6) = 1101$ with $q = 0$ and $r = 5$
+	\end{list}
+	\item \textbf{Show this $(1,3)$ codeword of $8$ on $2$-bit words}\\
+	$s = 1$ stoppers $\Rightarrow \{00\}$, $c = 3$ continuers $\Rightarrow \{01,10,11\}$. So:\\
+	\begin{center}
+		\begin{tabular}{c l}
+		\textbf{Values} & \textbf{Codewords}\\
+		0 & $00\:$\\
+		1 & $01\:00$\\
+		2 & $10\:00$\\
+		3 & $11\:00$\\
+		4 & $01\:01\:00$\\
+		5 & $01\:10\:00$\\
+		6 & $01\:11\:00$\\
+		7 & $10\:01\:00$\\
+		8 & $10\:10\:00 \longleftarrow$\\
+	\end{tabular}
+	\end{center}
+	\item \textbf{Encode $S=(1,3,4,5,9,16,23,27,28,31,40)$ with Elias-Fano and show how to answer ACCESS(4), NEXTGEQ(8) and NEXTGEQ(32)}.\\
+	We have $n = 11, u = 41$, $b = \lceil\log_2 u\rceil = 6$ and $l = \lceil\log_2(\frac{u}{n})\rceil = 2$ so $h = b-l=4$. The table is \begin{center}
+		\begin{tabular}{c c c}
+			\textbf{Value} & \textbf{H} & \textbf{L}\\
+			1 & 0000 & 01\\
+			3 & 0000 & 11\\
+			4 & 0001 & 00\\
+			5 & 0001 & 01\\
+			9 & 0010 & 01\\
+			16 & 0100 & 00\\
+			23 & 0101 & 11\\
+			27 & 0110 & 11\\
+			28 & 0111 & 00\\
+			31 & 0111 & 11\\
+			40 & 1010 & 00\\
+		\end{tabular}
+	\end{center}
+	\begin{list}{}{}
+		\item[$L =$] $01\:11\:00\:01\:01\:00\:11\:11\:00\:11\:00$
+		\item[$H =$] $110\:110\:10\:0\:10\:10\:10\:110\:0\:0\:10\:0\:0\:0\:0\:0$
+	\end{list}
+	As for the operations:
+	\begin{list}{}{}
+		\item Access(4): $4$th group in $L$ for the least significant bits, $4$th $1$ in $H$ (SELECT$_1(4)$) for the most significant bits. We get $01$ from $L$ and the $4$th $1$ corresponds to the $2$nd bucket, which is $1$ on $h = 4$ bits $\Rightarrow 0001$, so we get $000101 = 5$
+		\item NextGeq(8) = NextGeq(0010$\:$01) so we look for the starting position in $H$ for the bucket $0010 = 2$ ($\eta =$ SELECT$_0(2)+1 = 6+1 = 7$) $H[\eta] = 1$ so is a non empty bucket, we scan its elements from $\eta - H(8) = \eta - 2 = 5$ and return 9
+		\item NextGeq(32) = NextGeq(1000$\:$00)\\
+		$\eta =$ SELECT$_0(8) + 1 = 18+1 = 19$ and $H[19] = 0$ so bucket empty, we return the next element which is given by Access($\eta-H(32)$) = Access$(19-8)$ = Access$(11)$
+	\end{list}
+	\item \textbf{Encode $S=(11,14,16,19,20,21,22)$ with Elias-Fano and answer Access(5) and NextGeq(17)}. Reduce the Universe size by subtracting $11$ (so $5+11$ in the first and $17-11$ in the second question)
+\end{list}
 \end{document}
