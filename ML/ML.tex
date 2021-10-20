@@ -587,5 +587,187 @@ Also selecting the number of epochs by model selection it's not the best practic
 \subparagraph{Early Stopping} Should be part of the model selection as well. Tricky: uses part of the data just to decide when to stop, also complex with CV.\\
 How to select the best model with early stopping for the final retraining (ex: different stop point for each validation set in a CV)? You could take the average number of epochs, but varying the data for retraining after model selection could lead to a different (best) stop point. So it's better to consider the average of the TR error at the best point and use it to gain the same level of fitting on the retraining. Else you need a VL every time you train.
 \subparagraph{Random initialization} Different $w_{initial} \Rightarrow$ different models: how to chose one for the final model? You can compute the mean and variance of error/accuracy across the different trials, so that a random case would be in this range.
-\section{Statistical Learning Theory}  %TODO ML-21-SLT1-v.0.1File
+\section{Statistical Learning Theory}
+\subsection{VC-dim} The VC-dim is used to provide the analytical bound we need to evaluate $H$. It's a measure of complexity (that is to say, capacity/expressive power/flexibility) of a class of hypothesis.\\
+The bound is expressed not in terms of $|H|$ but in terms of distinct instances that can be completely discriminated using $H$. Intuitively (for classification): how much can $H$ discriminate points? The maximum number of points that can be correctly classified/learned without error for all the possible labelings.
+\paragraph{Shattering} Given $X$ instance/input space, $n$ size of the instance space (number of instances) and $l$ for the number of data available. $H$ is the hypothesis space.\\
+In the case of binary classification, there are $2^n$ possible \textbf{dichotomies} (partitions or labeling of the $n$ points in $\{-1,+1\}$): a particular dichotomy is represented in $H$ if there exists a hypothesis $h\in H$ that realizes the dichotomy.\\
+\textbf{Definition}: $H$ shatters $X \Leftrightarrow H$ can represent all the possible dichotomies on $X$ (0 errors). the points in $X$ can be separated by an $h\in H$ in al the possible ways, and for every possible dichotomy of $X$ there exists a consistent hypothesis $h\in H$
+\subparagraph{Example} \begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.5]{14.png}
+\end{center}
+\columnbreak
+3 points in $R^2$, $H$ as a set of lines: $h(x) = sign(wx + w_0)$ with $x\in R^2$\\
+A dichotomy is a particular labeling in $\{-1,+1\}$ of the points. This specific dichotomy can be represented in $H$: there exist a line that correctly separate the points (in pic)
+\end{multicols}
+\paragraph{VC-Dimension} \textbf{Definition}: the VC dimension of a class of functions $H$ is the maximum cardinality of a set (configuration) of points in $X$ that can be shattered by $H$.\\
+$VC(H) = p \Rightarrow H$ shatters \textbf{at least one} set of $p$ points $\wedge H$ \textbf{cannot shatter any} set of $p+1$ points.\\
+If arbitrarily large but finite sets of $X$ can be shattered by $H$ then $VC(H) = \infty$\\\\
+$VC(H)\geq 3$ shown before, note that not all the possible configurations of $3$ points can be shattered (example follows), but it's sufficient to find one configuration of three points which is separable for every labeling.
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}
+\end{center}
+VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, $k$-NN has infinite VC-dim.
+\paragraph{Analytical Bound} With $N$ number of data $$R[h]\leq R_{emp}[h] + \epsilon\left(\hbox{VC-dim}, N, \delta\right)$$
+with:
+\begin{list}{}{}
+	\item \textbf{Guaranteeded risk} $R_{emp}[h] + \epsilon\left(\hbox{VC-dim}, N, \delta\right)$
+	\item \textbf{VC Confidence} $\epsilon\left(\hbox{VC-dim}, N, \delta\right)$
+\end{list}
+For example, for 0/1 loss $$\epsilon\left(\hbox{VC-dim}, N, \delta\right) = \sqrt{\frac{VC\left(\ln\frac{2N}{\hbox{VC-dim}}\right) - \ln\frac{\delta}{4}}{N}}$$ with probability at least $1-\delta$ for every VC-dim$< N$\\\\
+There are different bound formulations for different classes of functions, of tasks\ldots\\
+This gives us a way to estimate the error on future data based only on the training error and the VC-dim of $H$. The resulting bounds are the worst case scenario, because the hold for all but $1-\delta$ of the possible approximation function/training sets.
+\paragraph{Remarks} For many reasonable hypothesis classes (ex: linear approximators), the VC-dim is linear in the number of free parameters of the hypothesis. This shows that to learn "well" we need a number of examples that is linear in the VC-dim.
+\subsection{Structural Risk Minimization} SRM uses VC-dim as a controlling parameter for minimizing the generalization bound on $R$. Assuming finite VC-dim, we can define a nested structure of models-hypothesis spaces according to the VC-dim in the following way:\begin{list}{}{}
+	\item $H_1\subseteq H_2\subseteq \ldots\subseteq H_n$
+	\item $VC(H_1)\leq VC(H_2)\leq \ldots\leq VC(H_n)$
+\end{list}
+Some examples:
+\begin{list}{}{}
+	\item Neural Networks with increasing number of hidden units, but also the number of epochs
+	\item Polynomial of increasing degree
+	\item Increasing values for $c$, in $||w||<c$ for regularization
+	\item Increasing number of nodes in a decision tree
+\end{list}
+\paragraph{Model selection} Growing VC-dim: empirical (training) error decreasing, VC confidence increasing.\\
+SRM: find a trade-off in the bound and choose the model ($h$) with the best bound on the true risk.
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\paragraph{Use of the bound} Provide a fundamental theoretical ground for principled ML: independently from specific model details or learning algorithms, highlighting the role of complexity control. The optimal choice of the model complexity (structure) provides the minimum expected risk (\textbf{inductive principle of SRM})\\
+Also to provide a direction for new model development guided by SRM. As estimation of predictive errors is rarely used: the upper bound is overly pessimistic and may not be adequate for reliable evaluation of the generalization error (model assessment) and tighter bounds are under development, also is difficult to compute the VC-dim for specific classes of $H$.\\
+Towards \textbf{principled approaches} less based on trial and error. For example, two practical approaches:
+\begin{list}{}{}
+	\item Choose appropriate structure/complexity, fix the model (hence the VC-dim) and minimize the TR error.\\
+	Can be used in neural networks, however regularization by training heuristic can further introduce implicit SRM (early stopping\ldots Or SRM with Tikhonov regularization where we have minimum loss with $R_{emp} +$ complexity term, considering both the terms.
+	\item Fix the TR error, automatically minimize the VC confidence (SVM)
+\end{list}
+\section{Support Vector Machines}
+Linear machine, with maximization of the separation margin and structural risk minimization. Initially \textbf{hard margin SVM}, we assume to deal with linearly separable problems without errors in the data.\\
+Example of linearly and non linearly separable problems:
+\begin{center}
+	\includegraphics[scale=0.5]{17.png}
+\end{center}
+\paragraph{Separating hyperplane} Given the training set $T = \{(x_i, d_i)\}_{i=1}^N$ we want to find an hyperplane of equation $w^Tx + b = 0$ to separate the examples and get $w^Tx_i + b \geq 0$ for $d_i = +1$ and $w^Tx_i + b < 0$ for $d_i = -1$\\
+$g(x) = w^Tx + b$ is the discriminant function and $h(x) = sign(g(x))$ is the hypothesis.\\
+An example of separation margin:
+\begin{center}
+	\includegraphics[scale=0.5]{18.png}
+\end{center}
+In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $w_O^Tx + b_O = 0$ with $_O$ being "optimal".\\
+We will find $p = \frac{2}{||w||}$, so maximize $p\Leftrightarrow$ minimize $||w||$.
+\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\hbox{ if }d_i = +1$$ $$w^Tx_i + b < 1\hbox{ if }d_i = -1$$ which is compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
+A \textbf{support vector} $x^{(s)}$ satisfies the previous equation exactly $$d^{(s)}(w^Tx^{(s)}+b) = 1$$ so the \textbf{support vectors are the closest data points to the hyperplane} and "lay on the margin".
+\begin{center}
+	\includegraphics[scale=0.5]{19.png}
+\end{center}
+\pagebreak
+\paragraph{Computing the distance} With the discriminant function $g(x) = w^Tx + b$, recalling that $w_O$ is a vector orthogonal to the hyperplane. Let's denote with $r$ the distance between $x$ and the optimal hyperplane.
+\begin{center}
+	\includegraphics[scale=0.5]{20.png}
+\end{center}
+$$x=x_p+r\frac{w_O}{||w_O||}$$
+$$g(x) = g\left(x_p + r\frac{w_O}{||w_O||}\right) ) w_O^Tx_o + b_O + w_O^Tr\frac{w_O}{||w_O||} = g(x_p) + rw_O^T\frac{w_O}{||w_O||} = r\frac{||w_O||^2}{||w_O||} = r||w_O||$$
+$$\hbox{thus }r=\frac{g(x)}{||w_O||}$$
+\paragraph{Computing the margin} Consider the distance between the hyperplane and a positive support vector $x^{(s)}$, for example $$r\hbox{ for }x^{(s)} = \frac{g(x^{(s)})}{||w_O||} = \frac{1}{||w_O||} = \frac{p}{2}$$
+$$\Rightarrow p = \frac{2}{||w_O||}$$
+So the optimum hyperplane maximizes $p\Leftrightarrow$ minimizes $||w||$
+\paragraph{Quadratic Optimization Problem} The formal derivation of the SVM solution requires techniques in the constrained optimization framework, and we assume that quadratic programming is solved elsewhere.\\
+For the hard margin SVM, the quadratic optimization problem asks to find the optimum values of $w$ and $b$ in order to maximize the margin.
+\subparagraph{Primal Form} Given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $w$ and $b$ which minimizes $$\psi(w) = \frac{1}{2}w^Tw$$ satisfying the constraints $$d_i(w^Tx_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$
+The objective function $\psi(w)$ is quadratic and convex in $w$, while the constraints are linear in $w$: solving this problem scales (the computational cost) with the size of the input space $m$.\\
+The Lagrangian multipliers method is used: constructing the Lagrangian function corresponding to the quadratic optimization problem $$J(w, b,\alpha) = \frac{1}{2} w^Tw - \sum_{i=1}^N\alpha_i\left(d_i\left(w^Tx_i+b\right)-1\right)$$ with $\alpha_i \geq 0$ the $N$ Lagrangian multipliers. Each term in the sum correspond to a constraint in the primal problem. $J$ must be minimized with respect to $w$ and $b$, and maximized with respect to $\alpha$, and the solution correspond to a saddle point in $J$.\\\\
+We will find $$w_O = \sum_{i=1}^N \alpha_{O,i}d_ix_i$$ thus the optimal hyperplane is expressed as $$w^T_Ox+b_O = 0 \Leftrightarrow \sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx + b_O = 0$$
+The optimal conditions will be:
+\begin{list}{}{}
+	\item Minimize $J$ with respect to $w \Rightarrow\frac{\partial J}{\partial w} = 0 \Rightarrow w = \sum_{i=1}^N \alpha_id_ix_i$
+	\item Minimize $J$ with respect to $b \Rightarrow\frac{\partial J}{\partial b} = 0 \Rightarrow w = \sum_{i=1}^N \alpha_id_i$
+\end{list}
+And we may substitute these in $J$ to study the dual form.
+\subparagraph{Kuhn-Tucker Conditions} From the KT conditions follows that $$\alpha_i(d_i(w^Tx_i + b) - 1) = 0\:\:\:\:\forall\:i=1,\ldots, N$$ in the saddle point of $J$:
+\begin{list}{}{}
+	\item $\alpha_i > 0 \Rightarrow d_i(w^Tx_i+b) = 1$ and $x_i$ is a support vector
+	\item $x_i$ isn't a support vector $\Rightarrow \alpha_i = 0$
+\end{list}
+Hence we can restrict the computation to $N_s$ so $w_O=\sum_{i=1}^{N_s} \alpha_{O,i}d_ix_i$: \textbf{the hyperplane depends solely on the support vectors}!\\\\
+To obtain the Lagrangian multipliers $\{a_i\}_{i=1}^N$ we must solve the dual form: given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $\{a_i\}_{i=1}^N$ that maximizes $$Q(\alpha) = \sum_{i=1}^N \alpha_i - \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jd_id_jx_i^Tx_j$$ satisfying the constraints $$\alpha_i\geq 0\:\:\:\forall\:i=1,\ldots,N$$ $$\sum_{i=1}^N\alpha_id_i = 0$$
+Then we compute $w_O = \sum_{i=1}^N\alpha_{O,i}d_ix_i$ and $b_O = 1-w_O^Tx^{(s)}$ corresponding to a positive support vector $x^{(s)}$, so $$b_O = = 1-\sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx^{(s)}$$
+So we don't need to explicitly compute $w_O$, but we only need the Lagrangian multipliers $\alpha_i$ (by solving the dual problem), then we compute the optimal bias $b_O$. The decision surface is given by $$w_O^Tx + b_O = 0 \Leftrightarrow\sum_{i=1}^N\alpha_{O,i}d_i x_i^Tx + b_O = 0$$
+So given the input pattern $x$:
+\begin{list}{}{}
+	\item Compute $g(x) = \sum_{i=1}^N \alpha_{O,i}d_ix_i^Tx + b_O$
+	\item Classify $x$ as the sign of $g(x)$
+\end{list}
+Note that it's not necessary to compute $w_O$, also the sum can be restricted to the number of support vector $N_s$
+\subparagraph{How does this improve the generalization?} Minimizing the norm of $w$ is equivalent to minimizing the VC-dim and thus to minimizing the VC confidence $\epsilon$ in $$R[h] \leq R_{emp}[h] + \epsilon(\hbox{VC-dim}, N, \delta)$$
+\subparagraph{Theorem (Vapnik)} Let $D$ be the diameter of the smallest ball around the data points $x_1,\ldots,x_N$. For the class of separating hyperplanes described by the equation $w^Tx+b = 0$, the upper bound to the VC-dim is $$\hbox{VC-dim} \leq min(\lceil\frac{D^2}{p^2}\rceil, m_O) + 1$$
+\paragraph{An elegant approach} For linearly separable data there are many solutions. Vapnik proposed an "optimal separating hyperplane" maximizing the margin providing:
+\begin{list}{}{}
+	\item An unique solution with zero errors for the binary classifier
+	\item An automatized approach to SRM that minimizes VC confidence (by maximizing the margin) as part of the training process, without hyper parameters in the linear separable case.
+	\item The use of a solver in the class of constrained quadratic programming (instead of gradient descent) with a dual form (showing support vectors and dot product among the patterns)
+	\item A solution focused on "selected" training data (support vectors)
+\end{list}
+For noisy or not linearly separable data, you can have a soft margin (support vector still on the border, but some data may fall closer to the hyperplane: at least one point violate $d_i(w^Tx_i+b)\geq 1$)
+\paragraph{Soft margin SVM} We introduce $\xi_i\geq 0\:\:\:\forall\:i=1,\ldots, N$ called \textbf{slack variables}: $d_i(w^Tx_i+b)\geq 1-\xi_i$, so a support vector satisfies that exactly $d_i(w^Tx_i+b)\geq 1-\xi_i$
+\begin{center}
+	\includegraphics[scale=0.5]{21.png}
+\end{center}
+Note that Vapnik does not hold anymore. The primal problems becomes: given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $w$ and $b$ which minimizes $$\psi(w, \xi) = \frac{1}{2}w^Tw + C\sum_{i=1}^N\xi_i$$ satisfying the constraints $$d_i(w^Tx_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$ $$\xi_i\geq 0\:\:\:\forall\:i=1,	\ldots, N$$
+We introduced $C$ as a regularization hyperparameter, losing the fully automated SRM. Low $C$ means many TR errors allowed (possible underfitting), while high $C$ means less or no TR errors allowed (smaller margin, possible overfitting)
+\subparagraph{Kuhn-Tucker Conditions} The KT conditions are now defined as
+\begin{list}{}{}
+	\item $\forall\:i=1,\ldots,N\:\:\:\alpha_i(d_i(w^Tx_i + b)+\xi_i - 1) = 0$
+	\item $\forall\:i=1,\ldots,N\:\:\:\mu_i\xi_i=0$ with $\mu_i$ Lagrangian multipliers introduced to enforce the non negativity of the slack variables.
+\end{list}
+We have $0<\alpha_i<C\Rightarrow\xi_i = 0$ on the margin and $\alpha_i=C\Rightarrow\xi_i > 0$ inside the margin.
+\subparagraph{Solving the problem} We solve the dual problem to compute the $\{\alpha_i\}_{i=1}^N$, then we find $w_O$ and $b_O$ from $\{\alpha_{O,i}\}_{i=1}^N$ with $w_O = \sum_{i=1}^N\alpha_{O,i}d_ix_i$\\
+Then, for a pattern $j$ such that $0<\alpha_j<C$, we have $$b_O = d_j-\sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx_j$$
+or an average of all the solutions for numerical stability. The non-zero Lagrangian multipliers correspond the the support vectors. We use it as before: $g(x) = \sum_{i=1}^N \alpha_{O,i}d_ix_iTx + b_O$ and $h(x) = sign(g(x))$
+\subsection{High-Dimensional feature spaces} We can use:
+\begin{list}{}{}
+	\item Non-linear mapping of input patterns to a high-dimensional feature space\\
+	\textbf{Cover's Theorem}: the patterns are linearly separable with high probability in the feature space under such conditions.
+	\item Finding the optimal hyperplane to separate the patterns in the feature space.
+\end{list}
+However we know that using high dimensional feature spaces (large basis function expansion) can be computationally unfeasible and can lead to overfitting.\\
+We will propose the kernel approach to implicitly manage the feature space while regularizing.
+\paragraph{Kernel} Non linear function mapping $$\phi:R^{m_0}\rightarrow R^{m_1}$$ $$x\mapsto \phi(x)$$
+The problem is formulated as before, but the training set is now $\{(\phi(x_i), d_i)\}_{i=1}^N$ and the hyper plane is now $w^T\phi(x) + b = 0$\\
+The weight vector is a linear combination of the feature vectors
+$$w=\sum_{i=1}^N\alpha_id_i\phi(x_i)$$ so the hyperplane equation is $$\sum_{i=1}^N\alpha_id_i\phi(x_i)^T\phi(x) = 0$$
+Evaluating $\phi(x)$ could be intractable, but with certain conditions we don't need to evaluate it directly. We do not even need to know the feature space itself! This is possible using a function to compute directly the dot products in the feature spaces $k:R^{m_0}\times R^{m_0}\rightarrow R$, with $k$ called inner product kernel function: $k(x_i, x) = \phi(x_i)^T\phi(x)$, and it's symmetric meaning $k(x_i, x) = k(x, x_i)$\\
+\subparagraph{Kernel Matrix} We can arrange the dot products in the feature space between the images of the input training patterns in a $N\times N$ matrix called kernel matrix $K = \{k(x_i, x_j)\}_{i,j=1}^N$, symmetrical.
+\subparagraph{Mercer's Theorem} This property holds only for kernels with positive semi-definite kernel matrices. It's related to having non-negative eigenvalues in the kernel matrix.
+\subparagraph{Properties} With $k_1,k_2$ kernels over $R^{m_0}\rightarrow R^{m_0}$, the following are also kernel functions:
+\begin{list}{}{}
+	\item $k_1(x,y)+k_2(x,y)$
+	\item $\alpha k_1(x,y)$ with $\alpha\in R^+$
+	\item $k_1(x,y)\cdot k_2(x,y)$
+\end{list}
+\paragraph{Wrapping up}
+\begin{list}{}{}
+	\item The training set is $T = \{(x_i,d_i)\}_{i=1}^N$
+	\item We can choose the trade-off parameter $C$ and the kernel function $k$
+	\item We find $\{\alpha_i\}_{i=1}^N$ by solving the optimization problem via quadratic programming algorithms\\
+	Remember that the solution is spars, as every $\alpha_i$ corresponding to non-support vector is $0$
+	\item The bias $b_O$ is computed knowing the Lagrangian multipliers and the kernel matrix
+	\item Given an input pattern $x$ we compute $w^T\phi(x) = \sum_{i=1}^N\alpha_id_ik(x,x_i)$\\
+	Fundamental: we don't need to compute $w$
+	\item $x$ is classified as $sign(g(x)) = sign\left(\sum_{i=1}^N\alpha_id_ik(x,x_i)\right)$ with $g(x)$ called discriminant function
+\end{list}
+At \textbf{test phase} we have the Lagrangian multipliers and the kernel matrix. To classify an unseen input pattern $x$, we compute $\sum_{i=1}^N\alpha_id_ik(x,x_i)$ and classify $x$ and the sign of that computation, so $h(x) = sign\left(\sum_{i=1}^N\alpha_id_ik(x,x_i)\right)$
+\paragraph{Examples of kernels}
+\begin{list}{}{}
+	\item \textbf{Polynomial Learning Machine} $k(x,x_i) = (x^Tx_i + 1)^p$ with $p$ user-specified parameter
+	\item \textbf{Radial Basis Function} or \textbf{Gaussian Kernel} $k(x,x_i) = e^{-\frac{1}{2\sigma^2}||x-x_i||^2}$ with $\sigma^2$ user-specified parameter.\\
+	Narrow peaked kernels with small $\sigma$, imply that the reply for $x_i$ is only $d_i$\\
+	Feature space with an infinite number of dimensions
+	\item \textbf{Two-layer perceptron} $k(x,x_i) = tanh(\beta_0x^Tx_i + \beta_1)$ where $\beta_0 > 0$ and $\beta_1 < 0$ are user-specified parameters\\
+	Here the Mercer's Theorem holds only for some choices of $\beta_0,\beta_1$
+\end{list}
+\subsection{SVM for non-linear regression}
+A regression problem requires to find $f$ such that $d=f(x)+v$ with a training set $T=\{(x_i,d_i)\}_{i=1}^N$\\
+We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(x)\}_{j=0}^{m_1}$ %TODO ML-21-SVM-v0.1.pdf p.161
 \end{document}
