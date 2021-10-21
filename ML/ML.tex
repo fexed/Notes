@@ -805,4 +805,31 @@ The estimate is defined as $h(x) = y = w^T\phi(x)$, and using the linear expansi
 	\item Obtain the estimate function as a linear combination of dot products in a feature space we can ignore ($h(x) = \sum_{i=1}^N \gamma_ik(x_i, x)$)
 \end{list}
 The test: given an input pattern $x$, we estimate the value of the unknown function $f$ in that point using the estimate computed before $$h(x) = \sum_{i=1}^N\gamma_i k(x_i,x)$$
+\paragraph{Summary of the main characteristics}
+\subparagraph{Pros}
+\begin{list}{}{}
+	\item The regularization is embedded in the optimization problem (margin)
+	\item Approximation of the theoretical structure risk minimization
+	\item Convex problem (\textbf{training always finds a global minimum})
+	\item Implicit feature transformation using kernels
+\end{list}
+\subparagraph{Cons}
+\begin{list}{}{}
+	\item Must choose the kernel and its parameters
+	\item It's a batch algorithm
+	\item Very large problems are computationally intractable\\
+	Problems with more than 20000 examples are very difficult to solve with standard approaches. However many solution are proposed (including gradient descent approaches)
+\end{list}
+\subparagraph{In practice} There is no theory which guarantees that a given family of SVMs will have high accuracy on a given problem.\\
+The nice property of hard-margin SVMs cannot be directly extended to soft-margin and kernels: the $C$ parameter and kernels can lead to infinite VC-dim of the SVM classifier.\\
+Gaussian RBF SVMs of sufficiently small width can classify an arbitrarily large number of training points correctly (only 1 SV point, the closest one, will contribute to the solution), thus have infinite VC-dim. On the opposite, with large width of the gaussian all SV points are considered and you get a sort of "global average", low VC-dim.\\
+$\Rightarrow$ controlling the width is controlling the VC-dim.\\\\
+Rigorous selection of the kernel and the $C$ requires an estimation of the complexity (VC-dim). Hyperparameters affecting model complexity are used for model selection. In practice a careful empirical evaluation.\\\\
+Nowadays, deep neural networks have largely outperformed previous records of SVMs on image and speech recognition tasks.
+\subsection{Kernel Methods}
+The kernel trick introduces the kernel methods, also without SVM. \textbf{Kernelization} of previous approaches, whenever you had a dot product inside your model or a similar measure enabling them to operate in a new implicit high-dimensional space just by specifying a kernel (and changing it: \textbf{the $K$ can change without changing the learning machine}.
+\begin{center}
+	\includegraphics[scale=0.75]{23.png}
+\end{center}
+An SVM is largely characterized by the kernel: the best choice of kernel for a given problem is still a research issue.
 \end{document}
