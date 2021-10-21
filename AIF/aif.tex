@@ -22,12 +22,13 @@
 \lstnewenvironment{C}
   {\lstset{language=C++,frame=none}}
   {}
+\usepackage{amssymb}
+\usepackage{amsmath}
 \begin{document}
 \title{Artificial Intelligence Fundamentals}
 \author{Federico Matteoni}
 \date{A.A. 2021/22}
 \renewcommand*\contentsname{Index}
-
 \maketitle
 \begin{multicols}{2}
 \tableofcontents
@@ -250,7 +251,7 @@ Properties of $A^*$:\begin{list}{}{}
 Consistency $\Rightarrow$ admissibility. With the monotone restriction, the $f$-values of the paths selected from the frontier are monotonically non-decreasing.
 \paragraph{Features} Often better to describe states in terms of features: \textbf{factored representation}, more natural and efficient than explicitly enumerating states. Often, features are not independent and there are constraints that specify legal combinations of assignments. We can exploits these constraints to solve tasks.\\
 Constraint satisfaction is about generating assignments that satisfy a set of hard constraints and how to optimize a collection of soft constraints (preferences).
-\paragraph{CSP} \textbf{Constraint Satisfaction Problem}, formal definition.
+\section{CSP} \textbf{Constraint Satisfaction Problem}, formal definition.
 A Constraint Satisfaction Problem $CSP = \langle X, D, C\rangle$ consists of three components: \begin{list}{}{}
 	\item A finite set of \textbf{variables}, $X = \{x_1, \ldots, x_n\}$
 	\item A \textbf{finite domain} for each variable, $D = \{D_1, \ldots, D_n\}$ with each $D_i = \{v_1, \ldots, v_k\}$ containing values assignable to $x_i$.\\
@@ -432,7 +433,7 @@ There are possible variants \begin{list}{}{}
 	\item select the value that results in the \textbf{minimum number of conflicts} with other variables
 \end{list}
 %TODO algorithm
-\subparagraph{Improvements} Usually many plateaux, possible improvements:
+\subparagraph{Improvements} Usually many plateaus, possible improvements:
 \begin{list}{}{}
 	\item \textbf{Tabu Search}: local search has no memory, the idea is keeping a small list of the last $t$ steps and forbidding the algorithm to change the value of a variable whose value was changed recently. This is meant to prevent cycling among assignments, and $t$ is called \textbf{tenure}
 	\item \textbf{Constraint Weighting}: concentrates the search on important constraints. We assign a numeric weight to each constraint, initially 1. The weight is incremented each time the constraint is violated: goal is choose the variable and value which minimizes the weights of the violated constraints.
@@ -449,22 +450,120 @@ There are possible variants \begin{list}{}{}
 \subparagraph{Online search} Another advantage of local search methods is that they can be used in an online setting when the problem changes dynamically.
 \subparagraph{Evaluating randomized algorithms} Randomized algorithms are difficult to evaluate since they output a different result and a different execution time each time they run. We take the runtime distribution, which shows the number of runs in which the algorithm solved the problem within a given number of steps.\\
 A randomized algorithm can be run multiple times with random restart, increasing the probability of success. An algorithm that succeeds with probability $p$ run $n$ times will found a solution with probability $1 - (1-p)^n$ with $(1-p)^n$ the probability of failing $n$ times.
-%TODO CSP-4.pdf
-\paragraph{Independent sub-problems: complexity}
-\paragraph{The structure of problems: tree} In a tree-structured graph, two node are connected by only one path: we can choose any variable as root of the tree. Chosen a variable as root, the tree induces a topological sort on the variables: chieldren of a node are listed after their parent
-\subparagraph{Directional arc consistency} %TODO def
-\paragraph{Reducing graphs to trees} For example, assigning a value to the node we want to remove and removing inconsistent values for other variables, then solve with tree-csp-solver.\\
+\paragraph{Independent sub-problems} When problems have a specific structure, which is reflected in properties of the constraint graph, there are strategies for improving the process of finding a solution. A first obvious case is that of independent subproblems, for examples in the map coloring problem, a country which is not connected to another country (in the image, $T$) can be colored \textit{independently} from the others, and any solution for that country combined with any solution for the other countries yields a solution for the whole map.
+\begin{center}
+	\includegraphics[scale=0.75]{8.png}
+\end{center}
+Formally, each \textbf{connected component} of the constraint graph corresponds to a subproblem $CSP_i$. If an assignment $S_i$ is a solution of $CSP_i$ then $\bigcup_i S_i$ is a solution of $\bigcup_i CSP_i$.
+\subparagraph{Complexity} The saving in computational time is dramatic. With $n$ variables and $c$ variables for subproblems, we have $\frac{n}{c}$ independent subproblems. Given $d$ size of the domain, solving one subproblem costs $O(d^c)$ and solving all of them costs $O(d^c\frac{n}{c})$, \textbf{linear} in the number of variables $n$ rather than $O(d^n)$ exponential!\\
+Dividing a boolean CSP with 80 variables into 4 subproblems reduces the worst case solution time from the lifetime of the Universe down to less than a second.
+\paragraph{The structure of problems: trees}
+\begin{center}
+	\includegraphics[scale=0.5]{9.png}
+\end{center}
+In a tree-structured graph, two node are connected by only one path: we can choose any variable as root of the tree. Chosen a variable as root, for example $A$, the tree induces a topological sort on the variables: children of a node are listed after their parent.
+\subparagraph{Directional Arc Consistency} A CSP constraint graph is defined to be directionally arc-consistent under an ordering of variables $X_1,\ldots,X_n \Leftrightarrow$ every $X_i$ is arc-consistent with each $X_j$ for $j>i$.\\
+We can make a tree-like graph directionally arc-consisten in one pass over the $n$ variables: each step must compare up to $d$ possible domain values for two variables (so $d^2$) for a total time of $O(nd^2)$
+\subparagraph{Tree-CSP solver}\begin{enumerate}
+	\item Proceeding from $X_n$ to $X_2$, make the arcs $X_i\rightarrow X_j$ DAC by reducing the domain of $X_i$ if necessary. This can be done in one pass
+	\item Proceeding from $X_1$ to $X_n$, assign values to variables. There's \textbf{no need for backtracking} since each value for a father has at least one legal value for the child
+\end{enumerate}
+\paragraph{Reducing graphs to trees} For example, assigning a value to the node we want to remove and removing inconsistent values for other variables, then solve with tree-CSP solver.\\
 In general not easy.
-\subparagraph{Cutset conditioning} Domain splitting strategy, trying with different assignments: choose subset S of CSP's variabile such that the constraint graph becomes a tree: S is cycle cutset. For each consistent assignmetn to variabiles in S: remove from the domains of remaining vars any vals that are inconsistent, if the remaining CSP has a solution, return it together with the current assignment of S.\\
-Time $O(d^c(n-c)d^2)$ where $c$ is size of cycle cutset and $d$ size of the domain. We have to try each of the $d^c$ coimbinations of values for the cvaraibles in $S$ and for each combination we must solve a tree problem of size $(n-c)$
-\paragraph{Tree decomposition} The approach consists in a tree decomposition of the contrasint graph into a set of connected sub-roboelkms. Each of them is solved intdepentendly\ldots\\ %TODO with image
+\subparagraph{Cutset conditioning} Domain splitting strategy, trying with different assignments: choose subset $S$ of CSP's variables such that the constraint graph becomes a tree: $S$ is called \textbf{cycle cutset}. For each consistent assignment to variables $\in S$: remove from the domains of remaining vars any inconsistent value, if the remaining CSP has a solution, return it together with the current assignment of $S$.\\
+Time $O(d^c(n-c)d^2)$ where $c$ is size of the cycle cutset and $d$ size of the domain. We have to try each of the $d^c$ combinations of values for the variables $\in S$ and for each combination we must solve a tree problem of size $(n-c)$
+\paragraph{Tree decomposition} The approach consists in a tree decomposition of the constraint graph into a set of connected sub-problems. Each of them is solved independently and the resulting solutions are combined cleverly.
+\begin{center}
+	\includegraphics[scale=0.5]{10.png}
+\end{center}
 \begin{list}{}{}
-	\item every var in the original problem appears in at least one of the sub-problems
-	\item if two var connectd by a constraint they must appear together at least in one of the sub problem along with the constraint
-	\item if a variabile appears in two subproblems in the tree, it must appear in every subproblem along the path connecting those subproblems
+	\item Every variable in the original problem must appear in at least one of the sub-problems
+	\item If two variables are connected by a constraint, they must appear together int at least one of the subproblem, along with the constraint
+	\item If a variable appears in two subproblems of the tree, it must appear in every subproblem along the path connecting those subproblems
 \end{list}
-1-2 ensure that all vars and constraints are represented. Condition 3 ensure that any given pvar must have same value in every subproblem.
-\subparagraph{Solving a decomposed problem} %TODO
-\paragraph{Simmetry} important factor for reducing complexity of CSP problems. Value simmetry: the values does not really matter: different colors, but there are 6 equivalent ways of satisfying the constraints. If $S$ is as solution to coloring $n$ var, there are $n!$ solutions.\\
-\textbf{Simmetry breaking constraints}: we impost an arbitrary ordering constraints that requires the values to be in alphabetical order. Breaking value simmetry has proved to be important and effective on many problems.
+1-2 ensure that all variables and constraints are represented. Condition 3 ensure that any given variable must have same value in every subproblem.
+\subparagraph{Solving a decomposed problem} We solve each subproblem independently. If any problem has no solution then the original problem has no solution. For putting the solutions together, we solve a "meta-problem" as follows:
+\begin{list}{}{}
+	\item Each subproblem is a "mega-variable", whose domain is the set of all solutions for the subproblem.\\
+	Es, Dom$(X_1) = \{($WA=r, SA=b, NT=g$),\ldots\}$
+	\item The constraints ensure that the subproblem solutions assign the same values to the variables they share
+\end{list}
+The tree width of the decomposition is the size of the largest subproblem $-1$. Ideally we should find, among many possible ones, a tree decomposition with minimal tree width. NP-hard but heuristics exists.
+\paragraph{Symmetry} Important factor for reducing the complexity of CSP problems. Value symmetry: the values does not really matter, for example different colors but there are 6 equivalent ways of satisfying the constraints. If $S$ is a solution to coloring $n$ var, then there are $n!$ solutions.\\
+\textbf{Symmetry breaking constraints}: we impose an arbitrary ordering constraints that requires the values to be in alphabetical order. Breaking value symmetry has proved to be important and effective on many problems.
+\subparagraph{Three approaches}
+\begin{list}{}{}
+	\item Reformulate the problem so that it has a reduced amount of symmetry, or none at all.
+	\item Add symmetry breaking constraints before the search begins, making some symmetric solutions unacceptable while leaving at least one solution in each symmetric equivalence class
+	\item Break symmetry dynamically during search
+\end{list}
+It's an active area of research.
+\section{Knowledge Based Systems}
+\subsection{Knowledge Representation and Reasoning}
+Introducing an additional level of complexity in the representation of states. Knowledge based systems have rich representation languages and the ability to do inference (derive new knowledge). These languages rely on classical logic.\\
+Other representation languages are proposed for inherent limitations in classical logic or for improving efficiency of inference.\\\\
+\textbf{Knowledge Representation and Reasoning} (KR\&R) is the field of AI dedicated to representing information about the world in a form that a computer system can use to solve complex tasks. The class of systems that derive from this is called \textbf{knowledge based} (KB) systems/\textbf{agents}. A KB agent maintains a knowledgebase of facts expressed in a declarative language, and is able to perform automated reasoning to solve complex tasks.\\
+The knowledgebase (KB) is the agent's representation of the world which is responsible for its intelligente behavior.\\\\
+We will deal on how knowledge is represented and reasoned about, to derive new knowledge or decide actions. A separate important issue is how knowledge is acquired: hardcoded, obtained automatically\ldots and how it evolves maintaining its anchorage to the world.
+\paragraph{Knowledge} What kind of knowledge? The emphasis is the relation between an agent and \textbf{facts that may be true or false in the world}. With $p$ proposition, something true or false: "John knows $p$", "John believes $p$", "John desires $p$", "John is confident that $p$"\ldots\\
+Contrast with non-factual knowledge: knowing how ("John knows how to play the piano"), when, where ("John knows where the party is"), a person ("John knows Bill very well")\ldots\\
+Represented knowledge is given a propositional account. Knowledge representation is about the use of formal symboli structures to represent a collection o propositions, believed by some agent. Not necessarily all of them.\\
+\textbf{A representation is a surrogate}.
+\begin{center}
+	\includegraphics[scale=0.5]{11.png}
+\end{center}
+\paragraph{Reasoning} Is the formal manipulation of the symbols representing a collection of beliefs, to produce representations of new ones. Analogy with arithmetic. \textbf{Logical deduction} is a very well know example of reasoning.\\
+Why reasoning? We would like the system to depend on what it believes and not what was explicitly stored. It's a question of economy of the representation.\\
+Usually we need more than just DB-styled retrieval of facts in the KB. Explicit and implicit beliefs, logical entailment (KB $\vDash \alpha$).\\
+Other forms of reasoning: \textbf{abductive reasoning} (given a causal relation $a\Rightarrow b$, from observing $b$ we can conjecture $a$: it's a way of providing an explanation) or \textbf{inductive reasoning} (from specific observation to a general rule)
+\paragraph{The Knowledgebase Representation hypothesis} \textit{Any mechanically embodied intelligent process will be comprised of structural ingredients that
+\begin{list}{}{}
+	\item we, as external observers, naturally take to represent a propositional account of the knowledge that the overall process exhibits, and
+	\item independent of such external semantic attribution play a formal but causal and essential role in engendering the behavior that manifests that knowledge
+\end{list}}
+Brian C. Smith, 1985\\\\
+Putting it simply, we want AI systems that contain symbolic representations with two important properties:
+\begin{list}{}{}
+	\item We can understand those symbolic structures as propositions
+	\item These symbolic structures determine the behavior of the system
+\end{list}
+Knowledge based systems have these properties.\\\\
+Competing approaches: \textbf{procedural approach} (knowledge is embedded in programs) and \textbf{connectionist approach} (avoids symbolic representation and reasoning, instead models intelligent behavior by computing with networks of weighted links between artificial neurons)
+\paragraph{Advantages of KB systems}
+\begin{list}{}{}
+	\item The try solving \textbf{open-ended tasks}, not per-compiled kind of behavior for specific tasks
+	\item \textbf{Separation} of knowledge and "inference engine"
+	\item \textbf{Extensibility}: we can extend the existing behavior by simply adding new proposition. \textbf{Knowledge is modular}, the reasoning mechanism does not change.
+	\item \textbf{Understandability}: the system can be understood at knowledge level. Important for debugging, so we can debug faulty behavior by changing erroneous beliefs, and \textbf{accountability}, so that the system can explain and justify current behavior in terms of the knowledge used.
+\end{list}
+Representation and reasoning are intimately connected, in AI research. \textbf{The representation scheme must be expressive enough} to describe many aspects of complex worlds with symbolic structures. The reasoning mechanism needs to ensure that \textbf{reasoning can be performed efficiently enough}. There is a trade-off between these two concerns.\\
+\textbf{Fundamental trade-off in knowledge representation and reasoning}: the more expressive the representation language is, the more complex is the reasoning. We want the best compromise.\\
+The expressivity of representation language doesn't concern what \textit{can be said}, but what \textit{may be left unsaid}: it's related to the possibility of expressing uncertainty and incomplete information.\\
+The complexity of inference regards the computational cost of deciding entailment (KB $\vDash \alpha$)
+\subsubsection{Knowledge representation and classical logic}
+Classical logic is propositional calculus (PROP) and first order predicate logic (FOL). We can understand KB systems at two different levels:
+\begin{list}{}{}
+	\item \textbf{Knowledge level}: representation language and its semantics, what can be expressed and what can be inferred
+	\item \textbf{Symbol level}: computational aspects, efficiency of encoding, data structures and efficiency of reasoning procedure, including their complexity
+\end{list}
+%TODO PROP recap
+\subsubsection{DPLL} Requires a formula in clausal form (conjunctive normal form, a conjunction of disjunctions of atomic formulas meaning "and outside or inside")\\
+It enumerates, with a depth first strategy, all interpretations looking for a model (an interpretation that makes a set of formulas true), with three strategies:
+\begin{list}{}{}
+	\item Anticipated control: if one clause is false it backtracks, if one literal is true then the clause is satisfied
+	\item Pure symbols heuristics: assign first pure symbols (symbols that appear everywhere with the same sign)
+	\item Unit clauses heuristics: assign first unit clauses (only one literal)
+\end{list}
+%TODO FOL recap
+\subsubsection{Unification algorithm} Computes the MGU by means of a rule-based equation-rewriting system. Initially the working memory (WM) contains the equality of the two expressions to be unified and the rules modify the equations in the WM. The algorithm terminates with a failure or when there are no applicable rules (success), so that the WM contains the MGU. The rules are:
+\begin{list}{}{}
+	\item $f(s_1,\ldots,s_n)=f(t_i,\ldots,t_n) \rightarrow s_1 = t_1, \ldots, s_n= t_n$
+	\item $f(s_1,\ldots,s_n)=g(t_i,\ldots,t_m) \rightarrow$ fail when $f\neq g$ or $n\neq m$
+	\item $x = x \rightarrow$ remove equation
+	\item $t = x \rightarrow x = t$ (bring variable to the left)
+	\item $x = t$, $x$ doesn't occur in $t \rightarrow$ apply $\{x/t\}$ to other equations
+	\item $x = t$, $t$ is not $x$, $x$ occur in $t\rightarrow$ fail (\textbf{occur check})
+\end{list}
+Note: when comparing two different constants, we use the second rule as a special case where $n=m=0$ and we fail.
+%TODO KRR-2.pdf
 \end{document}
