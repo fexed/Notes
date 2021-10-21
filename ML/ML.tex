@@ -768,6 +768,41 @@ At \textbf{test phase} we have the Lagrangian multipliers and the kernel matrix.
 	Here the Mercer's Theorem holds only for some choices of $\beta_0,\beta_1$
 \end{list}
 \subsection{SVM for non-linear regression}
-A regression problem requires to find $f$ such that $d=f(x)+v$ with a training set $T=\{(x_i,d_i)\}_{i=1}^N$\\
-We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(x)\}_{j=0}^{m_1}$ %TODO ML-21-SVM-v0.1.pdf p.161
+A regression problem requires to find $f$ such that $d=f(x)+v$ with a training set $T=\{(x_i,d_i)\}_{i=1}^N$ and with $v$ statistically independent from $x$\\
+We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(x)\}_{j=0}^{m_1}$ so $y=h(x) = w^T\phi(x)$ where $w = (w_0 = b, w_1,\ldots,w_{m_1})^T$ and $\phi(x) = (\phi(x)_0 = 1, \phi(x)_1,\ldots, \phi(x)_{m_1})^T$
+\paragraph{$\epsilon$-insensitive loss function} $L_\epsilon(d,y) = \left\{\begin{array}{l l}
+|d - y| - \epsilon & \hbox{if }|d-y|\geq\epsilon\\
+0 & \hbox{otherwhise}
+\end{array} \right.$
+\begin{center}
+	\includegraphics[scale=0.5]{22.png}
+\end{center}
+\paragraph{Optimization problem} Introducing the non-negative slack variables $\xi_i'$ and $\xi_i\forall\:i=1,\ldots,N$ $$-\xi_i'-\epsilon \leq d_i-w^T\phi(x_i)\leq \epsilon + \xi_i$$
+leading to the following constraints, all $\forall\:i=1,\ldots,N$
+\begin{list}{}{}
+	\item $d_i - w^T\phi(x_i)\leq \epsilon + \xi_i$
+	\item $w^T\phi(x_i)-d_i\leq \epsilon + \xi_i'$
+	\item $\xi_i\geq 0$
+	\item $\xi_i'\geq 0$
+\end{list}
+The primal problem then is: given the training set $\{(x_i, d_i)\}_{i=1}^N$ find the optimal values of $w$ such that the following objective function is minimized $$\psi(w,\xi,\xi') = \frac{1}{2}w^Tw + C\sum_{i=1}^N\left(\xi_i+\xi_i'\right)$$ under the constraints, all $\forall\:i=1,\ldots,N$
+\begin{list}{}{}
+	\item $d_i - w^T\phi(x_i)\leq \epsilon + \xi_i$
+	\item $w^T\phi(x_i)-d_i\leq \epsilon + \xi_i'$
+	\item $\xi_i\geq 0$
+	\item $\xi_i'\geq 0$
+\end{list}
+The dual problem yields the optimal $\{\alpha_i\}_{i=1}^N$ and $\{\alpha_i'\}_{i=1}^N$. With those, we can compute the optimal $w$ $$w=\sum_{i=1}^N(\alpha_i - \alpha_i')\phi(x_i) = \sum_{i=1}^N\gamma_i\phi(x_i)$$
+with $\gamma_i = \alpha_i - \alpha_i'$: in this case support vectors correspond to non-zero values of $\gamma_i$\\
+The estimate is defined as $h(x) = y = w^T\phi(x)$, and using the linear expansion for $w$ we get $$h(x) = \sum_{i=1}^N\gamma_i\phi(x_i)^T\phi(x) = \sum_{i=1}^N\gamma_i k(x_i, x)$$
+\paragraph{Wrapping up}
+\begin{list}{}{}
+	\item \textbf{Important}: select values for the user-specified parameters $C$ and $\epsilon$
+	\item \textbf{Important}: choose an inner product kernel function $k$
+	\item Compute the kernel matrix $K$
+	\item Solve the dual form and get the optimal values of the Lagrangian multipliers ($\{\gamma_i\}_{i=1}^N$)
+	\item Compute the optimal value for the bias ($b$)
+	\item Obtain the estimate function as a linear combination of dot products in a feature space we can ignore ($h(x) = \sum_{i=1}^N \gamma_ik(x_i, x)$)
+\end{list}
+The test: given an input pattern $x$, we estimate the value of the unknown function $f$ in that point using the estimate computed before $$h(x) = \sum_{i=1}^N\gamma_i k(x_i,x)$$
 \end{document}
