@@ -581,5 +581,248 @@ This allows Purchase to be described at different levels of detail.
 A general ontology organizes everything in the world into a hierarchy of categories.
 \paragraph{Properties} A general-purpose ontology should be applicable in any special-purpose domain, with the addition of domain-specific axioms. In any non-trivial domain, different areas of knowledge must be combined because reasoning and problem solving could involve several areas simultaneously.\\
 It's difficult to construct one single best ontology: every ontology is a treaty, a social agreement, among people with some common interest in sharing. An upper ontology is like an object oriented programming framework (reuse).
-%KRR-2.pdf p. 17
+\paragraph{Categories and objects} Much reasoning takes place at the level of categories: we can infer category membership from the perceived properties of an object, and the use category information to derive specific properties of the object.\\
+There are two choices for representing categories in first-order logic:
+\begin{list}{}{}
+	\item Predicates: categories are unary predicates that we assert of individuals\\
+	Example: WinterSport(Ski), $\forall\:x$ WintersSport($x$) $\Rightarrow$ Sport($x$)
+	\item Objects: categories are objects that we talk about (\textbf{reification})\\
+	Examples: Ski $\in$ WinterSports, WinterSports $\subseteq$ Sports
+\end{list}
+This way we can organize categories into taxonomies, define disjoint categories, partitions\ldots and use specialized inference mechanisms, such as \textbf{inheritance}. Description logic takes this approach.
+\subparagraph{PartOf} PartOf to say that one thing is part of another. Composite objects can be seen as part-of hierarchies, similar to the Subset hierarchy.\\
+PartOf is trainsitive, PartOf($x,y)\wedge$ PartOf$(y,z)\Rightarrow$ PartOf$(x,z)$, and reflexive, PartOf$(x,x)$
+\subparagraph{BunchOf} BunchOf is a composite object with definite parts but no particular structure. BunchOf(\{Apple1, Apple2, Apple3\}) not to be confused with the set of the 3 apples.\\
+BunchOf(\{$x$\}) = $x$ and each element of category $S$ is part of BunchOf($S$). Also BunchOf($S$) is part of any object that has all the elements of $S$ as parts ($\forall\:y[\forall\:x\:\:x\in S\Rightarrow$ PartOf$(x,y)]\Rightarrow$ PartOf(BunchOf$(S),y)$)
+\subparagraph{Qualitative Measures} Measures (weight, mass, cost\ldots) are represented as unit functions that take the number as argument (for example: Centimeters(2.54))\\
+The measures can be ordered, which enables us to do qualitative inference and is typical of the field of qualitative physics.
+\subparagraph{Objects vs Stuff} Objects are countable, while stuff are mass objects: water, energy, butter\ldots\\
+Any part of a stuff is still stuff, example with Butter: $b\in$ Butter $\wedge$ PartOf$(p,b)\Rightarrow p\in$ Butter\\
+Also stuff has a number of intrinsic properties (color, density, high-fat content\ldots) shared by all its subparts, but no extrinsic properties (weight, length, shape\ldots). It is a substance.
+\subsubsection{Situation Calculus} Representation and reasoning about states and actions. The situation calculus is a specific ontology in FOL dealing with actions and change:
+\begin{list}{}{}
+	\item \textbf{Situations}: snapshots of the world at a given instant in time, the result of an action
+	\item \textbf{Fluents}: time dependent properties and relations
+	\item \textbf{Actions}: performed by an agent, but also events
+	\item \textbf{Change}: how the worlds changes as a result of an action
+\end{list}
+The situation calculus is the formalization in FOL of this ontology. An example: the blocks world, there are blocks on a table and the goal is to reach a given arrangement of the blocks by stacking them on top of each other.
+\begin{center}
+	\includegraphics[scale=0.75]{13.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{States}: arrangements of blocks on a table
+	\item \textbf{Initial State} and \textbf{Goal State}: a specific arrangement of blocks
+	\item \textbf{Actions}:
+	\begin{list}{}{}
+		\item \textbf{Move}: move block $x$ from block $y$ to block $z$, provided $x$ and $z$ are free
+		\item \textbf{Unstack}: move block $x$ from $y$ to the table, $x$ must be free
+		\item \textbf{Stack}: move block $x$ from the table to $y$, $y$ must be free
+	\end{list}
+\end{list}
+Can be formalized as:
+\begin{list}{}{}
+	\item \textbf{Situations}: constants $s,s_0,s_1,\ldots$ and functions denoting situations
+	\item \textbf{Fluents}: predicates or functions that vary from a situation to another.\\
+	On, Table, Clear\ldots are Fluents, so for example On($a,b$) becomes On($a,b,s$)
+	\item \textbf{Actions}: modeled as functions\\
+	Move($a,b,c$) is a function representing the action of moving block $A$ from $B$ to $C$. It's an instance of the generic operator/function Move. Same thing for Unstack($a,b$) and Stack($a,b$)
+\end{list}
+Situations as results of actions: function Result : $A\times S\rightarrow S$, so $s_1 =$ Result(Move($b,a,c),s_0$) denotes the situation resulting from the action Move($b,a,c$) executed in $s_0$. Then we can assert, for example, On($b,c,$Result(Move($b,a,c),s_0))$
+\begin{center}
+	\includegraphics[scale=0.5]{14.png}
+\end{center}
+This can be applied to sequences of actions, too. Result : $[A^*]\times S \rightarrow S$
+\begin{list}{}{}
+	\item Result($[],s)=s$
+	\item Result($[a\:|\:$seq$],s) =$ Result(seq, Result$(a,s))$
+\end{list}
+In general Result($[a_1,a_2,\ldots,a_n],s_0) =$ Result$(a_n$, Result($a_{n-1}$, \ldots Result($a_2$, Result($a_1, s_0$))\ldots))
+\paragraph{Formalizing actions} We need \textbf{possibility axioms}, with the structure preconditions $\Rightarrow$ possibility, for example
+\begin{list}{}{}
+	\item On$(x,y,s)\wedge$ Clear$(x,s)\wedge$ Clear$(z,s)\wedge x\neq z \Rightarrow$ Poss(Move$(x,y,z),s)$
+\end{list}
+We also need \textbf{effect axioms} such as
+\begin{list}{}{}
+	\item Poss(Move$(x,y,z),s)\Rightarrow$ On($x,z,$ Result(Move$(x,y,z),s))\wedge$ Clear($y,$ Result(Move$(x,y,z),s))$
+\end{list}
+This is a specification of the direct effects of the action, what changes. But it's not enough: is $y$ on the table in the new situation? Is $x$ free?\\
+We have a big problem: in the new situation we don't know anything about properties that were not influenced at all by the action, and these properties are the majority. This is the \textbf{frame problem}.
+\paragraph{Frame problem and frame axioms} The frame problem is one of the most classical AI problems. The name comes from an analogy with the animation world, where the problem is to distinguish the background (the fixed part) from the foreground (the things that change) from one frame to the other.\\
+Let's fix the problem with frame axioms: Frame axioms for Clear with respect to Move
+\begin{list}{}{}
+	\item A block stays free unless the Move action is putting something on it\\
+	Clear$(x,s)\wedge x\neq w\Rightarrow$ Clear($x,$ Result(Move$(y,z,w),s))$
+	\item A block remains not free unless it is not freed by a Move action\\
+	$\neg$Clear$(x,s)\wedge x\neq z\Rightarrow$ $\neg$Clear$(x,$ Result(Move$(y,z,w),s))$
+\end{list}
+And similarly for each pair Fluent-Action: too many axioms, \textbf{representational frame problem}.
+\paragraph{Successor-State axioms} We can combine preconditions, effects and frame axioms to obtain more compact representation for each fluent $f$. The schema is this:\begin{center}
+\begin{tabular}{r l l}
+$f$ true after $\Leftrightarrow$ & [\textit{preconditions before} and & \textit{preconditions}\\
+& \textit{an action made $f$ true}] or & \textit{effect}\\
+& [$f$ \textit{was true before and no action made it false}] & \textit{frame axioms}
+\end{tabular}
+\end{center}
+An example with Clear:\begin{center}
+\begin{tabular}{r l l}
+Clear$(y$, Result$(a,s))$ $\Leftrightarrow$ & [On$(x,y,s)\wedge$ Clear$(x,s)\wedge$ Clear$(z,s)\wedge x\neq z \wedge a =$ Move$(x,y,z)$] $\vee$ & \textit{effect}\\
+& [On($x,y,s)\wedge$ Clear$(x,s)\wedge(a =$ Unstack$(x,y,))$] $\vee$ & \textit{effect}\\
+& [Clear$(y,s)\wedge(a\neq$ Move$(z,w,y))\wedge(a\neq$ Stack$(z,y))$] & \textit{frame}
+\end{tabular}
+\end{center}
+\paragraph{Related problems} The \textbf{representational frame problem} is considered more or less solved.
+\subparagraph{Qualification problem} In real situations it is almost impossible to list all the necessary and relevant preconditions.
+\subparagraph{Ramification problem} Among derived properties, which ones persist and which ones change?\\
+Objects on a table are in the room where the table is. If we move the table from one room to another, object on the table must also change their location. Frame axioms could make the old location persist for objects.
+\paragraph{Uses of situations calculus} \begin{list}{}{}
+	\item \textbf{Planning}: finding a sequence of actions to reach a certain goal condition $G$\\
+	KB$\vDash\:\exists\:a\:\:G$(Result$(a,s_0))$ where $a = [a_1,\ldots,a_n]$
+	\item \textbf{Projection}: given a sequence of actions and some initial situation, determine what it would be true in the resulting situation.\\
+	Given $\phi(s)$ determine whether KB$\vDash\:\phi($Result$(a,s_0))$ where $a = [a_1,\ldots,a_n]$
+	\item \textbf{Legality test}: checking whether a given sequence of actions $[a_1,\ldots,a_n]$ can be performed starting from an initial situation.\\
+	KB$\vDash\:$Poss$(a_i,$ Result$([a_1,\ldots,a_{i-1}],s_0))$ for each $i\:|\:1\leq i\leq n$\\
+	For example Result(Pickup($b_2$), Result(Pickup$(b_1),s_0))$ is not a legal situation because the robot can hold only one object.
+\end{list}
+\paragraph{Non-Monotonic approach} What we would need is the ability to formalize a notion of \textbf{persistence}: \textit{in the absence of information to the contrary, things remain as they were}".\\
+This leads out of classical logic, because it violates the \textbf{monotonicity property} of classical logic. The \textbf{closure assumption} we used is already an ad hoc form of completion and we will see more of this strategy in non-monotonic reasoning.\\
+In planning, specialized languages that makes more assumptions and are more limited in their expressivity.
+\paragraph{Limits of situation calculus} Single agent, actions are discrete and instantaneous (no duration in time), they happen one at a time (no concurrency, no simultaneous actions) and only primitive actions (no way to combine, conditionals, iterations,\ldots)\\
+The \textbf{event calculus} is introduced to handle such cases: it's based on events, points in time, intervals rather than situations.
+\subsubsection{Event Calculus}
+\begin{list}{}{}
+	\item A Fluent is an object (represented by a function)\\
+	To assert that a Fluent is true at some point in time $t$, we use the predicate $T($true$)$
+	\begin{list}{}{}
+		\item $T$(At(Shankar, Berkley)$, t)$
+		Where  At(Shankar, Berkley) is a term, $t$ a time
+		\item $T$(At(Shankar, Berkley)$, i)$
+		With $i = (t_1, t_2)$ being a time interval
+	\end{list}
+	\item Events are described as instances of event categories. The event $E_1$ of Shankar flying from San Francisco to Washington is described as $E_1\in$ Flyings $\wedge$ Flyer$(E_1,$ Shankar$)\wedge$ Origin$(E_1,$ SF$)\wedge$ Destination$(E_1,$ W)
+	\item To assert that an event happens during an extended period of time, we say Happens($e,i$)
+\end{list}
+\subsection{Nonmonotonic reasoning}
+Classical entailment is monotonic: if KB$\vDash a$ then KB $\cup \{b\}\vDash a$ (KB$\wedge b\vDash a$)\\
+Failures of monotonicity are widespread in commonsense reasoning. It seems that humans often "jump to conclusions" when they think it's safe to do so (when they lack information to the contrary). These conclusions are only "reasonable" given what you know, rather than classically entailed.\\
+Most of the inference we do is defeasible: additional information may lead to retract those tentative conclusions. Anytime the set of beliefs does not grow monotonically when new evidence arrives, the monotonicity property is violated. Including defeasible reasoning leads us to consider \textbf{nonsound inferences}.
+\paragraph{Common instances of nonmonotonic reasoning} \begin{list}{}{}
+	\item \textbf{Default reasoning}: reasonable assumptions unless evidence of the contrary\\
+	Car parked on the street: you assume it has for wheels even if you can only see two\\
+	Also, prototypes: birds fly, tomatoes are red\ldots
+	\item \textbf{Persistence}: things stay the same, according to the principle of inertia, unless we know they change
+	\item \textbf{Economy of representation}: only true facts are stored, false facts are only assumed
+	\item \textbf{Reasoning about knowledge}: if you have $\neg$Know($p$) and you learn $p$\ldots
+	\item \textbf{Abductive reasoning}: most likely explanations to known facts
+\end{list}
+\paragraph{Strictness of FOL universals} Universal rules (example: $\forall\:x\:\:(P(x)\Rightarrow Q(x))$) express properties that apply to all instances: all or nothing. But most of what we learn about the worlds is in terms of generics rather than universals. Properties are not strict for all instances: genetic/manufacturing varieties, borderline cases (early ferry wheels vs modern ones, or violins vs toy violins\ldots), cases in exceptional circumstances\ldots\\
+Listing all exceptions is not a viable solution: qualification problem in enumerating all exceptions, and similarly for general properties of individuals. The goal is to be able to say a $P$ is a $Q$ in general, normally, but not necessarily. It is reasonable to conclude $Q(a)$ given $P(a)$ unless there's a good reason not to.\\
+This is what we call a default, and \textbf{default reasoning} the tentative conclusion. Three ways to approach the problem:
+\begin{list}{}{}
+	\item \textbf{Model Theoretic Formalizations} (CWA, Circumscription)\\
+	Consist in a restriction to the possible interpretations, redefining the notion of entailment.
+	\item \textbf{Proof Theoretic Formalizations} (Default logic, Autoepistemic logic)\\
+	A proof system with non-monotonic inference rules. Autoepistemic logic (under the heading "logics for knowledge and beliefs")
+	\item \textbf{Systems Supporting Belief Revision} (TMS, ATMS)
+\end{list}
+\paragraph{Closed Worlds Assumpion (CWA)} \textit{There are usually many more negative facts than positive facts}! Under CWA, only positive facts are stored, and any other basic fact is assumed false. It's used in deductive databases and in logic programming with negation as failure. Corresponds to a new version of entailment $\vDash_C$:
+\begin{list}{}{}
+	\item KB $\vDash_C a \Leftrightarrow$ CWA(KB) $\vDash a$\\
+	Where CWA(KB) = KB $\cup\{\neg p\:|\:p$ ground atom and KB $\neq p\}$, the set of assumed beliefs\\
+\end{list}
+CWA(KB) is the completion under CWA of KB. CWA is a form of theory completion and is nonmonotonic.
+\subparagraph{Consistent and complete knowledge} KB with consistent knowledge (satisfiable): $\not\exists\:a\:|$ KB$\vDash a\wedge$ KB$\vDash\neg a$, so there's no contradiction.\\
+\textbf{Complete theory}: $\forall\:a$ KB$\vDash a\vee$ KB$\vDash\neg a$\\
+Normally a KB has incomplete knowledge:
+\begin{list}{}{}
+	\item Let KB = $\{p\vee q\}$, then KB$\vDash (p\vee q)$ but KB$\not\vDash p$ and KB$\not\vDash \neg p$\\
+	Also, for any ground atom not mentioned in KB, KB$\not\vDash r$ and KB $\not\vDash \neg r$
+\end{list}
+CWA can be seen as an \textbf{assumption about complete knowledge}, or a way to make a theory complete.\\
+\textbf{Theorem}: $\forall\:a$ within the language, KB$\vDash_C a\vee$ KB$\vDash_C\neg a \Leftrightarrow$ CWA(KB)$\vDash a\vee$ CWA(KB)$\vDash\neg a$\\\\
+CWA(KB) isn't always consistent when KB is consistent. Problems with disjunctions, for example: KB = $\{p\vee q\}$, CWA(KB) = KB$\cup\{\neq p, \neq q\}$ since KB $\neg\vDash p$ and KB $\neg\vDash q$, but KB$\cup\{\neg p, \neg q\}\vDash \neg(p\vee q)$ then CWA(KN) is inconsistent. The solution is to restrict CWA to atoms that are "uncontroversial": $p,q$ are controversial, $r$ isn't.\\
+CWA limited in such a way is called Generalized CWA (GCWA), is a weaker form of completion than unrestricted CWA (the assumed beliefs are less)
+\begin{list}{}{}
+	\item GCWA: if KB $\vDash\{p\vee q_1,\ldots,\vee q_n\}$ and KB $\neg\vDash p$ then add $\neg p$, provided at least one ground atom $q_i$ is entailed by KB\\
+	\textbf{Theorem} consistency of CWA: CWA(KB) is consistent $\Leftrightarrow$ whenever KB $\vDash(q_1\vee\ldots\vee q_n)$ then KB $\vDash q_i$ for some $i$.
+\end{list}
+Since it may be difficult to test the conditions of this theorem, the following \textbf{corollary} (which restricts the application of CWA) is also of practical importance: if the KB is made of Horn clauses and it's consistent, then CWA(KB) is consistent.\\
+A clause is a disjuction of atomic formulas (positive and negative literals), and a Horn clause has \textit{at most} one positive literal.
+\subparagraph{Vivid knowledgebase} A model is a vivid representation of the world. In a vivid KB we store a unique interpretation of the world (a consistent and complete set of positive literals) and answer questions retrieving from it. A vivid KB has the CWA built in.\\
+If positive atoms are stored as a table, deciding if KB $\vDash_C a$ is like a DB retrieval. Instead of reasoning with sentences we reason about an analogical representation of the world, with these properties:
+\begin{list}{}{}
+	\item For each object of interest in the world, there is exactly one constant in KB that stands for that object.
+	\item For each relationship of interest in the world, there is a corresponding predicate in the KB such that the relationship holds among certain objects in the world if and only if the predicate with the constants as arguments is an element of the KB.
+\end{list}
+\subparagraph{Extension to quantifiers} The application of the theorem of consistency depends on the terms that we allow as part of the language. The \textbf{Domain Closure Assumption} (DCA) may be used to restrict the constants to those explicitly mentioned in the KB. Under this restriction, quantifiers can be replaced by finite conjunctions and disjunctions.\\
+The \textbf{Unique Names Assumption} (UNA) can be used to deal with terms equality.
+\subparagraph{CWA in synthesis} CWA is the assumption that atomic formulas not entailed by the KB are assumed to be false. This is a normal assumption in databases. Formally, KB $\vDash_C a \Leftrightarrow$ KB $\cup\{\neg p\:|\:p$ ground atom and KB $\not\vDash p\}\vDash a$\\
+The KN so augmented is \textbf{complete}: $\forall\:a$ KB $\vDash_C a$ or KB $\vDash_C \neg a$\\
+\textbf{Consistency} requires a more restricted formulation of the assumed belief GCWA. If KB $\vDash \{p\vee q_1\ldots\vee q_n\}$ and KB $\not\vDash p$ then add $\neg p$ if at least one ground literal $q_i$ is entailed.\\
+Query processing can be reduced as a combination of atomic queries.\\
+Vivid knowledgebases store the plus part of a complete interpretation and make reasoning efficient (the augmentation reduces the possible models to one)
+\paragraph{Circumscription} A more powerful and precise version of CWA, working also for FOL. The idea is to specify special \textbf{abnormality predicates} for dealing with exceptions.\\
+For example, suppose we want to assert the default rule "birds fly":
+\begin{list}{}{}
+	\item All normal birds fly: $\forall\:x$ Bird$(x) \wedge\neg$Ab$_f(x)\Rightarrow$ Flies$(x)$
+	\item We also have Bird(Tweety), Bird(Chilly), Chilly $\neq$ Tweety, $\neg$Flies(Chilly)\\
+	We want to infer Flies(Tweety), but Tweetu could satisfy Ab$_f$ in some model
+\end{list}
+The idea is to \textbf{minimize abnormality}.\\
+\textbf{Circumscription}: given the unary predicate Ab, consider only interpretation where I[Ab$_f$] is \textbf{as small as possible} relative to KB.
+\subparagraph{Minimal Entailment} Let $P$ be a set of unary abnormality predicates. Let $I_1$ and $I_2$ two interpretations that agree on the values of constants and functions.\begin{list}{}{}
+	\item \textbf{Ordering on interpretations}\\
+	$I_1 < I_2 \Leftrightarrow$ same domain $\wedge\forall\:p\in P\:\:I_1[p]\subset I_2[p]$ holds
+	\item \textbf{Minimal Entailment}\\
+	KB $\vDash_\leq a \Leftrightarrow a$ is true in $I$ in every minimal model $I$\\
+	Note: model ($I$[KB] = true) and minimal (there is no other interpretation $I' < I$ such that $I'$[KB] = true)\\
+	$a$ doesn't need to be true in all interpretations satisfying KB but only in all those that minimize abnormalities.
+\end{list}
+\subparagraph{Issues} Although the default assumptions made by circumscription are usually weaker than those of the CWA, there are cases where they appear too strong.\\
+A partial fix is to distinguish between $P$ (variable predicates) and $Q$ (fixed predicates), and ordering on interpretations differently for the two sets so that only predicates in $P$ are allowed to be minimized:
+\begin{list}{}{}
+	\item $\forall\:p\in P\:\:I_1[p] \subset I_2[p]$ holds
+	\item $\forall\:q\in Q\:\:I_1[q] = I_2[q]$ holds
+\end{list}
+The problem is that we need to decide what to allow to vary.
+\paragraph{Default Logic} We use rules to specify implicit beliefs. We distinguish explicit beliefs (axioms) from implicit beliefs (theorems).\\
+Default logic KB uses two components: KB = (F, D)
+\begin{list}{}{}
+	\item F is a set of sentences (\textbf{facts})
+	\item D is a set of \textbf{default rules} $\frac{\alpha : \beta}{\gamma}$\\
+	Read it as: if you can infer $\alpha$ and it's consistent to assume $\beta$, then infer $\gamma$:
+	\begin{list}{}{}
+		\item $\alpha$ prerequisite
+		\item $\beta$ justification
+		\item $\gamma$ conclusion
+	\end{list}
+	Default rules where $\beta = \gamma$ are called normal defaults
+\end{list}
+\subparagraph{Extensions} How to characterize theorems/entailments? Cannot write a derivation, since don't know when to apply default rules, and no guarantee a unique set of theorems.\\
+\textbf{Extensions}: set of sentences that are "reasonable" beliefs, given explicit facts and default rules. E is and extension of (F, D) $\Leftrightarrow$ for every sentence $\pi$, E satisfies the following:
+$$\pi\in E\Leftrightarrow F\cup\Delta \vDash \pi\:\:\:\: \hbox{ where }\Delta=\left\{\gamma\:|\:\frac{\alpha : \beta}{\gamma}\in D, \alpha\in E, \neg\beta\not\in E\right\}$$
+An extension E is the set of entailments of $F\cup\Delta$ where the $\Delta$ is the "suitable" set of assumptions given D.\\
+Note that $\alpha$ has to be in E, not in F. This has the effect of allowing the prerequisite to be believed as the result of other default assumptions. Note also that this definition is not constructive.\\\\
+\textbf{Theorem}: an extension of a default theory is inconsistent $\Leftrightarrow$ the original F is inconsistent.\\
+In the following example the extension is unique, but in general a default theory can have multiple extensions.\\
+Suppose KB is 
+\begin{list}{}{}
+	\item F = \{Bird(Chilly), Bird(Tweety), $\neg$Flies(Chilly)\}
+	\item D = $\left\{\frac{\hbox{Bird}(x) : \hbox{Flies}(x)}{\hbox{Flies}(x)}\right\}$
+\end{list}
+then the unique possible extension is $\Delta = \{$Flies(Tweety)$\}$, since Bird(Tweety)$\in E$ and $\neg$Flies(Tweety)$\not\in E$.
+\subparagraph{Properties} \begin{list}{}{}
+	\item If a default theory has distinct extensions, they are \textbf{mutually inconsistent}.\\
+	Example: F=\{A$\vee$B\}, D=$\left\{\frac{:\neg A}{\neg A}, \frac{:\neg B}{\neg B}\right\}$ then E$_1$=\{A$\vee$B, $\neg$A\}, E$_2$=\{A$\vee$B, $\neg$B\} are mutually inconsistent
+	\item There are default theories with no extensions.\\
+	Example: with D=$\left\{\frac{:\neg A}{\neg A}\right\}$, if F=\{\} then E=\{\}
+	\item Every normal default theory has an extension
+	\item Adding new normal default rules does not require the withdrawal of beliefs, even if adding new beliefs might. Normal default theories are semi-monotonic.
+\end{list}
+\subparagraph{Grounded Extensions} We have a problem that leads to a more complex definition of extension. Suppose F = \{\} and D=$\left\{\frac{:p}{\neg p}\right\}$. Then E = entailments of $\{p\}$ is an extension since $p\in E$ and $\neg p\not\in E$, but we have no good reason to believe $p$. The only support for $p$ is the default rule, which requires $p$ itself as a prerequisite. So the default should have no effect.\\
+Desirable extension is only E = entailments of \{\}, that is to say all valid formulas. It's necessary a revision of the definition.\\
+\textbf{Grounded extensions}: $\forall$ set $S$, let $\Gamma(S)$ be the least set containing $F$, closed under entailment and satisfying the default rules $$\frac{\alpha : \beta}{\gamma} \in D, \alpha\in \Gamma(S) \wedge \neg\beta\not\in S \Rightarrow \gamma\in \Gamma(S)$$
+instead of $\neg\beta\not\in\Delta(S)$\\
+A set $E$ is an extension of (F, D) $\Leftrightarrow E = \Gamma(E)$, i. e. E is a fixed point of the $\Gamma$ operator.
+%TODO KRR-4.pdf
 \end{document}
