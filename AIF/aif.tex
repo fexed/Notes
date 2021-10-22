@@ -824,5 +824,89 @@ Desirable extension is only E = entailments of \{\}, that is to say all valid fo
 \textbf{Grounded extensions}: $\forall$ set $S$, let $\Gamma(S)$ be the least set containing $F$, closed under entailment and satisfying the default rules $$\frac{\alpha : \beta}{\gamma} \in D, \alpha\in \Gamma(S) \wedge \neg\beta\not\in S \Rightarrow \gamma\in \Gamma(S)$$
 instead of $\neg\beta\not\in\Delta(S)$\\
 A set $E$ is an extension of (F, D) $\Leftrightarrow E = \Gamma(E)$, i. e. E is a fixed point of the $\Gamma$ operator.
-%TODO KRR-4.pdf
+%KRR-4.pdf
+\subsection{Knowledge and Beliefs}
+Human intelligence is social: we need to negotiate and coordinate with others. In multi-agent scenarios we need methods for one agent to model \textbf{mental states} of other agents: high level representations of other agent's belief, intentions and goals may be relevant for acting.\\
+By mental states we mean the relation of an agent to a proposition. \textbf{Propositional Attitudes} that an agent can have include Believes, Knows, Wants, Intends, Desires, Inform\ldots so called because the argument is a proposition. Propositional attitudes do not behave as regular predicates.
+\paragraph{Referential Transparency} Suppose we try to assert "Lois knows that Superman can fly". Knows(Lois, CanFly(Superman))
+\begin{list}{}{}
+	\item What is "CanFly"? A predicate? A term?
+	\item Since Superman = Clark, then we can reason as follows:\\
+	(Superman = Clark) $\wedge$ Knows(Lois, CanFly(Superman)) $\vDash$ Knows(Lois, CanFly(Clark))
+\end{list}
+This property is called \textbf{referential transparency}: what matters is the object that the term names, not the form of the term. Important property for reasoning in classical logic.\\
+Propositional attitudes like Believes and Knows require \textbf{referential opacity}: the terms used do matter, because an agent may not be aware of which terms are co-referential.
+\subparagraph{Three approaches}
+\begin{list}{}{}
+	\item \textbf{Reification}: we remain within FOL, as we did for the situation calculus, using terms to represent propositions.\\
+	Ex: Bel($a$, On($b,c$))
+	\item \textbf{Meta-Lingustic representation}: we remain within FOL an represent proposition as strings.\\
+	Ex: Bel($a$, "On($b,c$)")
+	\item The problem in both of the previous approaches is connecting the reified version of the proposition (a function or a string) and the proposition itself
+	\item \textbf{Modal Logics}: propositional attitudes are represented as \textbf{modal operators} in specialized modal logics, with alternative semantics. Modal operators are an extension of classical logical operators.\\
+	Ex: B($a$, On($b,c$)) or B$_a$(On($b,c$)), K$_a$(On($b,c$)) to say that the agent $a$ believes/knows that block $b$ is on $c$.\\
+	Classical logic has only one modality (modality of truth): $P$ is the same as saying "$P$ is true"
+\end{list}
+\paragraph{Modal Logics} Modal logic is about necessity and possibility.
+\begin{list}{}{}
+	\item $\square A$ it is necessary that $A$\ldots (with $\square$ being some sort of universal quantification over interpretations)
+	\item $\lozenge A$ it is possible that $A$\ldots (with $\lozenge$ being some sort of existential quantification over interpretations)
+\end{list}
+The simplest logic is calle $K$, and results from adding the following to the principles of PROP:
+\begin{list}{}{}
+	\item \textbf{Necessitation Rule}: If $A$ is a theorem of $K$, then so is $\square A$
+	\item \textbf{Distribution Axiom}: $\square (A\Rightarrow B) \Rightarrow (\square A \Rightarrow \square B)$
+\end{list}
+Logic $T$ adds axiom
+\begin{list}{}{}
+	\item[(M)] $\square A \Rightarrow A$
+\end{list}
+Can be relevant for some modal operators, but not for others. For example, Knows $A\Rightarrow A$ seems plausible, while Believes $A\Rightarrow A$ is not.\\
+Logic $S4$ adds
+\begin{list}{}{}
+	\item $\square A \Rightarrow \square \square A$
+\end{list}
+Logic $S5$ adds
+\begin{list}{}{}
+	\item $\lozenge A \Rightarrow \square\lozenge A$
+\end{list}
+\subparagraph{World semantics} Semantics for modal logics is defined with reference to: a set $W$ of possible worlds and an \textbf{accessibility relation} $R$ between worlds.\\
+A formula $A$ is now given an interpretation with reference to a possible world $w$: we write $I(A, w)$
+\begin{list}{}{}
+	\item[$\neg$] $I(\neg A, w)= T \Leftrightarrow I(A, w) = F$
+	\item[$\Rightarrow$] $I(A\Rightarrow B, w)= T \Leftrightarrow I(A, w) = F\vee I(B, w) = T$
+	\item[\vdots]
+	\item[$\square$] $I(\square A, w)= T \Leftrightarrow\forall\:w'\in W\:|\: wRw'$ we have $I(A, w') = T$
+	\item[$\lozenge$] $I(\lozenge A, w)= T \Leftrightarrow\exists\:w'\in W\:|\: wRw'$ we have $I(A, w') = T$
+\end{list}
+Different modal logics are defined according to the properties of the accessibility relation $R$ and corresponding axioms.
+\subparagraph{Referential Transparency} Modal logics address this problem, since the truth of a complex formula does not depend on the truth of the components in the same world/interpretation. \textbf{Modal operator are not compositional}.\\
+Modal logics for knowledge are easier than those of beliefs.
+\subparagraph{Syntax for modal logic for knowledge} \begin{list}{}{}
+	\item All the well formed formulas of ordinary FOL are also well formed formulas of the modal language
+	\item If $\phi$ is a closed well formed formula of the modal language and $a$ is an agent, then Knows($a,\phi$) is a formula of the modal language
+	\item If $\phi$ and $\psi$ are well formed formulas so are the formulas that can be costructed form thed with the usual logic connectives.
+\end{list}
+Some examples:
+\begin{list}{}{}
+	\item Knows(A$_1$, Knows(A$_2$, On(B, C))), A$_1$ knows that A$_2$ knows that B is on C
+	\item Knows(A$_1$, On(B, C)) $\vee$ Knows(A$_1$, $\neg$On(B, C)), A$_1$ knows whether B is on C or not
+	\item $\neg$Knows(A$_1$, On(B, C)), A$_1$ doesn't know that B is on C
+\end{list}
+\subparagraph{Properties of knowledge}\begin{list}{}{}
+	\item One agent can hold false beliefs but \textbf{cannot hold false knowledge}.\\
+	If an agent knows something then that must be true. \textbf{Knowledge is justified true belief}.
+	\item An agent \textbf{doesn't know all the truths}: something may be true without the agent knowing it.
+	\item If two formulas $\phi$ and $\psi$ are equivalent, not necessarily Knows(A, $\phi$) implies Knows(A, $\psi$)
+\end{list}
+The semantics of modal logic is given in terms of possible worlds, and specific accessibility relations among them, one for each agent.\\
+An agent know a proposition just when that proposition is true in all the worlds accessible from the agent's worlds (those that the agent consider possible).\\
+\textbf{Possible worlds} roughly correspond to contexts within interpretations. An accessibility relation is defined for agents and connects possible worlds: if Knows$(a, w_i, w_j)$ is satisfied, then world $w_j$ is accessible form world $w_i$ for agent $a$.\\
+Possible world semantics:\begin{list}{}{}
+	\item Regular well formed formulas (with no modal operators) are not simply true or false but they are true or false with reference to a possible world.\\
+	$I(w_1, \phi)$ may be different from $I(w_2, \phi)$
+	\item A modal formula Knows$(a, \phi)$ is true in $w \Leftrightarrow \phi$ is true in all the worlds accessible from $w$ for agent $a$.
+	\item The semantics of complex formulas is determined by regular truth recursive rules.
+\end{list}
+%TODO KRR-4.pdf, p. 13
 \end{document}
