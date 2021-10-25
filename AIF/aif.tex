@@ -908,5 +908,227 @@ Possible world semantics:\begin{list}{}{}
 	\item A modal formula Knows$(a, \phi)$ is true in $w \Leftrightarrow \phi$ is true in all the worlds accessible from $w$ for agent $a$.
 	\item The semantics of complex formulas is determined by regular truth recursive rules.
 \end{list}
-%TODO KRR-4.pdf, p. 13
+Knows($a, \phi$) means that an agent $a$ knows the proposition denoted by $\phi$. "Not knowing $\phi$" in $w_0$, a specific world, is modeled by allowing some worlds, accessible by $w_0$, in which $\phi$ is true and some worlds in which $\phi$ is false.\\
+For example, in this scenario Knows($a,P$) and Knows($a, \neg R$) in $w_0$ since $P$ and $\neg R$ are true in worlds $w_0,w_1,w_2,w_3$, but Knows($a, Q$) is false in $w_0$.
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}
+\end{center}
+The accessibility relation also accounts for nested knowledge statements, also involving different agents. Knows($a$, Knows($b,P$)) holds in $w_0$ since Knows($b, P$) holds in $w_0,w_1,w_2$ and $w_3$ accessible to $a$.
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\subparagraph{Properties and axioms for knowledge} Many of the properties that we desire for the knowledge can be achieved by imposing constraints to the accessibility relation.
+\begin{enumerate}
+	\item Agents should be able to reason with the knowledge they have\\
+	Knows$(a, \alpha\Rightarrow\beta)$ $\Rightarrow$ (Knows$(a,\alpha)$ $\Rightarrow$ Knows($a,\beta$)), \textbf{distribution axiom}\\
+	Implicit in possible worlds semantics
+	\item Agents cannot have false knowledge\\
+	Knows($a,\alpha$) $\Rightarrow$ $\alpha$, \textbf{knowledge axiom}\\
+	Satisfied if the accessibility relation is \textbf{reflexive}, i.e. Knows($a,w,w$) for every $a$ and every $w$. An implication is that $\neg$Knows($a$, false)\\
+	Moreover, it implies that the relation is also \textbf{serial}, i.e. there's at least a worlds accessible from $w$.
+	\item It's reasonable to assume that if an agent knows something, then it knows that it knows\\
+	Knows($a,\alpha$) $\Rightarrow$ Knows($a$, Knows($a,\alpha$)), \textbf{positive introspection}\\
+	The accessibility relation must be \textbf{transitive}, i.e. Knows($a,w_1,w_2$) $\wedge$ Knows($a,w_2,w_3$) $\Rightarrow$ Knows($a,w_1,w_3$)
+	\item In some axiomatization we also assume that if an agent doesn't know something, then it knows that it doesn't know\\
+	$\neg$Knows($a,\alpha$) $\Rightarrow$ Knows($a$, $\neg$Knows($a,\alpha$)), \textbf{negative introspection}\\
+	The accessibility relation must be \textbf{euclidean}, i.e.Knows($a,w_1,w_2$) $\wedge$ Knows($a,w_1,w_3$) $\Rightarrow$ Knows($a,w_2,w_3$)
+	\item It's also intrinsic in possible worlds semantic that an agent knows all the logical theorems, including the ones characterizing knowledge\\
+	From $\vdash\alpha$ infer Knows$(a,\alpha)$, \textbf{epistemic necessitation rule}
+	\item From the first and fifth properties, we can also get the rules
+	\begin{list}{}{}
+		\item From $\alpha\vdash\beta$ and Knows($a,\alpha$) infer Knows($a,\beta$)
+		\item From $\vdash\alpha\Rightarrow\beta$ infer Knows($a,\alpha$) $\Rightarrow$ Knows($a,\beta$)
+	\end{list}
+	This is called \textbf{logical omniscience}, is considered problematic: we are assuming unbounded reasoning capabilities. As a corollary of logical omniscience we have Knows$(a,\alpha\wedge\beta)$ $\equiv$ Knows$(a,\alpha)$ $\wedge$ Knows($a,\beta$) (Knows distribution over $\wedge$)\\
+	It's however not the case that Knows$(a,\alpha\vee\beta)$ $\equiv$ Knows$(a,\alpha)$ $\vee$ Knows($a,\beta$)
+\end{enumerate}
+Modal epistemic logics are obtained with various combination of axioms 1-4 plus inference rule 5:
+\begin{list}{}{}
+	\item System K: axiom 1
+	\item System T: axioms 1-2
+	\item Logic S4: axioms 1-3
+	\item Logic S5: axioms 1-4 (perfect reasoner)
+\end{list}
+Not any combination is possible since the properties of accessibility are interdependent, for example: reflexive implies serial, a reflexive and euclidean relation is also transitive (axioms 2 and 4 impliy 3), \ldots
+\subparagraph{Properties and axioms for beliefs} Since an agent can hold wrong beliefs, the knowledge axiom is not appropriate. Instead, we include as an axiom the following: $neg$Believe($a$, False), \textbf{lack of contradictions}.\\The distribution axiom and the necessitation rule are controversial, since an agent cannot realistically believe all the logical consequences of its beliefs but only those that he is able to derive (\textbf{limited/bounded rationality}).
+\begin{list}{}{}
+	\item Believe($a,\alpha$) $\Rightarrow$ Believe($a$, Believe($a,\alpha$)), \textbf{positive introspection}
+	\item Believe($a,\alpha$) $\Rightarrow$ Believe($a$, Believe($a,\alpha$)) is also reasonable
+\end{list}
+Negative introspection is problematic, while the following special case of the knowledge axioms is safe: Believe($a$, Believe($a,\alpha$)) $\Rightarrow$ Believe($a,\alpha$)\ldots
+\subsection{Autoepistemic Logic}
+At the intersection between Modal Logics for Beliefs and Nonmonotonic Logic.\\
+$\frac{\alpha : \beta}{\gamma}$, in default logic, is read as "if $\alpha$ and \textit{it is consistent to believe $\beta$} then $\gamma$"\\
+A different approach to nonmonotoninc reasoning is to model "\textit{it is consistent to believe $\beta$}" as the lack of belief in $\neg\beta$ with a suitable logic for belief.
+\paragraph{Autoepistemic Logic} It uses a belief operator $B$. $B\alpha$ stands for "$\alpha$ is believed to be true". The $B$ operator could be used to represent defaults, for example:
+\begin{list}{}{}
+	\item $\forall\:x$ Bird$(x) \wedge\neg B\neg$Flies$(x)\Rightarrow$ Flies$(x)$\\
+	Any bird not believed to be unable to fly, does fly.
+\end{list}
+Note that $B\neg$Flies$(x)$ is different from $\neg$Flies$(x)$\\\\
+Given a KB that contains sentences with the $B$ "autoepistemic" operator, what is a reasonable set of beliefs $E$ to hold? Minimal properties of a set of beliefs $E$ to be considered stable:
+\begin{list}{}{}
+	\item Closure under entailment: if $E\vDash\alpha$ then $\alpha\in E$
+	\item Positive introspection: if $\alpha\in E$ then $B\alpha\in E$
+	\item Negative introspection: if $\alpha\not\in E$ then $\neg B\alpha\in E$
+\end{list}
+This leads to a the definition of a stable expansion of a KB (minimal set satisfying all three properties)
+\paragraph{Stable Expansion of the KB} A set $E$ is a stable expansion of KB $\Leftrightarrow\:\forall$ sentence $\pi$ we have
+$$\pi\in E \Leftrightarrow KB\cup\{B\alpha\:|\:\alpha\in E\}\cup\{\neg B\alpha\:|\:\alpha\not\in E\}\vDash\pi$$
+with $\{B\alpha\:|\:\alpha\in E\}\cup\{\neg B\alpha\:|\:\alpha\not\in E\}$ being the set of assumed beliefs. The \textbf{implicit beliefs} $E$ are those sentences entailed by KB plus the assumptions deriving from positive and negative introspection.
+%KRR-5.pdf
+\subsection{Graph representation and structured representation}
+\subsubsection{Psychological-linguistic approach to KR\&R}
+\paragraph{Logical Approach} Suitable to model rational reasoning: extension to model commonsense reasoning (frame problem, nonmonotonic reasoning, propositional attitudes\ldots), FOL contradictions to control computational complexity of reasoning (description logics, logic programming\ldots)
+\paragraph{Cognitive-Linguistic Approach} More concerned with understanding the mechanisms for knowledge acquisition, representation and use in human minds. Synergies with other fields, such as cognitive psychology and linguistics.
+\paragraph{Associationist theories of KR} In logic systems, symbolic expressions are modular and are syntactically transformed without paying attention to the symbols used or to their "meaning". The symbol themselves are arbitrary: it's all a matter of writing axioms to restrict interpretations.\\
+Associationist theories are instead concerned with the connection among symbols, and the meaning that emerges from these connections. The idea is that the meaning of a symbol emerges as a result of the connections to other symbols. The connections are shaped by experience.
+\subsubsection{Semantic Networks}
+\paragraph{Semantic Memory} The problems is how the meaning of the symbols/words is acquired, represented and used. The memory itself is distinguished in:
+\begin{list}{}{}
+	\item \textbf{Episodic memory}: specific facts and events
+	\item \textbf{Semantic memory}: abstract and general knowledge
+\end{list}
+\textbf{Semantic Networks} is a graphical model proposed for semantic memory, with two kinds of knowledge:
+\begin{list}{}{}
+	\item \textbf{Concepts}: semantic counterpart of words, represented as nodes
+	\item \textbf{Propositions}: relations among concepts, represented as labelled arcs
+\end{list}
+No account for dynamic aspects of memory and learning. Other models are: distributional models (example: word embeddings) or connectionist models for learning.
+\paragraph{Essence of semantic networks} It's a large family of graphical representation schemes. A semantic network is a graph where: labeled \textbf{nodes} correspond to \textbf{concepts} and labeled and directed \textbf{arcs} correspond to \textbf{binary relations between concepts}.\\
+Node come in two flavors: \textbf{generic concepts}, corresponding to categories/classes, and \textbf{individual concepts} corresponding to individuals.\\
+Two special kind of links are always present, with different names: \textbf{IS-A} (sublcass, between two generic concepts) and \textbf{Inst-Of} (member of, between and individual concept and a class).\\
+An example:
+\begin{center}
+	\includegraphics[scale=0.5]{17.png}
+\end{center}
+\subparagraph{Inheritance} Implemented as link traversal: find the first occurrence of the property that you seek.
+\subparagraph{Logic accounts} We may look at semantic networks as a convenient implementation for a part of FOL: representation and mechanism at the symbol level rather than at the knowledge level
+\begin{list}{}{}
+	\item $A \begin{array}{c}
+	\hbox{IS-A}\\\longrightarrow
+	\end{array} B$\\
+	$\forall\:x\:\:A(x)\Rightarrow B(x)$\\
+	All members of class $A$ are also members of class $B$
+	\item $a \begin{array}{c}
+	\hbox{Inst-Of}\\\longrightarrow
+	\end{array} B$\\
+	$B(a)$\\
+	$a$ belongs to class $B$
+	\item $A \begin{array}{c}
+	\hbox{R}\\\longrightarrow
+	\end{array} b$\\
+	$\forall\:x\:\:x\in A\Rightarrow R(x,b)$\\
+	All members of class $A$ are in relation $R$ with $b$
+	\item $A \begin{array}{c}
+	\hbox{R}\\\longrightarrow
+	\end{array} B$\\
+	$\forall\:x\:\:x\in A\Rightarrow \exists\:y\:\:y\in B \wedge R(x,y)$\\
+	For all members of class $A$, there is a $R$-related element in $B$
+\end{list}
+An example of "Shankar flew from New York to New Deli yesterday"
+\begin{center}
+	\includegraphics[scale=0.5]{18.png}
+\end{center}
+\subparagraph{Limited expressive power} Even if they can express $n$-ary predicates like in the example above, semantic networks do not have the same expressive power of FOL: Existential, $\vee$, $\Rightarrow$,\ldots are not expressible or are expressible only in special cases. Not necessarily a bad case, since it suggests that a subset of FOL with interesting computational properties, explored in description logics.\\
+More expressive assertional networks ere proposed in the past. A well-known example in AI are Pierces's Existential Graphs, which inspired Sowa's Conceptual Graphs: they candidate as an intermediate schema for representing natural language.
+\subsection{Object Oriented Representations and Frames}
+It's very natural to think of knowledge not as a flat collection of sentences, but rather as a structured and organized collection in terms of the objects the knowledge is about. Complex objects have attributes, part constrained in various ways. Objects might have a behavior that is better expressed as procedures (like in OOP).\\
+\subsubsection{Frames} Nothing to do with frame problems, proposed by Minsky in 1975: idea of using a structured representation of objects.\\
+Knowledge is organized in complex mental structures called \textbf{frames}. When one encounters a new situation (or makes a substantial change in one's view of the present problem) one selects from memory a structure called a frame: this is a remembered framework to be adapted to fit reality by changing details as necessary.\\
+A \textbf{frame} is a \textbf{data structure for representing a stereotypical object or situation}. There are two types:
+\begin{list}{}{}
+	\item \textbf{Individual frames}, used to represent single objects\\
+	Is a collection of slot-filler pairs:
+	\begin{verbatim}
+		(Frame-Name
+			<slot1 filler1>
+			<slot2 filler2>
+			...)
+	\end{verbatim}
+	Fillers can be: values (usually default values), constraints on values, names of other individual frames, the special slot INSTANCE-OF. Example:
+	\begin{verbatim}
+	(toronto
+		<:INSTANCE-OF CanadianCity>
+		<:Province ontario>
+		<:Population 4.5M>
+		...)
+	\end{verbatim}
+	\item \textbf{Generic frames}, used to represent categories or classes of objects.\\
+	Similar to individual frames, where fillers can be: the special slot IS-A or procedures (IF-ADDED, activated when the slot receives a value, or IF-NEEDED, activated when the value is requested)\\
+	These procedures are calles \textbf{procedural attachments} or demons. An example:
+	\begin{verbatim}
+	(CanadianCity
+		<:IS-A City>
+		<:Province CanadianProvince>
+		<:Country Canada>
+		...)
+		
+	(Lecture
+		<:DayOfWeek WeekDay>
+		<:Date [IF-ADDED ComputeDayOfWeek]>
+		...)
+		
+	(Table
+		<:Clearance [IF-NEEDED ComputeClearanceFromLegs]>
+		...)
+	\end{verbatim}
+\end{list}
+The INSTANCE-OF and IS-A slots organize frames in frame systems: they have the special role of activating inheritance of properties and procedures. In frames, all values are understood as default values, which can be overwritten.
+\paragraph{Reasoning with frames} Attached procedure provide a flexible, organized framework for computations: reasoning has a procedural flavor.\\
+A basic reasoning loop in a frame system has three steps:
+\begin{list}{}{}
+	\item \textbf{Recognition}: a new object or situation is recognized as instance of a generic frame
+	\item \textbf{Inheritance}: any slot fillers that are not provided explicitly but can be inherited by the new frame instance are inherited
+	\item \textbf{Demons}: for each slot with a filler, any inherited IF-ADDED procedure is run, possibly causing new slots to be filled, or new frames to be instantiated, until the system stabilizes.\\
+	Then the cycle repeats.
+\end{list}
+When the filler of a slot is requested:
+\begin{list}{}{}
+	\item If there's a value stored, it's returned
+	\item Otherwise, any inherited IF-NEEDED procedure is run to compute the filler for the slot. This may cause other slots to be filled, or new frames to be instantiated.
+\end{list}
+\paragraph{Frames and OOP} Frame-based representation languages and OOP systems were developed at the same time. They look similar and certainly one could implement a frame system in OOP. The \textbf{important difference} is that frame systems tend to work in a cycle:
+\begin{list}{}{}
+	\item Instantiate a frame and declare some slot fillers
+	\item Inherit values from more general frames
+	\item Trigger appropriate forward-chaining procedures
+	\item When the system is quiescent, stop and wait for the next input
+\end{list}
+The design can control the amount of "forward" reasoning that should be done (in a data-directed fashion) or "backward" (in a goal-directed fashion)
+%KRR-6.pdf
+\subsection{Description Logics} 
+\paragraph{Categories and Objects} Most of the reasoning takes place at the level of categories rather than on individuals. If we organize knowledge in categories and subcategories (in a hierarchy), it's enough to classify an object according to its perceived properties, in order to infer properties of the categories to which it belongs. \textbf{Inheritance} is the common form of inheritance, which exploits structures. \textbf{Ontologies} will play a crucial role, providing a source of shared and precisely defined terms that can be used in metadata of digital objects and real-world objects.
+\paragraph{Domain ontologies} The formalization of the ideas coming from semantic networks and frames resulted in \textbf{specialized logics}. These logics, called \textbf{terminological logics} and later \textbf{description logics}, find an important application in describing "domain ontologies" and represent the theoretical foundations for adding reasoning capabilities to the \textbf{semantic web}. \textbf{Ontology} is a \textbf{formal model of an application domain}, a \textbf{conceptualization}.\\
+the \textbf{semantic web} is the vision to gradually develop alongside the "syntactic web" (or web of documents), for communication among people, a "semantic web" (or web of data), form communication among the machines. It's a huge distributed network of linked data, which can be used by programs as well, provided their semantics is shared and made clear (role of formal ontologies).
+\begin{center}
+	\includegraphics[scale=0.5]{19.png}
+\end{center}
+\paragraph{Description logics} Can be seen as:
+\begin{list}{}{}
+	\item Logical counterparts of network knowledge representation schemas, frames and semantic networks.\\
+	In this formalization effort, defaults and exceptions are abandoned. The ideas and terminology (concept, roles, inheritance) are very similar (to KLOne in particular)
+	\item Contractions of FOL, investigated to obtain better computational properties. Attention to computational complexity and decidability of the inference mechanisms.
+\end{list}
+An example: "paper3 has exactly two authors"
+\begin{list}{}{}
+	\item (\textbf{and} Paper (\textbf{atmost} 2 hasAuthor) (\textbf{atleast} 2 hasAuthor)) [paper3]
+	\item We'll use the alternative, \textbf{mathematical notation}\\
+	paper3: Paper $\sqcap$ ($\leq$ 2 hasAuthor) $\sqcap$ ($\geq$ 2 hasAuthor)
+	\item The corresponding in FOL is\\
+	Paper(paper3) $\wedge$ $\exists\:x$ hasAuthor(paper3, $x$) $\wedge$ $\exists\:y$ hasAuthor(paper3, $y$) $\wedge$ $x\neq y$ $\wedge$ hasAuthor(paper3, $z$) $\Rightarrow (z = x) \vee (z = y)$
+\end{list}
+\paragraph{Concepts, roles, individuals} Each DL is characterized by operators for the construction of terms.\\
+\textbf{Terms} (description) are of three types:
+\begin{list}{}{}
+	\item \textbf{Concepts}, corresponding to unary relations, with operators for the construction of complex concepts: and ($\sqcap$), or ($\sqcup$), not ($\neg$), all ($\forall$), some ($\exists$), atleast ($\geq n$), atmost ($\leq n$), \ldots
+	\item \textbf{Roles}, corresponding to binary relations, possibily together with operators for construction of complex roles
+	\item \textbf{Individuals}, only used in assertions
+\end{list}
+\textbf{Assertions} are kept separate and can be of two types:
+\begin{list}{}{}
+	\item $i:C$, where $i$ is an individual and $C$ a concept
+	\item $(i,j):R$, where $i,j$ are individuals and $R$ a role
+\end{list}
+%TODO KRR-6.pdf p.11
 \end{document}
