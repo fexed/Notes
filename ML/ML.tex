@@ -832,4 +832,46 @@ The kernel trick introduces the kernel methods, also without SVM. \textbf{Kernel
 	\includegraphics[scale=0.75]{23.png}
 \end{center}
 An SVM is largely characterized by the kernel: the best choice of kernel for a given problem is still a research issue.
+\section{Bias-Variance} A training set is only one possible realizations from the universe of the data: different TR sets can provide different estimate. The expected error (on various TR) at a point $x$ is decomposed as:
+\begin{list}{}{}
+	\item \textbf{Bias}: quantify the discrepancy between true function and $h(x)$ (averaged on data)
+	\item \textbf{Variance}: quantify the variability of the response of model $h$ for different realizations of the TR data
+	\item \textbf{Noise}: error in the label
+\end{list}
+Let's assume the regression scenario with target $y$ and $L_2$ squared error loss. Suppose we have examples $(x,y)$ where the true function is $y = f(x) + \epsilon$ with $\epsilon$ being Gaussian noise with zero mean and std. dev. $\sigma$. In linear regression, given a set of examples $(x_i,y_i)$ with $i = 1,\ldots,l$, we fit a linear hypothesis $h(x) = wx + w_0$ to minimize sum-squared error over the training data $\sum_{i=1}^l (y_i - h(x_i))^2$\\
+Because of the hypothesis class that we chose for some function $f$ (linear hypothesis), we have a \textbf{systematic prediction error}. Depending on the dataset that we have, the parameters $w$ that we find will be different.\\\\
+Given a new data point $x$, what is the expected prediction error? Assume that the data points are drawn independent and identical distributed from a unique underlying probability distribution $P$. The goal is to compute, for an arbitrary new point $x$, $E_P[(y - h(x))^2]$ noting that there's a different $h$ and $y$ for each different "extracted" training set. $y$ is the value for $x$ that could be present in a data set, and the expectation is over \textbf{all training set} that are drawn according to $P$. We will decompose this expectation into three components: bias, variance and noise.
+\subparagraph{Recall of statistics} With $Z$ random variable of possible values $z_i$ with $i=1,\ldots,l$ and probability distribution $P(Z)$
+\begin{list}{}{}
+	\item \textbf{Expected value} or \textbf{mean} of $Z$ is $$\overline{Z} = E_P[Z] = \sum_{i=1}^l z_i\cdot P(z_i)$$ with the sum replaced by an integral and the distribution by a density function if $Z$ is continuous.
+	\item \textbf{Variance} of $Z$ is $$Var[Z] = E[(Z - E[Z])^2] = E[Z^2] - E[Z]^2$$ with $$E[Z^2] = E[Z]^2 + Var(Z)$$
+\end{list}
+\subsection{Bias-Variance Decomposition}
+$$E_P[(y - h(x))^2] = E_P[h(x)^2 - 2yh(x) + y^2] = E_P[h(x)^2] + E_P[y^2] - 2E_P[y]E_P[h(x)]$$
+Let $\overline{h}(x) = E_P[h(x)]$ denote the \textbf{mean prediction} of the hypothesis at $x$ when $h$ is trained with data drawn from $P$. By doing some calculations, we obtain $\begin{array}{r c l l}
+E_P[(y-h(x))^2] & = & E_P[(h(x) - E_P[h(x)])^2] + & \hbox{variance}\\
+ & & (E_P[h(x)] - f(x))^2 + & \hbox{bias}^2 \\
+ & & E_P[(y - f(x))^2] & \hbox{noise}^2
+\end{array}$\\
+So expected error is Variance + Bias$^2$ + Noise$^2$\begin{list}{}{}
+	\item \textbf{Bias}: quantify the discrepancy between true function and $h(x)$, with $h(x)$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
+	\item \textbf{Variance}: quantify the variability of the response of model $h$ for different realizations of the training data.\\Due to too high flexibility
+	\item \textbf{Noise}: event the optimal solution can be wrong.\\E.g. if for a give n$x$ there are more than one possible $d$.\\
+	It's irreducible, doesn't depend on the model.
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{24.png}
+\end{center}
+\section{Ensemble Learning}
+\begin{center}
+	\includegraphics[scale=0.5]{25.png}
+\end{center}
+Take advantage of multiple models. In regression: simple average committee, mean square error of a committee\ldots In classification, take a vote over many classifier.
+\subsection{Bagging} \paragraph{Bootstrap Aggregating} Combine many classifiers. Train $n$ classifiers on different subsets of TR and differentiate each training using bootstrap (resampling with replacement). Thing to bias-variance: high variance model can perform well on average. In other therms: the average of $h$ reduce the variance. In regression use the mean, in classification use the vote of the $n$ classifiers.
+\subsection{Boosting} If the models have the same errors we have no advantage on esembling.\\
+Differentiate each training concentrating on errors (more weight to difficult instances, e.g. more likely to be included in the TR of the next classifier, for example: train the 1st classifier, then train the 2nd with more weight on the instances misclassified before\ldots\\
+Combine the results by output weights (weighted vote for classifiers, with more weight to low error classifiers).\\
+If not stopped, boosting will learn to classify correctly all instances from TR, providing an incremental approach to construct complex models. Can suffer from noisy data (which are weighted more)
+\subsection{Feature Selection} Find a selection of features that are more informative for the problem at hands. Benefits for: dimensionality reduction and filtering of irrelevant information and noise, interpretability\ldots\\
+Computationally hard (many possible subsets of features, retraining\ldots) typically an heuristic search of the best subset by greedy or other optimization techniques.
 \end{document}
