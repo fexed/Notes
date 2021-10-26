@@ -39,6 +39,7 @@ This course's goals is to make sense of the huge amounts of data, take something
 The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually is the computational bottleneck.\\
 ML is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
 Solve general problem $min_{x\in S}f(x)$, with Poloni solve $min_{x\in R^n}||Ax - b||_2$ which is easier and can be solved exactly.
+\chapter{Numerical Analysis}
 \paragraph{Quick recap of linear algebra}
 \begin{list}{}{}
 	\item \textbf{Matrix - Vector multiplication}, with $A\in R^{4\times 3}, c\in R^3, b\in R^4$
@@ -103,12 +104,38 @@ Two practical solutions: maximize return with budget on maximum risk or maximize
 Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, the problem $P$ is unbounded below. Hardly ever happens in ML, because loss and regularization are $\geq 0$\\
 Also impossible if $f > -\infty$ but $\not\exists x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions ($\epsilon$-optima). On PC $x\in R$ is in fact $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
 Anyway finding the exact $x_*$ is impossible in general.
-\paragraph{Norms}
-\paragraph{Eigenvalues and eigenvectors}
-\paragraph{Semidefinite}
+\paragraph{Norms}\begin{list}{}{}
+	\item $||x||_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
+	x_1\\\vdots\\x_b
+	\end{array}\right]$\\
+	Many matrices preserve norm 2
+\end{list}
+\paragraph{Orthogonal} A square matrix $U\in R^{n\times n}$ is orthogonal if $U^TU = I \vee UU^T = I \vee U^{-1} = U^T$ equivalently\\
+\textbf{Theorem}: for an orthogonal matrix $U\in R^{n\times n}$ and every vector $x$, $||Ux|| = ||x||$\\
+More generally, $x^T y = (Ux)^T(Xy)$ for all vectors $x,y\in R^n$\\
+The columns of a orthogonal matrix are \textbf{orthonormal}: $u_i^Tu_j = \left\{\begin{array}{l l}
+1 &\hbox{if } i = j\\0&\hbox{otherwise}
+\end{array}\right.$\\
+If $U,V\in R^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
+\paragraph{Eigenvalues and eigenvectors} Given a square matrix $A\in R^{m\times m}$, if $Av = \lambda v$ for $v\in R^m, \lambda\in R$ then we call $\lambda$ and \textbf{eigenvalue} and $v$ an \textbf{eigenvector} of $A$.\\
+For many matrices we can find $v_1,\ldots,v_m$ eigenvectors that are a basis of $R^m$, i.e. $[v_1|\ldots|v_m] = V$ is invertible.\\
+$A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda$, with $\Lambda = \left[\begin{array}{c c c}
+\lambda_1 & & 0\\
+& \ddots \\
+0& & \lambda_m
+\end{array}\right]$\\
+Given $x\in R^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
+Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
+Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same for $\alpha v+\beta w$ (linear combination). Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a masis.
+\paragraph{Symmetry} $A$ is symmetric if $A = A^T$
+\paragraph{Spectral Theorem} For a symmetric matrix $A\in R^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
+\paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in R^{m\times m}$ we can consider the function $x\in R^m\mapsto f(x) = x^T Qx \in R$\\
+\textbf{Theorem} For all symmetric matrix $Q \in R^{m\times m}$, $\lambda_{min}||x||^2 \leq x^TQx\leq \lambda_{max}||x||^2$, where $\lambda_{min}, \lambda_{max}$ are the smallest and largest eigenvalue of $Q$.
+\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
+Positive definite if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
 \paragraph{Recall theorem} $\lambda_{min}(x^T x) \leq x^T Q x \leq \lambda_{max}(x^T x)$ for all symmetric $Q$ so $\lambda_{min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{max}$\\
 Slightly different form $\lambda_{min} \leq z^T Q z \leq \lambda_{max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
-$$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\alpha^2}$$
+$$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
 \paragraph{Generalization for complex matrices} $||x||^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
 % fine recap lin alg
 \paragraph{Singular Value Decomposition} Each $A\in R^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_i$ on the diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
@@ -131,10 +158,9 @@ $$||A||_2 = ||U\Sigma V^T||_2 = ||\Sigma V^T||_2 = ||\Sigma||_2 = \Sigma_1$$
 $$||A|| = max_{||z|| = 1} ||\Sigma V^T|| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1||z|| = \sigma_1$$
 $$||A||_F = ||U\Sigma U^T|| = \ldots = \Sigma_1$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
-we are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $min_{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $min_{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$ where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
-
-\paragraph{} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
+We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $min_{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
+The optimal solution of $min_{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
+\paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
 \paragraph{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
 As a statistical estimator: suppose my scores are of the form $A_{ij} = u_i v_j + \epsilon_{ij}$ with $\epsilon_{ij}$ being the error in the score for instance gaussian with variance $\lambda$.\\
@@ -142,14 +168,95 @@ The rank 1 approx of $(u_1\sigma_1)$, $v_1$ given by SVD is the one that minimiz
 The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which can be viewed as first approximation plus corrections.\\\\
 $\sigma_1 >> \sigma_2,\ldots$ then $A$ very close to rank 1.\\
 $\sigma_1, \sigma_2 >> \sigma_3,\ldots$ then $A$ very close to rank 2, and so on.
-\paragraph{} $X =$ best rank-1 approx of $I$, $X = u_1\sigma_1 v_1^T$, $x_{ij} = (u_1)_j \sigma_1 (v_1^T)_j$\\
+\subparagraph{Best approximations} $X =$ best rank-1 approx of $I$, $X = u_1\sigma_1 v_1^T$, $x_{ij} = (u_1)_j \sigma_1 (v_1^T)_j$\\
 Best rank-2 $X_2 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T$\\
 Best rank-3 $X_3 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T + u_3 \sigma_3 v_3^T$
 And so on\ldots\\
 The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.\\\\
 What is $||A - X_k||_F = \sqrt{\sum (a_{ij} - x_{ij})^2} = ||U\Sigma V^T - U[$main diagonal of $\sigma_i$ untile $\sigma_k] V^T|| = ||U([\ldots$ %TODO
 $= \sqrt{\sum_{i=k+1}^{min(m,n)} \sigma_i^2}$
-%TODO last half of 28/09
+\paragraph{Linear Least Squares problems} Given vectors $a_1,\ldots,a_n\in R^m$, so that $A = [a_1|\ldots|a_n]\in R^{m\times n}$, and targets $b\in R^m$, find $x_1,\ldots,x_n\in R\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
+Not always solvable, for example $\left[\begin{array}{c}
+1\\2\\0
+\end{array}\right]x_1 + \left[\begin{array}{c}
+1\\3\\0
+\end{array}\right]x_2 = \left[\begin{array}{c}
+5\\5\\1
+\end{array}\right]$ because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? I can get $\left[\begin{array}{c}
+5\\5\\0
+\end{array}\right]$\\
+In general $min_{x\in R^m} ||Ax - b||_2 = min_{x\in R^m} \sqrt{\sum ((Ax)_i - b_i)^2}$\\
+The special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible. Typical case il $A$ long thin, we cannot get all vectors $b$ but still $min_{x\in R^m} ||Ax - b||_2$ is a question that makes sense. 
+\paragraph{Polynomial Fitting} Statistical version: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $min_{coeff}||Ax - y||_2^2$
+\paragraph{Theory of least-squares problems} When does $min ||Ax-b||_2$ have a unique solution? With $A \in R^{m\times n}$\\
+We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = min||Ax-b||$ with unique $x$.\\
+We say that $A\in R^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\} \Leftrightarrow$ there is no $z\in R^n z\neq 0\:|\:Az=0\Leftrightarrow rk(A) = n$ and this can only happen is $m\geq n$\\
+\subparagraph{Theorem}The least-squares problem $min ||Ax-b||$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
+\textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
+\textbf{Proof} $Ax \neq 0\:\:\forall\:z\in R^n, z\neq 0$
+\begin{list}{$\Leftrightarrow$}{}
+	\item $||Az||_2 \neq 0\:\:\forall\:z\in R^n, z\neq 0$
+	\item $||Az||_2^2 \neq 0\:\:\forall\:z\in R^n, z\neq 0$
+	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in R^n, z\neq 0$
+	\item $z^TA^TAz\neq 0\:\:\forall\:z\in R^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
+\end{list}
+By manipulating the original problem $min_{x\in R^n} ||Ax-b||_2$ we obtain $$min ||Ax-b||_2 = min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q > 0$\\
+$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q > 0$\\\\
+So the least-squares problem $min_x ||Ax-b||$ has unique solution
+\begin{list}{$\Leftrightarrow$}{}
+	\item $f(x)$ has a unique minimum point
+	\item $2A^TA = Q > 0$ (positive definite)
+	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
+\end{list}
+The minimum is when $grad\:f(x) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
+$x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
+\subparagraph{Algorithm}
+\begin{enumerate}
+	\item Form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
+	\item Form $A^Tb$, costs $2mn$ flops lower order terms
+	\item Solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
+\end{enumerate}
+If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD.\\
+Possible optimizations:
+\begin{enumerate}
+	\item $A^TA$ symmetric so can compute only upper triangle then mirror the rest so from $2mn^2$ becomes $mn^2$ flops
+	\item Already a cheap step
+	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
+\end{enumerate}
+\paragraph{Pseudoinverse} $x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in R^{m\times n}$ then $A^+ \in R^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in R^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in R^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
+As consequences, if $x_1$ is solution of $min||Ax - b_1||$ and $x_2$ is solution of $min||Ax - b_2||$ then $x_1+x_2$ is solution of $min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
+$y \in R^{1\times m}$ row vector "target"\\
+The problem is $min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
+\paragraph{QR factorization of a matrix} Given $x\in R^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
+s\\0\\\vdots\\0
+\end{array}\right]$ with $e_1 = \left[\begin{array}{c}
+1\\0\\\vdots\\0
+\end{array}\right]$\\
+Since $H$ is orthogonal, $||x|| = ||\left[\begin{array}{c}
+s\\0\\\vdots\\0
+\end{array}\right]|| = |s| \Rightarrow s = \pm||x||$. We will find $H$ in a very specific form $$H = I - \frac{2}{v^Tv}vv^T=$$ $$= I - \frac{2}{||v||^2}vv^T =$$ $$= I - 2uu^T$$ for a certain $v\in R^n$ with $u = \frac{v}{||v||}$, so it has norm $=1$ and is parallel to $v$. This form is called \textbf{Householder reflector}.\\
+\textbf{Lemma}: for every $v\in R^n$, $H$ is orthogonal \textit{and} symmetric. Proof:
+\begin{list}{}{}
+	\item Symmetric: $H^T = (I-2uu^T)^T = I^T - (2uu^T)^T = I - 2uu^T = H$
+	\item Orthogonal: $H^TH = H^2 = (I-2uu^T)(I-2uu^T) = I - 2uu^T - 2uu^T + 4uu^Tuu^T$ but $u^Tu = ||u||^2 = 1$ so $= I - \not 4uu^T + \not 4uu^T = I$
+\end{list}
+By computing $Hx$ as $x - 2u(u^T x)$, meaning you compute $\alpha = u^Tx$ in $O(n)$ and then compute $x-2u\alpha$ in $O(n)$, you can reduce the complexity of $Hx$ from $O(n^2)$ to $O(n)$. By doing the same on every column you reduce $HA$ for an arbitrary $A\in R^{n\times n}$ from $O(n^3)$ to $O(n^2)$.\\
+\textbf{Lemma}: given any two vectors $x,y\in R^n$ with $||x|| = ||y||$, the Householder reflector built with $v = x-y$ is such that $Hx = y$
+\subparagraph{Numerical problems} If $x_1$ is close to $s = ||x||$ there are problems, because we do a subtraction between close numbers. Quick fix: switch to $s = -||x||$, then $x_1 - s = x_1 + \sqrt{x_1^2+x_2^2+\ldots+x_n^2}$, an addition between positive numbers whenever $x_1 > 0$. In general, we choose:
+\begin{list}{}{}
+	\item if $x_1 \geq 0$, we take $s = -||x||$ and $y = \left[\begin{array}{c}
+	-||x||\\0\\\vdots\\0
+	\end{array}\right]$
+	\item if $x_1 z 0$, we take $s = ||x||$ and $y = \left[\begin{array}{c}
+	||x||\\0\\\vdots\\0
+	\end{array}\right]$
+\end{list}
+This way $x_1 - s$ is never a "true subtraction", because $x_1,s$ have different signs.
+\chapter{Optimization}
+\paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
+With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
+Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\overline{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \overline{\alpha}]$\\
+SVM are constructed by creating a convex function as stated in the notes.
 \paragraph{Optimization need to be approximate} \begin{list}{}{}
 	\item $\{a_i = A(x_i) = f(x_i) - f_*\}$ absolute gap
 	\item $\{r_i = R(x_i) = \frac{f(x_i) - f(x)}{|f_*|} ) \frac{A(x_i)}{|f_*|}\}$ relative gap
@@ -177,8 +284,6 @@ Theorems breed algorithms: \textbf{golden ratio search}\\
 After $k$ iterations, $x_+^k - x_-^k = Dr^k$ stops when $Dr^k \leq \delta$, so when $k = 2\log\frac{D}{\delta}$: exponentially faster, can work with small $\delta$. Asymptotically optimal if no other information is available. $\delta \neq \epsilon$ but $f$ L-c $\Rightarrow A(x^k) \leq \epsilon$ when $k = 2\log\frac{LD}{\epsilon}$\\
 First example of linear convergence $A(x^k) \leq Sr^k \leq \epsilon$ with $r < 1$, as fast as a negative exponential $\Rightarrow k \geq \frac{\log\frac{S}{\epsilon}}{\log\frac{1}{r}}$\\\\
 $O(\log(\frac{1}{\epsilon}))$ good, but the constant $\rightarrow\infty$ as $r\rightarrow 1$
-
-\paragraph{Matrix Norms} %TODO
 %TODO inizio lezione 24/09
 \paragraph{To make it go faster, give it more information} Two points are needed to see in which direction $f$ is decreasing. If we could see this directly we could make it with one point, faster. Look at the linear function that best locally approximates $f$, trusty old first derivative $f'(x)$: slope of the tangent line to the graph of $f$ in $x$\\
 First order model of $f$ at $x$: $L_x(y)=f'(x)(y-x) + f(x)$. $L_x(y) = f(y) \forall\:y\in[x-\epsilon, x+\epsilon]$ for some small $\epsilon > 0$. $x_*$ local minimum then $f'(x_*) = 0 =$ root of $f' =$ stationary point. If $f'(x) < $ or $f'(x) > 0$, then $x$ is clearly not a local minimum. Hence, $f'(x) = 0$ for the all local minima (hence in the global minimum as well) but this is true for the local maxima (hence global maximum as well), as well in the plateau and saddle points. To tell them apart, look at the second derivative $f''$.
@@ -271,35 +376,5 @@ So $B=u_1\sigma_1 v^t$ from SVD of $\overline{A}$ will give me the rank-1 matrix
 min$||\overline{A}-B|| = $
 
 % 12/10
-\paragraph{Least Squares problem} $min_{x\in R^n} ||Ax - B||_2$ given $A \in R^{m\times n}$ and $b \in R^m$ with $m\geq n$.\\
-$min_{x\in R^n} ||Ax - B||_2 \Leftrightarrow min_{x\in R^n} ||Ax - B||^2_2$ are obtain in the same $x$.\\
-$= min(Ax-b)^T(Ax-b) = min(x^TA^T-b^T)(Ax-b) = min x^TA^TAx - b^TAx - x^TA^Tb + b^Tb$ and $b^TAx, x^TA^Tb$ are $\langle b, Ax\rangle = \langle Ax,b\rangle$. So\\
-$= min x^TA^TAx - 2b^TAx - b^Tb = x^TQx + q^Tx + c = f(x)$ a quadratic problem. minimum unique if function is convex so unique minimum exists $\Leftrightarrow A^TA > 0$ (positive definite) $\Leftrightarrow A$ has full column rank, all column are linearly independent.\\
-Minimum of $f(x)$ obtain when grad $f(x) = 0$.\\
-grad $f(x) = 2A^TAx - 2A^Tb = 2Qx + q$\\
-Hessian $f = 2A^TA$\\
-So if $\not 2 A^TAx = \not 2 A^Tb$ which is a $n\times m\cdot m \times n = n\times m \cdot m \times 1$ which gives a $n\times n = n \times 1$, a square linear system, $A^TA$ is invertbile (because is positive definite), so $x = (A^TA)^{-1} (A^Tb)$ a quick formula for the solution, obtained intuitively form multiplying $Ax = b$ on the left with $A^T$. This formula is our first algorithm to solve the Least Squares problem, also called the \textbf{normal equation}.
-\subparagraph{Algorithm}
-\begin{enumerate}
-	\item form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
-	\item form $A^Tb$, costs $2mn$ flops lower order terms
-	\item solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
-\end{enumerate}
-If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD. Optimizations:
-\begin{enumerate}
-	\item $A^TA$ symmetric so can compute only upper triangle then mirror the rest so from $2mn^2$ becomes $mn^2$
-	\item cheap already
-	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
-\end{enumerate}
-$x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or Moore-Penrose pseudoinverse. The definition is valid only when $A$ has full column rank.\\
-%TODO note
-If $x_1$ sol of $min||Ax - b_1||$ and $x_2$ sol of $min||Ax - b_2||$ then $x_1+x_2$ sol of $min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
-$y \in R^{1\times m}$ row vector "target"\\
-The problem is $min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
-\paragraph{QR factorization of a matrix} given $x\in R^n$ find orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1$ with $e_1$ has 1 in top position and all zeroes.
-%TODO
-\paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
-With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
-Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\overline{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \overline{\alpha}]$\\
-SVM are constructed by creating a convex function as stated in the notes.
+
 \end{document}
