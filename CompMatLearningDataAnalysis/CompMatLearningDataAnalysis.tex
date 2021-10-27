@@ -251,7 +251,140 @@ By computing $Hx$ as $x - 2u(u^T x)$, meaning you compute $\alpha = u^Tx$ in $O(
 	||x||\\0\\\vdots\\0
 	\end{array}\right]$
 \end{list}
-This way $x_1 - s$ is never a "true subtraction", because $x_1,s$ have different signs.
+This way $x_1 - s$ is never a "true subtraction", because $x_1$ and $s$ have different signs.
+\paragraph{Theorem} $\forall\:A\in R^{m\times n}\:\:\exists\:Q\in R^{m\times m}$ orthogonal, $R\in R^{m\times n}$ upper triangular $|\:A = QR$\\
+When $n = 1$ we already solved: $\forall\:x\in R^{m\times 1}\:\:\exists$ a Householder reflector $H\:|\:Hx = \left[\begin{array}{c}
+s\\0\\\vdots\\0
+\end{array}\right] \Leftrightarrow x = H\left[\begin{array}{c}
+s\\0\\\vdots\\0
+\end{array}\right]$ with $x$ being the $m\times 1$ matrix, $H$ orthogonal and the array is upper triangular.\\
+The general case is $A\in R^{m\times n}$:
+\begin{enumerate}
+	\item $[u_1, s_1]$ \texttt{= householder\_vector($A$(:,1))} $H_1 = I-2u_1u_1^T$\\
+	$H_1A = \left[\begin{array}{c c c c}
+	s_1&*&*&*\\
+	0&*&*&*\\
+	0&*&*&*\\
+	0&*&*&*\\
+	0&*&*&*\\
+	\end{array}\right] = A_1$
+	\item $A_2 = H_2A_1 = \left[\begin{array}{c c c c}
+	*&s_2&*&*\\
+	**&0&*&*\\
+	**&0&*&*\\
+	**&0&*&*\\
+	**&0&*&*\\
+	\end{array}\right]$ won't work because it spoils the first column.\\
+	So $[u_2,s_2]$ \texttt{= householder\_vector($A_1$(2:$m$,2))}, which the 2nd to $m$th row of the second column of $A_1$. Because if we multiply $\left[\begin{array}{c | c}
+	1 & 0\\
+	\hline\\
+	0 & H_2
+	\end{array}\right]\cdot\left[\begin{array}{c}
+	B\\\hline\\C
+	\end{array}\right]$ we get $\left[\begin{array}{c}
+	B\\\hline\\H_2\cdot C
+	\end{array}\right]$, so we say that $Q_2 = \left[\begin{array}{c | c}
+	1 & 0\\
+	\hline\\
+	0 & H_2
+	\end{array}\right]$\\and $Q_2A_1 = \left[\begin{array}{c c c c}
+	s_1&*&*&*\\
+	0&s_2&*&*\\
+	0&0&*&*\\
+	0&0&*&*\\
+	0&0&*&*\\
+	\end{array}\right] = A_2$
+	\item With $H_3$ from $[u_3,s_3]$ \texttt{= householder\_vector($A_2$(3:$m$,3))} we do\\$Q_3A_2 = \left[\begin{array}{c c | c c c}
+	1 & 0 & 0 & 0 & 0\\
+	0 & 1 & 0 & 0 & 0\\
+	\hline
+	0 & 0 & \\
+	0 & 0 & & H_3\\
+	0 & 0 & \\
+	\end{array}\right]A_2 = \left[\begin{array}{c c c c}
+	s_1&*&*&*\\
+	0&s_2&*&*\\
+	0&0&s_3&*\\
+	0&0&0&*\\
+	0&0&0&*\\
+	\end{array}\right] = A_3$
+	\item $H_4 = I - 2u_4u_4^T$ from $[u_4,s_4]$ \texttt{= householder\_vector($A_3$(4:$m$,4))}\\$Q_4A_3 = \left[\begin{array}{c | c}
+	I_3 & 0\\
+	\hline
+	0 & H_4
+	\end{array}\right]A_3 = \left[\begin{array}{c c c c}
+	s_1&*&*&*\\
+	0&s_2&*&*\\
+	0&0&s_3&*\\
+	0&0&0&s_4\\
+	0&0&0&0\\
+	\end{array}\right] = A_4$
+\end{enumerate}
+So $Q_4Q_3Q_2Q_1A = R$ is an upper triangular matrix.
+$$\not Q_4^T\not Q_4Q_3Q_2Q_1A = Q_4^TR$$
+$$\not Q_3^T\not Q_3Q_2Q_1A = Q_3^TQ_4^TR$$
+$$\not Q_2^T\not Q_2Q_1A = Q_2^TQ_3^TQ_4^TR$$
+$$\not Q_1^T\not Q_1A = Q_1^TQ_2^TQ_3^TQ_4^TR$$
+So $A = Q_1^TQ_2^TQ_3^TQ_4^T R$, and $Q_i = Q_i^T$ so we can omit transpose, giving $A = QR$ with $Q$ orthogonal and $R$ triangular.\\\\
+The QR factorization can be used to solve least squares problems $min ||Ax-b||_2$ with $A\in R^{m\times n}$ and $m\geq n$, $b\in R^m$.\\$A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
+R_1\\\hline\\0
+\end{array}\right]$ with $Q_1\in R^{m\times n}, Q_2\in R^{m\times m-n}, R_1\in R^{n\times n}$ and the last part of $n\times m-n$ zeroes. We rework the objective function $$||Ax-b|| = ||QRx-b||=||Q^T(QRx-b)||=||Rx-Q^Tb|| = \:\:\vline\:\vline\left[\begin{array}{c}
+R_1\\0
+\end{array}\right]x-\left[\begin{array}{c}
+Q_1^T\\Q_2^T
+\end{array}\right]b\:\:\vline\:\vline = \:\:\vline\:\vline\left[\begin{array}{c}
+R_1x-Q_1^Tb\\-Q_2^Tb
+\end{array}\right]\:\:\vline\:\vline$$
+How to make this norm as small as possible? The norm of the second block, $-Q_2^Tb$, doesn't depend on $x$. The norm of the first block does. Can I obtain $R_1x - Q_1^Tb = 0$? If $R_1$ is invertible, $R_1x=Q_1^Tb$ is a square linear system of solution $x = R_1^{-1}Q_1^Tb$. Algorithm:
+\begin{enumerate}
+	\item Compute the $QR$ factorization $A = QR = Q_1R_1$ (thin is enough) in $\frac{4}{3}n^3,2mn^2$ operations.
+	\item Compute $c = Q_1^Tb$, with $2mn$ operations
+	\item Solve the linear system $R_1x=c$ with back-substitution, $n^2$ operations
+\end{enumerate}
+Step 1 is the most expensive, cubic. When is $R_1$ invertible? Recall that the least-squares problem has unique solution $\Leftrightarrow$ A has full column rank $\Leftrightarrow$ $A^TA$ is positive definite $\Leftrightarrow$ $A^TA$ invertible $\Leftrightarrow$ $R_1$ invertible
+$$A^TA = (QR)^TQR = R^T\not Q^T\not QR = [R_1^T 0]\left[\begin{array}{c}
+R_1\\0
+\end{array}\right] = R_1^TR_1$$
+The least-squares problem can also be solved with $SVD$. Given $A=USV^T$ we have $$||Ax-b|| = ||USV^Tx-b|| = ||U^T(USV^Tx - b)|| = ||SV^Tx-U^Tb|| =$$
+With $S =\left[\begin{array}{c c c}
+\sigma_1\\
+& \ddots\\
+& & \sigma_n\\
+& 0
+\end{array}\right]$ and $V^Tx = y$ we have
+
+$$=\:\:\vline\:\vline\left[\begin{array}{c}
+\sigma_1y_1\\\vdots\\\sigma_ny_n\\0\\\vdots\\0
+\end{array}\right] - \left[\begin{array}{c}
+u_1^Tb\\\vdots\\u_m^tb
+\end{array}\right] \:\:\vline\:\vline = \:\:\vline\:\vline\left[\begin{array}{c}
+\sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ny_n-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
+\end{array}\right]\:\:\vline\:\vline$$
+The first $n$ entries become $0$ if $y_i = \frac{u_i^Tb}{\sigma_i}$\\
+$$x = Vy = v_1y_1 + \ldots + v_ny_n = v_1\frac{u_1^Tb}{\sigma_1} + \ldots + v_n\frac{u_n^Tb}{\sigma_n}$$
+$$x = VS_1^{-1}U_1^Tb = A^+b$$
+The solution of $min ||Ax-b||$ is unique $\Leftrightarrow A^TA$ is invertible $\Leftrightarrow A^TA=(USV^T)^TUSV^T = VS^T\not U^T\not USV^T = V\left[\begin{array}{c c c}
+\sigma_1^2\\
+& \ddots\\
+& & \sigma_n^2
+\end{array}\right]V^T$ which is the eigenvalue decomposition for $A^TA$\\
+So $A^TA$ is invertible $\Leftrightarrow$ non of the $\sigma_i$ are zeroes $\Leftrightarrow S_1$ is invertible.\\
+What happens if $\sigma_1\geq \sigma_2 \geq \ldots \sigma_r > \sigma_{r+1} = \ldots \sigma_n = 0$? We would have $\:\:\vline\:\vline\left[\begin{array}{c}
+\sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ry_r-u_r^Tb\\-u_{r+1}^Tb\\\vdots\\-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
+\end{array}\right]\:\:\vline\:\vline$\\How to choose a special solution here? Let's define another problem: $min ||x||$ of all $x\in$ solutions of $min ||Ax-b||$. It's minimized when $y_1 = \frac{u_1^Tb}{\sigma_1}, \ldots, y_r = \frac{u_r^Tb}{\sigma_r}, y_{r+1} = 0,\ldots,y_n = 0$\\
+The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
+\paragraph{Effect of noise in data} Suppose to know $A+E = \overline{A}$, with $A$ exact data, $E$ error/noise/etc. and $\overline{A}$ the observed data. We have
+\begin{list}{}{}
+	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
+	\item $\overline{\sigma_1},\ldots,\overline{\sigma_n} =$ SVD$(\overline{A})$
+\end{list}
+Then $|\sigma_i - \overline{\sigma_i}| \leq ||E||_2$\\
+The effect of noise is that there are longer relative changes to smaller singular values, another reason why it's beneficial to drop them.
+\paragraph{Tikhonov Regularization/Ridge Regression} Another solution, alternative to truncated SVD. Change the problem to $min_{x\in R^n} ||Ax-b||^2 + \lambda^2||x||^2 = min||\left[\begin{array}{c}
+A\\\lambda I
+\end{array}\right]x - \left[\begin{array}{c}
+b\\0
+\end{array}\right]||^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
 \chapter{Optimization}
 \paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
 With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
