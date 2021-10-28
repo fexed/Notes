@@ -385,7 +385,62 @@ A\\\lambda I
 \end{array}\right]x - \left[\begin{array}{c}
 b\\0
 \end{array}\right]||^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
+\paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $A,b\mapsto X=A^{-1}b$ or $(x_i,y_i)\mapsto$ weights\ldots\\
+If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
+$$f(x+\delta) = f(x)+\delta\cdot f'(x) + O(\delta^2)$$
+The (absolute) condition number of a function $f$ (of an input $x$) is the best possible bound $K$ of the form
+$$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$ with $K$ being the \textbf{condition number}\\
+The absolute condition number of (differentiable) $f$ in $x$ is $|f'(x)| = K_{abs}(f,x)$
+For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:R^m\rightarrow R^n$ is the best constant $K$ that I can use to bound $$||f(x+\delta)-f(x)|| \leq K\cdot||\delta|| + o(||\delta||)$$
+The absolute condition number $K_{abs}$ is $K_{abs}(f,x) = \lim_{\delta\to 0} sup_{||d||\leq \delta}\frac{||f(x+\delta)-f(x)||}{||d||}$$ $$K_{abs}(f,x) = ||\bigtriangledown_x f||$ 2-norm of the gradient, if $f$ differentiable.\\
+The \textbf{condition number measures the sensitivity of a problem to changes in input}.
+\subparagraph{Example} $x\in R^2, x=\left[\begin{array}{c}
+x_1\\x_2
+\end{array}\right], f(x) = x_1 + x_2, d = \left[\begin{array}{c}
+1\\1
+\end{array}\right]$\\
+$\left[\begin{array}{c}
+x_1\\x_2
+\end{array}\right] + \delta\left[\begin{array}{c}
+1\\1
+\end{array}\right] = \left[\begin{array}{c}
+x_1+\delta\\x_2+\delta
+\end{array}\right]$
+$$\frac{||f(x+\delta d) - f(x)||}{||\delta d||} = \frac{||x_1+\delta+x_2+\delta-x_1-x_2||}{|| \left[\begin{array}{c}
+\delta\\\delta
+\end{array}\right]||} = \frac{||2\delta||}{\sqrt{\delta^2 + \delta^2}} = \frac{2\delta}{\sqrt{2}\delta} = \sqrt{2}$$ which is the rate of change of perturbations parallel to $d$.\\
+With $d = \left[\begin{array}{c}
+1\\-1
+\end{array}\right]$ we would have $= 0$, and with $d = \left[\begin{array}{c}
+1\\0
+\end{array}\right]$ we would have $= 1$\\
+Also checking other directions, it turns out that $\sqrt{2}$ is the largest possible rate of change (no coincidence that it is $||\bigtriangledown_x f||$)
+\paragraph{Linear Systems} The condition number of solving square systems of linear equations.\\
+$Ax = b, A\in R^{n\times n}, b\in R^n$, we perturb input $b$ to $\overline{b}\in R^n$ and call $\overline{x}$ the solution of $A\overline{x} = \overline{b}$, while $x$ solution of $Ax=b$.\\
+The absolute bound is $$||\overline{x}-x|| = ||A^{-1}\overline{b} - A^{-1}b|| = ||A^{-1}(\overline{b}-b)||\leq ||A^{-1}||\cdot ||\overline{b}-b||$$ and $$||b|| = ||Ax|| \leq ||A||\cdot||x||$$Putting all together gives $$\frac{||\overline{x} - x||}{||x||} \leq ||A^{-1}||\cdot||A||\cdot\frac{||\overline{b}-b||}{||b||}$$ because $K(A) = ||A||\cdot||A^{-1}||$ the condition number of $A$ matrix.\\\\
+What if we perturb $\overline{A} = A + \Delta$? One can prove, if $\overline{x}$ is solution of $\overline{A}\overline{x} = b$, that $$\frac{||\overline{x} - x||}{||x||} \leq ||A||\cdot||A^{-1}||\cdot\frac{||\overline{A}-A||}{||A||}+o(||\Delta||)$$ In terms of SVD we know that $||A|| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $||A^{-1}|| = \frac{1}{\sigma_n}$, so $K(A) = ||A||\cdot||A^{-1}|| = \frac{\sigma_1}{\sigma_n}$.\\
+A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in R^{n\times n}$ is singular if $rk(B)<n$. By the Eckhart-Young theorem, $min_{B\:sing}||A-B|| = min_{rk(B)\leq n-1}||A-B|| = \sigma_n$ because $B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$. Hence $\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{min_{B\:sing}||A-B||}{||A||}$
+\paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in R^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
+\paragraph{Theorem} The condition number of the least-squares problem $min||Ax-b||$ for a full column rank matrix $A\in R^{m\times n},b\in R^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{||Ax||}{||b||}$$
 \chapter{Optimization}
+Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
+Fitting means minimizing training error, while machine learning means minimizing the generalization error.
+\subparagraph{Example: Linear estimation} Phenomenon measured by one number $y$ and believed to depend on a vector $x = [x_1,\ldots,x_n]$. Available set of observations $(x_1,y_i), \ldots, (x_m, y_m)$.\\
+And optimistic assumption: the dependence is linear, hence $y = \sum_{i=1}^n w_ix_i+w_0 = w_x + w_0$ for fixed $n+1$ real parameters $w = [w_0, w_+=[w_1,\ldots,w_n]]$ and find the $w$ for which is less untrue $min_w\:\:L(w)=||y-xw||$
+\subparagraph{Example: Low-rank approximation} A large, sparse matrix $M\in R^{n\times m}$ describes a phenomenon depending on pairs. Find a tall and thin $A\in R^{n\times k}$ and a fat and large $B\in R^{k\times m}$, meaning $k << n,m$, such that $A\cdot B = M$ with $min_{A,B} L(A,B) = ||M-AB||$\\
+$A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge and dense matrix. Efficiently solving this problem requires
+\begin{list}{}{}
+	\item Low complexity computation
+	\item Avoiding ever explicitly forming $M^TM$ and $MM^T$ (too much memory)
+	\item Exploiting the structure of $M$ (sparsity, similar columns\ldots)
+	\item Ensuring that the solution is numerically stable.
+\end{list}
+\subparagraph{Example: Support Vector Machines} Same setting as the first example, but $y_h\in\{1,-1\}$: want to linearly separate the two sets. Which separating hyperplane to choose? Intuitively, base on the margin: more margin, more robust classification.\\
+The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{||w_+||}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -$\\
+The \textbf{maximum margin separating hyperplane} is the solution of $min_w\{||w_+||^2\:|\:y_h(w_+x_h + w_0)\geq 1)\:\:h=1,\ldots,m\}$, and the margin is $\frac{2}{||w_+||}$ assuming any exists.\\
+If it doesn't exists, soft-margin SVM: $min_w ||w_+||^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
+Non differentiable, reformulation $min_{w,\xi} ||w_+||^2 + C\sum_{h=1}^m \xi_h$
+
 \paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
 With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
 Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\overline{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \overline{\alpha}]$\\
