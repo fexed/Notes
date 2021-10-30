@@ -618,30 +618,92 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 \begin{center}
 	\includegraphics[scale=0.5]{2.png}
 \end{center}
-"Easily" find local $\equiv$ global minimum $\overline{x}$ giving \underline{$f$}$(\overline{x}) \leq f_* \leq f(\overline{x})$. If the gap $f(\overline{x}) - \underline{f}(\overline{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}\overline{x}) \geq$ best $f$-value so far, then that partition is killed.\\
+"Easily" find local $\equiv$ global minimum $\overline{x}$ giving \underline{$f$}$(\overline{x}) \leq f_* \leq f(\overline{x})$. If the gap $f(\overline{x}) - \underline{f}(\overline{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\overline{x}) \geq$ best $f$-value so far, then that partition is killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
 \section{Unconstrained optimization}
-\paragraph{Multivariate} $f$ L-c, no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. Curse of dimensionality: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
-\subparagraph{Unconstraint global optimization} Local much better: most (but not all) convergence results are dimension indepenteent and not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.\\\\
-We have a vector space\ldots\\
-%TODO 2-uncostrained optimality.pdf, p 20
-\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in R^n$ origin and $d\in R^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ tomography of $f$ from $x$ along $d$.\\
-$\phi_{x,d}$ can always be pictured, but infinitely many: which $x,d$?\begin{list}{}{}
+From now on we'll use $f:R^n\rightarrow R$, i.e. $f(x_1,x_2,\ldots,x_n) = f(x)$ with $x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in R^n$. Note that $R^n = R\times R \times\ldots\times R$, which is \textbf{exponentially larger} than $R$.\\
+$I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal).\\\\
+We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. \textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
+\subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\equiv$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
+\paragraph{Notation}\begin{list}{}{}
+	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
+	\item \textbf{Norm} $||x|| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
+	\item \textbf{Distance} $d(x,y) = ||x-y|| = \sqrt{(x_1-y_1)^2+\ldots+(x_n-y_n)^2}$
+	\item \textbf{Ball} with center $r\in R^n$ and radius $r > 0$ is $B(x,r) = \{y\in R^n\:|\:||y-x||\leq r\}$
+\end{list}
+Usually $f:D\rightarrow R$ with $D = dom(f)$ domain of $f$ which may not be all $R^n$, but usually ok to ignore $dom(f)$ and assume $f(x)=\infty$ for $x\not\in D$
+\begin{list}{}{}
+	\item \textbf{Graph} of $f$ lives in $R^{n+1}$: $gr(f) = \{(f(x),x)\:|\:x\in R^n\}$
+	\item \textbf{Epigraph} of $f$ lives in $R^{n+1}$: $epi(f)=\{(v,x) \in R^{n+1}\:|\:v\geq f(x)\}$
+	\item \textbf{Level set} at value $v$: $L(f,v)=\{x\in R^n\:|\:f(x)=v\}$
+	\item \textbf{Sublevel set} at value $v$: $S(f,v)=\{x\in R^n\:|\:f(x)\leq v\}$
+\end{list}
+We have that $x_* \in S(f,v)\:\:\:\forall\:v\geq f_*$ and $S(f,v) = \emptyset\:\:\:\forall\:v<f_*$
+
+\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in R^n$ origin and $d\in R^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ \textbf{tomography} of $f$ from $x$ along $d$.\\
+$\phi_{x,d}$ can always be pictured, but there are infinitely many of them: which $x,d$?\begin{list}{}{}
 	\item $||d||$ only changes the scale: $\phi_{x,\beta d}(\alpha) = \phi_{x,d}(\beta \alpha)$ so often convenient to use normalised direction ($||d|| = 1$)
 	\item Simplest case: restriction along $i$-th coordinate\\
 	$f_x^i(\alpha) = f(x_1,\ldots,x_{i-1},\alpha,x_{i+1},\ldots,x_n) = \phi_{0,u^i}(\alpha)$ with $||u^i|| = 1$
 	\item When $x,d$ clear from context, then $\phi(\alpha)$
 \end{list}
 \paragraph{Simple Functions} \begin{list}{}{}
-	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c$\\
-	$b \in R^n, c\in R$\\
+	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c, b \in R^n, c\in R$\\
 	Tomography $f(x) = \langle b,x\rangle, x = 0, ||d||=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha||b||cos(\theta)$\\
 	Plotting this gives a line, increasing because "$b$ same direction as $d$", more collinear $\Rightarrow$ steeper. Collinear means steepest line, less collinear means less steap. 90° angle means a flat line. Decreasing if opposite directions.\\
 	min $f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
-	\item \textbf{Quadratic} %TODO formula
+	\item \textbf{Quadratic} with fixed $Q\in R^{n\times n}, q\in R^n$ we have $f(x) = \frac{1}{2}x^TQx + qx$. If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
+	Tomography $\phi(\alpha) = f(\alpha d) = \alpha^2(d^TQd)\Rightarrow$ sign and steepness depend on $d^TQd$, so we need to know about signs of $d^TQd$. Steeper when $d$ along one axe, least steep when $d$ along the other axe and intermediate steepness when "in between". Again, steeper along the opposite of one axe and least steep along the opposite of the other axe.\\
+	With $q\neq 0$ but $Q$ nonsingular then $\lambda_i\neq 0\:\:\:\forall\:i$, then $f(x)=\frac{1}{2}(x-x_*)^TQ(x-x_*) [+c]$ for $x_* = -Q^{-1}q$ and $x_* \neq 0$ center of the level sets (which shapes are determined by the eigenvalues).\\
+	$y = x - x_*, f_*(y) = y^TQy [+c]$
 \end{list}
-%TODO first half of 5/10
+\paragraph{Directional/partial derivatives} The directional derivative of $f:R^n\rightarrow R$ at $x\in R^n$ along the direction $d\in R^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
+How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial d}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in R^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
+The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f(x) = \left[\begin{array}{c}
+\frac{\partial f}{\partial x_1}(x)\\
+\vdots\\
+\frac{\partial f}{\partial x_n}(x)
+\end{array}\right]$$
+$$f(x) = \langle b,x\rangle \Rightarrow\nabla f(x) = b$$
+$$f(x) = \frac{1}{2}x^TQx + qx \Rightarrow\nabla f(x) = Qx + q$$
+$f$ differentiable at $x$ if $\exists$ linear function $\psi(h) =\langle b,h\rangle + f(x)$ such that $$\lim_{||h||\to 0}\frac{|f(x+h) - \psi(h)}{||h||} = 0$$ $$\Rightarrow \psi(0) = f(x) \Rightarrow c = f(x)$$
+$\psi$ is equivalent to the first order model of $f$ at $x$, the error of this equivalence vanishes faster than linearity. So $f$ differentiable at $x\Rightarrow b = \nabla f(x)$ and\begin{list}{}{}
+	\item $\Rightarrow \frac{\partial f}{\partial x_i}(x)$ exists for every $i$ (but $\Leftrightarrow$ not true)
+	\item $\Rightarrow$ first order model of $f$ at $x$ is $L_x(y) = \nabla f(x)(y-x)$
+\end{list}
+$f$ differentiable $\Rightarrow$ all relevant objects in $R^{n+1}$ and $R^n$ are smooth. If $f$ is non differentiable $\Rightarrow$ kinks appear and things break,
+\paragraph{Jacobian} Given a vector-valued function $f:R^n\rightarrow R^m$, $f(x) = [f_1(x), f_2(x),\ldots,f_m(x)]$, the partial derivatives are the same with extra index $$\frac{\partial f_j}{\partial x_i}(x) = \lim_{t\rightarrow 0}\frac{f_j(x_1,\ldots,x_{i-1},x_i+t,x_{i+1},\ldots,x_n) - f_j(x)}{t}$$
+The \textbf{Jacobian} is the matrix of all $mn$ partial derivatives
+$$Jf(X) = \left[ \begin{array}{c c c}
+\frac{\partial f_1}{\partial x_1}(x) & \ldots & \frac{\partial f_1}{\partial x_n}(x)\\
+\vdots&\ddots&\vdots\\
+\frac{\partial f_m}{\partial x_1}(x) & \ldots & \frac{\partial f_m}{\partial x_n}(x)\\
+\end{array}\right] = \left[\begin{array}{c}
+\nabla f_1(x)^T\\\vdots\\\nabla f_m(x)^T
+\end{array}\right]$$
+A $m\times n$ matrix with gradients as rows.
+\paragraph{Hessian} The $\frac{\partial f}{\partial x_i}:R^n\rightarrow R$ have partial derivatives themselves. \textbf{Second order partial derivative}, just do it twice $$\frac{\partial^2 f}{\partial x_i \partial x_j}$$ $$\frac{\partial^2 f}{\partial x_i \partial x_i}=\frac{\partial^2 f}{\partial x_i^2}$$
+So $\nabla f(x) : R^n \rightarrow R^n$ have a Jacobian and it's called \textbf{Hessian} of $f$ at $x$
+$$\nabla^2 f(x) = J\nabla f(x) = \left[ \begin{array}{c c c c}
+\frac{\partial^2 f}{\partial x_1^2}(x) & \frac{\partial^2 f}{\partial x_2\partial x_1} & \ldots & \frac{\partial^2 f}{\partial x_n\partial x_1}(x)\\
+\vdots&\ddots&\ddots&\vdots\\
+\frac{\partial^2 f}{\partial x_1\partial x_n}(x) & \frac{\partial^2 f}{\partial x_2\partial x_n}(x) & \ldots & \frac{\partial^2 f}{\partial x_n^2}(x)\\
+\end{array}\right]$$
+Requires $O(n^2)$ to store and at least $O(n^2)$ to compute, unless sparse.\\
+$f(x) = \frac{1}{2}x^TQx + qx \Rightarrow \nabla^2 f(x) = Q$\\
+Second order model = first order model plus second order term (better)
+$$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
+\subparagraph{Theorem} $\exists\:\delta>0\:|\:\forall\:y\in B(x, \delta)$ we have that $\frac{\partial^2 f}{\partial x_j\partial x_i}(y)$ and $\frac{\partial^2 f}{\partial x_i\partial x_j}(y)$ exist and are continuous in $x$\begin{list}{}{}
+	\item $\Rightarrow \frac{\partial^2 f}{\partial x_j\partial x_i}(y) = \frac{\partial^2 f}{\partial x_i\partial x_j}(y) \Leftrightarrow \nabla^2 f$ symmetric
+	\item $\Rightarrow$ all eigenvalues of $\nabla^2 f(x)$ are real
+\end{list}
+With $f\in C^2$ we have $\nabla^2 f(x)$ continuous everywhere, so symmetric everywhere. $C^2$ is the best class for optimization.
+\subsection{Optimality conditions}
+$f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \equiv$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I wold know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$\\
+$\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$, otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$.\\
+Another condition necessary and almost sufficient: $f\in C^2$.
+%end 2-uncostrained optimality.pdf
 So $B=u_1\sigma_1 v^t$ from SVD of $\overline{A}$ will give me the rank-1 matrix with minimum $||\overline{A}-B||_F^2 = \sum_{i,j}(\overline{A_{i,j}} - B_{i,j})^2$. Suppose now you can only keep a 2D projection of your data. What is the best plane (i.e. minimum sum of squares of errors)? Blue crosses on a plane through the origin = linear combination of tw vectors ($\overline{A}$ = real data, $B$ = plotted data, all cols multiples of the same 2 vectors $\Rightarrow$ rank-2\\
 min$||\overline{A}-B|| = $
 
