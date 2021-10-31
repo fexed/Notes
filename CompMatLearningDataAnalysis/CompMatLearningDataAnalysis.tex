@@ -213,12 +213,12 @@ We say that $A\in R^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\
 	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in R^n, z\neq 0$
 	\item $z^TA^TAz\neq 0\:\:\forall\:z\in R^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
 \end{list}
-By manipulating the original problem $min_{x\in R^n} ||Ax-b||_2$ we obtain $$min ||Ax-b||_2 = min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q > 0$\\
-$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q > 0$\\\\
+By manipulating the original problem $min_{x\in R^n} ||Ax-b||_2$ we obtain $$min ||Ax-b||_2 = min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
+$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\\\
 So the least-squares problem $min_x ||Ax-b||$ has unique solution
 \begin{list}{$\Leftrightarrow$}{}
 	\item $f(x)$ has a unique minimum point
-	\item $2A^TA = Q > 0$ (positive definite)
+	\item $2A^TA = Q \succ 0$ (positive definite)
 	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
 \end{list}
 The minimum is when $grad\:f(x) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
@@ -704,9 +704,136 @@ $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \eq
 $\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$, otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$.\\
 Another condition necessary and almost sufficient: $f\in C^2$.
 %end 2-uncostrained optimality.pdf
-So $B=u_1\sigma_1 v^t$ from SVD of $\overline{A}$ will give me the rank-1 matrix with minimum $||\overline{A}-B||_F^2 = \sum_{i,j}(\overline{A_{i,j}} - B_{i,j})^2$. Suppose now you can only keep a 2D projection of your data. What is the best plane (i.e. minimum sum of squares of errors)? Blue crosses on a plane through the origin = linear combination of tw vectors ($\overline{A}$ = real data, $B$ = plotted data, all cols multiples of the same 2 vectors $\Rightarrow$ rank-2\\
-min$||\overline{A}-B|| = $
-
-% 12/10
-
+\subsection{Gradient Methods}
+\paragraph{Multivariate optimization algorithms} These are iterative procedures: start from an initial guess $x_0$ and compute some process $x_i \longrightarrow x_{i+1}$ to get a \textbf{sequence} $\{x_i\}$ that \textbf{should go towards an optimal solution}. $\{x_i\}\rightarrow x_*$ is one option, the best one, but not the only possibility.\\
+At least $\{f_i = f(x_i)\} \rightarrow f_*$: \textbf{minimizing sequence}, and clearly $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}$ minimizing sequence, but $\not\Leftarrow$\\
+Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
+\begin{list}{}{}
+	\item \textbf{Line search}: first choose $d_i\in R^n$ (\textbf{direction}), then choose $\alpha_i\in R$ (\textbf{step size} $\equiv$ learning rate in ML)
+	\item \textbf{Trust region}: first choose $\alpha_i\in R$ (\textbf{trust radius}), then $d_i$
+\end{list}
+The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
+\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in argmin\{L_i(x) : x\in R^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
+It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = argmin\{\lim_{t\to 0} \frac{f(x+td)}{t}\} = -\nabla f(x_i) =$ steepest descent direction.\\
+$\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ groes $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
+\paragraph{Step selection} The issue is to find the Goldilocks Step $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
+\begin{list}{}{}
+	\item \textbf{Fixed Stepsize} (FS): $\forall\:i\:\:\:\alpha_i = \overline{\alpha}$ (how is chosen?)\\
+	Most inexpensive.
+	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in argmin\{f(x_i+\alpha d_i\}\:|\:\alpha\geq 0\}$\\
+	Most expensive but may converge faster.
+\end{list}
+Of course, something in the middle is better. $\phi'_i$ low-degree polynomial $\Rightarrow f(x_i+\alpha d_i) = \phi_{x_i,d_i}(\alpha) = \phi_i(\alpha)$
+\paragraph{Gradient for quadratic functions} $f(x) = \frac{1}{2}x^TQx + qx$ with $Q\geq 0$ otherwise $f$ is unbounded below. $x_*$ solves $Qx = -q$ if it exists, which is linear algebra but the linear system requires at most $O(n^3)$ while computing $d_i = -\nabla f(x_i) = -Qx_i - q$ is $O(n^2)$\\
+Line search is easy, $O(n^2)$ with $\alpha_i = \frac{||d_i||^2}{d_i^TQd_i}$
+\begin{lstlisting}[style=myPython]
+procedure x = SDQ(Q, q, x, eps):
+	while (||nablf(x)||>eps):
+		d = -nablf(x)
+		alpha = ||d||^2/dT*Q*d
+		x = x + alpha*d
+\end{lstlisting}
+With \texttt{nablf} being $\nabla f$
+\subparagraph{Analysis} Never obvious because we have to use properties of $x_*$ which is unknown, but in this case there's a nifty trick
+$$f_*(x) = \frac{1}{2}(x-x_*)^TQ(x-x_*) = f(x) - f_*(x) = A(x)$$
+for which, with $Q$ positive definite $$A(x_{i+1}) = \left(1-\frac{||d_i||^4}{(d_i^TQd_i)(d_i^TQ^{-1}d_i)} \right)A(x_i)$$
+This becomes linear convergences ($\lambda_1,\lambda_{n}$ being respectively the max and min eigenvalues of $Q$)
+\begin{list}{}{}
+	\item Simple $A(x_{i+1}) \leq (1-\frac{\lambda_n}{\lambda_1})A(x_i)$
+	\item Elaborated $A(x_{i+1}) \leq \frac{\lambda_1 - \lambda_n}{(\lambda_1 - \lambda_n)^2}A(x_i)$
+\end{list}
+The good news is that $n$ doesn't appear, it's \textbf{dimension-independent} so doable for very large scale machine learning. The bad news is that $r\rightarrow 1$ as conditioning of $Q = \frac{\lambda_1}{\lambda_n}\rightarrow\infty$
+\paragraph{When linear convergence may not be enough} The convergence is fast if $\lambda_1\simeq \lambda_n$ (one iteration for $||x||^2$) and rather slow if $\lambda_1 >> \lambda_n$. Intuitively, the algorithm zig-zags a lot when level sets are very elongated. Another bad news is that there may be an "hidden dependency": $\lambda_1$ and $\lambda_n$ may depend on $n$ and $\frac{\lambda_1}{\lambda_n}$ may grow as $n\rightarrow\infty$.\\
+Let's extend it to every function.
+\subsubsection{Gradient methods for general functions}
+Given $f$ a general nonlinear function, the algorithm is almost the same:
+\begin{lstlisting}[style=myPython]
+procedure x = SDQ(f, x, eps):
+	while (||nablf(x)||>eps):
+		d = -nablf(x)
+		alpha = stepsize(f, x, d)
+		x = x + alpha*d
+\end{lstlisting}
+\texttt{stepsize} is the crucial part: FS or (inexact) LS. Need to avoid two opposite problems:
+\begin{list}{}{}
+	\item Scylla: $\alpha_i$ not too large to avoid $f(x_{i+1}) > f(x_i)$
+	\item Charybdis: $\alpha_i$ not too small to avoid stalling
+\end{list}
+With $\frac{\partial f}{\partial d_i}(x_i)<0$ hence $\alpha_i\rightarrow 0$ we avoid Scylla but may hit Charybdis.\\
+\texttt{stepsize(f, x, d)} $= LS(\phi_{x,d}, [0,\infty], \epsilon')$ is attractive but $\epsilon' = 0$ in general is not possible: how to choose it? Depends on the stopping criterion in $LS()$, let's assume $|\phi_{x,d}(\alpha)| \leq \epsilon'$. A fundamental property is $$\phi'_i(\alpha) = \frac{\partial f}{\partial d_i}(x_i + \alpha d_i) = \langle\nabla f(x_i+\alpha d_i), d_i\rangle$$
+$$\Rightarrow |\phi_i'(\alpha_i)| = |\langle d_i, \nabla f(x_{i+1})\rangle| = |\langle \nabla f(x_i),\nabla f(x_{i+1})\rangle|$$
+The good news is that only an approximate stationary point of $\phi_i$ is needed, no global minimum (and not even a local minimum, can be a local maximum or a saddle point) $\Rightarrow f$ convex/unimodal is not needed. Also we can prove that the algorithm works with $\epsilon' = \epsilon ||\nabla f(x_i)||$\\
+A bad news is that the LS should become more accurate as the algorithm proceeds, and the LS can be very approximate ("far from $x_*$").\\
+Usually works well in practice with arbitrary fixed $\epsilon'$
+\paragraph{Notes on the stopping criterion} One would want $A(x_i)<\epsilon$ or $R(x_i) < \epsilon$ as stopping criterion, the issue is that $f_*$ is often unknown and cannot be used online. We need a lower bound $\underline{f} \leq f_*$, tight at least towards termination, but in general there are no good $\underline{f}$ available because good estimates of $f_*$ are hard to get.\\
+We can use $||\nabla f(x_i)||$ as proxy of $A(x_i)$ (small $\Rightarrow$ small) but the exact relationship is hard to assess, so choosing $\epsilon$ is not obvious.\\
+Sometimes we use a relative stopping condition $||\nabla f(x_i)||\leq \epsilon||\nabla f(x_0)||$, and sometimes $||\nabla f||$ has some meaning that can be used. Sometimes, we don't really care is $A(x_i)$ or $R(x_i)$ are small (machine learning).
+\paragraph{Efficiency} The efficiency is basically the same.\\
+With $f\in C^2, x_*$ local minimum such that $\nabla^2f(x_*)$ positive definite, exact LS $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}_{i\geq k}\rightarrow f_*$ linearly for large enough $k$, with $r = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}^2$ with $\lambda_1,\lambda_n$ those of $\nabla^2 f(x_*)$\\
+The result can be extended to inexact LS with $r\simeq 1-\frac{\lambda_n}{\lambda_1}$ (worse), with "$\simeq$" depending on LS parameters.
+\subsubsection{Fixed Stepsize}
+With $\alpha_i = \overline{\alpha}$ for each $i$ it's much simpler but also rigid. Easier to avoid Charybdis: $\sum_{i=1}^\infty \alpha_i = \infty$\\
+Yet $d_i = -\nabla f(x_i) \Rightarrow$ one wants $\{||d_i||\}\rightarrow 0$, so care is still required. We also have that $\alpha_i\rightarrow 0$ surely avoid Scylla, but it's not possible here.\\
+The fundamental trick is $d_i = -\nabla f(x_i) \Rightarrow ||x_{i+1} - x_i||$ automatically changes along iterations even if $\alpha_i$ is fixed.\\
+$d_i = \frac{-\nabla f(x_i)}{||\nabla f(x_i)||} \equiv ||d_i|| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
+\paragraph{L-smoothness} $$f \hbox{ L-smooth }\Rightarrow \phi(\alpha) \leq \phi(0) + ||\nabla f(x)||^2\left(\frac{L\alpha^2}{2-\alpha}\right)$$
+Powerful general idea: find $\alpha$ giving the best worst-case improvement, meaning $v(\alpha) = \frac{L\alpha^2}{2-\alpha}, \alpha_* = \frac{1}{L}$ (constant!), $v(\alpha_*) = -\frac{1}{2L}$ hence $$f(x_{i+1}) - f(x_i) \leq -\frac{||\nabla f(x_i)||^2}{2L}$$ Can't do better if you trust the quadratic bound (which you should not).\\
+The error decreases sublinearly: a term is subtracted to $a_i$ rather than multiplied $a_{i+1} = f(x_{i+1}) - f_* \leq a_i - \frac{||\nabla f(x_i)||^2}{2L}$\\
+In fact $a_i\leq \frac{2L||x_0 - x_*||^2}{i+3} \Rightarrow i\geq O(\frac{LD^2}{\epsilon})$ (note that the initial point matters)\\
+However we used $Q$ nonsingular $\Leftrightarrow \lambda_n > 0$, which does make a difference.
+\paragraph{Stronger forms of convexity}
+$f$ convex means that $\forall\:x,y\in R^n$ we have $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\geq f(x) + \langle \nabla f(x), y-x\rangle$$
+\textbf{Strictly} convex means $$\alpha f(x) + (1-\alpha)f(y)> f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle$$
+Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n||x||_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\equiv \lambda_n$-convex.\\
+$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $f(x)-\frac{\tau}{2}||x||_2^2$ is convex $\Leftrightarrow$ $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)||y-x||^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}||y-x||^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
+$f \in C^2,$ $L$-smooth and $\tau$-convex $\equiv \tau I \preceq \nabla^2 f\preceq LI \equiv \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
+\paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{||\nabla f(x_i)||^2}{2\tau} \Rightarrow ||\nabla f(x_i)||^2\geq 2\tau(f(x_i)-f(x_*))$$
+"If $a_i = f(x_i) - f_*$ is large then the gradient must also be large."\\
+$L$-smooth $\Rightarrow a_{i+1}\leq a_i - \frac{||\nabla f(x_i)||^2}{2L} \Rightarrow a_{i+1}\leq a_i(1-\frac{\tau}{L})$\\
+A small difference in $f$ makes a big difference in convergence $\Rightarrow$ properties of $f$ more important than the algorithm.
+\subsubsection{Inexact Line Search}
+\paragraph{Armijo} If FS works, then any rough LS also should work provided that $f_i$ decreases enough.\\
+The \textbf{Armijo condition} is $0 < m_1 < 1$
+\begin{list}{}{}
+	\item[$(A)$] $\phi(\alpha)\leq \phi(0)+m_1\alpha\phi'(0)$
+\end{list}
+$\alpha \rightarrow 0$ satisfies $(A)$. But if we avoid Charybdis then we "converge".\\
+$\alpha_i\geq \overline{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{||\nabla f(x_i)||\}\rightarrow 0$\\
+All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = ||\nabla f(x_i)||^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\overline{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\overline{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \overline{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
+\paragraph{Wolfe} \textbf{Goldstein condition} $m_1 < m_2 < 1$
+\begin{list}{}{}
+	\item[$(G)$] $\phi(\alpha)\geq \phi(0) + m_2\alpha\phi'(0)$
+\end{list}
+Issue: $(A)\cap (G)$ can exclude all local minima
+\textbf{Wolfe condition} $m_1 < m_3 < 1$
+\begin{list}{}{}
+	\item[$(W)$] $\phi'(\alpha)\geq m_3\phi'(0)$
+\end{list}
+The derivative has to be a bit closer to $0$, but can be $>>0$: there's a strong Wolfe, too
+\begin{list}{}{}
+	\item[$(W')$] $|\phi'(\alpha)|\leq m_3|\phi'(0)| = -m_3\phi'(0) [\Rightarrow (W)]$
+\end{list}
+We have that $(A)\cap (W)$ captures all local minima (and maxima), usually $m_1$ close to $1$, and $(A)\cap(W')$ ensures $\phi'(\alpha) \not >\not >0$\\
+Such points always exists.
+\paragraph{Amijo-Wolfe in practice} $m_1$ small enough so that local minima are not cut: just go for the local minima and stop whenever $(A)\cap (W)$ or $(W')$ holds. Hard to say if $m_1$ is small enough, usually $m_1 = 0.0001$ is enough. Specialized LS can be constructed for the odd case it's not, with some more logic for the nasty cases.\\
+A simpler version: "backtracking" LS, only check $(A)$
+\begin{lstlisting}[style=myPython]
+procedure alpha = BLS(phi, alpha, m1, tau)  # tau < 1
+	while(phi(alpha) > phi(0) + m1*alpha*dphi(0)):
+		alpha = tau*alpha
+\end{lstlisting}
+With \texttt{dphi(0)} meaning $\phi'(0)$\\
+Recall that $\exists\:\overline{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\overline{\alpha}_i]$. Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with\\$h_i\geq min\{k\:|\:\tau^k\leq \overline{\alpha}_i\}$
+$$\overline{\alpha}_i \geq \overline{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \hbox{\textbf{convergence}}$$
+We need conditions on $f$ to get it:
+\begin{list}{}{}
+	\item $f$ $L$-smooth $\Rightarrow \phi$ is $[L||d||^2]$-smooth
+	\item $\Rightarrow -\phi'(0) = ||d||^2 = ||\nabla f(x)||^2$
+	\item $\phi$ is $[L||d||^2]$-smooth $\Rightarrow \alpha'$ and $\overline{\alpha}$ are "large":\\
+	$L||d||^2(\alpha - 0)\geq \phi'(\alpha')-\phi'(0) > (1-m_3)(-\phi'(0)) = (1-m_3)||d||^2$
+	\item $\Rightarrow \overline{\alpha} > \alpha' > \frac{1-m_3}{L}$
+	\item If $f$ also $\tau$-convex $\Rightarrow$ convergence linear with $r\simeq \frac{1-\tau}{L}$, depending on $m_1,m_3$
+\end{list}
+Might be rather slow, need something better.
+%end 3-unconstrained optimization I.pdf
 \end{document}
