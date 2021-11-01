@@ -836,4 +836,99 @@ We need conditions on $f$ to get it:
 \end{list}
 Might be rather slow, need something better.
 %end 3-unconstrained optimization I.pdf
+\subsection{More-Than-Gradient Methods}
+\paragraph{General descent methods} So far, the crucial assumption was $d_i = -\nabla f(x_i)$\\
+The crucial convergence arguments are:
+\begin{list}{}{}
+	\item $\phi_i'(0) = -||\nabla f(x_i)||^2$, or "far from $x_*$ the derivative is very negative"
+	\item "You can get a non-vanishing fraction of the descent promised by $\phi_i'(0)$", the "exact" LS or Armijo or FS + $L$-smooth $\Rightarrow \alpha_i$ doesn't not go to 0 too fast.
+\end{list}
+so that there's a significant decrease at each step unless $||\nabla f(x_i)||\rightarrow 0$.\\
+There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -||\nabla f(x_i)||^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
+In $R^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
+\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $\frac{\partial f}{\partial d_i}(x_i) < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$ meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
+\textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty, (A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)||\nabla f(x_i)||^2<\infty$\\
+A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{||\nabla f(x_i)||\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
+Very many $d_i$, but which is better than $-\nabla f$? Need to look farther than the first order model.
+\paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)\Rightarrow$ Newton's direction $d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$ (just $R^n$ version). No problem with the step, we use $\alpha_i = 1$.\\
+The \textbf{Newton's Method} is $x_{i+1} = x_i + d_i$, a step of $\alpha_i = 1$ along $d_i$.\\
+It's not globally convergent, needs to be globalised. Easy as $\nabla^2 f(x_i) \succ 0 \Rightarrow [\nabla^2 f(x_i)]^{-1} \succ 0 \Rightarrow d_i$ is of descent.
+$$\langle \nabla f(x_i), d_i\rangle = -\nabla f(x_i)^T[\nabla^2f(x_i)]^{-1}\nabla f(x_i) < 0$$
+but it's not enough, we need it "negative enough".
+\paragraph{Globalised Netwtod} Simply add AWLS/BLS with $\alpha_0 = 1$. The convergence requires $f\in C^2, L$-smooth and $\tau$-convex
+\subparagraph{Theorem 1} $\cos(\theta_i)$ bounded away from $0 \Rightarrow$ global convergence.\\
+Meaning $\cos(\theta_i)\geq \overline{\theta} > 0$
+\subparagraph{Theorem 2} $f\in C^3, \nabla f(x_*) = 0, \nabla^2 f(x_*)\succ 0\Rightarrow\exists B(x_*, r)\:|\:x_0\in B\Rightarrow$ "pure" Newton sequence with $\alpha_i = 1$ that $\{x_i\}\rightarrow x_*$ quadratically.
+\subparagraph{Theorem 3} If $\{x_i\}\rightarrow x_* \exists\:h\:|\:\alpha_i = 1$ satisfies $(A)$ for all $i\geq h$\\
+Requires $m_1\leq \frac{1}{2}$, because $m_1>\frac{1}{2}$ cuts away the minimum when $f$ quadratic.\\\\
+\textbf{Global phase} ($\alpha_i$ varies) $+$ \textbf{pure Newton's phase} (ends in $O(1)\simeq 6$ iterations in practice)\\
+If $\nabla^2 f M$-smooth then global phase also $O(1)$: $O\left(\frac{M^2L^2(f(x_0)-f_*)}{\tau^5}\right)$\\
+An interpretation is Newton = Gradient in a twisted space. $Q$ is positive semidefinite ($\succeq 0$), so $Q= RR\Leftrightarrow R = Q^{\frac{1}{2}}$: it exists and it's symmetric $Q=H\Lambda H^T\Rightarrow R = H\sqrt{\Lambda}H^T$\\
+$f(x) = \frac{1}{2}x^TQx + qx, d = -x-Q^{-1}q \Rightarrow \nabla f(x+d)=0$ Netwon ends in one iteration. $y = Rx \Leftrightarrow x = R^{-1}y, h(y) = f(R^{-1}y) = \frac{1}{2}y^TIy + qR^{-1}y$ (in $y$-space, $\nabla^2 f(x_i)$ looks like $I\Rightarrow$ gradient is fast)\\
+$g = -\nabla h(y) = -y-R^{-1}q \Rightarrow \nabla h(y+g) = 0$
+\subparagraph{Nonconvex case} The Newton's method is a space dilation: a linear map making $\nabla^2 f$ "simple", but it's not necessarily $\nabla^2f(x_i)^{-1}$ especially when $\not\succeq 0$
+$$d_i=-H_{i}\nabla f(x_i),\tau I\preceq H_i\preceq LI, (A)\cap (W)\Rightarrow\hbox{Global convergence}$$
+Any $\epsilon_i > -\lambda_n$ works (but numerical issues). Also algorithmic issues: $\lambda_n(\nabla^2 f(x_i)+\epsilon I)$ is very small, so the axes are very elongated and $x_{i+1}$ far from $x_i$ (not good for a local model)\\
+Simple form $\epsilon = max\{0,\delta - \lambda_n\}$ for appropriately chosen $\delta$. This solves $min\{||H-\nabla^2 f(x_i)||_2\:|\:H\succeq \delta I\}$, works for other norms too.\\
+In every case, $\{x_i\}\rightarrow x_*$ with $\nabla^2 f(x_*)\succeq \delta I\Rightarrow \epsilon_i = 0 \Leftrightarrow H_i = \nabla^2 f(x_i)$ eventually (quadratic convergence in the tail)
+\paragraph{Quasi-Newton} The space of $H_i$ that gives fast convergence is big. Superlinear convergence if $H_i$ looks like $\nabla^2 f(x_i)$ along $d$.\\
+General derivation of Quasi-Newton methods $m_i(x) = \nabla f(x_i)(x-x_i)+\frac{1}{2}(x-x_i)^TH_i(x-x_i), x_{i+1} = x_i+\alpha_id_i$\\
+Having computed $x_{i+1}$ and $\nabla f(x_{i+1})$, new model
+$$m_{i+1}(x) = \nabla f(x_{i+1})(x-x_{i+1})+\frac{1}{2}(x-x_{i+1})^TH_{i+1}(x-x_{i+1})$$\\
+We would like $H_{i+1}$ to have the following properties:
+\begin{list}{}{}
+	\item $H_{i+1}\succ 0$ (new model is strongly convex)
+	\item $\nabla m_{i+1}(x_i) = \nabla f(x_i)$ (new model agrees with old information)\\
+	Secant equation $H_{i+1}(x_{i+1}-x_i)=\nabla f(x_{i+1})-\nabla f(x_i)$
+	\item $||H_{i+1} - H_i||$ "small" (new model is not too different)
+\end{list}
+Depending on the choices at iteration $i$, it may not be possible to achieve both the first and second properties.\\
+\textbf{Notation} $s_i = x_{i+1}- x_i = \alpha_id_i$, $y_i = \nabla f(x_{i+1}) -\nabla f(x_i)$\\
+Secant equation $(S)\:\:\:\:H_{i+1}s_i = y_i$\\
+$(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$ and the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
+So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
+Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$. Assuming an AWLS, $(C)$ can always be satisfied.
+\paragraph{DFP} With the three properties we have $H_{i+1} = argmin\{||H-H_i||\:|\:(S), H\succeq 0\}$\\
+Needs appropriate $||\:\:||$: \textbf{Davidon-Fletcher-Powell formula}
+\begin{list}{}{}
+	\item[$(DFP)$] $H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$
+\end{list}
+So $H_{i+1}$ is a rank-two correction of $H_i$, $O(n^2)$ to produce $H_{i+1}$ from $H_i$\\
+Actually need $B_{i+1} = H_{i+1}^{-1}$: \textbf{Sherman-Morrison-Woodbury formula}
+\begin{list}{}{}
+	\item[$(SMW)$] $[A+ab^T]^{-1} = \frac{A^{-1} - A^{-1}ab^TA^{-1}}{1-b^TA^{-1}a}$
+	\item[$\Rightarrow (DFP)^{-1}$] $B_{i+1} = \frac{B_i + \rho_is_is_i^T - B_iy_iy_i^TB_i}{y_i^TB_iy_i}$
+\end{list}
+$O(n^2)$ per iteration, just matrix-vector products and no inverses.\\
+This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficient but can do better.
+\paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = argmin\{||B-B_i||\:|\:(S),B\succeq 0\}$\\
+\textbf{Broyden-Felcther-Goldfarb-Shanno formulae} still $O(n^2)$\begin{list}{}{}
+	\item[$(BFGS)$] $H_{i+1} = \frac{H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{s_i^TH_is_i}$
+	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T = B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
+\end{list}
+\paragraph{Conjugate gradient method for quadratic functions} Gradient method + exact LS $\Rightarrow \langle \nabla f(x_{i+1}, d_i\rangle = 0\equiv d_{i+1}$ perpendicular to $d_i$. Property: $x_{i+1}$ minimum over all the small subspace of $d_i$. This is lost at $i+2$: zig-zags.\\
+Would be nice if $x_{i+1}$ minimum on the subspace of $\{d_1,\ldots,d_i\}$, getting larger with every iteration.\\
+Possible with quadratic $f\equiv$ linear systems, with two conditions:
+\begin{list}{}{}
+	\item all directions are $Q$-conjugate: $d_i^TQd_j=0\:\:\:\:\forall\:i,j$
+	\item the optimal step is always taken along each $d_i$
+\end{list}
+Can't use $d_i = -\nabla f(x_i)$, have to deflect $-\nabla f(x_i)$ using $d_{i-1}$: $d_0 = 0$ and $d_i = -\nabla f(x_i) + \beta_id_{i-1}$\\
+The crucial, but only, decision is $\beta_i$: \textbf{Fletcher-Reeves} (closed) \textbf{formula}:
+\begin{list}{}{}
+	\item $\beta_i = \frac{\nabla f(x_i)^T Qd_{i-1}}{d_{i-1}^TQd_{i-1}} = \frac{||\nabla f(x_i)||^2}{||\nabla f(x_{i-1})||^2}$
+\end{list}
+$f$ quadratic + exact LS $\Rightarrow$ quadratic conjugate gradient (CG): $\nabla f(x) = 0 \equiv Qx = -q$ in at most $n$ iterations. If properly preconditioned $<< n$ iterations.\\
+Also many $\beta$ formulae, all equivalent for quadratic $f$ but not so here.\\
+LS only exact with quadratic $f$, otherwise AWLS.
+\subparagraph{Convergence and efficiency} Depends on $\beta$-formula. F-R requires $m_1<m_2<\frac{1}{2}$ for $(A)\cap(W')$ to work.\\
+$(A)\cap(W')\not\Rightarrow d_i$ of P-R is of descent, unless $\beta_{PR,i} = max\{\beta_i, 0\}$\\
+Restart: from time to time take plain $-\nabla f$. It's a good idea especially for F-R: one bad step leads to many bad steps, restarting cures this. Typically restart after $n$ steps.\\
+$n$ CG steps $\simeq 1$ Newton steps, in $n$ steps CG exactly solves a quadratic function. Powerful approach, not easy to manage.
+\paragraph{Deflected Gradients method} CG's idea: use previous direction while computing the current one. Simple form: $x_{i+1} = x_i - \alpha_i\nabla f(x_i) + \beta_i(x_i-x_{i-1})$ with $\beta_i$ called \textbf{momentum}, $x_i$ \textbf{heavy} and $\nabla f(x_i)$ the \textbf{force} steering the trajectory.\\
+\textbf{Not a descent algorithm}, may zig-zags: specific analysis. For $L$-smooth and $\tau$-convex, better linear convergence
+$$||x_{i+1} - x_*||\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\right]||x_i-x_*||\:\:\:\:(\sqrt{L}<<L)$$
+Gridsearch required to find $\alpha_i$ and $\beta_i$ in practice. For non-convex $f$, converges if $\beta\in[0,1), \alpha\in(0,2\frac{1-\beta}{L})$\\
+$\nabla f$ computed after momentum but before descent: not at all a gradient-like method, almost entirely different.\\
+It's \textbf{optimal} $O(\frac{LD^2}{\sqrt{\epsilon}}$ for $L$-smooth not $\tau$-convex.
 \end{document}
