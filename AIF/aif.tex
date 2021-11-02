@@ -1131,4 +1131,74 @@ An example: "paper3 has exactly two authors"
 	\item $(i,j):R$, where $i,j$ are individuals and $R$ a role
 \end{list}
 %TODO KRR-6.pdf p.11
+\section{Reasoning Under Uncertainty}
+\subsection{Quantifying Uncertainty}
+Agents are inevitable forced to reason and make decisions based on incomplete information. They need a way to handle uncertainty deriving from:
+\begin{list}{}{}
+	\item \textbf{Uncertainty in sensors}: partial observability
+	\item \textbf{Uncertainty in actions}: nondeterministic actions
+\end{list}
+A partial answer would be to consider a set of possible worlds (a \textbf{belief set}, which are considered possible by the agent), but planning by anticipating all possible contingencies can be really complex. Moreover, if no plan guarantees the achievement of the goal but the agent still needs to act, how can he evaluate the relative merits of alternative plans? \textbf{Probability theory} offers a clean way to quantify uncertainty (common sense reduced to calculus).\\
+With a logical approach, it is difficult to anticipate everything "that could go wrong" (\textbf{quantification problem}). The rational decision depends on both the \textbf{relative importance} of the various goals and the \textbf{likelihood} that they will be achieved. When there are conflicting goals, the agent may express \textbf{preferences} by the means of a utility function. Utilities are combined with probabilities in the general theory of rational decisions called \textbf{decision theory}.\\
+An agent is rational $\Leftrightarrow$ it chooses \textbf{the action that yields the maximum expected utility, averaged over all the possible outcomes of the action}. This is called the principle of \textbf{Maximum Expected Utility} (\textbf{MEU}).
+\paragraph{Probability Theory} Logic and probability theory both talk about a world made of propositions which are \textit{true} or \textit{false}. They share the \textbf{ontological commitment}.\\
+What's different is the \textbf{epistemological commitment}: a logical agent believes each sentence to be true or false or has no opinion, whereas a probabilistic agent may have a numerical \textbf{degree of belief} between 0 (certainly false) and 1 (certainly true). The uncertainty is not in the world, but in the beliefs of the agent (\textbf{state of knowledge}). If the knowledge about the world changes (we learn more information) the probability changes, but there is no contradiction.
+\subparagraph{Probabilities} In AI terms: probabilistic assertions are assertions about possible worlds stating how probable a world is. The set of possible world is the \textbf{sample space} $\Omega$: they are mutually exclusive and exhaustive. For example, the 36 possible outcomes of rolling two dices.\\
+A fully specified probability model associates a probability $P\in R, 0\leq P \leq 1$ to each possible world $\omega\in\Omega$.\\
+The \textbf{basic axiom of probability} is $$0\leq P(\omega)\leq 1\:\:\forall\:\omega\in\Omega\hbox{ and }\sum_{\omega\in\Omega} P(\omega) = 1$$
+Usually we deal with a subset of possible worlds (\textbf{events}) which can be described by an expression (\textbf{proposition}) in a formal language. The \textbf{events} are the possible worlds where the proposition holds. Also for any event $\Phi$ we have that $P(\Phi) = \sum_{\omega\in\Phi} P(\omega)$
+\subparagraph{Conditional probabilities} Often we have evidence that restrict the number of possible worlds, conditioning the probability of an event. These probabilities are called \textbf{conditional}/posterior probabilities: $P(a\:|\:b) = \frac{P(a,b)}{P(b)}$ with $P(b) > 0$. Note that $P(a,b)=P(a\:|\:b)P(b)$
+\paragraph{Probability distribution} A full specification of the probability for all values of a variable $X$ is a \textbf{probability distribution}.
+\begin{list}{}{}
+	\item \textbf{Discrete} For example
+	\begin{list}{}{}
+		\item $P($Weather $=$ sunny$)=0.6$
+		\item $P($Weather $=$ rain$)=0.1$
+		\item $P($Weather $=$ cloudy$)=0.29$
+		\item $P($Weather $=$ snow$)=0.01$
+	\end{list}
+	can be expressed with a vector $P$ to represent the distribution: $P($Weather$) = \langle 0.6,0.1,0.29,0.01\rangle$\\
+	$P(X\:|\:Y)$ is the table of values $P(X=x_1\:|\:Y=y_i)$ one value for each pair $i,j$.
+	\item \textbf{Continuous} For continuous variables we can define the probability that a random variable takes some value $x$ as a function of $x$, called \textbf{probability density function} or \textbf{PDF}.\\
+	If $f$ is the density function, then $P(a\leq x\leq b) = \int_a^b f(x)\:dx$, $\int_{-\infty}^{+\infty} f(x)\:dx = 1$ for $f(x)\geq 0$
+\end{list}
+A \textbf{joint probability distribution} is a distribution over a set of variables.
+\paragraph{Semantics} A possible world is defined to be an assignment of values to all the random variables under consideration. It follows that possible worlds are mutually exclusive and exhaustive.\\
+The truth of a complex proposition in a world can be determined using the same recursive definition of truth used for formulas in PROP.\\
+If we have a joint probability distribution of all the variables (\textbf{full joint probability distribution}), then we can perform an inference. Given that
+\begin{list}{}{}
+	\item A proposition identifies a set of possible worlds
+	\item An entry in the table gives the probability of a possible world
+	\item For any event $\Phi, P(\Phi) = \sum_{\omega\in\Omega} P(\omega)$
+\end{list}
+we can compute the probability of any proposition by taking the sum of the probabilities of the relevant possible worlds in the distribution.
+\paragraph{Properties of discrete variables} Known as \textbf{Kolmogorov's axioms}:
+\begin{list}{}{}
+	\item $0\leq P(\omega)\leq 1\:\:\forall\:\omega\in\Omega$ and $\sum_{\omega\in\Omega}P(\omega)=1$
+	\item For any proposition $\Phi,P(\Phi)=\sum_{\omega\in\Omega}P(\omega)$
+	\item $P(\neg a)=1-P(a)$
+	\item $P(a\vee b) = P(a) + P(b) - P(a\wedge b)$ (\textbf{inclusion-exclusion principle})
+\end{list}
+\paragraph{Plausibility} If an agent holds an inconsistent set of beliefs, the if it bets according to this set of beliefs against another agent, then the other agent can devis a strategy to make it always lose money. De Finetti's theorem implies that no rational agent can have beliefs that violate the axioms of probability.
+\subsubsection{Probabilistic Inference} Assuming we have a full joint distribution as the knowledge base, we will use the axioms of probability and show how to:
+\begin{list}{}{}
+	\item Compute \textbf{marginals}, prior probability of a single variable
+	\item Compute the probability of complex propositions ($\wedge,\vee,\neg$)
+	\item Compute the \textbf{posterior probability} for a proposition given observed evidence
+\end{list}
+\paragraph{Computing marginals} Probability of a variable from the full joint distribution. Given a joint distribution $P(X,Y)$ over variables $X$ and $Y$, the distribution of the single variable $X$ is given by $$P(X) = \sum_{y\in dom(Y)}P(X,y) = \sum_y P(X,y)$$
+Also called \textbf{marginalization} or \textbf{summing out}. In general, if $Y$ and $Z$ are sets of variables such that $Y\cup Z$ are all the variables in the full joint distribution, then $P(Y) = \sum_{z\in Z}P(Y,z)$
+\subparagraph{Conditioning} Variant of the marginalization, involving conditional probabilities instead of joint probability: can be obtained from the previous using the product rule $$P(Y) = \sum_{z\in Z} P(Y\:|\:z)P(z)$$
+\paragraph{General inference procedure} If the query involves a single variable $X$, $e$ is the list of the observed values (the evidence) and $Y$ the rest of unobserved variables, then $$P(X\:|\:e) = \alpha P(X,e) = \alpha\sum_y P(X,e,y)$$
+However it's intractable due to the complexity of the joint distribution table: with $n$ boolean variables, it requires an input table of size $O(2^n)$ and $O(2^n)$ time to process.
+\paragraph{Independence} Independence of propositions $a,b$: $P(a\:|\:b) = P(a)$, $P(b\:|\:a)=P(b)$, $P(a,b)=P(a)P(b)$\\
+Independence of variables $X,Y$: $P(X\:|\:Y) = P(X)$, $P(Y\:|\:X)=P(Y)$, $P(X,Y)=P(X)P(Y)$\\
+Independence assumptions can reduce the size of the representation and the complexity of the inference problems. A notation for the independence $X\perp Y$.
+\paragraph{Bayes theorem} $$P(Y\:|\:X) = \frac{P(X\:|\:Y)P(Y)}{P(X)}$$
+This tells us how to update the agent's believes in hypothesis $h$ as new evidence $e$ arrives, given the background knowledge $k$ $$P(h\:|\:e,k)=\frac{P(e\:|\:h,k)P(h\:|\:k)}{P(e\:|\:k)}$$
+$X$ and $Y$ are \textbf{conditionally independent given $Z$} when $P(X,Y\:|\:Z)=P(X\:|\:Z)P(Y\:|\:Z)$. Alternatively, when \begin{list}{}{}
+	\item $P(X\:|\:Y,Z) = P(X\:|\:Z)$
+	\item $P(Y\:|\:X,Z) = P(Y\:|\:Z)$
+\end{list}
+\paragraph{Naive Bayes model} $P($Cause, Effect$_1$, \ldots, Effect$_n) = P($Cause$)\prod_i P($Effect$_i\:|\:$Cause$)$
 \end{document}
