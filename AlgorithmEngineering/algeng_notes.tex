@@ -691,4 +691,93 @@ Assuming we want to find $S[5]$. Until now, with the other codes, we needed to d
 	\end{list}
 	\item \textbf{Encode $S=(11,14,16,19,20,21,22)$ with Elias-Fano and answer Access(5) and NextGeq(17)}. Reduce the Universe size by subtracting $11$ (so $5+11$ in the first and $17-11$ in the second question)
 \end{list}
+\section{String Sorting} Until now: atomic items. Now: sequence of symbols/characters/letters (\textbf{strings}), drawn from a alphabet $\Sigma$ with $|\Sigma| = \sigma$ symbols.\\
+We have a set of strings $S[1,n]$ with $N$ the total length and $n$ the number of strings. Also $L=\frac{N}{n}$ is the average length. Often $\sigma = 256$\\
+Usually \texttt{qsort}, compared-based algorithm: need to specify the comparison function. So \texttt{qsort} is agnostic to the kind of objects it's sorting, we can use it to sort strings: it costs $O(L\cdot n\cdot\log n) = O(N\cdot\log n)$ time on average (worst case if using \texttt{mergesort}, \texttt{heapsort} or other very efficient sorting algorithms). Whenever the portion between $l$ and $r$ in \texttt{qsort} is small, with atomic items we would do insertion sort because the elements would fit in few cache lines, but with strings each item is a pointer so the items are probably spread apart. So we will try to improve this.\\\\
+The lower bound is composed by two parts: \begin{list}{}{}
+	\item I have to sort the first characters of these $n$ objects and I cannot escape the comparison of the first objects, so the classic lower bound $\Omega(n\cdot\log n)$
+	\item The first character only is too limiting, how many characters I have to surely look at? $d_i$ is the \textbf{distinguishing prefix} and is the minimum number of characters that we have to consider in order to distinguish the string $s_i$ from the others. We do not need the rest of the characters of $s_i$ in order to distinguish it from the other strings. We can say that $d = \sum_s d_s$ is the total distinguishing prefix.\\
+	So the second part of the lower bound is $\Omega(d)$, I cannot look at less than $d$ symbols.
+\end{list}
+So the lower bound is $\Omega(n\log n + d)$ time or character comparisons, which in asymptotic notation means the maximum between the two parts.
+\paragraph{State of \texttt{qsort}} In the case of $n$ strings $s_i$, composed by $l$ zeroes followed by $\log n$ other characters
+$$\begin{array}{r c c}
+ & l & \log n\\
+s_1 & 00\ldots 0 & 00\ldots 0\\
+s_2 & 00\ldots 0 & 00\ldots 1\\
+\vdots & \vdots & \vdots\\
+s_n & 00\ldots 0 & 11\ldots 1\\
+\end{array} n$$
+The \texttt{qsort} is $O(L\cdot n\cdot \log n)$, $L= l+\log n$ because they have all the same length. So \texttt{qsort} is $O(l\cdot n\cdot\log n + n\cdot\log^2n)$\\
+It is at least a $\log n$ factor from the lower bound, which can be very impactful due to the cache misses and the memory accesses.
+\subsection{Radix sort} Two families
+\begin{list}{}{}
+	\item \textbf{Most significant digit sort} (\textbf{MSD}), where we scan from the left to right
+	\item \textbf{Least significant digit sort} (\textbf{LSD}), where we scan from the right to left\\
+	Used in the punch cards 
+\end{list}
+An example: $S = \{007, 017, 042, 911, 999\}, n=5, \sigma = 10, N = 3\cdot 5 = 15$. The idea of MSD is trivial: we scan  the strings from left to right and position them according to the first character. So we have an array of size $\sigma$ and we put each item in the corresponding bucket according to the first symbol. Then we consider the second digits for every bucket, and do the same thing.
+$$\begin{array}{c c c c c}
+	0 & 1 & 2 & \ldots & 9\\
+	\downarrow & \ & \ & \ldots & \downarrow\\
+	007 & & & & 911\\
+	017 & & & & 999\\
+	042
+\end{array}$$
+$$\begin{array}{c c c c c c}
+	0 & 1 & 2 & 3 & 4 & \ldots\\
+	\downarrow & \downarrow & \ & \ & \downarrow & \\
+	007 & 017 & & & 042 &\\
+\end{array}\:\:\:\:\:\:\:\:\:\: \begin{array}{c c c c}
+	0 & 1 & \ldots & 9\\
+	\ & \downarrow & \ & \downarrow \\
+	 & 911 & & 999\\
+\end{array}$$
+We go down until we have one item per bucket in each level. If we had "019", it would've gone in the second bucket of the second level, so we would have done a third level.\\
+For each element $s_i$ we create $d_i$ nodes (arrays), its distinguishing prefix, but both nodes are in general shared with other strings. So $\forall$ string $s$ we create $d_s$ nodes. The total number of nodes (arrays) $\leq d = \sum_s d_s$ because some nodes are shared between strings. The arrays are of size $\sigma$, so in space terms we have $O(d\cdot \sigma)$. The sorting time is composed of: the time required to create the tree of arrays of $d\cdot\sigma$ nodes, so $O(d\cdot\sigma)$, then we have to scan the final set of strings, the last level, which is at most every possible node of the last level, another $O(d\cdot\sigma)$. So the cost is $O(d\sigma)$. This is not a comparison-based algorithm, so the lower bound stated before doesn't apply.
+\paragraph{Trie} A \textbf{data structure}. It's a tree, every node is an array of $\sigma$ positions where each position have a pointer to other nodes ($\sigma$-ary tree). The \textbf{MSD algorithm builds a trie}.\\
+Good and bad properties. The good is that the array is very sparsely populated, with big $\sigma$, so it's very efficient in time for searches, but it's inefficient in space ($d\cdot\sigma$).\\
+Given a pattern $P[1,p]$ of $p$ characters, we can check if $P$ is in the trie or not in $O(p)$, optimal in time. With arrays it's very inefficient in space, though, because most of the arrays would be empty or almost empty especially in the leaves. We need another way of implementing an array, there are two possibilities: binary search tree or hashtable, let's see the second one.
+\subparagraph{Trie with hashtables} We insert $\langle$digit, pointer$\rangle$ pairs. The idea is to create an hashtable for every node whose size is proportional to the number of distinct pairs ($\equiv\#$ edges, the pointers in the arrays). For example, an hashtable $T$ of $3$ positions where we insert the pairs $\langle 1,p_1\rangle, \langle 2,p_2\rangle, \langle \sigma,p_\sigma\rangle$ can be populated by applying the hash function to the keys and end up like $\begin{array}{c c l}
+T\\
+0&\rightarrow&\langle 2,p_2\rangle\\
+1\\
+2&\rightarrow&\langle 1,p_1,\rangle,\:\langle \sigma, p_\sigma\rangle
+\end{array}$\\
+So the size of the table is proportional to the number of keys, $|T|=O(\#$ keys$)$, and the cost of searching in an hashtable is $O(1)$ on average.
+\subparagraph{Trie with binary search tree} In this case, the worst case time cost is $O(\log \sigma)$\\\\
+In both cases we have a space complexity of $O(\#$ keys$)=O(\#$ edges$)$
+\paragraph{MSD radix sort with hashtable} In every node we have and hashtable of size the number of edges but not sorted. The algorithm goes like this:
+\begin{enumerate}
+	\item Builds the trie\\
+	Search and insertion of hashtables are both $O(1)$, so we pay $1$ for every string for every level we need to go down on. So constant time $\cdot$ the number of traversed nodes, which is $d_s$ for the string $s\Rightarrow$ total time is $\sum_s O(1)\cdot d_s = O(d)$ on average time .\\
+	In a binary search tree, the $O(1)$ becomes $O(\log\sigma)$ so the total cost is $O(d\cdot\log\sigma)$
+	\item Sorting the hashtables to sort the edges. We can use \texttt{qsort} on the pairs, which costs $O(\#$ edges$\cdot\log_2\#$ edges$)$.\\
+	Let's define $l_u$ the number of edges in the node $u$. So the total cost of sorting is $\sum_u O(l_i\cdot\log l_u)=O\left(\sum_u l_u\log l_u \right) = O\left(\sum_u l_u\log\sigma \right)$ because the number of edges in node $u$ is $\leq \sigma$ for every $u$. So we have $= O\left((\log\sigma)\cdot\sum_u l_u \right)$, the sum over all the nodes of the number of edges, which is $\leq d$. So the total cost of sorting is $O(d\cdot\log\sigma)$ in time and $O(d)$ in space.
+\end{enumerate}
+\paragraph{LSD radix sort} LSD scans the opposite way, from right to left, we sort every column using what's called a \textbf{stable-sort}: a sort that respects the original order, if two columns are equal. We used the counting sort, with a complexity of $O(\#$ keys$ + \sigma)$ with $|\Sigma| =$ size of the alphabet.\\
+An example assuming to have the following strings \begin{list}{}{}
+	\item $\begin{array}{c}
+	017\\042\\665\\111\\007
+	\end{array}$ first digit $\rightarrow\begin{array}{c}
+	111\\042\\665\\017\\007
+	\end{array}$ second digit $\rightarrow\begin{array}{c}
+	007\\111\\017\\042\\665
+	\end{array}$ third digit $\rightarrow\begin{array}{c}
+	007\\017\\042\\111\\665
+	\end{array}$
+\end{list}
+By respecting the order thanks to the stable sort, we get a ordered sequence. The total complexity is the $\#$ digits per string times the cost of counting sort. So $O(L\cdot(n+\sigma)) = O(Ln + L\sigma) = O(N)$ time and space.
+\subparagraph{Proof of why it works} Let's focus on two strings: $x,y$, with $x<y$. Let's say they have the same prefix $\alpha$, a character $a$ for $x$ and $b$ for $y$ and then the rest of the string: $$\begin{array}{r c c c}
+x = & \:\:\:\:\:\alpha\:\:\:\:\: & a & \ldots\\
+y = & \:\:\:\:\:\alpha\:\:\:\:\: & b & \ldots\\
+\end{array}$$
+$x<y\Rightarrow a<b$, for example $x$ is "abaco" and $y$ is "abate": $\alpha =$ "aba", $a=$ c, $b=$ t.
+$$\begin{array}{r c c c}
+x = & \hbox{aba} & \hbox{c} & \hbox{o}\\
+y = & \hbox{aba} & \hbox{t} & \hbox{e}\\
+\end{array}$$
+In the first phases, we compare the right part of both strings and $x$ could end up before or after $y$, it's not important. At some point, it will compare $a,b$ and since $a< b$ we will have a situation where $x$ comes before $y$. Then we compare $\alpha$, but they are equal and thanks to the stable sort the relative order between $x$ and $y$ will not change (possibly changing distance, but they will not "invert" order). This applies to every pair of strings, so the final order of strings will be a sorted order.
+\subparagraph{More precise complexity} Let's assume binary strings, with $0,1$ digits and of $b$ length. We can apply the LSD radix sort to groups of $r$ bits each: $\frac{b}{r}$ groups. Each group of $r$ bits can be interpreted as a symbol, so $\sigma = 2^r$ maximum configurations of $r$ bits (from all zeroes to all ones)\\
+$\frac{b}{r}$ phases each costing $n+2^r$, so the total cost is $O(\frac{b}{r}(n+2^r))$: the minimum is in $r=\log n$ and so the complexity becomes $(\frac{b}{\log n})\cdot(n+n) = O\left(\frac{n\cdot b}{\log n}\right) = O\left(\frac{N}{\log n}\right)$ time.
 \end{document}
