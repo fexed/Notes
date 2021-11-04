@@ -24,6 +24,8 @@
   {}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{tikz} 
+\usepackage[makeroom]{cancel}
 \begin{document}
 \title{Artificial Intelligence Fundamentals}
 \author{Federico Matteoni}
@@ -1201,4 +1203,149 @@ $X$ and $Y$ are \textbf{conditionally independent given $Z$} when $P(X,Y\:|\:Z)=
 	\item $P(Y\:|\:X,Z) = P(Y\:|\:Z)$
 \end{list}
 \paragraph{Naive Bayes model} $P($Cause, Effect$_1$, \ldots, Effect$_n) = P($Cause$)\prod_i P($Effect$_i\:|\:$Cause$)$
+\subsection{Probabilistic Reasoning} 
+\paragraph{Bayesian Networks} Also called \textbf{belief networks}: graphs for representing dependencies among variables. The network makes specific conditional dependencies: the intuitive meaning of an arc from $X$ to $Y$ is typically that $X$ has a direct influence on $Y$.\\
+Bayesian Networks are \textbf{directed acyclic graphs} (DAG) so defined:
+\begin{list}{}{}
+	\item Each node corresponds to a random variable, which may be discrete or continuous.
+	\item Directed links or arcs connect pairs of nodes. If there's an arc from node $X$ to node $Y$, $X$ is said to be a parent of $Y$: Parents($Y$) is the set of variables directly influencing $Y$.
+	\item Each node $X$ has an associated \textbf{conditional probability distribution table} $P(X\:|$ Parents$(X))$ that quantifies the effect of the parents on the node.
+\end{list}
+It's easier to decide what direct influences exist in the domain than actually specifying the probability themselves.
+\paragraph{Cavity \& Weather example}
+\begin{center}
+\begin{tikzpicture}[node distance={25mm}, main/.style = {draw, circle}] 
+\node[main] (1) {Weather}; 
+\node[main] (2) [right of=1,yshift = -1cm] {Cavity}; 
+\node[main] (3) [below left of=2] {Toothache}; 
+\node[main] (4) [below right of=2] {Catch}; 
+\draw[->] (2) -- (3);
+\draw[->] (2) -- (4);
+\end{tikzpicture} 
+\end{center}
+Weather is independent from the other variables, and Toothache and Catch are \textbf{conditionally dependent} given Cavity. The \textbf{lack of an arc between two variables} is interpreted as \textbf{independence}.
+\paragraph{Alarm example} \textit{The burglary alarm goes off very likely on burglary and occasionally on earthquakes. John and Mary are neighbors who agreed to call when the alarm goes off. Their reliability is different\ldots}
+\begin{center}
+\begin{tikzpicture}[node distance={25mm}, main/.style = {draw, circle}] 
+\node[main] (1) {Burglary}; 
+\node (6) [left of=1] {\begin{tabular}{|c|}
+\hline P(B)\\\hline.001\\\hline
+\end{tabular}};
+\node[main] (2) [right of=1] {Earthquake};
+\node (7) [right of=2] {\begin{tabular}{|c|}
+\hline P(E)\\\hline.002\\\hline
+\end{tabular}};
+\node[main] (3) [below left of=2,yshift = -1cm] {Alarm}; 
+\node (8) [right of=3] {\begin{tabular}{|c|c|c|}
+\hline B&E&P(A)\\
+\hline t&t&.95\\
+t&f&.94\\
+f&t&.29\\
+f&f&.001\\
+\hline
+\end{tabular}};
+\node[main] (4) [below right of=3,yshift = -1cm] {MaryCalls};
+\node (9) [right of=4] {\begin{tabular}{|c|c|}
+\hline A&P(M)\\
+\hline t&.70\\
+f&.01\\
+\hline
+\end{tabular}};
+\node[main] (5) [below left of=3,yshift = -1cm] {JohnCalls}; 
+\node (10) [left of=5] {\begin{tabular}{|c|c|}
+\hline A&P(J)\\
+\hline t&.90\\
+f&.05\\
+\hline
+\end{tabular}};
+\draw[->] (1) -- (3);
+\draw[->] (2) -- (3);
+\draw[->] (3) -- (4);
+\draw[->] (3) -- (5);
+\end{tikzpicture} 
+\end{center}
+The tables are called \textbf{Condition Probability Tables}.
+\subsubsection{Semantic of Bayesian Networks}
+Two alternative and equivalent ways to look at the semantic of Bayesian Networks:
+\begin{list}{}{}
+	\item Distributed representation of the full joint probability distribution\\
+	Suggests a metodology for constructing networks
+	\item Encoding of a collection of conditional independence statements\\
+	Helps in designing inference procedures
+\end{list}
+\paragraph{Representation of the full joint distribution} A joint probability distribution can be expressed in terms of conditional probabilities
+\begin{list}{}{}
+	\item $P(x_1,\ldots,x_n) = P(x_n\:|\:x_{n-1},\ldots,x_1)\cdot P(x_{n-1},\ldots,x_1)$, product rule
+\end{list}
+And by iterating the process we get the \textbf{chain-rule}
+\begin{list}{}{}
+	\item $P(x_1,\ldots,x_n) = P(x_n\:|\:x_{n-1},\ldots,x_1)P(x_{n-1}\:|\:x_{n-2},\ldots,x_1)\ldots P(x_2\:|\:x_1)P(x_1) = \prod_{i=1}^n P(x_i\:|\:x_{i-1},\ldots,x_1)$
+\end{list}
+So we assumed an order of the variables, we computed posterior probabilities of each variable, given all previous variables and we took the product of these posteriors.
+\subparagraph{Representing the joint probability distribution} Given that $P(x_1,\ldots,x_n) = \prod_{i=1}^n P(x_i\:|\:x_{i-1},\ldots,x_1)$ and assuming\begin{list}{}{}
+	\item Each variable appears after its parents in the ordering, meaning Parents$(X_i) \subseteq \{X_{i-1},\ldots,X_1\}$
+	\item We simplify the computation by conditioning the computation only to values of the parent variable (assuming the others are independent)
+	\item The numbers in the Condition Probability Tables are actually conditional probabilities.
+\end{list}
+Each entry in the joint distribution can be computed as the product of the appropriate entries in the conditional probability tables (CPTs) in the Bayesian network. We get the \textbf{simplified rule} for computing joint distributions: $$P(x_1,\ldots,x_n) = \prod_{i=1}^n P(x_i\:|\:\hbox{Parents}(x_i))$$
+Given the Alarm example and the ordering $(J,M,A,B,E)$ we can compute, by the chain rule \begin{list}{}{}
+	\item $P(j,m,a,\neg b, \neg e) = P(j\:|\:m,a,\neg b, \neg e)P(m\:|\:a,\neg b, \neg e)P(a\:|\:\neg b, \neg e)P(\neg b\:|\:\neg e)P(\neg e)$
+\end{list}
+And taking into account only direct dependencies, we can simplify as \begin{list}{}{}
+	\item $P(j,m,a,\neg b, \neg e) = P(j\:|\:\cancel{m},a,\cancel{\neg b, \neg e})P(m\:|\:a,\cancel{\neg b, \neg e})P(a\:|\:\neg b, \neg e)P(\neg b\:|\:\cancel{\neg e})P(\neg e)$
+\end{list}
+And using the probability values from the CPTs we get $P(j\:|\:a)P(m\:|\:a)P(a\:|\:\neg b,\neg e)P(\neg b)P(\neg e) = 0.9\cdot0.7\cdot0.001\cdot0.999\cdot0.998=0.000628$
+\subparagraph{Procedure for building the network}
+\begin{list}{}{}
+	\item Nodes: determine the set of variables required to model the domain, and order them $\{X_1,\ldots,X_n\}$\\
+	\textbf{Ordering influences the result}: the resulting network will be more compact if the variables are ordered such that causes precedes effects.
+	\item Liks: for $i=1$ to $n$ do
+	\begin{list}{}{}
+		\item Choose, from $X_1,\ldots,X_{i-1}$ a minimal set of parents for $X_i$ such that the equation $P(X_i\:|\:X_{i-1},\ldots,X_1) = P(X_i\:|\:$Parents$(X_i))$ is satisfied
+		\item For each parent insert an arc from the parent to $X_i$
+		\item CPTs: write down the conditional probability table $P(X_i\:|\:$Parents$(X_i))$
+	\end{list}
+\end{list}
+Note that the parents of $X_i$ should contain all the nodes that \textbf{directly} influence $X_i$. Also the network is a DAG by construction and contains no redundant probability values.\\
+In \textbf{locally structured systems} each subcomponent interacts directly only with a bounded number of other components. They are usually associated with linear rather than exponential growth in complexity. In the case of Bayesian networks, it is reasonable to suppose that in most domains each random variable is directly influenced by at most $k$ others, for some constant $k$.\\
+If we assume $n$ boolean variables, then each conditional probability table will have at most $2^k$ numbers, and the complete network can be specified by $n\cdot2^k$ numbers. In contrast, the joint distribution contains $2^n$ numbers.
+\paragraph{Conditional Independence} We can also extract the independence assumptions encoded in the graph to do inference. The topological semantics specifies that each variable is conditionally independent of its non-descendants, given its parents. In our example, the network tells us that JohnCalls is independent of Burglary, Earthquake and MaryCalls given the value of Alarm. This autorizes the following semplification $P(J,B,E,M\:|\:A)= P(J\:|\:A)P(M\:|\:A)P(B)P(E)$\\
+A node is conditionally independent of all other nodes in the network given its parents, children and children's parents.
+\paragraph{Efficient construction of CPTs} Often, the relationship between a node and its parent follows a canonical distribution and the construction of the CPTs can be simplified. Two examples:
+\begin{list}{}{}
+	\item \textbf{Deterministic Nodes}: nodes whose value is specified exactly by the values of their parents. For example, Price$_1$,\ldots,Price$_k$ (the parents) determine $min$(Price$_1$,\ldots,Price$_k$) (the best price)
+	\item \textbf{Noisy-OR Relations}: a generalization of the logical OR. We can specify inibiting factors, so that A$\vee$B$\Leftrightarrow$C but not always. The probability of $\neg$C is the product of the inibition probabilities $q$ for each parent that is true. It is $1$ when none of the causes are true. $P(x_i\:|\:$Parents$(X_i)) = 1-\prod_{\{j\:|\:X_j=\hbox{true}\}}q_j$
+\end{list}
+\paragraph{Continuous variables} One possible way to handle them is to avoid them and use discrete intervals. For example, temperature into three intervals: $<0$°C, $[0,100]$°C, $>100$°C.\\
+The most common solution is to define standard families of probability density function that are specified by a finite number of parameters, for example a Gaussian (normal) distribution $N(\mu,\sigma^2)(x)$ with parameters the mean $\mu$ and the variance $\sigma^2$.\\
+A network with both discrete and continuous variables is called hybrid Bayesian network.
+\subsubsection{Exact inference in Bayesian Networks}
+The basic task of probabilistic inference. Given:\begin{list}{}{}
+	\item $X$: the query variable (assuming just one)
+	\item $E$: the set of evidence variables $\{E_1,\ldots,E_m\}$
+	\item $Y$: the set of unknown variables, i.e. the \textbf{hidden} non-evidence variables $\{Y_1,\ldots,Y_l\}$
+	\item Thus $X = \{X\} \cup E \cup Y$
+\end{list}
+A typical query asks for the posterior probability distribution, given some evidence $P(X\:|\:e)$. In the alarm example, a query could be $P($Burglary$\:|\:$JohnCalls=true, MaryCalls=true$)$ with $E=\{$JohnCalls, MaryCalls$\}$ and $Y=\{$Earthquake, Alarm$\}$
+\paragraph{Inference by enumeration} We defined a procedure for the task as $P(X\:|\:e)=\alpha P(X,e) = \alpha\sum_y P(X,e,y)$ with $\alpha$ being a normalizing factor.\\
+The query can be answered using a Bayesian network by computing sums of products of conditional probabilities from the network. In the example: $P(B\:|\:j,m) = \alpha P(B,j,m) = \alpha\sum_e\sum_a P(B,j,m,e,a)$ summing over $y=\{E,A\}$\\
+We can now use the CPTs for computing $P(B,j,m,e,a)$, i.e. the case of Burglary = true:
+$$P(B\:|\:j,m) = \alpha\sum_e\sum_a P(B,j,m,e,a) = \alpha\sum_e\sum_aP(B)P(e)P(a\:|\:B,e)P(j\:|\:a)P(m\:|\:a)$$
+And simplifying
+$$P(B\:|\:j,m) = \alpha P(B)\sum_e P(e) \sum_a P(a\:|\:B,e)P(j\:|\:a)P(m\:|\:a)$$
+The tree of computation is evaluated depth first, but the computation can be improved substantially by storing and reusing the results of repeated computations. The variable elimination algorithm proceeds right to left (bottom-up in the tree). Conditional probabilities are represented as factors, matrices resulting from conditional probabilities. In the example, it becomes
+$$P(B\:|\:j,m) = \alpha f_1(B)\sum_e f_2(E) \sum_a f_3(A,B,E)f_4(A)f_5(A)$$
+Given a variable and some evidence, a factor can be built by looking at the variable part of the CPT's in the network: \texttt{make-factor(var, e)}
+\begin{list}{}{}
+	\item \texttt{make-factor(M, [j,m]) = f5(A)} because $M$ only depends on $A$, $m$ is an evidence\\
+	$f_5(A) = \langle P(m\:|\:a),P(m\:|\:\neg a)\rangle = \langle 0.7,0.01\rangle$
+\end{list}
+The pointwise product of two factors $f_1,f_2$ yields a new factor $f_3$ such that
+\begin{list}{}{}
+	\item variables are the union of the variables in $f_1$ and $f_2$
+	\item elements are given by the product of the corresponding values in the two factors
+\end{list}
+So $f_1(A,B)\cdot f_2(B,C)$ gives $f_3(A,B,C)$\\\\
+The ordering of variables can produce differences in efficiency. 
+\paragraph{Complexity} Depends strongly on the structure of the network. Singly connected networks or polytrees are such that there is at most one undirected path between any two nodes (the Alarm network, for example). The time and space complexity in polytrees is linear in the size of network (the number of CPT entries). For multiply connected networks, variable elimination can have exponential time and space complexity in the worst case. In fact, inference in Bayesian networks includes as a special case propositional inference, which is NP-complete.
 \end{document}
