@@ -699,7 +699,7 @@ The lower bound is composed by two parts: \begin{list}{}{}
 	\item The first character only is too limiting, how many characters I have to surely look at? $d_i$ is the \textbf{distinguishing prefix} and is the minimum number of characters that we have to consider in order to distinguish the string $s_i$ from the others. We do not need the rest of the characters of $s_i$ in order to distinguish it from the other strings. We can say that $d = \sum_s d_s$ is the total distinguishing prefix.\\
 	So the second part of the lower bound is $\Omega(d)$, I cannot look at less than $d$ symbols.
 \end{list}
-So the lower bound is $\Omega(n\log n + d)$ time or character comparisons, which in asymptotic notation means the maximum between the two parts.
+So the \textbf{lower bound for comparison-based sorting algorithms for strings} is $\Omega(n\log n + d)$ time or character comparisons, which in asymptotic notation means the maximum between the two parts.
 \paragraph{State of \texttt{qsort}} In the case of $n$ strings $s_i$, composed by $l$ zeroes followed by $\log n$ other characters
 $$\begin{array}{r c c}
  & l & \log n\\
@@ -780,4 +780,60 @@ y = & \hbox{aba} & \hbox{t} & \hbox{e}\\
 In the first phases, we compare the right part of both strings and $x$ could end up before or after $y$, it's not important. At some point, it will compare $a,b$ and since $a< b$ we will have a situation where $x$ comes before $y$. Then we compare $\alpha$, but they are equal and thanks to the stable sort the relative order between $x$ and $y$ will not change (possibly changing distance, but they will not "invert" order). This applies to every pair of strings, so the final order of strings will be a sorted order.
 \subparagraph{More precise complexity} Let's assume binary strings, with $0,1$ digits and of $b$ length. We can apply the LSD radix sort to groups of $r$ bits each: $\frac{b}{r}$ groups. Each group of $r$ bits can be interpreted as a symbol, so $\sigma = 2^r$ maximum configurations of $r$ bits (from all zeroes to all ones)\\
 $\frac{b}{r}$ phases each costing $n+2^r$, so the total cost is $O(\frac{b}{r}(n+2^r))$: the minimum is in $r=\log n$ and so the complexity becomes $(\frac{b}{\log n})\cdot(n+n) = O\left(\frac{n\cdot b}{\log n}\right) = O\left(\frac{N}{\log n}\right)$ time.
+\subsection{Multi-key Quicksort}
+The invariant is that that there is a prefix $[0, i-1]$ shared by the strings in $R$, $i$ is the character we compare and at the beginning $i=1$
+\begin{lstlisting}[style=myPython]
+def MKQ(R, i):
+	if (|R| <= 1):
+		return R
+	else:
+		choose a pivot string p in R
+		Rless = {s in R | s[i] < p[i]}
+		Req = {s in R | s[i] = p[i]}
+		Rgreat = {s in R | s[i] > p[i]}
+		A = MKQ(Rless, i)
+		B = MKQ(Req, i+1)
+		C = MKQ(Rgreat, i)
+		return A + B + C
+\end{lstlisting}
+We have the strings, and we know that all of them share $i-1$ characters. The $i$th character of the pivot strings realizes the three-way partitioning of $R$: if the $i$th character of the string is $<$ than the $i$th character of the pivot, then that string goes into $R_<$, if it's $=$ goes into $R_=$ and if it's greater goes into $R_>$.\\
+So returning the three partitions in order gives us the sorted order of the original $R$. Some considerations:
+\begin{list}{}{}
+	\item $|R_<|,|R_>|<|R|$ because $p$ is not in them, so their size is surely shrinking
+	\item $|R_=|\leq |R|$, could be equal whenever the $i$th character of all the strings in $R$ is equal to the $i$th character of the pivot string $p$. In any case, $i$ is increased by one (also $i\leq$ maximum string length)\\
+	So \textbf{the recursion is well-posed}.
+\end{list}
+Let's reason about complexity, taking $s\in S$ the original set, with $R=S$ at the beginning. For a generic step we have $R, i$ and there are two cases that can occur to $s$:
+\begin{list}{}{}
+	\item $s[i]<p[i]\rightarrow s\in R_<$ or $s[i]>p[i]\rightarrow s\in R_>$ and in both cases $|R_<|<|R|\wedge|R_>|<|R|$
+	\item $s[i]=p[i]\rightarrow s\in R_=$ and $i++$
+\end{list}
+How many times we do $i++$ on the string $s$? $i\leq d_s$ because $d_s$ is the maximum number of symbols shared with another string plus 1 (the distinguishing prefix), so the prefix of $s$ $s[1,d_s]$ is distinct from every other string. So on average, picking a random pivot, we have that $|R_<|\simeq\frac{|R|}{2}$ and $|R_>|\simeq\frac{|R|}{2}$. This means that we have a logarithm of recursive steps, and since we're starting from $S$ we have $O(\log |S|)$ recursive steps on average.\\
+For the string $s$, the numbers of recursive calls is $O(\log n + d_s)$, and $\sum_s O(\log n + d_s) = O(n\log n + d)$ average time, so it's optimal on average.
+\subsection{Ternary Search Tree} It's a \textbf{ternary trie}.\\
+Each node has a character and may have three outgoing edges: one is $<$, one is $=$ and one is $>$. If the node corresponds to the $i$th position and has character "c", then all the nodes in the $=$ subtree have "c" in the $i$th position, all the nodes in the $<$ subtree have characters $<$ "c" in the $i$th position and in the $>$ subtree the $i$th characters are $>$ "c". In the $<$ and $>$ subtree you still remain in the $i$th character, so the root of those subtrees still correspond the the $i$th character, while in the $=$ subtree you advance so that root corresponds to the $i+1$th character (much like the \texttt{MKQ} code before).\\
+But we don't want to explode the entire string. Let's do an example with S = \{cat, abi, cast, cam, at\}:
+\begin{list}{}{}
+	\item We insert "cat", in an empty tree, so simply
+		\begin{center}
+			\Tree [.C [. ] [.cat ] [. ] ]
+		\end{center}
+	\item "abi" in the $<$ subtree
+		\begin{center}
+			\Tree [.C [.abi ] [.cat ] [. ] ]
+		\end{center}
+	\item "cast", but we have "cat" so we have to distinguish the two string. The standard way is to take the character of the string that was already in the tree, so we distinguish them based on the "T" in "cat"
+		\begin{center}
+			\Tree [.C [.abi ] [.A [. ] [.T [.cast ] [.cat ] [. ] ] [. ] ] [. ] ]
+		\end{center}
+	\item "car", again a \textit{collision} with "cast" (remember that the $<$ and $>$ subtree match still the $i$th character, and only the $=$ subtree match the $i+1$th character)
+		\begin{center}
+			\Tree [.C [.abi ] [.A [. ] [.T [.S [.car ] [.cast ] [. ] ] [.cat ] [. ] ] [. ] ] [. ] ]
+		\end{center}
+	\item "at", \textit{collision} on the $<$ subtree of "C"
+		\begin{center}
+			\Tree [.C [.A [. ] [.B [. ] [.abi ] [.at ] ] [. ] ] [.A [. ] [.T [.S [.car ] [.cast ] [. ] ] [.cat ] [. ] ] [. ] ] [. ] ]
+		\end{center}
+\end{list}
+The TST could be unbalanced, but if strings are inserted randomly then we have that the string $s$ gets a path of length $O(|s| + \log n)$ on average. Also every node needs only an array of three positions and one character, very compact in space.
 \end{document}
