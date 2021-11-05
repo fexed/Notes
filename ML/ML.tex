@@ -874,4 +874,51 @@ Combine the results by output weights (weighted vote for classifiers, with more 
 If not stopped, boosting will learn to classify correctly all instances from TR, providing an incremental approach to construct complex models. Can suffer from noisy data (which are weighted more)
 \subsection{Feature Selection} Find a selection of features that are more informative for the problem at hands. Benefits for: dimensionality reduction and filtering of irrelevant information and noise, interpretability\ldots\\
 Computationally hard (many possible subsets of features, retraining\ldots) typically an heuristic search of the best subset by greedy or other optimization techniques.
+\section{Applications} A huge number of successful applications in all the fields of ML.
+\subsection{Character recognition (classification)}
+\paragraph{First approaches} Standard NN with 256 inputs (16$\times$16 pixels): misclassification rate of 5/20\% (mostly due to lack of invariance as rotations ecc.)
+\paragraph{Basic idea} Exploiting the architecture design to include pior information into NN:
+\begin{list}{}{}
+	\item Restricting the network architecture by extracting local features
+	\item Constraining weights by sharing them among different units, as to reduce the number of free parameters while still allowing more complex connectivity (same operation on different part of the input, because the features of the characters should appear in different areas of the image
+\end{list}
+$\Rightarrow$ \textbf{Convolutional neural networks}
+\subsection{Convolutional Neural Networks}
+\paragraph{The name} Takes inspiration from the convolutional operator $$(f * g)(t) = \int_{-\infty}^\infty f(\tau)g(t-\tau)\:d\tau = \int_{-\infty}^\infty f(t- \tau)g(\tau)\:d\tau$$
+Concept: weighted average of a function $f$ weighted by another function $g$ moved over time (\textbf{sliding}) $\Rightarrow$ a simple neural unit example over a stream
+$$out_t = \sum_{i=1}^3w_ix_{t+i-2}$$
+\begin{center}
+	\includegraphics[scale=0.5]{26.png}
+\end{center}
+We will call this a "time-delay NN": weights are tuned as usual by learning and there's weight sharing.
+\paragraph{2D convolution} Using a $n\times n$ kernel (\textbf{local receptive field}), we traverse the image with 1px shifts (\textbf{stride}), with padding used to treat the border.\begin{center}
+	\includegraphics[scale=0.5]{27.png}\\
+	\includegraphics[scale=0.5]{28.png}
+\end{center}
+With a 2D image $I$ and a 2D kernel $K$ $$S(i,j) = (I*K)(i,j)=\sum_m\sum_n I(m,n)K(i-m,j-n)$$ or alternatively $$S(i,j) = (I*K)(i,j)=\sum_m\sum_n I(i+m,j+n)K(m,n)$$
+The units weights are a \textbf{filter}, trained to detect some features in the image:
+\begin{list}{}{}
+	\item \textbf{Local and small receptive field} (kernel): by this architecture constraints, learnt "filters" produce the strongest response to a spatially local input pattern
+	\item The same unit/filter is \textbf{applied across the entire image}: this allows for features to be detected regardless of their position in the visual field, thus constituting the property of \textbf{translation invariance}
+	\item \textbf{Learnable filters}: we can learn the filters that in traditional algorithms for image processing were hand-engineered. This independence from prior knowledge and human effort in feature design in a major advantage.
+	\item \textbf{Stacking many layers}: feature maps unit represent larger and larger areas of the original image (assembling areas of the previous feature maps).
+\end{list}
+\paragraph{Pooling} So we reduce the feature map by sumbsampling (see before), or by operating a mean (average or weighted average), or by a max pool operation over the neighbors of each input. In practice, instead of producing a value for each input pixel, we produce a value for a rectangular set of pixels taking the mean or the max of the kernel/neuron outputs.
+\begin{center}
+	\includegraphics[scale=0.5]{29.png}\\
+	Max pooling with a $2\times2$ filter and stride of $2$
+\end{center}
+Pooling also further helps to make the representation become approximately invariant to small translations of the input.
+\paragraph{Overview} CNNs exploits weight sharing to setup a shifting windows or \textbf{local field} of the units over a segment of the input signal, also extended to 2D images and re-apply for many layers (\textbf{feature maps}).
+\paragraph{Advantages}
+\begin{list}{}{}
+	\item \textbf{Local connections and weight sharing}: detect local patterns and invariant to translations, helping reducing the number of free-parameters.
+	\item \textbf{Pooling}: helps reducing the dimension of the representation (in each layer, so a pyramid of layers), also helps to small shifts and distortions
+	\item Historical instance of deep neural network, progressive abstracting features from images.
+\end{list}
+\paragraph{How to use?} Training is typically made by backpropagation, with the many heuristics that we studied and some specializations for weight sharing, pooling ecc\ldots\\
+Given the typical usage of huge networks and large amount of data, many hyperparameters are fixed by experience and expert suggestion, as it would be very expensive to run cross-validation over a large set of hyperparameters.
+\paragraph{Modern CNNs} There are many variants and specialized architectures and models fro processing of images, and efficient implementations through tensor representation of matrices, exploiting GPUs. Even using the features of models already trained with large benchmarks: many pre-trained CNNs for image classification, segmentation, face recognition and text detection available.
+\paragraph{Parallelize linear operations on GPU} Matrix multiplication (i.e. dot product) is a typical linear operation performed efficiently on GPU. It can be parallelized by parallelizing the sum $(AB)_{ij} = \sum_{k=1}^m A_{ik}B_{kj}$ or a set of independent products $A_{ik}B_{kj}$ for each $i,j$\\
+In computer programming, a \textbf{tensor} is a multi-dimensional matrix with a linear operation called \texttt{tensordot}. In many libraries such as TensorFlow we can use tensors and perform linear operations as \texttt{tensordot0}s between them.
 \end{document}
