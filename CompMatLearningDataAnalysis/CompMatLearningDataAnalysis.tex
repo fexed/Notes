@@ -435,6 +435,78 @@ What if we perturb $\overline{A} = A + \Delta$? One can prove, if $\overline{x}$
 A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in R^{n\times n}$ is singular if $rk(B)<n$. By the Eckhart-Young theorem, $min_{B\:sing}||A-B|| = min_{rk(B)\leq n-1}||A-B|| = \sigma_n$ because $B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$. Hence $\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{min_{B\:sing}||A-B||}{||A||}$
 \paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in R^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
 \paragraph{Theorem} The condition number of the least-squares problem $min||Ax-b||$ for a full column rank matrix $A\in R^{m\times n},b\in R^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{||Ax||}{||b||}$$
+\paragraph{Condition Number} "Local" bound of the form $$\frac{||\overline{y} - y||}{||y||} \leq k\frac{||\overline{x} - x||}{||x||}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\overline{x}$ of $x$, $\overline{y} = f(\overline{x})$
+\section{Floating Point Numbers}
+\paragraph{Quick recap} Binary exponential notation.\\
+\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\overline{x}$ such that\\$\frac{|\overline{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$
+\paragraph{Error analysis} Given a function $y = f(x)$ and $x\in R$, how accurately can I compute $y=f(x)$ on a computer? In general, I can only ask the computer to compute $f(\overline{x})$ where $\overline{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\overline{y}=f(\overline{x})$ from $y=f(x)$?
+$$\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
+This is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\overline{x}-x}{x} = \delta \Leftrightarrow \overline{x} - x = x\delta \Leftrightarrow \overline{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
+$a\oplus b = (a+b)(1+\delta)$, the same for $\ominus$, $\otimes$ ecc: \textbf{error analysis requires keeping track of all these errors}.
+\subparagraph{Example} Error analysis of the scalar product $a\cdot b$ with $a,b \in R^3$
+$$y = a\cdot b = a^Tb = \left[\begin{array}{c c c}
+a_1 & a_2 & a_3
+\end{array}\right] \left[\begin{array}{c}
+b_1\\b_2\\b_3
+\end{array}\right]=a_1b_1+a_2b_2+a_3b_3$$
+We have an algorithm on the computer that performs this, with $|\delta_i|\leq u$ $$\overline{y} = a_1\otimes b_1\oplus a_2\otimes b_2\oplus a_3\otimes b_3 = a_1b_1(1+\delta_1)+a_2b_2(1+\delta_2)+a_3b_3(1+\delta_3) = $$
+$$ = \left((a_1b_1(1+\delta_1) + a_2b_2(1+\delta_2)) (1+\delta_4) + a_3b_3(1+\delta_3)\right)(1+\delta_5) =$$
+$$ = a_1b_1(1+\delta_1)(1+\delta_4)(1+\delta_5) + a_2b_2(1+\delta_2)(1+\delta_4)(1+\delta_5) + a_3b_3(1+\delta_3)(1+\delta_5) = $$
+$$ = a_1b_1+a_2b_2+a_3b_3 + a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5) + O(u^2) = $$
+Being $a_1b_1+a_2b_2+a_3b_3 = y$ we have 
+$$|\overline{y} - y| = |a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5)| + O(u^2)$$
+$$\leq |a_1b_1|\cdot3u + |a_2b_2|\cdot3u + |a_3b_3|\cdot2u + O(u^2)$$
+$$\leq (|a_1b_1|+|a_2b_2|+|a_3b_3|)\cdot 3u$$
+Noting that $|a_1b_1|+|a_2b_2|+|a_3b_3|\neq y$\\
+A \textbf{trick}: $\overline{y}$ is the exact result of a scalar product with a perturbated input. We define \begin{list}{}{}
+	\item $\hat{b_1} = b_1(1+\delta_1)(1+\delta_4)(1+\delta_5)$
+	\item $\hat{b_2} = b_2(1+\delta_2)(1+\delta_4)(1+\delta_5)$
+	\item $\hat{b_3} = b_3(1+\delta_3)(1+\delta_5)$
+\end{list}
+This way $\overline{y} = a_1\hat{b_1}+a_2\hat{b_2}+a_3\hat{b_3}$ is the exact result of the operation on perturbated inputs.\\
+We have $\hat{a} = a$ and $\hat{b}\:|\:|\hat{b_i}-b_i|\leq 3u|b_i|+O(u^2)$, so $||\hat{b}-b||\leq 3u||b||+O(u^2)$ which gives that $\frac{||\hat{b}-b||}{||b||} = 3u$\\
+Now we can use the condition number bound to estimate
+$$\frac{||\overline{y}-y||}{||y||}\leq K_{rel}(\cdot,b)\cdot\frac{||\hat{b}-b||}{||b||} + O(u^2)$$
+Comparing it with the intrinsic error $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(\cdot,b)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(\cdot,b)\cdot u + O(u^2)$ we get that the  algorithm is "as good as possible", apart from the factor $3$, given the intrinsic error.
+\paragraph{Backward Stability} An algorithm to compute $y=f(x)$ is called \textbf{backward stable} if it computes $\overline{y}$ such that $\overline{y}=f(\overline{x})$ for an $\overline{x}$ with $\frac{||\overline{x}-x||}{||x||}\leq O(u)$.\\
+Usually $O(u)$ hides polynomial factors in the dimensions, e.g. $3m^2nu = O(u)$.
+\subparagraph{Theorem} Backward stable algorithms are "almost optimal": they compute $\overline{y}$ with an error that is of the same order of magnitude of the (unavoidable) intrinsic error for a generic input $x\in R$.\\
+\textbf{Proof}: $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot O(u) + O(u^2)$ is only a $O(\:)$ factor away from the intrinsic bound $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u + O(u^2)$\\\\
+Not all algorithms are backward stable: the outer product $ab^T$ isn't. But multiplying by orthogonal matrices is backward stable. If you want an algorithm that computes $B=QA$ (for instance, the householder product), then typically you can write $\overline{B} = QA + E$ with $||E||=||A||\cdot O(u)$
+$$\overline{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$||F||=||Q^TE||=||E||=||A||\cdot O(u)$$
+With non-orthogonal $Q$ I'd get an additional factor $K(Q) = ||Q||\cdot||Q^{-1}||$\\\\
+The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\overline{x}$ exact solution of a least squares problems with $\overline{A} = A +\Delta A, \overline{b} = b+\Delta b$ with $\frac{||\overline{A}-A||}{||A||}=O(u),\frac{||\overline{b}-b||}{||b||}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
+Normal equations is not backward stable, of a general linear system with a poisitive definite $C$ \begin{list}{}{}
+	\item $C = A^TA$
+	\item $d = A^Tb$
+	\item $x = C \backslash d$
+\end{list}
+$A^T$ is not orthogonal. Even if the first two steps are perfectly accurate, the third causes error.
+$C=A^TA\Rightarrow K(C) = \frac{\sigma_1^2}{\sigma_n^2} = K(A)^2) \Rightarrow K_{LS,A\rightarrow x} = K(A)+K(A)^2\cdot\tan\theta$\\
+This may be larger than the condition number of the problem, especially for $\theta\simeq 0$.
+\paragraph{Residuals and a-posteriori stability checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\overline{x}$ that (approximately) solves the problem. How low can $||r|| = ||Ax-b||$ be? Backward stable algorithms usually get residuals of the order of $u$. If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\overline{x}$ is the exact solution of $\overline{A}\overline{x}=\hat{b}$, i.e. $(A+E)\overline{x}=b+f$ with $\frac{||E||}{||A||},\frac{||f||}{||b||} = O(u)$, so $A\overline{x}+E\overline{x}=b+f$ and $||b|| = ||Ax|| \leq ||A||\cdot||x||$
+$$||A\overline{x}-b||=||f-E\overline{x}||\leq ||f||+||E||\cdot||\overline{x}||=O(u)\cdot[||b||+||A||\cdot||x||]=O(u)\cdot||A||\cdot||x||$$
+$$\frac{||A\overline{x}-b||}{||A||\cdot||x||}=O(u)$$
+And typically $||A||\cdot||x||\simeq ||b||$\\
+So with backward stable algorithms we have \textbf{small} (relative) \textbf{residuals} $O(u)$.\\
+Suppose $\overline{x}$ computed somehow has a small $||r||=||A\overline{x}-b||$. Is this a quarantee for $\frac{||\overline{x}-x||}{||x||}$ to be small?
+\subparagraph{Theorem}: $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{||\overline{x}-x||}{||x||}\leq K(A)\cdot\frac{||r||}{||b||}$$
+\textbf{Proof}: $\overline{x}$ is the exact solution of $A\overline{x}=b+r$ and the condition number bound gives $\frac{||\overline{x}-x||}{||x||}\leq K(A)\frac{||(b+r)-b||}{||b||}$\\
+We can ask the same question for LS problems: when is small? Not $r$ in general. The gradient of $f(x) = ||Ax-b||^2$ is though 
+$$\nabla f(x) = 2A^TAx-2A^Tb = 2\cdot(\hbox{residual of normal equations}) = 2r$$
+$\frac{||\overline{x}-x||}{||x||}\leq K(A^TA) = K(A)^2$, and the relative error bound on $A^TAx=A^Tb$ is $\frac{||r||}{||A^Tb||}$, possibly larger than the condition number of the least squares problem.\\
+Recalling that with $A=Q_1R_1$ QR factorization, $||Ax-b||=||\left[\begin{array}{c}
+Q_1^T(Ax-b)\\Q_2^T(Ax-b)
+\end{array}\right]||$
+we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $min||Ax-b||$, then $\frac{||\overline{x}-x||}{||x||}\leq R_{rel, b\rightarrow x}\cdot\frac{||r_1||}{||b||}$\\
+\textbf{Proof}: replay the solution of the LS problems via QR with $\overline{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: \texttt{todo} %TODO l12.pdf p.4
+\section{Algorithms for square linear systems $Ax=b$}
+\subsection{Gaussian Elimination}
+\paragraph{Complexity} $\frac{2}{3}n^3$ (half of QR)
+\paragraph{Storage problem} $n\times n$ matrix, for example with $n=10^5$ it requires 80GB of RAM. In real life many matrices are sparse, $\simeq$3-10 nonzero elements per row or something like that.\\
+\textbf{Sparse matrices are stored as lists of nonzeros}.
+\paragraph{Idea} Use factorization of $A$ into simpler pieces: $A=QR$ or $A=USV^T$ for example. These can be used to solve linear systems, and the factorization can be reused if you have many systems with different right-hand sides.\\\\
+Gaussian elimination $\leftrightarrow$ LU factorization.
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
