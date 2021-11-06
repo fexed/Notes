@@ -1348,4 +1348,139 @@ The pointwise product of two factors $f_1,f_2$ yields a new factor $f_3$ such th
 So $f_1(A,B)\cdot f_2(B,C)$ gives $f_3(A,B,C)$\\\\
 The ordering of variables can produce differences in efficiency. 
 \paragraph{Complexity} Depends strongly on the structure of the network. Singly connected networks or polytrees are such that there is at most one undirected path between any two nodes (the Alarm network, for example). The time and space complexity in polytrees is linear in the size of network (the number of CPT entries). For multiply connected networks, variable elimination can have exponential time and space complexity in the worst case. In fact, inference in Bayesian networks includes as a special case propositional inference, which is NP-complete.
+\subsection{Probabilistic Reasoning Over Time}
+\paragraph{Reasoning in a changing world} So far, we've been reasoning in a static world. In an evolving world an agent needs:
+\begin{list}{}{}
+	\item A \textbf{belief state}: the states of the world which are possible
+	\item A \textbf{transition model}: to predict how the world will evolve
+	\item A \textbf{sensor model}: to update the belief state from perceptions
+\end{list}
+A changing world is modeled using a variable for each aspect of the world state \textbf{at each point in time} (\textbf{fluents}), and we use probabilities to quantify how likely a world is.\\
+The transition and sensor model themselves may be uncertain:
+\begin{list}{}{}
+	\item The transition model gives the probability distribution of the variables at time $t$, given the state of the world at past times
+	\item The sensor model describes the probability of each percept at time $t$, given the current state of the world
+\end{list}
+\subparagraph{The umbrella example} \textit{You are the security guard stationed at a secret underground installation. You want to know whether it's raining today, but your only access to the outside world occurs each morning when you see the director coming in with, or without, an umbrella.}
+\paragraph{States and observations} We view the world as a series of snapshots, or \textbf{time slices}, each of which contains a set of random variables, some observable and some not.
+\begin{list}{}{}
+	\item $x_t$ will denote the set of \textbf{state variables}, unobservable (hidden) at time $t$
+	\item $E_t = e_t$ will denote the set of observations (\textbf{evidence variables}) at time $t$, with $e_t$ being their values
+\end{list}
+The sequence starts at $t=0$ (state variables starts at 0, evidences at 1), and the distance between time slices is fixed.\\
+With $a:b$ we will denote the sequence of integers from $a$ to $b$, inclusive, and with $x_{a:b}$ the set of variables from $x_a$ to $x_b$.\\
+The umbrella world is represented by a sequence of evidence variables $E_t=\{U_t\}$ (whether the umbrella appears at time $t$) and state unobservable variables $x_t=\{R_t\}$ (it's raining):
+\begin{list}{}{}
+	\item State variables $R_0,R_1,R_2,\ldots$
+	\item Evidence variables $U_1,U_2,\ldots$
+\end{list}
+\paragraph{Transition model and simplifying absumptions} The transition model describes how the world evolves, i.e. the probability distribution over the latest state variables, given the previous values starting from time $0$: $P(x_t\:|\:x_{0:t-1})$, with $x_{0:t-1} = x_0,x_1,\ldots,x_{t-1}$\\
+The sequence of states can become very large, unbounded as $t$ increases. \textbf{Markov assumptions}: the transition model specifies the probability distribution over the lates state variables, given a \textbf{finite fixed number of previous states}.
+\begin{list}{}{}
+	\item \textbf{First-Order} Markov Chain: $P(x_t\:|\:x_{0:t-1}) = P(x_t\:|\:x_{t-1})$
+	\item \textbf{Second-Order} Markov Chain: $P(x_t\:|\:x_{0:t-1}) = P(x_t\:|\:x_{t-1}, x_{t-2})$
+\end{list}
+We additionally assume a \textbf{stationary process}, i.e. the conditional probability distribution is the same for all $t$: $P(x_t\:|\:x_{t-1})$ is the same for every $t$.
+\paragraph{Sensor model assumptions} The sensor model, under Markov sensor assumption, postulates that evidence only depends on the current state: $P(E_t\:|\:x_{0:t-1},E_{0:t-1})=P(E_t\:|\:x_t)$
+\subparagraph{Releasing the assumptions} Assuming that "Rain" only depends on rain the previous day may be a too strong assumption. There are two ways to improve the accuracy of the approximation:
+\begin{list}{}{}
+	\item Increasing the order of the Markov chain, for example using a second-order assumption
+	\item Increasing the set of state variables: we could add Season, Temperature, Humidity, Pressure\ldots as state variables.\\
+	This may imply more computation for predicting state variables or adding new sensors.
+\end{list}
+\paragraph{Bayesian net for Umbrella}
+\begin{center}
+\begin{tikzpicture}[node distance={25mm}, main/.style = {draw, circle}] 
+\node (1) {};
+\node[main] (2) [right of=1] {Rain$_{t-1}$};
+\node[main] (3) [below of=2] {Umbrella$_{t-1}$};
+\node[main] (4) [right of=2] {Rain$_{t}$};
+\node (9) [above of=4,yshift=-1cm] {\begin{tabular}{|c|c|}
+\hline R$_{t-1}$&P(R$_t$)\\
+\hline t&0.7\\
+f&0.3\\
+\hline
+\end{tabular}};
+\node[main] (5) [below of=4] {Umbrella$_{t}$};
+\node (10) [below of=5,yshift=0.7cm] {\begin{tabular}{|c|c|}
+\hline R$_t$&P(U$_t$)\\
+\hline t&0.9\\
+f&0.2\\
+\hline
+\end{tabular}};
+\node[main] (6) [right of=4] {Rain$_{t+1}$};
+\node[main] (7) [below of=6] {Umbrella$_{t+1}$};
+\node (8) [right of=6] {};
+\draw[->] (1) -- (2);
+\draw[->] (2) -- (3);
+\draw[->] (2) -- (4);
+\draw[->] (4) -- (5);
+\draw[->] (4) -- (6);
+\draw[->] (6) -- (7);
+\draw[->] (6) -- (8);
+\end{tikzpicture} 
+\end{center}
+The transition model is $P(R_t\:|\:R_{t-1})$ (the rain depends on rain on the previous day, first-order Markov model) and the sensor model is $P(U_t\:|\:R_t)$ (the rain causes the umbrella to appear).\\
+The \textbf{complete joint distribution} over all the variables, for any $t$, given the prior probability distribution at time 0 $P(x_0)$, is
+$$P(x_{0:t},E_{1:t})=P(x_0)\prod_{i=1}^t P(x_i\:|\:x_{i-1})P(E_i\:|\:x_i)$$
+Which comes from $P(x_1,\ldots,x_n)=\prod_{i=1}^n P(x_i\:|\:$Parents$(x_i))$, with:
+\begin{list}{}{}
+	\item $P(x_0)$ is the initial state model over set of variables $x$
+	\item $P(x_i\:|\:x_{t-1})$ is the transition model under a first-order Markov assumption
+	\item $P(E_i\:|\:x_i)$ is the sensor model under Markov sensor assumption
+\end{list}
+\subsubsection{Inference in temporal models}
+Basin inference task based on the temporal model:
+\begin{list}{}{}
+	\item \textbf{Filtering} or \textbf{state elimination}: computing the belief state (posterior probability distribution of state variables) given evidence from previous and current states. A subtask is the \textbf{likelihood of the evidence sequence $P(x_t\:|\:e_{1:t})$}
+	\item \textbf{Prediction}: computing the posterior distribution over a \textbf{future} state, given all the evidence to date $P(x_{t+k}\:|\:e_{1:t})$ with $k>1$
+	\item \textbf{Smoothing}: computing the posterior distribution over a \textbf{past} state, given all the evidence up to the present. Looking back with the knowledge of today provides a more accurate estimate $P(x_k\:|\:e_{1:t})$ with $0\leq k < t$
+	\item \textbf{Most likely explanation/sequence}: given a sequence of observations, we might wish to find the sequence of states that is most likely to have generated those observations
+	\item \textbf{Learning}: the transition and sensor models can be learned from observations
+\end{list}
+\paragraph{Filtering} Estimation of the next state. A good filtering algorithm maintains a current state estimate and updates it, rather than going back over the entire history of percepts for each time. The filtering function $f$ takes into account the state estimation computed up to the present and the new evidence $$P(x_{t+1}\:|\:e_{1:t+1}) = f(e_{t+1},P(x_t\:|\:e_{1:t}))$$
+This process is called \textbf{recursive estimation} and is made of two parts:
+\begin{list}{}{}
+	\item \textbf{Prediction}: the current state distribution is projected forward from $t$ to $t+1$: $P(x_{t+1}\:|\:e_{1:t})$
+	\item \textbf{Update}: then it's updated using the new evidence $e_{t+1}$: $P(e_{t+1}\:|\:x_{t+1})$
+\end{list}
+So it can be computed as $$P(x_{t+1}\:|\:e_{1:t+1}) = \alpha\cdot P(e_{t+1}\:|\:x_{t+1})\cdot\sum_{x_t} P(x_{t+1}\:|\:x_t)P(x_t\:|\:e_{1:t})$$
+\paragraph{Prediction} The task of prediction can be seen simply as filtering without the contribution of new evidence. The filtering process already incorporates a one-step prediction (the sum part).\\
+In general, looking ahead $k$ steps, at time $t+k+1$, given evidence up to $t$ $$P(x_{t+k+1}\:|\:e_{1:t})=\sum_{x_{t+k}} P(x_{t+k+1}\:|\:x_{t+k})P(x_{t+k}\:|\:e_{1:t})$$
+This involves only the transition model.\\
+In the Umbrella, the predicted distribution of Rain converges to a fixed point $\langle 0.5,0.5\rangle$, after which remains constant for all time (\textbf{stationary distribution}). The time it takes to reach the fixed point is called \textbf{mixing time}: the more uncertainty there is in the transition model the shorter is the mixing time.
+\paragraph{Smoothing} Is the process of computing the posterior distribution of the state at some past time $k$, given a complete sequence of observations up to the present $t$: $P(x_k\:|\:e_{1:t})$ with $0\leq k< t$. To compute it:
+$$P(x_k\:|\:e_{1:t}) = \alpha f_{1:k}\cdot b_{k+1:t} = \alpha  P(x_k\:|\:e_{1:k}) \cdot P(e_{k+1:t}\:|\:x_k)$$ where $\cdot$ is the pointwise multiplication, $f_{1:k} = P(x_k\:|\:e_{1:k})$ is the \textbf{forward message} and $b_{k+1:t} = P(e_{k+1:t}\:|\:x_k)$ is the \textbf{backward message} which can be computed by a recursive process that runs backward from $t$. This can be computed as: $$P(e_{k+1:t}\:|\:x_k) = \sum_{x_{k+1}} P(e_{k+1}\:|\:x_{k+1})P(e_{k+2:t}\:|\:x_{k+1})P(x_{k+1}\:|\:x_k)$$
+\paragraph{Viterbi Algorithm}
+There is a recursive relationship between the most likely path to each state $x_{t+1}$ and most likely paths to each previous state $x_t$. We can write a recursive equation similar to the one for filtering: $$max_{x_1,\ldots,x_t} P(x_1,\ldots,x_t,x_{t+1}\:|\:e_{1:t+1}) = \alpha P(e_{t+1}\:|\:x_{t+1})max_{x_t}(P(x_{t+1}\:|\:x_t) max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t}))$$
+With the forward message being $m_{1:t} = max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t})$, the probabilities of the best path to each state $x_t$.\\From those we can compute the probabilities of the extended paths at time $t+1$ and take the max. The \textbf{most likely sequence} can be computed in one pass. For each state, the best state that leads to it is recorded, so that the optimal sequence is identified.W
+
+\subsubsection{Other approaches}
+Despite the disadvantage of the many probability values, Probability Theory and Bayesian Networks are the dominant approaches today. Other approaches that have been used are:
+\begin{list}{}{}
+	\item \textbf{Rule-Based methods for uncertain reasoning in exper systems}\\
+	Three good properties of classical logic-based rules:
+	\begin{list}{}{}
+		\item \textbf{Locality}: in logical systems, from $A$ and $A\Rightarrow B$ we can conclude $B$ without worrying about any other rules. In probabilistic systems we have to consider all evidence.
+		\item \textbf{Detachment}: once $B$ is proven, in can be used regardless of how it was derived, it \textit{becomes detached from its justification}. Probabilities cannot be detached from evidence.
+		\item \textbf{Truth-Functionality}: the truth of complex sentences can be computed from the truth of the components. Probability combination doesn't work that way.
+	\end{list}
+	The idea is to attach a degree of belief to facts and rules and to combine and propagate them. The most famous examples is the \textbf{cerainty factors model}.
+	\item \textbf{Representing vagueness: fuzzy sets and fuzzy logic}
+		The theory of fuzzy sets is a way to specify how well an object satisfies a vague description property, like "being tall".\\
+		\textbf{Fuzzy Logic} is a way of reasoning about membership in fuzzy sets. A fuzzy predicate implicitly defines a fuzzy set. The standard rules are:
+		\begin{list}{}{}
+			\item $T(A\wedge B) = min(T(A),T(B))$
+			\item $T(A\vee B) = max(T(A),T(B))$
+			\item $T(\neg A) = 1-T(A)$
+		\end{list}
+		\textbf{Fuzzy Control} is a methodology for constructing control systems in which the mapping between real-valued input and output parameters is represented by fuzzy rules.
+		\begin{list}{}{}
+			\item \textbf{Fuzzication}: continuous variables mapped into a set of linguistic variables with fuzzy values
+			\item \textbf{Reasoning} with rules expressed in terms of these fuzzy variables
+			\item \textbf{Defuzzication}: mapping the results into numerical values
+		\end{list}
+	\item \textbf{Representing ignorance: Dempster-Shafer Theory}
+\end{list}
+
 \end{document}
