@@ -1004,6 +1004,73 @@ Unsupervised!
 The hope is that the pretraining has put the parameters of all the layers in a region from which a good local optimum can be reached by local descent. Despite many initially successful cases, the general role of pretraining is \textbf{nowadays under critical revision by researchers}.
 \subparagraph{Needed?} Pretraining can yield improvements for some tasks, but not in other. It allowed to start deep learning, but difficult to be managed.
 \paragraph{Transfer Learning} Using the representation discovered in a model to improve another model. We assume there exist features that are useful for the different settings or tasks, corresponding to underlying factors that appear in more than one setting. But also we can use a trained model for another task, with same inputs but different targets (\textbf{multi-task learning}), or changing the input domain but sharing features (\textbf{domain adaption}), or take advantage of pre-training models from a larger dataset\ldots (note that the bold terms are subfields of machine learning)
+\subparagraph{Example of pretrained networks}
+\begin{list}{}{}
+	\item \textbf{AlexNet}, a CNN that has been trained on $\simeq$ 1.2 million images, classifying them on 1000 categories: as a result, this model has learned rich feature representations for a wide range of images.\\
+	It has 5 convolutional layers and 3 fully connected layers. Its learned features can be transfered to new classification tasks, e.g. by replacing the last 3 layers for your task and train those new layers.
+	\item There are many pretrained CNNs for image classification, segmentation, face recognition and text detection.\\
+	AlexNet in matlab, also MatConvNet, VGG, ResNet, GoofLeNet\ldots and similarly for other DL libraries such as Keras\ldots
+\end{list}
+\paragraph{Distributed Representation} "\textit{In a distributed representation, their elements (the features) are not mutually exclisve and their many configurations correspond to the variations seen in the observed data.}"\\
+Deep learning methods exploit distributed representation with multiple levels of representation, but the concept is more abstract and can be applied to many models.\\
+An example of \textbf{symbolic representation} is the \textbf{one-hot representation}: one element is 1, the others are 0 and the distance between two elements is always $\sqrt{2}$. With a \textbf{distributed representation} we have a dense vector of real numbers, and each symbol or concept is represented as the set of unit activations: this allows to share similarities and some learned features among concepts. The distance between two concepts reflects the meaning, and their similarity.
+%TODO img p. 76
+\subparagraph{Input or internal representation?} Symbolic and distributed refers to the input or the internal representation? We are talking in general, but \textbf{learning acts on the internal representation}. In general, distributed representation is used:
+\begin{list}{}{}
+	\item In input if you have a background knowledge to build it (if it's done improperly then it could hamper the task solving)
+	\item Automatically, by learning, if distributed representation can be used internally in the model (e.g. hidden neural network layers)\\
+	Typically, one-hot is used for the input and the model is free to develop internally the distribution representation needed for the task at hand
+\end{list}
+\subparagraph{Count the difference} Distributed representation can represent $n$ features with $k$ values to describe $k^n$ different concepts.
+\subparagraph{Sharing attributes} By sharing a learned feature we can share its concept, disentangling it from the task.
+\subparagraph{Example} 4 concepts: blue car, blue bike, red car, red bike. There's no need for 4 neurons, just 2 are enough: a neuron for blue/red and a neuron for car/bike. The neuron describing redness is able to learn about the concept of redness from images of cars and bikes, not just one.\\
+If we share that neuron, we share the concept of redness.
+\subparagraph{Beyond Neural Networks} The debate on distributed representation extend to the debate between \textbf{logic-inspired paradigms} and \textbf{neural network-inspired paradigms} for cognition.
+\subparagraph{Interpretability} Less easy for distributed representation.
+\paragraph{Deep Distributed Representation} Deep learning exploits distributed representation through many layers, obtained by composing different levels of abstraction or by a hierarchy of reused features. This compositionality, as already discussed, can lead to further exponential boos to efficiency. Globally, deep learning learn a distributed representation of the data by disentangling shared causal factors that generates the data through different levels of abstraction.
+\paragraph{Deep Learning Techniques} Key techniques for training a layered neural network:
+\begin{list}{}{}
+	\item Originally: pretraining approaches
+	\item Nowadays:
+	\begin{list}{}{}
+		\item \textbf{SGD} with momentum, with decay on $\eta$ or minibatch, or Adam\ldots
+		\item \textbf{ReLU} activation functions on hidden units
+		\item \textbf{Cross-Entropy} (max $\log$-likelihood) loss with softmax for output layers, also to avoid saturation and small gradient effects
+		\item \textbf{Regularization}: early stopping and weight decay, also drop-out and batch normalization (for CNN and sigmoids)
+	\end{list}
+\end{list} 
+\paragraph{Gradient Issues} The magnitude of the gradients, as its backpropagated through the many layers, suffers from two main issues:
+\begin{list}{}{}
+	\item If the weights are small, the gradient shrinks exponentially (\textbf{vanishing gradient})
+	\item If the weights are big, the gradient grows exponentially (\textbf{exploding gradient})
+\end{list}
+Some approaches include the \textbf{gradient clipping}: if $||g||> v$ then $g = \frac{vg}{||g||}$ with $g$ being the gradient and $v$ the norm threshold, as to move in the gradient direction but bounding the weight update.\\
+Most of the heuristics try to deal with the problem of vanishing gradient tat hampers the training in early deep neural network in the low layers. Traditional activation functions, such as the hyperbolic tangent, have gradients in the range of $(-1,1)$ and the backpropagation computes gradients by the chain rule repeated through the layers. This has the effect of multiplying $n$ of these small numbers to compute gradients of the "front" layers (closer to the inputs), in a $n$-layer network: the gradient decreases exponentially with $n$, with the result of a very slow training in the front layers. Same with big weights (exploding gradients), but less frequent.\\
+To deal with this, many approaches: Rprop, short-cut connections, randomized neural networks\ldots let's see the new ones.
+\subparagraph{ReLU} \textbf{Rectified Linear Unit}: $f(x) = \hbox{max}(0,x) = \left\{\begin{array}{l l}
+0&\hbox{if }x< 0\\
+x&\hbox{if }x\geq 0\\
+\end{array}\right.$
+\begin{list}{}{}
+	\item \textbf{Sparse activation}: in a randomly initialized network, only about 50\% of hidden units are activated (non-zero output)
+	\item \textbf{Efficient gradient propagation} with respect to vanishing and exploding effects
+	\item \textbf{Efficient computation}: only comparison, addition and multiplication
+	\item \textbf{Faster and effective training of deep neural architectures}
+	\item But it's non differentiable in 0!
+\end{list}
+Used in deep learning since 2009 due to the simplified and better gradient propagation through many layers and the avoiding of saturation effects of sigmoidal functions. Non differentiable in 0, but often assumed to be 0 for the left derivative and 1 for the right derivative: the approximation is acceptable and safe because there's already an approximation for $x$ input, so unlikely to be $x=0$ effectively.\\
+Beyond ReLU there are:
+\begin{list}{}{}
+	\item ELU (Exponential Linear Unit), $f(\alpha,x)=\left\{\begin{array}{l l}
+	\alpha(e^x - 1)&\hbox{if }x \leq 0\\
+	x&\hbox{if} x > 0
+	\end{array}\right.$
+	\item Leaky ReLU $f(x) = \left\{\begin{array}{l l}
+	0.01x&\hbox{if }x < 0\\
+	x&\hbox{if }x \geq 0 
+	\end{array}\right.$
+\end{list}
+\paragraph{Batch Normalization} Method that normalizes each batch bt calculating each individual batch statistic such as mean and variance for each layer (\textbf{reparametrization}): normalize each matrix (databatch $\times$ activation of units) with mean and variance, by shifting values to zero-mean and unit variance, and include it in backpropagation.\\
 
-%ML-21-NN-part3-Deep-v0.1.pdf p.56
+%ML-21-NN-part3-Deep-v0.1.pdf
 \end{document}
