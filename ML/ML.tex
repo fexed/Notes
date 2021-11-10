@@ -1070,7 +1070,31 @@ Beyond ReLU there are:
 	x&\hbox{if }x \geq 0 
 	\end{array}\right.$
 \end{list}
-\paragraph{Batch Normalization} Method that normalizes each batch bt calculating each individual batch statistic such as mean and variance for each layer (\textbf{reparametrization}): normalize each matrix (databatch $\times$ activation of units) with mean and variance, by shifting values to zero-mean and unit variance, and include it in backpropagation.\\
-
+\paragraph{Batch Normalization} Method that normalizes each batch by calculating each individual batch statistic such as mean and variance for each layer (\textbf{reparametrization}): normalize each matrix (databatch $\times$ activation of units) with mean and variance, by shifting values to zero-mean and unit variance, and include it in backpropagation.\\
+Normalizing inputs is a standard approach, batch normalization helps by making the data flowing between intermediate layers to stay normalize. It has a regularization effect, achieving faster learning and higher accuracy fir deep learning.
+\paragraph{Dropout} Method that randomly selects a subset of the network during its training. Can be explained in terms of:
+\begin{list}{}{}
+	\item Ensembling: implicit bagging, different sub-networks
+	\item Regularization
+\end{list}
+Bagging is the combination of many classifiers/models: train $n$ classifiers/models on different subsets of the TR and differentiate each training using bootstrap (resampling with replacement). Dropout aims to approximate this process, with an exponentially large number of sub neural networks (while still having a single network at test time), while also aiming at maximizing the diversity of the ensemble preventing complex co-adaptions on training data.\\
+A basic algorithm:
+\begin{list}{}{}
+	\item Each time an example is loaded into a minibatch, we randomly sample a different binary mask to apply to all of the input and hidden units in the network.\\
+	The mask is sampled independently for each unit, and the probability of a mask value of 1 (causing the unit to be included) is an hyperparameter, typically 0.8 for input units and 0.5 for hidden units.
+	\item The forward propagation, back propagation and the learning algorithm are done as usual (only on a subset of units at the time)
+	\item The removed nodes are then reinserted into the network with their original weights.
+\end{list}
+There's parameter sharing among sub networks: in each single step only a small fraction of the possible sub networks are trained, but the parameter sharing causes the remaining sub networks to arrive at good settings of parameters.\\
+It also has regularization effect:\begin{list}{}{}
+	\item Avoids training all units on all training data, reducing units interactions
+	\item Variance reduction as for bagging
+	\item Insert structured noise\\
+	For example, recognize a face with the hidden unit for the nose, compare with standard regularization by adding deformed inputs with random noise)
+\end{list}
+Moreover, it regularizes each unit to be not merely a good feature but a feature that is good in many contexts (different sub-networks). It can be shown to be equivalent to L2 weight decays using a different $\lambda$ for each input, can be used for any model that uses distributed representation and SGD training and can be extended to any kind of random modification.
+\paragraph{L1 Regularization}
+Using the L1 norm (sum of absolute values) instead of the L2 norm in the penalty term. Favorite features elimination (weight zero) with respect to L2, which often only shrinks the weights without setting any of them to zero. This produces simpler final models.
+\paragraph{Adversarial Training} \textbf{Generative Adversarial Network}: two neural networks contesting with each other, one network generates candidates and the other evaluates them.
 %ML-21-NN-part3-Deep-v0.1.pdf
 \end{document}
