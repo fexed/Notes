@@ -506,7 +506,72 @@ we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)
 \paragraph{Storage problem} $n\times n$ matrix, for example with $n=10^5$ it requires 80GB of RAM. In real life many matrices are sparse, $\simeq$3-10 nonzero elements per row or something like that.\\
 \textbf{Sparse matrices are stored as lists of nonzeros}.
 \paragraph{Idea} Use factorization of $A$ into simpler pieces: $A=QR$ or $A=USV^T$ for example. These can be used to solve linear systems, and the factorization can be reused if you have many systems with different right-hand sides.\\\\
-Gaussian elimination $\leftrightarrow$ LU factorization.
+Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
+Ly=b\\Ux=y
+\end{array}\right.$ is $2n^2$\\
+Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $||\overline{A}-A||\leq O(u)\cdot||L||\cdot||U||$, so all fine if $||L||$ and $||U||$ are not too larger than $||A||$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and $p\:|\:|b_p|=max|b_i|$ for $i=k,k+1,\ldots,n$\\
+Swapping rows is equivalent to multiplying by $P_k$, and $I$ with the $k$ and $p$ rows swapped.
+$$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
+$$PA = LU$$
+$$A = P^TLU$$
+With an overhead of $O(n^2)$ swaps and comparisons.
+\subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow ||L||$ stays bounded. However, in the worst case, $\frac{||U||}{||A||} = 2^n$ (exponentially larger). The average case is that $\frac{||U||}{||A||}$ bounded polynomially.
+\subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure.
+\subsection{Symmetric Gaussian Elimination} Even if $A$ is symmetric, $L_2A$ is not symmetric but $L_1AL_1^T$ is.\\
+After $n-1$ steps we have $$L_{n-1}\ldots L_1AL_1^T\ldots L_{n-1}^T = D$$
+$$A = L_{n-1}^{-1}\ldots L_1^{-1} D (L_{n-1}^T)^{-1}\ldots(L_1^T)^{-1}$$
+$$A = L D L^T$$
+With $L$ lower triangular with $1$ on the diagonal, $D$ diagonal and $L^T$ transpose of $L$. This is called \textbf{LDL factorization}.
+\subparagraph{Theorem} For any $A=A^T$, \textit{if we do not encounter zero pivots} we can find $L,D\:|\:A = L DL^T$ with $L$ lower triangular with $1$ on the diagonal and $D$ diagonal.\\
+Small pivots, even non-zero, brings instability. We will need pivoting (row exchanges). To preserve symmetry, one needs to exchange not only rows but columns too: $PAP^T$ swaps both rows and columns. Unfortunately this is still not enough to ensure large pivots. To avoid this, one needs to allow for $2\times 2$ blocks in $D$\\
+$(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\\\
+Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in R^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
+\subparagraph{Lemma} If $A\in R^{n\times n}$ is positive definite, we have two properties:
+\begin{list}{}{}
+	\item $A_{k,k}>0$ for $k=1,\ldots,n$
+	\item For all invertible $M\in R^{n\times n}$, $MAM^T$ is also positive definite
+\end{list}
+Let's prove this: \begin{list}{}{}
+	\item $A_{k,k}=e_k^TAe_k > 0$ with $e_k$ array of zeroes with 1 in $k$
+	\item $x^TMAM^Tx = y^TAy > 0$ for all $x\in R^n, x\neq 0\Rightarrow y= M^Tx \neq 0$
+\end{list}
+Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$. So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
+\subsection{Cholesky factorization} $D = \left[\begin{array}{c c c}
+d_{1,1}& & 0\\
+& \ddots & \\
+0 & & d_{n,n}
+\end{array}\right] = \left[\begin{array}{c c c}
+\sqrt{d_{1,1}}& & 0\\
+& \ddots & \\
+0 & & \sqrt{d_{n,n}}
+\end{array}\right]\cdot\left[\begin{array}{c c c}
+\sqrt{d_{1,1}}& & 0\\
+& \ddots & \\
+0 & & \sqrt{d_{n,n}}
+\end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$\\
+$A = LDL^T = LD^{\frac{1}{2}}D^{\frac{1}{2}}L^T = R^T R$ with $R$ upper triangular.\\
+Every $A \succ 0$ can be written as $A = R^T R$ where $R$ is upper triangular.\\
+Cholensky and LDL for positive definite matrices are stable even without pivoting $||R||=||A||^{\frac{1}{2}}$
+\subsection{Algorithms for solving linear systems}
+\begin{list}{}{}
+	\item Symmetric Positive Definite $\Rightarrow$ Cholensky, $\frac{1}{3}n^3$
+	\item Symmetric $\Rightarrow$ $(P^T)LDL^T(P)$, $\frac{1}{3}n^3$
+	\item General $\Rightarrow$ $LU(P)$, $\frac{2}{3}n^3$
+\end{list}
+All of them come with sparse variants, with "list of non-zeroes"-based storage. \textbf{Problem}, fill-in: LU may be much less sparse than $A$, and at some point time/space becomes scarce.
+\subsection{Iterative Methods} $x^{(1)}, x^{(2)}, x^{(3)},\ldots$ sequence of vectors that converges to the solution $x$ of $Ax = b$\\
+Black-box methods: they only need a black-box function $\lambda_0v=Av$ that computer $Av$ given $v$. Fast whenever computing $Av$ for a given $v$ is fast, $O(nnz)$ for a sparse matrix $A$ with $nnz$ non-zeroes.
+\paragraph{Idea} If $A$ is positive definite, solving $Ax=b$ is finding $min\:\frac{1}{2}x^TAx - b^Tx$ with $f(x) = \frac{1}{2}x^TAx - b^Tx$ strongly convex. $\nabla f(x) = Ax-b$\\Most gradient-based algorithms produce iterates that belong to the same subspace, $x_0 = 0$\begin{list}{}{}
+	\item $\nabla f(x_0) = -b$, $x_1 = x_0+\alpha d=$ multiple of $b$
+	\item $\nabla f(x_1) = Ax_1-b=$ linear combination of $Ab$ and $b$, and $x_2=x_1+\alpha\nabla f(x_1) =$ linear combination of $Ab$ and $b$
+	\item $\nabla f(x_2) = Ax_2-b=$ linear combination of $A^2b$, $Ab$ and $b$, and $x_3=x_2+\alpha\nabla f(x_2) =$ linear combination of $A^2b$, $Ab$ and $b$
+	\item[$\Rightarrow$] all vectors we construct up to stop $k$ belong to $span(b,Ab,\ldots,A^{k-1}b)$ of $k$ different vectors
+\end{list}
+$$span(b,Ab,\ldots,A^{k-1}b) = \{v=\alpha_0b+\alpha_1Ab+\alpha_2A^2b+\ldots+\alpha_{k-1}A^{k-1}b\:|\:\alpha_i\in R\}=$$
+$$=\{v = (\alpha_0I+\alpha_1A+\alpha_2A^2+\ldots+\alpha_{k-1}A^{k-1})b\:|\:\alpha_i\in R\} = $$
+$$ = \{v=p(A)b\:|\:\hbox{for all polynomials }p(t)=\alpha_0+\alpha_1t+\ldots+a_{k-1}t^{k-1}\hbox{ of degree }<k\}$$
+
+\paragraph{Definition} This is the \textbf{Krylov Subspace} $K_k(A,b)\Rightarrow$ \textbf{Krylov space methods}
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
