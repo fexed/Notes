@@ -1096,5 +1096,108 @@ Moreover, it regularizes each unit to be not merely a good feature but a feature
 \paragraph{L1 Regularization}
 Using the L1 norm (sum of absolute values) instead of the L2 norm in the penalty term. Favorite features elimination (weight zero) with respect to L2, which often only shrinks the weights without setting any of them to zero. This produces simpler final models.
 \paragraph{Adversarial Training} \textbf{Generative Adversarial Network}: two neural networks contesting with each other, one network generates candidates and the other evaluates them.
-%ML-21-NN-part3-Deep-v0.1.pdf
+\subsection{Random Weights Neural Networks} A randomized approach employs a degree of randomness as part of its constructive strategy. Randomness can be seen as an effective part of ML approaches: can enhance several aspects of ML methodologies (data processing, learning, hyperparameter selection\ldots) and randomization can be a key factor in building efficient ML models.\\
+Randomness can be present at different levels: to enhance predictive performance and/or to alleviate difficulties of classical ML methodologies. For example: data splitting to avoid overfitting (hold-out, K-fold,\ldots), data generation, learning (observation order for example with shuffling minibatches) and hyper-parameters selection (for example with random selection).
+\paragraph{Overview} Is it possible to exploit MLP/RNN architectures without long training cycles in the hidden layers? Long tradition of randomized neural networks, random weights, random projections\ldots (e.g. Random Vector Functional Link Neural Network, RVFL). Recently, popularization of other schemes including ELM (Extreme Learning Machine).\\
+Basic idea: a network containing a \textbf{randomly connected hidden layers}, i.e. \textbf{weights are fixed after random initialization} and \textbf{only the output weights are trained}.
+\paragraph{Structure}\begin{list}{}{}
+	\item \textbf{Input}
+	\item \textbf{Untrained hidden layer}\\
+	Non-linearly embeds the input into a high-dimensional feature space, where the problem is more likely to be solved linearly. Theoretically grounded on the Cover's Theorem
+	\item \textbf{Feature representeation $\phi$}
+	\item \textbf{Trained readout layer}\\
+	Combines the features in the hidden space for output computation. Typically implemented by linear models
+	\item \textbf{Output}
+\end{list}
+\paragraph{Cover's Theorem} A complex pattern-classification problem, cast in a high-dimensional space non-linearly, is more likely to be linearly separable than in a low-dimensional space, provided that the space is not densely populated.\\
+In particular, using a deterministic mapping: assuming $l$ examples, lift them onto the vertexes of the $l-1$ dimension triangle (simplex), so that now every binary partition of the samples is linearly separable.\\
+It's the \textbf{same property exploited for kernels}.
+\subsubsection{Feedforward Ranbdomized Neural Networks} Input-output relation is implemented through an untrained hidden layer, which implements a randomized basis expansion.
+\paragraph{Pros and cons} Large set of hidden unit plays an interesting role: projection non-linearly expands the dimension of an input vector as to make the data more separable. A large number of units can provide sufficient "basis expansion" to solve the task. Also it's extremely efficient, and many variants and improvements exists (incremental learning adding hidden neurons, pruning\ldots\\
+Of course smaller models, with smaller numbers of adaptive units (basis functions) trained on the specific task at hand appear more elegant (\textbf{random features} vs \textbf{learned features} approaches)
+\paragraph{Suitable for}\begin{list}{}{}
+	\item \textbf{Big data} due to extreme efficiency
+	\item \textbf{Tiny implementations} for distributed embedding systems in resource limited devices
+	\item \textbf{Deep Learning}\\
+	Randomized neural networks can alleviate the computational burden of training. Randomized CNN approaches and also Deep Feedforward Randomized NN: networks consisting in stacks of RVFL/ELM modules.
+	\item \textbf{Recurrent Randomized Neural Networks}, where efficiency of training is more demanding respect to MLP
+\end{list}
+\subsection{Unsupervised Learning in Neural Networks}
+\paragraph{Unsupervised Learning} No teacher! TR = set of unlabeled data $\langle x\rangle$
+\subparagraph{Tasks}\begin{list}{}{}
+	\item \textbf{Clustering}, find natural groupings in a set of data
+	\item \textbf{Dimensionality Reduction}/Visualization/\textbf{Preprocessing}: multidimensional data are projected in a lower dimensional space (principal component analysis, multi-dimensional scaling\ldots)
+	\item \textbf{Modeling the data density}
+\end{list}
+\paragraph{Clustering} We focus on clustering, which is a problem that has been addressed in many contexts and by researchers in many disciplines. Thousands of different algorithms, but we go directly to a simple approach and a historical NN model: the \textbf{SOM/Kohonen maps}. We use a vector quantization perspective for partitioning clustering.
+\begin{center}
+	\includegraphics[scale=0.5]{31.png}
+\end{center}
+\subparagraph{Similarity Measures} The metric is very important, the assumed distance tells us which are the similar examples (\textbf{pattern proximity}), and the clustering algorithm decide the grouping using that metric.\\
+Many possible metric, Euclidean metrics are popular but it's just a choice.
+\paragraph{Vector Quantization} Vector quantization techniques encode a data manifold, e.g. a submanifold $V\subseteq R^n$, using only a finite set $w=(w_1,\ldots,w_k)$ of \textbf{reference/codebook vectors} $w_i\in R^n$ with $i=1,\ldots,k$\\
+A data vector $x\in V$ is described by the best matching or "winning" reference vector $w_{i^*(x)}$ of $w$ for which the \textbf{distortion error} $d(x, w_{i^*(x)})$ is minimal.\\
+This procedure divides the manifold $V$ into a number of subregions $$V_i=\{x\in V\:|\:||x-w_i||\leq ||x-w_j||\forall\:j\}$$ called \textbf{Voronoi Polyhedra}, out of which each data vector $x$ is described by the corresponding reference vector $w_{i^*(x)}$
+\begin{center}
+	\includegraphics[scale=0.5]{32.png}
+\end{center}
+In general it's hard to compute: optimal vector quantization codebook is NP-complete.\\
+Each cell consists of all points closer to the bold black/red points than to any other patterns. The segments of the \textbf{Voronoi Diagram} are all the points in the plane equidistant to two patterns.\\
+For us, the problem is to find centers that minimizes the loss $E$ given the dataset.\\\\
+Clustering has a more general objective of finding interesting/useful groupings of data. Interesting is often implicitly defined via the computational procedure by itself and not necessarily measured by the minimum quantization error. However, vector quantization provides an usefult framework and its algorithms can be used for clustering. We're going to use this perspective.
+\subparagraph{Goal} Optimal partitioning of unknown distribution in $x$-space into clusters approximated by a cluster center or \textbf{prototype}.\\
+I.e. a set of vector quantizers $x\rightarrow c(x) = w_{i^*(x)}$, from continous space to discrete space.\\
+We evaluate the squared error distortion $d(x_i,c(x_i)) = ||x_i-c(x_i)||^2$
+\subparagraph{Loss function} The average value over the distribution of inputs is the average distortion/reconstruction/quantization error: our loss function. $$E = \int f(d(x,w_{i^*(x)}))\cdot p(x)\:dx= \int||x-w_{i^*(x)}||^2\cdot p(x)\:dx$$
+Discrete version: $$E = \sum_i^l\sum_j^K||x_i-w_j||^2\delta_{winner}(i,j)$$ with $\delta_{winner}(i,j)$ the characteristic function of the receptive field of $w_j = \left\{\begin{array}{l l}
+1&\hbox{if }j\hbox{ is the winner for }x_i\\
+0&\hbox{otherwise}
+\end{array}\right.$ and $p(x)$ the probability distribution of $x$.\\
+Minimizing $E$ is the vector quantization: minimize $E$ through an optimal choice of $w$, the set of reference vectors $w$ that minimizes $E$ is the solution of the vector quantization problem.\\
+Note that the integrand of $E$ is not continuously differentiable: $w_{i^*(x)}$ have discrete changes, but derivatives can be computed locally by fixing $x$ in a Voronoi cell.
+\paragraph{Online $K$-means} Taking the derivatives of $E$ in the discrete version with respect to the $w_j$ yields the learning rule of vector quantization.\\
+The online version of $K$-means for any $x_i$ is $$\delta w_{i^*} = \eta\delta_{winner}(i,i^*)(x_i-w_{i^*})$$
+with $\eta$ being the learning rate. The basic algorithm is:
+\begin{enumerate}
+	\item Choose $k$ cluster centers to coincide with $k$ randomly selected patterns or $k$ randomly defined points inside the hypervolume containing the set
+	\item Assign each pattern to the closest cluster center (the winner)
+	\item Recompute the cluster centers (geometric centroids, i.e. means) using the current cluster membership.
+	\item If a convergence criterion is not met, go to step 2. Examples of stopping criteria are: no or minimal reassignment of patterns to new cluster centers, or a minimal decrease in squared error.
+\end{enumerate}
+Given the cluster centers $w_1,\ldots,w_k$ of dimension $n$ same as $x$, for each $x$ the winner is the nearest prototype $i^*(x) = arg\:min_i||x-w_i||^2$, so now $x$ belong to the cluster $i^*$.\\
+For each cluster $i$ the new centroid is $w_i=\frac{1}{|\hbox{cluster}_i|}\sum_{j\:|\:x_j\in\hbox{cluster}_j}x_j$\\\\
+This is the simplest and most common algorithm employing a squared error criterion, it's easy to implement and efficient in general.\\
+The number $K$ of clusters to find must be provided and local minima of $E$ makes the method dependent on the initialization. Also it works well only with hyperspherical and compact clusters, and has no visualization properties (doesn't allow to project in a lower dimension space).
+\paragraph{Softmax} To avoid confinement to local minima, a common approach is to introduce softmax adaptation rule: not only the winning reference is modified, but the adaption of $x$ affects all cluster centers depending on their proximity to $x$, typically with a step size that decreases with the distance $d(x,w_i)$. An instance of this strategy in neural networks is the Kohonen self-organizing maps, where the proximity among reference vectors is defined on a ordered map.
+\subsubsection{Self-Organizing Maps} SOM neural networks are also called Kohonen maps. Consists of $N$ neurons located on a regular low-dimensional, usually 2D, grid. Each unit can be identified by the coordinates on the map, receives the same input $x$ and has a weight $w$.\\\\
+SOM learns a map from an input space to a lattice of neural units. It's a topology preserving map: neighboring units respond to similar input pattern, datapoints close in the input space are mapped onto the same or nearby map units.
+\paragraph{Usage} \begin{list}{}{}
+	\item \textbf{Clustering}: clusters can be identified on the map.
+	\item \textbf{Pattern recognition} and \textbf{vector quantization}: the input is transformed into the closest neuron weights, the reference vector.
+	\item \textbf{Data Compression}: the input is transformed into the indexes, or digital codes, of the winner unit.
+	\item \textbf{Projects and exploitation}: the distribution of the multidimensional data is visualized in a lower dimensional space (the 2D map)
+\end{list}
+\paragraph{Competitive learning} An adaptive process in which neurons gradually becomes sensitive/specialized to different input categories/set of examples.\\
+Competitions among neurons for an input data, where the winner is allowed to learn more.
+\paragraph{Learning algorithm}\begin{enumerate}
+	\item The map is randomly initialized (weights)
+	\item A sample input $x$ is drawn
+	\item \textbf{Competitive Stage}: the winner is the unit (with $w$) most similar to $x$\\
+The current input vector $x$ is compared with all the unit weights using an euclidean distance criteria. The standard SOM adopts a "winner takes all" strategy, with the winner being $i^*(x) = arg\:min_i||x-w_i||$ where $i$ is an index on the map (e.g. coordinate in 2D)
+	\item \textbf{Cooperative Stage}: upgrade the weights of the units that have topological relationships with the winner unit (\textbf{softmax})\\
+	The weight of the winning unit and the weight of the units in its neighborhood are moved closer to the input vector (Hebbian learning)\\
+	At iteration $t$ $$w_i(t+1) = w_i(t) +\eta(t)h_{i,i^*(x)}(t)(x - w_i(t))$$ where $h(t)$ is the neighborhood function i.e. $h_{i,j}(t)$ is a function that decreases monotonically for increasing $||i-j||$ $$h_{i,i^*}(t)=\exp\left(-\frac{||r_i - r_{i^*}||^2}{2\sigma^2_{nh}(t)}\right)$$
+	The neighborhood radius $\sigma$ and the learning rate are decreased as function of iteration $t$: wide at the beginning and then width and height slowly decreases during learning.
+	\item Continues until convergence, when there are no changes
+\end{enumerate}
+\paragraph{Topological Order} The update rule of the cooperative stage is fundamental to the formation of topographically ordered maps. In fact, the weights are not modified independently of each other, but as topologically related subsets. For each subset similar kinds of weight updates are performed. For each step a subset is selected on the basis of the neighborhood of the current winner unit.\\
+Hence topological information is supplied to the map because both the winning units and its lattice neighbors receive similar weight updates that allow them, after learning, to respond to similar inputs.\\
+Formal proofs of ordering is difficult.
+\paragraph{Visualization} The map can be used to visualize different features of the SOM and of the data represented. For example:
+\begin{list}{}{}
+	\item Density of the reference vectors
+	\item Distance between prototype vectors of neighboring units
+	\item Sammon maps\ldots
+\end{list}
+providing the SOM with easy interpretability.
 \end{document}
