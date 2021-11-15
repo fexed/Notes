@@ -1482,5 +1482,362 @@ Despite the disadvantage of the many probability values, Probability Theory and 
 		\end{list}
 	\item \textbf{Representing ignorance: Dempster-Shafer Theory}
 \end{list}
-
+\section{Rule-Based Systems}
+\paragraph{Rules are everywhere} \begin{list}{}{}
+	\item Expert systems
+	\item Natural language processing
+	\item Rule-based programming
+	\item Decision support systems
+	\item Fuzzy control systems
+	\item Can be learned from decision trees and inductive methods\ldots
+\end{list}
+\paragraph{Rules Knowledgebases} As contractions of PROP and FOL\\
+We assume: clausal form (conjunctive normal form), unification (Most General Unifier), Resolution method for PROP and FOL, completeness of the resolution method when used for refutation.\\
+We will see \textbf{Horn clauses} i.e. rule-based knowledgebase, classical reasoning with rules (forward and backward), other forms of reasoning with rules.
+\paragraph{Reasoning with Horn clauses} By limiting the expressivity to a specific interesting subset of FOL, resolution procedures become much more manageable.\\
+We limit the degree of uncertainty we can express by considering \textbf{clauses that have at most one positive literal} (\textbf{Horn clauses}). Two cases:
+\begin{list}{}{}
+	\item The knowledgebase is a set of definite Horn clauses (\textit{exactly} one positive literal.\\
+	$\{\neg a_1,\ldots,\neg a_m, h\}$ also written as $a_1\wedge\ldots\wedge a_m \Rightarrow h$
+	\begin{list}{}{}
+		\item \textbf{Rules} when $m>0$, for example: Child $\wedge$ Male $\Rightarrow$ Boy
+		\item \textbf{Facts} when $m=0$, for example: Child
+	\end{list}
+	\item \textbf{Goals} or \textbf{queries} include only negative literals (\textbf{negative clauses}), for example $\{\neg Boy\}$
+\end{list}
+The limited expressivity is in the fact that we cannot express disjunctive conclusions. Propositional Horn clauses knowledgebases have linear time deduction algorithms.\\\\
+This was discovered by looking at different strategies to perform resolution proofs in resolution theorem proving for FOL, i.e. strategies to explore the resolution graph. Looking at deduction as a search problem and at the resolution graph as your search space, a number of strategies and heuristics can be devised:
+\begin{list}{}{}
+	\item Where do we start from? (Initial state)
+	\item Can you avoid considering irrelevant clauses?
+	\item How do you select the next clauses to resolve?
+\end{list}
+It was found that effective resolution strategies are complete with respect to knowledgebase of a certain form: \textbf{Definite Horn Clauses}.
+\paragraph{A resolution graph}
+\begin{center}
+\begin{tikzpicture}[node distance={25mm}, main/.style = {draw, circle}] 
+\node (1) {$\{P(x,x),Q(x),R(x)\}$};
+\node (2) [right of=1,xshift=15mm] {$\{\neg P(A,z), \neg Q(B)\}$};
+\node (3) [below of=1] {$\{Q(A),R(A),\neg Q(B)\}$};
+\node (4) [below of=2] {$\{P(B,B),R(B),\neg P(A,z)\}$};
+\draw[->] (1) -- (3) node [pos=0.5, right] {$\{x/A,z/A\}$};
+\draw[->] (2) -- (3);
+\draw[->] (2) -- (4) node [pos=0.5, left] {$\{x/B\}$};
+\draw[->] (1) -- (4);
+\end{tikzpicture} 
+\end{center}
+\paragraph{Forward and backward}
+Once we have a knowledgebase of facts and rules, the inference process can work in two directions:
+\begin{list}{}{}
+	\item \textbf{Forward reasoning}: use of rules from antecedent to consequent, to compute all the logical consequences of the initial facts. Also called \textbf{bottom-up}.
+	\item \textbf{Backward reasoning}: use of the rules from consequent to antecedent, until goals match initial facts. Also called \textbf{top-down}.
+\end{list}
+\subsection{Forward Reasoning}
+\paragraph{Example of inference tree}
+\begin{multicols}{2}
+	\begin{enumerate}
+		\item Toddler
+		\item Baby $\Rightarrow$ Child
+		\item Toddler $\Rightarrow$ Child
+		\item Child, Male $\Rightarrow$ Boy
+		\item Infant $\Rightarrow$ Child
+		\item Child, Female $\Rightarrow$ Girl
+		\item Female
+		\item[Goal:] Girl
+	\end{enumerate}
+	\columnbreak
+	\begin{center}
+		\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+\node (1) {Toddler};
+\node (2) [right of=1] {Female};
+\node (3) [below of=1] {Child};
+\node (4) [below of=3,xshift=8mm] {Girl};
+\draw[->] (1) -- (3);
+\draw[->] (3) -- (4);
+\draw[->] (2) -- (4);
+\end{tikzpicture}
+	\end{center}
+\end{multicols}
+\paragraph{Generalized Modus Ponens} For the first-order case, inference is performed on the basis of the following rule which uses unification $$\frac{p_1',p_2',\ldots,p_n',(p_1\wedge p_2\wedge p_n\Rightarrow q)}{q\gamma}\:\:\:\:\:\:\hbox{(Generalized Modus Ponens)}$$
+Where $\gamma$ is a MGU $|\:\forall\:i\:\:p_i' = p_i\gamma$.\\
+At each iteration new sentences are added to the knowledgebase, and it terminates when no new sentences are generated (\textbf{fixed point}) or the goal is found. This inferential process is \textbf{sound} (the rule is correct), \textbf{compelte} for Definite Horn Clauses, and convergence is guaranteed for datalog databases (without function symbols, only constant) because there are a finite number of consequences.
+%TODO example p.12 rules1.pdf
+\paragraph{Complexity issues} The interpeter is required to perform many unification operations. If we have
+\begin{list}{}{}
+	\item $r$ rules to try (in $\vee$)
+	\item $n$ preconditions in each rule to be satisfied (in $\wedge$)
+	\item $w$ facts in the knowledgebase (in $\vee$)
+	\item Everything repeated for $c$ loops
+\end{list}
+$$(\vee\ldots(\wedge\ldots(\vee\ldots)))$$
+We end up with $r\cdot n\cdot w\cdot c$ unification operations! Some ideas for possible improvements:
+\begin{enumerate}
+	\item Finding all the facts that unify with a given pattern can be made more efficient with appropriate predicate indexing: hash table on the head of the predicate, or with a combined key head plus first argument, or a discrimination network on the antecedents of the rules
+	\item Each rule does not need to be checked again at each iteration, only the ones which are affected by recent addition
+	\item[] These two rules are the strategies implemented by the RETE algorithm included in production systems and rule-based programming languages such as CLIPS
+	\item \textbf{Conjunct Ordering}: the order in which you list antecedents of rules is important for efficiency, each antecedent is a constraint and each rule a CSP:
+	\begin{list}{}{}
+		\item Can apply heuristics from CSP for ordering, for example MRV
+		\item Can try to write rules which correspond to CSP with a tree-structure
+	\end{list}
+	\item Proceeding forward may lead to derive many irrelevant facts
+	\begin{list}{}{}
+		\item Restrict the forward chaining to the relevant rules for the goal by proceeding backwards and marking them
+		\item \textbf{Magic sets} in deductive databases
+	\end{list}
+\end{enumerate}
+\subsubsection{Production systems} Rule-based systems are one of the first paradigms for representing knowledge in artificial intelligence. Most expert systems are rule-based. Rules are used forward to produce new facts, hence the name \textit{production} and \textit{production systems}: general computational model guided by patterns, where the rule to be applied next is determined by the operation of pattern matching, a simplified form of unification.
+\paragraph{Components} A typical rule-based systems has four basic components:
+\begin{list}{}{}
+	\item A \textbf{list of facts} (no variables), the temporary working memory (WM)\begin{list}{}{}
+		\item \textbf{Ordered facts}: (predicate arg$_1$ \ldots arg$_k$)
+		\item \textbf{Structured facts}: (predicate (slot$_1$ arg$_1$) \ldots (slot$_k$, arg$_k$))
+	\end{list}
+	\item A list of rules or \textbf{rule base}, a specific type of knowledgebase
+	\begin{list}{}{}
+		\item (defrule rule\_name["comment"] (pattern$_1$) \ldots (pattern$_k$) $\Rightarrow$ (action$_1$) \ldots (action$_m$))
+	\end{list}
+	\item An interpreter, called \textbf{inference engine}, which infers new facts or takes action based on the interaction of the working memory and the rules base.\\
+	The interpreter executes a \textit{match-resolve-act} cycle:
+	\begin{list}{}{}
+		\item \textbf{Match}: the Left-Hand-Sides (\textbf{LHS}) of all rules are matched against the contents of the working memory. This produces a conflict set: instantiations of all the rules that are satisfied/applicable.
+		\item \textbf{Conflict-Resolution}: one of the rules instantiations in the conflict is chosen for execution. If no applicable rule, the interpeter halts
+		\item \textbf{Act}: the actions in the Right-Hand-Side (\textbf{RHS}) of the rule selected are executed. These actions may change the contents of the working memory.\\
+		Then the cycle repeats.
+	\end{list}
+	\item A \textbf{conflict resolution strategy}
+\end{list}
+\paragraph{CLIPS} C Language Integrated Production System, successor of OPS-5, developed by NASA and freely available on \texttt{www.clipsrules.net}\\
+Matching rules (\textbf{activations}) are put in an \textbf{agenda} from where one will be selected:
+\begin{list}{}{}
+	\item Newly activated rules are added to the agenda and the agenda is reordered according to the salience of the rules
+	\item Among the rules of equal salience, the current conflict resolution strategy is used to determined the rule to be fired (activated, analogy with neurons)
+\end{list}
+The \textbf{depth} strategy is the standard default strategy for CLIPS: new rules on top. Different predefined conflict resolution strategies under user control:
+\begin{list}{}{}
+	\item \textbf{breadth}: newly activated rules placed below all rules of the same salience
+	\item \textbf{simplicity}: among rules of the same salience, less specific rules are preferred
+	\item \textbf{complexity}: among rules of the same salience, most specific rules are preferred
+	\item \textbf{random}: among rules of the same salience, choose at random (useful for debugging)
+\end{list}
+\paragraph{Advantages} \begin{list}{}{}
+	\item Writing rules is very natural for experts or end-users
+	\item Modular architecture: the rule knowledgebase is separated from the inference engine
+	\item Modularity of rules and incremental acquisition of knowledge
+	\item Explanations: justification of conclusions is possible
+	\item General programming paradigm: extensible with user defined functions and object oriented programming for object definition and ontologies
+\end{list}
+\paragraph{Disadvantages} \begin{list}{}{}
+	\item May be difficult to control the firing rules, unexpected behavior
+	\item Expressing knowledge as rules may be a bottleneck
+\end{list}
+\subsection{Backward Reasoning} 
+\paragraph{SLD Resolution Strategy} A SLD derivation of a clause $c$ from KB is a sequence $S$ of clauses $c_1,\ldots,c_n$ such that
+\begin{list}{}{}
+	\item $c_1 \in$ KB
+	\item $c_n = c$
+	\item Each $c_{i+1}$ is obtained by the resolution rule applied to $c_i$ and some clause in KB
+\end{list}
+In backward reasoning systems, the SLD strategy is used by refutation, i.e. starting from the negation of the gaol and trying to derive the empty clause. The SLD strategy is complete for Horn clauses $$\hbox{KB} \vDash c\Rightarrow S \vdash_{SLD} c$$
+Propositional Horn Clauses knowledgebases have linear-time deduction algorithms.
+\paragraph{Example}
+\begin{multicols}{2}
+	\begin{enumerate}
+		\item \{Toddler\}
+		\item \{$\neg$Baby, Child\}
+		\item \{$\neg$Toddler, Child\}
+		\item \{$\neg$Child, $\neg$Male, Boy\}
+		\item \{$\neg$Infant, Child\}
+		\item \{$\neg$Child, $\neg$Female, Girl\}
+		\item \{Female\}
+		\item[Goal:] Girl $\Rightarrow$ add \{$\neg$Girl\}
+	\end{enumerate}
+	\columnbreak
+	\begin{center}
+		\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+\node (1) {\{$\neg$Child, $\neg$Female, Girl\}};
+\node (2) [right of=1, xshift=15mm] {\{$\neg$Girl\}};
+\node (3) [below of=2] {\{$\neg$Child, $\neg$Female\}};
+\draw[->] (1) -- (3);
+\draw[->] (2) -- (3);
+\node (4) [left of=3, xshift=-10mm] {\{Female\}};
+\node (5) [below of=3] {\{$\neg$Child\}};
+\draw[->] (3) -- (5);
+\draw[->] (4) -- (5);
+\node (6) [left of=5, xshift=-10mm] {\{$\neg$Toddler, Child\}};
+\node (7) [below of=5] {\{$\neg$Toddler\}};
+\draw[->] (5) -- (7);
+\draw[->] (6) -- (7);
+\node (8) [left of=7, xshift=-10mm] {\{Toddler\}};
+\node (9) [below of=7] {\{\}};
+\draw[->] (7) -- (9);
+\draw[->] (8) -- (9);
+\end{tikzpicture}
+	\end{center}
+\end{multicols}
+The \textbf{SLD Goal Tree} will be
+\begin{multicols}{2}
+	\begin{enumerate}
+		\item Toddler
+		\item Child $\Leftarrow$ Baby
+		\item Child $\Leftarrow$ Toddler
+		\item Boy $\Leftarrow$ Child, Male
+		\item Child $\Leftarrow$ Infant
+		\item Girl $\Leftarrow$ Child, Female
+		\item Female
+		\item[Goal:] Girl
+	\end{enumerate} 
+	\columnbreak
+	\begin{center}
+		\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+\node (1) {Girl};
+\node (2) [below right of=1] {Female};
+\node (3) [below left of=1] {Child};
+\draw[->] (2) -- (1);
+\draw[->] (3) -- (1);
+\node (4) [below right of=3] {Baby};
+\node (5) [below left of=3] {Toddler};
+\draw[->] (4) -- (3);
+\draw[->] (5) -- (3);
+\end{tikzpicture}
+	\end{center}
+\end{multicols}
+\paragraph{Logic Programs} A logic program is a \textbf{set of definite Horn clauses} (facts and rules):
+\begin{list}{}{}
+	\item \textbf{Declarative interpretation}: \begin{list}{}{}
+		\item $A$
+		\item $A$ :- $B_1,\ldots,B_n$, with $A$ head and $B_1,\ldots,B_n$ body
+	\end{list}
+	\item \textbf{Procedural Interpretation}: \begin{list}{}{}
+		\item $A$ is true
+		\item $B_1,\ldots,B_n\Rightarrow A$, i.e. A is true if $B_1,\ldots,B_n$ are all true
+		\item The goal (query) is a negative clause whose logical meaning is $\neg(G_1\wedge\ldots\wedge G_k)$ written as ?- G$_1$,\ldots,G$_k$ (\textbf{conjunction of subgoals})
+	\end{list}
+\end{list}
+\paragraph{Example} \begin{list}{}{}
+	\item parent(X, Y) :- father(X, Y)
+	\item parent(X, Y) :- mother(X, Y)
+	\item ancestor(X, Y) :- parent(X, Y)
+	\item ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y)
+	\item father(john, mark)
+	\item father(john, luc)
+	\item mother(lia, john)
+	\item[?-] ancestor(lia, mark) (\textit{negation of the goal})
+\end{list}
+\paragraph{SLD Resolution} Given a logic program and a goal $G_1,\ldots,G_k$, the SLD goal tree is constructed as follows.\\
+Each node of the tree correspond to a conjunctive goal to be solved:
+\begin{list}{}{}
+	\item The root is ?- $G_1,\ldots,G_k$
+	\item Let ?- $G_1,\ldots,G_k$ a node in the tree, then the node successors are obtained by considering the facts and rules in the program whose head unifies with $G_1$:
+	\begin{list}{}{}
+		\item If $A$ is a fact and $\gamma =$ MGU$(A,G_1)$ then a descendant is the new goal ?- $(G_2,\ldots,G_k)\gamma$
+		\item If $A :- B_1,\ldots,B_m$ is a rule and $\gamma =$ MGU$(A,G_1)$ then a descendant is the new goal ?- $(B_1,\ldots,B_m,G_2,\ldots,G_k)\gamma$
+	\end{list}
+	\item Nodes that correspond to empty clauses are \textbf{successes}
+	\item Nodes without successors are \textbf{failures}
+\end{list}
+\paragraph{SLD tree for the goal ancestor(lia, mark)}
+\begin{center}
+\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+\node (1) {?- ancestor(lia, mark)};
+\node (2) [below left of=1, xshift=-15mm] {?- parent(lia, Z$_1$), ancestor(Z$_1$, mark)};
+\node (3) [below right of=1, xshift=15mm] {?- parent(lia, mark)};
+\draw[->] (2) -- (1);
+\draw[->] (3) -- (1);
+\node (4) [below right of=2, xshift=15mm] {?- father(lia, Z$_1$) (Fail)};
+\node (5) [below left of=2, xshift=-15mm] {?- mother(lia, Z$_1$), ancestor(Z$_1$, mark)};
+\draw[->] (4) -- (2);
+\draw[->] (5) -- (2);
+\node (6) [below right of=3, xshift=17mm, yshift=-10mm] {?- mother(lia, mark) (Fail)};
+\node (7) [below left of=3, xshift=-3mm, yshift=-10mm] {?- father(lia, mark) (Fail)};
+\draw[->] (6) -- (3);
+\draw[->] (7) -- (3);
+\node (8) [below of=5] {?- ancestor(john, mark)};
+\draw[->] (8) -- (5) node [pos=0.5, left] {\{Z$_1$/john\}};
+\node (9) [below right of=8, xshift=15mm] {?- parent(john, Z$_3$), ancestor(Z$_3$, mark)};
+\node (10) [below left of=8, xshift=-15mm] {?- parent(john, mark)};
+\draw[->] (9) -- (8);
+\draw[->] (10) -- (8);
+\node (11) [below right of=10, xshift=15mm] {\ldots};
+\node (12) [below of=10] {?- father(john, mark) (Success)};
+\draw[->] (11) -- (10);
+\draw[->] (12) -- (10);
+\node (13) [below of=9] {\ldots};
+\draw[->] (13) -- (9);
+\end{tikzpicture}
+\end{center}
+\paragraph{Computed answers} In addition to yes or no goals, such as ?- ancestor(lia, mark), we can also have goals with variables such as ?- ancestor($X$, mark).\\
+The logical meaning of the query is:
+\begin{list}{}{}
+	\item KB $\vDash\exists\:X$ ancestor($X$, mark)? (\textit{Are there ancestors of Mark?})
+	\item KB $\cup\:\neg\exists\:X$ ancestor($X$, mark) unsatisfiable?
+	\item KB $\cup\:\{\neg$ancestor($X$, mark)$\}\vdash_{RES} \{\}$?
+\end{list}
+In this case the expected answer are the values that $X$ is bound to during the resolution proof, $X\in\{$lia, john$\}$. Similarly, ?- ancestor(lia, $Y$) returns all the descendants of Lia ($Y\in\{$john, mark, luc$\}$).
+\paragraph{Properties} The SLD resolution strategy is complete for definite Horn clauses. This mean that if $P\cup\:\{\neg G\}$ is unsatisfiable, then at least one of the leaves of the SLD tree produces the empty clause (success). Moreover, trying to satisfy the subgoals in the order they appear is not restrictive, since in the end all of them must be satisfied.\\
+When there are variables in the goal, the substitution that we obtain is the \textbf{computed answer}.\\
+Completeness and efficiency are however influenced by: the order of expansion of the nodes (visit strategy of the SLD tree), the order in which we consider successor nodes at each level and the order of literals in the body.
+\subsection{Forms of Reasoning}
+\paragraph{Reasoning with Horn clauses}\begin{list}{}{}
+	\item Knowledge engineering issues: querying the user, providing knowledge-level explanations, knowledge-level debugging
+	\item Beyond classical deduction (asking whether KN $\vDash a$): proving by contradiction and consistency-based diagnosis, complete knowledge assumption and non-monotonic reasoning, abductive reasoning.
+\end{list}
+\paragraph{Observations} Observations arrive online by the user or from sensors. We cannot expect users or sensors to provide all relevant information. The solution is to introduce an "ask-the-user" mechanism into the backward procedure.
+\begin{list}{}{}
+	\item Define \textbf{askable} atoms: atoms for which the user is expected to provide an answer when unknown
+	\item In the top-down procedure, if the system isn't able to provide an atom and that atom is askable, it asks the user.
+\end{list}
+\paragraph{Knowledge-level Explanation} Explanations are required and a strong pro of a rule-based decision support system with respect to other AI techniques. Support can be provided for three different kinds of requests:
+\begin{list}{}{}
+	\item \textbf{How} questions: how a fact was proven
+	\item \textbf{Why} questions: why the system is asking about something
+	\item \textbf{Whynot} questions: why a fact was not proven
+\end{list}
+\paragraph{Knowledge-level Debugging} Given that the inference engine is correct, misbehaviors can only be caused by faulty knowledge. Debugging can be done by the domain expert, provided it's aware of the meaning of the symbols. We already discussed how why questions can be used to spot irrelevant questions, and four type of errors can be supported in debugging:
+\begin{list}{}{}
+	\item Incorrect answers
+	\item Missing answers
+	\item Infinite loops
+	\item Irrelevant questions
+\end{list}
+\paragraph{Proving by Contradiction} We need an extension of the language to deal with integrity constraints of this form: $$false \leftarrow a_1\wedge\ldots\wedge a_k \equiv \neg a_1\vee\ldots\vee\neg a_k$$
+A definite Horn database is always satisfiable and a Horn database (including integrity constraints) can be unsatisfiable.\\
+Discovering a contradiction in the knowledgebase can be important in many applications. For these tasks you must declare a set of assumables, atoms that can be assumed in a proof by contradiction. The system can then collect all teh assumable that are used in proving \textit{false}. That is KB $\cup\:\{c_1,\ldots,c_r\}\vDash false$, with $C=\{c_1,\ldots,c_r\}$ \textbf{conflict} of KB. A possible answer is KB $\vDash \neg c_1\vee\ldots\vee c_r$.\\
+A \textbf{minimal conflict} is a conflict such that no strict subset is also a conflict.
+\paragraph{Consistency-based Diagnosis} The aim of consistency-based diagnosis is to determine the possible faults based on a model of the system and observations of the system.\begin{list}{}{}
+	\item Background knowledge provides the model of the system
+	\item You make the absence of faults assumable
+	\item Conflicts with observations can be used to derive what is wrong with the system
+	\item From set of conflicts you can derive a \textbf{minimal diagnosis}
+\end{list}
+A \textbf{consistency-based diagnosis} is a set of assumables that has at least one element in each conflict. A \textbf{minimal diagnosis} is such that no subset is a diagnosis.
+%TODO example p. 47 rules1.pdf
+\paragraph{Complete Knowledge Assumption} What changes under a closed world assumption: everything which is true is in the knowledgebase, everything else is false. Knowledge is complete.\\
+Suppose $a\leftarrow b_1,\ldots,a\leftarrow b_n$ (equivalent to $a\leftarrow b_1,\ldots,b_n$), noting that $a$ is treated as $a\leftarrow true$.\\
+Complete knowledge assumption: $a\rightarrow b_1,\ldots,b_n$\\
+\textbf{Clark's Completion}: $a\leftrightarrow b_1,\ldots,b_n$\\
+Under Clark's completion, if there are no rules for $a$ then $a\leftrightarrow false$, i.e. $\neg a$\\
+With this, the system is able to derive negations. We extend the language of definite Horn clauses with \textbf{not}. Note that this negation is not the same as logical $\neg$, so we use a different notation. In backward reasoning systems this \textbf{not} can be implemented by \textbf{negation as failure}.
+\paragraph{Negation as Failure} The top-down procedure for negation as failure is defined as follows: \textbf{not}$p$ can be added to the set of consequences whenever proving $p$ fails. The failure must occur in finite time, there is no conclusion if the proof procedure does not halt.\\
+Negation as failure is the same as a proof of a logical negation from the KB under Clark's completion KB$_c$ $$\hbox{KB}_c\vDash\neg a\Leftrightarrow\hbox{KB}\not\vdash a$$
+It's a form of \textbf{non-monotonic reasoning}: you can express \textbf{defaults}.
+\paragraph{Abductive Reasoning} Abduction is a form of reasoning which consists in providing explanations for observations.\\
+The term is used to differentiate from deduction, which involves determining what logically follows from a set of axioms, and induction, which involves inferring general relationship from examples.\\
+Given\begin{list}{}{}
+	\item a knowledgebase KB, which is a set of Horn clauses
+	\item a set $A$ of assumable atoms, the building blocks of hypotheses
+\end{list}
+an \textbf{explanation} of $g$ is a set $H\subseteq A$ such that:
+\begin{list}{}{}
+	\item KB $\cup\:H\not\vDash false$
+	\item KB $\cup\:H\vDash g$
+\end{list}
+There can be multiple explanations, you usually want the minimal explanation.
+\paragraph{Example of abduction} Consider the knowledgebase
+\begin{list}{}{}
+	\item Alarm $\leftarrow$ Tampering
+	\item Alarm $\leftarrow$ Fire
+	\item Smoke $\leftarrow$ Fire
+\end{list}
+If Alarm is observed, there are two possible minimal explanations: \{Tampering\} and \{Fire\}. If Alarm $\wedge$ Smoke is observed, the only possible minimal explanation is \{Fire\}
 \end{document}
