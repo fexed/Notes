@@ -947,4 +947,70 @@ def match(path, ...):
 	return true
 \end{lstlisting}
 With $L$ an array of labels such that the original node with id $i$ has label $L[i]$.
+\section{Data Compression}
+\paragraph{Families of compressors}\begin{list}{}{}
+	\item Statistical Compressors
+	\item Lempel-Ziv parsings
+	\item Burrows-Wheeler Transform, which we will not see
+\end{list}
+\subsection{Statistical Compressors}
+Most important representatives of statistical compressors, based on frequencies, are Huffman and arithmetic.
+\paragraph{Notation}\begin{list}{}{}
+	\item $\Sigma$, the alphabet of symbols that we will encode.\\
+	Can be binary, formed by bytes, words. What changes is the size and the number of possible values of the symbols: 2 for bits, 256 for bytes, thousands/millions for words. It could be an alphabet of integers, so the size is $\infty$\\
+	By changing the alphabet we change how we manage the data. The text \texttt{abaabbaab} can be interpreted with an alphabet of bits, of bytes, of letters, of binomials\ldots in the case of letters we have 5 "a"s and 4 "b"s, but in the case of binomials we have 1 "ab", 2 "aa", 1 "bb" and 1 "b\#". Changing the size of the alphabet can help introducing the "context" around the symbol. With single letters you can permute them in the text and still get the same frequency, but with couple of letters getting the same frequency by randomly shuffling the letters it's harder. The downside is the increasing in size of the alphabet, which we have to take into account when we decompress.\\\\
+	In fact, by compressing $T$ we obtain $C(T)$ composed of:
+	\begin{list}{}{}
+		\item Preamble, which contains infos about $\Sigma$, frequency\ldots\\
+		Depends on the family of compressors and also the programmer.
+		\item Body, a sequence of bits
+	\end{list}
+	\item The frequencies can be in a:\begin{list}{}{}
+		\item Static model: the frequencies are given, you know the frequencies of each symbol
+		\item Semi-static model: the frequencies are computed from the data to compress (like the example before)\\
+		You assume that the entire text behaves the same way, but can't take into account variations (for example, first part of the text in english and second part in italian)
+		\item Dynamic model: consider a uniform starting model and encode while updating the model
+	\end{list}
+\end{list}
+\paragraph{Huffman algorithm} Greedy but also optimal. It repeats the following step: pick the two lightest symbols (less probability) and merge them in one new symbol whose probability is the sum of the probabilities of the merged symbols.
+\subparagraph{Example} $\Sigma=\{a,b,c,d,e,f\}$ with corresponding frequencies of $\{0.05, 0.1, 0.15, 0.3, 0.25, 0.15\}$, so a \textbf{static-model}.\\
+So the algorithm starts with $\begin{array}{c c c c c c}
+a&b&c&d&e&f\\
+0.05&0.1&0.15&0.3&0.25&0.15
+\end{array}$ and chooses to merge the two with the lowest probability, $a$ and $b$ obtaining a new symbol with probability $0.15$. Now the choice is between $c,f$ and the new symbol and can pick only two: whatever the choice, the algorithm is optimal, so we can pick the oldest symbols so we merge $c$ and $f$ into a symbol of probability $0.30$. Next choice is the $ab$ symbol and $e$, with a new symbol of $0.4$ probability. Next is $d$ and $cf$, with a probability of $0.6$. We are left with just two symbols, $1.0$ of probability.
+\begin{center}
+	\includegraphics[scale=0.5]{17.png}
+\end{center}
+The result is a \textbf{binary tree}, which is a way to generate codewords, so codes for symbols. We assign $0$ to the left subtree and $1$ to the right (or viceversa, the order is not important, and can also change the assignment for each subtree). With this we can compute the codewords, from the root to the symbol:
+\begin{list}{}{}
+	\item \texttt{a} is 000
+	\item \texttt{b} is 001
+	\item \texttt{c} is 110
+	\item \texttt{d} is 10 
+	\item \texttt{e} is 01
+	\item \texttt{f} is 111
+\end{list}
+Important things:\begin{list}{}{}
+	\item It's a \textbf{prefix-free code}: considering two codewords, no one is a prefix of the other
+	\item \textbf{Golden Rule of Data Compression}: the most frequent symbols get the shortest codewords\\
+	This because it starts merging from the lightest symbols, which will end up on the bottom of the tree.
+\end{list}
+To measure the "goodness" of a code we need the \textbf{average codeword length} $L =\sum_\sigma f(\sigma)\cdot l(c_\sigma)$ with $\sigma\in\Sigma$ symbols, $f(\sigma)$ the frequency of the symbol and $l(c)$ the length of its codeword. In our example, $L = 3\cdot0.05 + 3\cdot0.1+3\cdot0.15+2\cdot0.3+2\cdot0.25+3\cdot0.15 = 2.45$ bits.\\\\
+Whats the relation between $L$ average codeword length and $h$ height of the tree? $L$ means that on average every symbol will emit $L$ bits. The height of the tree is equale to the codeword length, a $1:1$ relation between length of the codeword and depth of the symbol so that is also called trie of codeword. This means that $L$ can be interpreted, in terms of the height, as the average path length $\equiv$ average depth of the tree.\\\\
+For this algorithm, the preable would contain the tree and $\Sigma$. So for the example \texttt{aaabb}, the body would be \texttt{000000000001001}. With \texttt{aaabb} I use 5 bytes, so 40 bits. Now I use 15 bits for the body plus the size of the preamble. So a good comparison is fundamental.
+\paragraph{Theorem} Huffman code is optimal among the prefix-free codes for $\Sigma$. In other words $L_H \leq L_C\:\:\forall\:C$ prefix-free code.
+\subparagraph{Lemma 1} Let $F$ be the set of binary trees corresponding to optimal prefix-free codes, thus binary trees with minimum average depth. Assuming they have $|\Sigma|$ leaves.\\
+$\exists$ tree $\in F\:|$ the minimum weighted leaves are at the largest depth.
+\subparagraph{Lemma 2} Considering a tree corresponding to a code $C$, with $x,y$ leaves among the $|\Sigma|$ leaves, and considering its \textbf{reduced tree} $R_C$ with the two leaves $x,y$ merged into a leaf with probability $P(x) + P(y)$ (so that $R_C$ has $|\Sigma|-1$ leaves). We have $L_C  = \sum_{\sigma\neq x,y} l(c_\sigma)\cdot f(\sigma)+l(x)P(x) + l(y)P(y)$ and $L_{R_C}  = \sum_{\sigma\neq x,y} l(c_\sigma)\cdot f(\sigma)+l(\langle x,y\rangle)(P(x)+P(y))$. Given that $l(x) = l(y) = l + 1$ then $l(\langle x,y\rangle) = l$ so that $L_C = L_{R_C} + P(x) + P(y)$
+\subparagraph{Proof} The base case in on $|\Sigma| = 2$, obviously optimal. By induction, from $|\Sigma|-1 \rightarrow |\Sigma|$ symbols, assume that Huffman constructs the optimal code for $|\Sigma|-1$ symbols.\\
+Let's consider $L_H$, for lemma 2 we have $L_H = L_{R_H} + P(x) + P(y)$, with $x,y$ being the symbols of the smallest frequency merged by Huffman. Let's pick an optimal code, $O$. From lemma 1, there's a tree whose smallest probability leaves are at the deepest level. So in $O$ we know that $x,y$ are at the bottom, and we can apply lemma 2 obtaining $R_O$ with the leaves $x,y$ merged.\\
+$H$ and $O$ would have $|\Sigma|$ leaves, and $R_H,R_O$ would have $|\Sigma|-1$ leaves. For inductive hypothesis, we know that Huffman of $|\Sigma|-1$ leaves, so $R_H$, is optimal. So the average depth of $R_H$, which is $L_{R_H}$, is $\leq$ than the average depth or $R_O$. So we have $L_{R_H}\leq L_{R_O}$\\
+So we have $L_H = L_{R_H} + P(x) + P(y) \leq L_{R_O} + P(x) + P(y)$ and for lemma 2 we have $= L_O$, concluding that $L_H = L_O$, proving that Huffman is optimal.
+\paragraph{Entropy} The entropy $H = \sum_\sigma P(\sigma)\cdot\log_2\frac{1}{P(\sigma)}$. In Huffman, $L_H = \sum_\sigma P(\sigma)\cdot l(c_\sigma)$.\\
+Very similar formulas, differing just by one factor: $\log_2\frac{1}{P(\sigma)}\in R$ and $l(c_\sigma)\in N$, so in general not equal.\\
+If the probabilities are diatic, in the form of $2^{-k}$, the two formulas could correspond, but it's not the general case, but surely we have that $$H\leq L_H < H + 1$$ So Huffman loses up to 1 bit per symbol: is this bad or good? This formula is per symbol, let's see it for the entire sequence (multiply by $n$)
+$$nH\leq \hbox{Huffman length} < nH + n$$ So we lose $n$ bits over the overall file. Good or bad depends on $nH$: if very small entropy, so $H$ close to zero meaning the text is highly repetitive, then $+n$ is very large, but if the text is not repetitive, then $n$ is possibly smaller than $nH$ and so it's ok. So the loss depends on the entropy. Arithmetic is able to drop that $+1$.\\
+This comes from the \textbf{Shannon bound} ($H\leq L_C$) and it's for all prefix-free code $C$. The property of Huffman is the right part.
+
+\paragraph{Shannon's Theorem}  
 \end{document}
