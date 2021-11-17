@@ -1012,5 +1012,89 @@ If the probabilities are diatic, in the form of $2^{-k}$, the two formulas could
 $$nH\leq \hbox{Huffman length} < nH + n$$ So we lose $n$ bits over the overall file. Good or bad depends on $nH$: if very small entropy, so $H$ close to zero meaning the text is highly repetitive, then $+n$ is very large, but if the text is not repetitive, then $n$ is possibly smaller than $nH$ and so it's ok. So the loss depends on the entropy. Arithmetic is able to drop that $+1$.\\
 This comes from the \textbf{Shannon bound} ($H\leq L_C$) and it's for all prefix-free code $C$. The property of Huffman is the right part.
 
-\paragraph{Shannon's Theorem}  
+\paragraph{Canonical Huffman} We want to create an Huffman code with some properties: more succint in space (not regarding the codewords, which are already optimal, but regarding what we are storing in the preamble) and with an increased speed in the compression.\\
+The main idea is to turn the Huffman tree into an unbalanced tree with the deepest codewords in the left part, and the more to the right the less deep it is. A heap-like structure: more to the left, less to the right.
+\begin{enumerate}
+	\item Build an Huffman tree 
+	\item Compute codeword lengths
+	\item Compute the number of symbols per level/length (\textbf{num} array)\\
+	So for each level, the number of codewords per level
+	\item Compute the symbol table (\textbf{symb})\\
+	For every level, keep a list of symbols per each level
+	\item Computing the new codewords.\\
+	It's sufficient to find the first codeword for each level, because all the codewords in that level are increasing\\
+	$l =$ max level, the first codeword of level max $fc[l_{max}] = 0$ and $l<l_{max}$ such that $fc[l])=\frac{fc[l+1]+\hbox{num}[l+1]}{2}$\\
+	Mathematically, by summing the first plus the num array element, I'm going to the next available leaf not occupied by any symbol on that level, and dividing by two in binary is just making a shift so we're dropping the leaf and going up one level. So it's the first codeword of the level $+1$ plus the number of leaves divided by two to go to the parent.\\
+	With $fc$ and the length which is $l$, we represent the value on $l$ bits and get the codeword.
+\end{enumerate}
+\subparagraph{An example} For the codeword lengths $\begin{array}{c c}
+a & 4\\
+b & 4\\
+c & 3\\
+d & 2\\
+e & 2\\
+f & 2
+\end{array}$ $$\hbox{num= }\begin{array}{c| c c c c}
+\hbox{pos}&1&2&3&4\\
+\hline
+\hbox{val}&0&3&1&2\\
+\end{array}\:\:\:\hbox{symb= }\begin{array}{c| l l l l}
+&0&1&2&\ldots\\
+\hline
+1&\\
+2&d,&e,&f\\
+3&c\\
+4&a,&b
+\end{array}$$
+$$\begin{array}{r | c c c c}
+fc & 1 & 2 & 3 & 4\\
+ & \frac{fc[2] + num[2]}{2} = \frac{1 + 3}{2} = 2 & \frac{fc[3] + num[3]}{2} = \frac{1 + 1}{2} = 1 & \frac{fc[4] + num[4]}{2} = \frac{0 + 2}{2} = 1 & 0\\
+\hbox{codeword} & \hbox{dummy value for the algorithm} & 01 & 001 & 0000
+\end{array}$$
+The first codeword at the deepest level is $0$, and the levels without codewords are still computed due to the functioning of the algorithm. The values are used as integers, so the $fc[1] = 2$ cannot be represented on $l=1$ bit, but it's not a problem because it's a dummy value and the fact that it's outside the tree is fundamental for the algorithm.
+\begin{center}
+	\includegraphics[scale=0.5]{18.png}
+\end{center}
+So we don't store the tree, we store the first codeword and the number of codewords in each level. To reconstruct the tree, we assign the first symbol to the first codeword and incrementally the rest of the symbols that are left for each codeword on that level, then move up one level to the first codeword of that level and assign the rest of the symbols and so on. So we store $fc$ and $symb$, $num$ is a temporary array just for computing.\\\\
+For \textbf{encoding}, given $T=bcf$ we see that $b$ is position/rank 1 of level 4, we take $fc[4] + rank[b] = 0 + 1 = 1$ on $4$ bits so $0001$. Same for $c \Rightarrow fc[3] + rank[c] = 1 + 0 = 1 \Rightarrow 001$\\\\
+The space needed is the space for $fc$ plus the space for $symb$ plus the space for the array $symb\rightarrow$ level.\\$fc$ occupies $l_{max}\cdot$ the number of bits to represent the codewords which is at most $l_{max}$, the table $symb$ occupies $|\Sigma|\cdot\log|\Sigma|$ because it is a table of lists containing each symbol that cost $\log|\Sigma|$ to store, the array has to store a level (on $\log_2 l_{max}$ bits) for each symbol, which are $|\Sigma|$, so occupies $|\Sigma|\cdot\log_2 l_{max}$.\\
+So the total space is $$l_{max}\cdot l_{max} + |\Sigma|\cdot\log|\Sigma| + |\Sigma|\cdot\log_2 l_{max}$$
+The tree has $|\Sigma|$ leaves and $|\Sigma|-1$ internal nodes, so it occupies $2|\Sigma|-1$ pointers, which is a lot more bits.\\\\
+For \textbf{decoding}, we can only use $fc$ and $symb$ (the $symb\rightarrow$ level array is not needed for decoding). To decode an array $v$ of $l$ bits, we must check if the node coded by the $l$ bits it's an internal node, so we need to read one more bit and repeat, or if the node is a leaf. We check if the value $v < fc[l]$: if it's less than the first key, it's "on the left" therefore it's an internal node, otherwise it's a leaf therefore we decode it. The dummy node of a level $m$ without leaves it's always greater than any possible value $v$ of the $m$ bits, so we will always "go down". The code:
+\begin{lstlisting}[style=myPython]
+v = nextBit();
+l = 1;
+while (v < fc[l]):
+	v = 2*v + nextBit();
+	l++;
+return symb[l][v-fc[l]]
+\end{lstlisting}
+\paragraph{Tools for the arithmetic Coding}
+$x\in[0,1)$ positional representation for $x$: $.b_1 b_2 \ldots b_k \ldots$ with $b_i$ representing $2^{-i}$, with $b_i\in [0,1]$. These are called \textbf{dyadic fractions}, because are of the form $\frac{v}{2^n}$\\
+For example $.101 = \frac{1}{2} + \frac{1}{8} = \frac{5}{8}$\\
+To represent, you add zeroes to the binary representation of $v$ until you get $k$ bits: $.0\ldots 0\:bin(v)$ such that the length is $k$ bits. For example, $\frac{5}{16} = \frac{5}{2^4}$ so $5$ in binary over $4$ bits and the dot $\Rightarrow .0101 = \frac{1}{4} + \frac{1}{16} = \frac{4+1}{16} = \frac{5}{16}$\\
+We need another tool, which we can use to represent a fraction as a sequence of that type: an algorithm \texttt{converter(x, k)} with $k$ being the precision/accuracy, how many bits we want to use and $x\in[0,1)$. The algorithm works as follows: if $2x < 1$ we output $0$ and repeat on $2x$, else if $2x\geq 1$ we output $1$ and repeat on $2x-1$.\\
+An example $x=\frac{1}{3}$\begin{list}{}{}
+	\item $2x=\frac{2}{3} < 1 \rightarrow 0$
+	\item $2x=\frac{4}{3} > 1 \rightarrow 1$ and $\frac{4}{3} - 1 = \frac{1}{3}$
+	\item $2x=\frac{2}{3} \rightarrow 0$
+	\item $\rightarrow .\overline{01}$
+\end{list}
+$x=\frac{5}{8}$\begin{list}{}{}
+	\item $2x = \frac{10}{8} > 1 \rightarrow 1$ and $\frac{10}{8} - 1 = \frac{1}{4}$
+	\item $2x = \frac{1}{2} < 1 \rightarrow 0$
+	\item $2x = \frac{2}{2} = 1 \rightarrow 1$ and $\frac{2}{2} - 1 = 0$
+	\item When we have 0 we stay with 0 forever so $\rightarrow .101\overline{0} = .101$
+\end{list}
+When we stop after $k$ bits we have to compute the error. \textbf{Lemma}: given $x=.b_1b_2\ldots b_d b_{d+1}\ldots$, we compute $\overline{x} = .b_1b_2\ldots b_d0\ldots0$ which is $x$ truncated at the first $d$ digits. So the difference is the value of the bits from $b_{d+1}$ onward, so $$x-\overline{x}=\sum_{i=1}^\infty b_{d+i}\cdot 2^{-(d+i)} = 2^{-d}\cdot\sum_{i=1}^\infty b_{d+i}\cdot 2^{-i}\leq 2^{-d}\cdot\sum_{i=1}^\infty 1\cdot 2^{-i} = 2^{-d}$$
+Because the worst case is when every $b_i$ with $i\geq d+1$ is $1$ and $t\sum_{n=1}^\infty \frac{1}{2^n} = 1$. This means that \texttt{converter(x, k)} makes an error of at most $2^{-k}$
+\paragraph{Arithmetic coding} Let's assume we have an alphabet of 3 symbols with $P(a) = \frac{1}{2}, P(b) = P(c) = \frac{1}{4}$. We assume to map the symbols in the $[0,1)$ interval alphabetically and according to the probability. So $f_a = 0, f_b = \frac{1}{2}, f_c = \frac{3}{4}$ are the cumulative frequencies of the previous symbols. $a$ is the first so $0$, $b$ is preceeded by $a$ so is $P(a)$, $c$ so is $P(a)+P(b)$. We do some trivial (for computers) calculation on the interval, depending on the text.\\
+Let's assume $T = abca$\begin{list}{}{}
+	\item The size at the beginning is the size of the whole interval $[0,1)$, so $s_0 = 1$
+	\item The first symbol is $a$, we go in its interval which is $[0,\frac{1}{2})$ and the size of the new interval is $s_1 = s_0\cdot P(a) = \frac{1}{2}$. This new interval must be partitioned according to the probabilities, so the first partition is of size $P(a)=\frac{1}{2}$ of the current interval so it's $\frac{1}{4}=s_1\cdot P(a)$, the second and third are of size $P(b)=P(c)=\frac{1}{4}$ so they are $\frac{1}{8} = s_1\cdot P(b) = s_1\cdot P(c)$\\
+	The first value, the border between the first two partitions, is $0$ (the beginning of the new interval) $+$ the size of the first partition $\frac{1}{4} = \frac{1}{4}$, the second border value is $0+\frac{1}{4}$ for the first partition $+\frac{1}{8}$ for the second $=\frac{3}{8}$, then the last border is the last value which is $\frac{1}{2}$\\
+	Programmatically, the interval starts at $0+f_a\cdot s_1 = 0$. The second partition starts at $0+f_b\cdot s_1 = 0+\frac{1}{2}\cdot\frac{1}{2} = \frac{1}{4}$ and so on. So the starting position of a letter is the current size times the cumulative frequency of that letter.
+	\item The second symbol is a $b$, so we zoom in it's interval inside $s_1$, which goes from $[\frac{1}{4},\frac{3}{8})$ of size $s_2 = s_1\cdot P(b) = \frac{1}{2}\cdot\frac{1}{4} = \frac{1}{8}$ and we partition in three parts again like before. The first partition is again for $a$ and starts at $\frac{1}{4}$, the beginning of the interval. The second partition, of $b$, starts at $\frac{1}{4}+f_b\cdot s_2 = \frac{1}{4}+\frac{1}{2}\cdot\frac{1}{8} = \frac{5}{16}$ and the third starts at $\frac{1}{4} + f_c\cdot s_2 = \frac{11}{32}$
+\end{list}
+So the arithmetic coding keeps the two integers describing the interval $[l_n, l_n+s_n)$: the left and the right endpoints of the interval. We start with $l_0 = 0, s_0 = 1$, and in every step $s_{n+1} = s_n\cdot P(T[n+1])$ and $l_{n+1} = l_n + f_{T[n+1]} \cdot s_n$, with $T[n+1]$ being the character in position $n+1$ which we are encoding.
 \end{document}
