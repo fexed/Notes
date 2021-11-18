@@ -51,7 +51,7 @@ Exam: project (groups of 2) + oral exam.\\
 This course's goals is to make sense of the huge amounts of data, take something big and unwieldy and produce something small that can be used, a \textbf{mathematical model}.\\
 The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually is the computational bottleneck.\\
 ML is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
-Solve general problem $min_{x\in S}f(x)$, with Poloni solve $min_{x\in R^n}||Ax - b||_2$ which is easier and can be solved exactly.
+Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}||Ax - b||_2$ which is easier and can be solved exactly.
 \chapter{Numerical Analysis}
 \section{Quick recap of linear algebra}
 \begin{list}{}{}
@@ -171,8 +171,8 @@ $$||A||_2 = ||U\Sigma V^T||_2 = ||\Sigma V^T||_2 = ||\Sigma||_2 = \Sigma_1$$
 $$||A|| = max_{||z|| = 1} ||\Sigma V^T|| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1||z|| = \sigma_1$$
 $$||A||_F = ||U\Sigma U^T|| = \ldots = \Sigma_1$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
-We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $min_{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $min_{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
+We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
+The optimal solution of $\min{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
 \paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
 \section{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
@@ -198,7 +198,7 @@ Not always solvable, for example $\left[\begin{array}{c}
 \end{array}\right]$ because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? I can get $\left[\begin{array}{c}
 5\\5\\0
 \end{array}\right]$\\
-In general $min_{x\in R^m} ||Ax - b||_2 = min_{x\in R^m} \sqrt{\sum ((Ax)_i - b_i)^2}$\\
+In general $\min{x\in R^m} ||Ax - b||_2 = \min{x\in R^m} \sqrt{\sum ((Ax)_i - b_i)^2}$\\
 The special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible. Typical case il $A$ long thin, we cannot get all vectors $b$ but still $min_{x\in R^m} ||Ax - b||_2$ is a question that makes sense. 
 \paragraph{Polynomial Fitting} Statistical version: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $min_{coeff}||Ax - y||_2^2$
 \paragraph{Theory of least-squares problems} When does $min ||Ax-b||_2$ have a unique solution? With $A \in R^{m\times n}$\\
@@ -571,13 +571,38 @@ $$span(b,Ab,\ldots,A^{k-1}b) = \{v=\alpha_0b+\alpha_1Ab+\alpha_2A^2b+\ldots+\alp
 $$=\{v = (\alpha_0I+\alpha_1A+\alpha_2A^2+\ldots+\alpha_{k-1}A^{k-1})b\:|\:\alpha_i\in R\} = $$
 $$ = \{v=p(A)b\:|\:\hbox{for all polynomials }p(t)=\alpha_0+\alpha_1t+\ldots+a_{k-1}t^{k-1}\hbox{ of degree }<k\}$$
 
-\paragraph{Definition} This is the \textbf{Krylov Subspace} $K_k(A,b)\Rightarrow$ \textbf{Krylov space methods}
+\paragraph{Krylov Subspace} This is the Krylov Subspace: $K_k(A,b)\Rightarrow$ \textbf{Krylov space methods}\\
+For now we assume that $b, Ab, \ldots, A^{n-1}b$ are linearly independent.\\
+$K_n(A,b)$ is a linear subspace means that $v,w\in K_n(A,b)\Rightarrow \alpha v+\beta w\in K_n(A,b)$\\
+$v\in K_n(A,b)\Rightarrow v=(\alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1} A^{n-1})b$ with $\alpha_{n-1}\neq 0 \Rightarrow Av = (\alpha_0A + \alpha_1 A^2+\ldots + \alpha_n A^n)b \in K_{n+1}(A,b)$ and also $v\in K_n(A,b) - K_{n-1}(A,b)\Rightarrow Av \in K_{n+1}(A,b)- K_n(A,b)$\\
+By composing $b$, linear combinations of already computed vectors and products of already computed vectors times $A$, one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you combine (3).\\
+Can we look for the best approximation of the solution of a certain problem, for instance a linear system $Ax=b$, inside $K_n(A,b)$?
+$$K_n(A,b) = \{\alpha_0b+\ldots + \alpha_{n-1}A^{n-1}b\:|\:\alpha_i\in R\} =$$ $$= \left\{\left[\begin{array}{c | c | c | c | c}
+b & Ab &A^2b & \ldots & A^{n-1}b
+\end{array}\right]\cdot\left[\begin{array}{c}
+\alpha_0\\\vdots\\\alpha_{n-1}
+\end{array}\right]\:|\:\left[\begin{array}{c}
+\alpha_0\\\vdots\\\alpha_{n-1}
+\end{array}\right]\in R^n \right\} = \{V_n\cdot y\:|\:y \in R^n\}$$
+So each vector in $K_n(A,b)$ is written as $V_ny$ for some $y\in R^n$ and the problem becomes a least squares problem with the matrix $AV_n\in R^{m\times n}$:
+$$\min_{x_n\in K_n(A,b)} ||Ax_n - b|| = \min_{y\in R^n} ||(AV_n)y-b||$$
+But this problem is very unstable to solve because $V_n = \left[\begin{array}{c | c | c | c | c}
+b & Ab &A^2b & \ldots & A^{n-1}b
+\end{array}\right]$ has columns that tend to be all multiples of the same vector as $n$ increases.
+\paragraph{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$\\
+The idea is that given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\
+The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\cdot b$, and the generic step is $j\rightarrow j+1$ %TODO algorithm, l14.pdf
+\paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $||Ax_n-b||$ with $x_n = Q_ny$.\\
+I.e. $\min_{x_n\in K_n(A,b)}||Ax_n-b|| = \min_{y\in R^n} ||AQ_ny -b||$, the least squares problem wit the matrix $AQ_n\in R^{m\times n}$, in $O(mn^2)$\\
+$= ||\underline{H}_n y - e_1||b||\,||$, the least squares problem with matrix $H_n\in R^{(n+1)\times n}$, in $O(n^3)$
+\subparagraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
+
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
 \subparagraph{Example: Linear estimation} Phenomenon measured by one number $y$ and believed to depend on a vector $x = [x_1,\ldots,x_n]$. Available set of observations $(x_1,y_i), \ldots, (x_m, y_m)$.\\
-And optimistic assumption: the dependence is linear, hence $y = \sum_{i=1}^n w_ix_i+w_0 = w_x + w_0$ for fixed $n+1$ real parameters $w = [w_0, w_+=[w_1,\ldots,w_n]]$ and find the $w$ for which is less untrue $min_w\:\:L(w)=||y-xw||$
-\subparagraph{Example: Low-rank approximation} A large, sparse matrix $M\in R^{n\times m}$ describes a phenomenon depending on pairs. Find a tall and thin $A\in R^{n\times k}$ and a fat and large $B\in R^{k\times m}$, meaning $k << n,m$, such that $A\cdot B = M$ with $min_{A,B} L(A,B) = ||M-AB||$\\
+And optimistic assumption: the dependence is linear, hence $y = \sum_{i=1}^n w_ix_i+w_0 = w_x + w_0$ for fixed $n+1$ real parameters $w = [w_0, w_+=[w_1,\ldots,w_n]]$ and find the $w$ for which is less untrue $\min_w\:\:L(w)=||y-xw||$
+\subparagraph{Example: Low-rank approximation} A large, sparse matrix $M\in R^{n\times m}$ describes a phenomenon depending on pairs. Find a tall and thin $A\in R^{n\times k}$ and a fat and large $B\in R^{k\times m}$, meaning $k << n,m$, such that $A\cdot B = M$ with $\min_{A,B} L(A,B) = ||M-AB||$\\
 $A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge and dense matrix. Efficiently solving this problem requires
 \begin{list}{}{}
 	\item Low complexity computation
@@ -588,8 +613,8 @@ $A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge a
 \subparagraph{Example: Support Vector Machines} Same setting as the first example, but $y_h\in\{1,-1\}$: want to linearly separate the two sets. Which separating hyperplane to choose? Intuitively, base on the margin: more margin, more robust classification.\\
 The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{||w_+||}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -$\\
 The \textbf{maximum margin separating hyperplane} is the solution of $min_w\{||w_+||^2\:|\:y_h(w_+x_h + w_0)\geq 1)\:\:h=1,\ldots,m\}$, and the margin is $\frac{2}{||w_+||}$ assuming any exists.\\
-If it doesn't exists, soft-margin SVM: $min_w ||w_+||^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
-Non differentiable, reformulation $min_{w,\xi} ||w_+||^2 + C\sum_{h=1}^m \xi_h$
+If it doesn't exists, soft-margin SVM: $\min_w ||w_+||^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
+Non differentiable, reformulation $\min_{w,\xi} ||w_+||^2 + C\sum_{h=1}^m \xi_h$
 \pagebreak
 \section{Optimization problems}
 Given $X$ \textit{any} set and $f:X\rightarrow R$ \textit{any} function, we have an optimization problem in the form $$(P)\:\:\:\:\:\:f_*=min\{f(x) : x\in X\}$$
