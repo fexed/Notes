@@ -607,10 +607,32 @@ The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\
 \subparagraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
 \beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
 \end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in R^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
+\subparagraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
 \paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $||Ax_n-b||$ with $x_n = Q_ny$.\\
 I.e. $\min_{x_n\in K_n(A,b)}||Ax_n-b|| = \min_{y\in R^n} ||AQ_ny -b||$, the least squares problem wit the matrix $AQ_n\in R^{m\times n}$, in $O(mn^2)$\\
-$= ||\underline{H}_n y - e_1||b||\,||$, the least squares problem with matrix $H_n\in R^{(n+1)\times n}$, in $O(n^3)$
-\subparagraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
+$= ||\underline{H}_n y - e_1||b||\,||$, the least squares problem with matrix $\underline{H}\in R^{(n+1)\times n}$, in $O(n^3)$
+\subparagraph{Convergence of GMRES} $x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$ with deg$(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$. So $$\min_{x_n\in K_n(A,b)} ||Ax_n-b|| = \min_{p\:|\:deg(p)<n}||Ap(A)b - b|| = !!(Ap(A)-I)b|| \leq ||Ap(A)-I||\cdot||b||$$
+And if $A = V\Lambda V^{-1}$ diagonalizable (with $\Lambda = \left[\begin{array}{c c c}
+\lambda_1\\
+& \ddots\\
+& & \lambda_m
+\end{array}\right]$) then $Ap(A)-I = q(A)$ with $q(t) = tp(t)-1$ and $A^k = V\Lambda^kV^{-1}$, then $q(A) = V\left[\begin{array}{c c c}
+q(\lambda_1)\\
+& \ddots\\
+& & q(\lambda_m)
+\end{array}\right] V^{-1}$\\
+First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} ||Ax_n - b|| = 0$\\
+This extends inexactly to matrices that have clustered eigenvalues.\\\\
+Arnoldi can be used to compute eigenvalues too. If there is a lucky breakdown $\Leftrightarrow h_{n+1,n}=0$, $\underline{H}_n=\left[\begin{array}{c c c c}
+x & x & \ldots & x\\
+x & x & \ldots & x\\
+0 & x & \ldots & x\\
+\vdots & & \ddots & \vdots\\
+& & x & x\\
+0 & \ldots & \ldots & 0
+\end{array}\right]$\\
+In this case, even if one can figure out $q_{n+1}$ and continue up to step $n=m$, one gets $AQ_m = Q_m\ldots$ which means that the eigenvalues of $H_n$ are a subset of the eigenvalues of $A$. So the lucky breakdown at step $n$ given me exactly $n$ eigenvalues of $A$.\\
+If $(\lambda_1,w_1),\ldots,(\lambda_n,w_n)$ are the eigenvalues/eigenvectors of $H_n$, then $(\lambda_1,Q_nw_1),\ldots,(\lambda_n,Q_nw_n)$ are the eigenvalues/eigenvectors of $A$. This because $AQ_n = Q_nH_n \Rightarrow AQ_nw_i = Q_nH_nw_i = Q_nw_i\lambda_i$ %TODO p.3 l15.pdf
 
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
