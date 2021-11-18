@@ -591,7 +591,22 @@ b & Ab &A^2b & \ldots & A^{n-1}b
 \end{array}\right]$ has columns that tend to be all multiples of the same vector as $n$ increases.
 \paragraph{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$\\
 The idea is that given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\
-The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\cdot b$, and the generic step is $j\rightarrow j+1$ %TODO algorithm, l14.pdf
+The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a $p$ of degree exactly $j-1$.
+\begin{enumerate}
+	\item Generate a vector $\in K_{j+1}$ that wasn't already in $K_j$
+	$$w = Aq_j = q_1\beta_1+\ldots + q_j\beta_j + q_{j+q}\beta_{j+1}$$
+	The $\beta_i$ are the coordinates of $w$ in the basis $q_1,\ldots,q_{j+1}$
+	\item Subtract $q_1$ component, as the $q_i$ are orthonormal
+	$$q_1^Tw = q_1^Tq_1\beta_1+\ldots+q_1^Tq_{j+1}\beta_{j+1} = \beta_1$$
+	$$w = w - q_1\beta_1 = q_2\beta_2 + \ldots + q_{j+1}\beta_{j+1}$$
+	\item Repeat!
+	$$q_i^Tw = q_i^Tq_i\beta_i + q_i^Tq_{i+1}\beta_{i+1}+\ldots+q_1^Tq_{j+1}\beta_{j+1} = \beta_i$$
+	$$w = w - q_i\beta_i = q_{i+1}\beta_{i+1} + \ldots + q_{j+1}\beta_{j+1}$$
+	\item After $j$ steps, $w = \beta_{j+1}q_{j+1}$, and $q_{j+1}$ must have norm 1 so set $q_{j+1}=\frac{1}{||w||}w$ and $\beta_{j+1}= ||w||$
+\end{enumerate}
+\subparagraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
+\beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
+\end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in R^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
 \paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $||Ax_n-b||$ with $x_n = Q_ny$.\\
 I.e. $\min_{x_n\in K_n(A,b)}||Ax_n-b|| = \min_{y\in R^n} ||AQ_ny -b||$, the least squares problem wit the matrix $AQ_n\in R^{m\times n}$, in $O(mn^2)$\\
 $= ||\underline{H}_n y - e_1||b||\,||$, the least squares problem with matrix $H_n\in R^{(n+1)\times n}$, in $O(n^3)$
