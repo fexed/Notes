@@ -1840,4 +1840,70 @@ There can be multiple explanations, you usually want the minimal explanation.
 	\item Smoke $\leftarrow$ Fire
 \end{list}
 If Alarm is observed, there are two possible minimal explanations: \{Tampering\} and \{Fire\}. If Alarm $\wedge$ Smoke is observed, the only possible minimal explanation is \{Fire\}
+\subsection{Prolog} Prolog is the most widely used \textbf{logic-programming language}. We already introduced the syntax and the execution model (SLD resolution).
+\begin{list}{}{}
+	\item The declarative semantics is given by Horn clause knowledgebases
+	\item The procedural semantics is given by a specific strategy for exploring SLD trees:
+	\begin{list}{}{}
+		\item Successors are generated in the order they appear in the logic program
+		\item The SLD tree is generated left-to-right \textbf{depth-first}
+	\end{list}
+	\item The \textbf{occur check is omitted} from Prolog's unification algorithm
+\end{list}
+Therefore Prolog is neither complete (since the depth-first strategy is not complete) nor correct.\\
+Prolog uses the database semantics rather than the first-order semantics: unique name assumption, closed world assumption (a form of nonmonotonic reasoning, i.e. negation as failure). Also Prolog is a full fledged programming language: efficient implementation of the interpreter, built-in functions for arithmetic and list manipulation, the burden of controlling the flow of execution is on the programmer.\\\\
+A Prolog interpreter is similar to FOL-BC-Ask but more efficient. It relies on a global data structure: a \textbf{stack of choice points}. Logic variables in a path remember their binding in a \textbf{trail}. When failure occurs, the interpreter backtracks to a previous choice point and undoes the bindings of the variables.\\
+Prolog compiles into an intermediate abstract machine (\textbf{Warren Abstract Machine}), and parallelism can be exploited in two ways:
+\begin{list}{}{}
+	\item \textbf{OR-parallelism}, a goal may unify with many different rules in the knowledge base
+	\item \textbf{AND-parallelism}, comes from the possibility of solving each conjunct in the body of an implication in parallel but with consistent substitutions
+\end{list}
+\paragraph{Redundant Computations} In forward chaining we do not have the problem of repeated computation since, once a solution to a smaller problem is computed, it's remembered as part of the solution to the bigger problem. We can obtain a similar saving in backward systems with a technique called \textbf{memoization}, which consists in caching solutions to subgoals and reusing them. Tabled logic programming systems use efficient storage and retrieval mechanisms to perform memoization.
+\paragraph{Data Types}\begin{list}{}{}
+	\item \textbf{Atoms}: identifiers with lowercase initial (tom, x-1,\ldots), string of characters ("Tom", "Sarah Johnes",\ldots), string of special characters ($<==>$, $::=$, \ldots)
+	\item \textbf{Numbers}: integers and reals
+	\item \textbf{Variables}: identifiers with uppercase initial (Tom, X1, Result,\ldots), anonymous variables (\_ as in hasChild(X) :- parent(X,\_))
+\end{list}
+\paragraph{Structured Objects} Functions with arguments (functor applied to arguments) and lists.
+\paragraph{Arithmetic} Basic arithmetic operations and comparison operators.
+\paragraph{Procedural Control of Reasoning} Declarative encoding of knowledge and general mechanisms for deduction can be very inefficient. For efficiency we must have some domain dependent control on the reasoning process. Given a knowledgebase of facts and rules, how to make the most effective use of the rules? The choice on the order of the rules makes a difference in performance. Prolog takes ordering of clauses and subgoals very seriously: \textbf{the burden is on the programmer}.
+\paragraph{Controlling backtracking} Prolog will automatically backtrack if this is necessary to satisfy a goal. Uncontrolled backtracking however may cause inefficiency in a Prolog program. With CUT we can control backtracking.\\
+In a case where given a clause of the form "G :- T,R", the goal T is needed only as a test for the applicability of a subgoal R. If R fails, we do not want to backtrack to T nor try any other alternative for G. The pattern \begin{list}{}{}
+	\item G :- T, !, R
+	\item G :- S
+\end{list}
+Is equivalent to \texttt{if T then R $\Rightarrow$ G else S $\Rightarrow$ G} and is more efficient than\begin{list}{}{}
+	\item G :- T, R
+	\item G :- $\overline{T}$, S
+\end{list}
+with $\overline{T}$ a goal mutually exclusive with T.\\
+In general, G :- T$_1$, \ldots, T$_m$, !, G$_1$, \ldots, G$_n$ means that once T$_1$, \ldots, T$_m$ have been established we can commit to the rest of goals without looking for alternatives.\\
+CUT has advantages and drawbacks:
+\begin{list}{}{}
+	\item With CUT we can often improve the efficiency of the program. The idea is to explicitly tell Prolog: do not try other alternatives because they are bound to fail.
+	\item Using CUT we can specify mutually exclusive rules, so we can add expressivity to the language.
+	\item The main disadvantage is that we can lose the correspondence between the declarative and procedural meanings of the programs.\\
+	Green cuts do not change the meaning, red cuts do and we have to be careful.
+	\begin{center}
+		\includegraphics[scale=0.5]{20.png}
+	\end{center}
+\end{list}
+\paragraph{Negation as failure} The unary predicate \textbf{not} is such that not(P) is true if P fails. This new type of goal, not(G), is understood to succeed when the goal G fails and to fail when the goal G succeed. Failure must occur in a finite number of steps.
+\subsection{Constraint Logic Programming} \textbf{CLP} combines the constraint satisfaction approach with logic programming, creating a new language where a logic program works along a specialized constraint solver.\\
+The basic Prolog can be seen as a very specific constraint satisfaction language, where the constraints are of a limited form. Prolog is extended introducing other types of constraints: CLP(X) differ in the domain and type of constraints they can handle
+\begin{list}{}{}
+	\item CLP(R) constraints on real numbers
+	\item CLP(Z) for integers
+	\item CLP(Q) rational numbers
+	\item CLP(B) booleans
+	\item CLP(FD) finite domains
+\end{list}
+A CLP solution is the most specific set of constraints on the variables that can be derived from the knowledgebase. A specific solution if the constraints are tight enough.
+\subsection{Meta Interpreters} A meta interpreter for a language is an interpreter that is written in the language itself. Prolog has powerful features for writing meta programs because Prolog treats programs and data both as terms. A program can be input to another program.\\
+One can write meta interpreters for various applications, extending the implementation of Prolog in different directions:
+\begin{list}{}{}
+	\item exploring different execution strategies for the interpreter (breadth-first, limited depth search\ldots)
+	\item generating proof trees, expert system shells, explanations\ldots
+	\item implementing new languages
+\end{list}
 \end{document}
