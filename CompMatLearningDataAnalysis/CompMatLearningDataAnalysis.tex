@@ -632,7 +632,22 @@ x & x & \ldots & x\\
 0 & \ldots & \ldots & 0
 \end{array}\right]$\\
 In this case, even if one can figure out $q_{n+1}$ and continue up to step $n=m$, one gets $AQ_m = Q_m\ldots$ which means that the eigenvalues of $H_n$ are a subset of the eigenvalues of $A$. So the lucky breakdown at step $n$ given me exactly $n$ eigenvalues of $A$.\\
-If $(\lambda_1,w_1),\ldots,(\lambda_n,w_n)$ are the eigenvalues/eigenvectors of $H_n$, then $(\lambda_1,Q_nw_1),\ldots,(\lambda_n,Q_nw_n)$ are the eigenvalues/eigenvectors of $A$. This because $AQ_n = Q_nH_n \Rightarrow AQ_nw_i = Q_nH_nw_i = Q_nw_i\lambda_i$ %TODO p.3 l15.pdf
+If $(\lambda_1,w_1),\ldots,(\lambda_n,w_n)$ are the eigenvalues/eigenvectors of $H_n$, then $(\lambda_1,Q_nw_1),\ldots,(\lambda_n,Q_nw_n)$ are the eigenvalues/eigenvectors of $A$. This because $AQ_n = Q_nH_n \Rightarrow AQ_nw_i = Q_nH_nw_i = Q_nw_i\lambda_i$.\\
+Even without the breakdown, the quantities $(\lambda_i, Q_nw_i)$ where $(\lambda_i, w_i)$ are eigenpairs of $H_n$, are good approximations of some eigenpairs of $A$, for most matrices, and are called \textbf{Ritz values}/vectors/pairs of $A$.\\
+This explanation starts from $A^kb = V \Lambda^k V^{-1} b = v_1\lambda_1^kc_1+\ldots+v_m\lambda_m^kc_m$ with $V^{-1}b = c$. As $k$ increases, the largest summands are the ones with large $|\lambda_i| \Rightarrow$ the spaces $K_n(A,b)=span(b,Ab,\ldots,A^{n-1}b)$ and $span(v_1,\ldots,v_n)$ are similar. One can guarantee a good approximation of the eigenvectors "a posteriori" by checking if $||Av-v\lambda||$ is small respect to $||A||\cdot||v||\Rightarrow$ Arnoldi works well to approximate few eigenvectors with largest modulus of a large and sparse matrix $A$.\\\\
+What if I need the \textbf{smallest} eigenvalues of $A$? A trick: if $A=V\Lambda V^{-1} = V\left[\begin{array}{ccc}
+\lambda_1\\
+&\ddots\\
+& &\lambda_m
+\end{array}\right]V^{-1}$ with $\lambda_m$ the smallest, then $A^{-1}=V\Lambda^{-1} V^{-1} = V\left[\begin{array}{ccc}
+\lambda_1^{-1}\\
+&\ddots\\
+& &\lambda_m^{-1}
+\end{array}\right]V^{-1}$ with $\lambda_m^{-1}$ the largest. So we can compute $\mu=$\texttt{eigs}$(B,n)$ with $B=A^{-1}$ and take $\lambda_i = \frac{1}{\mu_i}$ for $i=1,\ldots,n$. $B$ is dense and expensive to compute, but in Arnoldi it's enough to have a "black-box" function that computes $Bv=A^{-1}v$ given $v$.\\
+Computing $w=A^{-1}v \Leftrightarrow$ solving the linear system $Aw=v$. So one can precompute, once, a sparse factorization $A=PLU$ and then pass to \texttt{eigs}() the callback/black-box/oracle function $w = (U-(L-(P^Tb)))$\\
+Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ by applying Arnoldi to $(A-\alpha I)^{-1}$ with eigenvalues $\mu_i = (\lambda_i-\alpha)^{-1}$ for $i=1,\ldots,m$\\\\
+If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
+Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MNRES.
 
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
