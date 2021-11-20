@@ -1906,4 +1906,88 @@ One can write meta interpreters for various applications, extending the implemen
 	\item generating proof trees, expert system shells, explanations\ldots
 	\item implementing new languages
 \end{list}
+\subsection{Answer Set Programming}
+Answer Set programming/Prolog is a language for knowledge representation and reasoning based on the stable model semantics of logic programs (an alternative, more declarative, semantics). In includes, in a coherent framework, ideas from:
+\begin{list}{}{}
+	\item declarative programming, expressive knowledge representation language
+	\item deductive databases (forward reasoning) and also disjunctive databases
+	\item syntax and semantics of standard Prolog as a special case, but also disjunction, "classical" and "strong" negations, constraints\ldots)
+	\item nonmonotonic logic (defaults, preference models, autoepistemic logic)
+\end{list}
+Balance between expressivity, ease of use and computational effectiveness. Answer Set inference engines/solvers exist (often relying on SAT solvers).\\
+Useful real world application: decision support systems of the Space Shuttle, team building, configuration systems, bioinformatics, lingustics\ldots
+\paragraph{Syntax} Answer sets are sets of beliefs (AS) that can be justified on the basis of the program. We assume sorted signatures from classical logic, including natural numbers and arithmetic operators.\\
+\textbf{Literals} $p(t)$ and $\neg p(t)$ where $t$ are sequences of terms (contrary literals in this case).\\
+A \textbf{rule} is an espression of the form:
+$$l_0\hbox{ or }\ldots\hbox{ or }l_k\leftarrow l_{k+1},\ldots,l_m,\hbox{ not }l_{m+1},\ldots,\hbox{ not }l_n$$
+\begin{list}{}{}
+	\item head($r$) = \{$l_0\hbox{ or }\ldots\hbox{ or }l_k$\}
+	\item body($r$) = \{$l_{k+1},\ldots,l_m,\hbox{ not }l_{m+1},\ldots,\hbox{ not }l_n$\}
+	\item pos($r$) = \{$l_{k+1},\ldots,l_m$\}
+	\item neg($r$) = \{$\hbox{not }l_{m+1},\ldots,\hbox{ not }l_n$\}
+\end{list}
+With "not" being the negation as failure or \textbf{default negation}, different from classical $\neg$ which is also used, and "or" being the \textbf{epistemic disjuction}, different from classical $\vee$.
+\paragraph{Special cases} \begin{list}{}{}
+	\item \textbf{Normal logic programs} or \textbf{nlp}: programs without $\neg$ (the strong negation) and without "or" ($k=0$)
+	$$l_0\leftarrow l_{1},\ldots,l_m,\hbox{ not }l_{m+1},\ldots,\hbox{ not }l_n$$
+	\item \textbf{Constraint}: when head($r$) = \{\}
+	$$\leftarrow l_{1},\ldots,l_m,\hbox{ not }l_{m+1},\ldots,\hbox{ not }l_n$$
+	\item \textbf{Fact}: when body($r$) = \{\}
+	$$l_0\hbox{ or }\ldots\hbox{ or }l_k$$
+\end{list}
+A \textbf{ASP} (Answer Set Prolog/program) \textbf{is a pair \{$\sigma$, $\Pi$\} where $\sigma$ is a signature and $\Pi$ is a collection of logic programming rules over $\sigma$}. The signature $\sigma$.
+The signature may be derived from the program, $\sigma(\Pi)$, rather than being given explicitly. It consists of all the constants which appear in the program.\\
+Example of an ASP program, $\Pi_0$:
+\begin{list}{}{}
+	\item $q(a,1)$
+	\item $q(b,2)$
+	\item $p(X)\leftarrow K+1<2, q(X,K)$
+	\item $r(X)\leftarrow\hbox{not }p(X)$
+\end{list} for the signature $\sigma$:
+\begin{list}{}{}
+	\item Sorts/constants: $\tau_1=\{a,b\}$ and $\tau_2 = \{N\}$ with $N$ natural numbers set (note: no functions)
+	\item Predicates: $p(\tau_1)$, $q(\tau_1, \tau_2)$, $r(\tau_1)$ and the standard relation $<$ on $N$
+\end{list}
+\paragraph{Ground instances of a program} Terms, literals and rules are called ground if they contain no variables and no symbols for arithmetic functions.\begin{list}{}{}
+	\item \textbf{Herbrand Universe}: the set of all ground instances of terms
+	\item \textbf{Herbrand Base}: the set of all ground atomic sentences
+\end{list}
+A program $gr(\Pi)$ consisting of all ground instances of all rules of $\Pi$ is called the ground instantiation of $\Pi$: $gr(\Pi_0)$\begin{list}{}{}
+	\item $q(a,1)$
+	\item $q(b,2)$
+	\item $p(a)\leftarrow 1<2, q(a,0)$
+	\item $p(a)\leftarrow 2<2, q(a,1)$
+	\item \ldots
+	\item $p(b)\leftarrow 1<2, q(b,0)$
+	\item $p(b)\leftarrow 2<2, q(b,1)$
+	\item \ldots
+	\item $r(a)\leftarrow\hbox{not }p(a)$
+	\item $r(b)\leftarrow\hbox{not }p(b)$
+\end{list}
+\paragraph{ASP Partial Interpretations} A (partial) interpretation is a consistent subset of the Herbrand base.\\
+Partial interpretation $S$: a consistent set of ground literals over $\sigma$:
+\begin{list}{}{}
+	\item Given two contrary literals $l$ and $l^-$: $l$ is true if $l\in S$, $l$ is false if $l^-\in S$, otherwise $l$ is unknown in $S$
+	\item An extended literal not $l$ is true in $S$ if $l\not\in S$, otherwise not $l$ is false in $S$
+	\item A set of extended literals $U$, understood as their conjunction ($l_0,\ldots,l_k$), is true if all of them are true in $S$, false if at least one of them is false, unknown otherwise
+	\item A disjunction of literals ($l_0$ or $\ldots$ or $l_k$) is true if at least one of them is true, false if all of them are false, unknown otherwise.
+	Note that $\neg$($l_0,\ldots,l_k$) is treated as ($l_0^-$ or $\ldots$ or $l_k^-$) while $\neg$($l_0$ or $\ldots$ or $l_k$) is treated as ($l_0^-,\ldots,l_k^-$)
+\end{list}
+\textbf{Rule Satisfaction}: $S$ satisfies a rule $r$ if $S$ satisfies head($r$) or does not satisfies its body.
+\paragraph{ASP Semantics} The semantics is given for ASP ground programs: this approach is justified by the domain closure assumption, where all objects in the domain of discourse are in teh signature of $\Pi$, no other. The answer set semantics of a logic program $\Pi$ assign to $\Pi$ a \textbf{collection of answer sets} $S$. Each answer set $S$ obeys to the following principles:\begin{list}{}{}
+	\item \textbf{Consistency}: $S$ must satisfy the rules of $\Pi$
+	\item \textbf{Minimality}: a rationality principle, "\textit{do not believe anything you are not forced to believe}"
+\end{list}
+Semantics is given in two steps: programs without default negation (part 1) and arbitrary programs (part 2).
+\paragraph{Consistency of logic programs} A logic program is called consistent if it has an answer set. Inconsistency may be due to improper use of \textbf{logical negation} ($\neg$).\\
+We can transform a ASP program $\Pi$ to one without negation $\Pi^+$ (the positive form) as follows:
+\begin{list}{}{}
+	\item For each predicate symbol $p$ we introduce a symbol $p'$ with the same arity
+	\item We replace each $l=\neg p(t)$ with $p'(t)$, its positive form, $l^+$. If $l$ is positive, $l=l^+$
+\end{list}
+A logic program $\Pi$ can be transformed in its positive form $\Pi^+$ by replacing each rule with $l_0^+\hbox{ or }\ldots\hbox{ or }l_k^+\leftarrow l_{k+1}^+,\ldots,l_m^+,\hbox{ not }l_{m+1}^+,\ldots,\hbox{ not }l_n^+$ and adding the constraints $\leftarrow p(t),p'(t)$ for each $p'$ added.\\
+\textbf{Property 1}: a set $S$ of literals of $\sigma(\Pi)$ is an answer set of $\Pi \Leftrightarrow S^+$ is an answer set of $\Pi^+$.\\\\
+A logic program can be inconsistent for the use of the \textbf{default negation}.\\
+In general, the problem of checking inconsistency is undecidable or decidable and very complex for finite domains. The theory helps us in making simplifying assumptions to guarantee consistency.\\
+\textbf{Level Mapping}: a function $||\:||$ which maps ground atoms in $P$ (the Herbrand base of $P$) to natural numbers. If $D$ is a disjunction or conjunction of literals, $||D||$ is defined as the minimum level of atoms occurring in literals from $D'$ (the positive form). %TODO rules3.pdf p.17
 \end{document}
