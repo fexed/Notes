@@ -1989,5 +1989,43 @@ A logic program $\Pi$ can be transformed in its positive form $\Pi^+$ by replaci
 \textbf{Property 1}: a set $S$ of literals of $\sigma(\Pi)$ is an answer set of $\Pi \Leftrightarrow S^+$ is an answer set of $\Pi^+$.\\\\
 A logic program can be inconsistent for the use of the \textbf{default negation}.\\
 In general, the problem of checking inconsistency is undecidable or decidable and very complex for finite domains. The theory helps us in making simplifying assumptions to guarantee consistency.\\
-\textbf{Level Mapping}: a function $||\:||$ which maps ground atoms in $P$ (the Herbrand base of $P$) to natural numbers. If $D$ is a disjunction or conjunction of literals, $||D||$ is defined as the minimum level of atoms occurring in literals from $D'$ (the positive form). %TODO rules3.pdf p.17
+\textbf{Level Mapping}: a function $||\:||$ which maps ground atoms in $P$ (the Herbrand base of $P$) to natural numbers. If $D$ is a disjunction or conjunction of literals, $||D||$ is defined as the minimum level of atoms occurring in literals from $D'$ (the positive form). This also implies that $||\neg\:A|| = ||A||$.
+A logic program $\Pi$ is \textbf{locally stratified} if it does not contain $\neg$, and there is a level mapping on the grounded version of $\Pi$ ($gr(\Pi)$) such that for every rule:
+\begin{list}{}{}
+	\item $\forall\:l\in \hbox{pos}(r), ||l||\leq ||\hbox{head}(r)||$
+	\item $\forall\:l\in \hbox{neg}(r), ||l||< ||\hbox{head}(r)||$
+\end{list}
+as to impose an higher level when there is a not.\\
+If a program is locally stratified and, in addition, for any predicate symbol $p$ we have $||p(t_1)||=||p(t_2)||$ for any $t_1,t_2$, the program is called \textbf{stratified}. A stratified program is also locally stratified. A program without not is stratified. Properties:
+\begin{list}{}{}
+	\item A locally stratified program is consistent
+	\item A locally stratified program without disjunction has exactly one answer set
+	\item The above conditions hold by adding to a locally stratified program a collection of closed world assumptions of the form $\neg p(X)\leftarrow \hbox{not }p(X)$
+\end{list}
+\paragraph{Reasoning methods for Answer Set Programming}
+The choice of the algorithms used depend on the structure of problems and the type of queries. Two examples:
+\begin{list}{}{}
+	\item \textbf{Acyclic Programs}\\
+	A nlp $\Pi$ is called acyclic if there's a level mapping of $\Pi$ such that for every rule $r$ of $gr(\Pi)$ and every literal $l$ which occurs in pos($r$) or neg($r$), $||l||<||\hbox{head}(r)||$\begin{list}{}{}
+		\item If $\Pi$ is acyclic then the unique answer set of $\Pi$ is the unique Herbrand/classical model of Clark's completion of $\Pi$, comp($\Pi$)
+		\item SLDNF resolution-based interpreter of Prolog will always terminate on atomic queries and produce the intended answers.
+	\end{list}
+	\item \textbf{Tight Programs}\\
+	A nlp $\Pi$ is called tight if there is a level mapping of $\Pi$ such that for every literal rule $r$ of $gr(\Pi)$ and every literal $r\in$ pos($r$), head($r$) $>l$. Acyclic programs are tight but not viceversa.\\
+	If a program $\Pi$ is tight then answer sets of $\Pi$ are the model of the Clark's completion of $\Pi$. The problem of computing answer sets can be reduced to SAT for propositional formulas and a SAT solver can be used. Also, in the case of non tight programs there are theoretical results that allow translating into SAT program even if very large.
+\end{list}
+\paragraph{Answer Set Solvers} These theoretical results have led to the development of answer set solvers such as ASET, CMODELS\ldots which are based on (possibly multiple) calls to propositional solvers.\\
+Traditional answer set solvers typically have a two level architecture:
+\begin{list}{}{}
+	\item \textbf{Grounding step}: compute $gr(P)$\\
+	Grounders can be integrated or provided as separated modules. The size of the grounding, even if partial, is a major bottleneck.\\
+	Smart and lazy grounding techniques have been developed.
+	\item \textbf{Model search}: the answer sets of grounded (propositional) program are computed
+\end{list}
+The workflow of answer set programming:
+\begin{center}
+	\includegraphics[scale=0.75]{21.png}
+\end{center}
+\paragraph{Knowledge Representation with Answer Set Programming}
+%TODO example rules3.pdf p. 25
 \end{document}
