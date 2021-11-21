@@ -143,11 +143,11 @@ Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an ei
 \paragraph{Symmetry} $A$ is symmetric if $A = A^T$
 \paragraph{Spectral Theorem} For a symmetric matrix $A\in R^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
 \paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in R^{m\times m}$ we can consider the function $x\in R^m\mapsto f(x) = x^T Qx \in R$\\
-\textbf{Theorem} For all symmetric matrix $Q \in R^{m\times m}$, $\lambda_{min}||x||^2 \leq x^TQx\leq \lambda_{max}||x||^2$, where $\lambda_{min}, \lambda_{max}$ are the smallest and largest eigenvalue of $Q$.
-\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
-Positive definite if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
-\paragraph{Recall theorem} $\lambda_{min}(x^T x) \leq x^T Q x \leq \lambda_{max}(x^T x)$ for all symmetric $Q$ so $\lambda_{min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{max}$\\
-Slightly different form $\lambda_{min} \leq z^T Q z \leq \lambda_{max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
+\textbf{Theorem} For all symmetric matrix $Q \in R^{m\times m}$, $\lambda_{\min}||x||^2 \leq x^TQx\leq \lambda_{\max}||x||^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
+\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
+Positive definite if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
+\paragraph{Recall theorem} $\lambda_{\min}(x^T x) \leq x^T Q x \leq \lambda_{\max}(x^T x)$ for all symmetric $Q$ so $\lambda_{\min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{\max}$\\
+Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
 $$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
 \paragraph{Generalization for complex matrices} $||x||^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
 % fine recap lin alg
@@ -160,19 +160,19 @@ v_1^T\\v_2^T\\\vdots\\v_m^t
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
 Geometric idea: there is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
 $\{\sigma_i\}$: singular values of $A$, defined uniquely for each $A$\\
-Rectangular SVD: each $A\in R^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in R^{m\times m}$, $V \in R^{n\times n}$ are orthogonal and $\Sigma\in R^{m\times n}$ is diagonal, so $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{min(m, n)} \geq 0$\\
+Rectangular SVD: each $A\in R^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in R^{m\times m}$, $V \in R^{n\times n}$ are orthogonal and $\Sigma\in R^{m\times n}$ is diagonal, so $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
-$= u_i\sigma_1 v_1^T + \ldots + u_{min(m, n)} \sigma_{min(m, n)} v_{min(m, n)}^T$\\
-In Matlab, \texttt{svd(A, 'econ')} costs $max(m,n)\cdot min(m,n)^2$, still cubic but linear in the largest dimension. the full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $max(m,n)\times max(m,n)$, so it will cost more in time and memory.\\\\
-The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots$ so at one point a $\sigma_r > \sigma_{r+1} = \ldots = \sigma_{min(m,n)} = 0$\\
+$= u_i\sigma_1 v_1^T + \ldots + u_{\min(m, n)} \sigma_{\min(m, n)} v_{\min(m, n)}^T$\\
+In Matlab, \texttt{svd(A, 'econ')} costs $max(m,n)\cdot \min(m,n)^2$, still cubic but linear in the largest dimension. the full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $max(m,n)\times max(m,n)$, so it will cost more in time and memory.\\\\
+The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots$ so at one point a $\sigma_r > \sigma_{r+1} = \ldots = \sigma_{\min(m,n)} = 0$\\
 Given $A = U\Sigma V^T$ we can compute $A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proved that the eigenvalues of $A^T A$ Are the squares of the singular values of $A$ plus additional zeroes for dimension reasons.
 $$||A||_2 = ||U\Sigma V^T||_2 = ||\Sigma V^T||_2 = ||\Sigma||_2 = \Sigma_1$$
 $$||A|| = max_{||z|| = 1} ||\Sigma V^T|| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1||z|| = \sigma_1$$
 $$||A||_F = ||U\Sigma U^T|| = \ldots = \Sigma_1$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
 We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $\min{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{min(m,n)}\sigma_{min(m,n)} v_{min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
+The optimal solution of $\min{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{\min(m,n)}\sigma_{\min(m,n)} v_{\min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
 \paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
 \section{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
@@ -1259,12 +1259,51 @@ $\{x_i\}\rightarrow$ bundle $B=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
 The \textbf{cutting-plane model} $f_B$ if $f$ is $$f_B(x) = max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ a $(1+\epsilon)$-order model.\\
 $x_{B,*}\in$ argmin$\{f_B(x)\}$, $f_B(x_{B,*})\leq f_*$: use $x_{B,*}$ as the next iterate a-la Newton.\\
 $f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small": $min\{f_B(x)\}=min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$
-\paragraph{Cutting Plane Algorithm} $min\{f_B(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
+\paragraph{Cutting Plane Algorithm} $\min\{f_B(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
 $f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B\leftarrow B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
 The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#B\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
 So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\epsilon}\right)^{\frac{n}{2}}\right)$
 \subparagraph{Why} $x_{B,*}$ may be infinitely far from $x_*$, the iterates have no local property ($||x_{i+1}-x_i||$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail.\\
 It's unavoidable: linear functions have no curvature, and we need many of them to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
 \subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_B$ is a good model of $f$).\\
-Stabilized master problem $$min\{f_B(x)+\mu\frac{||x-\overline{x}||^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+Stabilized master problem $$\min\{f_B(x)+\mu\frac{||x-\overline{x}||^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+\section{Constrained Optimality and Duality}
+\paragraph{Constrained Optimization} Back to the full $(P) f_* = \min\{f(x)\:|\:x\in X\}$ with $x\subset R^n$\begin{list}{}{}
+	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
+	\item $x\in X$ feasible solution, $x\not\in X$ unfeasible solution
+	\item $x_*\in X\:|\:f(x_*)\leq f(x)\:\:\forall\:x\in X$ optimal solution $\Leftrightarrow$ global optimum
+\end{list}
+Constraints can be hidden in the objective $\chi_X : R^n\rightarrow \overline{R}$ \textbf{indicator function of $X$} with $\chi_X(x)=\left\{\begin{array}{l l}
+0&\hbox{if }x\in X\\
+\infty&\hbox{if }x\not\in X
+\end{array}\right.$ which is convex if $X$ is, but extended-valued.
+$$\Longrightarrow (P)\equiv \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\hbox{(essential objective)}$$ But very bad idea, $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
+$$(P)\equiv\min\{v\:|\:v\geq f(x), x\in X\}$$
+\paragraph{(Local) minima vs. optima} Note that $X=\emptyset\Rightarrow v(P) = +\infty$, so solving $(P)$ includes constructively proving $X=\emptyset$. Almost never happens in ML, so we will forget about this but the issue exists. The model is our choice, we choose it simple/nice/nonempty if we can.\\
+Global optimum obviously hard, hence $x_*$ local optimum solves $\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$ for some $\epsilon>0$.\\
+Important concept: $x$ in the interior of $X\Leftrightarrow\exists\:B(x,\epsilon)\subseteq X$ (for $\epsilon>0$), so $x_*$ in the interior of $X\Rightarrow$ local minimum/optimum so $\nabla f(x_*)=0$.\\
+Constrained (local) optimality conditions $\neq\nabla f(x)=0$, only if $x$ not in the interior $\Leftrightarrow x\in \partial X$, the boundary of $X$.
+\subsection{First-Order Optimality Conditions}
+\subsubsection{Geometric Version}
+\paragraph{The Tangent Cone} Crucial Object $T_X(x) =$ tangent cone of $X$ at $x$
+$$\{d\in R^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\}$$
+Tangent Cone Condition (TCC): $\langle\nabla f(x),d\rangle \geq 0\:\:\forall d\in T_X(x)$\\Zooming into $x$, $X$ looks like a cone, so we build the cone $T_X(x)$ with $x$ as the point.
+
+\begin{center}
+	\includegraphics[scale=0.75]{9.png}
+\end{center}
+Note that TCC $\not\Rightarrow$ local optimum, even less global optimum, \textbf{unless} $X$ is such that $X\subseteq x + T_X(x)$\\
+Turns out that $X$ convex $\Rightarrow$ this.
+\paragraph{Convex Sets} $x,y\in R^n,\{z=\alpha x+(1-\alpha)y\:|\:\alpha\in[0,1]\} = \hbox{conv}(x,y) =$ segment joining $x$ and $y$
+\begin{list}{}{}
+	\item $C\subset R^n$ \textbf{convex}: $\forall\:x,y\in C\:\:\hbox{conv}(x,y)\subseteq C$
+	\item $C\subset R^n$ \textbf{nonconvex}: $\exists\:x,y\in C\:|\:\hbox{conv}(x,y)\not\subseteq C$
+\end{list}
+Being convex is rare: nonconnected $\Rightarrow$ nonconvex. Every nonconvex set can be "completed" to a convex set (\textbf{convex hull}):
+$$\hbox{conv}(S) = \bigcup\{\hbox{conv}(x,y)\:|\:x,y\in S\} = \bigcap\{C\:|\:C\hbox{is convex }\wedge C\supseteq S\}$$
+Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest convex set containing $S$".\begin{list}{}{}
+	\item $C$ convex $\Leftrightarrow C = \hbox{conv}(C)$: a convex set is equal to its convex hull
+	\item $f$ convex $\Leftrightarrow epi(f)$ convex $\Rightarrow S(f,v)$ convex $\forall v$ ($\not\Leftarrow$)
+\end{list}
+%TODO 6-constrained%20optimality.pdf p41
 \end{document}
