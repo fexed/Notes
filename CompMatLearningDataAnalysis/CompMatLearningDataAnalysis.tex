@@ -1304,6 +1304,117 @@ $$\hbox{conv}(S) = \bigcup\{\hbox{conv}(x,y)\:|\:x,y\in S\} = \bigcap\{C\:|\:C\h
 Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest convex set containing $S$".\begin{list}{}{}
 	\item $C$ convex $\Leftrightarrow C = \hbox{conv}(C)$: a convex set is equal to its convex hull
 	\item $f$ convex $\Leftrightarrow epi(f)$ convex $\Rightarrow S(f,v)$ convex $\forall v$ ($\not\Leftarrow$)
+	\item $d$ is a \textbf{feasible direction} of $X$ at $x$ if $\exists\:\overline{\epsilon}>0\:|\:x+\overline{\epsilon}d \in X$
+	\item $F_X(x)$ is the \textbf{set of feasible directions of $X$ at $x$}
+	\item $X$ convex and $d\in F_X(x)\Rightarrow x+\epsilon d\in X\:\:\forall
+	\epsilon\in [0,\overline{\epsilon}]$ ($F_X$ cone)
+	\item $X$ convex and $d$ feasible at $x \Rightarrow d\in T_X(x)$ with $z_i = x + dt_i \equiv F_X(x)\subseteq T_X(x)$\\
+	In fact they are almost the same, except from the borders
+	\item $f,X$ convex, $x_*$ global optimum $\Leftrightarrow\langle\nabla f(x_*),d\rangle \geq 0\:\:\forall\:d\in F_X(x_*)$
+	\item $f,X$ convex, (TCC) at $x_*\Rightarrow x_*$ global optimum
+	\item $x_*$ global optimum $\Rightarrow x_*$ local optimum $\Rightarrow$ (TCC)
 \end{list}
-%TODO 6-constrained%20optimality.pdf p41
+(TCC) sufficient in the convex case, but is always necessary. Not always sufficient because it holds in saddle point of $\partial X$, for example, despite not being a minimum.\\
+$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in R^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\equiv\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in R^n\equiv \nabla f(x) = 0$\\
+In fact, $f,X$ convex $\Rightarrow$ (TCC) $\equiv \not\exists$ feasible descent direction: every direction is feasible, hence only descent matters. So "$x$ satifies (TCC)" is a direct constrained generalization of "$x$ stationary point".\\
+Necessary, \textbf{not sufficient} but the only one you can reasonably check. But how to compute this in practice? How to prove something doesn't exists? How to characterize $T_X$ depends on how you characterize $X$.
+\subsubsection{Algebraic Version}
+\paragraph{Describing a Set via Functions} The most used way to describe a set is via some functions.\\
+The obvious ways is via constraints:
+\begin{list}{}{}
+	\item \textbf{Inequality constraints} $f(x)\leq\delta$, \textbf{sublevel set $S(f,\delta)$}
+	\item \textbf{Equality constraints} $f(x)=\delta$, \textbf{level set $L(f,\delta)$}
+	\item For convenience, $\delta$ can be hidden in $f$ so $f(x)\leq0,f(x)=0$
+	\item If one wants $f(x)\geq 0$ simply $-f(x)\leq 0$
+\end{list}
+Usually multiple constraints, $f_1(x)\leq 0, f_2(x)\leq 0$ means logical conjunction (first condition \textit{and} second condition), so an \textbf{intersection} of (sub) level sets.\\\\
+One of the standard forms of constrained nonlinear optimization:
+$$X=\{x\in R^n\:|\:g_i(x)\leq 0\:\:i\in I, h_j(x)=0\:\:j\in J\}$$
+with $I$ set of inequality constraints and $J$ set of equality constraints. Often useful is the compact version via vector-valued functions:
+\begin{list}{}{}
+	\item $G(x) = [g_i(x)]_{i\in I} : R^n\rightarrow R^{|I|}$
+	\item $H(x) = [h_j(x)]_{j\in J} : R^n\rightarrow R^{|J|}$
+	\item $X=\{x\in R^n\:|\:G(x)\leq 0, H(x) = 0\}$
+\end{list}
+\textbf{There are many different ways to express the same $X$}. Often, choosing the right formulation is crucial for being able to solve a problem. We will not see this, but a few trivial observation are useful:
+\begin{list}{}{}
+	\item Could always assume $|J|=0$, no equality constraints: $h_j(x) = 0\Leftrightarrow h_j(x)\leq 0, -h_j(x)\leq 0$\\
+	One equality constraints $\equiv$ two "opposite" inequality constraints
+	\item Could always assume $|I|=1$, one single inequality constraint\\
+	$G(x)\leq 0\Leftrightarrow \max\{g_i(x)\:|\:i\in I\} = g(x)\leq 0$
+\end{list}
+This can be useful to simplify the notation, but almost never useful for implementation: \textbf{exploit the structure of $X$ and of the constraints when is there}.\\
+Also, reformulations can be bad: $\max\{g_1,g_2\}\not\in C^1$ even if both $g_1\in C^1$ and $g_2\in C^1$.
+\paragraph{Convex Sets out of Convex Functions} How can I be sure of the convexity of $X$?\\
+Sublevel sets of convex functions are convex $\Rightarrow g_i(x)\leq 0$ with $g_i$ convex "good"\begin{list}{}{}
+	\item $g_i(x) \geq 0$ not convex if $g_i$ is, and typically is badly not convex (reverse convex)
+	\item $g_i(x) \geq 0$ convex if $g_i$ concave, but $g_i(x) \leq 0$ is not
+	\item $g_i(x) = 0$ convex only if $g_i(x)\leq 0$ convex and $g_i(x) \geq 0$ convex, so $g_i$ is both convex and concave, meaning $g_i$ is linear
+\end{list}
+So, \textbf{to have a convex $X$ all equality constraints must be linear}.
+\paragraph{Linear Equality Constraints} $(P)\:\:\min\{f(x)\:|\:Ax=b\}$\\
+$x\in X \Leftrightarrow x\in \partial X$ plus "$\partial X$ looks the same everywhere".\\
+$S(f,\cdot)$ and $X=\{x\in R^n\:|\:Ax=b\}$: optimum touches the inner level set.\\
+$F_X(x) = \{d\in R^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$\\
+(TCC) $\equiv \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$\\
+$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\equiv\nabla f(x)\in $ range$(A)\equiv\exists\:\mu\in R^m\:|\:\nabla f(x) = \mu A$\\
+Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in R^m\:|\:\mu A = \nabla f(x)$\\
+$f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
+\paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
+$x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
+Active constraints at $x\in X$: $A(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
+\textbf{First-order feasible direction cone} at $x\in X$: $D_X(x) = \{d\in R^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=\{d\in R^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$
+\paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in R^n\:|\:Ad\leq 0\}$ for some $A\in R^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
+Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
+\textbf{Farkas' Lemma}: $\forall\:c\in R^n$:
+\begin{list}{}{}
+	\item either $\exists\:\lambda\geq 0\:|\:c = \sum_{i=1}^k \lambda_iA_i$
+	\item or $\exists\:d\:|\:Ad\leq 0\wedge\langle c,d\rangle > 0$
+\end{list}
+One and only one is true.\\
+$\langle c,d\rangle \leq 0\:\:\forall\:d\in C, c\in C^*$ actually a $\neq$ definition: polar cone $C^\circ=\{c\in R^n\:|\:\langle c,d\rangle\leq 0\:\:\forall\:d\in C\}=C^*$ so Farkas' lemma says that $\forall\:c\in R^n$ either $c\in C^*$ or $c\not\in C^*$\\\\
+$x_*$ optimum $\Rightarrow \langle\nabla f(x_*),d\rangle\geq 0\:\:\forall\:d\:|\:$
+\begin{list}{}{}
+	\item $\langle\nabla g_i(x_*),d\rangle\leq 0\:\:i\in A(x)$
+	\item $\langle\nabla h_j(x_*),d\rangle = 0\:\:j\in J$
+\end{list}
+$\equiv\lambda\in R_+^{|A(x)|}$ and $\mu \in R^{|J|}\:|\:\nabla f(x_*) + \sum_{i\in A(x)}\lambda_i\nabla g_i(x_*) + \sum_{j\in J} \mu_j\nabla h_j(x_*)=0$\\
+So a constructive way to prove the conditions is to find $\lambda$ and $\mu$.
+\paragraph{KKT Conditions} $\exists\:\lambda\in R_+^{|I|}$ and $\mu\in R^{|J|}\:|$\begin{list}{}{}
+	\item[(KKT-F)] $g_i(x)\leq 0\:\:i\in I$, $h_j(x) = 0\:\:j\in J$
+	\item[(KKT-G)] $\nabla f(x) + \sum_{i\in I}\lambda_i\nabla g_i(x) + \sum_{j\in J}\mu_h\nabla h_j(x) = 0$
+	\item[(KKT-CS)] $\sum_{i\in I}\lambda_i(-g_i(x)) = 0$ \textbf{complementary slackness} $\equiv \lambda_ig_i(x) = 0\:\:\forall\:i\in I$
+\end{list}
+\paragraph{KKT Theorem} $T_X(x)=D_X(x)\wedge x$ local optimum $\Rightarrow$ (KKT)\\
+For $(P)$ convex, (KKT) $\Rightarrow x$ global optimum: (KKT) $\Rightarrow \langle \nabla f(x), d\rangle \geq 0\:\:\forall\:d\in D_X(x)$ and $D_X(x)\supseteq T_X(x)\supseteq F_X(x) \Rightarrow\langle \nabla f(x), d\rangle \geq 0\:\:\forall\:d\in F_X(x)\Rightarrow x$ global optimum.
+\subsection{Second-Order Optimization}
+If $(P)$ is not convex then (KKT) is not sufficient, need to use second order but clearly not just "$\nabla^2 f(x_*)\succeq 0$". Fundamental concept: \textbf{Lagrangian function} $$L(x;\lambda, \mu)=f(x) + \sum_{i\in I} \lambda_ig_i(x) + \sum_{j\in J}\mu_jh_j(x)$$ with $x$ variables and $\lambda,\mu$ parameters. Fundamental observation $(x,\lambda,\mu)$ satisfies (KKT-G) $\Leftrightarrow \nabla L(x;\lambda,\mu) = 0$ (gradient on $x$ alone) $\Rightarrow x$ stationary point of $L(\cdot;\lambda,\mu)$. When a stationary point is also a minimum?
+\paragraph{Lagrangian Relaxation} Lagrangian function is objective and constraints together. (KKT-G) $\Leftrightarrow x$ stationary point of $L()$ for the right $\lambda\geq 0$ and $\mu$. Assume we know them, can we find $x$?\\
+Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in R^n\}$$\\
+The relaxation is another optimization problem carefully constructed in order to provide a lower bound on $v(P)$ for $(P)\:\:\min\{f(x)\:|\:x\in X\}$\\
+$(\underline{P})\:\:\min\{\underline{f}(x)\:|\:x\in \underline{X}\}$ relaxation of $(P) \Rightarrow v(\underline{P})\leq v(P)$ if $\underline{X}\supseteq X$ and $\underline{f}(x)\leq f(x)\:\:\forall\:x\in X$\\
+$(R_{\lambda,\mu})$ is a relaxation of $(P)\:\:\forall\:\lambda\geq 0$ and $\mu\Rightarrow$ weak duality $\forall\:\:x\in X$, $\psi(\lambda,\mu)\leq v(P)\leq f(x)$\\
+But how to choose $\lambda\geq 0$ and $\mu$? The dual function $\psi$ is \begin{list}{}{}
+	\item Often easy to compute
+	\item Concave, but note that $\psi(\lambda,\mu)=-\infty$ might happen
+	\item $\overline{x}$ optimal in ($R_{\lambda,\mu}$) $\Rightarrow [G(\overline{x}), H(\overline{x})]\in \partial\psi(\lambda,\mu)$
+	\item $\psi\not\in C^1$ even if $f,g_i,h_j$ are, but $\overline{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\overline{x}), H(\overline{x})]$
+\end{list}
+The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in R_+^{|I|},\mu\in R^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
+When is $v(D) = v(P)$ (strong duality)?  \textbf{Convexity} $\Rightarrow$ \textbf{Strong Duality}, so not always but yes if $(P)$ convex, meaning that $x_*$ optimum, $T_X(x_*)=D_X(x_*)\Rightarrow v(D) = v(P)$\\
+Under further conditions, solving $(D)$ actually solves $(P)$
+\paragraph{Specialized Lagrangians} Lagrangian dual is powerful but cumbersome: $\min$/$\max$, simplifies to have "just max".\begin{list}{}{}
+	\item For linear programs $(P)\:\:\min\{cx\:|\:Ax\geq b\}$\\
+	$L(x;\lambda) = cs + \lambda(b-Ax)=\lambda +(c-\lambda A)x$ lagrangian function\\
+	$\psi(\lambda)=\min_{x\in R^n} L(x;\lambda)=\left\{\begin{array}{l l}
+	-\infty& \hbox{if }c-\lambda A\neq 0\\
+	0& \hbox{if }c-\lambda A= 0\\
+	\end{array}\right.$\\
+	$(D)\:\:\max\{\psi(\lambda)\:|\:\lambda\geq 0\}=\max\{\lambda b\:|\:\lambda A=c, \lambda\geq 0\}$ a different linear program with the same data.\\
+	Strong duality almost always holds.
+	\item For quadratic programs $(P)\:\:\min\{\frac{1}{2}\|x\|_2^2\:|\:Ax = b\}$\\
+	 $L(x;\mu)=\frac{1}{2}\|x\|_2^2+\mu(Ax-b)$\\
+	 $\psi(\mu)=\min_{x\in R^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
+	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in R^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
+\end{list}
 \end{document}
