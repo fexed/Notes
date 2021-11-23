@@ -1115,6 +1115,10 @@ For sufficiently large texts, the number of occurrences occ($\sigma$) over $n$ c
 $$2 - n\sum_\sigma p(\sigma)\cdot\log_2 p(\sigma) = 2 + n\sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$$ and $H = \sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$.\\\\
 Recently, ANS (Asymmetric Numeral Systems) was proposed as a variation of the Arithmetic Encoding we've seen and it's actually better than this bound.\\\\
 So in every case you have to look at the entropy: if it's very small, so the source is highly compressible, then the $nH$ part is close to $0$ and additive part $+n$ or $+c\cdot n$ makes the difference. When the entropy is very large then $nH$ dominate and we can use Huffman.
+\paragraph{Decoding} Whenever we decompress, we have the preamble and the body of the compressed file. The preamble of the arithmetic encoders usually consists of the probabilities of the symbols and the length of the text.\\
+For example $P(a) =\frac{1}{2}, P(b)=P(c)=\frac{1}{4}$ and the text length $= 2$ with the body being $(111)_2$. The first thing to do is to transform the body into a real number (keeping the fraction, because then it's easier to do the calculations by hand): $(111)_2 = .111 = \frac{1}{2} + \frac{1}{4} + \frac{1}{8} = \frac{7}{8}$.\\
+Now we start from $[0,1)$ and partition according to the probabilities: from $0$ to $\frac{1}{2}$ is $a$, from $\frac{1}{2}$ to $\frac{1}{2}+\frac{1}{4}=\frac{3}{4}$ is $b$ and from $\frac{3}{4}$ to $\frac{3}{4} +\frac{1}{4} = 1$ is $c$. With $\frac{7}{8}$ we go in the $c$ partition (zoom into $[\frac{3}{4},1]$) and partition. Now the size is $s_1 = \frac{1}{4}$ so $a$ goes from the beginning $\frac{3}{4}$ to $\frac{3}{4} + s_1\cdot P(a) = \frac{3}{4} + \frac{1}{4}\cdot\frac{1}{2} = \frac{7}{8}$, same reasoning for $b$ which goes from $\frac{7}{8}$ to $\frac{15}{16}$.\\
+Every interval is closed below and open up, so $\frac{7}{8}$ belongs to the interval $b$. We stop because we found text len $=2$ symbols, and return $T=cb$.
 \subsection{Lempel-Ziv Family}
 \paragraph{LZ Compressors}
 \begin{enumerate}
@@ -1273,4 +1277,79 @@ The decoder expects pairs, reads the first number and if it's zero then knows th
 \end{multicols}
 The tries of course is then dropped and we just encode the sequence of pairs: we have two texts (node numbers and characters) that can be encoded as we like.
 \paragraph{ZLIB} Implementation of LZ77 which requires the array to compress $A$, its length $n$, and an array of output Out of length $m$ passed as a pointer (so \&$m$) initialized as $m=1.2\cdot n$ so a 20\% increase in size of $A$. This because the system can't know if $A$ is compressible or not, so the extra size is to account for the uncompressible cases (more because we use pairs or triples). When the procedure returns, $m$ has been updated with the occupied size which, possibly, is much smaller than $1.2\cdot n$
+\subsection{The Suffix Array}
+\paragraph{Notations} Pattern $P$ occurs at position $i$ of $T\Leftrightarrow P$ is a prefix of the $i$-the suffix of $T$ (i.e. $T[i,N]$)\begin{center}
+	\includegraphics[scale=0.75]{19.png}
+\end{center}
+So we can transform the problem of searching for occurrences into a problem of searching for prefixes. Occurrences of $P$ in $T$ are all the suffixes of $T$ having $P$ as a prefix.\\
+SUF$(T)$ = sorted set of all suffixes of $T$. Algorithmic reduction from substring search to prefix search: for example, using the trie data structure. We have a problem in space, because the total length of the suffixes is $n^2$.\\
+We consider an ending character, which sometimes is noted as $\#$ and sometimes as $\$$. So for example $T =$ mississipi$\# \Rightarrow$ SUF$(T)$:
+\begin{list}{}{}
+	\item \#
+	\item i\#
+	\item ippi\#
+	\item issippi\#
+	\item ississippi\#
+	\item mississippi\#
+	\item pi\#
+	\item ppi\#
+	\item sippi\#
+	\item sissippi\#
+	\item ssippi\#
+	\item ssissippi\#
+\end{list}
+So all suffixes in SUF$(T)$ having prefix $P$ are in a contiguous portion of the sorted set. Also the starting position of the contiguous portion is the lexicographic one of $P$, meaning that if I can find the position of my prefix in SUF$(P)$ I can simply scan ahead to find all the suffixes with $P$ prefix. So we can consider the suffix array, where every element is a pointer to the position in $T$:
+\begin{list}{}{}
+	\item 12
+	\item 11
+	\item 8
+	\item 5
+	\item 2
+	\item 1
+	\item 10
+	\item 9
+	\item 7
+	\item 4
+	\item 6
+	\item 3
+\end{list}
+The suffix array $SA$ occupies a lot less space than the $n^2$ of SUF$(T)$, it's $O(n)$ in $n = |T|$ and every element is a number of at most $\log_2 n$ bits, so is $\Theta(n\log_2 n)$ bits. In practice, is $5n$ bytes.\\\\
+To look for a pattern, indirected binary search on SA: $O(p) = O(|P|)$ time per suffix comparison. So go in the middle element, compare $P$ to the substring pointed by the element and so on, binary search. The total search cost is $O(p\log_2 n)$ time.\\
+Listing the occurrences is easy: take the element, access the position and compare, and go to the next element if the comparison is successful. This costs the number of occurrences times $p$, which can be costly with many occurrences. We can speed this up by finding the entire block: we look for $P\#$ with $\#<\sigma\:\:\forall\:\sigma\in\Sigma$ and for $P\$$ for $\sigma < \$\:\:\forall\sigma\in\Sigma$. Therefore, the block of occurrences of $P$ is delimited by those two elements.
+\begin{center}
+	\includegraphics[scale=0.5]{20.png}
+\end{center}
+With a total time of $O(p\log_2 n +$ occ$)$.
+\paragraph{Longest Common Prefix Array} The LCP array has elements that indicates the length of the longest prefix shared by adjacent suffixes. For example, the first and second suffixes in SA share no prefix (the first is "\#" and the second is "i\#"), so the first element of LCP is 0. LCP:
+\begin{list}{}{}
+	\item 0
+	\item 0
+	\item 1
+	\item 4
+	\item 0
+	\item 0
+	\item 1
+	\item 0
+	\item 2
+	\item 1
+	\item 3
+\end{list}
+How long is the common prefix between $T[i,\ldots]$ and $T[j,\ldots]$? The minimum element between them in LCP, so for example between $5$ and $10$ the common prefix is long $0$ characters. So the min of the subarray LCP[$h,k$] such that SA$[h]=i$ and SA$[k]=j$.
+\subsection{Burrows-Wheeler Transform}
+\paragraph{Two very simple compressors}
+\begin{list}{}{}
+	\item \textbf{MTF} Move-To-Front\\
+	Start with a list of symbols, a text $L=[a,b,c,d,\ldots]$ and for each input symbol $s$:
+	\begin{enumerate}
+		\item Output the position of $s$ in $L$
+		\item Move $s$ to the front of $L$
+	\end{enumerate}
+	For example, $L=[a,b,c,l], S =$ cabala $\Rightarrow$ MTF($S$) = 3 2 3 2 4 2.\\
+	It's a \textbf{dynamic code} (the same letter can be encoded with different values) and has memory (if the symbol has been read recently, its number will be small).
+	\item \textbf{RLE} Run-Length-Encoding\\
+	Specifically designed for spacial locality.\\
+	Example: $abbbaacccca \Rightarrow (a,1),(b,3),(a,2),(c,4),(a,1)$\\
+	In binary string just numbers and the first bit is sufficient.
+\end{list}
+%TODO 1:06:00 23/11
 \end{document}
