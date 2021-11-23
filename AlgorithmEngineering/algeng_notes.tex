@@ -1069,6 +1069,7 @@ while (v < fc[l]):
 	l++;
 return symb[l][v-fc[l]]
 \end{lstlisting}
+\subsection{Arithmetic Coding}
 \paragraph{Tools for the arithmetic Coding}
 $x\in[0,1)$ positional representation for $x$: $.b_1 b_2 \ldots b_k \ldots$ with $b_i$ representing $2^{-i}$, with $b_i\in [0,1]$. These are called \textbf{dyadic fractions}, because are of the form $\frac{v}{2^n}$\\
 For example $.101 = \frac{1}{2} + \frac{1}{8} = \frac{5}{8}$\\
@@ -1097,4 +1098,179 @@ Let's assume $T = abca$\begin{list}{}{}
 	\item The second symbol is a $b$, so we zoom in it's interval inside $s_1$, which goes from $[\frac{1}{4},\frac{3}{8})$ of size $s_2 = s_1\cdot P(b) = \frac{1}{2}\cdot\frac{1}{4} = \frac{1}{8}$ and we partition in three parts again like before. The first partition is again for $a$ and starts at $\frac{1}{4}$, the beginning of the interval. The second partition, of $b$, starts at $\frac{1}{4}+f_b\cdot s_2 = \frac{1}{4}+\frac{1}{2}\cdot\frac{1}{8} = \frac{5}{16}$ and the third starts at $\frac{1}{4} + f_c\cdot s_2 = \frac{11}{32}$
 \end{list}
 So the arithmetic coding keeps the two integers describing the interval $[l_n, l_n+s_n)$: the left and the right endpoints of the interval. We start with $l_0 = 0, s_0 = 1$, and in every step $s_{n+1} = s_n\cdot P(T[n+1])$ and $l_{n+1} = l_n + f_{T[n+1]} \cdot s_n$, with $T[n+1]$ being the character in position $n+1$ which we are encoding.
+\paragraph{What Arithmetic Coding Sends on the Network} Let's start with an example: $T=abac\longrightarrow$ will output $\left[\frac{19}{64},\frac{5}{16}\right)$. With a semi-static model, where we count occurrences, $f(a)=\frac{2}{4} = \frac{1}{2}$, $f(b)=f(c)=\frac{1}{4}$. Arithmetic coding sends the number in the middle of the interval, so in this case the size of the interval is $s=\frac{1}{64}$, the left extreme is $l=\frac{19}{64}$ therefore the picked number is $= l + \frac{s}{2} = \frac{19}{64}+\frac{1}{128} = \frac{39}{128}$. To represent this number we can do the classical representation of $\frac{v}{2^k}$ which is $bin(v)$ over $k$ bits, but we could do with less bits. So we represent a truncation of the number but guaranteeing that the truncation is larger than $l$.\\
+Remember we send the number and the length of $T$, because the number could correspond to an infinite number of texts.
+\subparagraph{Theorem} We truncate to $d=\lceil\log_2\frac{2}{s}\rceil$ bits. The truncated number converter($l+\frac{s}{2},d$)$\in[l,l+s)$.\\
+Remember that, according to a lemma, the number of information lost due to truncation at $d$ bits is $2^{-d}$.
+$$2^{-d} = 2^{-\lceil\log_2\frac{2}{s}\rceil} = \frac{1}{2^{\lceil\log_2\frac{2}{s}\rceil}}\leq \frac{1}{2^{\log_2\frac{2}{s}}} = \frac{1}{\frac{2}{s}} = \frac{s}{2}$$
+So this is a safe truncation, the number is still $\geq l$.\\\\
+In the example $d = \lceil \log_2 \frac{2}{s}\rceil = \lceil\log_2\frac{2}{\frac{1}{64}}\rceil = \lceil\log_2 128\rceil = 7$ bits, so we do converter($\frac{39}{128},7$) $= 0100111$ which is just $39$ over $7$ bits but it's a particular case, $39$ can be represented over $7$ bits without truncation.
+\paragraph{How good is the arithmetic compressor?} For Huffman, we had $H\leq L_{Huff} < H+1$ bits, giving Huffman compression $< nH+n$ with $n=|T|$, because Huffman can only use an integer number of bits per codeword while the entropy $H$ uses real numbers.\\
+Arithmetic compression $< nH + 2$, with a theoretical constant $2$ in the case of infinite arithmetic precision. In reality, it's something like $< nH + c\cdot n$ with $c\simeq\frac{1}{100}$.
+\subparagraph{Theorem} $d< nH + 2$
+$$d = \lceil\log_2\frac{2}{s}\rceil = \lceil 1-\log_2 s\rceil < 2 - \log_2 s = 2-\log_2\prod_{i=1}^{|T|}p(T[i]) = 2 - \sum_{i=1}^{|T|} \log_2 p(T[i]) =$$
+In the previous example of $T = abac$ this would be $=2- [\log_2 p(a)+\log_2 p(b)+\log_2 p(a) + \log_2 p(c)] = 2 - [2\cdot\log_2 p(a) + 1\cdot\log_2 p(b) + 1\cdot \log_2 p(c)$ so the number of occurrences times the probability
+$$ = 2 - \sum_\sigma \hbox{occ}(\sigma)\cdot\log_2 p(\sigma) = 2 - n\cdot\sum_\sigma \frac{\hbox{occ}(\sigma)}{n}\cdot\log_2 p(\sigma) = $$
+For sufficiently large texts, the number of occurrences occ($\sigma$) over $n$ converges to the frequency of $\sigma$ $f(\sigma)$, and in the semi-static model $p(\sigma)$ is $f(\sigma)$ 
+$$2 - n\sum_\sigma p(\sigma)\cdot\log_2 p(\sigma) = 2 + n\sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$$ and $H = \sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$.\\\\
+Recently, ANS (Asymmetric Numeral Systems) was proposed as a variation of the Arithmetic Encoding we've seen and it's actually better than this bound.\\\\
+So in every case you have to look at the entropy: if it's very small, so the source is highly compressible, then the $nH$ part is close to $0$ and additive part $+n$ or $+c\cdot n$ makes the difference. When the entropy is very large then $nH$ dominate and we can use Huffman.
+\subsection{Lempel-Ziv Family}
+\paragraph{LZ Compressors}
+\begin{enumerate}
+	\item Parsing, transform the text into a sequence of triples.
+	\item Encoding
+\end{enumerate}
+\paragraph{Parsing} $T=aacaacab|caaaaaaac$, where we've compressed up until the line and need to compress the next part. So the first part is the \textbf{dictionary}, all the substrings that starts in the first part are the dictionary. It parses the next part and finds the longest substring that starts in the first part:
+\begin{list}{}{}
+	\item $c$ is in the first part
+	\item $ca$ too
+	\item $caa$ too
+	\item $caaa$ doesn't
+\end{list}
+So it takes $caa$ plus one character: $caaa$ is called a \textbf{phrase}, it's represented as a copy of the corresponding substring in the dictionary, and is represented with $\langle d,l,$ char$\rangle$ corresponding to the distance of the copy (in this case, from $caa$, so $d=6$), the length ($caa$ has $l=3$) and the next character ($a$). We then move the bar after the $a$ and repeat for $T=aacaacabcaaa|aaaac$.\\
+Now the important part is that the copy start before: in this case, we have 4 $a$s, copied beginning from just the last $a$ before the bar: we copy $T=aacaacabcaaa|\underline{aaaa}c$ from $T=aacaacabcaa\underline{a|aaa}ac$ and it's not important that overlaps, becoming $\langle 1,4,c\rangle$\\\\
+What happens at the beginning? We start from $T=|aacaacabcaaaaaaac$, encode $\langle 0,0, a\rangle$ and the bar goes after the last character encoded so $T=a|acaacabcaaaaaaac$. We emit $\langle 1,1,c\rangle$ and $T=aac|aacabcaaaaaaac$, then $\langle 3, 4, a\rangle$ giving $T=aacaaca|bcaaaaaaac$ and so on.
+\paragraph{Encoding} The crucial part is how to encode the numbers and the characters, we cannot represent them in full because we can end up with a larger space complexity than the original data.\\
+For example, we could define three "texts": \begin{list}{}{}
+	\item text of distances $T_{dist} = 01361$
+	\item text of lengths $T_{len} = 01434$
+	\item text of characters $T_{char} = acaac$
+\end{list}
+and we could encode these three texts in any way we want as seen before.
+\paragraph{Window to copy} Whenever we look for a substring in the dictionary to copy, we cannot look arbitrary before: typically the compressors have a window of words of length $w$ and we consider only copies that starts at most $w$ character before so $d\leq w$. In \texttt{gzip} we have options \texttt{-1},\ldots,\texttt{-9} which specifies the windows from 100 Kb to 900 Kb. The larger the windows the more you compress, so less phrases and \textbf{faster in decompression} because every phrase tells you to go back and copy, it's a random jump, so with less random jumps the caching is more effective. But with larger windows we have slower compression.\\\\
+The approach discussed is called \textbf{LZ 77}.
+\paragraph{How to find the copies} There are several algorithms in literature, let's see the one used by \texttt{gzip} due to it being interesting from a programming point of view. Let's say we are in the situation $T = \:\:\:\:\:\:\:\:\:\:|caaa\ldots$: a brute-force way would be to take $c$ and search for it going back and find it, then take $ca$ and go back and search and find it so on until we don't find the occurrence of the substring. This is really slow, we need something faster: filtering. We want to find the candidate positions and then check them. So I want some tool that tells me the (hopefully few) interesting positions to check. This filter can be built with an hashtable over triples of characters. Let's see an example with $w=7$: $T = acaacab|caaa\ldots$ from position $2,3,4,5,\ldots$. For every previous position, it keeps a key in the hashtable of three characters:\begin{list}{}{}
+	\item $\langle bca,8\rangle$
+	\item $\langle abc,7\rangle$
+	\item $\langle cab,6\rangle$
+	\item $\langle aca,5\rangle$
+	\item $\langle aac,4\rangle$
+	\item $\langle caa,3\rangle$
+	\item $\langle aca,2\rangle$
+\end{list}
+So we can already see that two $aca$s will collide in the same slot, and we have to keep bot satellite informations $5$ and $2$. \texttt{gzip} finds copies only if they are longer or equal than three characters: it's useless to substitute one or two characters with a triple.\\
+So it takes the next three characters $caa$ and look for in the hashtable: it can find a collision, for example $\langle caa,3\rangle$, $\langle aac, 4\rangle$ and $\langle cab,6\rangle$ can collide, these are the candidate positions so it compares over them.\\
+After encoding the triple, we shift the window so the table is cut: each triple points to the next one so we can start from the head and simply cancel triples. We of course also add the new triples.
+\paragraph{LZSS} Doesn't use triples but pairs by making the following observation: either we copy, because $d>0$ or we don't copy and meet one single character. So whenever $d=0$ only the character is significant, and whenever we copy the character is useless. So LZSS considers just $\langle d,l\rangle$ (no extra characters) or $\langle 0,$ char$\rangle$.\\So for example $T=aacaacabcaaaaaaac$ we emit $\langle 0,a\rangle$ and $T=a|acaacabcaaaaaaac$, we can only copy $a$ so we output $\langle 1,1\rangle$ and $T=aa|caacabcaaaaaaac$, then $\langle 0,c\rangle$ and $T=aac|aacabcaaaaaaac$, then we can copy $aaca$ starting from the beginning ($3$ characters before) and copying 4 characters, so we output $\langle 3,4\rangle$ and $T=aacaaca|bcaaaaaaac$.\\
+The decoder expects pairs, reads the first number and if it's zero then knows that the next element is a character, otherwise knows that the next one is a number.
+\paragraph{LZ78} Different dictionary, this time is explicit. $T=aabaacabcabcb$, we have and output and a explicitly constructed dictionary that starts with $\epsilon$, the empty string.
+
+\begin{multicols}{2}
+\begin{list}{}{\textbf{Output}}
+	\item $T=aabaacabcabcb$
+	\item Since we don't find anything in the dictionary, which at this time is just the node $0$ corresponding to $\epsilon$, we emit $\langle 0, a\rangle$ and since we are processing one character we append it to the dictionary.
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+\pagebreak
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $T=a|abaacabcabcb$
+	\item We start from the root, match $a$ and can't find $b$ so we stop after $b$, emit $\langle 1,b\rangle$ and add $b$ to the trie.
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+	\node[main] [below left of=2] (3) {2};
+	\draw[->] (2) -- (3) node [pos=0.5, right] {$b$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $T=aab|aacabcabcb$
+	\item We have $aa$, find just one $a$ so we encode $\langle 1,a\rangle$ and add the second $a$ to the first $a$ subtree.
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+	\node[main] [below left of=2] (3) {2};
+	\draw[->] (2) -- (3) node [pos=0.5, right] {$b$};
+	\node[main] [below right of=2] (4) {3};
+	\draw[->] (2) -- (4) node [pos=0.5, right] {$a$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $T=aabaa|cabcabcb$
+	\item We have no $c$ from the root, encode $\langle 0,c\rangle$ and add it to the root.
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+	\node[main] [below left of=2] (3) {2};
+	\draw[->] (2) -- (3) node [pos=0.5, right] {$b$};
+	\node[main] [below right of=2] (4) {3};
+	\draw[->] (2) -- (4) node [pos=0.5, right] {$a$};
+	\node[main] [below right of=1] (5) {4};
+	\draw[->] (1) -- (5) node [pos=0.5, right] {$c$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $T=aabaac|abcabcb$
+	\item We find $ab$ in the trie, so we emit $\langle 2,c\rangle$ and add $c$ to the $b$ subtree
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+	\node[main] [below left of=2] (3) {2};
+	\draw[->] (2) -- (3) node [pos=0.5, right] {$b$};
+	\node[main] [below right of=2] (4) {3};
+	\draw[->] (2) -- (4) node [pos=0.5, right] {$a$};
+	\node[main] [below right of=1] (5) {4};
+	\draw[->] (1) -- (5) node [pos=0.5, right] {$c$};
+	\node[main] [below left of=3] (6) {5};
+	\draw[->] (3) -- (6) node [pos=0.5, right] {$c$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $T=aabaacabc|abcb$
+	\item We emit $\langle 5,d\rangle$ and add $d$ trie (although it's useless since we've finished)
+\end{list}
+\columnbreak
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (1) {0};
+	\node[main] [below left of=1] (2) {1};
+	\draw[->] (1) -- (2) node [pos=0.5, right] {$a$};
+	\node[main] [below left of=2] (3) {2};
+	\draw[->] (2) -- (3) node [pos=0.5, right] {$b$};
+	\node[main] [below right of=2] (4) {3};
+	\draw[->] (2) -- (4) node [pos=0.5, right] {$a$};
+	\node[main] [below right of=1] (5) {4};
+	\draw[->] (1) -- (5) node [pos=0.5, right] {$c$};
+	\node[main] [below left of=3] (6) {5};
+	\draw[->] (3) -- (6) node [pos=0.5, right] {$c$};
+	\node[main] [below left of=6] (7) {6};
+	\draw[->] (6) -- (7) node [pos=0.5, right] {$b$};
+\end{tikzpicture}
+\end{center}
+\end{multicols}
+The tries of course is then dropped and we just encode the sequence of pairs: we have two texts (node numbers and characters) that can be encoded as we like.
+\paragraph{ZLIB} Implementation of LZ77 which requires the array to compress $A$, its length $n$, and an array of output Out of length $m$ passed as a pointer (so \&$m$) initialized as $m=1.2\cdot n$ so a 20\% increase in size of $A$. This because the system can't know if $A$ is compressible or not, so the extra size is to account for the uncompressible cases (more because we use pairs or triples). When the procedure returns, $m$ has been updated with the occupied size which, possibly, is much smaller than $1.2\cdot n$
 \end{document}
