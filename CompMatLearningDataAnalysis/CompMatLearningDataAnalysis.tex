@@ -648,7 +648,72 @@ Computing $w=A^{-1}v \Leftrightarrow$ solving the linear system $Aw=v$. So one c
 Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ by applying Arnoldi to $(A-\alpha I)^{-1}$ with eigenvalues $\mu_i = (\lambda_i-\alpha)^{-1}$ for $i=1,\ldots,m$\\\\
 If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MNRES.
-
+\subsection{Conjugate Gradient}
+\paragraph{Conjugate} We say that $u,v$ are $A$-orthogonal, or \textbf{conjugate}, if $u^TAv = 0$.\\
+The $A$-norm of $u\in R^m$ is $||u||_A = \sqrt{u^TAv}$
+\paragraph{Conjugate Gradient} Supposing $A=A^T \succ 0$ (symmetric and positive definite), we can find the solution to $Ax = b$ by minimizing the strictly convex function $f(x) = \frac{1}{2}x^TAx-b^Tx +$ const, which $\nabla f = Ax-b$\\
+At each step there are 3 ingredients:
+\begin{list}{}{}
+	\item Current iterate: $x_j\in R^m$
+	\item Residual: $r_j = b-Ax_j = -\nabla f(x_j)$ 
+	\item Search direction: $d_j$
+\end{list}
+And $r_0,d_0,x_1\in K_1(A,b) \rightarrow r_1,d_1,x_2\in K_2(A,b)=span(b,Ab)\ldots$
+\begin{lstlisting}[style=myPython]
+x[0] = 0, r[0] = b, d[0] = b
+for j in range(1,n):
+	alpha[j] = (transpose(r[j-1])*r[j-1])/(transpose(d[j-1])*A*d[j-1])
+	x[j] = x[j-1]+alpha[j]*d[j-1]
+	r[j] = b - A*x[j] = b - A*x[j-1] - A*(x[j]-x[j-1]) = r[j-1]-alpha[j]*A*d[j-1]
+	beta[j] = (transpose(r[j])*r[j])/(transpose(r[j-1])*r[j-1])  # with this beta[j] we have transpose(d[j-1])*A*d[j] = 0
+	d[j] = r[j] + beta[j]*d[j-1]
+\end{lstlisting}
+Krylov subspace relations: $K_j(A,b) = span(x_1,\ldots,x_j) = span(d_0,\ldots,d_{j-1}) = span(r_0,\ldots,r_{j-1})$
+\paragraph{Theorem} For each $i,j$ we have
+\begin{list}{}{}
+	\item $i\neq j \Rightarrow r_i^Tr_j=0$
+	\item $i\neq j \Rightarrow d_i^TAd_j=0$
+\end{list}
+\textbf{Proof} by induction: let's assume this holds for $j-1$ and all $i<j-1$, and proceed to prove it for $j$ (and all $i<j$), only showing $r_i^Tr_j = 0\:\:\:i<j$
+\begin{list}{}{}
+	\item[$i<j-1$] $r_i^Tr_j = r_i^T(r_{j-1}-\alpha_jAd_{j-1})=r_i^Tr_{j-1}-\alpha_jr_i^TAd_{j-1} = 0$ because
+	\begin{list}{}{}
+		\item $r_i^Tr_{j-1} = 0$ by induction
+		\item $r_i^TAd_{j-1} = $ because $r_i\in K_{j-1}(A,b) = span(d_0,\ldots,d_{j-2})$ by induction, $d_i^TAd_{j-1}=0$\\
+		$r_i = d_0\gamma_0 + \ldots + d_{j-2}\gamma_{j-2} \Rightarrow$\\
+		$\Rightarrow r_i^TAd_{j-1} = ( d_0\gamma_0 + \ldots + d_{j-2}\gamma_{j-2})^TAd_{j-1} = \gamma_0d_0^TAd_{j-1}+\ldots + \gamma_{j-2}d_{j-2}^TAd_{j-1}$ all to 0
+	\end{list}
+	\item[$i=j-1$] $r_{j-1}^Tr_j = r_{j-1}^Tr_{j-1} -\alpha_jr_{j-1}^TAd_{j-1}$\\
+	For this to be 0, we need $\alpha_j = \frac{r_{j-1}^Tr_{j-1}}{r_{j-1}^TAd_{j-1}}$, almost equal to the definition $\alpha_j = \frac{r_{j-1}^Tr_{j-1}}{d_{j-1}^TAd_{j-1}}$.\\
+	But we can show that $d_{j-1}^TAd_{j-1} = r_{j-1}^TAd_{j-1}$ from the algorithm $d_{j-1} = r_{j-1}+\beta_{j-1}d_{j-2}$ (line 7):
+	\begin{list}{}{}
+		\item $d_{j-1}^TAd_{j-1} =(r_{j-1}+\beta_{j-1}d_{j-2})^TAd_{j-1} = r_{j-1}^TAd_{j-1} + \beta_{j-1}d_{j-2}^TAd_{j-1}$\\
+		and $d_{j-2}^TAd_{j-1} = 0$
+	\end{list}
+\end{list}
+\paragraph{Theorem} $x_j$ is the best approximation of the exact solution $x$ of the linear system $Ax = b$ inside $K_j(A,b)$ in the $A$ norm. I.e.
+$$x_j = arg\min_{z\in K_j(A,b)} \|x-z\|_A = arg\min_{z\in K_j(A,b)} (z-x)^TA(z-x)$$
+\textbf{Proof}: a generic $z\in K_j(A,b)$ can be written as $x_j+y$ with $y\in K_j(A,b)$\\
+$(z-x)^TA(z-x) = (y+x_j-x)^TA(y+x_j-x) = y^TAy + (x_j-x)^TAy + y^TA(x_j-x) + (x_j-x)^TA(x_j-x)$ with $(x_j-x)^TAy = 0$ and $y^TA(x_j-x) = 0$\\
+We claim that $y^TA(x_j-x)= = (x_j-x)^TAy = 0$\\
+$A(x_j-x) = Ax_j - Ax = Ax_j - b = -r_j$ and by construction $r_j$ is orthogonal to all vectors in $K_j(A,b) = span (r_0,\ldots,r_{j-1})$, hence $y^TA(x_j-x)=0$\\
+$(z-x)^TA(z-x) = (x_j-x)^TA(x_j-x) + y^TAy \geq 0$ so $\|z-x\|_A = \|x_j-x\|_A +$ something positive.
+\paragraph{Theorem} At each step of CG $$x_j = arg\min_{z\in K_j(A,b)} = \frac{1}{2}z^TAz - b^Tz + \hbox{constant}$$
+\textbf{Proof}: this quadratic form basically is the $A$-norm of the error:\begin{list}{}{}
+	\item $\|z-x\|_A = (z-x)^TA(z-x) = z^TAz - x^TAz - z^TAx + x^TAx = z^TAz - 2b^Tz +$ constant
+\end{list}
+Since the spaces $K_j(A,b)=$ are nested ($K_j(A,b)\subseteq K_{j+1}(A,b)$), then the quantities $arg\min_{z\in K_j(A,b)} = \frac{1}{2}z^TAz - b^Tz + \hbox{constant}$ decreases as $j$ increases.
+\paragraph{Convergence of CG} With $\lambda_{\max},\lambda_{\min}$ the max/min eigenvalues of $A$, then CG converges with rate $$\|x_n-x_*\|_A\leq \left(\frac{\sqrt{\lambda_{\max}}-\sqrt{\lambda_{\min}}}{\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}}}\right)^n\|x_0-x_*\|_A$$\\
+$\left(\frac{\sqrt{\lambda_{\max}}-\sqrt{\lambda_{\min}}}{\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}}}\right)$ is related to $K(A) = \frac{\sigma_1}{\sigma_n} = \frac{\sigma_{\max}}{\sigma_{\min}}=\frac{\lambda_{\max}}{\lambda_{\min}} \Rightarrow$ $$\frac{\sqrt{\lambda_{\max}}-\sqrt{\lambda_{\min}}}{\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}}} = \frac{\frac{\sqrt{\lambda_{\max}}}{\sqrt{\lambda_{\min}}} - 1}{\frac{\sqrt{\lambda_{\max}}}{\sqrt{\lambda_{\min}}} + 1} = \frac{\sqrt{K(A)}-1}{\sqrt{K(A)}+1}\in [0,1]$$
+"Defensive" formula that slows improvement at each step, but the actual convergence rate might be much better depending on the clustering of eigenvalues.\\
+We can adapt the argument for convergence of GMRES: $x_n\in K_n(A,b) \Rightarrow x_n = p(A)b$ where $p(t) = \alpha_0 + \alpha_1t + \ldots + \alpha_{n-1}t^{n-1}$ is a polynomial of degree $<n$. CG computes the minimizer $\|x_n-x_*\|_A = \min_{p(t)}\|p(A)b - x_*\|_A = \|p(A)Ax_*-x_*\|_A = \|(p(A)A-I)x_*\|_A$\\
+If $A =UDU^T$ then $$p(A)A-I = U(p(D)D-I)U^{-1} = U\left[\begin{array}{c c c}
+p(\lambda_1)\lambda_1-1\\
+& \ddots \\
+& & p(\lambda_m)\lambda_m - 1
+\end{array}\right]U^{-1}$$
+If $A$ has at most $n<m$ different eigenvalues, then we can choose $p$ such that $p(\lambda_i)=\frac{1}{\lambda_i}$ for all $i=1,\ldots,n$, so I can reach \textbf{exact convergence} after $n$ steps.\\
+Similarly convergence is fast if the eigenvalues are clustered in location far away from 0.
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
