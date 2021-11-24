@@ -1290,4 +1290,166 @@ Paradigm for efficiently model recurrent neural networks. An Echo State Network 
 \textbf{Echo State Property}: contractivity of the state transition functions, limiting the spectral radius of reservoir weights (i.e. the stability of the dynamical system).
 \paragraph{Recurrent plus deep} We can, combining the power of deep RNNs and the efficiency of ESN. Deep ESNs are under study, and deep layered organization of recurrent models show advantages in terms of: occurrence of multiple time-scale and increasing of richness of the dynamics (hierarchical).
 \paragraph{Toward Structured Domains} Can we extend this recurrent approach to rooted trees? Yes.
+\section{Structured Domains}
+\paragraph{Why structured data?} Because data have relationships.\\
+Vectors are examples of \textbf{flat data}, while sequences, trees, graphs are all examples of \textbf{structured data}. There are lots of examples:
+\begin{list}{}{}
+	\item Pattern recognition
+	\item Language parsing (trees)
+	\item Terms in first order logic (trees)
+	\item Social networks
+	\item Biological networks: proteins as nodes and the links represent interactions, or similarity
+	\item Maps, graphs: networks of roads. Each node is a route segment, and edges are between segments that are consecutive on the same road or connected through an intersections. Example tasks: traffic predictions or estimated times or arrival
+\end{list}
+In the following we use this notation for graphs:
+\begin{list}{}{}
+	\item Nodes/Vertexes $v$, vectors, with labels. For example the node $v$ has label $d$, and $l(v) = l_d = [1,0,1,0,7]$
+	\item Arc/Edges/Links can be oriented/directed or not
+\end{list}
+\paragraph{Graph Representations} There has been no systematic way to extract features or metrics relation between examples for structured domains. \textbf{Feature based} representations are incomplete (or strongly task-dependent), while \textbf{adjacent/incident matrix} representations or any other fixed-size representation have other issues (over-dimensionality, alignment among different graphs, topological orders which makes generalization difficult).\\
+The ability to treat the proper inherent nature of the input data is the key feature for a successful application of the machine learning methodologies.\\
+The goal is to \textbf{learn} a mapping between a structured information domain (SD) and a discrete/continuous space (\textbf{transduction} $T$): given a set of examples (graph, target), we can learn a \textbf{hypotheses mapping} $T$(graph). So instead of moving data to models (e.g. graphs into vectors, trees into sequences\ldots with alignment problems, loss of information, etc.) we \textbf{mode models to data}.
+\paragraph{Classes}
+\begin{center}
+	\includegraphics[scale=0.5]{40.png}
+\end{center}\begin{list}{}{}
+	\item \textbf{K-ary tree}: root and bounded out-degree ($k$) for each node (the number of children)
+	\item \textbf{DPAG}: laveled direct positional acyclic graphs with supersource, bounded in-degree and out-degree ($k$)
+\end{list}
+\paragraph{Overview of SD learning}
+\begin{center}
+\begin{tabular}{c | c | c | c}
+& \textbf{Symbolic model} & \textbf{Connectionist model} & \textbf{Probabilistic model}\\
+\hline
+\makecell{\textbf{Static}\\Attribute/value,\\real vectors} & \makecell{Rule induction,\\decision trees} & NN, SVM & \makecell{Mixture models,\\naive Bayes}\\
+\hline
+\makecell{\textbf{Sequential}\\Serially ordered\\entities} & \makecell{Learning finite\\state automata} & RNN & \makecell{Hidden Markov\\models}\\
+\hline
+\makecell{\textbf{Structural}\\Relations among\\domain variables} & \makecell{Inductive logic\\programming} & \makecell{RNN\\(kernel for SD)} & \makecell{Recursive Markov\\models}
+\end{tabular}
+\end{center}
+\paragraph{Transductions}
+From an input graph $g$, $T_{enc}$ produces $x(g)$ (possible internal representation/encoding) and with that produces the outpu $y(g)$ which type depends on the kind of transduction: a general transduction can be either
+\begin{list}{}{}
+	\item \textbf{Structure-to-Structure}, input and output $y(g)$ isomorphic
+	\item \textbf{Structure-to-Scalar}, regression/classification
+	\item Or in general can also be \textbf{non-isomorphic}
+\end{list}
+\subsection{Recurrent/Recursive Approaches for Trees}
+\paragraph{RRNs} A state-transitions system with free parameters. Given $x(0) = 0$, the internal state is $\left\{\begin{array}{l}
+x(t)=\tau(x(t-1),l(t))\\
+y(t)=g(x(t),l(t))
+\end{array}\right.$ and the states summarize the past information, with $\tau$ being the state transition function realized by a neural network with weights and sigmoidal functions.\\
+Over time the state information increases:
+\begin{center}
+	\includegraphics[scale=0.75]{41.png}
+\end{center}
+We can use RNNs to implement a bottom-up encoding of input trees, extending states for children of vertexes of the tree: \textbf{universal approximation} over the tree domain/DPAG
+\begin{center}
+	$$\left\{\begin{array}{l}
+x(v)=\tau(x(\hbox{ch}[v]),l(v))\\
+y(v)=g(x(v),l(v))
+\end{array}\right.$$
+	\includegraphics[scale=0.7]{42.png}
+\end{center}
+\paragraph{Encoding network} 
+\begin{center}
+	\includegraphics[scale=0.5]{43.png}
+\end{center}
+\textbf{Weight sharing} and \textbf{unfolding through structures}: the recursive units ($\tau$) visit all the vertexes of a tree and for all the trees in the data set.
+\paragraph{Useful concepts} Recurrent neural networks transductions admit a recursive state representation with the following properties:
+\begin{list}{}{}
+	\item \textbf{Causality}: the transduction computed in correspondence of a vertex $v$ depends only on $v$ and its descendants
+	\item \textbf{Stationarity}: the transduction computed in correspondence of a vertex $v$ is independent from the node node.\\
+	$\tau$ is the same for every $v$, regardless of the dimension of sequences/structures (useful to process data of variable length with a fixed size model)
+	\item \textbf{Adaptivity}: the transduction is learned from observed data
+\end{list}
+\subsubsection{Family of Models}
+\paragraph{Recursive Cascade Correlation} Recursive Neural Networks by Recursive Cascade Correlation (RecCC), constructive approach:
+\begin{list}{}{}
+	\item It adds a new layer for each training step (interleaving output and hidden units training)
+	\item The number of layers is automatically computed by the training algorithm
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{44.png}
+\end{center}
+\paragraph{TreeESN} Combines reservoir computing (untrained reservoir layer of recurrent units with linear trained readout layer) and recursive modeling:
+\begin{list}{}{}
+	\item Extends the applicability of the RC/ESN approach to tree structured data
+	\item Extremely efficient way of modeling RNNs (randomized approaches)
+	\item Architectural and experimental performance baseline for trained RNN models with often competitive results
+\end{list}
+$\rightarrow$ \textbf{Deep TreeESN}: hierarchical abstraction both trough the input structure and architectural layers.
+\begin{center}
+	\includegraphics[scale=0.5]{45.png}
+\end{center}
+Improve efficiency (giving the same number of units) and improves results.
+\paragraph{HTMM} For example, \textbf{Bottom-up Hidden Tree Markov models} extend HMM to trees exploiting the recursive approach. It's a generative process from the leaves to the root.\\
+Uses the Markov assumption $Q$ch$_1(u),\ldots,Q$ch$_k(u)\Rightarrow Q_u$ and a children-to-parent hidden state transition\\$P(Q_u\:|\:Q$ch$_1(u),\ldots,Q$ch$_k(u))$
+\begin{center}
+	\includegraphics[scale=0.5]{46.png}
+\end{center}
+Bayesian network unfolding graphical model over the input trees. $y$ are the observed elements, $Q$ the hidden state variables with discrete values.
+\paragraph{Unsupervised Recursive Models} Transfer recursive idea to unsupervised learning: no prior metric/preprocessing (but still bias). Evolution of the similarity measure through recursive comparison of sub-structures.\\
+Iteratively compared via bottom-up encoding process.
+\subsubsection{Analysis}
+\paragraph{Assumptions and Open Problems} Inherited from time sequence processing. Allow adaptive representation of SD, handling of variability by causality and stationarity:
+\begin{list}{}{}
+	\item \textbf{Stationarity}: efficacy solution to parsimony without reducing expressive power
+	\item \textbf{Causality}: affects the computational power! RNN are only able to memorize past information, outputs depend only on sub-structures and the domain is restricted to sequences and trees due to causality
+\end{list}
+Toward partial relaxation (or \textbf{extension}) of the causality assumption.
+\paragraph{Towards Context} Kind of data domain, \textbf{contextual processing} (does the model process vertexes considering the context over the graph?), \textbf{efficiency} (often graph processing induce high complexity), \textbf{adaptivity} (including generalization performance).\\
+Contextual processing can be referred to computations that yields for each vertex a response that depends on the whole information represented in the structured data, according to its topology. Causality introduces an issue: how to deal with cycles and causality? Two main approaches:\begin{list}{}{}
+	\item \textbf{RNN}: explicitly treat the cycles constraining state dynamics to be contractive.\begin{list}{}{}
+		\item \textbf{GraphESN/GNN}, cycles are allowed in state computation, the state is computed iterating the state transition function until convergence. Stability of the recursive encoding process is guaranteed by resorting to contractive state dynamics (banach theorem for fixed point).\\
+		In GNN imposing constraints in the loss function (alternating learning and convergence), while in GraphESN the condition is inherited by contractivity of the reservoir dynamics (very efficient).
+		\item \textbf{FDGNN} deep embedding: exploit embedding from the previous layer to develop a higher order embedding\begin{center}
+			\includegraphics[scale=0.5]{47.png}
+		\end{center}
+	\end{list}
+	\item \textbf{Layering}: contextual non-recursive approach. Basic idea (aka deep learning for graphs): the mutual dependencies are managed (architecturally) through different layers. Instead of iterating at the same layer, each vertex can take the context of the other vertexes computed in the previous layers, accessing progressively to the entire graph/network, and each vertex take information from all the others including mutual influences.\begin{list}{}{}
+		\item \textbf{NN4G}: pioneer approach following the RNN/CRCC line (completely relaxing the recursive causality assumption). It visits the nodes of the input graphs through units with weight sharing (stationarity), i.e. we apply the same model to each node and for each node we compose the context through layers.\\
+		Composition through layers. The context window is incrementally extended when the number of hidden units is decreased.
+		\begin{center}
+			\includegraphics[scale=0.5]{48.png}
+		\end{center}
+		Encoding transduction implemented by a non-recursive state transition function. Overcome the causal assumption: directly deal with cyclic/acyclic directed/undirected graphs. Contextual and constructive approach: layer by layer learning and automatic model design. This gives advantages: no gradient vanish issues, divide et impera, automatic number of layers etc (while standard CNN for graphs use end-to-end top-down backpropagation training over fixed architectures).
+		\item \textbf{CNN for graphs}: moving the idea of 2D processing to graph processing through many layers.
+	\end{list}
+\end{list}
+\subsection{Other Approaches and Other Tasks}
+\subsubsection{Kernel Methods for SD}
+$$k(x,x')=\langle\phi(x),\phi(x')\rangle$$
+Data $x$ can be of different types, including structured data.
+\paragraph{Kernel Modularity} The definition can easily be extended to graphs of different types: sequences, trees, graphs. Implicit embedding of data into euclidean space by specifying an inner product.
+\paragraph{Marginalized Kernel} Similarity between two graphs based on the commod label paths obtained by random walks in the graphs. Kernel function defined as the inner product of the count vectors, averaged over all possible label paths. The computational complexity of the kernel function typically scales quadratically with the graph size.
+\begin{center}
+	\includegraphics[scale=0.5]{49.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Efficiency}: the cost is critical (due to sub-structure decomposition)
+	\item Similarity measure \textbf{fixed} prior to learning, so no adaptivity/learning in the encoding into the feature space.\begin{list}{}{}
+		\item Pro: we can exploit prior knowledge with this kernel, by engineering it for a specific problem
+		\item Con: for SD no universality is known $\Rightarrow$ \textbf{the choice of the kernel function is critical}\\
+		E.g.: computing any complete graph kernel is at least as hard as graph isomorphism
+	\end{list}
+\end{list}
+\subsubsection{Adaptive Kernels with Generative Models}
+Represent data by feature vectors derived from generative models for structured data (e.g. HMM for sequence). Combine generative and discriminative models. The advantage is that the kernel is adapted to the dataset (data distribution).\\
+Examples: fisher kernel, kernels from HTMM\ldots
+\subsubsection{Statistical Relational Learning}
+Combining expressive knowledge representation formalisms such as relational and first-order logic (add expressive representation to statistical approaches) with probabilistic and statistical approaches to inference and learning (add treatment of uncertainty and statistical learning to logic).\\
+Typical applications:
+\begin{list}{}{}
+	\item Link prediction, predicting whether or not two or more objects are related
+	\item Link-based clustering, grouping of similar objects where similarity is determined according to the links of a object
+	\item Social network modeling
+	\item Objects identification/Entity resolution
+\end{list}
+\subsubsection{And others\ldots}
+\begin{list}{}{}
+	\item Distance based (and kernel based methdos): need a priori encoding or similarity measure for structured data
+	\item Subgraph mining based approaches, e.g. decomposition in substructures. Frequent subgraph patterns approaches
+\end{list}
 \end{document}
