@@ -1351,5 +1351,58 @@ How long is the common prefix between $T[i,\ldots]$ and $T[j,\ldots]$? The minim
 	Example: $abbbaacccca \Rightarrow (a,1),(b,3),(a,2),(c,4),(a,1)$\\
 	In binary string just numbers and the first bit is sufficient.
 \end{list}
-%TODO 1:06:00 23/11
+\paragraph{Burrows-Wheeler Transform} Let's take a given text $T=$ mississippi\# and we start by rotating $T$:
+\begin{list}{}{}
+	\item mississippi\#
+	\item ississippi\#m
+	\item ssissippi\#mi
+	\item sissippi\#mis
+	\item issippi\#miss
+	\item ssippi\#missi
+	\item sippi\#missis
+	\item ippi\#mississ
+	\item ppi\#mississi
+	\item pi\#mississip
+	\item i\#mississipp
+	\item \#mississippi
+\end{list}
+This produces $|T|$ rows, giving a square matrix (\textbf{BWT matrix}). The we sort the rows (\# is the smallest character):
+\begin{list}{}{}
+	\item \# mississipp i
+	\item i \#mississip p
+	\item i ppi\#missis s
+	\item i ssippi\#mis s
+	\item i ssissippi\# m
+	\item m ississippi \#
+	\item p i\#mississi p
+	\item p pi\#mississ i
+	\item s ippi\#missi s
+	\item s issippi\#mi s
+	\item s sippi\#miss i
+	\item s sissippi\#m i
+\end{list}
+Again a square matrix. We notice that the first column, $F$, is ordered and contains all the characters of $T$: this because we are considering circling rotations and fixing a column every character will pass by that column. We cannot compress just $F$ because every text comprised of those characters (in the example, 4 "i"s, 1 "m", 2 "p"s and 4 "s"s) would give the same $F$. The trick is done with $L$, the column of the last characters: the transformation is invertible if we consider the sequence of characters in the last column.\\
+So given a string $T$, we return $L$, which in this case $L=$ ipssm\#pississ.\\\\
+Note that the character in $L$ is the one that precedes the character in $F$. With "mississippi" this transformation can't show its true power. With natural language texts, there are a certain number of characters that precedes other characters: for example, in english the letter "n" succeeded by a space can be preceded by an "a", an "o" and other few vowels ("an", "on", "in"\ldots), so in these portions of texts the array $L$ will contain just few repeated characters. This means that \textbf{$L$ is locally homogeneous}, so is \textbf{highly compressible}.
+\paragraph{Bzip Algorithm}
+\begin{enumerate}
+	\item Move-to-Front of $L$
+	\item Run-Length coding
+	\item Statistical coder
+\end{enumerate}
+\paragraph{Computing the BWT matrix} If we look at the matrix and notice the position of \#, we notice that we need to sort just the suffixes of $T$: \begin{list}{}{}
+	\item \textbf{\#}mississipp i
+	\item \textbf{i\#}mississip p
+	\item \textbf{ippi\#}missis s
+	\item \textbf{issippi\#}mis s
+	\item \textbf{ississippi\#} m
+	\item \textbf{mississippi} \#
+	\item \textbf{pi\#}mississi p
+	\item \textbf{ppi\#}mississ i
+	\item \textbf{sippi\#}missi s
+	\item \textbf{sissippi\#}mi s
+	\item \textbf{ssippi\#}miss i
+	\item \textbf{ssissippi\#}m i
+\end{list}
+So \# is a dividing character. So these are the sorted suffixes of $T$, and we can compute it with a suffix array ($SA$) construction algorithm, with a linear space instead of quadratic. Given the items of the $SA$, the corresponding item of $L$ is $L[i] = T[SA[i]-1]$. This requires many jumps in memory, so it's the main reason why bzip is significantly slower than gzip. So this spurred a number of publications in '94-'10 on SA construction.
 \end{document}
