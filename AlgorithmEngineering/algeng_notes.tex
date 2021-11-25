@@ -1405,4 +1405,23 @@ Note that the character in $L$ is the one that precedes the character in $F$. Wi
 	\item \textbf{ssissippi\#}m i
 \end{list}
 So \# is a dividing character. So these are the sorted suffixes of $T$, and we can compute it with a suffix array ($SA$) construction algorithm, with a linear space instead of quadratic. Given the items of the $SA$, the corresponding item of $L$ is $L[i] = T[SA[i]-1]$. This requires many jumps in memory, so it's the main reason why bzip is significantly slower than gzip. So this spurred a number of publications in '94-'10 on SA construction.
+\subparagraph{SA with qsort} Initialize the array with the text $T$ and then just sort with qsort. The difference is that every position is treated as a suffix, not as a character. So with qsort we will sort every suffix (from position $i$ of the original $T$ up to the \#), giving $SA$ at the end of the procedure.\\
+The procedure is inefficient: $\Theta(n^2\log n)$ in the worst case with $\Theta(n\log n)$ cache misses.
+\paragraph{L$\rightarrow$F Mapping} Can we map $L$'s characters onto $F$'s characters? Need to distinguish between equal characters. Every column $i$ is a permutation of the original $T$ given by the first $i-1$ characters. Given a character on $L$, I have to find the equal character on $F$, so I will know the previous character. Iterating this procedure gives the original $T$ from right to left.\\
+Taken two characters in $L$, e.g. two "i"s, the first to appear in $L$ is alphabetically smaller than the second. I bring each character to the front of its corresponding rectangle: the alphabetical order doesn't change.
+\begin{center}
+	\includegraphics[scale=0.5]{21.png}
+\end{center}
+Each row will correspond to another row with the rotated character in $F$ and another character in $L$ which is the previous character. Note that the rows may come closer, but the green will always come before the red.
+\begin{center}
+	\includegraphics[scale=0.5]{22.png}
+\end{center}
+These stability in the ordering guarantees that the mapping is trivial.
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+These operations are just Rank$_{char}$(pos) and Select$_{char}$(pos) and the reason why these operations are so popular nowadays. Rank$_i$(pos) tells how many "i"s are above pos.
+\paragraph{Decompression} After decompressing in the inverse order of the compression, we end up with $L$.\\
+First thing to do is to find $F$: sort $L$ and find $F$. We now need to construct the string, and the first character from which we start, constructing from right to left, is \# which is the first character of $F$. So the last character of $T$ is the corresponding character in $L$, which in the example is an "i". Whenever I have an item in $L$, I compute the corresponding character in $F$ and iterate. The corresponding "i" in $F$ of the first "i" in $L$ is the first $i$ we find in $F$, in the second row. And so on.\\
+Several issues regarding efficiency in time and space.
 \end{document}
