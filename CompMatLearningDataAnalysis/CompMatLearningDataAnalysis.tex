@@ -10,6 +10,7 @@
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \usepackage{makecell}
+\usepackage{mathrsfs}
 
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
@@ -1427,7 +1428,7 @@ Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in R^m\:|\:\mu A = \nabla 
 $f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
 \paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
 $x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
-Active constraints at $x\in X$: $A(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
+Active constraints at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
 \textbf{First-order feasible direction cone} at $x\in X$: $D_X(x) = \{d\in R^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=\{d\in R^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$
 \paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in R^n\:|\:Ad\leq 0\}$ for some $A\in R^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
 Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
@@ -1481,5 +1482,189 @@ Under further conditions, solving $(D)$ actually solves $(P)$
 	 $L(x;\mu)=\frac{1}{2}\|x\|_2^2+\mu(Ax-b)$\\
 	 $\psi(\mu)=\min_{x\in R^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
 	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in R^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
+\end{list}
+\subsection{Constrained Optimization Algorithms} Algorithms for $(P)\:\:\:\min\{f(x)\:|\:G(x)\leq 0, H(x) = 0\}$\\
+Usually ok to ignore $H(\:)$, just $G(x)\leq 0$ (implementation details). Only linear inequalities $Ax\leq b$, because of their convenience: always convex, satisfy (Linl), numerically stable, cheap to compute\ldots\\
+Important notation: \textbf{sub-system} (a relaxation) $A\in R^{m\times n}, b\in R^m, B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes $\equiv$ constraints $\Rightarrow$ sub-matrix/vector/system $A_B=[A_i]_{i\in B}$/$b_B=[b_i]_{i\in B}$/$A_Bx \leq b_B$\\
+\textbf{Polyhedral cone} $F_X(x)=\{d\in R^n\:|\:A_{\mathscr{A}(x)} d\leq 0\}$ with $\mathscr{A}(x)$ being the 
+\textbf{active constraints} at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$
+\subsubsection{Quadratic Problem with Linear Equality Constraints}
+\paragraph{Equality-Constrained QP} $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax=b\}$ with $A\in R^{m\times n}$, rank$(A)=m<n \equiv$ rows of $A$ are linearly independent. Usually $(P)$ convex $\equiv Q\succeq 0$ (otherwise $v(P)=-\infty$ likely).\\
+For a minimum/saddle point, just solve the $KKT$ system (normal equations)
+$$\begin{array}{c}
+(a)\\(b)
+\end{array}\left[\begin{array}{c c}
+Q&A^T\\A&0
+\end{array}\right]\left[\begin{array}{c}
+x\\\mu
+\end{array}\right]=\left[\begin{array}{c}
+-q\\b
+\end{array}\right]$$\\
+Just linear algebra, symmetric but indefinite, lots of 0 eigenvalues. It's a basic step in many cases, so need to do that efficiently: just go and solve it by direct or iterative methods
+\begin{list}{}{}
+	\item indefinite factorization of the matrix (may reduce sparsity)
+	\item Krylov-type iterative methods (GMRES,\ldots)
+\end{list}
+or try to exploit the large scale structure (saddle-point system).
+\paragraph{Active-Set Method} Quadratic program with linear constraints. If one knew $\mathscr{A}(x_*)$, then it would be "just linear algebra" $\Rightarrow$ if you don't know it estimate it but be ready to revise your estimate: we estimate the active set with $B$, current estimate of $\mathscr{A}(x_*)$.
+\begin{center}
+	\includegraphics[scale=0.75]{10.png}
+\end{center}
+Can compute feasible initial $x$ autonomously.\\
+\textbf{Always exploit all the structure of your problem}: quadratic program with \textbf{box constraints}\\$(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:\underline{x}\leq x\leq \overline{x}\}$\\
+Active constraint $\equiv$ inactive variable, $B\subseteq N=\{1,2,\ldots,n\}, B = (L,U)$ with $L\cap U=\emptyset, L\cup U \subset N, F = N\setminus (L\cup U)\Rightarrow A_Bx=b_B \equiv x = [x_L, x_F, x_U]=[\underline{x}_L, x_F, \overline{x}_U]$ so only $x_F$ "free". $\underline{x} = 0 (x\leftarrow x+\underline{x})\Rightarrow x=[0, x_F, \overline{x}_U]$\\
+$(P)$ can become $(P)\:\:\:\min\{\frac{1}{2}x_F^TQ_{FF}x_F+(q_F+\overline{x}_U^TQ_{UF})x_F\}$ \textbf{unconstrained} and in a (possibly much) smaller space. Initial feasible $x$ straightforward.
+\subparagraph{In practice} If (Linl)-type not satisfied, $B$ needs to be more carefully managed to handle possible degenerate steps $(\overline{\alpha}=0)$. For instance, only one constraint at a time is added to $B$, not very efficient in practice and different nontrivial rules are used.\\
+Exploit information from previous iteration to speed up KKT system solution: update factorizations, use $x$ to warm-start iterative approaches\ldots many different variants.\\
+No more exact solution but hopefully fast iterative approaches, e.g. (quasi-)Newton on the reduced problem.\\
+Which $\epsilon$? How many iterations? How about one of the gradient methods?
+\subsubsection{Projected Gradient Method} Nonlinear problem with linear constraints $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b\}$, feasible $x$: if $-\nabla f(x)\in F_X(x)$ trivial, just LS/FS along $d=-\nabla f(x)$. In general, find $d\in F_X(x)$ "closer" to $-\nabla f(x)$ then FS/LS along $d$.\\
+Projection of $d\in R^n$ on $S\subset R^n$: $p_S(d)=\min\{\|d-x\|\:|\:x\in S\}$ so $$p_{F_X(x)}(-\nabla f(x))=\min\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\}$$
+a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\equiv x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
+$p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.\\\\
+Box constraints $\underline{x}\leq x\leq \overline{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \overline{x}_i] \Rightarrow$\\$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i), F_{[\underline{x},\overline{x}]}(x) = \left\{\begin{array}{l}
+R_+\hbox{ if }x=\underline{x}\\
+R_-\hbox{ if }x=\overline{x}\\
+R\hbox{ otherwise}\\
+\end{array} \right.$\\
+$g(d) = \|d-v\|^2$ decomposable: $g(d)=\sum_{i=1}^n [g_i(d_i)=(d_i-v_i)^2]$\\
+$p_X(x)$ separable $\Rightarrow n$ independent problems, much easier and parallelizable.
+\begin{center}
+	\includegraphics[scale=0.75]{11.png}
+\end{center}
+Other cases where projection is easy: simplex constraints $\sum_{i=1}^n x_i = 1, x_i\geq 0$ for $i=1,\ldots,n$.
+\paragraph{Goldstein's Version} What if projection is easy on the whole $X$, not only $F_X(x)$? Goldstein's projected gradient method: move first, project second: $y_i \leftarrow x_i - \alpha_i\nabla f(x_i);\:\:\:x_{i+1}\leftarrow p_X(y_i);$\\
+Not a descent method, more like a heavy ball, and only converges with appropriate stepsize, typical $\alpha=\frac{1}{L}$. Convergence result similar to unconstrained gradient (for good and bad): $O\left(\left(\frac{L}{\tau}\right)\log\left(\frac{1}{\epsilon}\right)\right)$ for $f$ $\tau$-convex, $O\left(\frac{LD}{\epsilon}\right)$ otherwise.
+\paragraph{Rosen's Version} General $Ax\leq b$: $p_{F_X(x)}$ can be too costly.\\
+Make it easier by projecting on $\partial F_X(x)=\{d\in R^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\overline{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
+	\item $\mu=-[\overline{A}\,\overline{A}^T]^{-1}\overline{A}\nabla f(x)$
+	\item $d = (I-\overline{A}^T[\overline{A}\,\overline{A}^T]^{-1}\overline{A})(-\nabla f(x))$
+	\begin{list}{}{}
+		\item $d = 0$ may happen: good if $\mu \geq 0$, un-good otherwise
+		\item $d = 0$ surely happens if $\overline{A}\in A^{n\times n}$ ($x$ a vertex, $\mathscr{A}(x)$ a base)
+	\end{list}
+\end{list}
+$A_{\mathscr{A}(x)}$ not full rank in general: must work with $A_B$ full rank with $B\subset \mathscr{A}(x) \Rightarrow$ rather more complicated logic.\\
+$f$ linear plus streamlining $\longrightarrow$ primal simplex method.\\
+Can be extended to $G(x)\leq 0$ nonlinear. When $B$ optimal face, then unconstrained steepest descent $\Rightarrow$ convergence results analogous with twists.
+\begin{center}
+	\includegraphics[scale=0.75]{12.png}
+\end{center}
+$\alpha_i = \max\{\alpha\:|\:A_i(x+\alpha d)\leq b_i\}$ if is $< \infty$. The pesky part is the handling of linear independence. Maximal $B$ easy to get via a greedy algorithm.
+\subsubsection{Frank-Wolfe Method}
+Nonlinear problem with linear constraints $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b\}$\\
+Minimizing $\| x-v\|$ over $Ax\leq b$ may be too costly, but minimizing a linear function may be possible (special structure, e.g. network constraints). Solve nonlinear $(P)$ by solving a sequence of $LP$s (master problem)
+\begin{center}
+	\includegraphics[scale=0.75]{13.png}
+\end{center}
+\begin{list}{}{}
+	\item $\langle \nabla f(x),d\rangle<0 \equiv d$ a descent direction
+	\item $\langle \nabla f(x),d\rangle = 0 \Rightarrow x$ local optimum
+\end{list}
+$f$ convex $\Rightarrow v = f(x) + \langle \nabla f(x),d\rangle\leq v(P) \Rightarrow f(x) - v(P)\leq f(X) - v =$ readily available estimate of gap $\Rightarrow \langle \nabla f(x),d\rangle = 0 \Rightarrow x$ global optimum.
+\paragraph{Stabilising the Frank-Wolfe Method} Initial $x$ not really needed: one LP, e.g. $\langle 0,y\rangle$ objective, to find it if any.\\
+Convergence easy enough, similar to run-of-the-mill descent algorithm.\\
+One LP per iteration is costly, exploit structure to make it efficient.\\
+Convergence rather slow: trusting $L_x(\:)$ very far from $x$ where $\nabla f$ is computed.\\
+Solution seen already: stabilize the master problem, but separable penalty $\gamma\|y-x\|_2$ in the objective. \textbf{Trust region stabilization}: constraint $\|y-x\|_\infty \leq \tau\equiv$ box constraints $x_i-\tau\leq y_i\leq x_i+\tau$, almost never make an LP harder.\\
+Have to manage $\tau$ somehow (e.g. fixed) but often worth it. Other ways to improve convergence speed, e.g. away step and/or use FW to identify optimal active set, then exploit it.
+\paragraph{Constrained Cutting Plane (Bundle)} Stabilised Frank-Wolfe. What if $f\not\in C^1$? Cannot use $g\in\partial f(x)$, bad first order information. $f$ convex $\Rightarrow$ first-order information not so bad, globally valid.\\
+What if I collect it along the way and use it all?
+\begin{list}{}{}
+	\item $\{x_i\}\rightarrow$ \textbf{bundle} $\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
+	\item \textbf{Cutting-plane model} $f_\mathscr{B}(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in \mathscr{B}\}$, a $(1+\epsilon)$-order model.
+\end{list}
+$\overline{x}\leftarrow arg\min\{f_\mathscr{B}(x)\:|\:Ax\leq b\}$ \textbf{constrained cutting-plane algorithm}, completely equivalent to the unconstrained version, even better if $Ax\leq b$ is compact.\\
+$x\leftarrow arg\min\{f_\mathscr{B}(y)+\gamma\|y-\overline{x}\|^2\:|\:Ay\leq b\}$ \textbf{constrained Bundle method}.\\
+More difficult to exploit the structure, but not impossible.
+\paragraph{Frank-Wolfe++} Sequential Quadratic Programming: want a better direction? Use a better model! Of course, second order model if you have one, or add appropriate trust region constraint to the master problem.\\
+Can approximate $\nabla^2 f(x)$ with quasi-Newton formula. Fast convergence if done properly.\\
+Solve a constrained quadratic program at each iteration, possibly with quadratic constraints.
+\subsubsection{Dual Methods}
+Quadratic program with linear constraints $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax\leq b\}$\\
+So far, kept $Ax\leq b$ and gotten $\lambda \geq 0$ in the end. We can do the reverse (dual approach): \begin{list}{}{}
+	\item $\forall$ fixed $\lambda\geq 0$, $\psi(\lambda)=\min\{\frac{1}{2}x^TQx + qx + \lambda(b-Ax)\}\leq v(P)$
+\end{list}
+$Q\succ 0\Rightarrow$ optimal solution $x(\lambda)=Q^{-1}(\lambda A-q)$\\
+$\psi$ concave, $\psi\in C^1$, $\nabla\psi(\lambda)=b-Ax(\lambda)$\\
+\textbf{Lagrangian dual}: $(D)\:\:\:\max\{\psi(\lambda)\:|\:\lambda\geq 0\}$
+\begin{list}{}{}
+	\item $(D)\equiv (P)$: $v(D) = v(P)$ and $\{x(\lambda_i)\}\rightarrow x_*$ as $\{\lambda_i\}\rightarrow \lambda_*$
+\end{list}
+\paragraph{Dual Method} Solve $(D)$ by any method for $C^1$, but $\psi\not\in C^2$ in general. $(D)$ is constrained but the constraints are very easy (projection is trivial).\\
+Feasible primal solution $x_*$ only asymptotically, but valid lower bound $v_i = \psi(\lambda_i)$ on $v(P)$ at every iteration.\\
+If $X$ is "simple", then \textbf{Langragian heuristic} $X_i = p_X(x(\lambda_i))\Rightarrow$ valid upper bound $f_i = f(x_i)$ on $v(P)$ at every iteration $\Rightarrow f(x_i)-v(P)\leq f_i - v_i$ = readily available estimate of gap.\\
+Can behave very differently from primal methods ($\frac{L}{\tau}$ much less of an issue). Also $Q$ singular $\Rightarrow \psi(\lambda)=-\infty$ happens $\Rightarrow$ nasty constraints in $(D)$. Extends to $f(x)$ strictly convex (must solve general nonlinear problem). $f(x)$ not convex is a serious issue, $\psi$ has to be computed exactly.
+\subparagraph{Decomposition} Partial Lagrangian relaxation $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b, Ex\leq d\}$\begin{list}{}{}
+	\item $(R_\lambda)\:\:\:\psi(\lambda)=\min_x\{f(x)+\lambda(b-Ax)\:|\:Ex\leq d\}$ by keeping the "easy" constraints $Ex\leq d$ and relaxing complicating constraints $Ax\leq b$
+\end{list}
+$(R_\lambda)$ is constrained but can exploit structure (and $\psi(\lambda)=-\infty$ less likely). The typical structure: $Ax\leq b$ linking constraints + $f$ separable
+\begin{center}
+	\includegraphics[scale=0.6]{14.png}\\
+	$\Rightarrow \psi(\lambda)=\sum_k \psi_k(\lambda)$
+\end{center}
+Algorithms can exploit (parallelize).
+\subsubsection{Barrier Methods}
+Pro of dual method: $(D)$ is almost unconstrained (would be with $Ax = b$). The cons of dual methods are that $\psi\not\in C^2$, and even $\not\in C^1$ if $f$ isn't strictly convex, also $x(\lambda)$ is never feasible until the very end (unless Langragian heuristic).\\
+We would like: unconstrained, $\in C^2$ and $x$ feasible. The first and last are obviously solved with $f + \chi_X$, but $\chi_X\not\in C^1$: we need something like $\chi_X$ but $\in C^2$. Can get $C^2$ if you accept to solve almost $(P)$ but not quite.
+\paragraph{Barrier Function and Central Path} $\gamma > 0$ parameter, $(P_\gamma)\:\:\:\min\{f_\gamma(x) = f(x) - \gamma\sum_{i=1}^m \log(b_i-A_i x)\}$ \textbf{logarithmic barrier} $f_\gamma$ strictly convex (if $f$ convex), $\in C^2$ (if $f\in C^2$)
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.6]{15.png}
+\end{center}
+\begin{list}{}{}
+	\item $X=\{x\in R^n\:|\:Ax\leq b\}$
+	\item $f_\gamma(x)=  \infty$ for $x\not\in X$ (like $\chi_X$)
+	\item $f_\gamma(x)=  \infty$ for $x\in \partial X$ (unlike $\chi_X$)
+	\item $\forall\:\gamma>0\:\:\exists!\:x_\gamma$ optimal of $(P_\gamma)$
+	\item $x_\infty = \lim_{y\to\infty} x_\gamma$ analytic center of $X$
+	\item As $\gamma \rightarrow 0$, $x_\gamma\rightarrow x_*$ analytic center of optimal face
+	\item $C = \{x_\gamma\:|\:\gamma\in(0,\infty)\}$ central path (smooth curve)
+\end{list}
+\end{multicols}
+Idea: start at center $x_\infty$ and follow $C$ to reach very close to $x_*$, always strictly feasible, never touch $\partial X$.\\\\
+$f_\gamma$ is for many $f$s (linear, quadratic,\ldots). Newton's method converges very quickly to $x_\gamma$ if started within an appropriate neighborhood $N$ of $C$.\\
+With $x_i$ "close" to $x(\gamma_i)$, a few Newton's steps give $x_{i+1}$ much closer to $x(\gamma_i) \Rightarrow$ "close" to $x(\gamma_{i+1})$ with $\gamma_{i+1}=\tau\gamma_i \Rightarrow$ linear convergence.\\
+Overall, $O(m\log(\frac{1}{\epsilon}))$ iterations, can be made $O(\sqrt{m}\log(\frac{1}{\epsilon}))$ and more like $O(\log(m)\log(\frac{1}{\epsilon}))$ in practice. Dimension independent on $n$, not on $m$ (but almost is, in practice), but each Newton's step is at least $O(n^3)$, costly.\\
+Best implementations for LP, QP, SOCP and SDP in fact are primal-dual.
+\paragraph{Primal-Dual Interior-Point (Barrier) Method} Focus on quadratic case $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax\leq b\}$. Could compute Newton's step as usual.\\
+Cleaner derivation out of KKT of $(P)$:
+\begin{list}{}{}
+	\item[(KKT-F)] $Ax + s = b$ with $s\geq 0$
+	\item[(KKT-G)] $Qx + \lambda A = -q$ with $\lambda \geq 0$
+	\item[(KKT-CS)] $\lambda_i s_i= 0$ for $i=1,\ldots,m$
+\end{list}
+One is solving the dual at the same time as the primal $(D)\:\:\:\max\{-\lambda b-\frac{1}{2}x^TQx\:|\:Qx+\lambda A= - q, \lambda \geq 0\}$\\
+"Slackened KKT" characterize $x(\gamma)$ and complementarity gap:
+\begin{list}{}{}
+	\item With (KKT-CS-$\mu$) $\lambda_i s_i = \gamma$ for $i=1,\ldots,m \Rightarrow \sum_{i=1}^m\lambda_i s_i = \gamma m = (\frac{1}{2}x^TQx + qx)-(-\lambda b - \frac{1}{2}x^TQx)$
+\end{list}
+And using $\Lambda, S$ diagonal matrices with $\lambda_i, s_i$ on the diagonal, we get (KKT-CS-$\mu$) $\Lambda Su = \gamma u$ for $i=1,\ldots,m$\\\\
+$x\rightarrow x + \Delta x, s\rightarrow s + \Delta s, \lambda \rightarrow \lambda + \Delta\lambda$ (current iterate plus displacement, so we get $(\Lambda + \Delta\Lambda)(S+\Delta S)u = (S\Delta\Lambda + \Lambda\Delta S + \Lambda S + \Delta\Lambda\Delta S)u = \gamma u$ so (KKT-CS-$\mu$) only nonlinear (bilinear) term $\Rightarrow$ linearize $\equiv$ Newton's method $\equiv$ just ignore it!
+$$\left[\begin{array}{c c c}
+Q&A^T&0\\
+A&0&I\\
+0&S&\Lambda
+\end{array}\right]\left[\begin{array}{c}
+\Delta x\\
+\Delta \lambda\\
+\Delta s
+\end{array}\right]=\left[\begin{array}{c}
+-(Qx+q)-\lambda A\\
+b-Ax-s\\
+\gamma u-\Lambda Su - \Delta\Lambda\Delta Su
+\end{array}\right] \simeq \left[\begin{array}{c}
+r^P\\r^D\\\gamma u-\Lambda Su
+\end{array}\right] $$
+\begin{center}
+	\includegraphics[scale=0.75]{17.png}
+\end{center}
+\begin{list}{}{}
+	\item Until $\|r^P\|>\epsilon^P\vee\|r^P\|>\epsilon^D$ may choose $\alpha^P\neq \alpha^D$
+	\item New iterate primal and dual feasible if the previous was, otherwise is less unfeasible than the old one
+	\item Primal-dual algorithm: upper and lower bound on $v(P)$, converge as $\gamma\rightarrow 0$
+	\item $\gamma = p\frac{\lambda s}{m}$ for $p<1$ fixed (a reasonable value is $p=\frac{1}{m}$)
+	\item Very good convergence but large cost in time/memory per iteration
+	\item May have numerical problems (dividing by very small numbers) especially on empty/unbounded problems.
 \end{list}
 \end{document}
