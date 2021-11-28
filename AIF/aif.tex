@@ -2026,6 +2026,161 @@ The workflow of answer set programming:
 \begin{center}
 	\includegraphics[scale=0.75]{21.png}
 \end{center}
-\paragraph{Knowledge Representation with Answer Set Programming}
+\paragraph{Knowledge Representation with Answer Set Programming} \texttt{todo}
 %TODO example rules3.pdf p. 25
+\section{Planning}
+\subsection{Classical Planning}
+Planning combines two major areas of AI: search and logic. By representing actions and change in logic (as in the situation calculus) we can cast the problem of planning as: a SAT problem in the PROP case or a theorem proving in the FOL case.\\
+In the classical planning, we'll introduce a \textbf{restricted language} suitable for describing planning problems. This language allows to \textbf{circumvent representation and computational problems} by resorting to a \textbf{restricted FOL representation}, allowing \textbf{specific descriptions of actions and states} (including goals) so that \textbf{special algorithms and heuristics can be developed}.
+\begin{multicols}{2}
+\begin{list}{}{\textbf{Problem Solving Agent}}
+	\item \textbf{Actions}: implicitly defined by a function defining successor states
+	\item \textbf{Goal}: test Goal(state) $\rightarrow$ \{true, false\}
+	\item \textbf{Planning}: to obtain, by heuristic search, a path in the state graph, leading from the initial state to a Goal. In needs good domain-specific heuristics.
+\end{list}
+\columnbreak
+\begin{list}{}{\textbf{Planning Agent}}
+	\item Has an explicit representation of the goal state, of action and their effects
+	\item It is able to inspect the goal and decompose it, and make abstractions
+	\item It can work freely on the plan construction, manipulating goals and plans
+	\item Some general heuristics and algorithms for planning become possible, leveraging on this representation
+\end{list}
+A planning agent can be more efficient.
+\end{multicols}
+\paragraph{Representation for Planning in PROP} Let's consider the \textbf{Wumpus world}: the agent moves in a labyrinth looking for gold, can shoot an arrow, grab the gold\ldots trying to avoid pits and the Wumpus. We need a (huge) number of propositional sentences in clausal form, that include:
+\begin{list}{}{}
+	\item Init, a collection of assertion about the initial state. Example: $L_{1,1}^0, W_{2,3}, G_{3,1}\ldots$
+	\item Transition$^1$, \ldots, Transition$^t$, the succesor-state axioms for all possible fluents at each time up to some maximum time $t$\\
+	Examples: HaveArrow$^{t+1}\Leftarrow$ (HaveArrow$^t\wedge\neg$Shoot$^t$), or another example $L_{x+1,y}^{t+1}\Leftrightarrow (L_x^t\wedge$ MoveUp$_y^t)$ replicated for $4$ action, $n\times n$ locations, $t$ times\ldots
+	\item State constraints like non ubiquity: $L_{x,y}^z\Rightarrow\neg L_{x',y'}^z$
+	\item Action exclusion axioms: $\neg A_i^t\wedge\neg A_j^t$ for any pair of actions $A_i$ and $A_j$ and any time $t$
+	\item Finally, the assertion that the goal is achieved at time $t$: HaveGold$^t\wedge$ ClimbedOut$^t$
+\end{list}
+Give all this in input to a SAT solver in clausal form and look for a model.
+\begin{center}
+	\includegraphics[scale=0.65]{22.png}
+\end{center}
+The planning problem is translated into a CNF sentence for increasing values of $t$ until a solution is found or the upper limit to the plan length is reached.
+\paragraph{Planning as Theorem Proving in FOL}
+\subparagraph{Reminder of Situation Calculus in FOL} A special ontology made of situations, fluents, actions\ldots\\
+Problems in defining actions and their effect (frame problem) partially solved by defining state successor axioms, one for each fluent. For example, for the blocks world\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+Effect of a sequence of actions Result : $[A^*]\times S \rightarrow S$
+\begin{list}{}{}
+	\item Result$([],s)=s$
+	\item Result$([a\:|\:$seq$],s)=$ Result$($seq$,$Result$(a,s))$
+\end{list}
+Planning is the generation of a sequence of actions, a plan $p$, to reach the goal $G$. This amounts to proving that $\exists\:p\:\:G($Result$(p,s_0))$\\
+The task is made complex by different sources of non-determinism:
+\begin{list}{}{}
+	\item The length of the sequence of actions is not known in advance
+	\item Frame axioms may infer many things that are irrelevant
+	\item We need to resort to ad hoc strategies
+	\item A general theorem prover is inefficient and semi-decidable, completeness is not guaranteed
+	\item We do not have any guarantee of the efficiency of the generated plan
+\end{list}
+\paragraph{Definition of Classical Planning}
+In classical planning we assume \textbf{fully observable}, \textbf{deterministic} and \textbf{static} environments with \textbf{single agents}. We also assume a \textbf{factored representation}: a state of the world is represented by a collection of variables.
+\subsubsection{PDDL} The \textbf{Planning Domain Definition Language} is a specialized language for describing planning problems and in particular:\begin{list}{}{}
+	\item States
+	\item Applicable actions (Actions($s$)) and transition model (Result($s,a$)) through action schemas
+	\item Initial and goal states
+\end{list}
+\paragraph{States} Conjunction/set of fluents, ground positive atoms with no variables and no functions.\\Examples: At(Truck$_1$, Melbourne) $\wedge$ At(Truck$_2$, Sydney)\\
+The database semantics is used:
+\begin{list}{}{}
+	\item Closed World Assumption: fluents that are not mentioned are considered false
+	\item Unique Name Assumption: distinct name to refer to distinct individuals
+\end{list}
+\paragraph{Actions} Defined by a set of action schemas that implicitly define the Actions($s$) and their Result($s,a$). Actions are defined in a way that avoids the frame problem, since they require that you carefully specify all the changes. All \textbf{the rest it is assumed to persist}. This because in most problems the things that change are very few compare to the ones that do not.
+\paragraph{Action Schemas} Correspond to parametric actions or operators (a lifted representation). Example of action schema: flying from a location to another one:
+\begin{list}{}{}
+	\item Action(Fly(p, from, to), \% p (a plane); from (departing airport); to (destination)\\
+	PRECOND: At(p, from) $\wedge$ Plane(p) $\wedge$ Airport(from) $\wedge$ Airport(to)\\
+	EFFECT: $\neg$At(p, from) $\wedge$ At(p, to))
+\end{list}
+p, from, to are universally quantified variables that need to be instantiated. An instance:
+\begin{list}{}{}
+	\item Action(Fly(P1, SFO, JFK),\\
+	PRECOND: At(P1, SFO) $\wedge$ Plane(P1) $\wedge$ Airport(SFO) $\wedge$ Airport(JFK)\\
+	EFFECT: $\neg$At(P1, SFO) $\wedge$ At(P1, JFK))
+\end{list}
+\textbf{Restriction}: any variable in the effect must also appear in the precondition.
+\begin{list}{}{}
+	\item PRECOND: a list of preconditions to be satisfied in $s$ for the action to be applicable.
+	\begin{list}{}{}
+		\item $a \in$ Actions$(s)\Leftrightarrow s\vDash$ PRECOND$(a)$	
+	\end{list}
+	I.e. positive literals are in $s$ and negated literals are not in $s$
+	\item EFFECT: the successor state $s'$ is obtained from $s$ as a result of the action by:\begin{list}{}{}
+		\item Adding positive effects to $s$: add list, ADD($a$)
+		\item Removing negative effects from $s$: delete list, DEL($a$)
+	\end{list}
+	Result($s,a$) = ($s-$ DEL$(a))$ $\cup$ ADD$(a)$\\
+	In the example, Fly(P1, SFO, JFK) would remove At(P1, SFO) and add At(P1, JFK).
+\end{list}
+\paragraph{Initial State} A collection of ground positive atoms.
+\paragraph{Goal} A conjunction of literals (positive or negative) that may contain variables, for example At(p, SFO) $\wedge$ Plane(p) is the goal of having any plane to SFO.\\
+Variables are treated as existentially quantified.
+\paragraph{Solution} The problem is solved when we can find a sequence of actions that end in a state $s$ that entails the goal.
+\subsubsection{Algorithms and Heuristics}
+\paragraph{Decision Problems for Planning, Complexity} PlanSAT (does a plan exist?) and Bounded PlanSAT (is there a solution of length $k$ or less?): both problems are decidable for classical planning\begin{list}{}{}
+	\item PlanSAT without functions, since the number of states is finite
+	\item Bounded PlanSAT: always decidable, also with functions
+\end{list}
+Theoretical complexity for both is very high (PSPACE). If we disallow negative effects, both problems are still NP-hard. If we also disallow negative preconditions, PlanSAT reduces to P.\\
+This means we need sub-optimal solutions and good heuristics.
+\paragraph{Planning as a State-Space Search}
+Nodes in the search space are states, the arcs are the actions.
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item \textbf{Progression Planning}: a forward search from the initial state to the goal state. Believed to be inefficient: prone to exploring irrelevant actions, and planning problems often have very large state spaces
+	\item \textbf{Regression Planning}: backward search from the goal state to the initial state, the first approach tempted.
+\end{list}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{24.png}
+\end{center}
+\end{multicols}
+\subparagraph{Regression Planning} We start with the goal, a conjunction of literals, describing a set of worlds. The PDDL representation allows to regress actions, i.e. to find a state $g'$ from where it is possible to reach the goal with some action $a$ (achieving some preconditions of $g$).\begin{list}{}{}
+	\item $g' = (g -$ ADD$(a))$ $\cup$ Precond$(a)$
+\end{list}
+We do not say anything about DEL($a$).
+\paragraph{Relevant Actions and Relevant Search} Actions that are useful to reach a goal are defined relevant. Relevant actions contribute to the goal (achieve some subgoal) but must be the last step to the solution (i.e. not have effects that negate some element of the goal).\\
+This is achieved by computing the \textbf{Most General Unifier} ($\Theta$). Formally: given a goal $g$ containing a literal $g_i$, an action is a relevant action towards $g$ if
+\begin{list}{}{}
+	\item action schema $A$ has an effect literal $e$ such that Unify($g_i,e)=\Theta$
+	\item $a$ = SUBST($\Theta, A$)
+	\item there is no effect in $a$ that is the negation of a literal in $g$
+\end{list}
+One of the earlier planning systems was a linear regression planner called STRIPS.
+\paragraph{Heuristics for Planning} Given the factored representation, we can devise good general heuristics for planning. Remember:
+\begin{list}{}{}
+	\item $A^*$ is a best first algorithm which uses an evaluation function $f(s) = g(s) + h(s)$ where $h$ is an admissible heuristic (i.e. an heuristic functions that never overestimate the distance from the solution, $\forall\:s\:\:h(s)\leq h^*(s)$)
+	\item $A^*$ is optimal
+	\item \textbf{Problem relaxation} is a common technique for finding admissible heuristics, it consists in looking at a problem with less constraints and computing the cost of the solution in the relaxed problem. This cost can be used as an admissible heuristics for the relaxed problem.
+\end{list}
+A state space is a graph, where the nodes are states and edges are actions. There are two strategies to relax the problem:
+\begin{list}{}{}
+	\item Add more arcs to the graph, so it's easier to find a path to the goal (ignore preconditions heuristics or ignore delete list heuristics)
+	\item Group multiple nodes together, forming an abstraction of the state space (with fewer states is easier to search)
+\end{list}
+\paragraph{Ignore Precondition Heuristic} It drops all preconditions from actions. Every action is applicable in any state, any single goal literal can be satisfied in one step or there is no solution.\\
+The number of steps to solve a goals is approximated by the number of unsatisfied subgoals, but: one action can achieve more than one subgoal (non admissible estimate) or one action may undo the effect of another one (admissible).\\
+An accurate heuristic is the following:
+\begin{list}{}{}
+	\item Remove all preconditions and all effects except those that are literals in the goal
+	\item Count the minimum number of actions required such that the union of those actions effects satisfies the goal (a problem of set-cover)\\
+	NP-complete but greedy approximations exist.
+\end{list}
+As an alternative, ignore only some selected preconditions.
+\paragraph{Ignore Delete List Heuristic} Assume all goals and preconditions contain only positive literals (not a very strong assumption, you can rename negative literals with new positive ones).\\
+Remove the delete lists from all actions (i.e. removing all negative literals from effects): no action will ever undo the effects of other actions, so there is a monotonic progress towards the goal.\\
+Use the length of the solution as an admissible heuristic.\\
+Still NP-hard to find the optimal solution of the relaxed problem, this can be approximated in polynomial time with hill-climbing.
+\paragraph{State Abstraction} In order to reduce the number of states, we need other forms of relaxation: state abstraction reduces the number of states.\\
+A state abstraction is a many-to-one mapping from the states in the original representation to a more abstract representation. The common strategy is to ignore some fluents.\\
+The cost of the solution to this smaller problem can be used as an admissible heuristic.
+\paragraph{Decomposition} Divide a problem into parts, solve each one independently an then combine the subplans. The subgoals independence assumption is that the cost of solving a conjunction of subgoals is approximated by the sum of the costs of solving each subgoal independently. This assumption can be: optimistic (admissible, there are negative interactions) or pessimistic (inadmissible, subplans contain redundant actions, \textbf{Sussman anomaly})
 \end{document}
