@@ -1424,4 +1424,53 @@ These operations are just Rank$_{char}$(pos) and Select$_{char}$(pos) and the re
 \paragraph{Decompression} After decompressing in the inverse order of the compression, we end up with $L$.\\
 First thing to do is to find $F$: sort $L$ and find $F$. We now need to construct the string, and the first character from which we start, constructing from right to left, is \# which is the first character of $F$. So the last character of $T$ is the corresponding character in $L$, which in the example is an "i". Whenever I have an item in $L$, I compute the corresponding character in $F$ and iterate. The corresponding "i" in $F$ of the first "i" in $L$ is the first $i$ we find in $F$, in the second row. And so on.\\
 Several issues regarding efficiency in time and space.
+\section{Hashing and Dictionary Problem} 
+\paragraph{Hashing} Typically related to the \textbf{Dictionary problem}: we have a set of objects $D=\{o_1,\ldots,o_n\}$ with every $o_i$ associated to $\langle$key, satellite information$\rangle$. We want to solve queries like:
+\begin{list}{}{}
+	\item Membership$(k)$: is $k\in D$?
+	\item Insertion$(k)$: $D = D \cup \{k\}$
+	\item Deletion$(k)$: $D = D \setminus \{k\}$
+\end{list}
+The hashing function $h : U\rightarrow [0, m-1]$ from the universe $U$, with a table $T[0,m]$. The hash function is applied to the key which gives a position inside the table. Two objects can collide in the same position, and stay "outside" the table in a overflow list. This is called \textbf{hashing with chaining}. If $U$ is small, then a direct table is better.\\
+This approach has a space complexity of the size of the table ($m$) plus the number of objects outside the table ($n$), so $O(m+n)$. Note that $m$ are pointers, the cells of the table, while $n$ are pointers and keys: if the key is an integer then is 4-8 bytes like the pointers, but if it's a string then it's another pointer.\\
+\textbf{Loading factor} $\alpha = \frac{n}{m}$, ratio between the number of keys and the size of the table.
+\paragraph{Analysis} Up until now in out studies we've seen $h$ that were \textbf{simple uniform hashing}, meaning that $\forall\:k\:\:\:P(h(k) = i)=\frac{1}{m}$. This is means that every key is independent and is \textbf{computationally unfeasible}, although possible it takes too much space and time. Let's consider this kind of function.\\\\
+The insertion is $O(1)$ because we simply append in $T$.\\
+The Membership and Deletion both require a search, and the search costs the average overflow list length: a constant time to access the position required and a scan of the list in that position to search for the key.\\
+The average list length is $$E[\hbox{length of a list}]=\sum_{k'\in D\:k'\neq k} P(h(k')=h(k)) = \sum_{k'\in D\:k'\neq k} P(h(k')=i) = \sum_{k'\in D\:k'\neq k} \frac{1}{m} = \frac{n}{m} = \alpha$$
+So the average time for a search is the loading factor $\alpha$. Typically we assume that the computation of $h(k)$ is $O(1)$ so the cost of both Membership and Deletion is $O(1+\alpha)$ to account for the computation.\\\\
+If the size of the table is chosen proportional to $n$ then $\alpha$ is constant. We have a problem: how much is $n$? It's certainly dynamic.
+\paragraph{Constant Time in Dynamic Context} Let's consider the evolution over time. At the beginning, $t=0$ we have $n_0$ keys and a table of size $m_0 = 2n_0$ so we allocate a table of twice the size, meaning $\alpha_0 = \frac{1}{2}$. Then we add and delete keys.\\
+Let's consider a time $t=1$ where either \# keys $\geq 2n_0$ or \# keys $\leq \frac{n_0}{2}$. Before this time, we certainly have\\$\frac{m_0}{4} = \frac{n_0}{2} < \#$ keys $< 2n_0=m_0$. At $t=1$ the number of keys is getting either too large or too small, so we \textbf{resize the table}: if $\#$ keys $\geq 2n_0$ then $m_1 = 2m_0$ so the table doubles, else if $\#$ keys $\leq \frac{n_0}{2}$ then $m_1 = \frac{m_0}{2}$ the table halves.\\
+The $2$ is just a constant for example. What's important is that between $t=0$ and $t=1$ the number of keys is proportional for a given constant to the size of the table. But resizing the table requires destroying the current table and creating a new one, so in $t=1$ we have a peak of complexity because we execute a lot of operations. The cost is the cost of moving keys into the new table and destroying the old table.\begin{list}{}{}
+	\item Moving keys: it's dependent on how many keys we have to move and how much moving a key costs.\\
+	We have to move $2n_0$ keys, and the cost of insertion is still constant, so the complexity is $O(2n_0\cdot 1)$
+	\item Destroying a table: it's its size so $O(m_0)$
+\end{list}
+Constructing the new table requires $O(m_1)$, so the total cost is $O(2n_0+m_0+m_1)$. $m_0$ and $m_1$ are always $O(n_0)$, so the cost is $O(n_0)$ and in fact is $\Theta(n_0)$.
+\paragraph{Amortized Analysis} So we can't say that an hashtable is constant, because pointwise it's $O(1)$ then $O(n_0)$ and so on. Instead, we do an \textbf{amortized analysis}: amortized meaning that we don't count the pointwise complexity but the complexity over a sequence of operations.\\
+Let's consider the window of time between $t=0$ and $t=1$ in the case where $n_1=2n_0$. We can have insertions and deletion, but at least we did $n_0$ insertions (in general, operations). So $n_0$ operations of $O(1)$ plus $\Theta(n_0)$ at $t=1$ for the resize, meaning that in this window of time we did $O(2n_0)=O(n_0)$.\\
+So in the amortized analysis we take the worst case cost of a sequence of operations and divide it by the number of operations.
+\paragraph{Hashing functions}
+\begin{list}{}{}
+	\item \textbf{Simple uniform}: every key can go everywhere in the table\\
+	This means that $k_1$ can go everywhere in principle, same for $k_2$ and so on up to $k_{|U|}$, same thing (can go to $0$, \ldots, $m-1$). I can have a function that maps every key in $0$, a function that maps $k_i$ in $i$ mod $m-1$\ldots any combination is possible, so the number of simple uniform hashes is at least the number of mappings, which are $m^{|U|}$. So to be represented every function needs $\Omega(|U|\log m)$ bits. So considering $|U|=2^{64}$, as in the case of keys of 8 bytes, we would need $2^{64}$ bits which is \textit{a lot}.\\
+	So these function exists but they require too much space ($\Rightarrow$ time) to be represented.
+	\item \textbf{Universal hashing}: a class $H$ of hash functions $h:U\rightarrow [0,m]$ is called \textbf{universal}\\ $\Leftrightarrow\forall\:x\neq y\in U\:\:\#\{h\:|\:h(x)=h(y)\}\leq \frac{|H|}{m}$, so for every pair of items there are at most $\frac{1}{m}$ hash functions that collide them.
+\end{list}
+\paragraph{Universal Hashing with Chaining} Let's compute $E[$list length in cell $i]$, remembering that $i = h(k)$:
+\begin{list}{}{}
+	\item $E[$list length in cell $i] \sum_{k'\in D\:k'\neq k} 1\cdot P(h(k')=h(k))$
+\end{list}
+The probability is linked to the function I pick in $H$, so it's the random factor, so it's $P_{h\in H}$ and $h$ is taken from an universal class so the probability of $k'\neq k$ colliding in $h$ is $\frac{1}{m}$, so\begin{list}{}{}
+	\item $E[$list length in cell $i] \sum_{k'\in D\:k'\neq k} \frac{1}{m} = \frac{n}{m} = \alpha$
+\end{list}
+So the key concept is that the $h$ is from an universal class and we have two different keys.\\\\
+Does this class of functions exists? How practical is it?
+\subparagraph{Example of universal hashing} $h:U\rightarrow [0,m]$ with $u=|U|$. So a key $k$ consists of $\log_2 u$ bits.\\
+Let's divide the key $k$ into blocks of $\log_2 m$ bits: so blocks from $k_0$ to $k_{r-1}$ where $r=\frac{\log_2 u}{\log_2 m} =$ the number of blocks. So $\forall\:k_i\:\:0\leq k_1< m$\\
+Let's consider a parameter of $h$: $a$ of size $\log_2 u$ bits with $0 < a < u$ and the same partitioning (blocks of $\log_2 m$ bits giving $a_0,\ldots,a_{r-1}$). Note that $a$ is \textbf{picked at random}.\\
+We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\hbox{ mod }n$$ with $a\neq 0$ and $n$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
+Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{u-1}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks are different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\\
+$\sum_{i=0}$ %todo 29/11 from 1:03:00
 \end{document}
