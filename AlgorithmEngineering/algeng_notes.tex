@@ -1499,4 +1499,111 @@ With each key $k$ I map it into $d$ bins with the $d$ hash functions and take, a
 The questions are: how large must $b$ be, and how many functions ($d$) do I need?\\
 It was proven that $E[$length of the longest list$]= \frac{\log\log n}{\log d} + O(1)$ with $d\geq 2$.\\\\
 In the case of $d=1$, we have a sort of chain case. So the $E[$length of the longest list$]= \frac{\log n}{\log\log n} + O(1)$. So by just going from $d=1$ to $d=2$ the length drops to a double logarithmic, guaranteeing an exponential improvement.
+\subsection{Cuckoo Hashing}
+A kind of perfect hashing, meaning $O(1)$ worst case for search.\\
+With Cuckoo Hashing we have $O(1)$ worst case time for queries and deletion, and $O(1)$  amortized expected time for insertion.\\
+We will use an array with $m\geq n$ cells and $h_1,h_2$ universal hashing functions and each $k$ is allocated in both cells selected by the hashing functions (not just one cell). It checks both cells: if one of them is empty then $k$ is stored there, and if both of them are full then one of the elements is kicked out of that cell and relocated (the hashing functions are reapplied). This goes on until I can find an empty cell. Which conditions guarantee that this process ends?
+\paragraph{Theorem} $\forall\:i,j, \forall\:c>1$, if $m\geq 2cn \Rightarrow P($shortest path $i\rightarrow j$ is of length $L)\leq \frac{1}{m\cdot c^L}$\\
+We would have a graph $G$ from the table where every cell is a node, and two nodes are connected when they represent two cells that a key can be stored in. $G$ would have $m$ nodes and $n$ edges (equal to the number of keys).\\
+$\alpha=\frac{n}{m} \leq \frac{\frac{m}{2c}}{m} = \frac{1}{2c} < \frac{1}{2}$\\
+\textbf{Proof} by induction on $L$:
+\begin{list}{}{}
+	\item $L = 1\Rightarrow P \leq \frac{1}{mc}$\\
+	Each node represent a slot, so either we have $\begin{array}{l}
+	 h_1 \rightarrow i\\h_2 \rightarrow j
+\end{array}$ or we have the opposite $\begin{array}{l}
+	 h_2 \rightarrow i\\h_1 \rightarrow j
+\end{array}$, meaning $P(i\rightarrow j) = P(\exists\:k\:|$ either $\begin{array}{l}
+	 h_1(k) =i\\h_2(k)=j
+\end{array}$ or $\begin{array}{l}
+	 h_1(k) = j\\h_2(k)=i
+\end{array}) \leq \sum_{k\in D} \frac{2}{m^2} = \frac{2n}{m^2}$\\
+Twice because of the symmetry $h_1,h_2$ in $i,j$, and each of the event has probability of $\frac{1}{m}$ (one slot, either $i$ or $j$, over the $m$ available).\\
+	$m\geq 2cn \Leftrightarrow 2n\leq \frac{m}{c} \Rightarrow \frac{2n}{m^2} \leq \frac{m}{cm^2} = \frac{1}{cm}$, which is want we wanted to prove.
+	\item Assume that the statement is true for $L-1$ and prove $L-1\Rightarrow L$\\
+	$P(i\rightarrow j$ of length $L) = P(i\rightarrow z$ in $L-1$ steps and $z\rightarrow j$ in 1$) \leq \sum_z P(i\rightarrow z$ in $L-1$ steps and $z\rightarrow j$ in 1$)=$\\$=\sum_z \frac{1}{mc^{L-1}} \cdot \frac{1}{mc} = \sum_z \frac{1}{m^2}\cdot\frac{1}{c^L} =\frac{1}{mc^L}$
+\end{list}
+\paragraph{Example}  We have a table of 7 cells, from $0$ to $6$, and the two hash functions are $h_1(x)=x$ mod $7, h_2(x) = 2x$ mod $7$. The keys we want to insert are $1,3,8,15$
+\begin{list}{}{}
+	\item $k=1, h_1(1) = 1$ and we immediately insert into the slot 1
+	\item $k=3, h_1(3) = 3$ so immediately in slot 3
+	\item $k=8, h_1(8) = 1$ so we try $h_2(8) = 2$ so into slot 2
+	\item $k=15, h_1(15) = 1$ and $h_2(15) = 2$, so we kick out from the cells indicated by $h_1$ and store $15$ in 1\\
+	In slot $1$ there was $1$, $h_2(1) = 2$ so we kick out from there and put 1 in slot 2.\\
+	The $8$ from slot 1 has $h_1(8) = 1$, so it kicks out the $15$ and it's stored in slot 1.\\
+	We again have the 15, so now we use $h_2(15) = 2$ and store 15 in slot 2.\\
+	$1$ is again kicked out, and goes back to the first cell\ldots\\
+	It's a never ending process: \textbf{failing insertion}.
+\end{list}
+In general, one single cycle is not enough to make an insertion fail. Two cycles connected by a key are sufficient.
+\paragraph{Theorem} $P($failing$) \leq P($exists 2 cycles$) \leq P($exists one cycle$) = P(\exists\:z\:|\:\exists\:L\:\:\:z$ is part of a cycle of length $L) \leq \sum_{z\in T}\sum_{L\geq 1} \frac{1}{mc^L} = \sum_z\frac{1}{m}\sum_{L\geq 1}\left(\frac{1}{c}\right)^L$ and $c>1$ so $= \sum_z\frac{1}{m}\cdot \frac{1}{c-1}$ 
+\paragraph{Theorem} Fix $c=3$, therefore $P($failed insertion$)\leq \frac{1}{2}$ but we would consider $m\geq 6n$, implying a loading factor of less than $\frac{1}{6}$ meaning a very empty table.\\
+When inserting a key, that key will travel a bit possibly generating a failed insertion. The question arise: how long does the key travels? The traveling is very small, because the probability $\leq \frac{1}{mc^L}$ is exponential in $L$ so goes very fast to 0. But the probability of failing is 50\%, not very small. But we have to argue that actually this probability is sufficient to guarantee expected amortized insertion cost.\\
+To prove this, we start at a time $t=0$ with $m_0\geq 6n_0$, with $n_0$ keys. But we build ahead, a larger table than strictly needed for $n_0$ keys. So we build with $m_0 = 6(1+\epsilon)n_0$, like we would have $(1+\epsilon)n_0$ keys. This ways the table can last up to $\epsilon n_0$ keys more. We consider the execution of $\epsilon n_0$ insertions. So at $t=1$, we have $n_0 + \epsilon n_0$ keys, $m_0 = 6\cdot\#$ keys and applying the theorem we know that the probability of having failed at least one of the $\epsilon n_0$ insertions is $\frac{1}{2}$.
+\paragraph{Theorem} $\forall\:x,y$, $P(x\rightarrow y)\leq\frac{1}{m}$ ($x,y$ "collide") for $c\geq 2$\\
+This is $P(\exists\:L\:|\:x\rightarrow y$ in $L$ steps$)\leq \sum_{L\geq1}=\frac{1}{mc^L}=\frac{1}{m}\sum_L \left(\frac{1}{c}\right)^L = \frac{1}{m}\cdot\frac{1}{c-1}$\\
+So the $P($collision$)\leq \frac{1}{m}$ so the average number of keys colliding with some key $k$ is $\frac{n}{m}\leq 1$ because $m\geq 6n \Rightarrow$ average insertion cost is $O(1)$.
+\subsection{Minimal Ordered Perfect Hashing} For a \textbf{given dictionary} $D$.\\
+Perfect means no collision. Ordered means $k_1<k_2\Rightarrow h(k_1)<h(k_2)$. Minimal means that the co-domain is $[0,n]$, so the smallest key is mapped to 0 and so on.\\
+\paragraph{Example} $D=\{AA,BB,BD,CD\}$, and I would like an hash function $h$ that for $AA$ returns 0, for $BB$ returns 1\ldots\\
+The first step is to consider two universal hash functions $h_1, h_2$ which codomain size $m$ is larger than the number of strings $n$ (which in this example is $n=4$). $h_1(xy) = 3\cdot$rank$(x)+$rank$(y)$ mod $7, h_2(xy) =$ rank$(x)+$rank$(y)$ mod $7$, and note that $m=7>4=n$. So we're going from a space of size $n$ to a space of size $n$, and then we will be going back to another space of size $n$ with the function $g$.\\
+We want the function $h$ that in general is computed as $h(t) = g(h_1(t))+g(h_2(t))$ mod $n$. So we get a system of $n$ equations to find a $g$ that holds for every element.
+\begin{center}
+	\begin{tabular}{c | c c c}
+	& $h_1$ & $h_2$ & $h$\\
+	\hline
+	$AA$ & 4 & 2 & 0\\
+	$BB$ & 1 & 4 & 1\\
+	$BD$ & 3 & 6 & 2\\
+	$CD$ & 6 & 0 & 3
+	\end{tabular}
+\end{center}
+$g$ can be represented as an array of $m=7$ positions and it's created thanks to a graph of $m$ nodes, with an arc between $i$ and $j$ for every pair $i,j$ in the table. In the example:
+\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (0) {0};
+	\node[main] [below right of=0,xshift = 7mm] (1) {1};
+	\node[main] [below of=1] (2) {2};
+	\node[main] [below left of=2] (3) {3};
+	\node[main] [below left of=0,xshift = -7mm] (6) {6};
+	\node[main] [below of=6] (5) {5};
+	\node[main] [below right of=5] (4) {4};
+	\draw[-] (4) -- (2);
+	\draw[-] (1) -- (4);
+	\draw[-] (3) -- (6);
+	\draw[-] (6) -- (0);
+\end{tikzpicture}
+\end{center}
+Note that \# nodes $=m$, \# edges $=n$ and $m > n$ so the graph is sparse $\Rightarrow P($cycle$)$ is very small. Typically $m$ is a prime and $m\simeq n\log n$. To solve the system of equation, we label every edge with the number I want to get:\begin{center}
+	\begin{tikzpicture}[node distance={15mm}, main/.style = {draw, circle}] 
+	\node[main] (0) {0};
+	\node[main] [below right of=0,xshift = 7mm] (1) {1};
+	\node[main] [below of=1] (2) {2};
+	\node[main] [below left of=2] (3) {3};
+	\node[main] [below left of=0,xshift = -7mm] (6) {6};
+	\node[main] [below of=6] (5) {5};
+	\node[main] [below right of=5] (4) {4};
+	\draw[-] (4) -- (2) node [above,pos=0.75] {0};
+	\draw[-] (1) -- (4) node [above,pos=0.33] {1};
+	\draw[-] (3) -- (6) node [above,pos=0.75] {2};
+	\draw[-] (6) -- (0) node [above,pos=0.5] {3};
+\end{tikzpicture}
+\end{center}
+We start from an arbitrary node and assign an arbitrary value, for example we start from node $0$ and assign value $0 \Rightarrow g(0)=0$. We have that $g(0)+g(6)$ mod $4 = 3 \Leftarrow 0 + g(6) = 3$ mod $n \Rightarrow$ for example $g(6) = 3$.\\
+Then we move to the next equation, $g(6) + g(3) = 2$ mod $4\Leftrightarrow 3 + g(3) = 2$ mod $4 \Rightarrow g(3) = 3$.\\
+Now there are no equations "in chain", so we can start from another arbitrary node (between the remaining ones) and assign an arbitrary value. For example, $g(1)=0$. We have $g(1)+g(4)=1$ mod $4\Leftrightarrow 0 + g(4) = 0$ mod $4\Rightarrow g(4) = 1$.\\
+Then $g(4)+g(2) = 0$ mod $4\Rightarrow g(2)=3$.\\
+In case of cycles, there could be a solutions but it's not necessarily the case. Instead, while we go through chains we're guaranteed to find solutions. So in case of cycles, we can choose two other $h_1,h_2$ and retry.
+\paragraph{Membership} Given $D=\{s_1,\ldots,s_n\}, g, h_1$ and $h_2$, $s\in D?$ The string are stored in alphabetic order inside an array of $n$ pointers. We compute $x=g(h_1(s))+g(h_2(s))$ mod $n$ and compare $s_x$ and $s$.\\
+If we're asked to find the alphabetic position, then we use binary search, because the $x$ returned is correct for $s\in D$ but it's an arbitrary value for every other element.
+\subsection{Bloom Filters} Randomized data structure that given a dictionary of keys $D$, it supports: membership and insertion. The deletion is not supported. Also, the $D$ is deleted, not stored in memory.\\
+It's defined as a binary array $B$ of size $m>n$, so of cells of 0 or 1.\\
+To insert, $\forall\:k\in D\:\:B[h_i(k)]=1$, having $h_1,\ldots,h_r$ hash functions.\\
+To search, the same but we check whether \textbf{every} $B[h_i(k)]=1$ instead of setting. If they are all 1, then the answer is yes (maybe), otherwise if at least one is zero then no (surely).
+\paragraph{Build a Bloom Filter over a dictionary} Define a binary array $B$ of size $m$ and $r$ hash functions.\\
+The issue is that the more functions you have the more $1$ you set so the more probable is to have a "yes" answer ("collisions" are more probable, in short).\\\\
+$P(B[i]=0$ after $n$ insertions$)$, so we have $rn$ bits set. For $i$ to be $0$, we need to have that each $h_j$ goes either to the left or to the right of $i$, in the other $m-1$ position, for each of the $n$ insertions. So $P(B[i]=0$ after $n$ insertions$) = \left(1-\frac{1}{m}\right)^{rn} = \left(\frac{m-1}{m}\right)^{rn}$.\\
+$\left(1-\frac{1}{m}\right)^{rn}\simeq e^{-\frac{rn}{m}}$\\
+So $P($a specific bit is $1) = 1-e^{-\frac{rn}{m}}$\\
+$P(k\not\in D$ but all $h_i(k)$ are set to $1) = \left(1-e^{-\frac{rn}{m}}\right)^r$. This is the main formula of bloom filters: $$P(\hbox{error})\simeq \left(1-e^{-\frac{rn}{m}}\right)^r$$
 \end{document}
