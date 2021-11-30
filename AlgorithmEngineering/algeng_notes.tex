@@ -1470,7 +1470,33 @@ Does this class of functions exists? How practical is it?
 \subparagraph{Example of universal hashing} $h:U\rightarrow [0,m]$ with $u=|U|$. So a key $k$ consists of $\log_2 u$ bits.\\
 Let's divide the key $k$ into blocks of $\log_2 m$ bits: so blocks from $k_0$ to $k_{r-1}$ where $r=\frac{\log_2 u}{\log_2 m} =$ the number of blocks. So $\forall\:k_i\:\:0\leq k_1< m$\\
 Let's consider a parameter of $h$: $a$ of size $\log_2 u$ bits with $0 < a < u$ and the same partitioning (blocks of $\log_2 m$ bits giving $a_0,\ldots,a_{r-1}$). Note that $a$ is \textbf{picked at random}.\\
-We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\hbox{ mod }n$$ with $a\neq 0$ and $n$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
-Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{u-1}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks are different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\\
-$\sum_{i=0}$ %todo 29/11 from 1:03:00
+We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\hbox{ mod }m$$ with $a\neq 0$ and $m$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
+Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{|H|}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks are different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\begin{list}{}{}
+	\item $h_a(x) = \sum_{i=0}^{r-1} a_i\cdot x_i$ mod $m = \sum_{i=0}^{r-1}a_i\cdot y_i$ mod $m$
+\end{list}
+And I want to count the number of $h_a$ (so, the number of $a$) such that that equality is true. We can rewrite with congruence:\begin{list}{}{}
+	\item $h_a(x) = \sum_{i=0}^{r-1} a_i\cdot x_i \equiv \sum_{i=0}^{r-1}a_i\cdot y_i$ (mod $m$)
+\end{list}
+The only thing I know is that $x_0\neq y_0$, so we can extract both\begin{list}{}{}
+	\item $a_0x_0 + \sum_{i=1}^{r-1} a_i\cdot x_i \equiv a_0y_0 + \sum_{i=1}^{r-1}a_i\cdot y_i$ (mod $m$)
+	\item $a_0(x_0-y_0) \equiv \sum_{i=1}^{r-1}a_i\cdot (x_i - y_i)$ (mod $m$)
+\end{list}
+$x_0-y_0\neq 0$ because $x_0\neq y_0$, and since $m$ is prime $\Rightarrow\exists\:(x_0-y_0)^{-1}$ (mod $m$), so\begin{list}{}{}
+	\item $a_0 \equiv (x_0-y_0)^{-1}\cdot\left(\sum_{i=1}^{r-1}a_i\cdot (x_i-y_i)\right)$ (mod $m$)
+\end{list}
+Each $a$ is formed by $a_0,a_1,\ldots,a_{r-1}$. Each of the $a_1,a_2,\ldots,a_{r-1}$ can be chosen in $m$ ways, because it's formed by $\log_2 m$ bits. In order to have a collision, $a_0$ cannot be chosen freely but must be in the form specified above in the congruence. So whenever I've chosen a combination of $a_1,\ldots,a_{r-1}$, then $a_0$ is fixed: so the possibilities of $a_0$ are $m^{r-1} - 1$ (because we still avoid the case of all zeroes.\\\\
+So we have a collision in $m^{r-1}-1$ ways, but is this number $\leq \frac{|H|}{m}$?
+$$m^{r-1}-1 = \frac{m^r}{m} -1 = \frac{2^{r\cdot\log_2 m}}{m} - 1 = \frac{2^{\log_2 u}}{m} - 1 = \frac{u}{m} - 1 = \frac{u-m}{m} \leq \frac{u-1}{m} = \frac{|H|}{m}$$
+Because $2^{\log_2 m} = m$ and $r$ blocks of size $\log_2 m$ is the total length $\log_2 u$
+\subparagraph{Another Example} $$h_a(x) = \left(\sum_{i=0}^{r-1}a_ix_i\hbox{ mod }p\right)\hbox{ mod } m$$
+With $p$ prime and $m < p$ any number.\\
+Assuming $|U| = 2^q$, $m = 2^l$, $a$ is odd, then the class of this function is $$H_{q,l} = \{h_a(x)\:|\:\left(a\cdot x\hbox { mod }2^q\right)\hbox{ div }2^{q-l}\}$$
+$a$ odd so that $a$ and $2^q$ are coprime. $x$ and $a$ are $\log_2 u$ bits, so $ax$ is $2\log_2 u$ bits. With mod we take the rest of the division, and the rest is the least significative $\log_2 u$ bits. With div $2^{q-l}$ we take the quotient, so we split the remaining $\log_2 u$ bits into two parts: the left $l$ bits and the right $q-l$ bits, and we take the left part of $l$ bits.\\
+This basically means taking $l$ bits in the middle of the multiplication $a\cdot x$.
+\subsection{$d$-Left Hashing}
+If I create chains (overflow lists), I need pointers and those pointers take space. One idea is to take a table $T$ of length $n$ and partition the table into bins, each of them formed by $b$ slots so we have $\frac{n}{b}$ bins.  We also have $d$ = \# hash functions, with each $h_i$ mapping into a bin.\\
+With each key $k$ I map it into $d$ bins with the $d$ hash functions and take, among the bins, the least filled one.\\
+The questions are: how large must $b$ be, and how many functions ($d$) do I need?\\
+It was proven that $E[$length of the longest list$]= \frac{\log\log n}{\log d} + O(1)$ with $d\geq 2$.\\\\
+In the case of $d=1$, we have a sort of chain case. So the $E[$length of the longest list$]= \frac{\log n}{\log\log n} + O(1)$. So by just going from $d=1$ to $d=2$ the length drops to a double logarithmic, guaranteeing an exponential improvement.
 \end{document}
