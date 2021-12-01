@@ -715,6 +715,30 @@ p(\lambda_1)\lambda_1-1\\
 \end{array}\right]U^{-1}$$
 If $A$ has at most $n<m$ different eigenvalues, then we can choose $p$ such that $p(\lambda_i)=\frac{1}{\lambda_i}$ for all $i=1,\ldots,n$, so I can reach \textbf{exact convergence} after $n$ steps.\\
 Similarly convergence is fast if the eigenvalues are clustered in location far away from 0.
+\subsection{Solving Sparse Linear Systems}
+Be careful if you're using dense or sparse format! $K(A) = \|A\|\cdot\|A\|^{-1}$ and $\|A\|=\rho(A^TA)^{\frac{1}{2}}$\\
+$A=R^TR$, $Ax=b\Leftrightarrow R^TRx=b$ with $Rx=y \Rightarrow\left\{\begin{array}{l}
+R^Ty = b\\Rx=y
+\end{array}\right.$\\
+\textbf{Fill-in reducing permutation} $P^TAP = R^TR\Leftrightarrow A = PR^TRP$\\
+For example, \texttt{symrcm} "reverse Cuthill McKee".
+\paragraph{Preconditioning} $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in R^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods.\\
+$P$ "looks like" inv$(A)$, $P =$ deg$(A)^{-1}$ %TODO
+\subparagraph{Incomplete $LU$} Construct sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute.\begin{list}{}{}
+	\item $L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$ and take $P = U_I^{-1}L_I^{-1}$
+\end{list}
+If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto PAv$:
+\begin{lstlisting}[style=myPython]
+	def product(v):
+		y = Av
+		w = UI \ (LI \ y)
+		return w
+\end{lstlisting}
+\texttt{gmres($f, U_I^{-1}L_I^{-1}b$)} solves $PAx=Pb$ with $P = U_I^{-1}L_I^{-1}$ up to a chosen threshold on $\|PAx-Pb\|$. \textbf{Not equivalent} to $\|Ax-b\|$ being below the same threshold.\\\\
+Even if $P$ and $A$ are both symmetric, $PA$ is not symmetric in general. So we need to switch to a non-symmetric solver (\texttt{gmres}).
+\paragraph{Symmetric Preconditioning} Symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" incomplete Cholesky factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
+Instead of solving $(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$, given that $(L^T)^{-1}L^{-1}A$ isn't symmetric, we can solve $L^{-1}A(L^T)^{-1}(L^Tx) = L^{-1}b$ with $L^Tx=y$ and $L^{-1}A(L^T)^{-1}$ symmetric positive definite ($A\simeq LL^T$, so $L^{-1}A(L^T)^{-1}\simeq(L^{-1}L)(L^T(L^T)^{-1}) = T$)\\
+\texttt{pcg($L^{-1}A(L^T)^{-1},L^{-1}b$)} will converge to $y$, where $y=L^Tx$ and $x$ is the solution of \texttt{pcg($A,b$)}, but possibly faster if the eigenvalues of $L^{-1}A(L^T)^{-1}$ have better clustering/condition number than the ones of $A$.
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
