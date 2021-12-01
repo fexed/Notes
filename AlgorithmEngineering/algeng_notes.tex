@@ -1605,5 +1605,38 @@ The issue is that the more functions you have the more $1$ you set so the more p
 $P(B[i]=0$ after $n$ insertions$)$, so we have $rn$ bits set. For $i$ to be $0$, we need to have that each $h_j$ goes either to the left or to the right of $i$, in the other $m-1$ position, for each of the $n$ insertions. So $P(B[i]=0$ after $n$ insertions$) = \left(1-\frac{1}{m}\right)^{rn} = \left(\frac{m-1}{m}\right)^{rn}$.\\
 $\left(1-\frac{1}{m}\right)^{rn}\simeq e^{-\frac{rn}{m}}$\\
 So $P($a specific bit is $1) = 1-e^{-\frac{rn}{m}}$\\
-$P(k\not\in D$ but all $h_i(k)$ are set to $1) = \left(1-e^{-\frac{rn}{m}}\right)^r$. This is the main formula of bloom filters: $$P(\hbox{error})\simeq \left(1-e^{-\frac{rn}{m}}\right)^r$$
+$P(k\not\in D$ but all $h_i(k)$ are set to $1) = \left(1-e^{-\frac{rn}{m}}\right)^r$. This is the main formula of bloom filters (and it's an approximation of the real formula, much more complex but asymptotically identical): $$P(\hbox{error})\simeq f(n,m,r)\left(1-e^{-\frac{rn}{m}}\right)^r$$
+\begin{list}{}{}
+	\item $n$ is the number of keys, and is given
+	\item $m$ is the size of $B$
+	\item $r$ is the number of hash functions
+\end{list}
+Fixed $m$, let's study $f$ with respect to $r$: we want to find $\min_r f(\overline{n},\overline{m},r)$ for a given $\overline{n}$ and given $\overline{m}$. The $r$ that minimizes the function is $\overline{r} = \frac{\overline{m}}{\overline{n}}\ln 2$ (either ceil or floor because it's an integer). With this $\overline{r}$, $P($error$)=\left(\frac{1}{2}\right)^{\overline{r}} = (0.6185)^{\frac{\overline{m}}{\overline{n}}}$\\
+So the probability of error goes down exponentially with $m$, and if $\overline{m} = c\cdot\overline{n}$ then $P($error$)=(0.6185)^c$
+\paragraph{When to Use the Bloom Filters?} Let's consider hashing with chaining: a table of size $n$ with lists in the slots. This table takes $n\log_2 n$ bits plus the cost of storing the $n$ lists, which with $L$ length of the key is $n\cdot L$ for the keys plus $n\cdot \log_2 n$ pointers. So hashing with chaining costs $2n\log_2n + nL$ bits. In practice with pointers of $64$ bits (the $\log_2 n$ are for the pointers) we get $128n+nL$ bits.\\
+The bloom filter takes $m=cn$ bits. According to the probability of error computed before, even if $c\simeq 30$ or $c\simeq 40$ we get a really low error with far fewer bits than the hashing with chaining.
+\subparagraph{Note} Fixed $m=30n$, for example, we get $r=30\ln 2$, so $30$ hash functions which are a lot. So may be better to fix $r$ to get more speed although not the minimum error.
+\paragraph{Spectral Bloom Filters} Array $C$ of $m$ counters. For insertion, of setting $C[h_i(k)] = 1$ we do $C[h_i(k)]$\texttt{++}. The deletion is analogous, $C[h_i(k)]$\texttt{--}.\\
+The search is $\min_i C[h_i(k)]$ with $1\leq i\leq r$: $\min$ because the counters are an overestimate of the number of occurrences of the key. $P($overestimating $k)=P(\min_i C[h_i(k)]>\#\hbox{occ}(k))$. Overestimate happens when we have conflicts with other keys, so it's analogous to the normal bloom filter, so it's just $P($error of the bloom filter$)$.\\
+The size of a spectral bloom filter is $c\cdot n\cdot($counter size$)$
+\section{Prefix String Search}
+Given a dictionary of strings $D$ and want to preprocess it and build a data structure: \texttt{prefix\_search(P,D)} $\rightarrow$ return or count the strings in $D$ that are prefixed by $P$.
+\paragraph{Array Approach} Take an array $A$ with pointers to the strings. Assuming $D=\{s_1,\ldots,s_m\}$ alphabetically sorted, then $A[i]$ points to $s_i$. Given that the strings are alphabetically sorted, then the ones that starts with $P$ are contiguous starting just after the position of $P$. As stated before, with \$ and \# special characters with \$ $<$ any character $<$ \#, the contiguous portion of strings starting with $P$ are between the positions of $P$\$ and $P$\#.\\
+These two position can be found with a search. For the counting, the time cost of binary search for each of the two position is $O(|P|\cdot\log m)$ because we access $\log m$ positions and pay the length of $P$, $|P|$, to compare. For the retrieval, we pay $O(|P|\cdot\log m +$ occ$)$ time, because we have to return each occurrence.\\
+It's good but there are a lot of random accesses. We want to solve two problems:
+\begin{enumerate}
+	\item Allocating strings arbitrarily in memory (pointers)\\
+	Even if I restrict the attention on a small portion, the pointers are very close but the strings can be arbitrarily far apart in memory. So we need to avoid arbitrary storage in the memory. So \textbf{store strings continuously on disk, partitioning in pages}. By storing the alphabetically sorted strings in pages we have situations were the strings in a certain page share one or more initial letters among them: we can use \textbf{front-coding}, where the first string is stored explicitly (e.g. \texttt{<0,abaco>}) and the other are stored with the number stating the number of characters shared with the previous string, so for example the second string can be \texttt{<3,te>}, meaning \texttt{abate}, and the third may be \texttt{<2,iura>} sharing the first two characters of \texttt{abate} so \texttt{abiura}. And every page starts anew. To get a string we have to decompress the entire page, costing $O(B)$ with $B$ size of page.\\
+	We can take the starting string of every page and store it in an array of pointers. For searching we do a lexicographic search in the array finding the position of $P$, and then go in the corresponding block and scan for $P$. Actually, we search for $P$\$ and $P$\# and looks for occurrences in the blocks between the one that should contain $P$\$ and the one that should contain $P$\#. In principle, we just decompress the two blocks that contain $P$\$ and $P$\#, the other blocks "in the middle" all contain strings prefixed by $P$.
+	\item The data structure itself.\\
+	Over the array we do binary search for $P$\$ and $P$\#, but we want something better: a \textbf{trie}. In the trie, the strings are stored as triples so for every node (every position in the string) we need to do an I/O to access the memory and decode the triple. A much more compact data structure is the patricia trie.
+\end{enumerate}
+\subsection{Patricia Trie} Compacted trie where we store just the first letter of every edge of the trie. The search consists of three steps:
+\begin{enumerate}
+	\item Downward traversal: the node represents the position of the bit to compare and go in the edge of the corresponding bit. If stop before reaching a leaf, then we pick any descending leaf.
+	\item Compute the longest common prefix between $P$ and the string associated with the selected leaf. (Pay 1 I/O to access the leaf)
+	\item Upward traversal, up to the longest common prefix. If the LCP was of length 5, we traverse until the length and know that the mismatch is next to that position. We didn't store that bit in the patricia trie but having accessed the leaf we now know the value of that bit. So we know whether $P$ is after or before the leaf.
+\end{enumerate}
+We have same space as the trie, $O(n)$, but just 1 I/O.\\
+If the pages/blocks include $B$ strings, the patricia trie is built over $\frac{n}{B}$ strings. So we have to guarantee that $\frac{n}{B}$ fits in memory to have the patricia trie in memory (otherwise every edge access is a I/O).
 \end{document}
