@@ -2183,4 +2183,184 @@ Still NP-hard to find the optimal solution of the relaxed problem, this can be a
 A state abstraction is a many-to-one mapping from the states in the original representation to a more abstract representation. The common strategy is to ignore some fluents.\\
 The cost of the solution to this smaller problem can be used as an admissible heuristic.
 \paragraph{Decomposition} Divide a problem into parts, solve each one independently an then combine the subplans. The subgoals independence assumption is that the cost of solving a conjunction of subgoals is approximated by the sum of the costs of solving each subgoal independently. This assumption can be: optimistic (admissible, there are negative interactions) or pessimistic (inadmissible, subplans contain redundant actions, \textbf{Sussman anomaly})
+\subsection{Planning Graph}
+A data structure that can be a rich source of information:\begin{list}{}{}
+	\item Can be used to give better heuristic estimates to employ in conjunction with search algorithms
+	\item It's the search space of an algorithm called \textbf{GraphPlan}
+\end{list}
+A search tree is exponential in size, and a planning graph is a polynomial size approximation of the search tree that can be constructed quickly.\\
+The planning graph can't answer definitively whether $G$ is reachable from $S_0$, but
+\begin{list}{}{}
+	\item It may discover that the goal is not reachable
+	\item It can estimate how many steps it takes, in the most optimistic case, to reach $G$, so it can be used to derive an admissible heuristic
+\end{list}
+\paragraph{Definition} A planning graph works just for propositional planning problems with no variables.\\
+A planning graph is a directed graph which is \textbf{built forward} and is \textbf{organized into levels}:\begin{list}{}{}
+	\item A levels $S_0$ for the initial state, representing each fluent that holds in $S_0$
+	\item A level $A_0$ consisting of nodes for each ground action applicable in $S_0$
+	\item Alternating levels $S_i$ followed by $A_i$ are built until we reach a terminating condition.
+\end{list}
+$S_i$ contains all the \textbf{literals that could hold} at time $i$ (even contrary literals, like $P$ and $\neg P$). $A_i$ contains all the \textbf{actions that could have their precondition satisfied} at time $i$.\\
+Mutual exclusion links (\textbf{mutex}) connect incompatible pairs of literals and actions:\begin{list}{}{}
+	\item Mutex between literals mean that two literals cannot appear in the same belief state
+	\item Mutex between actions mean that two actions cannot occur at the same time
+\end{list}
+\subparagraph{Example}
+\begin{center}
+	\includegraphics[scale=0.7]{25.png}
+\end{center}
+\paragraph{Mutex Computation} Mutex relations between actions:
+\begin{list}{}{}
+	\item \textbf{Inconsistent Effects}: one action negates an effect of another action.\\E.g. persistence of Have(Cake) and Eat(Cake) have inconsistent effects
+	\item \textbf{Interference}: one of the effect of one action is the negation of a precondition of the other.\\E.g. Eat(Cake) interferes with the persistence of Have(Cake)
+	\item \textbf{Competing Needs}: one of the preconditions of one action is mutually exclusive with a precondition of the other.\\E.g. Bake(Cake) and Eat(Cake)
+\end{list}
+Mutex relations between literals at the same level:
+\begin{list}{}{}
+	\item If one is the negation of the other
+	\item \textbf{Inconsistent Support}: if each possible pair of actions that could achieve the two literals is mutually exclusive.\\
+	E.g. Have(Cake), produced by noOp, is mutex with Eaten(Cake), produced by Eat(Cake).
+\end{list}
+\paragraph{Properties of the Planning Graph}
+\begin{list}{}{}
+	\item Each level $S_i$ represent a set of possible belief states. Two literals connected by a mutex belong to different belief states
+	\item The levels, alternating $S$s and $A$s, are computed until we reach a point where two consecutive levels are identical. The graph for the cake \textbf{levels off} at $S_2$
+	\item The level $j$ at with a literal first appears is never grater than the level at which it can be achieved. We cal this the \textbf{level cost} of a literal/goal
+	\item The process of constructing the planning graph does not require choosing among actions and is very fast
+	\item A planning graph is polynomial in the size of the planning problem: an entire graph with $n$ levels, $a$ actions, $l$ literals has size $O(n(a+l)^2)$. The same for time complexity.
+\end{list}
+\paragraph{Using the Planning Graph for Heuristic Estimation} The information that can be extracted from the planning graph is:
+\begin{list}{}{}
+	\item If any goal literal fails to appear in the final level of the graph, then the problem is unsolvable
+	\item We can \textbf{estimate the cost of achieving a goal} literal $g_i$ by its level cost. \textbf{This estimate is admissible}
+	\item A better estimate can be obtained by \textbf{serial planning graphs}: by enforcing only one action at each level (adding mutex)
+\end{list}
+Estimating the heuristic cost of a conjunction of goals:\begin{list}{}{}
+	\item \textbf{Max-level heuristic}: the maximum level cost of any of the sub-goals (\textbf{admissible})
+	\item \textbf{Level sum heuristic}: the sum of the level costs of the goals (can be inadmissible when
+goals are not independent, but it may work well in practice)
+	\item \textbf{Set-level heuristic}: finds the level at which all the literals in the goal appear together in the planning graph, without any mutex between pairs of them (admissible, accurate, but not
+perfect)
+\end{list}
+\paragraph{Planning Graph as Relaxed Problem} The planning graph can be seen as a relaxed problem with the following characteristics:
+\begin{list}{}{}
+	\item If there exists a plan with $i$ actions levels that achieves $g$, then $g$ will appear at level $i$. If $g$ doesn't appear then there's no plan
+	\item But not viceversa: the fact that a $g$ appears does not mean that there's a plan
+\end{list}
+If $g$ appears at level $i$, the plan possibly exists but we have to check the mutex relations. But, even so, there are plans that mutex cannot recognize as impossible. We need higher order constraints and to search over the planning graph.
+\subsubsection{GraphPlan Algorithm}
+The GraphPlan algorithm is a strategy for extracting a plan from the planning graph.\\
+The planning graph is computed incrementally by the function Expand-Graph. Once a level is reached where \textbf{all the literals in the goal show up as non-mutex}, an attempt to extract a plan is made with Extract-Solution.\\
+If Extract-Solution fails, the failure is recorded as no-good, another level is expanded and the process repeats until a termination condition is met.
+\begin{center}
+	\includegraphics[scale=0.7]{26.png}
+\end{center}
+\subparagraph{Example}
+\begin{center}
+	\includegraphics[scale=0.7]{27.png}
+\end{center}
+\begin{enumerate}
+	\item The planning graph is initialized with $S_0$, representing the initial state. The goal At(Spare, Axle) is not present in $S_0$
+	\item Expand-Graph adds into $A_0$ the three applicable actions and persistence actions for all the literals in $S_0$. The effects of the actions are added at level $S_1$. Mutex relations are also added to the graph
+	\item The goal is not yet present in $S_1$, so we call Expand-Graph again adding $A_1$ and $S_2$
+	\item All the literals from the goal are present in $S_2$, and non of them is mutex with any other $\Rightarrow$ we can call Extact-Solution
+\end{enumerate}
+\paragraph{Extract-Solution} Two approaches:
+\begin{list}{}{}
+	\item \textbf{Solve as boolean CSP}: the variables are the actions at each level, the values for each variable are in or out of the plan, and the constraints are the mutexes and the need to satisfy each goal and precondition
+	\item \textbf{Solve as backward search problem}\begin{list}{}{}
+		\item Start with $S_n$ (the last level of the planning graph) and the goals
+		\item For each level $S_i$ select a number of non-conflicting actions in $A_{i-1}$ whose effects cover the goals in $S_i$. The resulting state is $S_{i-1}$ with goals the preconditions of the selected actions
+		\item The process is repeated until $S_0$, hoping all the goals are satisfied
+	\end{list}
+\end{list}
+If Extract-Solution fails, we record the pair (level, goals) as no-good so that we can avoid to repeat the computations.
+\paragraph{Complexity and Heuristics} Constructing the planning graph takes polynomial time. Solution extractions is \textbf{intractable} in the worst case. Heuristics exist.\\
+Greedy algorithm based on the level cost of the literals:
+\begin{enumerate}
+	\item Pick first the literal with the highest level cost
+	\item To achieve that literal, prefer actions with easier preconditions. That is, choose an action such that the sum (or maximum) of the level costs of its preconditions is the smallest
+\end{enumerate}
+\paragraph{Termination} We can prove that GraphPlan will terminate and return failure when there is no solutions, but we may need to expand the graph even after it levels off.\\
+\textbf{Theorem}: if the graph and the no-goods have both leveled off, and no solution is found, we can safely terminate with failure. The \textbf{proof} is sketched as follows:
+\begin{list}{}{}
+	\item Literals and actions increase monotonically and are finite, we need to reach a level where they stabilize
+	\item Mutex and no-goods decrease monotonically and cannot become less than zero, so they too must level off
+	\item When we reach this stable state, if one of the goals is missing or is mutex with another goal, it will remain so.\\
+	We may as well stop the computation
+\end{list}
+\subsection{From PDDL to Boolean SAT}
+How to translate a PDDL description into a form that can be processed by SATPlan?\begin{enumerate}
+	\item \textbf{Propositionalize the actions}: create ground instances of the actions (used in step 4)
+	\item \textbf{Define the initial state}: $F_0$ for every fluent $F$ in the initial state, $\neg F_0$ for every fluent $F$ \textit{not} in the initial state
+	\item \textbf{Propositionalize the goal} by instantiating variables to a disjunction of constraints\\
+	E.g. $On(A,x)\wedge Block(x)$ becomes $On(A,B)\vee On(A,C) \vee On(A,D) \vee\ldots$ for each block mentioned
+	\item \textbf{Add successor-state axioms}. For each fluent:
+	\begin{list}{}{}
+		\item $F_{t+1} \Leftrightarrow \hbox{ActionCauses}F_t \vee (F_t\wedge\neg\hbox{ActionCausesNot}F_t)$
+	\end{list}
+	where $\hbox{ActionCauses}F_t$ is a disjunction of all the ground actions that have $F$ in their add list and $\hbox{ActionCausesNot}F_t$ is a disjunction of all the ground actions that have $F$ in their delete list
+	\item \textbf{Add precondition axioms}: for every ground action $A_t\Rightarrow PRE(A)_t$
+	\item \textbf{Add action exclusion axioms}: every actions is distinct from every other action
+\end{enumerate}
+This resulting translation is in the form that can be given in input to SATPlan to find a solution.
+\subsection{Partial Order Planning}
+POP is an interesting approach since it addresses the issue of independent subgoals, that can be performed in parallel. For some specific tasks, such as operations scheduling, is the technology of choice.\\
+It represents a change of paradigm: planning as search in the state of partial plans rather than in space of states. The plan refinement approach is also more explainable: it makes it easier for humans to understand what the planning algorithms are doing and verify that they are correct.
+\paragraph{Ideas} The driving principle is \textbf{least-commitment}. Partially ordered plans:
+\begin{list}{}{}
+	\item Do not order steps in the plan unless necessary to do so
+	\item In a partial-order plan, steps are partially ordered
+	\item \textbf{Plan linearization}: to impose a total order to a partially ordered plan
+\end{list}
+Partially instantiated plans:
+\begin{list}{}{}
+	\item Leave variables uninstantiated until is necessary to instantiate them
+	\item A plan without variables is said to be \textbf{totally instantiated}
+\end{list}
+\paragraph{Searching in the Space of Partial Plans}
+Instead of searching in space of states as in the classical formulation, we search in the space of partial plans:
+\begin{enumerate}
+	\item We start with an empty plan
+	\item At each step, we use operators for plan construction and refinement
+	\begin{list}{}{}
+		\item We can add actions in order to satisfy some pre-condition, i.e. fixing flaws in the plan
+		\item We can instantiate variables
+		\item We can add ordering constraints between steps
+	\end{list}
+	\item We stop when we obtain a consistent and complete plan where\begin{list}{}{}
+		\item All the preconditions of all the steps are satisfied
+		\item Ordering constraints do not create cycles
+	\end{list}
+\end{enumerate}
+Every linearization is a solution.
+\paragraph{Representation of Plans} Partial plans are represented as:\begin{list}{}{}
+	\item A set of actions, among them Start and Finish
+	\item A set of open preconditions
+	\item Constraints among actions of two different types\begin{list}{}{}
+		\item Ordering relations $S_1<S_2$ ($S_1$ before $S_2$)
+		\item Causal links $S_1\rightarrow_{\hbox{Cond}}S_2$ ($S_1$ achieves Cond for $S_2$)
+		\item Note: $S_1\rightarrow_{\hbox{Cond}}S_2\Rightarrow S_1<S_2$ but not viceversa 
+	\end{list}
+\end{list}
+\paragraph{Representation of Actions}\begin{center}
+	\includegraphics[scale=0.75]{28.png}
+\end{center}
+\paragraph{POP Algorithm} We start with the empty plan, with Start and Finish. At each step:
+\begin{list}{}{}
+	\item We choose a step $B$ and one of its preconditions $p$, and we generate a successor plan for each action $A$ (old or new) having $p$ among the effects
+	\item After choosing an actions $A$, consistency is re-established as follows:
+	\begin{list}{}{}
+		\item Add to the plan the constraints $A<B$ and $A\rightarrow_p B$
+		\item Possible actions $C$ having $\neg p$ as effect are potential conflicts (or \textbf{threats}). They need to be anticipated or delayed, adding the constraints $C< A$ or $B < C$.\\
+		This step may fail
+	\end{list}
+	\item We stop ehn the set of open pre-conditions is empty
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.65]{29.png}\\
+	Credits: M. Simi
+\end{center}
+\paragraph{Analysis} We obtained a complete and consistent partial plan. Any linearization is a solution, in this case only one possible: [Unstack(C, A), Stack(B, C), Stack(A, B)]\\
+The POP algorithm is correct and complete: any plan computed is a solution and if a plan exists the algorithm finds it.
 \end{document}
