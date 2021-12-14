@@ -11,10 +11,10 @@ I will keep this updated as much as I can. For every doubt, correction and fix, 
 
 Course | Notes | Project | Other
 ------|---------|----------|------
-Algorithm Engineering | [Notes](https://github.com/fexed/Notes/blob/master/AlgorithmEngineering/algeng_notes.pdf)
-Computational Mathematics for Learning and Data Analysis | [Notes](https://github.com/fexed/Notes/blob/master/CompMatLearningDataAnalysis/CompMatLearningDataAnalysis.pdf)
-Machine Learning | [Notes](https://github.com/fexed/Notes/blob/master/ML/ML.pdf)
-Artificial Intelligence Fundamentals | [Notes](https://github.com/fexed/Notes/blob/master/AIF/aif.pdf)
+Algorithm Engineering | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/AlgorithmEngineering/algeng_notes.pdf)
+Computational Mathematics for Learning and Data Analysis | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/CompMatLearningDataAnalysis/CompMatLearningDataAnalysis.pdf)
+Machine Learning | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/ML/ML.pdf)
+Artificial Intelligence Fundamentals | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/AIF/aif.pdf)
 
 # Appunti :it:
 Appunti e note varie presi durante alcune lezioni e corsi, divisi per cartella e scritti prevalentemente in LaTeX.
