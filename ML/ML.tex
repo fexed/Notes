@@ -450,9 +450,9 @@ def backprop():
 But now the $\Delta w =-\frac{\partial E(w)}{w}$ were obtained through backprop derivation/algorithm for any weight in the network. At step 2, to compute the error, we first apply inputs to the network computing an output (\textbf{forward phase}), then we retro-propagate the deltas for the gradient (\textbf{backward phase}). So how to choose the $w_{initial}, \eta$ and the convergence?
 \subparagraph{Starting values} In the basic algorithm, $w_{initial}$. The weights are initialized with random values close to zero. To be avoided: all zero, high values or all equal (symmetry), because this hampers the training. For standardized data, values $\in [-0.7, +0.7]$. There are other heuristics: $range \cdot \frac{2}{fanin}$ with $fanin$ being the number of inputs to a hidden unit, or orthogonal matrices\ldots
 \subparagraph{Multiple minima} The loss is not convex, has local minima. This affects the results, which depends on the starting weight values, hence: try a number of random starting configurations (5-10 or more \textbf{training runs} or \textbf{trials}). Useful taking the mean results (mean of errors) and looking at the variance to evaluate the model and then, if only one response is needed: we can choose the solution giving the lowest (penalized) validation error or we can take advantage of different end points and outputting a mean of the outputs (\textbf{committee approach}).\\
-A "good" local minima is often sufficient: in ML we don't need the global or local minimum on $R_{emp}$, as we are searching the minimum of $R$ (which we can't compute). Often we stop early, in a point of non-zero gradient so being neither a local nor a global minima for the training error. The neural network builds a variable size hypothesis space, so VC-dim increases during training and the training error decreases toward zero (or global minimum) while the neural network becomes too complex. We \textbf{stop before this condition of overtraining}, avoiding overfitting.
+A "good" local minima is often sufficient: in ML we don't need the global or local minimum on $R_{emp}$, as we are searching the minimum of $R$ (which we can't compute). Often we stop early, in a point of non-zero gradient so being neither a local nor a global minima for the training error. The neural network builds a variable sized hypothesis space, so VC-dim increases during training and the training error decreases toward zero (or global minimum) while the neural network becomes too complex. We \textbf{stop before this condition of overtraining}, avoiding overfitting.
 \subparagraph{Online/batch} Batch version: sum all the gradients of each pattern over an epoch and then update the weights ($\Delta w$ after each epoch of $l$ patterns). Online/stochastic: upgrade $w$ for each pattern $p$, making progress with each example it sees. Faster but need smaller $\eta$.\begin{multicols}{2}
-\textbf{Batch}
+\paragraph{Batch}
 \begin{enumerate}
 	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
 	\item Compute $\Delta w = -$ gradient of $E(w)$ on the entire training set (\textbf{epoch})
@@ -461,7 +461,7 @@ A "good" local minima is often sufficient: in ML we don't need the global or loc
 \end{enumerate}
 More accurate estimation of gradient
 \columnbreak
-\textbf{Online}
+\paragraph{Online}
 \begin{enumerate}
 	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
 	\item For each pattern $p$\begin{enumerate}
@@ -471,12 +471,12 @@ More accurate estimation of gradient
 	\end{enumerate}
 	\item Repeat from $2$ until convergence
 \end{enumerate}
-Since the gradient of a single data point can be considered a noisy approximation to the overall gradient, this is also called stochastic gradient descent.
+Since the gradient of a single data point can be considered a noisy approximation to the overall gradient, this is also called \textbf{stochastic gradient descent}.
 \end{multicols}
-Many variations exists, for example stochastic gradient descent with minibatch.
-\subparagraph{Learning rate} With batch training we have more accurate estimation of gradient, higher $\eta$. With online we have training faster but potentially unstable, lower $\eta$. So high vs low $\eta \Leftarrow$ fast but unstable vs slow but stable. Typically $\eta \in [0.01, 0.5]$.\\
+Many variations exists, for example stochastic gradient descent with minibatches.
+\subparagraph{Learning rate} With batch training we have more accurate estimation of gradient, so higher $\eta$. With online we have faster but potentially unstable training, hence lower $\eta$. So high vs low $\eta \Leftarrow$ fast but unstable vs slow but stable. Typically $\eta \in [0.01, 0.5]$.\\
 The learning curve, plotting the errors during training, allows to check the behavior in the early phases of the model design. Of course the absolute value depends also on model capability and other hyperparameters, but $\eta$ plays a big role in the curve quality. It's useful to have the mean of the gradients over the epoch: uniform approach (Least \textbf{Mean} Square). Some improvements: momentum (Nesterov), variable and adaptive learning rates, varying depending on the layers (in deep networks)\ldots\\
-With momentum it becomes $\Delta w_{new} = -\eta\frac{\partial E(w)}{w} \underline{+ \alpha\Delta w_{old}}$, saving $\Delta w_{new}$ in $\Delta w_{old}$ for the next step. Becomes faster in plateaus but damps in oscillations (inertia effect, allows higher $\eta$)\\
+With \textbf{momentum} it becomes $\Delta w_{new} = -\eta\frac{\partial E(w)}{w} \underline{+ \alpha\Delta w_{old}}$, saving $\Delta w_{new}$ in $\Delta w_{old}$ for the next step. Becomes faster in plateaus but damps in oscillations (inertia effect, allows higher $\eta$)\\
 Can be used in online by considering the previous example, $\Delta w_{p-1}$ as $\Delta w_{old}$.\\
 It smooths the gradient over different examples. A variant is to evaluate the gradient after the momentum is applied (so using $\overline{w} = w + \alpha\Delta w_{old}$), improves the rate of convergence for the batch mode (not online!).\\
 The variable learning rate starts high and decays linearly for each step until iteration $\tau$, using $\alpha = \frac{s}{\tau}$ with $s$ current step so that $\eta_s = (1-\alpha)\eta_0 + \alpha\eta_\tau$, then stops and uses a fixed small $\eta_\tau$. Set up as $\eta_\tau = 1\%$ of $\eta_0$ and $\tau$ as few hundred steps. $\eta_0$ same no instability/no stuck trade off.\\
@@ -485,7 +485,7 @@ With adaptive learning rate, it's automatically adapted during training possibly
 \subparagraph{Stopping criteria} When to stop training? Basic: error. The best metric if we know the tolerance of data. Other: max tolerance instead of mean, number of misclassified, no more relevant weight changes or no more significant error decreasing.\\
 In any case stop after too many epochs, but avoid stopping at an arbitrary fixed number of epochs, and not necessarily stop with very low training error.\\
 Control of complexity is the main aim to achieve best generalization capability.
-\subparagraph{Overfitting and regularization} Typically, stopping at the global minimum of $R_{emp}(w)$ is likely to be an overfitting solution. The control of complexity is our main aim to achieve the best generalization capability. For instance, we need to add some \textbf{regularization}: can be achieve directly (\textbf{penalty term}) or indirectly (\textbf{early stopping}). Model selection with cross validation on empirical data to find the trade-off.\\
+\subparagraph{Overfitting and regularization} Typically, stopping at the global minimum of $R_{emp}(w)$ is likely to be an overfitting solution. The control of complexity is our main aim to achieve the best generalization capability. For instance, we need to add some \textbf{regularization}: can be achieved directly (\textbf{penalty term}) or indirectly (\textbf{early stopping}). Model selection with cross validation on empirical data to find the trade-off.\\
 In neural networks, we start learning with small random weights (breaking the symmetry!). As optimization proceeds, hidden units tend to saturate, increasing the effective number of free parameters (hence increasing the VC-dim). As we discussed, this is a variable-sized hypothesis space (changes during training).
 \begin{center}
 	\includegraphics[scale=0.5]{8.png}
@@ -542,7 +542,7 @@ For the output, one or more linear units for regression. For classification, one
 \begin{center}
 	\includegraphics[scale=0.75]{10.png}
 \end{center}
-\subsection{Motivations} We are looking for the best solution, with minimal test error, looking for a balance between fitting (accuracy on training data) and model complexity. The \textbf{training set is not a good estimate of test error}.\\
+\subsection{Motivations} We are looking for the best solution, with minimal test error: looking for a balance between fitting (accuracy on training data) and model complexity. The \textbf{training error is not a good estimate of the test error}.\\
 Assuming that we have a set of tuning parameters $\Theta$, implicit or explicit, that varies the model complexity, we wish to find the value of $\Theta$ that minimizes test error: \textbf{methods for estimating the expected error} for a model (or each model of a class of models, or event a set of models\ldots)
 \subsection{Validation}
 We can approximate the estimation analytically:
@@ -568,19 +568,19 @@ If the test set is used repeatedly in the design cycle we would be doing model s
 	\includegraphics[scale=0.5]{12.png}
 \end{center}
 \paragraph{Grid Search} For the model selection: hyperparameters can be set by searching in a hyperparameters space. Try every hyperparameter-value combination and record the result. The best result will corresponds to the best hyperparameter values.\\
-The cost can be high (cartesian product between sets of values per each hyperparameter: what if 6 hyperparameters each with tens of possible different values?), so can be useful to fix some hyperparameter value before: more levels of grid search, where we do a first coarse grid search to find good intervals of values, then a finer grid-search can be performed over smaller intervals.
-\paragraph{K-fold Cross Validation} Split the data set $D$ into $k$ mutually exclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$. No unique model, but we get a variance (std. dev.) over different folds for the class of models or algorithm.
+The cost can be high (cartesian product between sets of values per each hyperparameter: what if 6 hyperparameters each with tens of possible different values? So many combinations), so can be useful to fix some hyperparameter value before: more levels of grid search, where we do a first coarse grid search to find good intervals of values, then a finer grid-search can be performed over smaller intervals.
+\paragraph{K-fold Cross Validation} Split the data set $D$ into $K$ mutually exclusive subsets $D_1,\ldots, D_k$, we train on $D - D_i$ and test it on $D_i$. No unique model, but we get a variance (std. dev.) over different folds for the class of models or algorithm.
 \begin{center}
 	\includegraphics[scale=0.5]{3.png}
 \end{center}
-The issue is to find $k$ and that it can be very computationally expensive but in can be combined with validation set,  double-$k$-fold cross-validation\ldots
-\paragraph{Double cross-validation} After dividing the data set into $k$ mutually exclusive subsets $D_1,\ldots, D_k$, for each $D_i$: do another \textbf{internal} cross-validation using the other $k-1$ subsets.
+The issue is to find $K$ and that this method can be very computationally expensive but it can be combined with validation set,  double-$K$-fold cross-validation\ldots
+\paragraph{Double cross-validation} After dividing the data set into $K$ mutually exclusive subsets $D_1,\ldots, D_k$, for each $D_i$: do another \textbf{internal} cross-validation using the other $K-1$ subsets.
 \begin{center}
-	\includegraphics[scale=0.75]{13.png}
+	\includegraphics[scale=0.7]{13.png}
 \end{center}
 It doesn't provide a model but an estimation of the risk, because can provide a different model per external step cycle.
-\paragraph{Example with $k$-fold CV} Split data in TR and TS.\\
-For the \textbf{model selection}, use $k$-fold CV over TR, obtaining new TR and VL in each fold, to find the best hyperparameters of the model.\\
+\paragraph{Example with $K$-fold CV} Split data in TR and TS.\\
+For the \textbf{model selection}, use $K$-fold cross-validation over TR, obtaining new TR and VL in each fold, to find the best hyperparameters of the model.\\
 \textbf{Train} the final model on the whole, original, TR.\\
 Perform the \textbf{model assessment} by evaluating it on the external TS.\\\\
 There are more combination and more ways of doing this.
@@ -588,38 +588,38 @@ There are more combination and more ways of doing this.
 \subparagraph{Lucky/unlucky sampling} Can we avoid to be sensible to the particular partitioning of the examples?
 \begin{list}{}{}
 	\item \textbf{Stratification}: the process of grouping examples into relatively homogeneous subgroups. For example, partitioning in a way that every class (in a classification task) is represented in approximately the same proportions as in the full data set.\\
-	\item  \textbf{Repeated} hold-out or $k$-fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
+	\item  \textbf{Repeated} hold-out or $K$-fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
 \end{list}
 \subparagraph{Very few data} In this case it's difficult to say if the sampling is representative or not. We can use stratification.\\
 To avoid (or to be considered during evaluation): missing classes or features in training data, special classes, known outliers that can affect the results\ldots\\
 Also the blind test set can be misleading if: is from a different distribution, measured with a different scale/tolerance, uncleaned, unprocessed\ldots
-\subparagraph{When to stop?} Best to avoid stopping the NN training by fixing an arbitrary number of epochs: if it's too small it may be to early (underfitting), too high may be too late (overfitting), may not old for all the configuration in a cross-validation\ldots\\
+\subparagraph{When to stop?} Best to avoid stopping the model training by fixing an arbitrary number of epochs: if it's too small it may be to early (underfitting), and too high may be too late (overfitting), may not old for all the configuration in a cross-validation\ldots\\
 Also selecting the number of epochs by model selection it's not the best practice: better than a fixed number, but still not accurate.
-\subparagraph{Early Stopping} Should be part of the model selection as well. Tricky: uses part of the data just to decide when to stop, also complex with CV.\\
-How to select the best model with early stopping for the final retraining (ex: different stop point for each validation set in a CV)? You could take the average number of epochs, but varying the data for retraining after model selection could lead to a different (best) stop point. So it's better to consider the average of the TR error at the best point and use it to gain the same level of fitting on the retraining. Else you need a VL every time you train.
+\subparagraph{Early Stopping} Should be part of the model selection as well. Tricky: uses part of the data just to decide when to stop, also complex with cross-validation.\\
+How to select the best model with early stopping for the final retraining (example: different stop points for each validation set in a cross-validation)? You could take the average number of epochs, but varying the data for retraining after model selection could lead to a different (better) stop point. So it's better to consider the average of the TR error at the best point and use it to gain the same level of fitting on the retraining. Else you need a VL every time you train.
 \subparagraph{Random initialization} Different $w_{initial} \Rightarrow$ different models: how to chose one for the final model? You can compute the mean and variance of error/accuracy across the different trials, so that a random case would be in this range.
 \section{Statistical Learning Theory}
 \subsection{VC-dim} The VC-dim is used to provide the analytical bound we need to evaluate $H$. It's a measure of complexity (that is to say, capacity/expressive power/flexibility) of a class of hypothesis.\\
 The bound is expressed not in terms of $|H|$ but in terms of distinct instances that can be completely discriminated using $H$. Intuitively (for classification): how much can $H$ discriminate points? The maximum number of points that can be correctly classified/learned without error for all the possible labelings.
 \paragraph{Shattering} Given $X$ instance/input space, $n$ size of the instance space (number of instances) and $l$ for the number of data available. $H$ is the hypothesis space.\\
 In the case of binary classification, there are $2^n$ possible \textbf{dichotomies} (partitions or labeling of the $n$ points in $\{-1,+1\}$): a particular dichotomy is represented in $H$ if there exists a hypothesis $h\in H$ that realizes the dichotomy.\\
-\textbf{Definition}: $H$ shatters $X \Leftrightarrow H$ can represent all the possible dichotomies on $X$ (0 errors). the points in $X$ can be separated by an $h\in H$ in al the possible ways, and for every possible dichotomy of $X$ there exists a consistent hypothesis $h\in H$
+\textbf{Definition}: $H$ shatters $X \Leftrightarrow H$ can represent all the possible dichotomies on $X$ (0 errors). The points in $X$ can be separated by an $h\in H$ in all the possible ways, and for every possible dichotomy of $X$ there exists a consistent hypothesis $h\in H$
 \subparagraph{Example} \begin{multicols}{2}
 \begin{center}
 	\includegraphics[scale=0.5]{14.png}
 \end{center}
 \columnbreak
-3 points in $R^2$, $H$ as a set of lines: $h(x) = sign(wx + w_0)$ with $x\in R^2$\\
+3 points in $R^2$, $H$ as a set of lines: $h(x) = \hbox{sign}(wx + w_0)$ with $x\in R^2$\\
 A dichotomy is a particular labeling in $\{-1,+1\}$ of the points. This specific dichotomy can be represented in $H$: there exist a line that correctly separate the points (in pic)
 \end{multicols}
 \paragraph{VC-Dimension} \textbf{Definition}: the VC dimension of a class of functions $H$ is the maximum cardinality of a set (configuration) of points in $X$ that can be shattered by $H$.\\
-$VC(H) = p \Rightarrow H$ shatters \textbf{at least one} set of $p$ points $\wedge H$ \textbf{cannot shatter any} set of $p+1$ points.\\
+$VC(H) = p \Rightarrow H$ shatters \textbf{at least one} set of $p$ points $\wedge$ $H$ \textbf{cannot shatter any} set of $p+1$ points.\\
 If arbitrarily large but finite sets of $X$ can be shattered by $H$ then $VC(H) = \infty$\\\\
 $VC(H)\geq 3$ shown before, note that not all the possible configurations of $3$ points can be shattered (example follows), but it's sufficient to find one configuration of three points which is separable for every labeling.
 \begin{center}
 	\includegraphics[scale=0.5]{15.png}
 \end{center}
-VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, $k$-NN has infinite VC-dim.
+VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, $K$-NN has infinite VC-dim.
 \paragraph{Analytical Bound} With $N$ number of data $$R[h]\leq R_{emp}[h] + \epsilon\left(\hbox{VC-dim}, N, \delta\right)$$
 with:
 \begin{list}{}{}
@@ -646,12 +646,12 @@ SRM: find a trade-off in the bound and choose the model ($h$) with the best boun
 \begin{center}
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
-\paragraph{Use of the bound} Provide a fundamental theoretical ground for principled ML: independently from specific model details or learning algorithms, highlighting the role of complexity control. The optimal choice of the model complexity (structure) provides the minimum expected risk (\textbf{inductive principle of SRM})\\
-Also to provide a direction for new model development guided by SRM. As estimation of predictive errors is rarely used: the upper bound is overly pessimistic and may not be adequate for reliable evaluation of the generalization error (model assessment) and tighter bounds are under development, also is difficult to compute the VC-dim for specific classes of $H$.\\
+\paragraph{Use of the bound} Provide a fundamental theoretical ground for principled Machine Learning: independently from specific model details or learning algorithms, highlighting the role of complexity control. The optimal choice of the model complexity (structure) provides the minimum expected risk (\textbf{inductive principle of SRM})\\
+Also used to provide a direction for new model development guided by SRM. As estimation of predictive errors is rarely used: the upper bound is overly pessimistic and may not be adequate for reliable evaluation of the generalization error (model assessment) and tighter bounds are under development, also is difficult to compute the VC-dim for specific classes of $H$.\\
 Towards \textbf{principled approaches} less based on trial and error. For example, two practical approaches:
 \begin{list}{}{}
 	\item Choose appropriate structure/complexity, fix the model (hence the VC-dim) and minimize the TR error.\\
-	Can be used in neural networks, however regularization by training heuristic can further introduce implicit SRM (early stopping\ldots Or SRM with Tikhonov regularization where we have minimum loss with $R_{emp} +$ complexity term, considering both the terms.
+	Can be used in neural networks, however regularization by training heuristic can further introduce implicit SRM (early stopping\ldots) or SRM with Tikhonov regularization where we have minimum loss with $R_{emp} +$ complexity term, considering both the terms.
 	\item Fix the TR error, automatically minimize the VC confidence (SVM)
 \end{list}
 \section{Support Vector Machines}
@@ -661,19 +661,18 @@ Example of linearly and non linearly separable problems:
 	\includegraphics[scale=0.5]{17.png}
 \end{center}
 \paragraph{Separating hyperplane} Given the training set $T = \{(x_i, d_i)\}_{i=1}^N$ we want to find an hyperplane of equation $w^Tx + b = 0$ to separate the examples and get $w^Tx_i + b \geq 0$ for $d_i = +1$ and $w^Tx_i + b < 0$ for $d_i = -1$\\
-$g(x) = w^Tx + b$ is the discriminant function and $h(x) = sign(g(x))$ is the hypothesis.\\
+$g(x) = w^Tx + b$ is the discriminant function and $h(x) = \hbox{sign}(g(x))$ is the hypothesis.\\
 An example of separation margin:
 \begin{center}
 	\includegraphics[scale=0.5]{18.png}
 \end{center}
-In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $w_O^Tx + b_O = 0$ with $_O$ being "optimal".\\
-We will find $p = \frac{2}{||w||}$, so maximize $p\Leftrightarrow$ minimize $||w||$.
-\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\hbox{ if }d_i = +1$$ $$w^Tx_i + b < 1\hbox{ if }d_i = -1$$ which is compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
+In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $w_O^Tx + b_O = 0$ with $_O$ meaning "optimal".\\
+We will find that $p = \frac{2}{||w||}$, so maximize $p\Leftrightarrow$ minimize $||w||$.
+\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\hbox{ if }d_i = +1$$ $$w^Tx_i + b < 1\hbox{ if }d_i = -1$$ which its compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
 A \textbf{support vector} $x^{(s)}$ satisfies the previous equation exactly $$d^{(s)}(w^Tx^{(s)}+b) = 1$$ so the \textbf{support vectors are the closest data points to the hyperplane} and "lay on the margin".
 \begin{center}
 	\includegraphics[scale=0.5]{19.png}
 \end{center}
-\pagebreak
 \paragraph{Computing the distance} With the discriminant function $g(x) = w^Tx + b$, recalling that $w_O$ is a vector orthogonal to the hyperplane. Let's denote with $r$ the distance between $x$ and the optimal hyperplane.
 \begin{center}
 	\includegraphics[scale=0.5]{20.png}
@@ -845,13 +844,13 @@ The kernel trick introduces the kernel methods, also without SVM. \textbf{Kernel
 An SVM is largely characterized by the kernel: the best choice of kernel for a given problem is still a research issue.
 \section{Bias-Variance} A training set is only one possible realizations from the universe of the data: different TR sets can provide different estimate. The expected error (on various TR) at a point $x$ is decomposed as:
 \begin{list}{}{}
-	\item \textbf{Bias}: quantify the discrepancy between true function and $h(x)$ (averaged on data)
-	\item \textbf{Variance}: quantify the variability of the response of model $h$ for different realizations of the TR data
+	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(x)$ (averaged on data)
+	\item \textbf{Variance}: quantifies the variability of the response of the model $h$ for different realizations of the TR data
 	\item \textbf{Noise}: error in the label
 \end{list}
-Let's assume the regression scenario with target $y$ and $L_2$ squared error loss. Suppose we have examples $(x,y)$ where the true function is $y = f(x) + \epsilon$ with $\epsilon$ being Gaussian noise with zero mean and std. dev. $\sigma$. In linear regression, given a set of examples $(x_i,y_i)$ with $i = 1,\ldots,l$, we fit a linear hypothesis $h(x) = wx + w_0$ to minimize sum-squared error over the training data $\sum_{i=1}^l (y_i - h(x_i))^2$\\
+Let's assume the regression scenario with target $y$ and L2 squared error loss. Suppose we have examples $(x,y)$ where the true function is $y = f(x) + \epsilon$ with $\epsilon$ being Gaussian noise with 0 mean and $\sigma$ standard deviation. In linear regression, given a set of examples $(x_i,y_i)$ with $i = 1,\ldots,l$, we fit a linear hypothesis $h(x) = wx + w_0$ to minimize sum of the squared error over the training data $\sum_{i=1}^l (y_i - h(x_i))^2$\\
 Because of the hypothesis class that we chose for some function $f$ (linear hypothesis), we have a \textbf{systematic prediction error}. Depending on the dataset that we have, the parameters $w$ that we find will be different.\\\\
-Given a new data point $x$, what is the expected prediction error? Assume that the data points are drawn independent and identical distributed from a unique underlying probability distribution $P$. The goal is to compute, for an arbitrary new point $x$, $E_P[(y - h(x))^2]$ noting that there's a different $h$ and $y$ for each different "extracted" training set. $y$ is the value for $x$ that could be present in a data set, and the expectation is over \textbf{all training set} that are drawn according to $P$. We will decompose this expectation into three components: bias, variance and noise.
+Given a new data point $x$, what is the expected prediction error? Assume that the data points are drawn independently and identically distributed from a unique underlying probability distribution $P$. The goal is to compute, for an arbitrary new point $x$, $E_P[(y - h(x))^2]$ noting that there's a different $h$ and $y$ for each different "extracted" training set. $y$ is the value for $x$ that could be present in a data set, and the expectation is over \textbf{all training sets} that are drawn according to $P$. We will decompose this expectation into three components: bias, variance and noise.
 \subparagraph{Recall of statistics} With $Z$ random variable of possible values $z_i$ with $i=1,\ldots,l$ and probability distribution $P(Z)$
 \begin{list}{}{}
 	\item \textbf{Expected value} or \textbf{mean} of $Z$ is $$\overline{Z} = E_P[Z] = \sum_{i=1}^l z_i\cdot P(z_i)$$ with the sum replaced by an integral and the distribution by a density function if $Z$ is continuous.
@@ -865,8 +864,8 @@ E_P[(y-h(x))^2] & = & E_P[(h(x) - E_P[h(x)])^2] + & \hbox{variance}\\
  & & E_P[(y - f(x))^2] & \hbox{noise}^2
 \end{array}$\\
 So expected error is Variance + Bias$^2$ + Noise$^2$\begin{list}{}{}
-	\item \textbf{Bias}: quantify the discrepancy between true function and $h(x)$, with $h(x)$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
-	\item \textbf{Variance}: quantify the variability of the response of model $h$ for different realizations of the training data.\\Due to too high flexibility
+	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(x)$, with $h(x)$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
+	\item \textbf{Variance}: quantifies the variability of the response of model $h$ for different realizations of the training data.\\Due to too high flexibility
 	\item \textbf{Noise}: event the optimal solution can be wrong.\\E.g. if for a give n$x$ there are more than one possible $d$.\\
 	It's irreducible, doesn't depend on the model.
 \end{list}
