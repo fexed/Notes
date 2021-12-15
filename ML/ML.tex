@@ -908,12 +908,12 @@ We will call this a "time-delay NN": weights are tuned as usual by learning and 
 With a 2D image $I$ and a 2D kernel $K$ $$S(i,j) = (I*K)(i,j)=\sum_m\sum_n I(m,n)K(i-m,j-n)$$ or alternatively $$S(i,j) = (I*K)(i,j)=\sum_m\sum_n I(i+m,j+n)K(m,n)$$
 The units weights are a \textbf{filter}, trained to detect some features in the image:
 \begin{list}{}{}
-	\item \textbf{Local and small receptive field} (kernel): by this architecture constraints, learnt "filters" produce the strongest response to a spatially local input pattern
-	\item The same unit/filter is \textbf{applied across the entire image}: this allows for features to be detected regardless of their position in the visual field, thus constituting the property of \textbf{translation invariance}
-	\item \textbf{Learnable filters}: we can learn the filters that in traditional algorithms for image processing were hand-engineered. This independence from prior knowledge and human effort in feature design in a major advantage.
+	\item \textbf{Local and small receptive field} (kernel): with this architecture constraints, learned "filters" produce the strongest response to a spatially local input pattern
+	\item The \textbf{same unit}/filter is \textbf{applied across the entire image}: this allows for features to be detected regardless of their position in the visual field, thus constituting the property of \textbf{translation invariance}
+	\item \textbf{Learnable filters}: we can learn the filters that in traditional algorithms for image processing were hand-engineered. This independence from prior knowledge and human effort in feature design is a major advantage.
 	\item \textbf{Stacking many layers}: feature maps unit represent larger and larger areas of the original image (assembling areas of the previous feature maps).
 \end{list}
-\paragraph{Pooling} So we reduce the feature map by sumbsampling (see before), or by operating a mean (average or weighted average), or by a max pool operation over the neighbors of each input. In practice, instead of producing a value for each input pixel, we produce a value for a rectangular set of pixels taking the mean or the max of the kernel/neuron outputs.
+\paragraph{Pooling} So we reduce the feature map by subsampling (see before), or by operating a mean (average or weighted average), or by a max pool operation over the neighbors of each input. In practice, instead of producing a value for each input pixel, we produce a value for a rectangular set of pixels taking the mean or the max of the kernel/neuron outputs.
 \begin{center}
 	\includegraphics[scale=0.5]{29.png}\\
 	Max pooling with a $2\times2$ filter and stride of $2$
@@ -922,15 +922,15 @@ Pooling also further helps to make the representation become approximately invar
 \paragraph{Overview} CNNs exploits weight sharing to setup a shifting windows or \textbf{local field} of the units over a segment of the input signal, also extended to 2D images and re-apply for many layers (\textbf{feature maps}).
 \paragraph{Advantages}
 \begin{list}{}{}
-	\item \textbf{Local connections and weight sharing}: detect local patterns and invariant to translations, helping reducing the number of free-parameters.
+	\item \textbf{Local connections and weight sharing}: detect local patterns and invariant to translations, helping in reducing the number of free-parameters.
 	\item \textbf{Pooling}: helps reducing the dimension of the representation (in each layer, so a pyramid of layers), also helps to small shifts and distortions
-	\item Historical instance of deep neural network, progressive abstracting features from images.
+	\item Historical instance of deep neural network, progressively abstracting features from images.
 \end{list}
 \paragraph{How to use?} Training is typically made by backpropagation, with the many heuristics that we studied and some specializations for weight sharing, pooling ecc\ldots\\
 Given the typical usage of huge networks and large amount of data, many hyperparameters are fixed by experience and expert suggestion, as it would be very expensive to run cross-validation over a large set of hyperparameters.
-\paragraph{Modern CNNs} There are many variants and specialized architectures and models fro processing of images, and efficient implementations through tensor representation of matrices, exploiting GPUs. Even using the features of models already trained with large benchmarks: many pre-trained CNNs for image classification, segmentation, face recognition and text detection available.
+\paragraph{Modern CNNs} There are many variants and specialized architectures and models for image processing, and efficient implementations through tensor representation of matrices, exploiting GPUs. Even using the features of models already trained with large benchmarks: many pre-trained CNNs for image classification, segmentation, face recognition and text detection are available.
 \paragraph{Parallelize linear operations on GPU} Matrix multiplication (i.e. dot product) is a typical linear operation performed efficiently on GPU. It can be parallelized by parallelizing the sum $(AB)_{ij} = \sum_{k=1}^m A_{ik}B_{kj}$ or a set of independent products $A_{ik}B_{kj}$ for each $i,j$\\
-In computer programming, a \textbf{tensor} is a multi-dimensional matrix with a linear operation called \texttt{tensordot}. In many libraries such as TensorFlow we can use tensors and perform linear operations as \texttt{tensordot0}s between them.
+In computer programming, a \textbf{tensor} is a multi-dimensional matrix with a linear operation called \texttt{tensordot}. In many libraries such as \textbf{TensorFlow} we can use tensors and perform linear operations as \texttt{tensordot}s between them.
 \subsection{Deep Learning}
 \paragraph{Framework} "\textit{Deep learning  allows computational models that are composed of
 multiple processing layers to learn representations of data with multiple levels of abstraction. These methods have dramatically improved the state-of-the-art in speech recognition, visual object recognition, object detection and many other domains}".\\
@@ -940,7 +940,7 @@ Deep learning is a \textbf{general framework} which includes different models:
 	\item Deep Neural Networks
 	\item Convolutional Neural Networks
 	\item Deep Belief Networks and Generative Approaches
-	\item Recurrent and Recursive Neural Networks
+	\item Recurrent/Recursive Neural Networks
 	\item \ldots
 \end{list}
 This contrasts with "shallow models", e.g. neural networks with few layers.
@@ -954,43 +954,43 @@ This contrasts with "shallow models", e.g. neural networks with few layers.
 The abstract features can be "reused" at the higher levels: \textbf{combine to generalize} to unseen during training.
 \paragraph{Techniques} In general, deeper networks are able to use less units in each layer, so less parameters and less training data to achieve a good generalization. But, many layers can be harder to train, hence emphasis on methods to improve
 \begin{list}{}{}
-	\item gradient descent (also gradient vanishes/explodes through layers)
+	\item gradient descent (also due to gradients vanishing/exploding through layers)
 	\item regularization (due to large networks)
 	\item better exploitation of data
 \end{list}
 \paragraph{Do we \textit{need} many layers?} The general idea is that when a function can be compactly represented by a deep architecture, in might need a very large architecture to be represented by an insufficiently deep one.\\
-An example from logic circuits: a two-layer circuit of logic gates can be represented by any boolean function, and any boolean function can be written as a sum of products (\textbf{disjuntive normal form}, $\wedge$ gates on the first layers with optional negation of inputs and $\vee$ gates on the second layer). With dept-two logical circuits, most boolean functions require an exponential (in input size) number of logic gates to be represented.\\
+An example from logic circuits: a two-layer circuit of logic gates can be represented by any boolean function, and any boolean function can be written as a sum of products (\textbf{disjuntive normal form}, $\wedge$ gates on the first layers with optional negation of inputs and $\vee$ gates on the second layer). With depth-two logical circuits, most boolean functions require an exponential (in input size) number of logic gates to be represented.\\
 Examples: the parity function (return $1\Leftrightarrow$ there are an odd number of 1 over $N$ binary inputs) with 2 inputs can be done with 3 gates, with 3 inputs 5 gates, with $N$ inputs $2^{N-1}+1$ gates, exponential. If we use $\log N$ layers, we have fewer gates. However this doesn't hold for all classes of functions.\\
-The \textbf{universal approximation theorem} is a fundamental contributions, it shows that 1 hidden layer is sufficient in general but doesn't assure that a "small number" of units could be sufficient and it also doesn't provide a limit on such number. For many function families it's possible to find boundaries on such number and "\textbf{no flattening}" results (on efficiency): cases for which the implementation by a single hidden layer world require an exponential number of units (in terms of $n$ input dimension) or exponential non-zero weights, while more layer can help for the number of units/weights and also for learning.
+The \textbf{universal approximation theorem} is a fundamental contribution, it shows that 1 hidden layer is sufficient in general, but doesn't assure that a "small number" of units could be sufficient and it also doesn't provide a limit on such number. For many function families it's possible to find boundaries on such number and "\textbf{no flattening}" results (on efficiency): cases for which the implementation by a single hidden layer world require an exponential number of units (in terms of $n$ input dimension) or exponential non-zero weights, while more layers can help for the number of units/weights and also for learning.
 \subparagraph{Examples} Cases with an exponential number of units are for example classes of problems requiring one hidden units corresponding to each input configuration that needs to be distinguished. For example, the number of possible binary functions on vector $v\in\{0,1\}^n$ is $2^{2^n}$ and selecting one such function requires $2^n$ bits which in general requires $O(2^n)$ degrees of freedom. It's a practical issue for the dimension of the network, but also implies that it's difficult to learn complex tasks with few examples.\\
 On the other side there are families of functions that can be approximated efficiently by an architecture with depth greater than some value $d$, but which would require a much larger model if the depth is restricted to be $\leq d$. There's in general \textbf{no guarantee} that your task share this property.
 \subparagraph{Theoretical Analysis} Deep models can exploit the \textbf{compositionality} of internal representation: an exponential gain in representation power, due to the fact that simpler concepts represented in a layer of the network can be exploited as primitives by the next layer to represent more complex concepts, avoiding explicit combinatorial representation and learning of features.\\
 More in general, but it's an open theoretical research topic:
 \begin{list}{}{}
-	\item No flattening results: no-flattening theorems, compositional functions that can be well implemented by a deep neural network cannot be implemented retaining the same efficiency while flattening the neural network
+	\item No-flattening results: no-flattening theorems, compositional functions that can be well implemented by a deep neural network cannot be implemented retaining the same efficiency while flattening the neural network
 	\item A complete list of no-flattening theorems would show exactly when deep networks are more efficient than shallow networks
 \end{list}
 So, deep networks can be seen as compact models with respect to potentially larger shallow models for the task (even exponentially more compact). Hence more efficient, not just from the computational point of view but from the learning point of view too: less units and less weights help learning on complex tasks to achieve good generalization with less examples.
-\subparagraph{Inductive Bias} Choosing a deep model encodes a very general belief that the function we want to learn should involve composition of several simpler functions. If our task matches this bias, then of course the deep shape of the learner is suitable, and it happens that generalization is better due to the use of many layers. Typical examples are: the structure of images (composition of sub-graphical parts), the structure of language (text and speech), music\ldots new fields are under discovering.\\
+\subparagraph{Inductive Bias} Choosing a deep model encodes a very general belief that the function we want to learn should involve composition of several simpler functions. If our task matches this bias, then of course the deep shape of the learner is suitable, and it happens that generalization is better due to the use of many layers. Typical examples are: the structure of images (composition of sub-graphical parts), the structure of language (text and speech), music\ldots new fields are being discovered.\\
 This doesn't apply to all data and tasks, of course. Also note that it's still a quite general bias, much more than other ad hoc constraints.
-\subparagraph{Curse of Dimensionality} Many learners rely on local approximation (K-nn, local kernels, decision trees\ldots), but often the smoothness assumption (or local consistency) is not enough. They need training examples to generalize the surrounding and the may need many examples: $O(k)$ examples to distinguish $O(k)$ regions, or exponential number of regions (in $k$) with additional assumptions.\\
+\subparagraph{Curse of Dimensionality} Many learners rely on local approximation (K-NN, local kernels, decision trees\ldots), but often the smoothness assumption (or local consistency) is not enough. They need training examples to generalize the surrounding and they may need many examples: $O(k)$ examples to distinguish $O(k)$ regions, or exponential number of regions (in $k$) with additional assumptions.\\
 To approach this, one can make strong, task-specific assumptions, loosing the generality. Instead, the deep learning framework chooses a quite general inductive bias related to composition of functions: we assume that the data was generated by the composition of factors or features, potentially at multiple levels in hierarchy. This allows to:\begin{list}{}{}
-	\item achieve a potential exponential gain between number of examples and number of regions that can be distinguished
+	\item achieve a potentially exponential gain between number of examples and number of regions that can be distinguished
 	\item generalize non-locally
 	\item learn with less examples
 \end{list}
 \subparagraph{Practical issues} How many layers? How many units? Model selection!\\
-In general, for deep learning: deeper network often with less units, so less parameters, so less training data. But many layers harder to optimize during learning (exploding/vanishing gradients\ldots)
+In general, for deep learning: deeper network often with less units, so less parameters, so less training data. But many layers are harder to optimize during learning (exploding/vanishing gradients\ldots)
 \paragraph{Representation Learning} "\textit{Representation learning is a set of methods that allows a machine to be fed with raw data and to automatically discover the representations needed for detection or classification}.".\\
 Deep learning methods are representation-learning methods with multiple levels of representation. But this concept is more abstract an can be applied to many models, and neural networks in general.\\
 This is in most cases referred to raw data such as images or texts.
 \subparagraph{Basic ideas} Many information processing tasks can be very easy or very difficult, depending on the representation of the information (this applies to every field of computer science).\\
-In machine learning, a good representation is one that makes a subsequent learning task easier. The \textbf{manual design of features} is difficult, even decades for specific communities (languages, images,\ldots). Supervised learning in a deep neural network is an example that leads to an \textbf{automatic representation} at every hidden layer, taking on properties that make the output layer task easier.
+In Machine Learning, a good representation is one that makes a subsequent learning task easier. The \textbf{manual design of features} is difficult, even decades for specific communities (languages, images,\ldots). Supervised learning in a deep neural network is an example that leads to an \textbf{automatic representation} at every hidden layer, taking on properties that make the output layer task easier.
 \subparagraph{Obtaining or exploiting hidden representation} The historical case in obtaining the hidden representation is the semi-supervised learning: we can learn a representation for the unlabeled data and then use it to solve supervised tasks (\textbf{pretraining approaches}).\\
 To exploit the hidden representation, we can use the learned representation for other tasks (\textbf{transfer learning approaches})
 \subsubsection{Implementing Deep Learning} Many approaches. Let's start with a simple one: building a multi-layer perceptron with many layers and pretraining techiniques.
-\paragraph{Pretraining} The first approach to make possible to train a deep supervised network was the \textbf{Greedy Later-Wise Unsupervised Pretraining}: unsupervised learning as pretraining to capture the shape of the input distribution. In makes training the whole network easier, used by autoencoders.\\
-Each layer is optimized independently (\textit{greedy layer-wise}) in an \textit{unsupervised} way, constituting a \textit{pretraining} for the final fine-tuning of the network. Works in terms of: good initialization strategy, regularization (in terms of discovering features that simplify the unsupervised process, which can be a more appropriate regularization techinique when the underlying functions are "complicated" and shaped by regularities of the input distribution) and reducing the variance of the estimation.
+\paragraph{Pretraining} The first approach to make the training of a deep supervised network possible was the \textbf{Greedy Layer-Wise Unsupervised Pretraining}: unsupervised learning as pretraining to capture the shape of the input distribution. It makes training the whole network easier, used by autoencoders.\\
+Each layer is optimized independently (\textit{greedy layer-wise}) in an \textit{unsupervised} way, constituting a \textit{pretraining} for the final fine-tuning of the network. Works in terms of: good initialization strategy, regularization (in terms of discovering features that simplify the unsupervised process, which can be a more appropriate regularization technique when the underlying functions are "complicated" and shaped by regularities of the input distribution) and reducing the variance of the estimation.
 \paragraph{Autoencoders} A neural network that is trained to attempt copy its input to its output. Internally, it has an hidden layer $h$ that describes a code used to represent the input. The network may be viewed as consisting of two parts: an encoder function $h = f(x)$ and a decoder that produces a reconstruction $r = g(h)$.\\
 There many forms of autoencoders, for example:
 \begin{list}{}{}
@@ -1000,19 +1000,19 @@ There many forms of autoencoders, for example:
 	Regularization make the constraint for sparsity of the representation, robustness to noise and other properties of interest beside the trivial input-output copy capability.
 \end{list}
 Unsupervised!
-\subparagraph{Layer-wise pretraining} Unsupervised, it can exploit also unlabeled data for the layer by layer training.
+\subparagraph{Layer-Wise Pretraining} Unsupervised, it can exploit also unlabeled data for the layer by layer training.
 \begin{center}
 	\includegraphics[scale=0.5]{30.png}
 \end{center}
 \begin{enumerate}
-	\item Train the first layer as an autoassociator to minimez the reconstruction error of the raw input (unsupervised because we only need unlabeled examples)
+	\item Train the first layer as an autoassociator to minimize the reconstruction error of the raw input (unsupervised because we only need unlabeled examples)
 	\item The hidden units outputs in the autoassociator are now used as input for another layer, also trained to be an autoassociator (again, unsupervised)
 	\item Iterate 2. to add the desired number of layers
 	\item Take the last hidden layer output as input to a supervised layer and initialized its parameters (either randomly or by supervised training, keep the rest of the network fixed)
 	\item Fine-tune all the parameters of this deep architecture with respect to the supervised criterion
 \end{enumerate}
 The hope is that the pretraining has put the parameters of all the layers in a region from which a good local optimum can be reached by local descent. Despite many initially successful cases, the general role of pretraining is \textbf{nowadays under critical revision by researchers}.
-\subparagraph{Needed?} Pretraining can yield improvements for some tasks, but not in other. It allowed to start deep learning, but difficult to be managed.
+\subparagraph{Needed?} Pretraining can yield improvements for some tasks, but not in other. It allowed to start deep learning, but its difficult to be managed.
 \paragraph{Transfer Learning} Using the representation discovered in a model to improve another model. We assume there exist features that are useful for the different settings or tasks, corresponding to underlying factors that appear in more than one setting. But also we can use a trained model for another task, with same inputs but different targets (\textbf{multi-task learning}), or changing the input domain but sharing features (\textbf{domain adaption}), or take advantage of pre-training models from a larger dataset\ldots (note that the bold terms are subfields of machine learning)
 \subparagraph{Example of pretrained networks}
 \begin{list}{}{}
@@ -1021,15 +1021,17 @@ The hope is that the pretraining has put the parameters of all the layers in a r
 	\item There are many pretrained CNNs for image classification, segmentation, face recognition and text detection.\\
 	AlexNet in matlab, also MatConvNet, VGG, ResNet, GoofLeNet\ldots and similarly for other DL libraries such as Keras\ldots
 \end{list}
-\paragraph{Distributed Representation} "\textit{In a distributed representation, their elements (the features) are not mutually exclisve and their many configurations correspond to the variations seen in the observed data.}"\\
+\paragraph{Distributed Representation} "\textit{In a distributed representation, their elements (the features) are not mutually exclusive and their many configurations correspond to the variations seen in the observed data.}"\\
 Deep learning methods exploit distributed representation with multiple levels of representation, but the concept is more abstract and can be applied to many models.\\
 An example of \textbf{symbolic representation} is the \textbf{one-hot representation}: one element is 1, the others are 0 and the distance between two elements is always $\sqrt{2}$. With a \textbf{distributed representation} we have a dense vector of real numbers, and each symbol or concept is represented as the set of unit activations: this allows to share similarities and some learned features among concepts. The distance between two concepts reflects the meaning, and their similarity.
-%TODO img p. 76
+\begin{center}
+	\includegraphics[scale=0.75]{51.png}
+\end{center}
 \subparagraph{Input or internal representation?} Symbolic and distributed refers to the input or the internal representation? We are talking in general, but \textbf{learning acts on the internal representation}. In general, distributed representation is used:
 \begin{list}{}{}
 	\item In input if you have a background knowledge to build it (if it's done improperly then it could hamper the task solving)
 	\item Automatically, by learning, if distributed representation can be used internally in the model (e.g. hidden neural network layers)\\
-	Typically, one-hot is used for the input and the model is free to develop internally the distribution representation needed for the task at hand
+	Typically, one-hot is used for the input and the model is free to develop internally the distributed representation needed for the task at hand
 \end{list}
 \subparagraph{Count the difference} Distributed representation can represent $n$ features with $k$ values to describe $k^n$ different concepts.
 \subparagraph{Sharing attributes} By sharing a learned feature we can share its concept, disentangling it from the task.
@@ -1037,7 +1039,8 @@ An example of \textbf{symbolic representation} is the \textbf{one-hot representa
 If we share that neuron, we share the concept of redness.
 \subparagraph{Beyond Neural Networks} The debate on distributed representation extend to the debate between \textbf{logic-inspired paradigms} and \textbf{neural network-inspired paradigms} for cognition.
 \subparagraph{Interpretability} Less easy for distributed representation.
-\paragraph{Deep Distributed Representation} Deep learning exploits distributed representation through many layers, obtained by composing different levels of abstraction or by a hierarchy of reused features. This compositionality, as already discussed, can lead to further exponential boos to efficiency. Globally, deep learning learn a distributed representation of the data by disentangling shared causal factors that generates the data through different levels of abstraction.
+\paragraph{Deep Distributed Representation} Deep learning exploits distributed representation through many layers, obtained by composing different levels of abstraction or by a hierarchy of reused features. This compositionality, as already discussed, can lead to further exponential boost in efficiency. Globally, deep learning learn a distributed representation of the data by disentangling shared causal factors that generates the data through different levels of abstraction.
+\pagebreak
 \paragraph{Deep Learning Techniques} Key techniques for training a layered neural network:
 \begin{list}{}{}
 	\item Originally: pretraining approaches
@@ -1055,9 +1058,9 @@ If we share that neuron, we share the concept of redness.
 	\item If the weights are big, the gradient grows exponentially (\textbf{exploding gradient})
 \end{list}
 Some approaches include the \textbf{gradient clipping}: if $||g||> v$ then $g = \frac{vg}{||g||}$ with $g$ being the gradient and $v$ the norm threshold, as to move in the gradient direction but bounding the weight update.\\
-Most of the heuristics try to deal with the problem of vanishing gradient tat hampers the training in early deep neural network in the low layers. Traditional activation functions, such as the hyperbolic tangent, have gradients in the range of $(-1,1)$ and the backpropagation computes gradients by the chain rule repeated through the layers. This has the effect of multiplying $n$ of these small numbers to compute gradients of the "front" layers (closer to the inputs), in a $n$-layer network: the gradient decreases exponentially with $n$, with the result of a very slow training in the front layers. Same with big weights (exploding gradients), but less frequent.\\
+Most of the heuristics try to deal with the problem of vanishing gradient that hampers the training in early deep neural network in the low layers. Traditional activation functions, such as the hyperbolic tangent, have gradients in the range of $(-1,1)$ and the backpropagation computes gradients by the chain rule repeated through the layers. This has the effect of multiplying $n$ of these small numbers to compute gradients of the "front" layers (closer to the inputs), in a $n$-layer network: the gradient decreases exponentially with $n$, with the result of a very slow training in the front layers. Same with big weights (exploding gradients), but less frequent.\\
 To deal with this, many approaches: Rprop, short-cut connections, randomized neural networks\ldots let's see the new ones.
-\subparagraph{ReLU} \textbf{Rectified Linear Unit}: $f(x) = \hbox{max}(0,x) = \left\{\begin{array}{l l}
+\subparagraph{ReLU} \textbf{Rectified Linear Unit}: $f(x) = \max(0,x) = \left\{\begin{array}{l l}
 0&\hbox{if }x< 0\\
 x&\hbox{if }x\geq 0\\
 \end{array}\right.$
@@ -1081,8 +1084,8 @@ Beyond ReLU there are:
 	\end{array}\right.$
 \end{list}
 \paragraph{Batch Normalization} Method that normalizes each batch by calculating each individual batch statistic such as mean and variance for each layer (\textbf{reparametrization}): normalize each matrix (databatch $\times$ activation of units) with mean and variance, by shifting values to zero-mean and unit variance, and include it in backpropagation.\\
-Normalizing inputs is a standard approach, batch normalization helps by making the data flowing between intermediate layers to stay normalize. It has a regularization effect, achieving faster learning and higher accuracy fir deep learning.
-\paragraph{Dropout} Method that randomly selects a subset of the network during its training. Can be explained in terms of:
+Normalizing inputs is a standard approach, batch normalization helps by making the data flowing between intermediate layers to stay normalized. It has a regularization effect, achieving faster learning and higher accuracy for deep learning.
+\paragraph{Dropout} Method that randomly selects and "ignores" a subset of the network units during its training. Can be explained in terms of:
 \begin{list}{}{}
 	\item Ensembling: implicit bagging, different sub-networks
 	\item Regularization
@@ -1100,28 +1103,28 @@ It also has regularization effect:\begin{list}{}{}
 	\item Avoids training all units on all training data, reducing units interactions
 	\item Variance reduction as for bagging
 	\item Insert structured noise\\
-	For example, recognize a face with the hidden unit for the nose, compare with standard regularization by adding deformed inputs with random noise)
+	For example, recognize a face with the hidden unit for the nose, compare it with standard regularization by adding deformed inputs with random noise.
 \end{list}
 Moreover, it regularizes each unit to be not merely a good feature but a feature that is good in many contexts (different sub-networks). It can be shown to be equivalent to L2 weight decays using a different $\lambda$ for each input, can be used for any model that uses distributed representation and SGD training and can be extended to any kind of random modification.
 \paragraph{L1 Regularization}
 Using the L1 norm (sum of absolute values) instead of the L2 norm in the penalty term. Favorite features elimination (weight zero) with respect to L2, which often only shrinks the weights without setting any of them to zero. This produces simpler final models.
 \paragraph{Adversarial Training} \textbf{Generative Adversarial Network}: two neural networks contesting with each other, one network generates candidates and the other evaluates them.
-\subsection{Random Weights Neural Networks} A randomized approach employs a degree of randomness as part of its constructive strategy. Randomness can be seen as an effective part of ML approaches: can enhance several aspects of ML methodologies (data processing, learning, hyperparameter selection\ldots) and randomization can be a key factor in building efficient ML models.\\
-Randomness can be present at different levels: to enhance predictive performance and/or to alleviate difficulties of classical ML methodologies. For example: data splitting to avoid overfitting (hold-out, K-fold,\ldots), data generation, learning (observation order for example with shuffling minibatches) and hyper-parameters selection (for example with random selection).
+\subsection{Random Weights Neural Networks} A randomized approach employs a degree of randomness as part of its constructive strategy. Randomness can be seen as an effective part of ML approaches: can enhance several aspects of Machine Learning methodologies (data processing, learning, hyperparameter selection\ldots) and randomization can be a key factor in building efficient Machine Learning models.\\
+Randomness can be present at different levels: to enhance predictive performance and/or to alleviate difficulties of classical Machine Learning methodologies. For example: data splitting to avoid overfitting (hold-out, K-fold,\ldots), data generation, learning (observation order for example with shuffling minibatches) and hyper-parameters selection (for example with random selection).
 \paragraph{Overview} Is it possible to exploit MLP/RNN architectures without long training cycles in the hidden layers? Long tradition of randomized neural networks, random weights, random projections\ldots (e.g. Random Vector Functional Link Neural Network, RVFL). Recently, popularization of other schemes including ELM (Extreme Learning Machine).\\
-Basic idea: a network containing a \textbf{randomly connected hidden layers}, i.e. \textbf{weights are fixed after random initialization} and \textbf{only the output weights are trained}.
+Basic idea: a network containing \textbf{randomly connected hidden layers}, i.e. \textbf{weights are fixed after random initialization} and \textbf{only the output weights are trained}.
 \paragraph{Structure}\begin{list}{}{}
 	\item \textbf{Input}
 	\item \textbf{Untrained hidden layer}\\
 	Non-linearly embeds the input into a high-dimensional feature space, where the problem is more likely to be solved linearly. Theoretically grounded on the Cover's Theorem
-	\item \textbf{Feature representeation $\phi$}
+	\item \textbf{Feature representation $\phi$}
 	\item \textbf{Trained readout layer}\\
 	Combines the features in the hidden space for output computation. Typically implemented by linear models
 	\item \textbf{Output}
 \end{list}
 \paragraph{Cover's Theorem} A complex pattern-classification problem, cast in a high-dimensional space non-linearly, is more likely to be linearly separable than in a low-dimensional space, provided that the space is not densely populated.\\
 In particular, using a deterministic mapping: assuming $l$ examples, lift them onto the vertexes of the $l-1$ dimension triangle (simplex), so that now every binary partition of the samples is linearly separable.\\
-It's the \textbf{same property exploited for kernels}.
+It's the \textbf{same property exploited by kernels}.
 \subsubsection{Feedforward Ranbdomized Neural Networks} Input-output relation is implemented through an untrained hidden layer, which implements a randomized basis expansion.
 \paragraph{Pros and cons} Large set of hidden unit plays an interesting role: projection non-linearly expands the dimension of an input vector as to make the data more separable. A large number of units can provide sufficient "basis expansion" to solve the task. Also it's extremely efficient, and many variants and improvements exists (incremental learning adding hidden neurons, pruning\ldots\\
 Of course smaller models, with smaller numbers of adaptive units (basis functions) trained on the specific task at hand appear more elegant (\textbf{random features} vs \textbf{learned features} approaches)
