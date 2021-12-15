@@ -1214,12 +1214,12 @@ Formal proofs of ordering is difficult.
 \end{list}
 providing the SOM with easy interpretability.
 \subsection{Recurrent Neural Networks}
-\paragraph{"The Neural Network That Remembers"} With short-term memory, recurrent neural networks are able to remember gaining amazing abilities. A recurrent neural network includes connections between neurons in the hidden layer, some of which feed back on themselves.
+\paragraph{"The Neural Network That Remembers"} With short-term memory, recurrent neural networks are able to remember, thus gaining amazing abilities. A recurrent neural network includes connections between neurons in the same hidden layer, some of which feed back on themselves.
 \begin{center}
 	\includegraphics[scale=0.75]{33.png}
 \end{center}
 In \textbf{feedforward} neural networks, the direction of the data flow is input $\rightarrow$ output. In \textbf{recurrent} neural networks, we add \textbf{feedback loops} connections in the network topology. The presence of self-loop connections provides the network with dynamical properties, leaving a memory (states) of the past computations in the model: this allows us to extend the representation capability of the model to the processing of sequences (and structured data).\\\\
-Whenever the output of the model depends on the history of the inputs or the domain is composed by varying-size sequences we talk about \textbf{sequential data}:
+Whenever the output of the model depends on the history of the inputs, or the domain is composed by varying-size sequences, we talk about \textbf{sequential data}:
 \begin{list}{}{}
 	\item Dynamical processes
 	\item Language
@@ -1246,7 +1246,7 @@ CNN extends this idea to 2D images. We must know the window dimension in advance
 	\includegraphics[scale=0.5]{35.png}
 \end{center}
 $$x(0) = 0$$
-$$x(t) = \tau(l(t),x(t-1)) = f(wl(t) + \overline{w}x(t-i) + \Theta)$$
+$$x(t) = \tau(l(t),x(t-1)) = f(wl(t) + \overline{w}x(t-1) + \Theta)$$
 With $f$ sigmoidal activation function, $\overline{w}$ recurrent weight and $\Theta$ bias. The state summarize the past information, the \textbf{context}: the encoding of the past is adaptive (free weights of the model).
 \paragraph{State Transition System - Recurrent Model} Given $x(0) = 0$, $\left\{\begin{array}{l}
 x(t) = \tau(x(t-1),l(t))\\
@@ -1264,7 +1264,7 @@ RNN are based on the following assumptions:
 \begin{list}{}{}
 	\item \textbf{Causality}: a system is causal if the output at time $t_0$ (or node $v$) only depends on inputs at time $t<t_0$ (or depends only on $v$ and its descendants).\\
 	Necessary and sufficient for internal state.
-	\item \textbf{Stationarity}: time invariance (after model training), i.e. the state transition function $\tau$ is independent of node $v$ of the sequence.\\
+	\item \textbf{Stationarity}: time invariant (after model training), i.e. the state transition function $\tau$ is independent of node $v$ of the sequence.\\
 	This means that $\tau$ is the same in any time $t$, regardless of the dimension of sequences.
 	\item \textbf{Adaptivity}: transition functions are realized by neural networks with free weights, hence they are \textbf{learned} from data.
 \end{list}
@@ -1273,13 +1273,13 @@ RNN are based on the following assumptions:
 	\includegraphics[scale=0.5]{38.png}
 \end{center}
 We can build a feedforward MLB (called \textbf{encoding network}) equivalent to the RNN given a specific input sequence. It's the replica of the model for each step, and stationarity $\Rightarrow$ weight sharing across unfolded layers. On this encoding network we can apply the backpropagation algorithm.
-\paragraph{Learning Algorithms} The learning algorithm must take into account the set of encode transitions developed by the model for each step of the inputs. \textbf{BPTT} (backpropagation through time) and \textbf{RTRL} (real time current learning) are \textbf{supervised} learning algorithms designed for recurrent neural networks. In different style, they compute the same gradient values of the output errors across an \textbf{unfolded} network that is equivalent to the recurrent one (encoding network). The vanish of gradients over this deep network can make difficult to learn long-term dependencies.
+\paragraph{Learning Algorithms} The learning algorithm must take into account the set of encode transitions developed by the model for each step of the inputs. \textbf{BPTT} (Backpropagation Through Time) and \textbf{RTRL} (Real Time Current Learning) are \textbf{supervised} learning algorithms designed for recurrent neural networks. In different style, they compute the same gradient values of the output errors across an \textbf{unfolded} network that is equivalent to the recurrent one (encoding network). The vanish of gradients over this deep network can make difficult to learn long-term dependencies.
 \paragraph{Advanced Models} It's a rapid growing research field, with many variants:
 \begin{list}{}{}
 	\item \textbf{LSTM} (Long Short-Term Memory): tries to solve the vanishing gradients problem by using "gate units" able to select the past/gradient flow. Not suitable for short series, these are born to address the need to retain long term memory.
-	\item \textbf{GRU} (Gated Recurrent Units): simplified LSTM
+	\item \textbf{GRU} (Gated Recurrent Units): simplified LSTMs
 	\item \textbf{BRNN} (Bi-Directional RNN): to consider both the left and right context
-	\item But also, to deal with gradient vanish issues: hessian-free optimizers, pre-training techiniques\ldots
+	\item But also, to deal with gradient vanish issues: Hessian-free optimizers, pre-training techniques\ldots
 \end{list}
 \paragraph{Related Approaches} \begin{list}{}{}
 	\item SOM/Unsupervised NN for sequential domains
@@ -1295,7 +1295,7 @@ Fractal machine plus reservoir computing: very efficient with the capability to 
 \begin{center}
 	\includegraphics[scale=0.5]{39.png}
 \end{center}
-Paradigm for efficiently model recurrent neural networks. An Echo State Network consists of:
+Paradigm to efficiently model recurrent neural networks. An Echo State Network consists of:
 \begin{list}{}{}
 	\item Large \textbf{reservoir} of sparsely connected recurrent units, \textbf{untrained} after a random initialization
 	\item A simple feed-forward \textbf{readout} of linear units \textbf{trained} by efficient linear methods (e.g. ridge regression)
