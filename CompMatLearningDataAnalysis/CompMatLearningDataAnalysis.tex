@@ -767,26 +767,26 @@ $A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge a
 	\item Exploiting the structure of $M$ (sparsity, similar columns\ldots)
 	\item Ensuring that the solution is numerically stable.
 \end{list}
-\subparagraph{Example: Support Vector Machines} Same setting as the first example, but $y_h\in\{1,-1\}$: want to linearly separate the two sets. Which separating hyperplane to choose? Intuitively, base on the margin: more margin, more robust classification.\\
-The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{||w_+||}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -$\\
-The \textbf{maximum margin separating hyperplane} is the solution of $min_w\{||w_+||^2\:|\:y_h(w_+x_h + w_0)\geq 1)\:\:h=1,\ldots,m\}$, and the margin is $\frac{2}{||w_+||}$ assuming any exists.\\
+\subparagraph{Example: Support Vector Machines} Same setting as the first example, but $y_h\in\{1,-1\}$: want to linearly separate the two sets. Which separating hyperplane to choose? Intuitively, based on the margin: more margin, more robust classification.\\
+The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{||w_+||}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -1$\\
+The \textbf{maximum margin separating hyperplane} is the solution of $\min_w\{||w_+||^2\:|\:y_h(w_+x_h + w_0)\geq 1), h=1,\ldots,m\}$, and the margin is $\frac{2}{||w_+||}$ assuming any exists.\\
 If it doesn't exists, soft-margin SVM: $\min_w ||w_+||^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
 Non differentiable, reformulation $\min_{w,\xi} ||w_+||^2 + C\sum_{h=1}^m \xi_h$
 \pagebreak
 \section{Optimization problems}
-Given $X$ \textit{any} set and $f:X\rightarrow R$ \textit{any} function, we have an optimization problem in the form $$(P)\:\:\:\:\:\:f_*=min\{f(x) : x\in X\}$$
+Given $X$ \textit{any} set and $f:X\rightarrow R$ \textit{any} function, we have an optimization problem in the form $$(P)\:\:\:\:\:\:f_*=\min\{f(x) : x\in X\}$$
 with $X$ \textbf{feasible region} and $f$ \textbf{objective function}.
-$$min\{f(x) : x\in X\} = -max\{-f(x) : x\in X\}$$
+$$\min\{f(x) : x\in X\} = -\max\{-f(x) : x\in X\}$$
 $x\in X$ is the \textbf{feasible solution}, often $X\subset F, x\in F-X$ \textbf{unfeasible solution}. We want (any) optimal solution $x_* \in X\:|\:\forall\:x\in X\:\:f(x_*)\leq f(x)$ and we don't care if $\exists\:x'\neq x_*\:|\:f(x')=f(x_*)$: \textbf{all optimal solutions are $\equiv$}. $f_* = f(x_*) = v(P)$ is the \textbf{optimal value} (which is \textbf{unique}) if $x_*$ exists, which it may not.
 \paragraph{Multi-objective optimization} Often we have multiple objective function, and often they have incomparable values (for example, loss and regularization in machine learning). There are two practical solutions:
 \begin{multicols}{2}
-\textbf{Scalarization}, maximize one of the losses compared to the others: 	$min\{f_1(x) + \alpha f_2(x)\:|\:x\in X\}$, but which $\alpha$?
+\textbf{Scalarization}, maximize one of the losses compared to the others: 	$\min\{f_1(x) + \alpha f_2(x)\:|\:x\in X\}$, but which $\alpha$?
 \begin{center}
 	\includegraphics[scale=0.33]{3.png}
 \end{center}
 \columnbreak
 \textbf{Budgeting}: bound the value of one of the losses\\
-	$min\{f_1(x)\:|\:f_2(x)\leq \beta_2,x\in X\}$, but which $\beta_2$?
+	$\min\{f_1(x)\:|\:f_2(x)\leq \beta_2,x\in X\}$, but which $\beta_2$?
 \begin{center}
 	\includegraphics[scale=0.33]{4.png}
 \end{center}
@@ -811,16 +811,16 @@ and on computers $x\in R$ is actually $x\in Q$ with up to 16 digits precision, s
 	\item \textbf{Absolute gap}: $\{a_i = A(x_i) = f(x_i) - f_*\}$ so $A(x) = f(x) - f_*$ ($\geq 0$)
 	\item \textbf{Relative gap}: $\{r_i = R(x_i) = \frac{f(x_i) - f_*}{|f_*|} = \frac{A(x_i)}{|f_*|}\}$ so $R(x) = \frac{f(x) - f_*}{|f_*|} = \frac{A(x)}{|f_*|}$ ($\geq 0$)
 \end{list}
-The relative gap is useful because $\forall\:\alpha>0$ we have that $(P)\equiv (P_\alpha) = min\{\alpha f(x)\:|\:x\in X\}$, and for the same $x_*$ we have $v(P_\alpha) = \alpha v(P) \Rightarrow$ same $R(x)$, different $A(x)$\\
+The relative gap is useful because $\forall\:\alpha>0$ we have that $(P)\equiv (P_\alpha) = \min\{\alpha f(x)\:|\:x\in X\}$, and for the same $x_*$ we have $v(P_\alpha) = \alpha v(P) \Rightarrow$ same $R(x)$, different $A(x)$\\
 But in general computing the absolute/relative gap is hard because we don't know $f_*$, which is what we want to estimate. So it's hard to estimate how good a solution is. Could argue that this is the "issue" in optimization: compute an estimate of $f_*$.
 \paragraph{Optimization is really hard} Impossible, even, because isolated minima can be anywhere, and restricting to $x\in X=[x_-, x_+]$ with $-\infty<x_-<x_+<+\infty$ doesn't help: still uncountable many points to try. Also $f$ can have isolated downward spike anywhere. Even on $X = [x_-, x_+]$ the spikes can be arbitrarily narrow.
 \paragraph{Optimization at least possible} We can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$, meaning with a fixed finite diameter. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\equiv$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\:\:|f(x) - f(y)| \leq L|x - y|\:\:\:\forall x,y\in X$$
 $f$ L-c $\Rightarrow$ doesn't "jump" and one $\epsilon$-optimum can be found with $O(\frac{LD}{\epsilon})$ evaluations by uniformly sampling $X$ with step $\frac{2\epsilon}{L}$. There's a bad news: no algorithm can work in less that $\Omega(\frac{LD}{\epsilon})$, but it's the worst case of $f$ (constant with one spike).\\
 The number of steps is inversely proportional to accuracy: just not doable for small $\epsilon$. Dramatically worse with $X\subset R^n$.\\
 Also generally $L$ is unknown and not easy to estimate, but algorithms actually require/use it.
-\subsection{Local Optimization} Even if I stumble in $x_*$ how do I recognize it? This is the difficult thing. It's simpler to start with a weaker condition: $x_*$ is the local minimum if it solves $min\{f(x)\:|\:f\in X(x_*, \epsilon) = [x_* - \epsilon, x_* + \epsilon]\}$ for some $\epsilon > 0$.\\
+\subsection{Local Optimization} Even if I stumble in $x_*$ how do I recognize it? This is the difficult thing. It's simpler to start with a weaker condition: $x_*$ is the local minimum if it solves $\min\{f(x)\:|\:f\in X(x_*, \epsilon) = [x_* - \epsilon, x_* + \epsilon]\}$ for some $\epsilon > 0$.\\
 Stronger notion: \textbf{strict} local minimum if $f(x_*) < f(y)\:\:\:\forall\:y\in X(x_*,\epsilon) - \{x_*\}$\\
-$f$ (strictly) \textbf{unimodal} on X if has minimum $x_* \in X$ and it is (strictly) decreasing on the left $[x_-, x_*]$ and (strictly) increasing on the right $[x_*, x_+]$. If $x_*$, then typically $\exists\:\epsilon>=\:|\:f$ is (strictly) unimodal on $X(x_*,\epsilon)$
+$f$ (strictly) \textbf{unimodal} on X if has minimum $x_* \in X$ and it is (strictly) decreasing on the left $[x_-, x_*]$ and (strictly) increasing on the right $[x_*, x_+]$. If $x_*$, then typically $\exists\:\epsilon>0\:|\:f$ is (strictly) unimodal on $X(x_*,\epsilon)$
 Most functions are not unimodal, but they are if you focus on the attraction basin of $x_*$ and restrict there. Unfortunately it's true for every local optimum, they all look the same.
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
