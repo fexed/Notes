@@ -49,10 +49,10 @@
 \pagebreak
 \section{Introduction}
 Exam: project (groups of 2) + oral exam.\\
-This course's goals is to make sense of the huge amounts of data, take something big and unwieldy and produce something small that can be used, a \textbf{mathematical model}.\\
-The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually is the computational bottleneck.\\
-ML is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
-Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}||Ax - b||_2$ which is easier and can be solved exactly.
+This course's goal is to make sense of the huge amounts of data, take something big and unwieldy and produce something small that can be used, a \textbf{mathematical model}.\\
+The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually this is the computational bottleneck.\\
+Machine Learning is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
+Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}\|Ax - b\|_2$ which is easier and can be solved exactly.
 \chapter{Numerical Analysis}
 \section{Quick recap of linear algebra}
 \begin{list}{}{}
@@ -82,7 +82,7 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}||Ax 
 	b_1\\b_2\\b_3\\b_4
 	\end{array}\right]$$
 	with $c_1, c_2, c_3$ and $c_4$ called coordinates.
-	\item \textbf{Basis}: tuple of vectors $v_1, v_2, \ldots, v_n\:|\:$ you can write all vectors $b$ in a certain space as a linear combination $v_1\alpha_1 + v_2\alpha_2 + \ldots + v_n\alpha_n$ with \textbf{unique} $a_1,\ldots,a_n$. The canonical basis is 
+	\item \textbf{Basis}: tuple of vectors $v_1, v_2, \ldots, v_n\:|$ you can write all vectors $b$ in a certain space as a linear combination $v_1\alpha_1 + v_2\alpha_2 + \ldots + v_n\alpha_n$ with \textbf{unique} $a_1,\ldots,a_n$. The canonical basis is 
 	$$c_1 = \left[\begin{array}{c}
 	1\\0\\0\\0
 	\end{array}\right]\:\:\:c_2 = \left[\begin{array}{c}
@@ -105,17 +105,17 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}||Ax 
 	\end{array}\right]\cdot 9$$
 	\item \textbf{Image} $Im A$ = set of vectors $b$ that we can reach with $A$
 	\item \textbf{Kernel} $Ker A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
-	\item \textbf{Invertible} $A$ if this problem has exactly one solution.\\
-	$\forall\:b\in R^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix$\:|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
-	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A \ b}.
+	\item \textbf{Invertible} $A$ if this problem has exactly one solution:\\
+	$\forall\:b\in R^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix $|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
+	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A $\setminus$ b}.
 	\item \textbf{Cost}, with $A\in R^{m\times n}, B\in R^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
 	In particular, $A, B$ squared $\Rightarrow AB$ costs $O(m^3)$. With $A, v$ vector $\Rightarrow$ $Av$ costs $O(m^2)$. Faster alternatives are not worth it usually. And remember that $AB \neq BA$ generally, and also that $CA = CB \not\Rightarrow A = B$ with $C$ matrix.\\
 	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
 \end{list}
 \paragraph{} Why a real valued function? Strong assumption, given $x'$ and $x''$, I can always tell which one I like best (\textbf{total order} of R). Often more than one objective function, with contrasting and/or incomparable units (ex: loss function vs regularity in ML).\\
 But $R^k$ with $k > 1$ has no total order $\Rightarrow$ no \textit{best} solution, only non-dominated ones.\\
-Two practical solutions: maximize return with budget on maximum risk or maximize...\\
-Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, the problem $P$ is unbounded below. Hardly ever happens in ML, because loss and regularization are $\geq 0$\\
+Two practical solutions: maximize return with budget on maximum risk or maximize\ldots\\
+Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, if the problem $P$ is unbounded below). Hardly ever happens in ML, because losses and regularizations are $\geq 0$\\
 Also impossible if $f > -\infty$ but $\not\exists x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions ($\epsilon$-optima). On PC $x\in R$ is in fact $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
 Anyway finding the exact $x_*$ is impossible in general.
 \paragraph{Norms}\begin{list}{}{}
@@ -140,27 +140,28 @@ $A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda$, with $\Lambda = \l
 \end{array}\right]$\\
 Given $x\in R^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
 Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
-Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same for $\alpha v+\beta w$ (linear combination). Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a masis.
+Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same for $\alpha v+\beta w$ (linear combination). Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a basis.
 \paragraph{Symmetry} $A$ is symmetric if $A = A^T$
 \paragraph{Spectral Theorem} For a symmetric matrix $A\in R^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
 \paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in R^{m\times m}$ we can consider the function $x\in R^m\mapsto f(x) = x^T Qx \in R$\\
 \textbf{Theorem} For all symmetric matrix $Q \in R^{m\times m}$, $\lambda_{\min}||x||^2 \leq x^TQx\leq \lambda_{\max}||x||^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
-\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
-Positive definite if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
+\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite ($Q \succeq 0$) if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
+Positive definite ($Q \succ 0$) if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
 \paragraph{Recall theorem} $\lambda_{\min}(x^T x) \leq x^T Q x \leq \lambda_{\max}(x^T x)$ for all symmetric $Q$ so $\lambda_{\min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{\max}$\\
 Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
 $$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
 \paragraph{Generalization for complex matrices} $||x||^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
 % fine recap lin alg
+\section{SVD}
 \paragraph{Singular Value Decomposition} Each $A\in R^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_i$ on the diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
 The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
 Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
 \sigma_1\\ & \sigma_2\\ & & \ddots\\ & & & \sigma_m
 \end{array} \right]\left[\begin{array}{c}
-v_1^T\\v_2^T\\\vdots\\v_m^t
+v_1^T\\v_2^T\\\vdots\\v_m^T
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
 Geometric idea: there is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
-$\{\sigma_i\}$: singular values of $A$, defined uniquely for each $A$\\
+$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}\\
 Rectangular SVD: each $A\in R^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in R^{m\times m}$, $V \in R^{n\times n}$ are orthogonal and $\Sigma\in R^{m\times n}$ is diagonal, so $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
@@ -176,7 +177,7 @@ We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1
 The optimal solution of $\min{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{\min(m,n)}\sigma_{\min(m,n)} v_{\min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
 \paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
-\section{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
+\subsection{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
 As a statistical estimator: suppose my scores are of the form $A_{ij} = u_i v_j + \epsilon_{ij}$ with $\epsilon_{ij}$ being the error in the score for instance gaussian with variance $\lambda$.\\
 The rank 1 approx of $(u_1\sigma_1)$, $v_1$ given by SVD is the one that minimizes $\sum (A_{ij} - u_iv_j)^2 = ||A-X_1||_F^2 = \sum \epsilon_{ji}^2$. This is the maximum-likelihood estimation of abilities $(u_1)_i, (v_1)_j$.\\\\
 The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which can be viewed as first approximation plus corrections.\\\\
@@ -187,7 +188,7 @@ Best rank-2 $X_2 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T$\\
 Best rank-3 $X_3 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T + u_3 \sigma_3 v_3^T$
 And so on\ldots\\
 The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.\\\\
-What is $||A - X_k||_F = \sqrt{\sum (a_{ij} - x_{ij})^2} = ||U\Sigma V^T - U[$main diagonal of $\sigma_i$ untile $\sigma_k] V^T|| = ||U([\ldots$ %TODO
+What is $||A - X_k||_F = \sqrt{\sum (a_{ij} - x_{ij})^2} = ||U\Sigma V^T - U[$main diagonal of $\sigma_i$ until $\sigma_k] V^T|| = ||U([\ldots$ %TODO
 $= \sqrt{\sum_{i=k+1}^{min(m,n)} \sigma_i^2}$
 \paragraph{Linear Least Squares problems} Given vectors $a_1,\ldots,a_n\in R^m$, so that $A = [a_1|\ldots|a_n]\in R^{m\times n}$, and targets $b\in R^m$, find $x_1,\ldots,x_n\in R\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
 Not always solvable, for example $\left[\begin{array}{c}
@@ -201,11 +202,11 @@ Not always solvable, for example $\left[\begin{array}{c}
 \end{array}\right]$\\
 In general $\min{x\in R^m} ||Ax - b||_2 = \min{x\in R^m} \sqrt{\sum ((Ax)_i - b_i)^2}$\\
 The special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible. Typical case il $A$ long thin, we cannot get all vectors $b$ but still $min_{x\in R^m} ||Ax - b||_2$ is a question that makes sense. 
-\paragraph{Polynomial Fitting} Statistical version: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $min_{coeff}||Ax - y||_2^2$
-\paragraph{Theory of least-squares problems} When does $min ||Ax-b||_2$ have a unique solution? With $A \in R^{m\times n}$\\
-We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = min||Ax-b||$ with unique $x$.\\
+\paragraph{Polynomial Fitting} Statistical version: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{coeff}||Ax - y||_2^2$
+\paragraph{Theory of least-squares problems} When does $\min ||Ax-b||_2$ have a unique solution? With $A \in R^{m\times n}$\\
+We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = \min||Ax-b||$ with unique $x$.\\
 We say that $A\in R^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\} \Leftrightarrow$ there is no $z\in R^n z\neq 0\:|\:Az=0\Leftrightarrow rk(A) = n$ and this can only happen is $m\geq n$\\
-\subparagraph{Theorem}The least-squares problem $min ||Ax-b||$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
+\subparagraph{Theorem}The least-squares problem $\min ||Ax-b||$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
 \textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
 \textbf{Proof} $Ax \neq 0\:\:\forall\:z\in R^n, z\neq 0$
 \begin{list}{$\Leftrightarrow$}{}
@@ -214,9 +215,9 @@ We say that $A\in R^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\
 	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in R^n, z\neq 0$
 	\item $z^TA^TAz\neq 0\:\:\forall\:z\in R^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
 \end{list}
-By manipulating the original problem $min_{x\in R^n} ||Ax-b||_2$ we obtain $$min ||Ax-b||_2 = min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
+By manipulating the original problem $\min_{x\in R^n} ||Ax-b||_2$ we obtain $$\min ||Ax-b||_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
 $f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\\\
-So the least-squares problem $min_x ||Ax-b||$ has unique solution
+So the least-squares problem $\min_x ||Ax-b||$ has unique solution
 \begin{list}{$\Leftrightarrow$}{}
 	\item $f(x)$ has a unique minimum point
 	\item $2A^TA = Q \succ 0$ (positive definite)
@@ -238,15 +239,15 @@ Possible optimizations:
 	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
 \end{enumerate}
 \paragraph{Pseudoinverse} $x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in R^{m\times n}$ then $A^+ \in R^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in R^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in R^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
-As consequences, if $x_1$ is solution of $min||Ax - b_1||$ and $x_2$ is solution of $min||Ax - b_2||$ then $x_1+x_2$ is solution of $min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
+As consequences, if $x_1$ is solution of $\min||Ax - b_1||$ and $x_2$ is solution of $\min||Ax - b_2||$ then $x_1+x_2$ is solution of $\min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
 $y \in R^{1\times m}$ row vector "target"\\
-The problem is $min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
+The problem is $\min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
 \section{QR factorization} Given $x\in R^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]$ with $e_1 = \left[\begin{array}{c}
 1\\0\\\vdots\\0
 \end{array}\right]$\\
-Since $H$ is orthogonal, $||x|| = ||\left[\begin{array}{c}
+Since $H$ is orthogonal, $||Hx|| = ||x|| = ||\left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]|| = |s| \Rightarrow s = \pm||x||$. We will find $H$ in a very specific form $$H = I - \frac{2}{v^Tv}vv^T=$$ $$= I - \frac{2}{||v||^2}vv^T =$$ $$= I - 2uu^T$$ for a certain $v\in R^n$ with $u = \frac{v}{||v||}$, so it has norm $=1$ and is parallel to $v$. This form is called \textbf{Householder reflector}.\\
 \textbf{Lemma}: for every $v\in R^n$, $H$ is orthogonal \textit{and} symmetric. Proof:
@@ -261,7 +262,7 @@ By computing $Hx$ as $x - 2u(u^T x)$, meaning you compute $\alpha = u^Tx$ in $O(
 	\item if $x_1 \geq 0$, we take $s = -||x||$ and $y = \left[\begin{array}{c}
 	-||x||\\0\\\vdots\\0
 	\end{array}\right]$
-	\item if $x_1 z 0$, we take $s = ||x||$ and $y = \left[\begin{array}{c}
+	\item if $x_1 < 0$, we take $s = ||x||$ and $y = \left[\begin{array}{c}
 	||x||\\0\\\vdots\\0
 	\end{array}\right]$
 \end{list}
@@ -340,7 +341,7 @@ $$\not Q_3^T\not Q_3Q_2Q_1A = Q_3^TQ_4^TR$$
 $$\not Q_2^T\not Q_2Q_1A = Q_2^TQ_3^TQ_4^TR$$
 $$\not Q_1^T\not Q_1A = Q_1^TQ_2^TQ_3^TQ_4^TR$$
 So $A = Q_1^TQ_2^TQ_3^TQ_4^T R$, and $Q_i = Q_i^T$ so we can omit transpose, giving $A = QR$ with $Q$ orthogonal and $R$ triangular.\\\\
-The QR factorization can be used to solve least squares problems $min ||Ax-b||_2$ with $A\in R^{m\times n}$ and $m\geq n$, $b\in R^m$.\\$A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
+The QR factorization can be used to solve least squares problems $\min ||Ax-b||_2$ with $A\in R^{m\times n}$ and $m\geq n$, $b\in R^m$.\\$A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
 R_1\\\hline\\0
 \end{array}\right]$ with $Q_1\in R^{m\times n}, Q_2\in R^{m\times m-n}, R_1\in R^{n\times n}$ and the last part of $n\times m-n$ zeroes. We rework the objective function $$||Ax-b|| = ||QRx-b||=||Q^T(QRx-b)||=||Rx-Q^Tb|| = \:\:\vline\:\vline\left[\begin{array}{c}
 R_1\\0
@@ -394,7 +395,7 @@ The problem is that on computers the zeroes are very often not zeroes. Even incl
 \end{list}
 Then $|\sigma_i - \overline{\sigma_i}| \leq ||E||_2$\\
 The effect of noise is that there are longer relative changes to smaller singular values, another reason why it's beneficial to drop them.
-\paragraph{Tikhonov Regularization/Ridge Regression} Another solution, alternative to truncated SVD. Change the problem to $min_{x\in R^n} ||Ax-b||^2 + \lambda^2||x||^2 = min||\left[\begin{array}{c}
+\paragraph{Tikhonov Regularization/Ridge Regression} Another solution, alternative to truncated SVD. Change the problem to $\min_{x\in R^n} ||Ax-b||^2 + \lambda^2||x||^2 = \min||\left[\begin{array}{c}
 A\\\lambda I
 \end{array}\right]x - \left[\begin{array}{c}
 b\\0
@@ -490,8 +491,8 @@ $$||A\overline{x}-b||=||f-E\overline{x}||\leq ||f||+||E||\cdot||\overline{x}||=O
 $$\frac{||A\overline{x}-b||}{||A||\cdot||x||}=O(u)$$
 And typically $||A||\cdot||x||\simeq ||b||$\\
 So with backward stable algorithms we have \textbf{small} (relative) \textbf{residuals} $O(u)$.\\
-Suppose $\overline{x}$ computed somehow has a small $||r||=||A\overline{x}-b||$. Is this a quarantee for $\frac{||\overline{x}-x||}{||x||}$ to be small?
-\subparagraph{Theorem}: $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{||\overline{x}-x||}{||x||}\leq K(A)\cdot\frac{||r||}{||b||}$$
+Suppose $\overline{x}$ computed somehow has a small $||r||=||A\overline{x}-b||$. Is this a guarantee for $\frac{||\overline{x}-x||}{||x||}$ to be small?
+\subparagraph{Theorem} $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{||\overline{x}-x||}{||x||}\leq K(A)\cdot\frac{||r||}{||b||}$$
 \textbf{Proof}: $\overline{x}$ is the exact solution of $A\overline{x}=b+r$ and the condition number bound gives $\frac{||\overline{x}-x||}{||x||}\leq K(A)\frac{||(b+r)-b||}{||b||}$\\
 We can ask the same question for LS problems: when is small? Not $r$ in general. The gradient of $f(x) = ||Ax-b||^2$ is though 
 $$\nabla f(x) = 2A^TAx-2A^Tb = 2\cdot(\hbox{residual of normal equations}) = 2r$$
@@ -499,8 +500,22 @@ $\frac{||\overline{x}-x||}{||x||}\leq K(A^TA) = K(A)^2$, and the relative error 
 Recalling that with $A=Q_1R_1$ QR factorization, $||Ax-b||=||\left[\begin{array}{c}
 Q_1^T(Ax-b)\\Q_2^T(Ax-b)
 \end{array}\right]||$
-we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $min||Ax-b||$, then $\frac{||\overline{x}-x||}{||x||}\leq R_{rel, b\rightarrow x}\cdot\frac{||r_1||}{||b||}$\\
-\textbf{Proof}: replay the solution of the LS problems via QR with $\overline{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: \texttt{todo} %TODO l12.pdf p.4
+we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $\min||Ax-b||$, then $\frac{||\overline{x}-x||}{||x||}\leq K_{rel, b\rightarrow x}\cdot\frac{||r_1||}{||b||}$\\
+\textbf{Proof}: replay the solution of the LS problems via QR with $\overline{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: $$\|A\overline{x}-\hat{b}\| = \|\left[\begin{array}{c}
+Q_1^T(A\overline{x}-\hat{b})\\Q_2^T(A\overline{x}-\hat{b})
+\end{array}\right]\|=\|\left[\begin{array}{c}
+Q_1^T(A\overline{x}-b-Q_1r_1)\\
+Q_2^T(A\overline{x}-\hat{b})
+\end{array}\right]\|=$$
+$$=\|\left[\begin{array}{c}
+Q_1^T(A\overline{x}-b)-Q_1^TQ_1r_1)\\
+Q_2^T(A\overline{x}-\hat{b})
+\end{array}\right]\|=\|\left[\begin{array}{c}
+0\\
+Q_2^T(A\overline{x}-\hat{b})
+\end{array}\right]\|$$
+because $Q_1^TQ_1=I$.\\
+And this $\Rightarrow\overline{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 \section{Algorithms for square linear systems $Ax=b$}
 \subsection{Gaussian Elimination}
 \paragraph{Complexity} $\frac{2}{3}n^3$ (half of QR)
