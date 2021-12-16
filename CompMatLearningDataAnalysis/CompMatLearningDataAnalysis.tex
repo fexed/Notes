@@ -525,8 +525,8 @@ And this $\Rightarrow\overline{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
 Ly=b\\Ux=y
 \end{array}\right.$ is $2n^2$\\
-Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $||\overline{A}-A||\leq O(u)\cdot||L||\cdot||U||$, so all fine if $||L||$ and $||U||$ are not too larger than $||A||$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and $p\:|\:|b_p|=max|b_i|$ for $i=k,k+1,\ldots,n$\\
-Swapping rows is equivalent to multiplying by $P_k$, and $I$ with the $k$ and $p$ rows swapped.
+Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $||\overline{A}-A||\leq O(u)\cdot||L||\cdot||U||$, so all fine if $||L||$ and $||U||$ are not too larger than $||A||$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max|b_i|$ for $i=k,k+1,\ldots,n$\\
+Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
 $$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
 $$PA = LU$$
 $$A = P^TLU$$
@@ -576,8 +576,8 @@ Cholensky and LDL for positive definite matrices are stable even without pivotin
 \end{list}
 All of them come with sparse variants, with "list of non-zeroes"-based storage. \textbf{Problem}, fill-in: LU may be much less sparse than $A$, and at some point time/space becomes scarce.
 \subsection{Iterative Methods} $x^{(1)}, x^{(2)}, x^{(3)},\ldots$ sequence of vectors that converges to the solution $x$ of $Ax = b$\\
-Black-box methods: they only need a black-box function $\lambda_0v=Av$ that computer $Av$ given $v$. Fast whenever computing $Av$ for a given $v$ is fast, $O(nnz)$ for a sparse matrix $A$ with $nnz$ non-zeroes.
-\paragraph{Idea} If $A$ is positive definite, solving $Ax=b$ is finding $min\:\frac{1}{2}x^TAx - b^Tx$ with $f(x) = \frac{1}{2}x^TAx - b^Tx$ strongly convex. $\nabla f(x) = Ax-b$\\Most gradient-based algorithms produce iterates that belong to the same subspace, $x_0 = 0$\begin{list}{}{}
+Black-box methods: they only need a black-box function $\lambda_0v=Av$ that computer $Av$ given $v$. Fast whenever computing $Av$ for a given $v$ is fast, $O(nnz)$ for a sparse matrix $A$ with $nnz$ non-zero elements.
+\paragraph{Idea} If $A$ is positive definite, solving $Ax=b$ is finding $\min\:\frac{1}{2}x^TAx - b^Tx$ with $f(x) = \frac{1}{2}x^TAx - b^Tx$ strongly convex. $\nabla f(x) = Ax-b$\\Most gradient-based algorithms produce iterates that belong to the same subspace, $x_0 = 0$\begin{list}{}{}
 	\item $\nabla f(x_0) = -b$, $x_1 = x_0+\alpha d=$ multiple of $b$
 	\item $\nabla f(x_1) = Ax_1-b=$ linear combination of $Ab$ and $b$, and $x_2=x_1+\alpha\nabla f(x_1) =$ linear combination of $Ab$ and $b$
 	\item $\nabla f(x_2) = Ax_2-b=$ linear combination of $A^2b$, $Ab$ and $b$, and $x_3=x_2+\alpha\nabla f(x_2) =$ linear combination of $A^2b$, $Ab$ and $b$
@@ -591,7 +591,7 @@ $$ = \{v=p(A)b\:|\:\hbox{for all polynomials }p(t)=\alpha_0+\alpha_1t+\ldots+a_{
 For now we assume that $b, Ab, \ldots, A^{n-1}b$ are linearly independent.\\
 $K_n(A,b)$ is a linear subspace means that $v,w\in K_n(A,b)\Rightarrow \alpha v+\beta w\in K_n(A,b)$\\
 $v\in K_n(A,b)\Rightarrow v=(\alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1} A^{n-1})b$ with $\alpha_{n-1}\neq 0 \Rightarrow Av = (\alpha_0A + \alpha_1 A^2+\ldots + \alpha_n A^n)b \in K_{n+1}(A,b)$ and also $v\in K_n(A,b) - K_{n-1}(A,b)\Rightarrow Av \in K_{n+1}(A,b)- K_n(A,b)$\\
-By composing $b$, linear combinations of already computed vectors and products of already computed vectors times $A$, one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you combine (3).\\
+By composing $b$, linear combinations of already computed vectors and products of already computed vectors times $A$, one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you combine.\\ % (3).\\
 Can we look for the best approximation of the solution of a certain problem, for instance a linear system $Ax=b$, inside $K_n(A,b)$?
 $$K_n(A,b) = \{\alpha_0b+\ldots + \alpha_{n-1}A^{n-1}b\:|\:\alpha_i\in R\} =$$ $$= \left\{\left[\begin{array}{c | c | c | c | c}
 b & Ab &A^2b & \ldots & A^{n-1}b
