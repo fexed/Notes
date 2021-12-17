@@ -1032,14 +1032,14 @@ Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 	\item \textbf{Trust region}: first choose $\alpha_i\in R$ (\textbf{trust radius}), then $d_i$
 \end{list}
 The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
-\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in argmin\{L_i(x) : x\in R^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
-It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = argmin\{\lim_{t\to 0} \frac{f(x+td)}{t}\} = -\nabla f(x_i) =$ steepest descent direction.\\
-$\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ groes $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
+\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in arg\min\{L_i(x) : x\in R^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
+It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = arg\min\{\lim_{t\to 0} \frac{f(x+td)}{t}\} = -\nabla f(x_i) =$ steepest descent direction.\\
+$\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
 \paragraph{Step selection} The issue is to find the Goldilocks Step $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
 \begin{list}{}{}
 	\item \textbf{Fixed Stepsize} (FS): $\forall\:i\:\:\:\alpha_i = \overline{\alpha}$ (how is chosen?)\\
 	Most inexpensive.
-	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in argmin\{f(x_i+\alpha d_i\}\:|\:\alpha\geq 0\}$\\
+	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in arg\min\{f(x_i+\alpha d_i\}\:|\:\alpha\geq 0\}$\\
 	Most expensive but may converge faster.
 \end{list}
 Of course, something in the middle is better. $\phi'_i$ low-degree polynomial $\Rightarrow f(x_i+\alpha d_i) = \phi_{x_i,d_i}(\alpha) = \phi_i(\alpha)$
@@ -1061,7 +1061,7 @@ This becomes linear convergences ($\lambda_1,\lambda_{n}$ being respectively the
 	\item Simple $A(x_{i+1}) \leq (1-\frac{\lambda_n}{\lambda_1})A(x_i)$
 	\item Elaborated $A(x_{i+1}) \leq \frac{\lambda_1 - \lambda_n}{(\lambda_1 - \lambda_n)^2}A(x_i)$
 \end{list}
-The good news is that $n$ doesn't appear, it's \textbf{dimension-independent} so doable for very large scale machine learning. The bad news is that $r\rightarrow 1$ as conditioning of $Q = \frac{\lambda_1}{\lambda_n}\rightarrow\infty$
+The good news is that $n$ doesn't appear, it's \textbf{dimension-independent} so doable for very large scale machine learning. The bad news is that the rate of convergence $r\rightarrow 1$ as conditioning of $Q = \frac{\lambda_1}{\lambda_n}\rightarrow\infty$
 \paragraph{When linear convergence may not be enough} The convergence is fast if $\lambda_1\simeq \lambda_n$ (one iteration for $||x||^2$) and rather slow if $\lambda_1 >> \lambda_n$. Intuitively, the algorithm zig-zags a lot when level sets are very elongated. Another bad news is that there may be an "hidden dependency": $\lambda_1$ and $\lambda_n$ may depend on $n$ and $\frac{\lambda_1}{\lambda_n}$ may grow as $n\rightarrow\infty$.\\
 Let's extend it to every function.
 \subsubsection{Gradient methods for general functions}
@@ -1086,7 +1086,7 @@ A bad news is that the LS should become more accurate as the algorithm proceeds,
 Usually works well in practice with arbitrary fixed $\epsilon'$
 \paragraph{Notes on the stopping criterion} One would want $A(x_i)<\epsilon$ or $R(x_i) < \epsilon$ as stopping criterion, the issue is that $f_*$ is often unknown and cannot be used online. We need a lower bound $\underline{f} \leq f_*$, tight at least towards termination, but in general there are no good $\underline{f}$ available because good estimates of $f_*$ are hard to get.\\
 We can use $||\nabla f(x_i)||$ as proxy of $A(x_i)$ (small $\Rightarrow$ small) but the exact relationship is hard to assess, so choosing $\epsilon$ is not obvious.\\
-Sometimes we use a relative stopping condition $||\nabla f(x_i)||\leq \epsilon||\nabla f(x_0)||$, and sometimes $||\nabla f||$ has some meaning that can be used. Sometimes, we don't really care is $A(x_i)$ or $R(x_i)$ are small (machine learning).
+Sometimes we use a relative stopping condition $||\nabla f(x_i)||\leq \epsilon||\nabla f(x_0)||$, and sometimes $||\nabla f||$ has some meaning that can be used. Sometimes, we don't really care if $A(x_i)$ or $R(x_i)$ are small (machine learning).
 \paragraph{Efficiency} The efficiency is basically the same.\\
 With $f\in C^2, x_*$ local minimum such that $\nabla^2f(x_*)$ positive definite, exact LS $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}_{i\geq k}\rightarrow f_*$ linearly for large enough $k$, with $r = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}^2$ with $\lambda_1,\lambda_n$ those of $\nabla^2 f(x_*)$\\
 The result can be extended to inexact LS with $r\simeq 1-\frac{\lambda_n}{\lambda_1}$ (worse), with "$\simeq$" depending on LS parameters.
@@ -1134,15 +1134,15 @@ The derivative has to be a bit closer to $0$, but can be $>>0$: there's a strong
 \end{list}
 We have that $(A)\cap (W)$ captures all local minima (and maxima), usually $m_1$ close to $1$, and $(A)\cap(W')$ ensures $\phi'(\alpha) \not >\not >0$\\
 Such points always exists.
-\paragraph{Amijo-Wolfe in practice} $m_1$ small enough so that local minima are not cut: just go for the local minima and stop whenever $(A)\cap (W)$ or $(W')$ holds. Hard to say if $m_1$ is small enough, usually $m_1 = 0.0001$ is enough. Specialized LS can be constructed for the odd case it's not, with some more logic for the nasty cases.\\
-A simpler version: "backtracking" LS, only check $(A)$
+\paragraph{Amijo-Wolfe in practice} $m_1$ small enough so that local minima are not cut: just go for the local minima and stop whenever $(A)\cap (W)$ or $(W')$ holds. Hard to say when $m_1$ is small enough, usually $m_1 = 0.0001$ is enough. Specialized LS can be constructed for the odd case it's not, with some more logic for the nasty cases.\\
+A simpler version: "backtracking" LS, only checking $(A)$
 \begin{lstlisting}[style=myPython]
 procedure alpha = BLS(phi, alpha, m1, tau)  # tau < 1
 	while(phi(alpha) > phi(0) + m1*alpha*dphi(0)):
 		alpha = tau*alpha
 \end{lstlisting}
 With \texttt{dphi(0)} meaning $\phi'(0)$\\
-Recall that $\exists\:\overline{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\overline{\alpha}_i]$. Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with\\$h_i\geq min\{k\:|\:\tau^k\leq \overline{\alpha}_i\}$
+Recall that $\exists\:\overline{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\overline{\alpha}_i]$. Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with\\$h_i\geq \min\{k\:|\:\tau^k\leq \overline{\alpha}_i\}$
 $$\overline{\alpha}_i \geq \overline{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \hbox{\textbf{convergence}}$$
 We need conditions on $f$ to get it:
 \begin{list}{}{}
@@ -1207,7 +1207,7 @@ Secant equation $(S)\:\:\:\:H_{i+1}s_i = y_i$\\
 $(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$ and the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
 So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
 Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$. Assuming an AWLS, $(C)$ can always be satisfied.
-\paragraph{DFP} With the three properties we have $H_{i+1} = argmin\{||H-H_i||\:|\:(S), H\succeq 0\}$\\
+\paragraph{DFP} With the three properties we have $H_{i+1} = arg\min\{||H-H_i||\:|\:(S), H\succeq 0\}$\\
 Needs appropriate $||\:\:||$: \textbf{Davidon-Fletcher-Powell formula}
 \begin{list}{}{}
 	\item[$(DFP)$] $H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$
@@ -1220,7 +1220,7 @@ Actually need $B_{i+1} = H_{i+1}^{-1}$: \textbf{Sherman-Morrison-Woodbury formul
 \end{list}
 $O(n^2)$ per iteration, just matrix-vector products and no inverses.\\
 This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficient but can do better.
-\paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = argmin\{||B-B_i||\:|\:(S),B\succeq 0\}$\\
+\paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = arg\min\{||B-B_i||\:|\:(S),B\succeq 0\}$\\
 \textbf{Broyden-Felcther-Goldfarb-Shanno formulae} still $O(n^2)$\begin{list}{}{}
 	\item[$(BFGS)$] $H_{i+1} = \frac{H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{s_i^TH_is_i}$
 	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T = B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
@@ -1253,18 +1253,18 @@ It's \textbf{optimal} $O(\frac{LD^2}{\sqrt{\epsilon}}$ for $L$-smooth not $\tau$
 %TODO poormans' directions, heavy ball gradient and accelerated gradient
 \subsection{Less-Than-Gradient Methods}
 \paragraph{Stochastic Gradient} The motivation comes from the incremental a.k.a. stochastic gradient in ML.\\
-We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in R^h\}_{i\in I}$ inputs and $y=\{y_i\in R^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):R^h\rightarrow R^k$ parametric on $w\in R^n$ with $l:R^k\times R^k \rightarrow R$ \textbf{loss function} (could be $l_i$), fitting $$min\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in R^n\}$$
+We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in R^h\}_{i\in I}$ inputs and $y=\{y_i\in R^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):R^h\rightarrow R^k$ parametric on $w\in R^n$ with $l:R^k\times R^k \rightarrow R$ \textbf{loss function} (could be $l_i$), fitting $$\min\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in R^n\}$$
 $\nabla f(w) = \sum_{i\in I}\nabla f_i(w)$ with $m >> n$ we have a sum of a very large number of terms.\\
 A trivial case: $\pi(x;w) = \langle x,w\rangle$, $l=\frac{d^2}{2}\equiv$ linear least squares.$$f_i(w) = \frac{(y_i-\langle X_i, w\rangle)^2}{2}\:\:\:\:\:\:\:\:\nabla f_i(w) = -X_i(y_i - \langle X_i, w\rangle)$$
 Each $\nabla f_i$ is cheap, but computing the full $\nabla f$ is already costly.\\
-\textbf{Intuition}: $X_i$ are independent and identically distributed $\Rightarrow\nabla f_i$ are i.i.d. too $\Rightarrow$ "many of them will cancel out" so a \textbf{small sample} is enough to compute a close $\simeq$ to the "true" $\nabla f$: $K\subset I$ "small", so $\nabla f_K(w) = \sum_{i\in K}\nabla f_i(w) =$ incremental gradient. Cheaper but $-\nabla f_K$ is not a descent direction, a different analysis is needed.\\\\
-How to choose $K$? What is the better $|K|$? Apparently, no better way than \textbf{random}: \textbf{stochastic gradient}. With $K=I$ "batch" and $|K|<m$ mini-batch. An extreme version, on-line: observations used one-by-one and discarded (no memory).
-\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$min\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in R^n\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{||w||_2^2}{2}\in C^1$ with $\nabla\Omega(w) = w$.\\
+\textbf{Intuition}: $X_i$ are independent and identically distributed $\Rightarrow\nabla f_i$ are i.i.d. too $\Rightarrow$ "many of them will cancel out" so a \textbf{small sample} is enough to compute a close $\simeq$ to the "true" $\nabla f$: $K\subseteq I$ "small", so $\nabla f_K(w) = \sum_{i\in K}\nabla f_i(w) =$ incremental gradient. Cheaper but $-\nabla f_K$ is not a descent direction, a different analysis is needed.\\\\
+How to choose $K$? What is the better $|K|$? Apparently, no better way than \textbf{random}: \textbf{stochastic gradient}. With $K = I$ we have a "batch" and with $K\subset I \Leftrightarrow |K| < m$ a "mini-batch". An extreme version, on-line: observations used one-by-one and discarded (no memory).
+\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$\min\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in R^n\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{||w||_2^2}{2}\in C^1$ with $\nabla\Omega(w) = w$.\\
 The regularization simplifies the model and reduces the number of parameters (feature selection).
 \paragraph{Smooth methods fail on nonsmooth functions} With a nonsmooth function, many directions point outside, not giving a descent direction. But if $f$ is convex, it can be exploited.
-\subsubsection{Convex Nondifferentiable Functions}\
+\subsubsection{Convex Nondifferentiable Functions}
 \paragraph{Subgradients and subdifferentials} $s$ \textbf{subgradient} of $f$ at $x$: $f(y)\geq f(x) + s(y-x)$, $\forall\:y\in R^n$\\
-By changing $s$ we have \textbf{too much information} of the first-order. so $s$ it's a \textbf{direction}.
+By changing $s$ we have \textbf{too much information} of the first-order. So $s$ it's a \textbf{direction}.
 \begin{center}
 	\includegraphics[scale=0.5]{7.png}
 \end{center}
@@ -1273,14 +1273,14 @@ For $x$ on the border of dom$(f)$, $||s||\rightarrow\infty$, while for $s=0\Righ
 \begin{list}{}{}
 	\item $\partial f(x) = \{\nabla f(x)\}\Leftrightarrow f$ differentiable at $x$
 	\item $\frac{\partial f}{\partial d}(x) \leq \langle s,d\rangle\:\:\forall s \in \partial f(x)\Rightarrow d$ is a descent direction $\Leftrightarrow \langle s,d\rangle < 0\:\: \forall s\in\partial f(x)$
-	\item $s_* = -$argmin$\{||s||\:|\:s\in\partial f(x)\}$ \textbf{steepest descent direction}
+	\item $s_* = -arg\min\{||s||\:|\:s\in\partial f(x)\}$ \textbf{steepest descent direction}
 	\item $x$ \textbf{global minimum} $\Leftrightarrow 0\in \partial f(x)$
 \end{list}
 \paragraph{Subgradients in $R^n$} If $\partial f(X) = \{g=\nabla f(x)\}$, $g\perp (f,f(x))$ i.e. $-g$ points towards $x_*$, then we can take $d\:|\:\langle g,d\rangle < 0$ (descent direction). But if $f$ is nondifferentiable in $x$, there are many different $g$ and all of them are $\perp S(f,f(x))$ ($x$ = kink point), but \textbf{not all of them are descent directions}.\\
 However, any (-)subgradient points towards $x_*$:
 $$f(x_*)\geq f(x)+\langle g,x_*-x\rangle\Rightarrow \langle g,x_*-x\rangle\leq f(x_*)-f(x)\leq 0$$
 Enough for gradient-type approaches.
-\paragraph{Convex nondifferentiable optimization is hard} Nondifferentiable optimization is \textbf{orders of bagnitude slower}
+\paragraph{Convex nondifferentiable optimization is hard} Nondifferentiable optimization is \textbf{orders of magnitude slower}
 \begin{center}
 	\begin{tabular}{c | c | c | c}
 	$f\in C^1$&$\tau$-convex&$L$-smooth&$O\left(\log\left(\frac{1}{\epsilon}\right)\right)$\\
@@ -1332,10 +1332,10 @@ As $\alpha \rightarrow 0$ (short step), the $2\alpha_i(f_*-f(x_i))$ term dominat
 So $\alpha_i\rightarrow 0$ but not fast enough that the series converges ($\alpha_i = \frac{1}{i}$).\\
 DSS just works: $\lim_{i\to\infty} inf\{f_h\:|\:h\geq i\} = f_*$\\
 Incredibly robust result: $\alpha_i$ chosen a priori, $f(x_i)$ not even used (only $g_i$), but \textbf{convergence is very slow}.\\
-If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $min\{a\alpha_i^2+2b\alpha_i\}\equiv \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{||g_i||^2} \geq 0$.\\
+If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $\min\{a\alpha_i^2+2b\alpha_i\}\equiv \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{||g_i||^2} \geq 0$.\\
 \textbf{Polyak stepsize} (\textbf{PSS}): $$\alpha_i = \beta_i\frac{f(x_i)-f_*}{||g_i||^2}$$ With $\beta_i = 1$ we have a "optimal step", but works $\forall\:\beta_i\in(0,2)$ since this $\Rightarrow ||x_{i+1}-x_*||^2 < ||x_i-x_*||^2\Rightarrow \{x_i\}\rightarrow x_*$\\
-In pratice is vastly better, but as far as it can go (not much): $min\{f(x_h)\:|\:g\leq i\}-f_*\leq L\frac{||x_1-x_*||}{\sqrt{i}}\Rightarrow O(\frac{1}{\epsilon^2}$\\
-From $\epsilon=1$e$-3$ to $\epsilon=1$e$-4$ we get 100x the iterations. The good news is that PSS would be optimal if we knew $f_*$, which we don't $\rightarrow$ \textbf{target level stepsize} (vanishing), "if you don't know it estimate it, but be ready to revise your estimate".\\
+In pratice is vastly better, but as far as it can go (not much): $\min\{f(x_h)\:|\:g\leq i\}-f_*\leq L\frac{||x_1-x_*||}{\sqrt{i}}\Rightarrow O\left(\frac{1}{\epsilon^2}\right)$\\
+From $\epsilon=1$e$-3$ to $\epsilon=1$e$-4$ we get 100x the iterations. The good news is that PSS would be optimal if we knew $f_*$, which we don't $\rightarrow$ \textbf{target level stepsize} (vanishing), "\textit{if you don't know it estimate it, but be ready to revise your estimate}".\\
 Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With a "good improvement", $f_{ref}$ gets smaller and also does the target level. If there are too many steps without improvement, $\delta$ gets smaller so the target level increases.\\
 \textbf{Too many parameters} $\rho\in(0,1),\beta\in(0,2),\delta_0>0,R>0$. $\{f_{rec,i}\}\rightarrow f_*$ but there's no reasonable stopping criterion, just "stop after a while". So slow convergence.
 \paragraph{Deflected Subgradient} Better model, better direction. There's no second-order information but deflection is possible $$d_i = \gamma_ig_i+(1-\gamma_i)d_{i-1},\:x_{i+1}=x_i-\alpha_id_i$$ "Conjugate subgradient". To have theoretical convergence, there are some rules:
@@ -1355,15 +1355,15 @@ Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With
 \end{multicols}
 In both cases, target level to replace $f_*$.\\
 A closed formula, $\gamma_i\in$ argmin$\{||\gamma g_i+(1-\gamma)d_{i-1}||^2\:|\:\gamma\in[0,1]\}$
-\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\overline{z}$ optimal for $x\Rightarrow A\overline{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\overline{z}$).\\
-\textbf{Smoothed} $f_\mu(x)=max\{x^TAz-\mu\frac{||z||^2}{2}\:|\:z\in Z\}\in C^1$ hopefully easy.\\
+\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\overline{z}$ optimal for $x\Rightarrow A\overline{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\overline{z}$).\\
+\textbf{Smoothed} $f_\mu(x)=\max\{x^TAz-\mu\frac{||z||^2}{2}\:|\:z\in Z\}\in C^1$ hopefully easy.\\
 In practice is slowish, superlinear in a doubly-logarithmic chart after a long flat leg. Subgradients are faster but flatline at $\epsilon\simeq 1$e$-4$, smoothed does at $\epsilon\simeq 1$e$-6$.
 \subsubsection{Bundle Methods}
 \paragraph{Basic Idea} Cutting-plane model. Being $f$ convex, the first-order information that we have is globally valid: I can collect it along the way and use it all.\\
 $\{x_i\}\rightarrow$ bundle $B=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
-The \textbf{cutting-plane model} $f_B$ if $f$ is $$f_B(x) = max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ a $(1+\epsilon)$-order model.\\
-$x_{B,*}\in$ argmin$\{f_B(x)\}$, $f_B(x_{B,*})\leq f_*$: use $x_{B,*}$ as the next iterate a-la Newton.\\
-$f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small": $min\{f_B(x)\}=min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$
+The \textbf{cutting-plane model} $f_B$ if $f$ is $$f_B(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ a $(1+\epsilon)$-order model.\\
+$x_{B,*}\in arg\min\{f_B(x)\}$, $f_B(x_{B,*})\leq f_*$: use $x_{B,*}$ as the next iterate a-la Newton.\\
+$f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small": $\min\{f_B(x)\}=\min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$
 \paragraph{Cutting Plane Algorithm} $\min\{f_B(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
 $f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B\leftarrow B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
 The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#B\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
@@ -1392,8 +1392,7 @@ Constrained (local) optimality conditions $\neq\nabla f(x)=0$, only if $x$ not i
 \subsubsection{Geometric Version}
 \paragraph{The Tangent Cone} Crucial Object $T_X(x) =$ tangent cone of $X$ at $x$
 $$\{d\in R^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\}$$
-Tangent Cone Condition (TCC): $\langle\nabla f(x),d\rangle \geq 0\:\:\forall d\in T_X(x)$\\Zooming into $x$, $X$ looks like a cone, so we build the cone $T_X(x)$ with $x$ as the point.
-
+Tangent Cone Condition (TCC): $\langle\nabla f(x),d\rangle \geq 0\:\:\forall d\in T_X(x)$\\Zooming into $x$, $X$ looks like a cone, so we build the cone $T_X(x)$ with $x$ as the vertex.
 \begin{center}
 	\includegraphics[scale=0.75]{9.png}
 \end{center}
@@ -1545,7 +1544,7 @@ Just linear algebra, symmetric but indefinite, lots of 0 eigenvalues. It's a bas
 	\item Krylov-type iterative methods (GMRES,\ldots)
 \end{list}
 or try to exploit the large scale structure (saddle-point system).
-\paragraph{Active-Set Method} Quadratic program with linear constraints. If one knew $\mathscr{A}(x_*)$, then it would be "just linear algebra" $\Rightarrow$ if you don't know it estimate it but be ready to revise your estimate: we estimate the active set with $B$, current estimate of $\mathscr{A}(x_*)$.
+\paragraph{Active-Set Method} Quadratic program with linear constraints. If one knew $\mathscr{A}(x_*)$, then it would be "just linear algebra" $\Rightarrow$ \textit{if you don't know it estimate it but be ready to revise your estimate}: we estimate the active set with $B$, current estimate of $\mathscr{A}(x_*)$.
 \begin{center}
 	\includegraphics[scale=0.75]{10.png}
 \end{center}
