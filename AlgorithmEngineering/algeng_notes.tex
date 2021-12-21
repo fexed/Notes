@@ -494,14 +494,17 @@ The algorithm does $\log_2 \Delta_j$ jumps plus the binary search inside the las
 We merge $A'$ and $B$, and so we find in which blocks of $A$ can fall the elements of $B$, by using the keys as dividers in the merged $A'+B$ array. This merge costs $O\left(m + \frac{n}{L}\right)$.\\
 This also produces buckets in $B$, and $B_i$ will be intersected with $A_i$. How many blocks of $A_i$ will be considered at most? $m$, because $B$ has $m$ elements, so in the worst case is one element of $B$ per block of $A$. So we have $|B| + mL = m + mL = O(mL)$.\\
 So the total cost is $O(mL + \frac{n}{L})$. Not optimal but very good, one of the best algorithms.
-\subsection{Interpolation search} Search in a set $X \subseteq N$, which is sorted $X=\{x_1,x_2,\ldots,x_n\}$. Let's define $b = \frac{x_n - x_1 + 1}{n}$ and partition $X$ into buckets of size $b$ of the universe. So with $b= 3$ the bucket $B_1 = \{1,2,3\}$, $B_2 = \{4,5,6\}$\ldots
+\subsection{Interpolation search} Search in a set $X \subseteq N$, which is sorted $X=\{x_1,x_2,\ldots,x_n\}$. Let's define $b = \frac{x_n - x_1 + 1}{n}$ and partition $X$ into buckets of size $b$ \textbf{of the universe}. So with $b= 3$ the bucket $B_1 = \{1,2,3\}$, $B_2 = \{4,5,6\}$\ldots
 \begin{center}
-	\includegraphics[scale=0.75]{10.png}
+	\begin{tabular}{c c c c | c c | c | c c | c c | c | c}
+	X= & 1 & 2 & 3 & 8 & 9 & 17 & 19 & 20 & 28 & 30 & 32 & 36\\
+	 & \multicolumn{3}{c}{$B_1$} & \multicolumn{2}{c}{$B_3$} & \multicolumn{1}{c}{$B_6$} & \multicolumn{2}{c}{$B_7$} & \multicolumn{2}{c}{$B_{10}$} & \multicolumn{1}{c}{$B_{11}$} & \multicolumn{1}{c}{$B_{12}$}
+	\end{tabular}
 \end{center}
 For every bucket we have pointers in the index array $I = 1,3,0,0,4,5\ldots$ with the indexes of the beginning and the end of the bucket in $X$. If I want to search for $y$, given that I partitioned the universe I know already the bucket of $y$: it's $B_J$ with $J = \lfloor\frac{y-x_1}{b}\rfloor + 1$, so we do a binary search over $B_J$ looking for $y$. It costs constant, for computing $J$, plus the binary search over $B_J$ which costs $O(\log_2 b)$
-\paragraph{Theorem} Time complexity is $O(\log_2 \Delta)$ where $\Delta = \frac{max_{2,\ldots,n} x_i - x_{i-1}}{min_{2,\ldots,n} x_i - x_{i-1}}$, the first time that a complexity depends on the distribution of the data.
-\subparagraph{Proof} The maximum is surely larger than the average so $max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\sum_{i=1}^m x_i - x_{i-1}}{n-1}$, again a telescopic sum, so $= \frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$. So $$max_{2,\ldots,n} x_i - x_{i-1} \geq b$$
-$$|B_J| \leq \frac{b}{min_{2,\ldots,n} x_i - x_{i-1}} \leq \frac{max_{2,\ldots,n} x_i - x_{i-1}}{min_{2,\ldots,n} x_i - x_{i-1}} = \Delta$$
+\paragraph{Theorem} Time complexity is $O(\log_2 \Delta)$ where $$\Delta = \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}}$$ It's the first time that a complexity depends on the distribution of the data.
+\subparagraph{Proof} The maximum is surely larger than the average so $\max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\sum_{i=1}^m x_i - x_{i-1}}{n-1}$, again a telescopic sum, so $= \frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$. So $$\max_{2,\ldots,n} x_i - x_{i-1} \geq b$$
+$$|B_J| \leq \frac{b}{\min_{2,\ldots,n} x_i - x_{i-1}} \leq \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}} = \Delta$$
 \section{Data Compression}
 \paragraph{Entropy} Of a source, assuming an alphabet $\Sigma$ of symbols (characters, or digits in the case of integers), with a probability distribution $\{p_\sigma\}$ over $\Sigma$.\\
 The entropy of a source is $H = \sum_\sigma p_\sigma\cdot\log_2 \frac{1}{p_\sigma} = H_0$, sometimes specified as $H_0$ which means no context, every symbol is independent from the previous one.\\
@@ -515,7 +518,7 @@ For example, if $\Sigma = \{$a, b, c$\}, C = \left[\begin{array}{l}
 a\rightarrow 0\\
 b\rightarrow 10\\
 c\rightarrow 110
-\end{array}\right.$ It's a variable length code, because every symbol is encoded with a variable number of bits, and a prefix-free code, because if a compare the codewords I note that no codeword is prefix of another one. This is important because if we designed the code like $C = \left[\begin{array}{l}
+\end{array}\right.$ It's a variable length code, because every symbol is encoded with a variable number of bits, and a prefix-free code, because if I compare the codewords I notice that no codeword is prefix of another one. This is important because if we designed the code like $C = \left[\begin{array}{l}
 a\rightarrow 0\\
 b\rightarrow 01\\
 c\rightarrow 1
@@ -530,10 +533,10 @@ c\rightarrow 01
 \end{array}\right.$, with b being the most probable symbol having the shortest length and a and c having same length, where we would get $E[C'] = \frac{1}{4}\cdot2 + \frac{1}{2}\cdot1 + \frac{1}{4}\cdot2 = 1.5$ bits which is better (and optimal, we will prove it).\\
 $\forall\:C$ prefix-free $E[C] \geq H$ (Shannon), so if we can make the length of the codeword of $\sigma$ exactly $\log_2 \frac{1}{p_\sigma}$ bits we have optimality. Formally, if $|\hbox{cw}(\sigma)| = \log_2\frac{1}{p_\sigma} \Rightarrow C$ is optimal. But $\log_2\frac{1}{p_\sigma}$ is a real number, which cannot be a length. For it to belong to $N$, we should have $p_\sigma = 2^{-x}$.
 \subsection{Integer coding}
-$\Sigma = N$, we will consider sequences of integers $S = s_1s_2\ldots s_n$ with $s_i\in N$ and possibly repetitive (one or more of $s_i$ can repeat). Sometimes we have increasing sequences, such that $s_i < s_{i+1}$: if we have a sequence like this we can transform is into a sequence comprised of the first element and the next element encoded as the distance from the first, the third element encoded as the distance from the original seconds, and so on. So $S' = 1\:3\:5\:6\:9\ldots$ will be $S = 1\:2\:2\:1\:3\ldots$, these are called $d$-gaps, or gaps, and are used in place of the increasing sequences for the encoding. Of course we can revert $S$ to its original sequence $S'$ by making the prefix sum: a number is the sum of the previous numbers, so by summing the numbers from left to right.\\
+$\Sigma = N$, we will consider sequences of integers $S = s_1s_2\ldots s_n$ with $s_i\in N$ and possibly repetitive (one or more of $s_i$ can repeat). Sometimes we have increasing sequences, such that $s_i < s_{i+1}$: if we have a sequence like this we can transform is into a sequence comprised of the first element and the next element encoded as the distance from the first, the third element encoded as the distance from the original second, and so on. So $S' = 1\:3\:5\:6\:9\ldots$ will be $S = 1\:2\:2\:1\:3\ldots$, these are called $d$-gaps, or gaps, and are used in place of the increasing sequences for the encoding. Of course we can revert $S$ to its original sequence $S'$ by making the prefix sum: a number is the sum of the previous numbers, so by summing the numbers from left to right.\\
 This increasing sequences occur in search engines (page ids), databases (keys), hash tables (positions of unempty slots)\ldots\\
 Also if $x\in Z$ we can encode them as integers with $2x$ if $x \geq 0$ or $-2x + 1$ if $x < 0$.\\\\
-\paragraph{Fixed length code} Up to now we took the maximum $s_i^* = max_i s_i$ and encoded each $s_i$ with $1+ \lfloor \log_2 s_i^*\rfloor$ bits, a fixed-size encoding.\\
+\paragraph{Fixed length code} Up to now we took the maximum $s_i^* = \max_i s_i$ and encoded each $s_i$ with $1+ \lfloor \log_2 s_i^*\rfloor$ bits, a fixed-size encoding.\\
 With $m = s^*$, the fixed length code encodes $s_i$ with $1+ \lfloor \log_2 m\rfloor$ bits.\\
 This is optimal when $$1+ \log_2 m = \log_2 \frac{1}{p(x)}\Leftrightarrow \log_2 2m = \log_2 \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2m}$$
 Which is a uniform distribution from $1$ to $m$, apart from the $2$, which is the case where the fixed-length encoding is optimal.
@@ -543,9 +546,9 @@ Very efficient for small $x$, but with large $x$ it's inefficient. For which dis
 \paragraph{$\gamma$-code} Improvement over the unary code, still for $x > 0$.\\
 $\gamma(9) = \begin{array}{c c c}
 000 & 1001 & \\
-|\hbox{bin(9)}|-1 & \hbox{bin(9)} &
+|\hbox{bin(9)}|-1\hbox{ zeros} & \hbox{bin(9)} &
 \end{array} = 0001001$ with bin$(x)$ being the binary representation of $x$.\\
-In general, $\gamma(x) = |\hbox{bin}(x)| - 1$ zeroes followed by bin$(x)$.\\
+In general, $\gamma(x) = |\hbox{bin}(x)| - 1$ zeros followed by bin$(x)$.\\
 bin$(x)$ surely starts with $1$, so to decode you read the number of zeroes until you find the first $1$ and then you know how many bits to read after that $1$\\
 $$|\gamma(x)| = 2\hbox{bin}(x) - 1 = 2\left(\lfloor\log_2 x\rfloor + 1\right) - 1 = 2\lfloor\log_2 x\rfloor + 1\hbox{ bits}$$
 Ignoring the floor, in order to get the optimal distribution for the $\gamma$-code we need $$|\gamma(x)| = \log_2\frac{1}{p(x)} \Leftrightarrow 2\log_2 x + 1 = \log_2\frac{1}{p(x)} \Leftrightarrow \log_2 2x^2 = \log \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2x^2}$$
@@ -690,7 +693,7 @@ Assuming we want to find $S[5]$. Until now, with the other codes, we needed to d
 \end{list}
 \section{String Sorting} Until now: atomic items. Now: sequence of symbols/characters/letters (\textbf{strings}), drawn from a alphabet $\Sigma$ with $|\Sigma| = \sigma$ symbols.\\
 We have a set of strings $S[1,n]$ with $N$ the total length and $n$ the number of strings. Also $L=\frac{N}{n}$ is the average length. Often $\sigma = 256$\\
-Usually \texttt{qsort}, compared-based algorithm: need to specify the comparison function. So \texttt{qsort} is agnostic to the kind of objects it's sorting, we can use it to sort strings: it costs $O(L\cdot n\cdot\log n) = O(N\cdot\log n)$ time on average (worst case if using \texttt{mergesort}, \texttt{heapsort} or other very efficient sorting algorithms). Whenever the portion between $l$ and $r$ in \texttt{qsort} is small, with atomic items we would do insertion sort because the elements would fit in few cache lines, but with strings each item is a pointer so the items are probably spread apart. So we will try to improve this.\\\\
+Usually \texttt{qsort}, comparison-based algorithm: need to specify the comparison function. So \texttt{qsort} is agnostic to the kind of objects it's sorting, we can use it to sort strings: it costs $O(L\cdot n\cdot\log n) = O(N\cdot\log n)$ time on average (worst case if using \texttt{mergesort}, \texttt{heapsort} or other very efficient sorting algorithms). Whenever the portion between $l$ and $r$ in \texttt{qsort} is small, with atomic items we would do insertion sort because the elements would fit in few cache lines, but with strings each item is a pointer so the items are probably spread apart. So we will try to improve this.\\\\
 The lower bound is composed by two parts: \begin{list}{}{}
 	\item I have to sort the first characters of these $n$ objects and I cannot escape the comparison of the first objects, so the classic lower bound $\Omega(n\cdot\log n)$
 	\item The first character only is too limiting, how many characters I have to surely look at? $d_i$ is the \textbf{distinguishing prefix} and is the minimum number of characters that we have to consider in order to distinguish the string $s_i$ from the others. We do not need the rest of the characters of $s_i$ in order to distinguish it from the other strings. We can say that $d = \sum_s d_s$ is the total distinguishing prefix.\\
