@@ -836,22 +836,24 @@ But we don't want to explode the entire string. Let's do an example with S = \{c
 		\end{center}
 \end{list}
 The TST could be unbalanced, but if strings are inserted randomly then we have that the string $s$ gets a path of length $O(|s| + \log n)$ on average. Also every node needs only an array of three positions and one character, very compact in space.
-\section{Compressed Data Structures} Able to store the data in compact form, often significantly reducing the size of the data. The questions are about what we can do for the query operations: asymptotically identical to the uncompressed data structures or we lose a little bit. Very useful structures in edge computing and smartphone, where there's not much space available and the energy consumption must be under control.\\
-Assume a binary array $B=0100110\ldots$ of size $|B| = m$ and with $n = \#$ of ones. This could be just a binary array or, for example, the characteristic vector of a set: we have a set of integers from $1$ to $m$ and we have just the integer $2$, the integer $5$, the $6$ and so on. If we want to store the position of the ones, the typical solution is to encode the position. With \textbf{standard encoding} we have a space complexity of $O(n\cdot\log_2 m)$ bits (pointer-based programming). We will propose a pointer-less programming.\\\\
+\section{Compressed Data Structures} Data structures that are able to store data in compact form, often significantly reducing the space complexity. The interesting questions are about what we can do for the queries: are those asymptotically identical to the uncompressed data structures or do we lose a little bit? Very useful structures in edge computing and smartphones, where there's not much space available and the energy consumption must be under control.\\
+Assume a binary array $B=0100110\ldots$ of size $|B| = m$ and with $n = \#$ of ones. This could be just a binary array or, for example, the characteristic vector of a set: we have a set of integers from $1$ to $m$ and we have just the integer $2$, the integer $5$, the $6$ and so on. If we want to store the position of the ones, the typical solution is to encode the position. With \textbf{standard encoding} we have a space complexity of $O(n\cdot\log_2 m)$ bits (pointer-based programming). We will propose a pointer-less programming.
+
+\paragraph{Fundamental Operations}
 Two operations, fundamental basic blocks for modern applications: \begin{list}{}{}
-	\item Rank$_b(i) =$ number of $b$ in the prefix $B[1,i]$, with $b\in\{0,1\}$\\
+	\item Rank$_b(i) =$ number of $b$ in the prefix $B[1,i]$, with $b\in\{0,1\}$ for the binary arrays\\
 	E.g.: Rank$_1(4) = 1$\\
 	Property: Rank$_0(i) = i -$ Rank$_1(i)$
-	\item Select$_b(i) =$ position of the $i$-th $b$ in $B$, with $b\in\{0,1\}$\\
+	\item Select$_b(i) =$ position of the $i$-th $b$ in $B$, with $b\in\{0,1\}$ for the binary arrays\\
 	E.g.: Select$_1(3) = 6$
 \end{list}
-These two primitives can be used to implement all the common queries on data structures. If a data structure is implemented with Rank and Select as primitives, then it can use all the optimization that exists of those two data structures.
+These two primitives can be used to implement all the common queries on data structures. If a data structure is implemented with Rank and Select as primitives, then it can use all the optimization that exists of those two primitives.
 \paragraph{Theorem} $\exists$ data structures that takes $o(m)$ bits \textbf{in addition} to $B$ (read-only) and supports Rank$_1$ in $O(1)$ time.\\
 $o(m)$ means sublinear but in the universe, so its performance scales with the size of the universe.\\\\
-With $B$ array, we partition $B$ into blocks of size $Z$, so we end up with $O\left(\frac{m}{Z}\right)$ blocks. For each block, I store Rank$_1$ of all previous blocks (absolute, from the beginning). The space needed for the blocks to store the counting is the number of the blocks times the counter, an integer which counts up to $n$, so $\log_2 n$, but we want in terms of $m$ and $n\leq m$ so $\log_2 m$ is surely enough bits. So the space occupied by the big blocks is $O\left(\frac{m}{Z}\cdot \log_2 m\right)$ bits.\\
-The size of the big blocks, $Z$, impacts on the space: we would like a larger $Z$ to reduce space but if it becomes larger the time we need to compute Rank$_1$ also increases. We make another partition of smaller blocks to increase the granularity. We consider small blocks insider the big blocks, of size $z$. So every big block is partition in $\frac{Z}{z}$ small blocks, and for each of them we store the relative rank from to the beginning of the enclosing big block. The space needed by small blocks is $O\left(\frac{m}{z}\cdot\log_2 Z\right)$ bits.\\
-So the total space is $O\left(\frac{m}{Z}\cdot\log_2 m + \frac{m}{z}\cdot\log_2 Z\right)$ bits. The time complexity is $O(z)$\\ %TODO come funziona
-\textbf{Four-russians tricks}, because we work in a RAM model with word size of $O(\log m)$ bits. The idea is as follows: in the small blocks of $z$ size, we start from the beginning of that block and scan counting the ones. For every small block configuration $X$ and for every position $Y\in[1,z]$, we store the number of ones in $X[1,Y]$: basically, for the sequence $X$ currently in $z$ we store the number of ones up to position $Y$. In some sense, we create a table of all possible situations (configurations, $X$s), and all possible answers. Time is constant, how big is this table? We have $2^z$ rows and $z$ columns, with every entry requiring $\log_2 z$ bits.\\
+With $B$ array, we partition $B$ into blocks of size $Z$, so we end up with $O\left(\frac{m}{Z}\right)$ blocks. For each block, I store Rank$_1$ of all previous blocks (absolute, from the beginning). The space needed for the blocks to store the counting is the number of the blocks times the counter size, an integer which counts up to $n$, so $\log_2 n$, but we want in terms of $m$ and $n\leq m$ so $\log_2 m$ is surely enough bits. So the space occupied by the big blocks is $O\left(\frac{m}{Z}\cdot \log_2 m\right)$ bits.\\
+The size of the big blocks, $Z$, impacts on the space: we would like a larger $Z$ to reduce space but if it becomes larger the time we need to compute Rank$_1$ also increases. We make another partition of smaller blocks to increase the granularity. We consider small blocks insider the big blocks, of size $z$. So every big block is partitioned in $\frac{Z}{z}$ small blocks, and for each of them we store the relative rank from the beginning of the enclosing big block. The space needed by small blocks is $O\left(\frac{m}{z}\cdot\log_2 Z\right)$ bits.\\
+So the total space is $O\left(\frac{m}{Z}\cdot\log_2 m + \frac{m}{z}\cdot\log_2 Z\right)$ bits. The time complexity is $O(z)$ %TODO come funziona
+\paragraph{Four-Russians tricks} Because we work in a RAM model with word size of $O(\log m)$ bits. The idea is as follows: in the small blocks of $z$ size, we start from the beginning of that block and scan counting the ones. For every small block configuration $X$ and for every position $Y\in[1,z]$, we store the number of ones in $X[1,Y]$: basically, for the sequence $X$ currently in $z$ we store the number of ones up to position $Y$. In some sense, we create a table of all possible situations (configurations, $X$s), and all possible answers. Time is constant, how big is this table? We have $2^z$ rows and $z$ columns, with every entry requiring $\log_2 z$ bits.\\
 $O\left(\frac{m}{Z}\log_2 m + \frac{m}{z}\log_2 Z + 2^z\cdot z\cdot\log_2 z\right)$. How to solve the query Rank$_1(i)$: we take the counter stored at the big block including $i$, the counter stored at the small block including $i$ and let $X$ be the small blocks including $i$ and $Y=i$ mod $z$, we get $T[X,Y]$ (the entry in the table), all constant time. The space is the problem, if $Z=(\log_2 m)^2$ and $z = \frac{1}{2}\log_2 m$ (less than the word) let's use in the formula
 $$O\left(\frac{m}{Z}\log_2 m + \frac{m}{z}\log_2 Z + 2^z\cdot z\cdot\log_2 z\right)$$
 $$O\left(\frac{m}{(\log_2 m)^2}\log_2 m + \frac{m}{\frac{1}{2}\log_2 m}\log_2 ((\log_2 m)^2) + 2^{\frac{1}{2}\log_2 m}\cdot (\frac{1}{2}\log_2 m)\cdot\log_2 (\frac{1}{2}\log_2 m)\right)$$
@@ -864,7 +866,7 @@ So how I can construct a data structure which space depends on the number of key
 If I apply Elias-Fano, $l=\lceil\log_2\frac{u}{n}\rceil \leq \lceil\log_2\frac{m}{n}\rceil$ and $h = b - l$, $L$ array of blocks of $l$ bits and $H$ array of $2n$ bits. The Access$(i)$ uses Select$_1$ in $H$ and Geq$(x)$ uses Select$_0$ and something else.\\
 In $B$, Select$_1(i)$ is the $i$-th 1, which is Access$(i)$ in $S$ so a Select$_i(i)$ in $H$, so it requires the space needed for the $H$ so an increase of $+o(2n)$ bits. So $|H|+|L| + o(2n)$ (the constant $2$ can be dropped so just $o(n)$ is fine).\\
 Rank$_1(x)$ which can be implemented as a binary search for $x$ in $S$, and with Access we can do it. So it costs $O(\log n)$ time using binary search + Access(). There's another way, NextGeq. So Rank$_1(x)$ can be implemented with NextGeq$(x)$ which finds $y\in S\:|\:y\geq x$ and returns the position, which is the Rank. To implement NextGeq, as seen before, we need Select$_0$, so space of $|H|+|L|+o(2n)$ for Select on $H$. We need to go on $L$ too, and scan the bucket but scanning is too slow. The values are increasing so we can do binary search, if the position is inside the bucket. If it's larger, we take the next bucket and same as before. So is $\log$ bucket size$=\log 2^l = l = \log\frac{m}{n}$, more tricky but better.
-\paragraph{Example} With pointer-less programming, what we've seen up until now can be applied in several situations and not only integers. The idea is to have an array of strings $S$ and to manage them we take an array $P$ of pointer: the first pointer points to the first string in $S$, the second to the second string and so on. But $P$ can store just the offset of the starting index of each string, so if the first string starts in index 0 and the second in index 4 and so on, $P$ can be $\{0,4,\ldots\}$. So starting from the problem of storing strings we returned to the problem of storing increasing integers, with the solutions already seen.\\
+\paragraph{Example} With pointer-less programming, what we've seen up until now can be applied in several situations and not only integers. The idea is to have an array of strings $S$ and to manage them we take an array $P$ of pointers: the first pointer points to the first string in $S$, the second to the second string and so on. But $P$ can store just the offset of the starting index of each string, so if the first string starts in index 0 and the second in index 4 and so on, $P$ can be $\{0,4,\ldots\}$. So starting from the problem of storing strings we returned to the problem of storing increasing integers, with the solutions already seen.\\
 With $P$ of pointers we pay $n\cdot w$ with $w$ being the word size (32 or 64 bits). With $P$ of offsets, instead, the cost is $2n+n\lceil\log\frac{|S|}{n}\rceil+o(n)$ but without the disk access due to the pointers.
 \paragraph{Free Encoding and Traversal (Binary Trees)} 
 \begin{center}
@@ -909,7 +911,7 @@ With $n=8$ nodes. We could implement it with pointers, every node with a left an
 	\hbox{Positions}&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16&17\\
 	B = &1&1&1&1&0&1&1&0&1&0&0&1&0&0&0&0&0
 	\end{array}$$
-	Compress and index $B$ using Rank/Select data structures, using a space of $|B|+o(|B|)$ for Rank$_1$ $+0(|B|)$ for Select$_1$
+	Compress and index $B$ using Rank/Select data structures, using a space of $|B|+o(|B|)$ for Rank$_1$ $+ o(|B|)$ for Select$_1$
 \end{enumerate}
 $B$ is 17 bits, but where does this number comes from? It's $2n+1$, because we have $n$ ones (original nodes) and $n+1$ dummy nodes. So the space is $2n+1+o(n)$, the lower bound is the \textbf{catalan number}.
 \paragraph{Catalan Number} The number of binary trees of $n$ nodes $= 2^{2n}$, then the number of bits surely needed to represent a tree is $\log_2 2^{2n} = 2n$, so you can't do better than $2n$ bits in space. So we are far from the lower bound by $1+o(n)$ bits.\\
@@ -930,7 +932,7 @@ $$\begin{array}{r c c c c c c c c c c c c c c c c c}
 	So I just do Rank$_1(9)$. So the left child is Rank$_1(2x)$ if $B[2x]=1$ and the right child is Rank$_1(2x+1)$ if $B[2x+1]=1$.\\
 	The parent comes from inverting the child operations, and it's $\lfloor\frac{\hbox{Select}_1(x)}{2}\rfloor$. On the uncircled nodes, the parent is the half, but we are reasoning for uncircled values. So first we turn $x$ into an uncircled value, the opposite of before, then we divide by two and find the parent (circled). Of course not in the root, so $x\neq 1$\\
 Let's see an algorithm that, given a path $\Pi$ and a tree described by its parameters "\ldots", answers if the requested path exists in the given tree starting from the root or not.
-\begin{lstlisting}
+\begin{lstlisting}[style=myPython]
 def match(path, ...):
 	x = 1
 	if (L[1] != path[1]):
@@ -1142,7 +1144,7 @@ For example, we could define three "texts": \begin{list}{}{}
 	\item text of characters $T_{char} = acaac$
 \end{list}
 and we could encode these three texts in any way we want as seen before.
-\paragraph{Window to copy} Whenever we look for a substring in the dictionary to copy, we cannot look arbitrary before: typically the compressors have a window of words of length $w$ and we consider only copies that starts at most $w$ character before so $d\leq w$. In \texttt{gzip} we have options \texttt{-1},\ldots,\texttt{-9} which specifies the windows from 100 Kb to 900 Kb. The larger the windows the more you compress, so less phrases and \textbf{faster in decompression} because every phrase tells you to go back and copy, it's a random jump, so with less random jumps the caching is more effective. But with larger windows we have slower compression.\\\\
+\paragraph{Window to copy} Whenever we look for a substring in the dictionary to copy, we cannot look arbitrarily back: typically the compressors have a window of words of length $w$ and we consider only copies that starts at most $w$ character before so $d\leq w$. In \texttt{gzip} we have options \texttt{-1},\ldots,\texttt{-9} which specifies the windows from 100 Kb to 900 Kb. The larger the windows the more you compress, so less phrases and \textbf{faster in decompression} because every phrase tells you to go back and copy, it's a random jump, so with less random jumps the caching is more effective. But with larger windows we have slower compression.\\\\
 The approach discussed is called \textbf{LZ 77}.
 \paragraph{How to find the copies} There are several algorithms in literature, let's see the one used by \texttt{gzip} due to it being interesting from a programming point of view. Let's say we are in the situation $T = \:\:\:\:\:\:\:\:\:\:|caaa\ldots$: a brute-force way would be to take $c$ and search for it going back and find it, then take $ca$ and go back and search and find it so on until we don't find the occurrence of the substring. This is really slow, we need something faster: filtering. We want to find the candidate positions and then check them. So I want some tool that tells me the (hopefully few) interesting positions to check. This filter can be built with an hashtable over triples of characters. Let's see an example with $w=7$: $T = acaacab|caaa\ldots$ from position $2,3,4,5,\ldots$. For every previous position, it keeps a key in the hashtable of three characters:\begin{list}{}{}
 	\item $\langle bca,8\rangle$
@@ -1153,7 +1155,7 @@ The approach discussed is called \textbf{LZ 77}.
 	\item $\langle caa,3\rangle$
 	\item $\langle aca,2\rangle$
 \end{list}
-So we can already see that two $aca$s will collide in the same slot, and we have to keep bot satellite informations $5$ and $2$. \texttt{gzip} finds copies only if they are longer or equal than three characters: it's useless to substitute one or two characters with a triple.\\
+So we can already see that two $aca$s will collide in the same slot, and we have to keep both satellite informations $5$ and $2$. \texttt{gzip} finds copies only if they are longer or equal than three characters: it's useless to substitute one or two characters with a triple.\\
 So it takes the next three characters $caa$ and look for in the hashtable: it can find a collision, for example $\langle caa,3\rangle$, $\langle aac, 4\rangle$ and $\langle cab,6\rangle$ can collide, these are the candidate positions so it compares over them.\\
 After encoding the triple, we shift the window so the table is cut: each triple points to the next one so we can start from the head and simply cancel triples. We of course also add the new triples.
 \paragraph{LZSS} Doesn't use triples but pairs by making the following observation: either we copy, because $d>0$ or we don't copy and meet one single character. So whenever $d=0$ only the character is significant, and whenever we copy the character is useless. So LZSS considers just $\langle d,l\rangle$ (no extra characters) or $\langle 0,$ char$\rangle$.\\So for example $T=aacaacabcaaaaaaac$ we emit $\langle 0,a\rangle$ and $T=a|acaacabcaaaaaaac$, we can only copy $a$ so we output $\langle 1,1\rangle$ and $T=aa|caacabcaaaaaaac$, then $\langle 0,c\rangle$ and $T=aac|aacabcaaaaaaac$, then we can copy $aaca$ starting from the beginning ($3$ characters before) and copying 4 characters, so we output $\langle 3,4\rangle$ and $T=aacaaca|bcaaaaaaac$.\\
@@ -1174,7 +1176,6 @@ The decoder expects pairs, reads the first number and if it's zero then knows th
 \end{tikzpicture}
 \end{center}
 \end{multicols}
-\pagebreak
 \begin{multicols}{2}
 \begin{list}{}{}
 	\item $T=a|abaacabcabcb$
@@ -1382,7 +1383,7 @@ This produces $|T|$ rows, giving a square matrix (\textbf{BWT matrix}). The we s
 	\item s sissippi\#m i
 \end{list}
 Again a square matrix. We notice that the first column, $F$, is ordered and contains all the characters of $T$: this because we are considering circling rotations and fixing a column every character will pass by that column. We cannot compress just $F$ because every text comprised of those characters (in the example, 4 "i"s, 1 "m", 2 "p"s and 4 "s"s) would give the same $F$. The trick is done with $L$, the column of the last characters: the transformation is invertible if we consider the sequence of characters in the last column.\\
-So given a string $T$, we return $L$, which in this case $L=$ ipssm\#pississ.\\\\
+So given a string $T$, we return $L$, which in this case $L=$ ipssm\#pissii.\\\\
 Note that the character in $L$ is the one that precedes the character in $F$. With "mississippi" this transformation can't show its true power. With natural language texts, there are a certain number of characters that precedes other characters: for example, in english the letter "n" succeeded by a space can be preceded by an "a", an "o" and other few vowels ("an", "on", "in"\ldots), so in these portions of texts the array $L$ will contain just few repeated characters. This means that \textbf{$L$ is locally homogeneous}, so is \textbf{highly compressible}.
 \paragraph{Bzip Algorithm}
 \begin{enumerate}
@@ -1412,7 +1413,7 @@ Taken two characters in $L$, e.g. two "i"s, the first to appear in $L$ is alphab
 \begin{center}
 	\includegraphics[scale=0.5]{21.png}
 \end{center}
-Each row will correspond to another row with the rotated character in $F$ and another character in $L$ which is the previous character. Note that the rows may come closer, but the green will always come before the red.
+Each row will correspond to another row with the rotated character in $F$ and another character in $L$ which is the previous character. Notice that the rows may come closer, but the green will always come before the red.
 \begin{center}
 	\includegraphics[scale=0.5]{22.png}
 \end{center}
@@ -1434,7 +1435,7 @@ Several issues regarding efficiency in time and space.
 The hashing function $h : U\rightarrow [0, m-1]$ from the universe $U$, with a table $T[0,m]$. The hash function is applied to the key which gives a position inside the table. Two objects can collide in the same position, and stay "outside" the table in a overflow list. This is called \textbf{hashing with chaining}. If $U$ is small, then a direct table is better.\\
 This approach has a space complexity of the size of the table ($m$) plus the number of objects outside the table ($n$), so $O(m+n)$. Note that $m$ are pointers, the cells of the table, while $n$ are pointers and keys: if the key is an integer then is 4-8 bytes like the pointers, but if it's a string then it's another pointer.\\
 \textbf{Loading factor} $\alpha = \frac{n}{m}$, ratio between the number of keys and the size of the table.
-\paragraph{Analysis} Up until now in out studies we've seen $h$ that were \textbf{simple uniform hashing}, meaning that $\forall\:k\:\:\:P(h(k) = i)=\frac{1}{m}$. This is means that every key is independent and is \textbf{computationally unfeasible}, although possible it takes too much space and time. Let's consider this kind of function.\\\\
+\paragraph{Analysis} Up until now in our studies we've seen $h$ that were \textbf{simple uniform hashing}, meaning that\\$\forall\:k\:\:\:P(h(k) = i)=\frac{1}{m}$. This is means that every key is independent and is \textbf{computationally unfeasible}, although possible it takes too much space and time. Let's consider this kind of function.\\\\
 The insertion is $O(1)$ because we simply append in $T$.\\
 The Membership and Deletion both require a search, and the search costs the average overflow list length: a constant time to access the position required and a scan of the list in that position to search for the key.\\
 The average list length is $$E[\hbox{length of a list}]=\sum_{k'\in D\:k'\neq k} P(h(k')=h(k)) = \sum_{k'\in D\:k'\neq k} P(h(k')=i) = \sum_{k'\in D\:k'\neq k} \frac{1}{m} = \frac{n}{m} = \alpha$$
@@ -1471,7 +1472,7 @@ Does this class of functions exists? How practical is it?
 Let's divide the key $k$ into blocks of $\log_2 m$ bits: so blocks from $k_0$ to $k_{r-1}$ where $r=\frac{\log_2 u}{\log_2 m} =$ the number of blocks. So $\forall\:k_i\:\:0\leq k_1< m$\\
 Let's consider a parameter of $h$: $a$ of size $\log_2 u$ bits with $0 < a < u$ and the same partitioning (blocks of $\log_2 m$ bits giving $a_0,\ldots,a_{r-1}$). Note that $a$ is \textbf{picked at random}.\\
 We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\hbox{ mod }m$$ with $a\neq 0$ and $m$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
-Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{|H|}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks are different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\begin{list}{}{}
+Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{|H|}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks is different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\begin{list}{}{}
 	\item $h_a(x) = \sum_{i=0}^{r-1} a_i\cdot x_i$ mod $m = \sum_{i=0}^{r-1}a_i\cdot y_i$ mod $m$
 \end{list}
 And I want to count the number of $h_a$ (so, the number of $a$) such that that equality is true. We can rewrite with congruence:\begin{list}{}{}
@@ -1484,7 +1485,7 @@ The only thing I know is that $x_0\neq y_0$, so we can extract both\begin{list}{
 $x_0-y_0\neq 0$ because $x_0\neq y_0$, and since $m$ is prime $\Rightarrow\exists\:(x_0-y_0)^{-1}$ (mod $m$), so\begin{list}{}{}
 	\item $a_0 \equiv (x_0-y_0)^{-1}\cdot\left(\sum_{i=1}^{r-1}a_i\cdot (x_i-y_i)\right)$ (mod $m$)
 \end{list}
-Each $a$ is formed by $a_0,a_1,\ldots,a_{r-1}$. Each of the $a_1,a_2,\ldots,a_{r-1}$ can be chosen in $m$ ways, because it's formed by $\log_2 m$ bits. In order to have a collision, $a_0$ cannot be chosen freely but must be in the form specified above in the congruence. So whenever I've chosen a combination of $a_1,\ldots,a_{r-1}$, then $a_0$ is fixed: so the possibilities of $a_0$ are $m^{r-1} - 1$ (because we still avoid the case of all zeroes.\\\\
+Each $a$ is formed by $a_0,a_1,\ldots,a_{r-1}$. Each of the $a_1,a_2,\ldots,a_{r-1}$ can be chosen in $m$ ways, because it's formed by $\log_2 m$ bits. In order to have a collision, $a_0$ cannot be chosen freely but must be in the form specified above in the congruence. So whenever I've chosen a combination of $a_1,\ldots,a_{r-1}$, then $a_0$ is fixed: so the possibilities of $a_0$ are $m^{r-1} - 1$ (because we still avoid the case of all zeroes).\\\\
 So we have a collision in $m^{r-1}-1$ ways, but is this number $\leq \frac{|H|}{m}$?
 $$m^{r-1}-1 = \frac{m^r}{m} -1 = \frac{2^{r\cdot\log_2 m}}{m} - 1 = \frac{2^{\log_2 u}}{m} - 1 = \frac{u}{m} - 1 = \frac{u-m}{m} \leq \frac{u-1}{m} = \frac{|H|}{m}$$
 Because $2^{\log_2 m} = m$ and $r$ blocks of size $\log_2 m$ is the total length $\log_2 u$
@@ -1546,7 +1547,7 @@ So the $P($collision$)\leq \frac{1}{m}$ so the average number of keys colliding 
 \subsection{Minimal Ordered Perfect Hashing} For a \textbf{given dictionary} $D$.\\
 Perfect means no collision. Ordered means $k_1<k_2\Rightarrow h(k_1)<h(k_2)$. Minimal means that the co-domain is $[0,n]$, so the smallest key is mapped to 0 and so on.\\
 \paragraph{Example} $D=\{AA,BB,BD,CD\}$, and I would like an hash function $h$ that for $AA$ returns 0, for $BB$ returns 1\ldots\\
-The first step is to consider two universal hash functions $h_1, h_2$ which codomain size $m$ is larger than the number of strings $n$ (which in this example is $n=4$). $h_1(xy) = 3\cdot$rank$(x)+$rank$(y)$ mod $7, h_2(xy) =$ rank$(x)+$rank$(y)$ mod $7$, and note that $m=7>4=n$. So we're going from a space of size $n$ to a space of size $n$, and then we will be going back to another space of size $n$ with the function $g$.\\
+The first step is to consider two universal hash functions $h_1, h_2$ which codomain size $m$ is larger than the number of strings $n$ (which in this example is $n=4$). $h_1(xy) = 3\cdot$rank$(x)+$rank$(y)$ mod $7, h_2(xy) =$ rank$(x)+$rank$(y)$ mod $7$, and note that $m=7>4=n$. So we're going from a space of size $n$ to a space of size $m$, and then we will be going back to another space of size $n$ with the function $g$.\\
 We want the function $h$ that in general is computed as $h(t) = g(h_1(t))+g(h_2(t))$ mod $n$. So we get a system of $n$ equations to find a $g$ that holds for every element.
 \begin{center}
 	\begin{tabular}{c | c c c}
