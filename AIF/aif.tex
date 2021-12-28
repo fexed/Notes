@@ -577,11 +577,13 @@ Classical logic is propositional calculus (PROP) and first order predicate logic
 It enumerates, with a depth first strategy, all interpretations looking for a model (an interpretation that makes a set of formulas true), with three strategies:
 \begin{list}{}{}
 	\item Anticipated control: if one clause is false it backtracks, if one literal is true then the clause is satisfied
-	\item Pure symbols heuristics: assign first pure symbols (symbols that appear everywhere with the same sign)
-	\item Unit clauses heuristics: assign first unit clauses (only one literal)
+	\item Pure symbols heuristics: first assign pure symbols (symbols that appear everywhere with the same sign)
+	\item Unit clauses heuristics: first assign unit clauses (only one literal)
 \end{list}
 %TODO FOL recap
-\subsubsection{Unification algorithm} Computes the MGU by means of a rule-based equation-rewriting system. Initially the working memory (WM) contains the equality of the two expressions to be unified and the rules modify the equations in the WM. The algorithm terminates with a failure or when there are no applicable rules (success), so that the WM contains the MGU. The rules are:
+\subsubsection{Unification algorithm}
+\paragraph{Unification} Fundamental operation in FOL, which computes a \textbf{substitution} that makes two expressions identical. For example, $P(A, y, z)$ and $P(x, B, z)$ can be made identical by the substitution $\tau = \{x/A, y/B, z/C\}$. $\sigma = \{x/A, y/B\}$ is also a substitution and is \textbf{more general} than $\tau$.
+\paragraph{Algorithm} It returns the Most General Unifier (MGU) or FAIL. Computes the MGU by means of a rule-based equation-rewriting system. Initially the working memory (WM) contains the equality of the two expressions to be unified and the rules modify the equations in the WM. The algorithm terminates with a failure or when there are no applicable rules (success), so that the WM contains the MGU. The rules are:
 \begin{list}{}{}
 	\item $f(s_1,\ldots,s_n)=f(t_i,\ldots,t_n) \rightarrow s_1 = t_1, \ldots, s_n= t_n$
 	\item $f(s_1,\ldots,s_n)=g(t_i,\ldots,t_m) \rightarrow$ fail when $f\neq g$ or $n\neq m$
@@ -591,14 +593,14 @@ It enumerates, with a depth first strategy, all interpretations looking for a mo
 	\item $x = t$, $t$ is not $x$, $x$ occur in $t\rightarrow$ fail (\textbf{occur check})
 \end{list}
 Note: when comparing two different constants, we use the second rule as a special case where $n=m=0$ and we fail.
-%KRR-2.pdf
+
 \subsubsection{Knowledge Engineering \& Ontological Engineering} It's possible to discuss representation issues at two levels:
 \begin{list}{}{}
 	\item \textbf{Knowledge Engineering} is the activity to formalize a specific problem or task domain. It involves decisions about: what are the relevant facts and objects relations, which is the right level of abstraction and what are the queries to the KB (inferences)
 	\item \textbf{Ontological Engineering} seeks to build general-purpose ontologies which can be reused in any special-purpose domain (with additional domain-specific axioms).
 \end{list}
 Sometimes it's useful to reduce $n$-ary predicates to 1-place predicates and 1-place functions: this involves creating new individuals and new functions for properties/roles and it's typical of description logics/frame languages.\\
-For example Purchase(john, sears, bike, \$200), we can introduce individuals for purchase objects and functions for roles (\textbf{reification}): Purchase(p23)$\wedge$agent(p23)=john$\wedge$object(p23)=bike$\wedge$source(p23)=sears$\wedge$amount(p23)=\$200\ldots\\
+For example, with Purchase(john, sears, bike, \$200) we can introduce individuals for purchase objects and functions for roles (\textbf{reification}): Purchase(p23) $\wedge$ Agent(p23)=john$\wedge$ Object(p23)=bike $\wedge$ Source(p23)=sears $\wedge$ Amount(p23)=\$200\ldots\\
 This allows Purchase to be described at different levels of detail.
 \paragraph{Representing common sense} The use of KR languages and logic in AI is representing common sense knowledge about the world, rather than mathematics or properties of programs. Common sense knowledge is difficult since it comes in different varieties. It requires formalisms able to represent actions, events, time, physical objects, beliefs\ldots categories that occur in many different domains. We will explore FOL as a tool to formalize different kinds of knowledge.
 \begin{center}
@@ -607,7 +609,7 @@ This allows Purchase to be described at different levels of detail.
 A general ontology organizes everything in the world into a hierarchy of categories.
 \paragraph{Properties} A general-purpose ontology should be applicable in any special-purpose domain, with the addition of domain-specific axioms. In any non-trivial domain, different areas of knowledge must be combined because reasoning and problem solving could involve several areas simultaneously.\\
 It's difficult to construct one single best ontology: every ontology is a treaty, a social agreement, among people with some common interest in sharing. An upper ontology is like an object oriented programming framework (reuse).
-\paragraph{Categories and objects} Much reasoning takes place at the level of categories: we can infer category membership from the perceived properties of an object, and the use category information to derive specific properties of the object.\\
+\paragraph{Categories and objects} Most reasoning takes place at the level of categories: we can infer category membership from the perceived properties of an object, and the use category information to derive specific properties of the object.\\
 There are two choices for representing categories in first-order logic:
 \begin{list}{}{}
 	\item Predicates: categories are unary predicates that we assert of individuals\\
@@ -617,7 +619,7 @@ There are two choices for representing categories in first-order logic:
 \end{list}
 This way we can organize categories into taxonomies, define disjoint categories, partitions\ldots and use specialized inference mechanisms, such as \textbf{inheritance}. Description logic takes this approach.
 \subparagraph{PartOf} PartOf to say that one thing is part of another. Composite objects can be seen as part-of hierarchies, similar to the Subset hierarchy.\\
-PartOf is trainsitive, PartOf($x,y)\wedge$ PartOf$(y,z)\Rightarrow$ PartOf$(x,z)$, and reflexive, PartOf$(x,x)$
+PartOf is transitive, PartOf($x,y)\wedge$ PartOf$(y,z)\Rightarrow$ PartOf$(x,z)$, and reflexive, PartOf$(x,x)$
 \subparagraph{BunchOf} BunchOf is a composite object with definite parts but no particular structure. BunchOf(\{Apple1, Apple2, Apple3\}) not to be confused with the set of the 3 apples.\\
 BunchOf(\{$x$\}) = $x$ and each element of category $S$ is part of BunchOf($S$). Also BunchOf($S$) is part of any object that has all the elements of $S$ as parts ($\forall\:y[\forall\:x\:\:x\in S\Rightarrow$ PartOf$(x,y)]\Rightarrow$ PartOf(BunchOf$(S),y)$)
 \subparagraph{Qualitative Measures} Measures (weight, mass, cost\ldots) are represented as unit functions that take the number as argument (for example: Centimeters(2.54))\\
@@ -705,9 +707,9 @@ Objects on a table are in the room where the table is. If we move the table from
 	\item \textbf{Planning}: finding a sequence of actions to reach a certain goal condition $G$\\
 	KB$\vDash\:\exists\:a\:\:G$(Result$(a,s_0))$ where $a = [a_1,\ldots,a_n]$
 	\item \textbf{Projection}: given a sequence of actions and some initial situation, determine what it would be true in the resulting situation.\\
-	Given $\phi(s)$ determine whether KB$\vDash\:\phi($Result$(a,s_0))$ where $a = [a_1,\ldots,a_n]$
+	Given $\phi(s)$ determine whether KB $\vDash\:\phi($Result$(a,s_0))$ where $a = [a_1,\ldots,a_n]$
 	\item \textbf{Legality test}: checking whether a given sequence of actions $[a_1,\ldots,a_n]$ can be performed starting from an initial situation.\\
-	KB$\vDash\:$Poss$(a_i,$ Result$([a_1,\ldots,a_{i-1}],s_0))$ for each $i\:|\:1\leq i\leq n$\\
+	KB $\vDash\:$Poss$(a_i,$ Result$([a_1,\ldots,a_{i-1}],s_0))$ for each $1\leq i\leq n$\\
 	For example Result(Pickup($b_2$), Result(Pickup$(b_1),s_0))$ is not a legal situation because the robot can hold only one object.
 \end{list}
 \paragraph{Non-Monotonic approach} What we would need is the ability to formalize a notion of \textbf{persistence}: \textit{in the absence of information to the contrary, things remain as they were}".\\
@@ -718,7 +720,7 @@ The \textbf{event calculus} is introduced to handle such cases: it's based on ev
 \subsubsection{Event Calculus}
 \begin{list}{}{}
 	\item A Fluent is an object (represented by a function)\\
-	To assert that a Fluent is true at some point in time $t$, we use the predicate $T($true$)$
+	To assert that a Fluent is true at some point in time $t$, we use the predicate $T$ (true)
 	\begin{list}{}{}
 		\item $T$(At(Shankar, Berkley)$, t)$
 		Where  At(Shankar, Berkley) is a term, $t$ a time
@@ -729,7 +731,7 @@ The \textbf{event calculus} is introduced to handle such cases: it's based on ev
 	\item To assert that an event happens during an extended period of time, we say Happens($e,i$)
 \end{list}
 \subsection{Nonmonotonic reasoning}
-Classical entailment is monotonic: if KB$\vDash a$ then KB $\cup \{b\}\vDash a$ (KB$\wedge b\vDash a$)\\
+Classical entailment is monotonic: if KB $\vDash a$ then KB $\cup$ $\{b\}\vDash a$ (KB $\wedge$ $b$ $\vDash a$)\\
 Failures of monotonicity are widespread in commonsense reasoning. It seems that humans often "jump to conclusions" when they think it's safe to do so (when they lack information to the contrary). These conclusions are only "reasonable" given what you know, rather than classically entailed.\\
 Most of the inference we do is defeasible: additional information may lead to retract those tentative conclusions. Anytime the set of beliefs does not grow monotonically when new evidence arrives, the monotonicity property is violated. Including defeasible reasoning leads us to consider \textbf{nonsound inferences}.
 \paragraph{Common instances of nonmonotonic reasoning} \begin{list}{}{}
@@ -754,19 +756,19 @@ This is what we call a default, and \textbf{default reasoning} the tentative con
 \paragraph{Closed Worlds Assumpion (CWA)} \textit{There are usually many more negative facts than positive facts}! Under CWA, only positive facts are stored, and any other basic fact is assumed false. It's used in deductive databases and in logic programming with negation as failure. Corresponds to a new version of entailment $\vDash_C$:
 \begin{list}{}{}
 	\item KB $\vDash_C a \Leftrightarrow$ CWA(KB) $\vDash a$\\
-	Where CWA(KB) = KB $\cup\{\neg p\:|\:p$ ground atom and KB $\neq p\}$, the set of assumed beliefs\\
+	Where CWA(KB) = KB $\cup$ $\{\neg p\:|\:p$ ground atom and KB $\neq p\}$, the set of assumed beliefs\\
 \end{list}
 CWA(KB) is the completion under CWA of KB. CWA is a form of theory completion and is nonmonotonic.
-\subparagraph{Consistent and complete knowledge} KB with consistent knowledge (satisfiable): $\not\exists\:a\:|$ KB$\vDash a\wedge$ KB$\vDash\neg a$, so there's no contradiction.\\
-\textbf{Complete theory}: $\forall\:a$ KB$\vDash a\vee$ KB$\vDash\neg a$\\
+\subparagraph{Consistent and complete knowledge} KB with consistent knowledge (satisfiable): $\not\exists\:a\:|$ KB $\vDash a$ $\wedge$ KB $\vDash\neg a$, so there's no contradiction.
+\subparagraph{Complete theory} $\forall\:a$ KB $\vDash a$ $\vee$ KB $\vDash\neg a$\\
 Normally a KB has incomplete knowledge:
 \begin{list}{}{}
-	\item Let KB = $\{p\vee q\}$, then KB$\vDash (p\vee q)$ but KB$\not\vDash p$ and KB$\not\vDash \neg p$\\
-	Also, for any ground atom not mentioned in KB, KB$\not\vDash r$ and KB $\not\vDash \neg r$
+	\item Let KB = $\{p\vee q\}$, then KB $\vDash (p\vee q)$ but KB $\not\vDash p$ and KB$\not\vDash \neg p$\\
+	Also, for any ground atom not mentioned in KB, KB $\not\vDash r$ and KB $\not\vDash \neg r$
 \end{list}
 CWA can be seen as an \textbf{assumption about complete knowledge}, or a way to make a theory complete.\\
-\textbf{Theorem}: $\forall\:a$ within the language, KB$\vDash_C a\vee$ KB$\vDash_C\neg a \Leftrightarrow$ CWA(KB)$\vDash a\vee$ CWA(KB)$\vDash\neg a$\\\\
-CWA(KB) isn't always consistent when KB is consistent. Problems with disjunctions, for example: KB = $\{p\vee q\}$, CWA(KB) = KB$\cup\{\neg p, \neg q\}$ since KB $\not\vDash p$ and KB $\not\vDash q$, but KB$\cup\{\neg p, \neg q\}\vDash \neg(p\vee q)$ then CWA(KN) is inconsistent. The solution is to restrict CWA to atoms that are "uncontroversial": $p,q$ are controversial, $r$ isn't.\\
+\textbf{Theorem}: $\forall\:a$ within the language, KB $\vDash_C a\vee$ KB $\vDash_C\neg a \Leftrightarrow$ CWA(KB) $\vDash a\vee$ CWA(KB) $\vDash\neg a$\\\\
+CWA(KB) isn't always consistent when KB is consistent. Problems with disjunctions, for example: KB = $\{p\vee q\}$, CWA(KB) = KB $\cup$ $\{\neg p, \neg q\}$ since KB $\not\vDash p$ and KB $\not\vDash q$, but KB $\cup$ $ \{\neg p, \neg q\}\vDash \neg(p\vee q)$ then CWA(KB) is inconsistent. The solution is to restrict CWA to atoms that are "uncontroversial": $p,q$ are controversial, $r$ isn't.\\
 CWA limited in such a way is called Generalized CWA (GCWA), is a weaker form of completion than unrestricted CWA (the assumed beliefs are less)
 \begin{list}{}{}
 	\item GCWA: if KB $\vDash\{p\vee q_1,\ldots,\vee q_n\}$ and KB $\neg\vDash p$ then add $\neg p$, provided at least one ground atom $q_i$ is entailed by KB\\
@@ -783,8 +785,8 @@ If positive atoms are stored as a table, deciding if KB $\vDash_C a$ is like a D
 \subparagraph{Extension to quantifiers} The application of the theorem of consistency depends on the terms that we allow as part of the language. The \textbf{Domain Closure Assumption} (DCA) may be used to restrict the constants to those explicitly mentioned in the KB. Under this restriction, quantifiers can be replaced by finite conjunctions and disjunctions.\\
 The \textbf{Unique Names Assumption} (UNA) can be used to deal with terms equality.
 \subparagraph{CWA in synthesis} CWA is the assumption that atomic formulas not entailed by the KB are assumed to be false. This is a normal assumption in databases. Formally, KB $\vDash_C a \Leftrightarrow$ KB $\cup\{\neg p\:|\:p$ ground atom and KB $\not\vDash p\}\vDash a$\\
-The KN so augmented is \textbf{complete}: $\forall\:a$ KB $\vDash_C a$ or KB $\vDash_C \neg a$\\
-\textbf{Consistency} requires a more restricted formulation of the assumed belief GCWA. If KB $\vDash \{p\vee q_1\ldots\vee q_n\}$ and KB $\not\vDash p$ then add $\neg p$ if at least one ground literal $q_i$ is entailed.\\
+The KB so augmented is \textbf{complete}: $\forall\:a$ KB $\vDash_C a$ or KB $\vDash_C \neg a$\\
+\textbf{Consistency} requires a more restricted formulation of the assumed belief GCWA. If KB $\vDash \{p\vee q_1\ldots\vee q_n\}$ and\\KB $\not\vDash p$ then add $\neg p$ if at least one ground literal $q_i$ is entailed.\\
 Query processing can be reduced as a combination of atomic queries.\\
 Vivid knowledgebases store the plus part of a complete interpretation and make reasoning efficient (the augmentation reduces the possible models to one)
 \paragraph{Circumscription} A more powerful and precise version of CWA, working also for FOL. The idea is to specify special \textbf{abnormality predicates} for dealing with exceptions.\\
@@ -792,7 +794,7 @@ For example, suppose we want to assert the default rule "birds fly":
 \begin{list}{}{}
 	\item All normal birds fly: $\forall\:x$ Bird$(x) \wedge\neg$Ab$_f(x)\Rightarrow$ Flies$(x)$
 	\item We also have Bird(Tweety), Bird(Chilly), Chilly $\neq$ Tweety, $\neg$Flies(Chilly)\\
-	We want to infer Flies(Tweety), but Tweetu could satisfy Ab$_f$ in some model
+	We want to infer Flies(Tweety), but Tweety could satisfy Ab$_f$ in some model
 \end{list}
 The idea is to \textbf{minimize abnormality}.\\
 \textbf{Circumscription}: given the unary predicate Ab, consider only interpretation where I[Ab$_f$] is \textbf{as small as possible} relative to KB.
