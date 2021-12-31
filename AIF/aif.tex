@@ -1478,26 +1478,26 @@ In the Umbrella, the predicted distribution of Rain converges to a fixed point $
 \paragraph{Smoothing} Is the process of computing the posterior distribution of the state at some past time $k$, given a complete sequence of observations up to the present $t$: $P(x_k\:|\:e_{1:t})$ with $0\leq k< t$. To compute it:
 $$P(x_k\:|\:e_{1:t}) = \alpha f_{1:k}\cdot b_{k+1:t} = \alpha  P(x_k\:|\:e_{1:k}) \cdot P(e_{k+1:t}\:|\:x_k)$$ where $\cdot$ is the pointwise multiplication, $f_{1:k} = P(x_k\:|\:e_{1:k})$ is the \textbf{forward message} and $b_{k+1:t} = P(e_{k+1:t}\:|\:x_k)$ is the \textbf{backward message} which can be computed by a recursive process that runs backward from $t$. This can be computed as: $$P(e_{k+1:t}\:|\:x_k) = \sum_{x_{k+1}} P(e_{k+1}\:|\:x_{k+1})P(e_{k+2:t}\:|\:x_{k+1})P(x_{k+1}\:|\:x_k)$$
 \paragraph{Viterbi Algorithm}
-There is a recursive relationship between the most likely path to each state $x_{t+1}$ and most likely paths to each previous state $x_t$. We can write a recursive equation similar to the one for filtering: $$max_{x_1,\ldots,x_t} P(x_1,\ldots,x_t,x_{t+1}\:|\:e_{1:t+1}) = \alpha P(e_{t+1}\:|\:x_{t+1})max_{x_t}(P(x_{t+1}\:|\:x_t) max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t}))$$
-With the forward message being $m_{1:t} = max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t})$, the probabilities of the best path to each state $x_t$.\\From those we can compute the probabilities of the extended paths at time $t+1$ and take the max. The \textbf{most likely sequence} can be computed in one pass. For each state, the best state that leads to it is recorded, so that the optimal sequence is identified.W
+There is a recursive relationship between the most likely path to each state $x_{t+1}$ and most likely paths to each previous state $x_t$. We can write a recursive equation similar to the one for filtering: $$\max_{x_1,\ldots,x_t} P(x_1,\ldots,x_t,x_{t+1}\:|\:e_{1:t+1}) = \alpha P(e_{t+1}\:|\:x_{t+1})\max_{x_t}(P(x_{t+1}\:|\:x_t) \max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t}))$$
+With the forward message being $m_{1:t} = \max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t})$, the probabilities of the best path to each state $x_t$.\\From those we can compute the probabilities of the extended paths at time $t+1$ and take the max. The \textbf{most likely sequence} can be computed in one pass. For each state, the best state that leads to it is recorded, so that the optimal sequence is identified.
 
 \subsubsection{Other approaches}
 Despite the disadvantage of the many probability values, Probability Theory and Bayesian Networks are the dominant approaches today. Other approaches that have been used are:
 \begin{list}{}{}
-	\item \textbf{Rule-Based methods for uncertain reasoning in exper systems}\\
+	\item \textbf{Rule-Based methods for uncertain reasoning in expert systems}\\
 	Three good properties of classical logic-based rules:
 	\begin{list}{}{}
 		\item \textbf{Locality}: in logical systems, from $A$ and $A\Rightarrow B$ we can conclude $B$ without worrying about any other rules. In probabilistic systems we have to consider all evidence.
-		\item \textbf{Detachment}: once $B$ is proven, in can be used regardless of how it was derived, it \textit{becomes detached from its justification}. Probabilities cannot be detached from evidence.
+		\item \textbf{Detachment}: once $B$ is proven, it can be used regardless of how it was derived, it \textit{becomes detached from its justification}. Probabilities cannot be detached from evidence.
 		\item \textbf{Truth-Functionality}: the truth of complex sentences can be computed from the truth of the components. Probability combination doesn't work that way.
 	\end{list}
-	The idea is to attach a degree of belief to facts and rules and to combine and propagate them. The most famous examples is the \textbf{cerainty factors model}.
+	The idea is to attach a degree of belief to facts and rules and to combine and propagate them. The most famous examples is the \textbf{certainty factors model}.
 	\item \textbf{Representing vagueness: fuzzy sets and fuzzy logic}
 		The theory of fuzzy sets is a way to specify how well an object satisfies a vague description property, like "being tall".\\
 		\textbf{Fuzzy Logic} is a way of reasoning about membership in fuzzy sets. A fuzzy predicate implicitly defines a fuzzy set. The standard rules are:
 		\begin{list}{}{}
-			\item $T(A\wedge B) = min(T(A),T(B))$
-			\item $T(A\vee B) = max(T(A),T(B))$
+			\item $T(A\wedge B) = \min(T(A),T(B))$
+			\item $T(A\vee B) = \max(T(A),T(B))$
 			\item $T(\neg A) = 1-T(A)$
 		\end{list}
 		\textbf{Fuzzy Control} is a methodology for constructing control systems in which the mapping between real-valued input and output parameters is represented by fuzzy rules.
@@ -1518,12 +1518,12 @@ Despite the disadvantage of the many probability values, Probability Theory and 
 	\item Can be learned from decision trees and inductive methods\ldots
 \end{list}
 \paragraph{Rules Knowledgebases} As contractions of PROP and FOL\\
-We assume: clausal form (conjunctive normal form), unification (Most General Unifier), Resolution method for PROP and FOL, completeness of the resolution method when used for refutation.\\
+We assume: clausal form (conjunctive normal form, $\vee$ inside and $\wedge$ outside), unification (Most General Unifier), resolution method for PROP and FOL, completeness of the resolution method when used for refutation.\\
 We will see \textbf{Horn clauses} i.e. rule-based knowledgebase, classical reasoning with rules (forward and backward), other forms of reasoning with rules.
 \paragraph{Reasoning with Horn clauses} By limiting the expressivity to a specific interesting subset of FOL, resolution procedures become much more manageable.\\
 We limit the degree of uncertainty we can express by considering \textbf{clauses that have at most one positive literal} (\textbf{Horn clauses}). Two cases:
 \begin{list}{}{}
-	\item The knowledgebase is a set of definite Horn clauses (\textit{exactly} one positive literal.\\
+	\item The knowledgebase is a set of definite Horn clauses (\textit{exactly} one positive literal)\\
 	$\{\neg a_1,\ldots,\neg a_m, h\}$ also written as $a_1\wedge\ldots\wedge a_m \Rightarrow h$
 	\begin{list}{}{}
 		\item \textbf{Rules} when $m>0$, for example: Child $\wedge$ Male $\Rightarrow$ Boy
@@ -1612,7 +1612,7 @@ We end up with $r\cdot n\cdot w\cdot c$ unification operations! Some ideas for p
 		\item \textbf{Magic sets} in deductive databases
 	\end{list}
 \end{enumerate}
-\subsubsection{Production systems} Rule-based systems are one of the first paradigms for representing knowledge in artificial intelligence. Most expert systems are rule-based. Rules are used forward to produce new facts, hence the name \textit{production} and \textit{production systems}: general computational model guided by patterns, where the rule to be applied next is determined by the operation of pattern matching, a simplified form of unification.
+\subsubsection{Production systems} Rule-based systems are one of the first paradigms for representing knowledge in artificial intelligence. Most expert systems are rule-based. Rules are used forward to produce new facts, hence the names \textit{production} and \textit{production systems}: general computational model guided by patterns, where the rule to be applied next is determined by the operation of pattern matching, a simplified form of unification.
 \paragraph{Components} A typical rule-based systems has four basic components:
 \begin{list}{}{}
 	\item A \textbf{list of facts} (no variables), the temporary working memory (WM)\begin{list}{}{}
@@ -1664,7 +1664,7 @@ The \textbf{depth} strategy is the standard default strategy for CLIPS: new rule
 	\item $c_n = c$
 	\item Each $c_{i+1}$ is obtained by the resolution rule applied to $c_i$ and some clause in KB
 \end{list}
-In backward reasoning systems, the SLD strategy is used by refutation, i.e. starting from the negation of the gaol and trying to derive the empty clause. The SLD strategy is complete for Horn clauses $$\hbox{KB} \vDash c\Rightarrow S \vdash_{SLD} c$$
+In backward reasoning systems, the SLD strategy is used by refutation, i.e. starting from the negation of the goal and trying to derive the empty clause. The SLD strategy is complete for Horn clauses $$\hbox{KB} \vDash c\Rightarrow S \vdash_{SLD} c$$
 Propositional Horn Clauses knowledgebases have linear-time deduction algorithms.
 \paragraph{Example}
 \begin{multicols}{2}
@@ -1734,7 +1734,7 @@ The \textbf{SLD Goal Tree} will be
 		\item $A$
 		\item $A$ :- $B_1,\ldots,B_n$, with $A$ head and $B_1,\ldots,B_n$ body
 	\end{list}
-	\item \textbf{Procedural Interpretation}: \begin{list}{}{}
+	\item \textbf{Procedural interpretation}: \begin{list}{}{}
 		\item $A$ is true
 		\item $B_1,\ldots,B_n\Rightarrow A$, i.e. A is true if $B_1,\ldots,B_n$ are all true
 		\item The goal (query) is a negative clause whose logical meaning is $\neg(G_1\wedge\ldots\wedge G_k)$ written as ?- G$_1$,\ldots,G$_k$ (\textbf{conjunction of subgoals})
@@ -1800,7 +1800,7 @@ The logical meaning of the query is:
 	\item KB $\cup\:\{\neg$ancestor($X$, mark)$\}\vdash_{RES} \{\}$?
 \end{list}
 In this case the expected answer are the values that $X$ is bound to during the resolution proof, $X\in\{$lia, john$\}$. Similarly, ?- ancestor(lia, $Y$) returns all the descendants of Lia ($Y\in\{$john, mark, luc$\}$).
-\paragraph{Properties} The SLD resolution strategy is complete for definite Horn clauses. This mean that if $P\cup\:\{\neg G\}$ is unsatisfiable, then at least one of the leaves of the SLD tree produces the empty clause (success). Moreover, trying to satisfy the subgoals in the order they appear is not restrictive, since in the end all of them must be satisfied.\\
+\paragraph{Properties} The SLD resolution strategy is complete for definite Horn clauses. This means that if $P\cup\:\{\neg G\}$ is unsatisfiable, then at least one of the leaves of the SLD tree produces the empty clause (success). Moreover, trying to satisfy the subgoals in the order they appear is not restrictive, since in the end all of them must be satisfied.\\
 When there are variables in the goal, the substitution that we obtain is the \textbf{computed answer}.\\
 Completeness and efficiency are however influenced by: the order of expansion of the nodes (visit strategy of the SLD tree), the order in which we consider successor nodes at each level and the order of literals in the body.
 \subsection{Forms of Reasoning}
@@ -1828,7 +1828,7 @@ Completeness and efficiency are however influenced by: the order of expansion of
 \end{list}
 \paragraph{Proving by Contradiction} We need an extension of the language to deal with integrity constraints of this form: $$false \leftarrow a_1\wedge\ldots\wedge a_k \equiv \neg a_1\vee\ldots\vee\neg a_k$$
 A definite Horn database is always satisfiable and a Horn database (including integrity constraints) can be unsatisfiable.\\
-Discovering a contradiction in the knowledgebase can be important in many applications. For these tasks you must declare a set of assumables, atoms that can be assumed in a proof by contradiction. The system can then collect all teh assumable that are used in proving \textit{false}. That is KB $\cup\:\{c_1,\ldots,c_r\}\vDash false$, with $C=\{c_1,\ldots,c_r\}$ \textbf{conflict} of KB. A possible answer is KB $\vDash \neg c_1\vee\ldots\vee c_r$.\\
+Discovering a contradiction in the knowledgebase can be important in many applications. For these tasks you must declare a set of assumables, atoms that can be assumed in a proof by contradiction. The system can then collect all the assumable that are used in proving \textit{false}. That is KB $\cup\:\{c_1,\ldots,c_r\}\vDash false$, with $C=\{c_1,\ldots,c_r\}$ \textbf{conflict} of KB. A possible answer is KB $\vDash \neg c_1\vee\ldots\vee c_r$.\\
 A \textbf{minimal conflict} is a conflict such that no strict subset is also a conflict.
 \paragraph{Consistency-based Diagnosis} The aim of consistency-based diagnosis is to determine the possible faults based on a model of the system and observations of the system.\begin{list}{}{}
 	\item Background knowledge provides the model of the system
@@ -1961,8 +1961,7 @@ With "not" being the negation as failure or \textbf{default negation}, different
 	\item \textbf{Fact}: when body($r$) = \{\}
 	$$l_0\hbox{ or }\ldots\hbox{ or }l_k$$
 \end{list}
-A \textbf{ASP} (Answer Set Prolog/program) \textbf{is a pair \{$\sigma$, $\Pi$\} where $\sigma$ is a signature and $\Pi$ is a collection of logic programming rules over $\sigma$}. The signature $\sigma$.
-The signature may be derived from the program, $\sigma(\Pi)$, rather than being given explicitly. It consists of all the constants which appear in the program.\\
+A \textbf{ASP} (Answer Set Prolog/program) \textbf{is a pair \{$\sigma$, $\Pi$\} where $\sigma$ is a signature and $\Pi$ is a collection of logic programming rules over $\sigma$}. The signature $\sigma$ may be derived from the program, $\sigma(\Pi)$, rather than being given explicitly. It consists of all the constants which appear in the program.\\
 Example of an ASP program, $\Pi_0$:
 \begin{list}{}{}
 	\item $q(a,1)$
@@ -2005,8 +2004,7 @@ Partial interpretation $S$: a consistent set of ground literals over $\sigma$:
 	\item \textbf{Minimality}: a rationality principle, "\textit{do not believe anything you are not forced to believe}"
 \end{list}
 Semantics is given in two steps: programs without default negation (part 1) and arbitrary programs (part 2).
-\paragraph{Consistency of logic programs} A logic program is called consistent if it has an answer set. Inconsistency may be due to improper use of \textbf{logical negation} ($\neg$).\\
-We can transform a ASP program $\Pi$ to one without negation $\Pi^+$ (the positive form) as follows:
+\paragraph{Consistency of logic programs} A logic program is called consistent if it has an answer set.\\Inconsistency may be due to improper use of \textbf{logical negation} ($\neg$). We can transform a ASP program $\Pi$ to one without negation $\Pi^+$ (the positive form) as follows:
 \begin{list}{}{}
 	\item For each predicate symbol $p$ we introduce a symbol $p'$ with the same arity
 	\item We replace each $l=\neg p(t)$ with $p'(t)$, its positive form, $l^+$. If $l$ is positive, $l=l^+$
@@ -2014,7 +2012,7 @@ We can transform a ASP program $\Pi$ to one without negation $\Pi^+$ (the positi
 A logic program $\Pi$ can be transformed in its positive form $\Pi^+$ by replacing each rule with $l_0^+\hbox{ or }\ldots\hbox{ or }l_k^+\leftarrow l_{k+1}^+,\ldots,l_m^+,\hbox{ not }l_{m+1}^+,\ldots,\hbox{ not }l_n^+$ and adding the constraints $\leftarrow p(t),p'(t)$ for each $p'$ added.\\
 \textbf{Property 1}: a set $S$ of literals of $\sigma(\Pi)$ is an answer set of $\Pi \Leftrightarrow S^+$ is an answer set of $\Pi^+$.\\\\
 A logic program can be inconsistent for the use of the \textbf{default negation}.\\
-In general, the problem of checking inconsistency is undecidable or decidable and very complex for finite domains. The theory helps us in making simplifying assumptions to guarantee consistency.\\
+In general, the problem of checking inconsistency is undecidable, or decidable but very complex for finite domains. The theory helps us in making simplifying assumptions to guarantee consistency.\\
 \textbf{Level Mapping}: a function $||\:||$ which maps ground atoms in $P$ (the Herbrand base of $P$) to natural numbers. If $D$ is a disjunction or conjunction of literals, $||D||$ is defined as the minimum level of atoms occurring in literals from $D'$ (the positive form). This also implies that $||\neg\:A|| = ||A||$.
 A logic program $\Pi$ is \textbf{locally stratified} if it does not contain $\neg$, and there is a level mapping on the grounded version of $\Pi$ ($gr(\Pi)$) such that for every rule:
 \begin{list}{}{}
@@ -2222,7 +2220,7 @@ The planning graph can't answer definitively whether $G$ is reachable from $S_0$
 \end{list}
 \paragraph{Definition} A planning graph works just for propositional planning problems with no variables.\\
 A planning graph is a directed graph which is \textbf{built forward} and is \textbf{organized into levels}:\begin{list}{}{}
-	\item A levels $S_0$ for the initial state, representing each fluent that holds in $S_0$
+	\item A level $S_0$ for the initial state, representing each fluent that holds in $S_0$
 	\item A level $A_0$ consisting of nodes for each ground action applicable in $S_0$
 	\item Alternating levels $S_i$ followed by $A_i$ are built until we reach a terminating condition.
 \end{list}
@@ -2251,7 +2249,7 @@ Mutex relations between literals at the same level:
 \begin{list}{}{}
 	\item Each level $S_i$ represent a set of possible belief states. Two literals connected by a mutex belong to different belief states
 	\item The levels, alternating $S$s and $A$s, are computed until we reach a point where two consecutive levels are identical. The graph for the cake \textbf{levels off} at $S_2$
-	\item The level $j$ at with a literal first appears is never grater than the level at which it can be achieved. We cal this the \textbf{level cost} of a literal/goal
+	\item The level $j$ at with a literal first appears is never greater than the level at which it can be achieved. We cal this the \textbf{level cost} of a literal/goal
 	\item The process of constructing the planning graph does not require choosing among actions and is very fast
 	\item A planning graph is polynomial in the size of the planning problem: an entire graph with $n$ levels, $a$ actions, $l$ literals has size $O(n(a+l)^2)$. The same for time complexity.
 \end{list}
