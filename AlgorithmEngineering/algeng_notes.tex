@@ -164,7 +164,49 @@ while H != {}:
 \end{lstlisting}
 Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $\tau = \#$ items read. The phase has processed $\tau + M$ items, $\tau$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $\tau$ items are written out. So $\tau$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to $U$ and $H$. $P($item read goes to $U) = \frac{1}{2}$, a totally random situation. By changing the probability we change "how much sorted" is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = \tau/2$ because we have $\tau$ items that go to $U$ with probability $\frac{1}{2}$.\\
 Given that $|U| = M$, then on average $E[|U|] = \frac{\tau}{2} = M$ so average $\tau = 2M$
-\paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots
+\paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots\\
+$\left[\begin{array}{l r}
+1,8&\\
+&\emptyset
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not1,8
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not3,8
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+2&\\
+&\not8
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+2,5&\\
+&\emptyset
+\end{array}\right]$ first run is $1,3,8$\\
+$\left[\begin{array}{l r}
+2,5&\\
+&\emptyset
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not2,5
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+0&\\
+&\not5
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+0,4&\\
+&\emptyset
+\end{array}\right]\rightarrow$ second run is $2,5$\\
+$\left[\begin{array}{l r}
+0,4&\\
+&\emptyset
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not0, 4
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not4, 6
+\end{array}\right]\rightarrow\left[\begin{array}{l r}
+\emptyset&\\
+&\not6
+\end{array}\right]\rightarrow$ third run is $0,4,6$
 \paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, by merging we need $3B$ for reading the memory (one for the first run, one on the second run and one page for the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if we immediately load all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$, $k$ pages for $k$ runs plus an output page. So $k = \frac{M}{B} - 1$ which we can approximate with $\frac{M}{B}$. Each run generates $\frac{1}{B}$ I/Os, and the merged run is long $k\cdot\frac{M}{B}$ elements.\\
 So every run is composed of $M$ elements which take $\frac{M}{B}$ I/Os, for $\frac{n}{M}$ runs. So the total cost is $O(\frac{n}{\not M} \cdot \frac{\not M}{B}) = O(\frac{n}{B})$ for creating runs. So the merge tree has $\frac{n}{M}$ leafs and every node has $k$ runs to merge from the lower level, making it $\log_k \frac{n}{M}$ levels high.\\
 The cost of merge sort is $O(\frac{n}{B} + \frac{n}{B}\cdot\log_k \frac{n}{M})$ which we have seen with $k = \frac{M}{B}$. It's the cost of creating the runs ($\frac{n}{B}$) plus the cost of merging (every merge is linear, total length divided by $B$, times the number of merge operations which is the levels of the tree)\\
