@@ -657,7 +657,7 @@ It proceeds like this.
 \paragraph{Effectivness} The bits represents values in ranges, so if the ranges are small we use fewer bits. So it's efficient when values are clustered, "dense".
 \paragraph{Elias Fano codes} Where we can access any value in the compressed sequence very efficiently. We have $n$ increasing values in the range $[0, u)$, $b = \lceil\log_2 u\rceil$ bits for the representation and $l = \lceil\log_2(\frac{u}{n})\rceil$, $h = b-l$. An example with $n = 8, u = 32, b = 5, l = 2, h = 3$
 \begin{center}
-	\includegraphics[scale=0.5]{11.png}
+	\includegraphics[scale=0.5]{12.png}
 \end{center}
 We work with two columns: the $l$ least significant bits and the $h$ most significant bits. The values in the $l$ column are not compressed at all, so $L$ is just the concatenation of those values. Because it has no compression, $l$ is chosen also to make $L$ small compared to the rest of the encoding.\\
 The values in the $h$ column are increasing, because the values of the sequence are increasing and the most significant bits remain increasing even when removing the least significant bits. To compress $H$ the idea is the following: we know that $h=3$, so $2^h = 2^3 = 8$ possible values and maybe some of them don't appear (for example: $2,3,5$ do not appear in the example). We consider all 8 possible values and we record a unary representation of the number of items in the $h$ column with that value (in the example, only one $0$ so $10$ with as many ones as the occurrences ended by a $0$ "separator"). The values are increasing, so the one 0 is the first, the two 1 are the second and third, zero $2$, zero $3$ and then one $4$ so is the fifth.\\
@@ -939,7 +939,7 @@ Let's assume we have this tree (with left-right childs that might be null)
 \begin{center}
 	\includegraphics[scale=0.5]{14.png}
 \end{center}
-With $n=8$ nodes. We could implement it with pointers, every node with a left and right pointer and possibly another pointer for the parent, and with 8 bytes per pointer that's 24 bytes per node just for the structure. We can do better in an elegant and brilliant way, consisting of several steps.\begin{enumerate}
+With $n=8$ nodes. We could implement it with pointers, every node with a left and right pointer and possibly another pointer for the parent, and with 8 bytes per pointer that's 24 bytes per node just for the structure. We can do better in an elegant and brilliant way, consisting of several steps (\textbf{LOUDS} scheme).\begin{enumerate}
 	\item \textbf{Tree completion}: transforming the tree into a full binary tree\begin{center}
 		\includegraphics[scale=0.5]{15.png}\\
 		The circled numbers are relative to the original tree
@@ -1067,7 +1067,7 @@ The main idea is to turn the Huffman tree into an unbalanced tree with the deepe
 	For every level, keep a list of symbols per each level
 	\item Computing the new codewords.\\
 	It's sufficient to find the first codeword for each level, because all the codewords in that level are increasing\\
-	$l =$ max level, the first codeword of level max $fc[l_{max}] = 0$ and $l<l_{max}$ such that $fc[l])=\frac{fc[l+1]+\hbox{num}[l+1]}{2}$\\
+	$l =$ max level, the first codeword of level max $fc[l_{max}] = 0$ and $l<l_{max}$ such that $fc([l])=\frac{fc[l+1]+\hbox{num}[l+1]}{2}$\\
 	Mathematically, by summing the first plus the num array element, I'm going to the next available leaf not occupied by any symbol on that level, and dividing by two in binary is just making a shift so we're dropping the leaf and going up one level. So it's the first codeword of the level $+1$ plus the number of leaves divided by two to go to the parent.\\
 	With $fc$ and the length which is $l$, we represent the value on $l$ bits and get the codeword.
 \end{enumerate}
