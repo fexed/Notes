@@ -728,7 +728,8 @@ Assuming we want to find $S[5]$. Until now, with the other codes, we needed to d
 	As for the operations:
 	\begin{list}{}{}
 		\item Access(4): $4$th group in $L$ for the least significant bits, $4$th $1$ in $H$ (SELECT$_1(4)$) for the most significant bits. We get $01$ from $L$ and the $4$th $1$ corresponds to the $2$nd bucket, which is $1$ on $h = 4$ bits $\Rightarrow 0001$, so we get $000101 = 5$
-		\item NextGeq(8) = NextGeq(0010$\:$01) so we look for the starting position in $H$ for the bucket $0010 = 2$ ($\eta =$ SELECT$_0(2)+1 = 6+1 = 7$) $H[\eta] = 1$ so is a non empty bucket, we scan its elements from $\eta - H(8) = \eta - 2 = 5$ and return 9
+		\item NextGeq(8) = NextGeq(0010$\:$01) so we look for the starting position in $H$ for the bucket $0010 = 2$ ($\eta =$ SELECT$_0(2)+1 = 6+1 = 7$) $H[\eta] = 1$ so is a non empty bucket: we scan elements in $L$ from $\eta - H(7) = \eta - 2$ (the bucket value) $ = 5$ group and return 9.\\
+		At the same time I scan $H$ and if I encounter 0 I've ended the bucket, so I return the first item of the next non-empty bucket.
 		\item NextGeq(32) = NextGeq(1000$\:$00)\\
 		$\eta =$ SELECT$_0(8) + 1 = 18+1 = 19$ and $H[19] = 0$ so bucket empty, we return the next element which is given by Access($\eta-H(32)$) = Access$(19-8)$ = Access$(11)$
 	\end{list}
