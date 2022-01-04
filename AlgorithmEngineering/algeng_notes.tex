@@ -1394,8 +1394,11 @@ How long is the common prefix between $T[i,\ldots]$ and $T[j,\ldots]$? The minim
 	\item \textbf{RLE} Run-Length-Encoding\\
 	Specifically designed for spacial locality.\\
 	Example: $abbbaacccca \Rightarrow (a,1),(b,3),(a,2),(c,4),(a,1)$\\
-	In binary string just numbers and the first bit is sufficient.
+	In binary string just numbers and the first bit is sufficient.\\
+	\textbf{RLE0} is the following pipeline: add $1$ to non-zero elements and encode 0-runs with Wheeler's code.
 \end{list}
+\paragraph{Wheeler's Code} To encode the sequence of zeroes we do the following: we take the length of the sequence, $n$, and compute Bin$(n+1)$. We use the returned sequence without the first $1$.\\
+For example, RLE0(221200) = 33231 because 00 has length $n=2$ and Bin(3) = 11.
 \paragraph{Burrows-Wheeler Transform} Let's take a given text $T=$ mississippi\# and we start by rotating $T$:
 \begin{list}{}{}
 	\item mississippi\#
@@ -1449,7 +1452,8 @@ Note that the character in $L$ is the one that precedes the character in $F$. Wi
 	\item \textbf{ssippi\#}miss i
 	\item \textbf{ssissippi\#}m i
 \end{list}
-So \# is a dividing character. So these are the sorted suffixes of $T$, and we can compute it with a suffix array ($SA$) construction algorithm, with a linear space instead of quadratic. Given the items of the $SA$, the corresponding item of $L$ is $L[i] = T[SA[i]-1]$. This requires many jumps in memory, so it's the main reason why bzip is significantly slower than gzip. So this spurred a number of publications in '94-'10 on SA construction.
+So \# is a dividing character. So these are the sorted suffixes of $T$, and we can compute it with a suffix array ($SA$) construction algorithm, with a linear space instead of quadratic. Given the items of the $SA$, the corresponding item of $L$ is $L[i] = T[SA[i]-1]$. This requires many jumps in memory, so it's the main reason why bzip is significantly slower than gzip. So this spurred a number of publications in '94-'10 on SA construction.\\
+$BW(S) = \langle L$ without $\#$, position of $\#$ in $L\rangle$ with $L$ being the last column. In the example, $BW(S) = \langle$ipssmpissii, 5$\rangle$
 \subparagraph{SA with qsort} Initialize the array with the text $T$ and then just sort with qsort. The difference is that every position is treated as a suffix, not as a character. So with qsort we will sort every suffix (from position $i$ of the original $T$ up to the \#), giving $SA$ at the end of the procedure.\\
 The procedure is inefficient: $\Theta(n^2\log n)$ in the worst case with $\Theta(n\log n)$ cache misses.
 \paragraph{L$\rightarrow$F Mapping} Can we map $L$'s characters onto $F$'s characters? Need to distinguish between equal characters. Every column $i$ is a permutation of the original $T$ given by the first $i-1$ characters. Given a character on $L$, I have to find the equal character on $F$, so I will know the previous character. Iterating this procedure gives the original $T$ from right to left.\\
