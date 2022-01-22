@@ -26,21 +26,21 @@ Verranno aggiornati man mano, per qualsiasi dubbio, correzione o domanda contatt
 
 ## UniPi :it:
 
-Corso | Appunti | Progetto | Altro 
+Corso | Appunti | Progetto | Altro
 ------|---------|----------|------
-Algoritmica | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/AL/AL.pdf)
-Analisi Matematica | [Cheatsheet :white_check_mark:](https://github.com/fexed/Notes/blob/master/AM/AM.pdf) | | [Eserciziario (WIP)](https://github.com/fexed/Notes/blob/master/AM/AM_eserciziario.pdf)
-Architettura degli Elaboratori (thanks to [Simone Pepi](https://github.com/sipemopo92)) | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/AE/architettura_appunti.pdf) | | [D-RISC compiler :white_check_mark:](https://github.com/fexed/D-RISCcompiler)
-Basi di Dati | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/BD/BD.pdf) | [Progetto](https://github.com/fexed/Notes/blob/master/BD/ProgettoBD8/relazione.pdf)
-Calcolo Numerico | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/CN/CN.pdf)
-Crittografia | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/CRI/CRI.pdf)
-Elementi di Calcolo e Complessità | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/ECC/ECC.pdf)
-Fisica | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/FIS/FIS.pdf)
-Gestione di Reti | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/GR/GR.pdf) | [APIForecast](https://github.com/fexed/APIForecast)
-Introduzione all'Intelligenza Artificiale | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/IIA/IIA.pdf)
-Ingegneria del Software | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/IS/IS.pdf)
-Programmazione d'Interfacce | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/PI/PI.pdf)
-Programmazione 2 | [Appunti Java :white_check_mark:](https://github.com/fexed/Notes/blob/master/PR2/PR2_Java.pdf), [Appunti OCaML :white_check_mark:](https://github.com/fexed/Notes/blob/master/PR2/PR2_OCaML.pdf) | [SecureDataContainer (Java)](https://github.com/fexed/SecureDataContainer), [LangInterpreter (OCaML)](https://github.com/fexed/LangInterpreter)
-Reti di Calcolatori | [Appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/RCL/RCL.pdf), [Laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/LPR/LPR.pdf) | [WordQuizzle](https://github.com/fexed/WordQuizzle)
-Sistemi Operativi e Laboratorio | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/SOL/SOL.pdf) | [ObjectStore](https://github.com/fexed/ObjectStore/releases/tag/1.0) | [Esercizi di laboratorio](https://github.com/fexed/SOL_LAB)
-Sviluppo Applicazioni Mobili | [Appunti 🗑️](https://github.com/fexed/Notes/blob/master/SAM/SAM.pdf) | [Coffee Monitor 2.0](https://github.com/fexed/CoffeeMonitor/releases/tag/2.0)
+Algoritmica | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/Algoritmica/AL.pdf)
+Analisi Matematica | [Cheatsheet :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/AnalisiMatematica/AM.pdf) | | [Eserciziario (WIP)](https://github.com/fexed/Notes/blob/master/UniPi_CS/AnalisiMatematica/AM_eserciziario.pdf)
+Architettura degli Elaboratori (thanks to [Simone Pepi](https://github.com/sipemopo92)) | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/ArchitetturaDegliElaboratori/architettura_appunti.pdf) | | [D-RISC compiler :white_check_mark:](https://github.com/fexed/D-RISCcompiler)
+Basi di Dati | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/BasiDiDati/BD.pdf) | [Progetto](https://github.com/fexed/Notes/blob/master/BD/ProgettoBD8/relazione.pdf)
+Calcolo Numerico | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/CalcoloNumerico/CN.pdf)
+Crittografia | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/Crittografia/CRI.pdf)
+Elementi di Calcolo e Complessità | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/ElementiDiCalcoloeComplessita/ECC.pdf)
+Fisica | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/Fisica/FIS.pdf)
+Gestione di Reti | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/GestioneDiRete/GR.pdf) | [Progetto (API Forecast)](https://github.com/fexed/APIForecast)
+Ingegneria del Software | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/IngegneriaDelSoftware/IS.pdf)
+Introduzione all'Intelligenza Artificiale | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/IntroduzioneAllIntelligenzaArtificiale/IIA.pdf)
+Programmazione d'Interfacce | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/ProgrammazioneDInterfacce/PI.pdf)
+Programmazione 2 | [Appunti Java :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/Programmazione2/PR2_Java.pdf), [Appunti OCaML :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/Programmazione2/PR2_OCaML.pdf) | [SecureDataContainer (Java)](https://github.com/fexed/SecureDataContainer), [LangInterpreter (OCaML)](https://github.com/fexed/LangInterpreter)
+Reti di Calcolatori | [Appunti teoria :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/RetiDiCalcolatori/RCL.pdf), [Laboratorio :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/LaboratorioDiReti/LPR.pdf) | [WordQuizzle](https://github.com/fexed/WordQuizzle)
+Sistemi Operativi e Laboratorio | [Appunti :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CS/SistemiOperativi/SOL.pdf) | [ObjectStore](https://github.com/fexed/ObjectStore/releases/tag/1.0) | [Esercizi di laboratorio](https://github.com/fexed/SOL_LAB)
+Sviluppo Applicazioni Mobili | [Appunti 🗑️](https://github.com/fexed/Notes/blob/master/UniPi_CS/SviluppoApplicazioniMobili/SAM.pdf) | [Coffee Monitor 2.0](https://github.com/fexed/CoffeeMonitor/releases/tag/2.0)
