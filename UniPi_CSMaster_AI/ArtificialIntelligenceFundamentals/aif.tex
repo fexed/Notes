@@ -1161,21 +1161,21 @@ An example: "paper3 has exactly two authors"
 %TODO KRR-6.pdf p.11
 \section{Reasoning Under Uncertainty}
 \subsection{Quantifying Uncertainty}
-Agents are inevitable forced to reason and make decisions based on incomplete information. They need a way to handle uncertainty deriving from:
+Agents are inevitably forced to reason and make decisions based on incomplete information. They need a way to handle uncertainty deriving from:
 \begin{list}{}{}
 	\item \textbf{Uncertainty in sensors}: partial observability
 	\item \textbf{Uncertainty in actions}: nondeterministic actions
 \end{list}
-A partial answer would be to consider a set of possible worlds (a \textbf{belief set}, which are considered possible by the agent), but planning by anticipating all possible contingencies can be really complex. Moreover, if no plan guarantees the achievement of the goal but the agent still needs to act, how can he evaluate the relative merits of alternative plans? \textbf{Probability theory} offers a clean way to quantify uncertainty (common sense reduced to calculus).\\
+A partial answer would be to consider a set of possible worlds (a \textbf{belief set}, worlds which are considered possible by the agent), but planning by anticipating all possible contingencies can be really complex. Moreover, if no plan guarantees the achievement of the goal but the agent still needs to act, how can he evaluate the relative merits of alternative plans? \textbf{Probability theory} offers a clean way to quantify uncertainty (common sense reduced to calculus).\\
 With a logical approach, it is difficult to anticipate everything "that could go wrong" (\textbf{quantification problem}). The rational decision depends on both the \textbf{relative importance} of the various goals and the \textbf{likelihood} that they will be achieved. When there are conflicting goals, the agent may express \textbf{preferences} by the means of a utility function. Utilities are combined with probabilities in the general theory of rational decisions called \textbf{decision theory}.\\
 An agent is rational $\Leftrightarrow$ it chooses \textbf{the action that yields the maximum expected utility, averaged over all the possible outcomes of the action}. This is called the principle of \textbf{Maximum Expected Utility} (\textbf{MEU}).
 \paragraph{Probability Theory} Logic and probability theory both talk about a world made of propositions which are \textit{true} or \textit{false}. They share the \textbf{ontological commitment}.\\
 What's different is the \textbf{epistemological commitment}: a logical agent believes each sentence to be true or false or has no opinion, whereas a probabilistic agent may have a numerical \textbf{degree of belief} between 0 (certainly false) and 1 (certainly true). The uncertainty is not in the world, but in the beliefs of the agent (\textbf{state of knowledge}). If the knowledge about the world changes (we learn more information) the probability changes, but there is no contradiction.
-\subparagraph{Probabilities} In AI terms: probabilistic assertions are assertions about possible worlds stating how probable a world is. The set of possible world is the \textbf{sample space} $\Omega$: they are mutually exclusive and exhaustive. For example, the 36 possible outcomes of rolling two dices.\\
+\subparagraph{Probabilities} In AI terms: probabilistic assertions are assertions about possible worlds stating how probable a world is. The set of possible worlds is the \textbf{sample space} $\Omega$: they are mutually exclusive and exhaustive. For example, the 36 possible outcomes of rolling two dices.\\
 A fully specified probability model associates a probability $P\in R, 0\leq P \leq 1$ to each possible world $\omega\in\Omega$.\\
 The \textbf{basic axiom of probability} is $$0\leq P(\omega)\leq 1\:\:\forall\:\omega\in\Omega\hbox{ and }\sum_{\omega\in\Omega} P(\omega) = 1$$
 Usually we deal with a subset of possible worlds (\textbf{events}) which can be described by an expression (\textbf{proposition}) in a formal language. The \textbf{events} are the possible worlds where the proposition holds. Also for any event $\Phi$ we have that $P(\Phi) = \sum_{\omega\in\Phi} P(\omega)$
-\subparagraph{Conditional probabilities} Often we have evidence that restrict the number of possible worlds, conditioning the probability of an event. These probabilities are called \textbf{conditional}/posterior probabilities: $P(a\:|\:b) = \frac{P(a,b)}{P(b)}$ with $P(b) > 0$. Note that $P(a,b)=P(a\:|\:b)P(b)$
+\subparagraph{Conditional probabilities} Often we have evidence that restricts the number of possible worlds, conditioning the probability of an event. These probabilities are called \textbf{conditional}/posterior probabilities: $P(a\:|\:b) = \frac{P(a,b)}{P(b)}$ with $P(b) > 0$. Note that $P(a,b)=P(a\:|\:b)P(b)$
 \paragraph{Probability distribution} A full specification of the probability for all values of a variable $X$ is a \textbf{probability distribution}.
 \begin{list}{}{}
 	\item \textbf{Discrete} For example
@@ -1207,7 +1207,7 @@ we can compute the probability of any proposition by taking the sum of the proba
 	\item $P(\neg a)=1-P(a)$
 	\item $P(a\vee b) = P(a) + P(b) - P(a\wedge b)$ (\textbf{inclusion-exclusion principle})
 \end{list}
-\paragraph{Plausibility} If an agent holds an inconsistent set of beliefs, the if it bets according to this set of beliefs against another agent, then the other agent can devis a strategy to make it always lose money. De Finetti's theorem implies that no rational agent can have beliefs that violate the axioms of probability.
+\paragraph{Plausibility} If an agent holds an inconsistent set of beliefs, then if it bets according to this set of beliefs against another agent, then the other agent can devise a strategy to make it always lose money. De Finetti's theorem implies that no rational agent can have beliefs that violate the axioms of probability.
 \subsubsection{Probabilistic Inference} Assuming we have a full joint distribution as the knowledge base, we will use the axioms of probability and show how to:
 \begin{list}{}{}
 	\item Compute \textbf{marginals}, prior probability of a single variable
@@ -1586,7 +1586,7 @@ Once we have a knowledgebase of facts and rules, the inference process can work 
 \end{multicols}
 \paragraph{Generalized Modus Ponens} For the first-order case, inference is performed on the basis of the following rule which uses unification $$\frac{p_1',p_2',\ldots,p_n',(p_1\wedge p_2\wedge p_n\Rightarrow q)}{q\gamma}\:\:\:\:\:\:\hbox{(Generalized Modus Ponens)}$$
 Where $\gamma$ is a MGU $|\:\forall\:i\:\:p_i' = p_i\gamma$.\\
-At each iteration new sentences are added to the knowledgebase, and it terminates when no new sentences are generated (\textbf{fixed point}) or the goal is found. This inferential process is \textbf{sound} (the rule is correct), \textbf{compelte} for Definite Horn Clauses, and convergence is guaranteed for datalog databases (without function symbols, only constant) because there are a finite number of consequences.
+At each iteration new sentences are added to the knowledgebase, and it terminates when no new sentences are generated (\textbf{fixed point}) or the goal is found. This inferential process is \textbf{sound} (the rule is correct), \textbf{complete} for Definite Horn Clauses, and convergence is guaranteed for datalog databases (without function symbols, only constant) because there are a finite number of consequences.
 %TODO example p.12 rules1.pdf
 \paragraph{Complexity issues} The interpeter is required to perform many unification operations. If we have
 \begin{list}{}{}
