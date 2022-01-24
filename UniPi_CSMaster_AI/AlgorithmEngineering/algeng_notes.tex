@@ -1406,34 +1406,25 @@ The tries of course is then dropped and we just encode the sequence of pairs: we
 So we can transform the problem of searching for occurrences into a problem of searching for prefixes. Occurrences of $P$ in $T$ are all the suffixes of $T$ having $P$ as a prefix.\\
 SUF$(T)$ = sorted set of all suffixes of $T$. Algorithmic reduction from substring search to prefix search: for example, using the trie data structure. We have a problem in space, because the total length of the suffixes is $n^2$.\\
 We consider an ending character, which sometimes is noted as $\#$ and sometimes as $\$$. So for example $T =$ mississipi$\# \Rightarrow$ SUF$(T)$:
+\begin{multicols}{2}
 \begin{list}{}{}
-	\item \#
-	\item i\#
-	\item ippi\#
-	\item issippi\#
-	\item ississippi\#
-	\item mississippi\#
-	\item pi\#
-	\item ppi\#
-	\item sippi\#
-	\item sissippi\#
-	\item ssippi\#
-	\item ssissippi\#
+	\item \texttt{\#}
+	\item \texttt{i\#}
+	\item \texttt{ippi\#}
+	\item \texttt{issippi\#}
+	\item \texttt{ississippi\#}
+	\item \texttt{mississippi\#}
+	\item \texttt{pi\#}
+	\item \texttt{ppi\#}
+	\item \texttt{sippi\#}
+	\item \texttt{sissippi\#}
+	\item \texttt{ssippi\#}
+	\item \texttt{ssissippi\#}
 \end{list}
+\end{multicols}
 So all suffixes in SUF$(T)$ having prefix $P$ are in a contiguous portion of the sorted set. Also the starting position of the contiguous portion is the lexicographic one of $P$, meaning that if I can find the position of my prefix in SUF$(P)$ I can simply scan ahead to find all the suffixes with $P$ prefix. So we can consider the suffix array, where every element is a pointer to the position in $T$:
 \begin{list}{}{}
-	\item 12
-	\item 11
-	\item 8
-	\item 5
-	\item 2
-	\item 1
-	\item 10
-	\item 9
-	\item 7
-	\item 4
-	\item 6
-	\item 3
+	\item 12, 11, 8, 5, 2, 1, 10, 9, 7, 4, 6, 3
 \end{list}
 The suffix array $SA$ occupies a lot less space than the $n^2$ of SUF$(T)$, it's $O(n)$ in $n = |T|$ and every element is a number of at most $\log_2 n$ bits, so is $\Theta(n\log_2 n)$ bits. In practice, is $5n$ bytes.\\\\
 To look for a pattern, indirected binary search on SA: $O(p) = O(|P|)$ time per suffix comparison. So go in the middle element, compare $P$ to the substring pointed by the element and so on, binary search. The total search cost is $O(p\log_2 n)$ time.\\
@@ -1444,17 +1435,7 @@ Listing the occurrences is easy: take the element, access the position and compa
 With a total time of $O(p\log_2 n +$ occ$)$.
 \paragraph{Longest Common Prefix Array} The LCP array has elements that indicates the length of the longest prefix shared by adjacent suffixes. For example, the first and second suffixes in SA share no prefix (the first is "\#" and the second is "i\#"), so the first element of LCP is 0. LCP:
 \begin{list}{}{}
-	\item 0
-	\item 0
-	\item 1
-	\item 4
-	\item 0
-	\item 0
-	\item 1
-	\item 0
-	\item 2
-	\item 1
-	\item 3
+	\item 0, 0, 1, 4, 0, 0, 1, 0, 2, 1, 3
 \end{list}
 How long is the common prefix between $T[i,\ldots]$ and $T[j,\ldots]$? The minimum element between them in LCP, so for example between $5$ and $10$ the common prefix is long $0$ characters. So the min of the subarray LCP[$h,k$] such that SA$[h]=i$ and SA$[k]=j$.
 \subsection{Burrows-Wheeler Transform}
@@ -1478,33 +1459,33 @@ How long is the common prefix between $T[i,\ldots]$ and $T[j,\ldots]$? The minim
 For example, RLE0(221200) = 33231 because 00 has length $n=2$ and Bin(3) = 11.
 \paragraph{Burrows-Wheeler Transform} Let's take a given text $T=$ mississippi\# and we start by rotating $T$:
 \begin{list}{}{}
-	\item mississippi\#
-	\item ississippi\#m
-	\item ssissippi\#mi
-	\item sissippi\#mis
-	\item issippi\#miss
-	\item ssippi\#missi
-	\item sippi\#missis
-	\item ippi\#mississ
-	\item ppi\#mississi
-	\item pi\#mississip
-	\item i\#mississipp
-	\item \#mississippi
+	\item \texttt{mississippi\#}
+	\item \texttt{ississippi\#m}
+	\item \texttt{ssissippi\#mi}
+	\item \texttt{sissippi\#mis}
+	\item \texttt{issippi\#miss}
+	\item \texttt{ssippi\#missi}
+	\item \texttt{sippi\#missis}
+	\item \texttt{ippi\#mississ}
+	\item \texttt{ppi\#mississi}
+	\item \texttt{pi\#mississip}
+	\item \texttt{i\#mississipp}
+	\item \texttt{\#mississippi}
 \end{list}
 This produces $|T|$ rows, giving a square matrix (\textbf{BWT matrix}). The we sort the rows (\# is the smallest character):
 \begin{list}{}{}
-	\item \# mississipp i
-	\item i \#mississip p
-	\item i ppi\#missis s
-	\item i ssippi\#mis s
-	\item i ssissippi\# m
-	\item m ississippi \#
-	\item p i\#mississi p
-	\item p pi\#mississ i
-	\item s ippi\#missi s
-	\item s issippi\#mi s
-	\item s sippi\#miss i
-	\item s sissippi\#m i
+	\item \texttt{\# mississipp i}
+	\item \texttt{i \#mississip p}
+	\item \texttt{i ppi\#missis s}
+	\item \texttt{i ssippi\#mis s}
+	\item \texttt{i ssissippi\# m}
+	\item \texttt{m ississippi \#}
+	\item \texttt{p i\#mississi p}
+	\item \texttt{p pi\#mississ i}
+	\item \texttt{s ippi\#missi s}
+	\item \texttt{s issippi\#mi s}
+	\item \texttt{s sippi\#miss i}
+	\item \texttt{s sissippi\#m i}
 \end{list}
 Again a square matrix. We notice that the first column, $F$, is ordered and contains all the characters of $T$: this because we are considering circling rotations and fixing a column every character will pass by that column. We cannot compress just $F$ because every text comprised of those characters (in the example, 4 "i"s, 1 "m", 2 "p"s and 4 "s"s) would give the same $F$. The trick is done with $L$, the column of the last characters: the transformation is invertible if we consider the sequence of characters in the last column.\\
 So given a string $T$, we return $L$, which in this case $L=$ ipssm\#pissii.\\\\
