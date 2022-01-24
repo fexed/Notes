@@ -775,7 +775,7 @@ CWA can be seen as an \textbf{assumption about complete knowledge}, or a way to 
 CWA(KB) isn't always consistent when KB is consistent. Problems with disjunctions, for example: KB = $\{p\vee q\}$, CWA(KB) = KB $\cup$ $\{\neg p, \neg q\}$ since KB $\not\vDash p$ and KB $\not\vDash q$, but KB $\cup$ $ \{\neg p, \neg q\}\vDash \neg(p\vee q)$ then CWA(KB) is inconsistent. The solution is to restrict CWA to atoms that are "uncontroversial": $p,q$ are controversial, $r$ isn't.\\
 CWA limited in such a way is called Generalized CWA (GCWA), is a weaker form of completion than unrestricted CWA (the assumed beliefs are less)
 \begin{list}{}{}
-	\item GCWA: if KB $\vDash\{p\vee q_1,\ldots,\vee q_n\}$ and KB $\neg\vDash p$ then add $\neg p$, provided at least one ground atom $q_i$ is entailed by KB\\
+	\item GCWA: if KB $\vDash\{p\vee q_1,\ldots,\vee q_n\}$ and KB $\not\vDash p$ then add $\neg p$, provided at least one ground atom $q_i$ is entailed by KB\\
 	\textbf{Theorem} consistency of CWA: CWA(KB) is consistent $\Leftrightarrow$ whenever KB $\vDash(q_1\vee\ldots\vee q_n)$ then KB $\vDash q_i$ for some $i$.
 \end{list}
 Since it may be difficult to test the conditions of this theorem, the following \textbf{corollary} (which restricts the application of CWA) is also of practical importance: if the KB is made of Horn clauses and it's consistent, then CWA(KB) is consistent.\\
@@ -1896,7 +1896,13 @@ Prolog compiles into an intermediate abstract machine (\textbf{Warren Abstract M
 \end{list}
 \paragraph{Structured Objects} Functions with arguments (functor applied to arguments) and lists.
 \paragraph{Arithmetic} Basic arithmetic operations and comparison operators.
-\paragraph{Procedural Control of Reasoning} Declarative encoding of knowledge and general mechanisms for deduction can be very inefficient. For efficiency we must have some domain dependent control on the reasoning process. Given a knowledgebase of facts and rules, how to make the most effective use of the rules? The choice on the order of the rules makes a difference in performance. Prolog takes ordering of clauses and subgoals very seriously: \textbf{the burden is on the programmer}.
+\paragraph{Procedural Control of Reasoning} Declarative encoding of knowledge and general mechanisms for deduction can be very inefficient. For efficiency we must have some domain dependent control on the reasoning process. Given a knowledgebase of facts and rules, how to make the most effective use of the rules? The choice on the order of the rules makes a difference in performance. Prolog takes ordering of clauses and subgoals very seriously: \textbf{the burden is on the programmer}.\\
+For example, suppose we want to find an American Cousin of Sally: \texttt{?- AmericanCousin(X, Sally).}, we could either:
+\begin{list}{}{}
+	\item Find an American and then check if she is a Cousin of Sally\\\texttt{AmericanCousin(X,Y) :- American(X), Cousin(X,Y).}
+	\item Find a cousin of Sally and then check to see if she is an American\\\texttt{AmericanCousin(X,Y) :- Cousin(X,Y), American(X).}
+\end{list}
+Both are correct, but it's better to generate all cousins (far less than all the americans) and then test each one if it's american, rather than generate all the americans and for each one check to see if it's a cousin.
 \paragraph{Controlling backtracking} Prolog will automatically backtrack if this is necessary to satisfy a goal. Uncontrolled backtracking however may cause inefficiency in a Prolog program. With CUT we can control backtracking.\\
 In a case where given a clause of the form "G :- T,R", the goal T is needed only as a test for the applicability of a subgoal R. If R fails, we do not want to backtrack to T nor try any other alternative for G. The pattern \begin{list}{}{}
 	\item G :- T, !, R
@@ -2058,7 +2064,7 @@ The workflow of answer set programming:
 %TODO example rules3.pdf p. 25
 \section{Planning}
 \subsection{Classical Planning}
-Planning combines two major areas of AI: search and logic. By representing actions and change in logic (as in the situation calculus) we can cast the problem of planning as: a SAT problem in the PROP case or a theorem proving in the FOL case.\\
+Planning combines two major areas of AI: search and logic. By representing actions and changes in logic (as in the situation calculus) we can cast the problem of planning as a \textbf{SAT problem in the PROP} case or a \textbf{theorem proving in the FOL} case.\\
 In the classical planning, we'll introduce a \textbf{restricted language} suitable for describing planning problems. This language allows to \textbf{circumvent representation and computational problems} by resorting to a \textbf{restricted FOL representation}, allowing \textbf{specific descriptions of actions and states} (including goals) so that \textbf{special algorithms and heuristics can be developed}.
 \begin{multicols}{2}
 \begin{list}{}{\textbf{Problem Solving Agent}}
@@ -2253,7 +2259,7 @@ Mutex relations between literals at the same level:
 \begin{list}{}{}
 	\item Each level $S_i$ represent a set of possible belief states. Two literals connected by a mutex belong to different belief states
 	\item The levels, alternating $S$s and $A$s, are computed until we reach a point where two consecutive levels are identical. The graph for the cake \textbf{levels off} at $S_2$
-	\item The level $j$ at with a literal first appears is never greater than the level at which it can be achieved. We cal this the \textbf{level cost} of a literal/goal
+	\item The level $j$ at which a literal first appears is never greater than the level at which it can be achieved. We call this the \textbf{level cost} of a literal/goal
 	\item The process of constructing the planning graph does not require choosing among actions and is very fast
 	\item A planning graph is polynomial in the size of the planning problem: an entire graph with $n$ levels, $a$ actions, $l$ literals has size $O(n(a+l)^2)$. The same for time complexity.
 \end{list}
@@ -2267,7 +2273,7 @@ Estimating the heuristic cost of a conjunction of goals:\begin{list}{}{}
 	\item \textbf{Max-level heuristic}: the maximum level cost of any of the sub-goals (\textbf{admissible})
 	\item \textbf{Level sum heuristic}: the sum of the level costs of the goals (can be inadmissible when
 goals are not independent, but it may work well in practice)
-	\item \textbf{Set-level heuristic}: finds the level at which all the literals in the goal appear together in the planning graph, without any mutex between pairs of them (admissible, accurate, but not
+	\item \textbf{Set-level heuristic}: finds the level at which all the literals in the goal appear together in the planning graph, without any mutex between pairs of them (\textbf{admissible}, accurate, but not
 perfect)
 \end{list}
 \paragraph{Planning Graph as Relaxed Problem} The planning graph can be seen as a relaxed problem with the following characteristics:
