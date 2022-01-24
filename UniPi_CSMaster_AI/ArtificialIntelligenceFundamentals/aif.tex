@@ -282,11 +282,15 @@ A Constraint Satisfaction Problem $CSP = \langle X, D, C\rangle$ consists of thr
 	\item A finite set of \textbf{variables}, $X = \{x_1, \ldots, x_n\}$
 	\item A \textbf{finite domain} for each variable, $D = \{D_1, \ldots, D_n\}$ with each $D_i = \{v_1, \ldots, v_k\}$ containing values assignable to $x_i$.\\
 	$\textsl{Dom}$ is a function that maps every variable in $X$ to a set of objects of arbitrary type. $\textsl{Dom}(x) = D_x$
-	\item A \textbf{set of constraints} that restrict the values the variables can simultaneously take, $C$
+	\item A \textbf{set of constraints} that restrict the values that each variable can simultaneously take, $C$
 \end{list}
 Task: assign a value from the associated domain to each variable satisfying all the constraints. \textbf{NP-hard} in worst cases, but general heuristics exist and structures can be exploited for efficiency.\\\\
 A \textbf{(partial) assignment} of values to a set of variables (\textbf{compound label}) is a set of pairs $A=\{\langle x_i, v_i\rangle, \ldots\}$ with $v_i \in D_{x_i}$. A \textbf{complete assignment} is an assignment to all the variables of the problem. Can be projected to a smaller partial assignment by restricting the variables to a subset (projection, with the following notation: $\pi_{x_1,\ldots,x_k} A$, with $\pi$ being the projection operator of relational algebra)\\
-Each constant in $C$ can be represented as a pair $\langle$scope, rel$\rangle$: scope is a tuple of variables participating in the constraint, and rel is a relation that defines the allowable combinations of values for those variables, taken from the respective domains. The relation can be represented as: an explicit list of all tuples of values that satisfy the constraint (explicit relation), or an implicit relation (an object that supports two operations: testing if a tuple is a member of the relation and enumerating the members of the relation).\\
+Each constant in $C$ can be represented as a pair $\langle$scope, rel$\rangle$:\begin{list}{}{}
+	\item scope is a tuple of variables participating in the constraint
+	\item rel is a relation that defines the allowable combinations of values for those variables, taken from the respective domains
+\end{list}
+The relation can be represented as: an explicit list of all tuples of values that satisfy the constraint (explicit relation), or an implicit relation (an object that supports two operations: testing if a tuple is a member of the relation and enumerating the members of the relation).\\
 We also use $C_{x_1,\ldots,x_k} =$ rel to denote a constraint with scope = $x_1,\ldots,x_k$, so the constraint $C=\langle(x_1,\ldots,x_k),$ rel$\rangle$
 \paragraph{CSP solution} To solve a CSP problem seen as a search problem, we need to define a state space and the notion of a solution.
 \begin{list}{}{}
@@ -330,7 +334,7 @@ This will become $Dom(C_1) = \{(1,2,3), (2,1,3), (1,1,2)\}, Dom(C_2)=\{(1,2), (1
 	\includegraphics[scale=0.75]{6.png}
 \end{center}
 \paragraph{Related concepts} \begin{list}{}{}
-	\item \textbf{Problem reduction techniques}: techniques for transforming CSP into an equivalent problem easier to solve or recognizable as insoluble
+	\item \textbf{Problem reduction techniques}: techniques for transforming CSP into an equivalent problem, easier to solve or recognizable as insoluble
 	\item \textbf{Enforcing local consistency}: the process of enforcing local consistency properties in a constraint graph causes inconsistent values to be eliminated. Different types of local consistency properties have been studied.
 	\item \textbf{Constraint propagation/inference}: constraints are used to reduce the number of legal values for a variable, which in turn can reduce the legal value for another variable and so on\ldots
 \end{list}
@@ -348,7 +352,7 @@ All these operations do not change the set of solutions, do not necessarily solv
 	\item \textbf{Arc consistency}: a variable is arc-consistent if every value in its domain satisfies the binary constraints of this variable with another variable. $x_i$ is arc-consistent with respect to $x_j$ if for every value in its domain $D_i$ there is some value in the domain $D_j$ that satisfies the binary constraint on the arc $(x_i, x_j)$\\
 	Example, $X = \{x, y\}$, $D_x = D_y = \{0,1,2,3,4,5,6,7,8,9\}$ and constraint $\langle(x,y), x=y^2\rangle$. Considering arc $x \rightarrow y$, it can be made consistent by reducing $D_x$ to $\{0,1,4,9\}$. Considering $y \rightarrow x$, can be made consistent by reducing $D_y$ to $\{0,1,2,3\}$, making the entire edge consistent.
 \end{list}
-\paragraph{Arc Consistency Algorithm (AC-3)} It maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent respect to $x_j$: \begin{list}{}{}
+\subparagraph{Arc Consistency Algorithm (AC-3)} It maintains a queue of arcs to consider, initially all the arcs in CSP. An edge produces two arcs. AC-3 pops off an arc $(x_i, x_j)$ from the queue and makes $x_i$ arc-consistent respect to $x_j$: \begin{list}{}{}
 	\item If this step leaves $D_i$ unchanged, the algorithm just moves on to the next arc
 	\item If $D_i$ is made smaller, then we need to add to the queue all arcs $(x_k, x_j)$ where $x_k$ is a neighbor of $x_i \neq x_j$
 	\item If $D_i$ becomes empty, then we conclude that the CSP has no solution
@@ -416,7 +420,7 @@ Search strategies:
 	\item \textbf{Degree heuristic}: variable involved in the largest number of constraints
 \end{list}
 \subparagraph{Choosing value} \begin{list}{}{}
-	\item \textbf{Least constraint variable}: prefer the variable rules out the fewest choices
+	\item \textbf{Least constraint value}: prefer the value that rules out the fewest choices
 \end{list}
 Note that \textbf{in choosing the variable, a fail-first strategy helps in reducing the amount of search} by pruning large parts of the tree earlier. \textbf{In the choice of value, a fail-last approach works best in CSP where the goal is to find \textit{any} solution}. This is \textbf{not effective if we are looking for all solutions or no solution exists}.
 \subparagraph{Interleaving search and inference} One of the simplest form of inference propagation is \textbf{forward checking}: efficient constraint propagation, weaker than other forms. Whenever $X$ is assigned, FC process establishes arc consistency of $X$ for the arcs connecting neighbor nodes. For each unassigned $Y$ connected to $X$, delete from $Y$'s domain any value inconsistent with the value assigned to $X$.
@@ -461,8 +465,8 @@ There are possible variants \begin{list}{}{}
 %TODO algorithm
 \subparagraph{Improvements} Usually many plateaus, possible improvements:
 \begin{list}{}{}
-	\item \textbf{Tabu Search}: local search has no memory, the idea is keeping a small list of the last $t$ steps and forbidding the algorithm to change the value of a variable whose value was changed recently. This is meant to prevent cycling among assignments, and $t$ is called \textbf{tenure}
-	\item \textbf{Constraint Weighting}: concentrates the search on important constraints. We assign a numeric weight to each constraint, initially 1. The weight is incremented each time the constraint is violated: goal is choose the variable and value which minimizes the weights of the violated constraints.
+	\item \textbf{Taboo Search}: local search has no memory, the idea is keeping a small list of the last $t$ steps and forbidding the algorithm to change the value of a variable whose value was changed recently. This is meant to prevent cycling among assignments, and $t$ is called \textbf{tenure}
+	\item \textbf{Constraint Weighting}: focuses the search on important constraints. We assign a numeric weight to each constraint, initially 1. The weight is incremented each time the constraint is violated: the goal is choosing the variable and value which minimizes the weights of the violated constraints.
 \end{list}
 \subparagraph{Alternatives}\begin{list}{}{}
 	\item \textbf{Simulated Annealing}: allows downhill moves at the beginning of the algorithm and slowly \textit{freezes} this possibility
