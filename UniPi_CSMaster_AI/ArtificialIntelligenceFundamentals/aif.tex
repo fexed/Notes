@@ -613,7 +613,7 @@ This allows Purchase to be described at different levels of detail.
 \end{center}
 \paragraph{Properties} A general-purpose ontology should be applicable in any special-purpose domain, with the addition of domain-specific axioms. In any non-trivial domain, different areas of knowledge must be combined because reasoning and problem solving could involve several areas simultaneously.\\
 It's difficult to construct one single best ontology: every ontology is a treaty, a social agreement, among people with some common interest in sharing. An upper ontology is like an object oriented programming framework (reuse).
-\paragraph{Categories and objects} Most reasoning takes place at the level of categories: we can infer category membership from the perceived properties of an object, and the use category information to derive specific properties of the object.\\
+\paragraph{Categories and objects} Most reasoning takes place at the level of categories: we can infer category membership from the perceived properties of an object, and then use category information to derive specific properties of the object.\\
 There are two choices for representing categories in first-order logic:
 \begin{list}{}{}
 	\item Predicates: categories are unary predicates that we assert of individuals\\
@@ -670,11 +670,11 @@ This can be applied to sequences of actions, too. Result : $[A^*]\times S \right
 	\item Result($[a\:|\:$seq$],s) =$ Result(seq, Result$(a,s))$
 \end{list}
 In general Result($[a_1,a_2,\ldots,a_n],s_0) =$ Result$(a_n$, Result($a_{n-1}$, \ldots Result($a_2$, Result($a_1, s_0$))\ldots))
-\paragraph{Formalizing actions} We need \textbf{possibility axioms}, with the structure preconditions $\Rightarrow$ possibility, for example
+\paragraph{Formalizing actions} We need \textbf{possibility axioms}, with the structure pre-conditions $\Rightarrow$ Poss, for example
 \begin{list}{}{}
 	\item On$(x,y,s)$ $\wedge$ Clear$(x,s)$ $\wedge$ Clear$(z,s)\wedge x\neq z \Rightarrow$ Poss(Move$(x,y,z),s)$
 \end{list}
-We also need \textbf{effect axioms} such as
+We also need \textbf{effect axioms}, with the structure Poss $\Rightarrow$ post-conditions, such as
 \begin{list}{}{}
 	\item Poss(Move$(x,y,z),s)\Rightarrow$ On($x,z,$ Result(Move$(x,y,z),s))\wedge$ Clear($y,$ Result(Move$(x,y,z),s))$
 \end{list}
@@ -699,7 +699,7 @@ $f$ true after $\Leftrightarrow$ & [\textit{preconditions before} and & \textit{
 An example with Clear:\begin{center}
 \begin{tabular}{r l l}
 Clear$(y$, Result$(a,s))$ $\Leftrightarrow$ & [On$(x,y,s)\wedge$ Clear$(x,s)\wedge$ Clear$(z,s)\wedge x\neq z \wedge a =$ Move$(x,y,z)$] $\vee$ & \textit{effect}\\
-& [On($x,y,s)\wedge$ Clear$(x,s)\wedge(a =$ Unstack$(x,y,))$] $\vee$ & \textit{effect}\\
+& [On($x,y,s)\wedge$ Clear$(x,s)\wedge(a =$ Unstack$(x,y))$] $\vee$ & \textit{effect}\\
 & [Clear$(y,s)\wedge(a\neq$ Move$(z,w,y))\wedge(a\neq$ Stack$(z,y))$] & \textit{frame}
 \end{tabular}
 \end{center}
@@ -760,7 +760,7 @@ This is what we call a default, and \textbf{default reasoning} the tentative con
 \paragraph{Closed Worlds Assumpion (CWA)} \textit{There are usually many more negative facts than positive facts}! Under CWA, only positive facts are stored, and any other basic fact is assumed false. It's used in deductive databases and in logic programming with negation as failure. Corresponds to a new version of entailment $\vDash_C$:
 \begin{list}{}{}
 	\item KB $\vDash_C a \Leftrightarrow$ CWA(KB) $\vDash a$\\
-	Where CWA(KB) = KB $\cup$ $\{\neg p\:|\:p$ ground atom and KB $\neq p\}$, the set of assumed beliefs\\
+	Where CWA(KB) = KB $\cup$ $\{\neg p\:|\:p$ ground atom and KB $\not\vDash p\}$, the set of assumed beliefs\\
 \end{list}
 CWA(KB) is the completion under CWA of KB. CWA is a form of theory completion and is nonmonotonic.
 \subparagraph{Consistent and complete knowledge} KB with consistent knowledge (satisfiable): $\not\exists\:a\:|$ KB $\vDash a$ $\wedge$ KB $\vDash\neg a$, so there's no contradiction.
