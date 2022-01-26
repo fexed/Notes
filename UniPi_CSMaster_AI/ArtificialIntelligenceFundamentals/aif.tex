@@ -849,7 +849,7 @@ then the unique possible extension is $\Delta = \{$Flies(Tweety)$\}$, since Bird
 	\item There are default theories with no extensions.\\
 	Example: with D=$\left\{\frac{:\neg A}{\neg A}\right\}$, if F=\{\} then E=\{\}
 	\item Every normal default theory has an extension
-	\item Adding new normal default rules does not require the withdrawal of beliefs, even if adding new beliefs might. Normal default theories are semi-monotonic.
+	\item Adding new normal default rules does not require the withdrawal of beliefs, even if adding new beliefs might. Normal default theories are semi-nonmonotonic.
 \end{list}
 \subparagraph{Grounded Extensions} We have a problem that leads to a more complex definition of extension. Suppose F = \{\} and D=$\left\{\frac{:p}{\neg p}\right\}$. Then E = entailments of $\{p\}$ is an extension since $p\in E$ and $\neg p\not\in E$, but we have no good reason to believe $p$. The only support for $p$ is the default rule, which requires $p$ itself as a prerequisite. So the default should have no effect.\\
 Desirable extension is only E = entailments of \{\}, that is to say all valid formulas. It's necessary a revision of the definition.\\
@@ -1140,7 +1140,23 @@ the \textbf{semantic web} is the vision to gradually develop alongside the "synt
 \begin{list}{}{}
 	\item Logical counterparts of network knowledge representation schemas, frames and semantic networks.\\
 	In this formalization effort, defaults and exceptions are abandoned. The ideas and terminology (concept, roles, inheritance) are very similar (to KLOne in particular)
-	\item Contractions of FOL, investigated to obtain better computational properties. Attention to computational complexity and decidability of the inference mechanisms.
+	\item Contractions of FOL, investigated to obtain better computational properties. Attention to computational complexity and decidability of the inference mechanisms.\\
+	It's always possible to turn a DL assertion into FOL: translation rule $t(C,x)\mapsto C(x)$
+	\begin{multicols}{2}
+	\begin{list}{}{}
+		\item $t(C\sqsubseteq D)\mapsto \forall\:x.t(C,x)\Rightarrow t(D,x)$
+		\item $t(a:C)\mapsto t(C,a)$
+		\item $t((a,b):R)\mapsto R(a,b)$
+		\item $t(\intercal, x)\mapsto$ true
+		\item $t(\perp, x) \mapsto$ false
+		\item $t(A,x)\mapsto A(x)$
+		\item $t(C \sqcap D, x) \mapsto t(C,x)\wedge t(D,x)$
+		\item $t(C \sqcup D, x) \mapsto t(C,x)\vee t(D,c)$
+		\item $t(\neg C, x) \mapsto \neg t(C,x)$
+		\item $t(\exists\:R.C,x)\mapsto \exists\:y.R(x,y)\wedge t(C,y)$
+		\item $t(\forall\:R.C,x)\mapsto \forall\:y.R(x,y)\Rightarrow t(C,y)$
+	\end{list}
+	\end{multicols}
 \end{list}
 An example: "paper3 has exactly two authors"
 \begin{list}{}{}
@@ -1162,7 +1178,60 @@ An example: "paper3 has exactly two authors"
 	\item $i:C$, where $i$ is an individual and $C$ a concept
 	\item $(i,j):R$, where $i,j$ are individuals and $R$ a role
 \end{list}
-%TODO KRR-6.pdf p.11
+\paragraph{Semantic Tableaux} Technique for verifying the satisfiability of a KB (KBS). It applies constraint propagation.\\
+The basic idea is that each formula in a KB is a constraint on possible interpretations. So complex constraints are decomposed in simpler constraints by means of propagation rules until, in a finite number of steps, we obtain atomic constraints. If the set of atomic constraints contains a contradiction, then the KB is unsatisfiable, else a model has been found.\\
+It's a simple technique, modular and useful for evaluating the complexity of decision algorithms.
+\paragraph{Logic AL} $\Delta^I$ is the intepretation of a domain, a set of individuals, and $I$ is the interpretation function that assigns:
+\begin{list}{}{}
+	\item Atomic concepts $A:A^I\subseteq \Delta^I$
+	\item Atomic roles $R:R^I\subseteq \Delta^I\times\Delta^I$
+	\item Individual constants $a:a^I\in\Delta^I$
+\end{list}
+\begin{multicols}{2}
+\begin{center}
+	\begin{tabular}{r l l}
+	$\langle$concept$\rangle$ $\rightarrow$ & A\\
+	& $|\:\intercal$ & top, universal concept\\
+	& $|\:\perp$ & bottom\\
+	& $|\:\neg A$ & atomic negation\\
+	& $|\:C\sqcap D$ & intersection\\
+	& $|\:\forall\:R.C$ & value restriction\\
+	& $|\:\exists R.\intercal$ & weak existential\\
+	\\
+	$\langle$role$\rangle$ $\rightarrow$ & R
+	\end{tabular}
+\end{center}
+\columnbreak
+\begin{list}{}{}
+	\item $\intercal^I = \Delta^I$, the interpretation domain
+	\item $\perp^I = \emptyset$
+	\item $(\neg A)^I = \Delta^I\smallsetminus A^I$
+	\item $(C\sqcap D)^I = C^I\cap D^I$
+	\item $(\forall\:R.C)^I = \{a\in\Delta^I\:|\:\forall\:b\:\:(a.b)\in R^I \Rightarrow b\in C^I\}$
+	\item $(\exists\:R.\intercal)^I = \{a\in\Delta^I\:|\:\exists\:b\:\:(a,b)\in R^I\}$
+\end{list}
+\end{multicols}
+\paragraph{Logic ALC}
+\begin{center}
+	\begin{tabular}{r l l l}
+	$\langle$concept$\rangle$ $\rightarrow$ & A\\
+	& $|\:\intercal$ & top, universal concept\\
+	& $|\:\perp$ & bottom\\
+	& $|\:\neg A$ & full negation & $\leftarrow$\\
+	& $|\:C\sqcap D$ & intersection\\
+	& $|\:C\sqcup D$ & union & $\leftarrow$\\
+	& $|\:\forall\:R.C$ & value restriction\\
+	& $|\:\exists R.C$ & full existential & $\leftarrow$\\
+	\\
+	$\langle$role$\rangle$ $\rightarrow$ & R
+	\end{tabular}
+\end{center}
+\paragraph{KBS} If the algorithm terminates with at least one primitive constraint set and no clashes, then the KB is satisfiable and from the constraints we can derive a model (it's \textbf{correct}).\\
+If a KB is satisfiable, then the algorithm terminates producing at least a finite model without clashes (it's \textbf{complete}).\\
+KBS it's also decidable for ALC and ALCN (ALC with numeric restrictions).
+\begin{center}
+\includegraphics[scale=0.5]{30.png}
+\end{center}
 \section{Reasoning Under Uncertainty}
 \subsection{Quantifying Uncertainty}
 Agents are inevitably forced to reason and make decisions based on incomplete information. They need a way to handle uncertainty deriving from:
@@ -2397,4 +2466,58 @@ Every linearization is a solution.
 \end{center}
 \paragraph{Analysis} We obtained a complete and consistent partial plan. Any linearization is a solution, in this case only one possible: [Unstack(C, A), Stack(B, C), Stack(A, B)]\\
 The POP algorithm is correct and complete: any plan computed is a solution and if a plan exists the algorithm finds it.
+\section{Q\&A (ITA)}
+\paragraph{Parla del nonmonotonic reasoning} Il nonmonotonic reasoning cerca di modellare il meccanismo di inferenza che viene adottato nella realtà dall'uomo, il quale "salta a conclusioni" quando lo ritiene giusto e cioè quando non ha prove a sfavore della propria conclusione. L'implicazione classica invece è monotonica: se ho una proposizione $a$ che è conseguenza logica di una data KB, allora $a$ sarà conseguenza logica anche di KB $\cup$ $\{b\}$.\\
+Esempi sono: la persistenza, mantenere solo fatti veri nella KB, ragionare sulla conoscenza, default reasoning.
+\subparagraph{Che problemi può comportare?} Principalmente la difficoltà nel gestire le eccezioni ai generics: si vuole poter affermare che $P$ è $Q$ in generale ma non necessariamente, così da concludere $Q(a)$ dato $P(a)$ a meno di un'evidenza che provi il contrario. Questo si chiama \textbf{default reasoning}.
+\subparagraph{Definisci in modo formale}
+\subparagraph{La logica classica è monotonic?} Si, come detto prima: KB $\vDash$ $a$ $\Rightarrow$ KB $\cup$ $\{b\}$ $\vDash$ $a$
+\subparagraph{E la default logic?} La default logic è semi-nonmonotonic
+\paragraph{Definizione di CWA} CWA$(KB) = KB \cup\{\neg b\:|\:KB\not\vDash b\}$
+\subparagraph{Com'è usata per i default?} Nelle estensioni tramite le default rules.
+\paragraph{Parla dei principali limiti del FOL} Uno dei principali limiti del FOL è la rigidità del quantificatore universale, che non permette di esprimere eccezioni: il quantificatore universale esprime tutto o niente. La circumscription tramite predicati di anormalità può risolvere questo problema.
+\subparagraph{Esempio di contradizione indotto da rappresentazioni nonmonotonic} Per esempio, KB = $\{p\vee q\}$, allora CWA(KB) = KB $\cup\{\neg p, \neg q\}$. Però KB $\cup\{\neg p, \neg q\}\vDash \neg (p\vee q)$, contraddizione.
+\paragraph{Compara FOL e Description Logic} I description logic sono meccanismi per inferenza a livello di categorie, rispetto al FOL che ragiona a livello di individui. Può essere visto come una versione del FOL che mira a ottenere proprietà computazionali migliori.
+\paragraph{Horn Clause} Una clausola di Horn è una disgiunzione di letterali con al più un letterale positivo.
+\subparagraph{Ogni formula FOL può essere trasformata in forma a clausole Horn?} Si.
+\paragraph{Il Description Logic è decidibile?} Si, è una restrizione del FOL dotata di proprietà computazionali migliori. C'è attenzione sulla complessità computazionale e sulla decidibilità dei meccanismi di inferenza.
+\paragraph{PDDL è una restrizione del FOL?} No, è un linguaggio specializzato nella descrizione di problemi di pianificazione.
+\paragraph{Fast Thinking e Slow Thinking} Il fast thinking riguarda i task di percezione e semplici operazioni, mentre lo slow thinking riguarda operazioni complesse, richiamare dalla memoria\ldots
+\paragraph{Vantaggi della Knowledge Representation rispetto al Machine Learning} La knowledge representation consente di delineare metodi di rappresentazione di informazioni riguardo il mondo in una forma che il computer può usare per risolvere task complessi.
+\paragraph{Problemi nel rappresentare attitudini proposizionali nella logica classica} Le attitudini proposizionali riguardano Believe, Knows ecc., usate per rappresentare i mental state. Con la logica classica abbiamo la referential transparency, cioè conta ciò che è indicato da un dato nome e non il nome con cui lo si indica. Le propositional attitudes richiedono la referential opacity, perché possiamo sapere che l'oggetto indicato da un dato nome ha una data proprietà, ma non sapere che quell'oggetto è chiamato in altri modi.
+\paragraph{Semantiche speciali disponibili in modal logic}
+\subparagraph{Come gestisce i problemi di inferenza nonmonotonic?}
+\paragraph{Quali sono le diverse dimensioni di complessità di un agente?} \begin{list}{}{}
+	\item Livello d'astrazione
+	\item Modularità: piatto, modulare, gerarchico
+	\item Orizzonte: non pianifica, orizzonte finito, indefinito o infinito
+	\item Rappresentazione: atomica, feature-based, relazionale
+	\item Limiti computazionale: razionalità perfetta o limitata
+	\item Incertezza: sensori o azioni
+\end{list}
+\paragraph{Estremi del trade-off fondamentale della Knowledge Representation} Possiamo avere un linguaggio di rappresentazione estremamente espressivo, a discapito di un meccanismo di inferenza molto complesso, oppure un linguaggio di rappresentazione molto semplice che comporta un meccanismo di inferenza rapido e a bassa complessità.
+\paragraph{Differenze nell'espressività tra logiche differenti e limiti nel FOL}
+\paragraph{Che cos è un semantic network?} Sono grafi dove i nodi corrispondono ai concetti e gli archi, diretti, corrispondono a relazioni binarie fra i concetti.\\
+I nodi possono essere concetti generici o individui, e le relazioni sempre presenti sono IS-A (per specificare sottoclassi) e INST-OF (per specificare l'appartenenza di un individuo ad una classe)
+\subparagraph{Inferenza tipica di un semantic network} Viene sfruttata la gerarchia e l'ereditarietà.\\
+Per esempio da \begin{center}
+\begin{tikzpicture}[node distance={25mm}, main/.style = {draw, circle}] 
+\node[main] (1) {Animal}; 
+\node[main] (2) [below of=1] {Mammal};
+\node[main] (3) [right of=2] {4};
+\node[main] (4) [below of=2] {Elephant};
+\node[main] (5) [right of=4] {grey};
+\node[main] (6) [below of=4] {Clyde};
+\draw[->] (6) -- (4) node [pos=0.5, left] {INST-OF};
+\draw[->] (4) -- (2) node [pos=0.5, left] {IS-A};
+\draw[->] (2) -- (1) node [pos=0.5, left] {IS-A};
+\draw[->] (2) -- (3) node [pos=0.5, above] {NLegs};
+\draw[->] (4) -- (5) node [pos=0.5, above] {Color};
+\end{tikzpicture}
+\end{center}
+si può dedurre che Animal(Clyde), Mammal(Clyde), NLegs(Clyde, 4), Color(Clyde, grey).\\
+Per tradurre in FOL, le eccezioni presentano un problema e si possono aggirare con una clausola "$x\neq$ individuoEccezione" per ciascuna eccezione.
+\paragraph{Cos è un agente computazionale?} Agente le cui decisioni in merito alle proprie azioni sono spiegabili attraverso computazioni e implementate su un device fisico.
+\paragraph{Cos è formalmente un CSP?} Un Constraint Satisfaction Problem è CSP = (X,D,C) dove X è un insieme finito di variabili, D è un insieme di domini uno per variable, C è un insieme di vincoli che restringono i valori che ogni variabile può assumere contemporaneamente.\\
+Il task richiesto è assegnare un valore dal rispettivo dominio a ciascuna variabile in modo da soddisfare ogni vincolo in C.
 \end{document}
