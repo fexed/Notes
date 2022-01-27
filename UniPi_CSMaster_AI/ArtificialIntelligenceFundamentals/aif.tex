@@ -1226,6 +1226,9 @@ It's a simple technique, modular and useful for evaluating the complexity of dec
 	$\langle$role$\rangle$ $\rightarrow$ & R
 	\end{tabular}
 \end{center}
+We may add other logics, more expressive ones, for example: N for the numerical restrictions
+$$(\geq n\:R)^I = \{a\in\Delta^I\:|\:\:|\{b\:|\:(a,b)\in R^I\}|\:\geq n\}\:\:\:\:(\hbox{atleast})$$
+with $n$ integer and $|\:\:|$ set cardinality.
 \paragraph{KBS} If the algorithm terminates with at least one primitive constraint set and no clashes, then the KB is satisfiable and from the constraints we can derive a model (it's \textbf{correct}).\\
 If a KB is satisfiable, then the algorithm terminates producing at least a finite model without clashes (it's \textbf{complete}).\\
 KBS it's also decidable for ALC and ALCN (ALC with numeric restrictions).
@@ -1551,9 +1554,38 @@ In the Umbrella, the predicted distribution of Rain converges to a fixed point $
 \paragraph{Smoothing} Is the process of computing the posterior distribution of the state at some past time $k$, given a complete sequence of observations up to the present $t$: $P(x_k\:|\:e_{1:t})$ with $0\leq k< t$. To compute it:
 $$P(x_k\:|\:e_{1:t}) = \alpha f_{1:k}\cdot b_{k+1:t} = \alpha  P(x_k\:|\:e_{1:k}) \cdot P(e_{k+1:t}\:|\:x_k)$$ where $\cdot$ is the pointwise multiplication, $f_{1:k} = P(x_k\:|\:e_{1:k})$ is the \textbf{forward message} and $b_{k+1:t} = P(e_{k+1:t}\:|\:x_k)$ is the \textbf{backward message} which can be computed by a recursive process that runs backward from $t$. This can be computed as: $$P(e_{k+1:t}\:|\:x_k) = \sum_{x_{k+1}} P(e_{k+1}\:|\:x_{k+1})P(e_{k+2:t}\:|\:x_{k+1})P(x_{k+1}\:|\:x_k)$$
 \paragraph{Viterbi Algorithm}
-There is a recursive relationship between the most likely path to each state $x_{t+1}$ and most likely paths to each previous state $x_t$. We can write a recursive equation similar to the one for filtering: $$\max_{x_1,\ldots,x_t} P(x_1,\ldots,x_t,x_{t+1}\:|\:e_{1:t+1}) = \alpha P(e_{t+1}\:|\:x_{t+1})\max_{x_t}(P(x_{t+1}\:|\:x_t) \max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t}))$$
+There is a recursive relationship between the most likely path to each state $x_{t+1}$ and most likely paths to each previous state $x_t$. We can write a recursive equation similar to the one for filtering:\\$$\max_{x_1,\ldots,x_t} P(x_1,\ldots,x_t,X_{t+1}\:|\:e_{1:t+1}) =$$ $$=\alpha P(e_{t+1}\:|\:X_{t+1})\cdot\max_{x_t}\left(P(X_{t+1}\:|\:x_t)\cdot \max_{x_1,\ldots,x_{t-1}}P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t})\right)$$
 With the forward message being $m_{1:t} = \max_{x_1,\ldots,x_{t-1}} P(x_1,\ldots,x_{t-1},x_t\:|\:e_{1:t})$, the probabilities of the best path to each state $x_t$.\\From those we can compute the probabilities of the extended paths at time $t+1$ and take the max. The \textbf{most likely sequence} can be computed in one pass. For each state, the best state that leads to it is recorded, so that the optimal sequence is identified.
-
+\paragraph{An example with the Umbrella}\begin{list}{}{Filtering}
+	\item Day 0: no observation, $P(R_0) = \langle 0.5, 0.5\rangle = \langle P(r_0), P(\neg r_0)\rangle$
+	\item Day 1: we predict $P(R_1) = \sum_{r_0} P(R_1\:|\:r_0)P(r_0) = P(R_1\:|\:r_0)\cdot P(r_0) + P(R_1\:|\:\neg r_0)\cdot P(\neg r_0) = \langle 0.7, 0.3\rangle\cdot 0.5 + \langle 0.3, 0.7\rangle \cdot 0.5 = \langle 0.5,0.5\rangle$\\
+	Given the evidence $u_1$, we update $P(R_1\:|\:u_1) = \alpha P(u_1\:|\:R_1)P(R_1) = \alpha\langle0.9,0.2\rangle\langle0.5,0.5\rangle=\alpha\langle0.45, 0.1\rangle \simeq \langle 0.818, 0.182\rangle$
+	\item Day 2: we predict $P(R_2) = \langle0.7,0.3\rangle\cdot0.818 + \langle0.3,0.7\rangle\cdot 0.182 = \langle 0.627, 0.373\rangle$\\
+	Update with $u_2$, $P(R_2\:|\:u_1,u_2) = \alpha P(u_2\:|\:R_2)P(R_2\:|\:u_1) = \alpha\langle0.9,0.2\rangle\langle0.627,0.373\rangle=\alpha\langle0.565, 0.075\rangle \simeq \langle 0.883, 0.117\rangle$
+\end{list}
+\begin{list}{}{Smoothing}
+	\item Computing the smoothed estimate at $k=1$ given the observations at $k=1$ and $k=2$\\
+	$P(R_1\:|\:u_1,u_2) = \alpha P(R_1\:|\:u_1)\cdot P(u_2\:|\:R_1)$\\
+	$P(R_1\:|\:u_1) = \langle0.818, 0.182\rangle$ computed in filtering\\
+	$P(u_2\:|\:R_1) = \sum_{r_2}P(u_2\:|\:r_2)P(U_{3:2}\:|\:r_2)P(r_2\:|\:R_1) =$\begin{list}{}{}
+		\item $= (P(u_2\:|\:r_2)1P(r_2\:|\:R_1)) + (P(u_2\:|\:\neg r_2)1P(\neg r_2\:|\:R_1)) =$
+		\item $= (0.9 \cdot 1 \cdot \langle0.7,0.3\rangle) + (0.2\cdot 1 \cdot \langle0.3,0.7\rangle) = \langle 0.69, 0.41\rangle$
+	\end{list}
+	So $P(R_1\:|\:u_1,u_2) = \alpha\langle0.818, 0.182\rangle\langle0.69,0.41\rangle \simeq \langle0.883, 0.117\rangle$
+\end{list}
+With forward message $P(r_1\:|\:u_1) = 0.818$ and backward message $P(r_2\:|\:u_1,u_2) = 0.883$
+\begin{center}
+\includegraphics[scale=0.5]{31.png}\\
+Trellis diagram, square boxes are states
+\end{center}
+\begin{list}{}{Viterbi algorithm}
+\item $m_{1:1} = \langle 0.8182, 0.1818\rangle$ computed in filtering
+\item $m_{1:2} = \langle\max[P(u_2\:|\:r_2)\cdot 0.8182\cdot P(r_2\:|\:r_1), P(u_2\:|\:r_2)\cdot 0.1818 \cdot P(r_2\:|\:\neg r_1) ],$ rain at $k=2$\\$\max[ P(u_2\:|\:\neg r_2)\cdot 0.8182\cdot P(\neg r_2\:|\:r_1),P(u_2\:|\:\neg r_2)\cdot 0.1818 \cdot P(\neg r_2\:|\:\neg r_1) ]\rangle$ not rain at $k=2$\\
+Meaning the max between the probabilities of having the umbrella given that it's raining at $k=2$ given that it has rained at $k=1$ and having the umbrella given that it's raining at $k=2$ given that it hasn't rained at $k=1$ for the first member, and the same but with not raining at $k=2$ for the second member.\\
+$=\langle\max[0.9\cdot0.8182\cdot0.7, 0.9\cdot0.1818\cdot 0.3], \max[0.2\cdot0.8182\cdot0.3, 0.2\cdot0.1818\cdot0.7]\rangle =$\\
+$=\langle\max[0.5155, 0.0491], \max[0.0491, 0.0255]\rangle = \langle 0.5155, 0.0491\rangle$
+\item $m_{1:3} = P(\neg u_3\:|\:R_3) \cdot \max_{r_2}[P(R_3\:|\:r_2)\cdot m_{1:2}] = \langle 0.361, 0.1237\rangle$
+\end{list}
 \subsubsection{Other approaches}
 Despite the disadvantage of the many probability values, Probability Theory and Bayesian Networks are the dominant approaches today. Other approaches that have been used are:
 \begin{list}{}{}
@@ -1951,7 +1983,7 @@ If Alarm is observed, there are two possible minimal explanations: \{Tampering\}
 \end{list}
 Therefore Prolog is neither complete (since the depth-first strategy is not complete) nor correct.\\
 Prolog uses the database semantics rather than the first-order semantics: unique name assumption, closed world assumption (a form of nonmonotonic reasoning, i.e. negation as failure). Also Prolog is a full fledged programming language: efficient implementation of the interpreter, built-in functions for arithmetic and list manipulation, the burden of controlling the flow of execution is on the programmer.\\\\
-A Prolog interpreter is similar to FOL-BC-Ask but more efficient. It relies on a global data structure: a \textbf{stack of choice points}. Logic variables in a path remember their binding in a \textbf{trail}. When failure occurs, the interpreter backtracks to a previous choice point and undoes the bindings of the variables.\\
+A Prolog interpreter is similar to FOL-FC-Ask but more efficient. It relies on a global data structure: a \textbf{stack of choice points}. Logic variables in a path remember their binding in a \textbf{trail}. When failure occurs, the interpreter backtracks to a previous choice point and undoes the bindings of the variables.\\
 Prolog compiles into an intermediate abstract machine (\textbf{Warren Abstract Machine}), and parallelism can be exploited in two ways:
 \begin{list}{}{}
 	\item \textbf{OR-parallelism}, a goal may unify with many different rules in the knowledge base
@@ -1965,6 +1997,8 @@ Prolog compiles into an intermediate abstract machine (\textbf{Warren Abstract M
 \end{list}
 \paragraph{Structured Objects} Functions with arguments (functor applied to arguments) and lists.
 \paragraph{Arithmetic} Basic arithmetic operations and comparison operators.
+\paragraph{Algorithm = Logic + Control} \textbf{Robert Kowalski}\\
+"\textit{An algorithm can be regarded as consisting of a logic component, which specifies the knowledge to be used in solving problems, and a control component, which determines the problem-solving strategies\ldots The logic component determines the meaning of the algorithm whereas the control component only affects its efficiency.}
 \paragraph{Procedural Control of Reasoning} Declarative encoding of knowledge and general mechanisms for deduction can be very inefficient. For efficiency we must have some domain dependent control on the reasoning process. Given a knowledgebase of facts and rules, how to make the most effective use of the rules? The choice on the order of the rules makes a difference in performance. Prolog takes ordering of clauses and subgoals very seriously: \textbf{the burden is on the programmer}.\\
 For example, suppose we want to find an American Cousin of Sally: \texttt{?- AmericanCousin(X, Sally).}, we could either:
 \begin{list}{}{}
@@ -2520,4 +2554,87 @@ Per tradurre in FOL, le eccezioni presentano un problema e si possono aggirare c
 \paragraph{Cos è un agente computazionale?} Agente le cui decisioni in merito alle proprie azioni sono spiegabili attraverso computazioni e implementate su un device fisico.
 \paragraph{Cos è formalmente un CSP?} Un Constraint Satisfaction Problem è CSP = (X,D,C) dove X è un insieme finito di variabili, D è un insieme di domini uno per variable, C è un insieme di vincoli che restringono i valori che ogni variabile può assumere contemporaneamente.\\
 Il task richiesto è assegnare un valore dal rispettivo dominio a ciascuna variabile in modo da soddisfare ogni vincolo in C.
+\paragraph{Cos è la tecnica del problem reduction?} Sono tecniche che consentono di trasformare un problema, ad esempio un CSP, in una forma diversa ma equivalente, più facile da risolvere o riconoscibile come non risolvibile. Ad esempio, nel CSP rimuovendo dai vincoli quelli che non appaiono in nessuna soluzione.\\
+Due problemi CSP sono equivalenti se hanno un insieme di soluzioni identico, e P$_1$ si riduce a P$_2$ quando sono equivalenti, le variabili di P$_2$ sono un sottoinsieme di quelle di P$_1$ e i vincoli di P$_2$ sono almeno restrittivi quanto quelli di P$_1$.
+\subparagraph{Complessità generale della ricerca di una soluzione in CSP} Considerando $d$ come la cardinalità massima dei domini, $n$ variabili quindi $d^n$ foglie totali, e $c$ archi.\\
+AC-3, che mantiene una coda di archi e per ogni arco $(i,j)$ rende consistente $i$ rispetto a $j$ eventualmente aggiungendo ogni arco $(k,j)$ con $k\neq i$ se $D_i$ è reso più piccolo o fallendo se è reso vuoto, ha una complessità di $O(cd^3)$: $O(d^2)$ per la consistenza di ogni arco e ognuno può essere aggiunto al più $O(d)$ volte, per $c$ archi totali.\\
+AC-4 evita di visitare tutti gli archi $(k,j)$, portando la complessità a $O(cd^2)$.
+DAC-1, per la consistenza direzionale, visita ogni arco una sola volta quindi anche qui $O(cd^2)$
+\paragraph{Frame Systems} Un frame system è una collezione di frame, strutture dati che servono a rappresentare uno stereotipo di oggetto o situazione. In questi frame possono essere specificate primitive di IS-A e INST-OF, che all'interno del frame system attivano ereditarietà di proprietà e procedure. Inoltre, tutti i valori sono di default e possono essere sovrascritti da ciascun individuo, consentendo così eccezioni e default reasoning.
+\paragraph{Soddisfacibilità di un KR FOL. È un problema decidibile?}
+\paragraph{Algoritmi di Ricerca Locali} Sono algoritmi di ricerca che richiedono una formulazione dello stato completo (non parziale) e mantengono in memoria solo lo stato corrente su cui migliorare iterativamente. Non sono completi.\\
+Per esempio, in CSP si parte da un'assegnazione casuale e, fintanto che non si ottiene un assegnamento soddisfacente, si seleziona una variabile ed un suo valore attraverso qualche euristica e si continua. Solitamente si sceglie la variabile con MRV (meno valori rimasti) per una strategia fail-first che pota l'albero di ricerca, e il valore LCV (meno vincolante) per una strategia fail-last perché l'obiettivo è trovare una qualsiasi soluzione. Altrimenti si può valutare tutte le possibili coppie variabile-valore e scegliere quella che migliora di più la soluzione.\\
+Si può aggiungere casualità, con random restart o random walk.
+\paragraph{Specificità dei description logics} Particolare versione del FOL che mira a ottenere proprietà computazionali migliori. Può essere formata da diverse logiche: AL, U con l'unione, E per la full existential, N per le restrizioni numeriche\ldots
+\subparagraph{Cosa sono i concepts?} Sono relazioni unarie, con operatori per costruire concetti complessi
+\subparagraph{Cosa sono i roles?} Sono relazioni binarie
+\subparagraph{Problema tipico dei description logics} Per esempio:
+\begin{list}{}{}
+	\item Concept satisfiability CS(c): c'è un'interpretazione diversa dall'insieme vuoto?\\
+	(father) è soddisfacibile, mentre (father $\sqcap$ $\neg$father) non lo è
+	\item Subsumption: K $\vDash$ C $\sqsubseteq$ D (D sussume C) se per ogni modello $I$ di T, C$^I$ $\subseteq$ D$^I$\\
+	 K $\vDash$ C $\sqsubseteq$ D $\Leftrightarrow$ C $\sqcap$ $\neg$D è inconsistente $\Leftrightarrow$ K $\cup\{a : C \sqcap \neg D\}$ è insoddisfacibile
+	\item Disjointess: C$^I$ $\cap$ D$^I$ = $\emptyset$ per ogni modello $I$ di T
+	\item Retrieval: trovare tutti gli individui instanze di $C$, cioè calcolare l'insieme $\{a\:|\:K\vDash a : C\}$
+	\item MSC (Most Specific Concept): dato un insieme di individui, trovare il concetto più specifico di cui sono tutti istanze
+	\item LCS (Least Common Subsumer): dato un insieme di concetti, trovare il concetto più specifico che li sussume tutti 
+\end{list}
+\paragraph{Come si può modellare l'incertezza nelle IA?} Attraverso lo strumento della teoria della probabilità.
+\paragraph{Quale linguaggio specifico è necessario per "fare" planning?} Il PDDL è un linguaggio creato appositamente per descrivere problemi di pianificazione, in particolare per definire: stati, iniziali e goal, ed azioni.
+\paragraph{Cos è una variabile causale nella teoria della probabilità? Fai un esempio} Si tratta di una variabile a cui è associata una distribuzione di probabilità, che indica la probabilità con cui tale variabile può assumere un determinato valore.\\
+Un esempio: X = risultato del lancio di una moneta. X ha valore in \{testa, croce\} e P(X = testa) = P(X = croce) = 0.5 è la distribuzione di probabilità.
+\paragraph{Definizione della regola del prodotto con un esempio con due variabili} La product rule è $$P(a,b) = P(a\:|\:b)\cdot P(b)$$
+Se le variabili sono indipendenti, allora $P(a,b) = P(a)\cdot P(b)$ poiché $a,b$ indipendenti se $P(a\:|\:b)=P(a)$ e viceversa.
+\paragraph{Compara Forward e Backward Reasoning} Il forward reasoning parte dalle premesse del problema e cerca di arrivare al goal attraverso l'esplorazione del grafo di ricerca generato applicando le regole da premesse a conseguenze. Il backward reasoning fa l'esatto opposto, parte dal goal e usando le regole applicandole da conseguenze a premesse cerca di generare lo stato iniziale del problema.\\
+Il forward reasoning è considerato inefficiente e tendente ad esplorare azioni irrilevanti. Possono essere "uniti" ed esplorati contemporaneamente.
+\paragraph{Cos è il PROLOG? Per cosa è usato?} Il PROLOG è uno dei linguaggi di programmazione logica più usati. Prende una KB composta da clausole di horn e cerca la soluzione con una strategia di esplorazione degli alberi SLD: in successori sono generati nell'ordine in cui appaiono nel programma logico, da sinistra a destra depth-first.\\
+Usa la unique name assumption, closed world assumption e omette l'occur check, diventando così né completo né corretto.
+\paragraph{Descrivi l'utilizzo dell'operatore !CUT} Dato che in PROLOG il backtracking è automatico e che i sottogoal sono esplorati nell'ordine in cui appaiono, nei casi della forma $G :- T, R$ dove T serve sono come test dell'applicabilità di R, si può mettere $G :- T, !, R$ a indicare che se R fallisce, non vogliamo tornare a $T$ né testare altre alternative per G. Una volta che si prova $T$ allora possiamo passare ad $R$ senza guardare altro.\\Si migliora l'efficienza del programma, e migliorarne l'espressività per specificare regole mutualmente esclusive, ma si può perdere la corrispondenza fra espressività dichiarativa e procedurale: i green cut non cambiano il significato, mentre i red cut si.
+\paragraph{Definizione di Full Joint Probability} Distribuzione di probabilità su tutte le variabili.\\
+$P(x_1,\ldots,x_n) = P(x_n\:|\:x_{n-1},\ldots,x_i)\cdot P(x_{n-1},\ldots,x_n) = \prod_{i=1}^n P(x_i\:|\:x_{i-1},\ldots,x_1)$
+\paragraph{Cos è un belief network? Cos è rappresentato su nodi e archi?} Un belief network è un grafo che rappresenta la dipendenza fra variabili: un arco $(i,j)$ indica che la variabile $i$ ha diretta influenza sulla variabile $j$.\\
+Ogni nodo corrispondea ad una variabile casuale, discreta o continua. Ogni arco diretto connette due nodi, e l'arco $(i,j)$ indica che $i$ è genitore di $j$. Ogni nodo $i$ ha una tabella di distribuzione di probabilità condizionale associata.
+\paragraph{Dato un problema, ci sono molti modi di rappresentarlo o solamente uno?} No, la rappresentazione di un problema è parte del design process e ci sono molti modi di rappresentare un dato problema: livelli di astrazione, rappresentazioni atomiche o strutturate, rappresentare l'incertezza\ldots In CSP si usano variabili a dominio finito e insiemi di vincoli, ad esempio.\\
+L'alta espressività di rappresentazione comporta una maggiore complessità del meccanismo di inferenza, e spesso usare una restrizione dei linguaggi aiuta ad avere proprietà computazionali migliori.
+\paragraph{Definizione di PDDL} PDDL è un linguaggio specializzato per descrivere problemi di pianificazione. Vengono definiti: stati (insiemi di fluents o atomi positivi, senza variabili o funzioni, con CWA e UNA) e azioni (insieme di action schemas che definiscono azione e risultato.\\
+Esempio:
+\begin{list}{}{}
+	\item \textit{Init}(AT(C1, SFO) and AT(C2, JFK) and AT(P1, SFO) and AT(P2, JFK) and CARGO(C1) and CARGO(C2) and PLANE(P1) and PLANE(P2) and AIRPORT(JFK) and AIRPORT(SFO))
+	\item \textit{Goal}(AT(C1, JFK) and AT(C2, SFO))
+	\item \textit{Action}(LOAD(c, p, a),\\
+	PRECOND: AT(c, a) and AT(p, a) and CARGO(c) and PLANE(p) and AIRPORT(a)\\
+	EFFECT: $\neg$AT(c, a) and IN(c, p))
+	\item \textit{Action}(UNLOAD(c, p, a),\\
+	PRECOND: IN(c, p) and AT(p, a) and CARGO(c) and PLANE(p) and AIRPORT(a)\\
+	EFFECT: AT(c, a) and $\neg$IN(c, p))
+	\item \textit{Action}(FLY(p, from, to),\\
+	PRECOND: AT(p, from) and PLANE(p) and AIRPORT(from) and AIRPORT(to)\\
+	EFFECT: $\neg$AT(p, from) and AT(p, to))
+	\item Piano: [LOAD(C1, P1, SFO), FLY(P1, SFO, JFK), UNLOAD(C1, P1, JFK), LOAD(C2, P2, JFK),\\FLY(P2, JFK, SFO), UNLOAD(C2, P2, SFO)]
+\end{list}
+\paragraph{Teorema di Bayes} $$P(Y\:|\:X) = \frac{P(X\:|\:Y)P(Y)}{P(X)}$$
+Ci dice come aggiornare la credenza dell'agente nell'ipotesi $h$ data l'evidenza $e$ e la conoscenza $k$
+$$P(h\:|\:e,k) = \frac{P(e\:|\:h,k)P(h\:|\:k)}{P(e\:|\:k)}$$
+\paragraph{Algoritmo di Viterbi} Dice che c'è una relazione ricorsiva tra il percorso più probabile ad ogni $x_{t+1}$ e il percorso più probabile ad ogni  $x_t$ precedente.
+\paragraph{Perché abbiamo bisogno di modellare l'incertezza?} Nel mondo reale è inevitabile possedere informazioni incomplete: incertezza nei sensori (visibilità parziale) e incertezza nelle azioni (non determinismo)
+\paragraph{Decision Theory vs Probability Theory} In entrambe abbiamo lo stesso obiettivo ontologico, cioè parlare di un mondo fatto di proposizioni vere e false. Ciò che cambia è l'obiettivo epistemologico: un agente classico non ha opinione e ritiene ogni cosa vera o falsa, mentre un agente probabilistico può avere un grado di credenza tra 0 e 1: l'incertezza non è nel mondo ma nello stato della conoscenza dell'agente.\\
+La probability theory offre un modo di quantificare l'incertezza, che combinato all'utilizzo di preferenze tramite funzioni di utilità genera la teoria delle decisioni razionali chiamata decision theory. Un agente è razionale se sceglie l'azione con l'utilità attesa maggiore comparata con tutti i possibili outcome.
+\paragraph{Variable Elimination algorithm} Procede da sinistra a destra (nell'albero, dal basso verso l'alto) e rappresenta le probabilità condizionali come fattori $f_i$\\
+Viene usato nell'inferenza tramite enumerazione, per conservare e riusare i risultati di computazioni eseguite spesso.
+\paragraph{Differenze fra prediction, filtering e smoothing}
+\begin{list}{}{}
+	\item Prediction: calcolare la distribuzione di probabilità di uno stato futuro data tutta l'evidenza fino ad ora.
+	\item Filtering: calcolare il belief state data l'evidenza da stati precedenti e attuali
+	\item Smoothing: calcolare la distribuzione di probabilità di uno stato precedente data tutta l'evidenza fino ad ora (una sorta di raffinamento della stima precedente)
+\end{list}
+\paragraph{Assiomi di Kolmogorov}
+\begin{list}{}{}
+	\item $0\leq P(a) \leq 1$
+	\item $\sum_{a\in A} P(a) = 1$ se $A$ è l'intero spazio di riferimento
+	\item $P(E) = \sum_{e\in E} P(e)$
+\end{list}
+\paragraph{Cos è una clausola di Horn definita?} È una disgiunzione di letterali con esattamente un letterale positivo.
+\subparagraph{Perché bisogna limitarci ad usarle?} KB composte da clausole di Horn hanno algoritmi di deduzione lineari.
+\paragraph{Tradeoff tra la rappresentazione e la complessità dei Bayesian networks} 
+\subparagraph{Come fa la topologia a impattare sulla complessità?} Reti con al più un arco tra due nodi (polytrees) hanno complessità in spazio e tempo lineare nel numero delle righe delle CPT. Per reti più interconnesse, il variable elimination può avere tempo e spazio esponenziale e portare all'inferenza proposizionale, che è NP-Completa.
 \end{document}
