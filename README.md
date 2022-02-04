@@ -12,7 +12,7 @@ I will keep this updated as much as I can. For every doubt, correction and fix, 
 Course | Notes | Project | Other
 ------|---------|----------|------
 Algorithm Engineering | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/AlgorithmEngineering/algeng_notes.pdf)
-Artificial Intelligence Fundamentals | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/ArtificialIntelligenceFundamentals/aif.pdf)
+Artificial Intelligence Fundamentals | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/ArtificialIntelligenceFundamentals/aif.pdf)
 Computational Mathematics for Learning and Data Analysis | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/ComputationalMathematicsForLearningAndDataAnalysis/CompMatLearningDataAnalysis.pdf)
 Machine Learning | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/MachineLearning/ML.pdf)
 
