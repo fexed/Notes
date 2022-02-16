@@ -79,4 +79,80 @@ Basically, lots of time spent hand-engineering the best data features.
 \paragraph{A modern view}
 Data is thrown into a neural network. A single stage process with a data crushing-and-munching neural network spitting out prediction, which encapsulates the three historical steps. But the time is now spent in fine-tuning the neural network.
 \paragraph{The deep learning Lego} Creating applications by putting together various combinations of CNN and LSTM modules.
+\subsection{Signals}
+Signals are time series: a sequence of measurements in time. Examples of sources are: medicine, finance, geology, IoT, biometrics\ldots
+\paragraph{Formalization} A time series x is a sequence of measurements in time $t$
+$$\hbox{x} = x_0,\ldots,x_N$$
+where $x_t$ or $x(t)$ is the measurement at time $t$.
+\begin{list}{}{}
+	\item Observation can be at \textbf{irregular} time intervals.
+	\item We assume \textbf{weakly stationary} (or second-order stationary) data\begin{list}{}{}
+		\item $\forall\:t\:\:E[x_t] = \mu$
+		\item $\forall\:t$ Cov$(x_{t+\tau},x_t) = \gamma_\tau$ with $\gamma$ depending only on the lag $\tau$
+	\end{list}
+\end{list}
+\paragraph{Goals}\begin{list}{}{}
+	\item \textbf{Description}
+	\item \textbf{Analysis}: identify and describe dependencies in data
+	\item \textbf{Prediction}: forecast next values given information up to $t$
+	\item \textbf{Control}: adjust parameters of the generative process to make the time series fit a target
+\end{list}
+\paragraph{Key Methods}\begin{list}{}{}
+	\item \textbf{Time domain analysis}: assesses how a signal changes over time (correlation, convolution, auto-regressive models)
+	\item \textbf{Spectral domain analysis}: assesses the distribution of the signal over a range of frequencies (Fourier analysis, wavelets)
+\end{list}
+\subsection{Time Domain Analysis}
+\paragraph{Mean} $$\hat\mu=\frac{1}{N}\sum_{t=1}^N x_t$$
+Can be used to subtract mean from values and "standardize" the two series.
+\paragraph{Autocovariance} For lag $-N\leq \tau \leq N$
+$$\hat\gamma_x(\tau) = \frac{1}{N}\sum_{t=1}^{N-|\tau|} (x_{t+|\tau|}-\hat\mu)(x_t - \hat\mu)$$
+\paragraph{Autocorrelation} The correlation of a signal with itself. $$\hat\rho_x(\tau)=\frac{\hat\gamma_x(\tau)}{\hat\gamma_x(0)}$$
+We can compute this with every possible $\tau$, finding the max/min which gives the $\tau$ where the autocorrelation is max/min, which means the lag where the signal starts repeating itself. The lags near zero typically dominates, so we want the maximum lag reasonably far from 0.
+\subparagraph{Autocorrelation plot} %TODO
+\paragraph{Cross-Correlation} A measure of similarity of x$_1$ and x$_2$ as a function of a time lag $\tau$ $$\phi_{\hbox{x}_1\:\hbox{x}_2}(\tau)=\sum_{t = \max\{0,\tau\}}^{\min\{(T_1 - 1 + \tau), (T_2 - 1)\}} \hbox{x}_1(t-\tau)\cdot \hbox{x}_2(t)$$
+\subparagraph{Normalized cross-correlation} Returns an amplitude independent value %TODO
+$$\overline{\phi}_{\hbox{x}_1\:\hbox{x}:2}(\tau) = \frac{\phi_{\hbox{x}_1\:\hbox{x}:2}}{\hbox{\texttt{todo}}} \in [-1,+1]$$
+With $\overline{\phi}_{\hbox{x}_1\:\hbox{x}:2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
+Note that we measure \textbf{linear correlation}.\\\\
+Cross correlation looks like the convolution $$(f * g)[n]=\sum_{t=-M}^M f(n-t)g(t)$$ but we have a flipped sign ($n-t$ instead of $t-\tau$).\\
+Cross-correlation is not symmetric, whereas convolution is ($f * g = g * f$).
+\paragraph{Autoregressive Process} A timeseries autoregressive process (AR) of order $K$ is the linear system $$x_t = \sum_{k=1}^K \alpha_k x_{t-k} + \epsilon_t$$\begin{list}{}{}
+	\item Autoregressive means $x_t$ regresses on itself
+	\item $\alpha_k \Rightarrow$ linear coefficients$\:|\:|\alpha|<1$
+	\item $\epsilon_t\Rightarrow$ sequence of independent and identically distributed values with mean 0 and fixed variance.
+	\item We look backward $K$ steps, so limited memory.
+\end{list}
+\paragraph{ARMA} Autoregressive with Moving Average process $$x_t = \sum_{k=1}^K \alpha_k x_{t-k} + \sum_{q=1}^Q \beta_q\epsilon_{t-1}+\epsilon_t$$
+\begin{list}{}{}
+	\item With $\epsilon_t$ Random white noise (again)
+	\item The current time series values is the result of a regression on its past values plus a term that depends on a combination of stochastically uncorrelated information
+\end{list}
+\paragraph{Estimating Autoregressive Models} Need to estimate: the values of the linear coefficients $\alpha_t$ and $\beta_t$ and the order of the autoregressor $K$ and $Q$\\
+Estimation of the $\alpha$, $\beta$ is performed with the Levinson-Durbin Recursion (\texttt{levinson(x, K)} in matlab, and included in several Python modules).\\
+The order is often estimated with a Bayesian model selection criterion, choosing the largest $K$ and $Q$ possible. E.g.: BIC, AIC\ldots\\
+The set of autoregressive parameters $\alpha_{i,1},\ldots,\alpha_{i,K}$ fitted to a specific time series x$_i$ is used to confront it with other time series. Same thing for $\beta$ so we can use $\alpha$ for both sets.
+\paragraph{Comparing time series by AR}\begin{list}{}{}
+	\item timeseries clustering %TODO
+	\item novelty/anomaly detection %TODO
+\end{list}
+\subsection{Spectral Domain Analysis}
+Analyze the time series in the frequency domain. Key idea: decomposing the time series into a linear combination of sines and cosines with random and uncorrelated coefficients. So a \textbf{regression on sinusoids} with Fourier analysis.
+\paragraph{Fourier Transform} Discrete Fourier Transform (DFT): transform a time series from the time domain to the frequency domain. Can be easily inverted back to the time domain.\\
+Useful to handle periodicity in the time series: seasonal trends, cyclic processes\ldots
+\paragraph{Representing functions} We know that, given an orthonormal system for $E$ we can use linear combinations of the basis $\{e_1,\ldots\}$ to represent any function $f\in E$ $$\sum_{k=1}^\infty \langle f,e_k\rangle e_k$$
+Given the orthonormal system $$\{\frac{1}{\sqrt{2}}, \sin(x),\cos(x),\sin(2x),\cos(2x),\ldots\}$$
+The linear combination above becomes the Fourier series \texttt{todo} %TODO
+\paragraph{Representing function in Complex space} Using $\cos(kx)-i\:\sin(kx) = e^{-ikx}$ with $i=\sqrt{-1}$ we can rewrite the Fourier series as $$\sum_{k=-\infty}^\infty c_k e^{ikx}$$
+on the orthonormal system $$\{1,e^{ix},e^{-ix},e^{2ix},e^{-2ix},\ldots\}$$
+\paragraph{Representing Discrete Time Series} Consider x of length $N$ and $x_n\in R$. Using the exponential formulation, the orthonormal system is finite, from $e_0$ to $e_{N-1}$ each $\in C^N$\\
+The $n$-th component of the $k$-th vector is $$[e_k]n=e^{\frac{-2\pi ink}{2}}$$
+\paragraph{Discrete Fourier Transform} Given a time series x = $x_0,\ldots,x_{N-1}$ its DFT is the sequence $$\hbox{Spectral domain}\:\:\:X_k = \sum_{n=1}^{N-1}x_ne^{\frac{-2\pi ink}{N}}\:\:\:\hbox{Time domain}$$
+And can be inverted $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}$$
+\paragraph{Basic Spectral Quantities in SFT}
+\begin{list}{}{}
+	\item Amplitude $A_k = |X_k| = \sqrt{Re^2(X_k)+Im^2(X_k)}$
+	\item Power $P_k = \frac{|X_k|^2}{N}$, more used in reality and under some conditions this is a reasonable estimate of %TODO
+\end{list}
+\paragraph{DFT in Action} We use the DFT elements $X_1,\ldots,X_K$ as representation of the signal to train the predictor/classifier.\\
+This representation can reveal patterns that are not clear in the time domain.
 \end{document}
