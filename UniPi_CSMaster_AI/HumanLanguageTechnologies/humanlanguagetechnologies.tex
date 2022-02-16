@@ -116,4 +116,38 @@ Background: philosophy, linguistics and statistics ML (feature vectors).
 \subparagraph{Language Model} Statistical model which tells the probability that a word comes after a given word in a sentence.
 \subparagraph{Dealing with Sentences} A sentence is a sequence of words: build a representation of a sequence from those of its words (compositional hypothesis). Sequence to sequence models.\\
 Is there more structure in a sentence than a sequence of words? In many cases, tools forgets information when translating sentences into sequences of words, discarding much of the structure.
+\section{Language Modeling}
+\paragraph{Probabilistic Language Model} The goal is to assign a probability to a sentence.
+\begin{list}{}{}
+	\item \textbf{Machine Translation}: $P($high winds tonight$) > P($large winds tonight$)$
+	\item \textbf{Spell Correction}: $P($about fifteen minutes from$) > P($about fifteen minuets from$)$
+	\item \textbf{Speech Recognition}: $P($I saw a van$) > P($eye saw a van$)$
+	\item \textbf{Language Identification}: $s$ from unknown language (italian or english) and $L$ita, $L$eng language models for italian and english $\Rightarrow$ $L$ita$(s) > L$eng$(s)$
+	\item Summarization, question answering\ldots
+\end{list}
+We want to compute \begin{list}{}{}
+	\item $P(W) = P(w_1,w_2,\ldots,w_n)$ the probability of a sequence
+	\item $P(w_4\:|\:w_1,w_2,w_3,w_4)$ the probability of a word given some previous words
+\end{list}
+The model that computes that is called the \textbf{language model}
+\paragraph{Markov Model and N-Grams} Simplify the assumption: the probability of a word given all the previous is the same of the probability of that word given just few (one, two\ldots) previous words. So $P(w_i\:|\:w_{i-},\ldots,w_1) = P(w_i\:|\:w_{i-1})$ (First order Markov chain).\\
+With a \textbf{$N$-gram}: $P(w_n\:|\:w_1^{n-1}) \simeq P(w_n\:|\:w_{n-N+1}^{n-1})$\\
+In general it's insufficient: language has \textbf{long distance dependencies}, but we can often get away with $N$-gram models. For example:\begin{list}{}{}
+	\item “The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{is} tall.”
+	\item “The \textbf{men} next to the large oak tree near the grocery store on the corner \textbf{are} tall.”
+\end{list}
+Or even semantic dependencies:
+\begin{list}{}{}
+	\item “The \textbf{bird} next to the large oak tree near the grocery store on the corner \textbf{flies} rapidly.”
+	\item “The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{talks} rapidly.”
+\end{list}
+So more complex models are needed to handle such dependencies.
+\paragraph{Maximum likelihood estimate}$$P(w_n\:|\:w_{n-N+1}^{n-1}) = \frac{\hbox{count}(w_{n-N+1}^{n-1},w_n)}{\hbox{count}(w_{n-N+1}^{n-1})}$$
+Maximum because it's the one that maximize $P($Training set $|$ Model$)$
+\paragraph{Shannon Visualization Method} Generate random sentences:
+\begin{list}{}{}
+	\item Choose a random bigram $(\langle s\rangle,w)$ according to its probability
+	\item Choose a random bigram $(w,x)$ according to its probability
+	\item Repeat until we pick $\langle/s\rangle$
+\end{list}
 \end{document}
