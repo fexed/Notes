@@ -101,7 +101,7 @@ where $x_t$ or $x(t)$ is the measurement at time $t$.
 	\item \textbf{Time domain analysis}: assesses how a signal changes over time (correlation, convolution, auto-regressive models)
 	\item \textbf{Spectral domain analysis}: assesses the distribution of the signal over a range of frequencies (Fourier analysis, wavelets)
 \end{list}
-\subsection{Time Domain Analysis}
+\subsubsection{Time Domain Analysis}
 \paragraph{Mean} $$\hat\mu=\frac{1}{N}\sum_{t=1}^N x_t$$
 Can be used to subtract mean from values and "standardize" the two series.
 \paragraph{Autocovariance} For lag $-N\leq \tau \leq N$
@@ -135,7 +135,7 @@ The set of autoregressive parameters $\alpha_{i,1},\ldots,\alpha_{i,K}$ fitted t
 	\item timeseries clustering %TODO
 	\item novelty/anomaly detection %TODO
 \end{list}
-\subsection{Spectral Domain Analysis}
+\subsubsection{Spectral Domain Analysis}
 Analyze the time series in the frequency domain. Key idea: decomposing the time series into a linear combination of sines and cosines with random and uncorrelated coefficients. So a \textbf{regression on sinusoids} with Fourier analysis.
 \paragraph{Fourier Transform} Discrete Fourier Transform (DFT): transform a time series from the time domain to the frequency domain. Can be easily inverted back to the time domain.\\
 Useful to handle periodicity in the time series: seasonal trends, cyclic processes\ldots
@@ -155,4 +155,63 @@ And can be inverted $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}
 \end{list}
 \paragraph{DFT in Action} We use the DFT elements $X_1,\ldots,X_K$ as representation of the signal to train the predictor/classifier.\\
 This representation can reveal patterns that are not clear in the time domain.
+\subsection{Image Processing}
+Bidimentional series. Basically same approach to signals.
+\subsubsection{Descriptors}
+An image is a matrix of pixel intensities or color values (RGB). There are other representations, not interesting for this course. CIE-LUV often used in image processing due to perceptual linearity (image difference is more coherent)
+\paragraph{Machine Vision Applications} For example region of interest, or object classification.\\
+Even pixel-level tasks, for example image segmentation (regions of the image) or semantic segmentation (classifying regions of the image).\\
+Up one level of abstraction: automated image captioning, requiring identifying objects, generating sentences and ranking those sentences.
+\paragraph{Key Questions}
+\begin{list}{}{}
+	\item How to represent visual information? It has to be:\begin{list}{}{}
+		\item Informative, carrying all the information
+		\item Invariant to photometric (different illuminations) and geometric transformation (position in the picture, rotation\ldots)
+		\item Efficient for indexing and querying
+	\end{list}
+	\item How to identify informative parts?\begin{list}{}{}
+		\item Whole image is generally not a good idea
+		\item Must lead to good representations
+	\end{list}
+\end{list}
+\paragraph{Image Histograms} One of the first answer. Describes the distribution of some visual information on the whole image: colors, edges, corners\ldots depending on the goals.\begin{list}{}{}
+	\item \textbf{Color Histograms}, one of the earliest image descriptors.\\
+	Count the number of pixels of a given color (normalize!). We need to discretize and group the RGB colors.\\
+	Any information concerning shapes and position is lost. Two image with a random permutation of the same pixels produce the same color histograms.\\
+	Images can be compared, indexed and classified based on their color histogram representation.\\
+	Can be computed with OpenCV in Python.
+\end{list}
+\paragraph{Describing Local Image Properties} We need something less global, on a local level. Capturing information on image regions, extract \textbf{multiple local descriptors}: different location, different scale\ldots\\
+Several approaches, typically performing convolution between a filter and the image region. Using filters sensitive to specific features we can extract many kind of information.
+\paragraph{Localized Descriptors}
+\begin{list}{}{}
+	\item \textbf{Intensity Vector} The simplest form of localized descriptor: a vector $n\cdot m$ of the pixels of a single patch of the image with dimensions $n,m$. The vector can be normalized to make it invariant to intensity variations.\\
+	But rotating gives a different vector. A more robust representation is an histogram of this vector.
+	\item \textbf{Distribution-Based Descriptors} Represent local patches by histograms describing properties of the pixels in the patch. The simplest is an histogram of intensity values, but it's not invariant enough even if normalized.\\
+	We want a descriptor invariant to illumination (normalization), scale (captured at multiple scale) and geometric transformations (rotation invariant). We want locality, histogram based and invariant to geometric transformation.
+\end{list}
+\paragraph{SIFT} \textbf{Scale Invariant Feature Transform}\begin{enumerate}
+	\item Center the image patch on a pixel $x,y$ of the image $I$
+	\item Represent image at scale $\sigma$ (controls how close to look at the image)
+	\item[] Convolve the image with a Gaussian filter with standard variation $\sigma$, basically computing average of pixels with the coefficient taken from a Gaussian distribution. With a smooth Gaussian, we artificially smooth the object, and vice versa. We can compute different versions of the image.
+$$L_\sigma(x,y) = G(x,y,\sigma) * I(x,y)$$
+$$G(x,y,\sigma) = \exp\left(-\frac{x^2+y^2}{2\sigma^2}\right)$$
+	\item Compute the \textbf{gradient of intensity} in the patch, extracting magnitude $m$ and orientation $\Theta$ using finite differences.
+\end{enumerate}
+\subparagraph{Gaussian Filter of an Image}
+\begin{center}
+	\includegraphics[scale=0.5]{1.png} \includegraphics[scale=0.6]{2.png}
+\end{center}
+\pagebreak
+\begin{list}{}{}
+	\item[4.] Create \textbf{gradient histogram}\begin{list}{}{}
+		\item 4$\times$4 gradient window
+		\item Histogram of 4$\times$4 per window on 8 orientation bins
+		\item Gaussian weighting on center keypoint (width = $1.5\sigma$)
+		\item 4$\times$4$\times$8 = 128 descriptor size
+	\end{list}
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{3.png}
+\end{center}
 \end{document}
