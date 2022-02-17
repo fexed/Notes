@@ -110,5 +110,38 @@ We spend $(nw-1)t$ to get the last stage working and $m\cdot t$ time spent by th
 $$T_{par}(nw) = (nw-1)\cdot t + m\cdot t$$
 $$\hbox{SpeedUp}(nw)=\frac{(nw\cdot t)\cdot m}{(nw-1)\cdot t + m\cdot t}$$
 So the higher the $m$ is, the lower is the impact of the time required to get up to speed. So $m >> nw \Rightarrow T_{par}(nw) \simeq m\cdot t$
-\paragraph{Throughput} Task completed per unit of time.
+\paragraph{Throughput} Tasks completed per unit of time.
+\section{Measures}
+On one side we can have more speed with more resources (computing devices). On the other side we can use more complex applications, with more resources. For example more precise computations, so extra resources not for improving the time but to improve the quality of the computations.\\
+Finally, we could aim at computing results with less energy thanks to parallelism. This is a recent perspective on parallelism.\\\\
+We've seen the SpeedUp($n$) = $\frac{T_{seq}}{T_{par}(n)}$, where the plot has to lie below the bisection of the cartesian graph.
+\subsection{Base Measurements}
+\paragraph{Latency $L$} Measure of the wall-clock time between the start and end of the single task.
+\paragraph{Service Time $T_s$} It's related to the possibility of executing more tasks. It's the measure of the time between the delivery of two consecutive results, for example between $f(x_i)$ and $f(x_{i+1})$\\
+Even if $x_i$ and $x_{i+1}$ arrive at the same time, $f$ would still be computing $f(x_i)$ so it'll start computing $f(x_{i+1})$ when it has finished.
+\paragraph{Completion Time $T_c$} The latency related to a number of tasks. $T_c = L\cdot m$ for $x_m,\ldots,x_1$ inputs to a sequential system.\\
+With a parallel system, instead, we have $T_c\simeq m\cdot T_s$.
+\paragraph{Example} A 3 stage pipeline, with each node being sequential and with latency $L_i$ for node $i$.\\
+At $t_0$ the first stage $N_1$ gets the first tasks and computes it in $L_1$, then $N_2$ computes in $L_2$ and $N_3$ computes in $L_3$ so a total of $t_0 + L_1 + L_2 + L_3$.\\
+When the pipeline is filled, $T_s$ is dominated by the longest $L_i$, so $T_s = \max\{L_1, L_2, L_3\}$ and $T_c = \sum L_i + (m-1)T_s$\\
+If $m$ is large with respect to $n=$ number of stages, the "base of the parallelogram" would be very long, so $m >> n \Leftrightarrow T_c = m\cdot T_s$
+\subsection{Derived Measurements}
+\paragraph{SpeedUp} $$\hbox{SpeedUp}(n) = \frac{T_{seq}}{T_{par}(n)}$$ Could be latencies, service times\ldots depending on what we want to measure the speedup of.
+\paragraph{Scalability} $$\hbox{Scalability}(n)=\frac{T_{par}(1)}{T_{par}(n)}$$
+\paragraph{Efficiency} $$\hbox{Efficiency}(n) = \frac{\hbox{Ideal parallel time}(n)}{T_{par}(n)} = \frac{\frac{T_{seq}}{n}}{T_{par}(n)} = \frac{T_{seq}}{n\cdot T_{par}(n)} = \frac{\hbox{SpeedUp}(n)}{n}$$
+Measures the tradeoff between what you gain with the speedup and the cost of the speedup.
+\paragraph{Throughput} $$\hbox{Throughput} = \frac{1}{T_s}$$
+\paragraph{Amdahl Law} Taken the total time of a computation, $T_{seq}$, it can be divided into something that can and something that cannot be computed in parallel (for example, dividing the book is a sequential activity). So we can say that\\$T_{seq} =$ serial fraction + parallel fraction and the \textbf{serial fraction cannot be parallelized}. $f\in[0,1]\:|\:f\cdot T_{seq}$ is the serial fraction.
+$$T_{seq} = f\cdot T_{seq} + (1-f)\cdot T_{seq}$$
+The parallel fraction can be splitted between the workers, but we would have to compute the serial fraction too. By splitting more and more and more, we have that $$\lim_{n\to\infty} T_{par}(n) = f\cdot T_{seq}$$ $$\hbox{SpeedUp}(n) = \frac{T_{seq}}{f\cdot T_{seq}} = \frac{1}{f}$$
+So we have a very low upper bound on the achievable speedup. This is referred to as \textbf{strong scaling}: strong meaning using more resources to get the computation faster.
+\paragraph{Gustaffson Law} $$\hbox{SpeedUp}(n) = N - S\cdot(N-1)$$ With $S$ being the serial fraction. This comes from the fact that we're considering a different perspective: Gustaffson assumes that the computation increases with the parallelism, something that's called \textbf{weak scaling}, getting the speedup from using more computational devices, using more data. %TODO rivedere 17/02 inizio parte 2
+\paragraph{Cores} In modern computers, we have a main memory (slow), a disk (even slower) and the memory is connected to at least 3 levels of cache. At the bottom we have some cores (4, 8\ldots), each one has its own level 1 cache (usually split in data and instruction cache).\\
+With an activity with a working set that fills the cache, in case of strong scaling splitting the computation across cores we process less data per core because the size of the problem is the same.\\
+With weak scaling, we assume that the data increases so by using more cores we process the same data on all cores but the data grows so we could have extra overhead because of the working set size.\\
+We will have patterns of parallel computation that differentiate in how we process the data.
+\paragraph{Application as Graphs} The applications can be seen as graphs of sequential nodes with dependencies.
+%TODO
+The maximum speedup is the work over the span, because in every case I need to go from the first to the goal node. I take the longest one because at least the longest path must be computed, and all the rest can be done in parallel and I assume to have enough resources to compute the rest in the time of the span.\\
+We can use this model %TODO
 \end{document}
