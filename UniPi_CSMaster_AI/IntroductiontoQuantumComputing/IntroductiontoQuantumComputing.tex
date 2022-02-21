@@ -233,4 +233,90 @@ $$|0\rangle = \left(\begin{array}{c}
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
 \end{center}
+How much information in a qubit $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$? $\alpha$ is a complex number and we could store lots of bits in the binary expression of Re$(\alpha)$. This is there was some way of measuring the value of $\alpha$ exactly. But $\alpha,\beta$ are kind of hidden information. Measurement of a qubit will give only a single bit of information, 0 or 1, about the state of the qubit. There is no way to figure out $\alpha$ and $\beta$ if they start out unknown: after the measurement $\alpha$ and $\beta$ are gone.\\
+Why does this collapse occurs? We don't know.\\
+Only if infinitely many identically prepared qubits %TODO
+\paragraph{Power of Quantum Computing} The system can be put in a combination of very large number of state: $n$ qubits in a superposition of $2^n$ states, so operating on $2^n$ bits at the same time.\\
+Idea: find an algorithm that converges all $2^n$ states of the qubits to a state that's solution of the problem: exploiting constructive and destructive interferences, for example.
+\paragraph{Quantum Algorithms} We start from a well known initial state (example: all qubits in $|0\rangle$). The system evolves in a quantum way: qubits are connected in elementary logic circuits and are manipulated by a simple set of rules (rotations of state vectors of the quantum state).\\
+From a superposition of states to a superpositions of calculations (each with a certain probability of converging to a significant result) to a superposition of results. When the machine measures the final state, the superposition of results collapses on the result with the higher probability: with high probability being the solution of our problem.\\
+This can be called \textbf{quantum parallelism}.\begin{list}{}{}
+	\item Observing the system during these manipulations comes with a severe \textbf{penalty}: if we look to soon, the \textbf{computation will fail}. We are allowed to \textbf{view only the machine final state}.
+	\item Interaction with the outside occurs through classic bit sequences: qubits collapses in that instant to a single state.
+\end{list}
+\paragraph{Why Quantum Computing?} The idea was born to efficiently simulate quantum-mechanical processes. But this model can help to solve problems of high computational complexity.\\
+However:
+\begin{list}{}{}
+	\item Quantum computation doesn't violate the Church-Turing thesis, undecidable functions are still undecidable
+	\item Widely believed that NP-Complete problems are still difficult problems, requiring exponential time
+\end{list}
+We are interested because for some problems a classical computers can take exponentially more time.
+\paragraph{Shor's Factoring Algorithm} Factor numbers in polynomial time. This remains one of the (or \textit{the}) most important results in quantum computing. Meaning that \textbf{current public key cryptography can be attacked}. But remember that factorization is not NP-complete.
+\paragraph{Grover's Quantum Search} The algorithm concerns search in an unstructured database with $N$ entries. If we are searching for a unique marked entry, classicaly it would take a maximum of $N$ queries and $\frac{N}{2}$ queries on average.\\
+With this algorithm, enables the search to be completed with $O(\sqrt{N})$ queries. It's \textbf{optimal}: no search algorithm can do less than $\sqrt{N}$ operations.\\
+In practice, this quadratic speed-up can be very impactful making a big difference. With $10^{20}$ entries, and a quantum processors capable of $10^8$ calls per second, we can find the entry in $10^{10}$ calls, so $10^2$ seconds ($\simeq 2$ minutes). In classical search we would need $10^{12}$ seconds ($\simeq 32000$ years).\\
+In cryptography, it enables brute force attacks so we need longer keys.
+\paragraph{Evolution of Quantum Technology}
+%TODO image
+\begin{center}
+	\includegraphics[scale=0.5]{6.png}
+\end{center}
+IBM claims that it will build a 1000-qubit machine by 2023 and 1M-qubits by 2030.
+\paragraph{Quantum Supremacy} Is the goal of demonstrating that a programmable quantum device can solve a problem that \textbf{no classical computer can solve in any feasible amount of time} (irrespective of the usefulness of the problem).\\
+Proving this requires:\begin{list}{}{}
+	\item Building a powerful physical quantum machine
+	\item Finding a problem that can be solved efficiently on a quantum computer with a superpolynomial speed-up over the best known or possible classical algorithm for that task.
+\end{list}
+Note that Shor's algorithm is unfeasible to be implemented with current technology, so it cannot be used to prove quantum supremacy.
+\paragraph{Physical Realization of Quantum Computers}
+A qubit can be realized as real quantum physical system. We can use:
+\begin{list}{}{}
+	\item Two different polarization of a photon
+	\item Two possible alignments of nuclear spin in a uniform magnetic field
+	\item Two state of an electron orbiting a single atom (ground or excited state, shining light on the electron makes it change states and even stay halfway between states)
+\end{list}
+The theory is independent of the physical realization of the system.
+\begin{center}
+	\includegraphics[scale=0.5]{7.png}
+	\includegraphics[scale=0.7]{8.png}
+\end{center}
+\paragraph{Challenges} It will be quite an engineering challenge to control a quantum computer and to make sure that its state will not be affected by various sources of error.\\
+Quantum operations (rotations) are never perfect: an intended rotation of 90 degrees might end up being of 90.1 or 89.9 degrees and this errors add up quickly.\\
+It's very difficult to avoid interaction with the external environments, so need fault-tollerant protocols and quantum-errors correcting algorithms, meaning additional qubits.\\
+Circuit dimensions are also very large. Shor's algorithm require $O(n^2\log n\log\log n)$ gates for a $n$ bit number.
+\section{Circuit Model of Computation}
+\begin{center}
+	\includegraphics[scale=0.5]{9.png}
+\end{center}
+The \textbf{interaction is classical}.
+\paragraph{Circuits} Networks (graphs) of wires (arcs) that carry bit values to gates that perform elementary operations (nodes) on the bits (input nodes).\\
+$C_n$ circuit with $n$ input variables. We consider acyclic circuits. The gates come from some finite library of gates.\\
+Circuits are a \textbf{non-uniform model of computation}: with $n$ inputs we can solve only instances of length $n$. Inputs of different lengths are processed by different circuits, in contrast with uniform models (such as Turing machines) where the same computational device is used for all possible input lengths. A different "program" for each input size.\\\\Non-uniform because computation on input size $n$ can be absolutely different from computations on some input size $m$. For example, \textbf{non-uniform circuit families of small size may compute undecidable functions}. Size being the number of operations in the circuit.\begin{list}{}{}
+	\item Let $L\subseteq \{0,1\}^*$ be an undecidable language
+	\item Let $U = \{1^n\:|\:$the binary expansion of $n$ is in $L\}$\\
+	For example $1^5 = 11111_1\in U$ if $5_{10}=101_2 \in L$
+	\item $U$ is also undecidable, but we can build a non-uniform family of circuits that computes $U$: $\forall\:n$ we build two circuits with $n$ inputs\begin{list}{}{}
+		\item $C_n^0$ %TODO
+		\item $C_n^1$ %TODO
+	\end{list}
+	What's missing is the effective and efficient constructability of the circuits. Since $U$ is undecidable we are not able to say if the $n$-th circuit of the family is $C_n^0$ or $C_n^1$.
+\end{list}
+\paragraph{Uniform Families} So we often impose a \textbf{uniformity condition}: the family is uniform if each $C_n$ can be constructed by an appropriately resource-bounded Turing machine. We assume that the circuits can be generated by a Turing machine or equivalent model that on input $n$ produces a description of $C_n$ in time polynomial in $n$ and in the number of gates in $C_n$.
+\paragraph{Complexity of the Circuits} One natural measure is the \textbf{overall number of gates}, the number of operations (can be put in relation with sequential time).\\
+Another is the \textbf{depth of the circuit}, the length of the longest path between input and output with each gate counting as one, can be put in relation with parallel time.\\
+A third measure is the \textbf{number of input variables}, sometimes called width or space of the circuit.
+\paragraph{Reversible Computation} Quantum computation are always reversible. A computation is reversible if it always possible to uniquely recover the input given the output. Otherwise, it's called irreversible.\\
+Many classical logic gates are irreversible, but the NOT gate is reversible.\\
+Reversibility is connected to information loss: an irreversible operation produces loss of information. With reversible computation no information is ever erased.\\
+Laws of physics %TODO
+\paragraph{Reversible Circuits} Realize bijection. We have digital circuits with same number of input and outputs. Any classical irreversible circuit can be transformed in a equivalent reversible one (computes same one), by adding new inputs and new outputs and replacing irreversible operations with reversible ones. The extra inputs represent information that we must keep in order to maintain the reversability.\\
+With an irreversible classical circuit of depth $T$ and space $S$, the reversible version uses $O(S+ST)$ space and $T$ depth.
+\subparagraph{Reversible AND} Also known as Toffoli gate.
+\begin{center}
+	\includegraphics[scale=0.5]{10.png}
+\end{center}
+\paragraph{Universality} A set of gates is universal for classical computation if, for any positive integer $n,m$ and any function $f : \{0,1\}^n\rightarrow \{0,1\}^m$, a circuit can be constructed for computing $f$ using only gates from that set.\\
+Well-known sets are \{AND, OR, NOT\}\ldots \\ %TODO 
+NAND and NOR gates have the \textbf{functional completeness} assuming unlimited unlimited fanout (a gate can be connected to unlimitedely many nodes).\\\\
+\textbf{Toffoli gate} is universal for classical reversible computation. We need to add \textbf{ancillary} (extra) bits that can be initialized to 0 or 1 as required.
 \end{document}
