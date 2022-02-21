@@ -150,5 +150,96 @@ Maximum because it's the one that maximize $P($Training set $|$ Model$)$
 	\item Choose a random bigram $(w,x)$ according to its probability
 	\item Repeat until we pick $\langle/s\rangle$
 \end{list}
-\paragraph{Perils of Overfitting}
+\paragraph{Shannon Game} Generate random sentences by selecting the words according to the probabilities of the language models.
+\begin{lstlisting}[style=myPython]
+def gentext(cpd, word, length=20):
+	print(word, end = ' ')
+	for i in range(length):
+		word = cpd[word].generate()
+		print(word, end = ' ')
+	print("")
+\end{lstlisting}
+\paragraph{Perils of Overfitting} %TODO
+\paragraph{Zipf's Law} A small number of events occur with high frequency, while a large number of events occur with small frequency. You can quickly collect statistics on the high frequency events, but you may have to wait an arbitrarily long time to get valid statistics on low frequency events.\\
+The result is that our estimates are sparse. No counts at all for the vast bulk of things we want to estimate. Some of the zeroes in the table are really zeroes, but others are simply low frequency events you haven't seen yet: after all, anything can happen. How to address? By estimating the likelihood of unseen N-grams.
+\begin{center}
+	\includegraphics[scale=0.75]{1.png}
+\end{center}
+\textbf{Result}: $f$ is proportional to $\frac{1}{r}$, meaning that there is a constant $k\:|\:f\cdot r = k$
+\begin{center}
+	\includegraphics[scale=0.75]{2.png}
+\end{center}
+\subsection{Evaluation and Perplexity}
+\paragraph{Evaluation} Train parameters of our model on a training set. For the evaluation, we apply the model on new data and look at the model's performance: \textbf{test set}. We need a metric which tells us how well the model is performing: one of such is \textbf{perplexity}.
+\paragraph{Extrinsic Evaluation} Evaluating N-gram models. Put model A in a task (language identification, speech recognizer, machine translation system\ldots) %TODO
+\paragraph{Language Identification Task} Build a model for each language and compute probability that text is of such language.
+$$lang = arg\max_l P_l(text)$$
+\paragraph{Difficulty of Extrinsic Evaluation} Extrinsic evaluation is time-consuming, can take days to run an experiment. Recent benchmarks like GLUE have become popular due to the effectiveness.\\
+Intrinsic evaluation us an approximation called \textbf{perplexity}: it's a poor approximation unless the test data looks just like the training data.
+\paragraph{Perplexity} The intuition is the notion of surprise: how surprised is the language model when it sees the test set? Where surprise is a measure of "I didn't see that coming". The more surprised is, the lower the probability it assigned to the test set, and the higher the probability the less surprised it is.\\
+So perplexity measures how well a model "fits" the test data. It uses the probability that the model assigns to the test corpus and normalizes for the number of words in the test corpus, taking the inverse. $$PP(w) = \sqrt[N]{\frac{1}{P(w_1\ldots w_N)}}$$
+Measures the weighted average branching factor in predicting the next word (lower is better).\\
+In the chain rule $$PP(w) = \sqrt[N]{\prod_{i=1}^N\frac{1}{P(w_i\:|\:w_1\ldots w_{i-1})}}$$
+And for bigrams $$PP(w) = \sqrt[N]{\prod_{i=1}^N\frac{1}{P(w_i\:|\:w_{i-1})}}$$
+Lower perplexity $\Rightarrow$ better model
+\section{Representation of Words}
+\paragraph{Word Meaning} Definition of \textbf{meaning}:\begin{list}{}{}
+	\item Idea represented by a word, phrase\ldots
+	\item Idea that a person wants to express by using words, signs\ldots
+	\item Idea expressed in a work of writing, art\ldots
+\end{list}
+\textbf{Signifier} (symbol) $\Leftrightarrow$ \textbf{Signified} (idea or concept) = \textbf{denotation}
+\paragraph{Linguistic Solution} Dictionary or lexical resources provide word definitions as well as synonyms, hypernums, antonyms\ldots example: \textbf{Wordnet}.
+\subparagraph{Problems with lexical resources} \begin{list}{}{}
+	\item Imperfect, sometimes there are errors
+	\item Missing new meanings of words, hard to keep up-to-date
+	\item Subjective
+	\item Require human labor to create and adapt
+	\item Hard to compute accurate word similarity
+\end{list}
+\paragraph{Vector Space Model} The \textbf{VSM} is a representation for text used in information retrieval. A document is represented by a vector in a $n$-dimensional space $$v(d_1) = [t_1,\ldots, t_n]$$
+Each dimension corresponds to a separate term.\\
+The VSM considers words as discrete symbols.
+\subparagraph{One Hot Representation} A word occurrence is represented by one-hot vectors, with the vector dimension being the number of words in a vocabulary and $1$ in correspondence of the position of the represented word. Useful for representing a document by the sum of the word occurrence vector, and document similarity given by \textbf{cosine distance} (angle between vectors).
+\subparagraph{tf*idf Measure} Term frequency: frequency of the word.\\
+Inverse document frequency: %TODO
+\subparagraph{Classical VSM} Vector is all zeroes with $idf_t$ instead of $1$. The vector of a document is the sum of the vectors of its terms occurrence vectors.\\
+Doesn't capture similarity between terms.
+\paragraph{Problems with Discrete Symbols} All vectors are orthogonal, with no notion of similarity. Search engines try to address the issue using WordNet synonyms but it's better to encode the similarity in the vectors themselves.
+\subparagraph{Intuition} Model the meaning of a word by "embedding" it in a vector space. The meaning of a word is a vectors of numbers (vector models are also called \textbf{embeddings}), so a \textbf{dense vector space}. Constrast: word meaning is represented in many computational %TODO
+\paragraph{Word Vectors/Embeddings} Build dense vector for each word chosen so that it is similar to vectors of words that appear in similar contexts.\\
+Four kinds:\begin{enumerate}
+	\item[] Sparse Vector Representations
+	\item Mutual-information weighted word co-occurence matrices
+	\item[] Dense Vector Representations
+	\item %TODO
+	\item 
+	\item 
+\end{enumerate}
+\paragraph{Distributional Hypothesis} A word's meaning is given by the words that frequently appear close-by. Old idea but successful just with modern statistical NLP.\\
+When a word $w$ appears in a text, its context is the set of words that appear nearby (within a fixed-size window). Use of the many contexts of $w$ to build a representation of $w$.
+\subparagraph{Word Context Matrix} Is a $|V|\times|V|$ matrix $X$ that counts the frequencies of co-occurrence of words in a collection of contexts (i.e. text spans of a given length).
+\subparagraph{Co-Occurrence Matrix} Words $\equiv$ Context words. Rows of $X$ capture similarity yet $X$ is still high dimensional and sparse. One row per word with counts of occurrencies of any other word.\\
+We can compute the distance vectors between words, but neighboring words are not semantically related.
+\subsection{Word Embeddings}
+\paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddigns})
+$$Embed : R^{|V|}\rightarrow R^k$$
+$$Embed(v(t)) = e(t)$$
+Desired properties: remaining dimensions %TODO
+\paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and negative examples made replacing center word with random one. The loss for the training is $$Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))$$
+with $x^{(w)}$ obtained by replacing the central word of $x$ with a random word.
+\paragraph{Word2Vec} Framework for learning words, much faster to train. Idea:\begin{list}{}{}
+	\item Collect a large corpus of text
+	\item Every word in a fixed vocabulary is represented by a vector
+	\item Go through each position $t$ in the text, which has a center word $c$ and context ("outside") words $o$
+	\item Use the similarity of the word vectors for $c$ and $o$ to calculate the probability of $o$ given $c$
+	\item %TODO
+\end{list}
+Two kinds:
+\begin{list}{}{}
+	\item Skip-gram: predict context words within window of size $m$ given the center word $w_t$
+	\item CBoW: predict center word $w_t$ given context words within window of size $m$
+\end{list}
+Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text (no need for human-labeled data!).\\
+Usual context size is 5 words before and after. Features can be multi-word expressions. Longer %TODO
 \end{document}
