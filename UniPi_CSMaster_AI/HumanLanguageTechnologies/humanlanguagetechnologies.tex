@@ -233,13 +233,63 @@ with $x^{(w)}$ obtained by replacing the central word of $x$ with a random word.
 	\item Every word in a fixed vocabulary is represented by a vector
 	\item Go through each position $t$ in the text, which has a center word $c$ and context ("outside") words $o$
 	\item Use the similarity of the word vectors for $c$ and $o$ to calculate the probability of $o$ given $c$
-	\item %TODO
+	\item Keep adjusting word vectors to maximize this probability
 \end{list}
 Two kinds:
+\begin{center}
+	\includegraphics[scale=0.5]{3.png}
+\end{center}
 \begin{list}{}{}
 	\item Skip-gram: predict context words within window of size $m$ given the center word $w_t$
+	\begin{center}
+		\includegraphics[scale=0.4]{4.png}
+	\end{center}
 	\item CBoW: predict center word $w_t$ given context words within window of size $m$
 \end{list}
 Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text (no need for human-labeled data!).\\
-Usual context size is 5 words before and after. Features can be multi-word expressions. Longer %TODO
+Usual context size is 5 words before and after. Features can be multi-word expressions. Longer windows can capture more semantics and less syntax.\\
+A typical size for $h$ is 200-300.
+\subparagraph{Skip-Gram}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Inputs are one-hot representation of the word
+	\item $w\in R^{|Vocabulary|}$ are high-dimensional
+	\item $v\in R^d$ is low dimensional: size of the embedding space $d$
+	\item $V\in R^{|Voc|\times d}$ input word matrix
+	\item row $t$ of $V$ is the input vector, representation for \textbf{center} word $w_t$
+	\item $U\in R^{d\times|Voc|}$ output matrix
+	\item column $o$ of $U$ is the output vector, representation for \textbf{context} word $w_o$
+\end{list}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.35]{5.png}
+\end{center}
+\end{multicols}
+$v_t = w_tV$ embedding of word $w_t$\\$z=v_tU$ $z_i$ is the similarity of $w_t$ with $w_i$\\Softmax converts $z$ to a probability distribution $p_i$ $$p_i=\frac{e^{z_i}}{\sum_{j\in V}e^{z_j}}$$
+Procedure
+\begin{list}{}{}
+	\item Lookup the embedded word vector for the center word $v_c = V[c] \in R^n$
+	\item Generate score vector $z = v_cU$
+	\item Turn the score vector into probabilities $\hat{y} =$ softmax$(z)$
+\end{list}
+$\hat{y}_{c-m},\ldots$ Those are the estimates\\ %TODO
+So the training iterates through the whole corpus predicting sorrounding words given the center word.
+\subparagraph{Objective Function} For each position $t=1,\ldots,T$ predict context words within a windows of fixed size $m$ given each center word $w_t$ $$\hbox{Likelihood} = L(\Theta) = \prod_{t=1}^T\prod_{-m\leq j\leq m,\:\:j\neq 0} P(w_{t+j}\:|\:w_t,\Theta)$$
+While the objective function $J(\Theta)$ is the average negative log likelihood $$J(\Theta) = -\frac{1}{T}\log L(\Theta) = -\frac{1}{T}\sum_{t=1}^T\sum_{-m\leq j\leq m,\:\:j\neq 0} \log(P(w_{t+j}\:|\:w_t,\Theta)=$$
+To compute $P(o\:|\:c, \Theta)$ we use two vectors per word $w$: $v_w$ when $w$ center word and $u_w$ when $w$ context word. For a center word $c$ and a context word $o$:$$P(o\:|\:c) = \frac{e^{u_o v_c}}{\sum_{w\in V} e^{u_w v_c}}$$
+With the dot product $u\cdot v = \sum_i u_iv_i$: larger product $\Rightarrow$ larger probability. Normalize over entire vocabulary to give probability distribution.\\
+$J(\Theta)$ is a function of all windows in the corpus, potentially billions: too expensive to compute. The solution is the stochastic gradient descent, sampling windows randomly and update after each one.
+\paragraph{Softmax}\begin{list}{}{}
+	\item Soft because still assign some probability to smaller $x_i$
+	\item Max because amplifies the probability of largest $x_i$
+\end{list}
+\paragraph{Can we really capture the concept represented by a word?} Philosophical debate.
+\paragraph{Negative Sampling} $\log\sum_{j\in F}e^{u_j}$ has lots of terms, costly to compute. The solution is to compute it only on a small sample of negative samples, i.e. $\log\sum_{j\in E}e^{u_j}$ where words $E$ are a few (e.g. 5) %TODO
+\paragraph{CBoW} Continuous Bag of Words\\
+Mirror of the skip-gram, where context words are used to predict target words.\\
+$h$ is computed from the average of the embeddings of the input context, $z_i$ is the similarity of $h$ with the words embedding of $w_i$ from $U$.
+\paragraph{Which Embeddings} $V$ and $U$ both define embeddigns, which to use? Usually just $V$. Sometimes average pairs of vectors from $V$ and $U$ into a single one or append one embedding vector after the other, doubling the length.
+\paragraph{GloVe} Global Vectors for Word Representation. Insight: the ratio of conditional probabilities may capture meaning.
+$$J = \sum_{i,j=1}^V f(X_{ij})\ldots$$
+\paragraph{fastText} Similar to CBoW, word embeddings averaged to obtain good sentence representation. Pretrained models.
 \end{document}
