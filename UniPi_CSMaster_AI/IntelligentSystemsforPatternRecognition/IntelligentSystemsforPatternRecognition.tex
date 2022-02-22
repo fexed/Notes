@@ -214,4 +214,109 @@ $$G(x,y,\sigma) = \exp\left(-\frac{x^2+y^2}{2\sigma^2}\right)$$
 \begin{center}
 	\includegraphics[scale=0.5]{3.png}
 \end{center}
+\subsubsection{Detectors}
+\paragraph{Visual Feature Detector} Properties
+\begin{list}{}{}
+	\item \textbf{Repeatability} Detect the same feature in different image portions and different images, under different conditions (color, luminance\ldots). So with respect to translation, photometric changes, rotation, scaling and affine transformations (non-isotropic changes, for example the relative position of the camera)\ldots
+\end{list}
+\paragraph{Edge Detection} We need to find interesting points, talking about fundamental elements, basic components. One possible example are the edges of the image.\\
+Reasoning in changes of intensity: edges are those points where the intensity changes.\begin{center}
+	\includegraphics[scale=0.5]{4.png}
+\end{center}
+Typically using an edge detector filter on each pixel and turning pixels white or black by thresholding
+\subparagraph{Edges and Gradients} The image gradient (graylevel) is $$\nabla I = \left[\frac{\partial I}{\partial x},\frac{\partial I}{\partial y}\right]$$ which is basically two images, gradient in both $x$ and $y$ directions. Edge are pixel regions where intensity gradient changes abruptly. The return of finite difference methods:
+\begin{list}{}{}
+	\item $G_x = \frac{\partial I}{\partial x} \simeq I(x+1,y)-I(x-1,y)$
+	\item $G_y = \frac{\partial I}{\partial y} \simeq I(x,y+1)-I(x,y-1)$
+\end{list}
+\pagebreak
+Edge detectors build on this idea combining with some smoothing: average on multiple pixels.
+\subparagraph{Prewitt operators}
+$$G_x = \left[\begin{array}{c c c }
++1&0&-1\\
++1&0&-1\\
++1&0&-1
+\end{array}\right]\:\:\:\:\:G_y = \left[\begin{array}{c c c }
++1&+1&+1\\
+0&0&0\\
+-1&-1&-1
+\end{array}\right]$$
+\begin{center}
+	\includegraphics[scale=0.5]{5.png}
+\end{center}
+\subparagraph{Sobel Operator}
+$$G_x = \left[\begin{array}{c c c }
++1&0&-1\\
++2&0&-2\\
++1&0&-1
+\end{array}\right]\:\:\:\:\:G_y = \left[\begin{array}{c c c }
++1&+2&+1\\
+0&0&0\\
+-1&-2&-1
+\end{array}\right]$$
+Often with a constant $c\simeq \frac{1}{8}$ for scaling.
+\begin{center}
+	\includegraphics[scale=0.4]{6.png}
+\end{center}
+\paragraph{Blob Detection} Pixel regions with little gradient variability.\\
+$g_\sigma(x,y)$ has maximum response when centered on a circle of radius $\sqrt{2}\sigma$, with $\sigma$ being the scale of the gaussian.\\
+Laplace of Gaussian (LoG):
+$$\nabla^2g_\sigma(x,y)=\frac{\partial^2g_\sigma}{\partial x^2} + \frac{\partial^2g_\sigma}{\partial y^2}$$
+Typically using a scale normalized response
+$$\nabla^2_{norm}g_\sigma(x,y)=\sigma^2\left(\frac{\partial^2g_\sigma}{\partial x^2} + \frac{\partial^2g_\sigma}{\partial y^2}\right)$$
+\begin{enumerate}
+	\item Convolve image with a LoG filter at different scales $\sigma = k\sigma_0$ by varying $k$ with a starting $\sigma_0$
+	\item Find maxima of squared LoG responses:
+	\begin{list}{}{}
+		\item Find maxima on space-scale: focus on a scale and find maxima
+		\item Find maxima between scales: do the same for all the scales and pick the maxima
+		\item Threshold
+	\end{list}
+\end{enumerate}
+The LoG can be approximated by the Difference of Gaussians (DoG) for efficiency, so to reuse part of the computations.
+$$g_{k\sigma_0}(x,y) - g_{\sigma_0}(x,y) \simeq (k-1)\sigma_0^2\nabla^2g_{(k-1)\sigma_0}$$
+SIFT uses LoG.
+\paragraph{Affine Detectors} Laplacia-based detectors are invariant to scale thanks to the maximization in scale-space. Still not invariant to affine-transformation.
+\begin{center}
+	\includegraphics[scale=0.5]{7.png}\\
+	\includegraphics[scale=0.5]{8.png}
+\end{center}
+\paragraph{MSER} Maximally Stable Extremal Regions\\
+Extract covariant regions (blobs) that are stable connected components of intensity sets of the image. Interesting areas stay the same at different threshold: stable with respect to variations in luminance, not scale dependent and doesn't assume circular regions. Key idea\ldots %TODO
+Blobs generated (locally) by binarizing the image over a large number of thresholds %TODO
+\subparagraph{Intuitions on MSER} Generate frames from the image by thresholding it on all graylevels.\\
+Capture those regions that from a small seed of pixel grow to a stably connected region. Stability is assessed by looking at derivatives of region masks in time (most stable $\Rightarrow$ minima of connected region variation).
+\paragraph{Image Segmentation} The process of partitioning an image into a set of homogeneous pixels, hoping to match objects or their subparts.\\
+A naive approach: straighten the image in a $N\cdot M$ vector and use it as a dataset for K-means.\\
+\subparagraph{Ncut} Normalized cuts
+\begin{center}
+	\includegraphics[scale=0.5]{9.png}
+\end{center}
+With each node being a pixel: an image is a graph. $a_{ij}$ is the affinity between pixels at a certain scale $\sigma$. A cut of $G$ is the set of edges such whose removal makes $G$ a disconnected graph. Breaking the graph into pieces by cutting edges of low affinity.\\
+The normalized cut problem is NP-hard, approximate solution as an eigenvalue problem. But the eigenvalue decomposition it's really intractable with big images. We need to reduce the number of pixels. We can use \textbf{superpixels}: clustering the pixels with K-means (perhaps with different $K$) and using the clusters as nodes for segmentation algorithms (Ncut, Markov Random Fields\ldots). We can do multiscale superpixeling and segmenting at different scales, different policies\ldots\\
+\subsubsection{Conclusion}
+Image processing is a lot about convolutions: linear masks to perform gradient operations, gaussian functions to apply scale changes (zooming in and out). Computational efficiency is a driving factor: convolution in Fourier domain, superpixel, lightweight feature detectors\ldots
+\section{Wavelets}
+\paragraph{Limitations of DFT} Sometimes we might need localized frequencies rather than global frequency analysis.
+\begin{center}
+	\includegraphics[scale=0.5]{10.png}
+\end{center}
+We slice the signal in "time slots" in time analysis and "frequency slots" in frequency analysis. In wavelet analysis you do both.\begin{center}
+	\includegraphics[scale=0.5]{11.png}\\
+	\includegraphics[scale=0.5]{12.png}
+\end{center}
+\begin{enumerate}
+	\item Scale and shift original signal
+	\item Compare signal to a wavelet
+	\item Compute coefficient of similarity
+\end{enumerate}
+Split the signal with an orthonormal basis generate by translation and dilation of a mother wavelet $$\sum_t \hbox{x}(t)\phi_{j,k}(t)$$
+Terms $k,j$ regulate scaling and shifting of the wavelet
+$$\phi_{t,k}(\hbox{x}) = 2^{\frac{k}{2}}\phi\left(\frac{t-j2^k}{2^k}\right)$$
+With many different options for the mother wavelet $\phi$
+\begin{center}
+	\includegraphics[scale=0.5]{13.png}
+\end{center}
+Scaling and dilation is akin to a sort of frequency: high scale mean stretched wavelet with slowly changing coarse feature and low frequency, while low scale compressed wavelet with rapidly changing details and high frequency.
+\paragraph{DWT} Discrete Wavelet Transform: uses a finite set of scales and shifts rather than "any possible value" as in the continuous wavelet transform.
 \end{document}
