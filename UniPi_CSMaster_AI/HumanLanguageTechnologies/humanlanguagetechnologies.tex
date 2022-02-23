@@ -292,4 +292,69 @@ $h$ is computed from the average of the embeddings of the input context, $z_i$ i
 \paragraph{GloVe} Global Vectors for Word Representation. Insight: the ratio of conditional probabilities may capture meaning.
 $$J = \sum_{i,j=1}^V f(X_{ij})\ldots$$
 \paragraph{fastText} Similar to CBoW, word embeddings averaged to obtain good sentence representation. Pretrained models.
+\paragraph{Co-Occurrence Counts}
+$$P(w_t,w_{t-i},\ldots,w_{t-1}) = \frac{P(w_t,w_{t-i},\ldots,w_{t-1})}{P(w_{t-i},\ldots,w_{t-1})}$$
+It's a big matrix, of $|V|\times|V|\simeq 100$k$\times100$k $\Rightarrow$ dimensionality reduction: principal component analysis, Hellinger PCA, SVD\ldots trying to reduce to size to $100$k$\times 50$, $100$k$\times 100$ or something similar, assigning each word a vector of $50$, $100$ or similar features.
+\paragraph{Weighting} Weight the counts using corpus-level statistics to reflect co-occurrence significance: \textbf{Pointwise Mutual Information} $$ PMI(w_t,w_{t-i},\ldots,w_{t-1}) = \frac{P(w_t,w_{t-i},\ldots,w_{t-1})}{\log P(w_t)P(w_{t-i},\ldots,w_{t-1})} = \log\frac{\#(w_t,w_{t-i},\ldots,w_{t-1})\cdot|V|}{\#(w_{t-i},\ldots,w_{t-1})\#(w_t)}$$
+Skip-gram model implicitly factorizes a shifted PMI matrix.\\
+Idea of Singular Value Decomposition:
+\begin{center}
+	\includegraphics[scale=0.5]{6.png}
+\end{center}
+\subparagraph{Which One?} No clear winner. Parameters play a relevant role in the outcome of each method. Both SVD and SGNS performed well on most tasks, never underperforming significantly.\\
+SGNS is suggested to be a good baseline: faster to compute and performs well.
+\paragraph{Parallel word2vec} How to synchronize access to V and U, given multicore CPU to run SGD in parallel? No synchronization is good, because computation is stochastic hence it is approximate anyhow. Parameters are huge: low likelihood of concurrent access to the same memory cell. The effect is a very fast training.
+\paragraph{Computing embeddings} The training cost of word2vec is linear in the size of the input. The training algorithm works well in parallel, given sparsity of words in contexts and use of negative sampling. It can be halted and restarted at anytime. %TODO
+\paragraph{Gensim} Cython
+\paragraph{Fang} Uses PyTorch
+\subsection{Evaluation}
+\paragraph{Polysemy} Word vector is a linear combination of its word senses.
+$$v_{pike} = \alpha_1v_{pike_1} + \alpha_2v_{pike_3} + \alpha_3v_3$$
+with $\alpha_i = \frac{f_i}{f_1+f_2+f_3}$ for the frequencies $f_i$.\\
+It's intrinsic evaluation.
+\paragraph{Extrinsic Vector Evaluation} The proof of the pudding is in the eating. Test on a task, e.g. NER (Named Entity Recognition)
+\subsubsection{Embeddings in Neural Networks} An embedding layer is often used as fist layer in a neural network for processing text.\\
+It consists of a matrix $W$ of size $|V|\times d$ where $d$ is the size of the embedding space. $W$ maps words to dense representations.\\
+It is initialized either with random weights\ldots %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{7.png}
+\end{center}
+\subsubsection{Limits of Word Embeddings} \begin{list}{}{}
+	\item Polysemous words
+	\item Limited to words (neither multi words nor phrases)
+	\item Represent similarity: antinomies often appear similar.\\
+	Not good for sentiment analysis or polysemous words. Example:
+	\begin{list}{}{}
+		\item The movie was \textbf{exciting}
+		\item The movie was \textbf{boring}
+	\end{list}
+\end{list}
+\paragraph{Word Senses and Ambiguity}
+\paragraph{Sentiment Specific}
+\paragraph{Context Aware Word Embeddings}
+\paragraph{ELMo} Embeddings from Language Model
+\begin{center}
+	\includegraphics[scale=0.5]{8.png}
+\end{center}
+Given a sequence of $n$ tokens ($x_1,\ldots,x_n$) %TODO
+\paragraph{OpenAI GPT-2}
+\paragraph{BERT} Semi-supervised training on large amounts of text, or supervised training on a specific task with a labeled dataset.
+\section{Text Classification}
+For example: positive/negative review identification, author identification, spam identification, subject identification\ldots
+\paragraph{Definition} The classifier $f : D \rightarrow C$ with
+\begin{list}{}{}
+	\item $d\in D$ input document
+	\item $C=\{c_1,\ldots,c_K\}$ set of classes
+	\item $c\in C$ predicted class as output
+\end{list}
+The learning has
+\begin{list}{}{}
+	\item Input %TODO
+	\item Output %TODO
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{9.png}
+\end{center}
+\paragraph{Hand-Coded Rules} Often very high accuracy, but building and maintaining this rules is expensive.
+\paragraph{Supervised Machine Learning} %TODO
 \end{document}

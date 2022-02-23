@@ -296,13 +296,13 @@ With each node being a pixel: an image is a graph. $a_{ij}$ is the affinity betw
 The normalized cut problem is NP-hard, approximate solution as an eigenvalue problem. But the eigenvalue decomposition it's really intractable with big images. We need to reduce the number of pixels. We can use \textbf{superpixels}: clustering the pixels with K-means (perhaps with different $K$) and using the clusters as nodes for segmentation algorithms (Ncut, Markov Random Fields\ldots). We can do multiscale superpixeling and segmenting at different scales, different policies\ldots\\
 \subsubsection{Conclusion}
 Image processing is a lot about convolutions: linear masks to perform gradient operations, gaussian functions to apply scale changes (zooming in and out). Computational efficiency is a driving factor: convolution in Fourier domain, superpixel, lightweight feature detectors\ldots
-\section{Wavelets}
+\subsection{Wavelets}
 \paragraph{Limitations of DFT} Sometimes we might need localized frequencies rather than global frequency analysis.
 \begin{center}
 	\includegraphics[scale=0.5]{10.png}
 \end{center}
 We slice the signal in "time slots" in time analysis and "frequency slots" in frequency analysis. In wavelet analysis you do both.\begin{center}
-	\includegraphics[scale=0.5]{11.png}\\
+	\includegraphics[scale=0.33]{11.png}\\
 	\includegraphics[scale=0.5]{12.png}
 \end{center}
 \begin{enumerate}
@@ -319,4 +319,42 @@ With many different options for the mother wavelet $\phi$
 \end{center}
 Scaling and dilation is akin to a sort of frequency: high scale mean stretched wavelet with slowly changing coarse feature and low frequency, while low scale compressed wavelet with rapidly changing details and high frequency.
 \paragraph{DWT} Discrete Wavelet Transform: uses a finite set of scales and shifts rather than "any possible value" as in the continuous wavelet transform.
+\section{Generative and Graphical Models}
+Generative referring to the probability we learn: if we know the distribution probability of data we can generate new data.\\
+Graphical referring to graphical formalisms that describe in a syntetic way the structures we'll see.
+\paragraph{Generative Learning} ML models that represent knowledge inferred from data under the form of probabilities:
+\begin{list}{}{}
+	\item Probabilities can be sample: new data can be generated
+	\item Supervised, unsupervised, weakly supervised tasks
+	\item More easily incorporate prior knowledge on data and tasks
+	\item Interpretable knowledge (how data is generated)
+\end{list}
+The majority of modern tasks comprises large number of variables\begin{list}{}{}
+	\item Modeling the joint distribution of all variables can become impractical
+	\item Exponential size of the parameter space
+	\item Computationally impractical to train and predict
+\end{list}
+\subsection{Graphical Models Framework}
+\paragraph{Representation} Graphical models are a compact way to represent exponentially large probability distributions. Encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
+\paragraph{Inference} How to query (predict with) a graphical model? Probability of unknown $X$ given observations $d$, $P(X\:|\:d)$, the \textbf{most likely hypothesis} (parameters) $X$.
+\paragraph{Learning} Find the right model parameters.
+\subsubsection{Representation} A graph whose nodes are random variables and edges represent probabilistic relationships between the variables.\\
+Different classes of graphs:
+\begin{list}{}{}
+	\item Directed edges express \textbf{causal relationships}
+	\item Undirected edges express \textbf{soft constraints}, values cannot change independently
+	\item \textbf{Dynamic models}, graphs subject to structure changes to reflect dynamic processes. For example RNNs: recurrent neural networks are unfolded using weight sharing, producing a dynamic model.
+\end{list}
+\paragraph{In Deep Learning} Bayesian learning necessary to understand Variational Deep Learning.
+\begin{center}
+	\includegraphics[scale=0.5]{14.png}
+\end{center}
+\paragraph{Generate new knowledge} Complex data can be generated if the model is powerful enough to capture its distribution.
+\subsection{Probability Refresher}
+\texttt{todo} %TODO
+\subsection{Inference} Bayesian: consider all hypothesis weighted by their probabilities
+$$P(X\:|\:d)=\sum_i P(X\:|\:h_i)P(h_i\:|\:d)$$
+MAP (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
+$$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H} P(d\:|\:h)P(h)$$
+ML assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(d\:|\:h)$$
 \end{document}
