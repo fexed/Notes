@@ -334,11 +334,10 @@ The majority of modern tasks comprises large number of variables\begin{list}{}{}
 	\item Exponential size of the parameter space
 	\item Computationally impractical to train and predict
 \end{list}
-\subsection{Graphical Models Framework}
 \paragraph{Representation} Graphical models are a compact way to represent exponentially large probability distributions. Encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
 \paragraph{Inference} How to query (predict with) a graphical model? Probability of unknown $X$ given observations $d$, $P(X\:|\:d)$, the \textbf{most likely hypothesis} (parameters) $X$.
 \paragraph{Learning} Find the right model parameters.
-\subsubsection{Representation} A graph whose nodes are random variables and edges represent probabilistic relationships between the variables.\\
+\paragraph{Representation} A graph whose nodes are random variables and edges represent probabilistic relationships between the variables.\\
 Different classes of graphs:
 \begin{list}{}{}
 	\item Directed edges express \textbf{causal relationships}
@@ -352,9 +351,87 @@ Different classes of graphs:
 \paragraph{Generate new knowledge} Complex data can be generated if the model is powerful enough to capture its distribution.
 \subsection{Probability Refresher}
 \texttt{todo} %TODO
-\subsection{Inference} Bayesian: consider all hypothesis weighted by their probabilities
+\subsubsection{Inference} Bayesian: consider all hypothesis weighted by their probabilities
 $$P(X\:|\:d)=\sum_i P(X\:|\:h_i)P(h_i\:|\:d)$$
 MAP (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
 $$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H} P(d\:|\:h)P(h)$$
 ML assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(d\:|\:h)$$
+Any probability can be obtained from the Joint Probability Distribution $P(X_1,\ldots,X_n)$ by marginalization but at an exponential cost (e.g. $2^{n-1}$ for a marginal distribution from binary RV)
+\subsection{Graphical Models}
+Compact graphical representation for exponentially large joint distribution: simplifies marginalization and inference algorithms %TODO
+\subsubsection{Bayesian Networks} 
+\begin{multicols}{2}
+Directed Acyclic Graphs (DAG) $G = (V,E)$\begin{list}{}{}
+	\item Nodes $v\in V$ represent random variables\\
+	Shaded $\Rightarrow$ observed, empty (like $Y_3$) $\Rightarrow$ unobserved
+	\item Edges $e\in E$ describe the conditional independence relationships
+\end{list}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}
+\end{center}
+\end{multicols}
+\paragraph{Conditional Probability Tables} CPTs are local to each node and describe the probability distribution \textbf{given its parents}.
+$$P(Y_1,\ldots,Y_n) = \prod_{i=1}^N P(Y_i\:|\:\hbox{Parents}(Y_i))$$
+\paragraph{Plate notation} If the same causal relationship is replicated for a number of variables, we can compactly represent it with plate notation.
+$$P(Y_1,\ldots,Y_N,C) = P(C)\prod_{i=1}^N P(Y_i\:|\:C)$$
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\paragraph{Full-Plate Notation}
+Boxes denote replication for a number of times (denoted by the letter in the corner). Shaded nodes are observed variables, empty nodes are unobserved latent variables.\\
+Black dots (optional) identify model parameters.
+\begin{center}
+	\includegraphics[scale=0.5]{17.png}
+\end{center}
+\subsubsection{Markov Random Fields}
+\begin{center}
+	\includegraphics[scale=0.5]{18.png}
+\end{center}
+Undirected graph $G = (V,E)$ (a.k.a. Markov Networks). Also with shaded/empty nodes to denote observed/unobserved variables.\\
+Edges $e\in E$ represent bidirectional dependencies between variables (constraints).\\
+Often arranged in a structure that is coherent with the data/constraint we want to model.\\
+Often used in image processing to impose spatial constraints (e.g. smoothness)
+\subsection{Conditional Independence and Causality}
+Can we reason on the structure of the graph to infer direct/indirect relationships between random variables?
+\paragraph{Local Markov Property} Each node (random variable) is conditionally independent of all its non-descendants given a joint state of its parents. $$Y_v\perp Y_{V\setminus \hbox{Children(v)}}\hbox{ given }Y_{\hbox{Parent}(v)}\:\:\forall\:v\in V$$
+There are substructures in the Bayesian networks with which we can build everything.
+\paragraph{Markov Blanket} A Markov blanket $Mb(A)$ of a node $A$ is the minimal set of vertices that isolates/shields the node from the rest of the Bayesian network. If I know the variables in $Mb(A)$ then I know everything I need to know about $A$\begin{center}
+	\includegraphics[scale=0.5]{19.png}
+\end{center}
+Taking only the parents it's not sufficient, we need also the children and the co-parents (nodes that are parents of one of my children). So it contains parents, children and children's parents.
+$$P(A\:|\:Mb(A), Z) = P(A\:|\:Mb(A))\:\:\forall\:Z\not\in Mb(A)$$
+\paragraph{Joint Probability Factorization} An application of the chain rule and local Markov property.\begin{enumerate}
+	\item Pick a topological ordering of the nodes
+	\item Apply chain rule following the order
+\end{enumerate}
+\paragraph{Sampling of a Bayesian Network} A BN describes a generative process for observations.
+\begin{enumerate}
+	\item Pick a topological ordering of the nodes
+	\item Generate data by sampling from the local condition probabilities following this order
+\end{enumerate}
+Generate $i$th sample for each variable, example $s_i\simeq P(S)$, $h_i\simeq P(H\:|\:S=s_i)$
+\subsection{Fundamental Bayesian Network Structures}
+Three fundamental substructures that determine the conditional independence relationships in a Bayesian network. %TODO verify dependent/independent!!!!!
+\paragraph{Tail to Tail} Common cause \begin{center}
+	\includegraphics[scale=0.75]{20.png}
+\end{center}
+$$P(Y_1,Y_3\:|\:Y_2)=P(Y_1\:|\:Y_2)P(Y_3\:|\:Y_2)$$
+If $Y_2$ is unobserved, then $Y_1,Y_3$ are marginally dependent $Y_1\not\perp Y_3$\\
+If $Y_2$ is observed, $Y_1,Y_3$ become conditionally independent $Y_1\perp Y_3\:|\:Y_2$ (the path between $Y_1,Y_3$ is blocked by the observed (shaded) $Y_2$)
+\paragraph{Head to Tail} \begin{center}
+	\includegraphics[scale=0.75]{21.png}
+\end{center}
+$$P(Y_1,Y_3\:|\:Y_2)=P(Y_1)P(Y_2\:|\:Y_1)P(Y_3\:|\:Y_2)=P(Y_1\:|\:Y_2)P(Y_3\:|\:Y_2)$$
+Same behavior as before!\\
+If $Y_2$ is unobserved, then $Y_1,Y_3$ are marginally dependent $Y_1\not\perp Y_3$\\
+If $Y_2$ is observed, $Y_1,Y_3$ become conditionally independent $Y_1\perp Y_3\:|\:Y_2$ ($Y_2$ again blocks the path)
+\paragraph{Heat to Head} Common effect\begin{center}
+	\includegraphics[scale=0.75]{22.png}
+\end{center}
+$$P(Y_1,Y_2,Y_3) = P(Y_1)P(Y_3)P(Y_2\:|\:Y_1,Y_3)$$
+If $Y_2$ is unobserved, then $Y_1,Y_3$ are marginally independent $Y_1\perp Y_3$\\
+If $Y_2$ is observed, then $Y_1,Y_3$ are conditionally dependent $Y_1\not\perp Y_3\:|\:Y_2$\\
+If any $Y_2$ descendants is observed it unlocks the path.
+\paragraph{Derived Conditional Independence Relationships} A Bayesian network represent the local relationship encoded by the 3 basic structures plus the derived relationships.
 \end{document}
