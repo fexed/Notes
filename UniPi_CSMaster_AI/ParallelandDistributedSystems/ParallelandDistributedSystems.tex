@@ -162,4 +162,86 @@ char translate_char(char c) {
 \subsection{Threads}
 We used to write instructions sequentially. At a given point now we \texttt{fork} another flow of computation: we get two flows that are executed together \textbf{in the same address space}, so the new thread inherits all the memory of the original thread.
 \paragraph{Concurrence} \texttt{todo} %TODO
+\section{Patterns}
+Computations with particular shapes and semantics that can be understood and implemented depending on the situations, not linked to languages and technicalities. Patterns are a useful concepts, allow programmers to reuse experience of other programmers an not reinventing the wheel.\\
+Parallel patterns:
+\begin{list}{}{}
+	\item Data parallel
+	\item Stream parallel
+\end{list}
+The same patterns can be referred with different names.
+\subsection{Data Parallel Patterns}
+Parallelism comes from data: we split the data in pieces, compute a set of results that can be combined into a single final result. The book translation examples is a data parallel pattern. What matters is $L$.\\
+The general pattern is:
+\begin{list}{}{}
+	\item Decomposition
+	\item Partial results
+	\item Recomposition
+\end{list}\begin{multicols}{2}
+\subparagraph{Map Pattern} Also called applytoall:\begin{list}{}{}
+	\item $\forall$ item of the collection
+	\item Function $f($item$)$
+	\item $\forall$ $f($item$) \rightarrow$ isomorphic collection
+\end{list}
+\subparagraph{Reduce Pattern} Also called fold:\begin{list}{}{}
+	\item $\forall$ item of the collection
+	\item $\oplus(x,y)$
+	\item $\oplus(\oplus(a,b),\oplus(c,d))$
+\end{list}
+\end{multicols}
+\subparagraph{Stencil Pattern} \begin{list}{}{}
+	\item In partially overlapping position, e.g. of a matrix or an image
+	\item Function $f($item$)$
+	\item $\forall$ $f($item$) \rightarrow$ isomorphic collection
+\end{list}
+Different kind of problems: overlapping positions will yield the new value, so we have to account for that.
+\subparagraph{"Google" mapreduce}
+\begin{list}{}{}
+	\item $\forall$ items
+	\item $f($item$) + \oplus($item$, $item$)$
+	\item Item
+\end{list}
+What I apply to each item is an $f$ that maps to $\langle$key, value$\rangle$ and $\oplus$ applies the sum to each value.\\
+For example in a document, $f($word$)=\langle w,1\rangle$ and $\oplus(\langle w_k,v_1\rangle,\langle w_k,v_2\rangle) = \langle w_k, \oplus(v_1,v_2)\rangle$\\
+"The lesson given by the professor", $f$ will output $\langle$the, 1$\rangle,\langle$lesson, 1$\rangle$\ldots and $\oplus$ will for example output $\langle$the, 2$\rangle$.\\
+We can apply the map function over all the data distributed in various databases, for example.\\
+This is \texttt{map(f)} and \texttt{reduce($\oplus$)}, but we want something like \texttt{map(reduce($\oplus$))}. Combining elementary patterns to achieve more complex results. Like two nested \texttt{for}s.\\
+So I want building blocks, something that guarantees correctness of implementation that can be used to build upon. For example \texttt{map(function<A(B)>, collection<B>)}\\
+So build a bag of tools that we can combine to undertake common situations with good efficiency, speedup, scalability\ldots
+\subsection{Stream Parallel Patterns}
+Stream of data, flowing in time. In data parallel we process a data collection, while in stream parallel we don't have data appearing all at the same time. So stream as a collection with items appearing at different times. We want to take the single items and try to process in parallel, parallel execution of $f$ over different items of the stream.\\
+What matters is $T_S$
+\paragraph{Pipeline}
+\begin{center}
+	\includegraphics[scale=0.5]{3.png}
+\end{center}
+Inside the pipeline we have $f_1\rightarrow f_2\rightarrow\ldots\rightarrow f_k$ with each $f_i$ corresponding to a phase, with $f_i$ taking input from $f_{i-1}$.\\
+So $x_i\mapsto f_1(x_i)\mapsto f_2(f_1(x_i))\mapsto \ldots$, and the parallelism is in the computation of different phases of different items (much like what we've seen with the CPU fetch-decode-execute pipeline).
+\begin{center}
+	\includegraphics[scale=0.5]{4.png}
+\end{center}
+\paragraph{Farm}
+We have a number $nw$ of instances of the same function $f$ each processing one single item.
+\begin{center}
+	\includegraphics[scale=0.5]{5.png}
+\end{center}
+We have no interference between computations of $x_i,x_j$ with $i\neq j$, no need for synchronization.
+\paragraph{} $T_C \simeq m\cdot T_S$ and $T_S$ in sequential is $\simeq L$ this means that I can try to decrease the latency by decreasing the stages in the pipeline or the workers in a farm.
+\paragraph{Two Tier Model} Let's assume a grammar of patterns.\begin{list}{}{}
+	\item Pat = Seq(f) $|$ DPP $|$ SPP
+	\item DPP = Map(Pat) $|$ Reduce(Pat)
+	\item SPP = Farm(Pat) $|$ Pipe(Pat, Pat)
+\end{list}
+This defines parallel computations and we aim at assuring that this can be done, a way of implementing this. So\begin{list}{}{}
+	\item Map(Pipe(Seq(f), Seq(g)))
+\end{list}
+can be a data parallel computation where on the single item we compute a 2-stages pipeline of $f$ and $g$. But each element of the map is given to a single pipeline, or each pipeline receives a single item, so the stream parallelism is useless.
+\begin{list}{}{}
+	\item Farm(Map(Seq(f)))
+\end{list}
+Here we have a stream of items that will be processed by a Farm, each item splitted by Map and processed. This can deliver the result faster and access the next item.\\
+So Data parallel with Stream parallel is not very good, Stream parallel with Data parallel is better: \textbf{two tier model}.\\
+So we have an initial part of the pattern which is Stream Parallel, the second part is Data Parallel and eventually the last stages (the leafs of the tree) which are sequential.
+\subsection{Parallel Design Patterns}
+Also called \textbf{algorithm skeletons}: programming abstraction that model some pattern. The programmer has a framework, libraries, languages and that includes algorithm abstractions.
 \end{document}
