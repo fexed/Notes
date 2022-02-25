@@ -319,4 +319,125 @@ With an irreversible classical circuit of depth $T$ and space $S$, the reversibl
 Well-known sets are \{AND, OR, NOT\}\ldots \\ %TODO 
 NAND and NOR gates have the \textbf{functional completeness} assuming unlimited unlimited fanout (a gate can be connected to unlimitedely many nodes).\\\\
 \textbf{Toffoli gate} is universal for classical reversible computation. We need to add \textbf{ancillary} (extra) bits that can be initialized to 0 or 1 as required.
+\section{Complex Numbers}
+A field that can be represented in a 2D space.
+$$z = a + ib$$ with $a,b \in R$ and $i^2 = -1$, that can be represented in a plot with $Re(z) = a$ on $x$ axis and $Im(z) = b$ on $y$ axis (\textbf{cartesian form}).\\
+Can be expressed also as $$z = \rho(\cos\theta + i \sin\theta) = \rho \cdot e^{i\theta}$$ with $\rho$ being the distance from the origin and $\theta$ the angle (\textbf{polar form}). $\rho$ is called modulo and $e^{i\theta}$ is called phase (sometimes referring with that term to just $\theta$)
+$$|z|^2 = z\cdot z^* = a^2 + b^2 = \rho^2 = |z^*|$$
+$$z^* = \overline{z} = a-ib = \rho(\cos\theta - i\sin\theta) = \rho\cdot e^{-i\theta}$$
+with $\overline{z}$ called complex conjugate of $z$.
+\paragraph{Euler Identity} Let's prove the polar form. $e^z$ is a function from $C$ to $C$
+$$e^z = \sum_{k=0}^\infty = \frac{z^k}{k!}$$
+With $z\in C$, let's see with $z = ix$ and $x\in R$. We want to prove that
+$$e^{ix} = \cos x + i\sin x$$
+\pagebreak
+$$e^{ix} = \sum_{k=0}^\infty \frac{(ix)^k}{k!} = 1 + ix + \frac{i^2x^2}{2} + \frac{i^3x^3}{3!} + \ldots=$$
+Let's take the even powers, we have $i^2 = -1, i^4 = +1,\ldots$, and with the odd powers we can take out $i$ from the $\sum$
+$$= \sum_{k=0}^\infty \frac{(-1)^{k}x^{2k}}{(2k)!} + i\sum_{k=0}^\infty \frac{(-1)^k x^{2k+1}}{(2k+1)!} =$$
+These are the power series expansions of $\cos$ and $\sin$
+$$e^{ix}=\cos x + i \sin x$$
+This results in the Euler identity which puts together all the principle of math. The imaginary unit an two irrational number together with $1$ and $0$.
+$$e^{i\pi} + 1 = 0 \Leftrightarrow e^{i\pi} = -1$$
+\paragraph{Roots of Unity} Useful when we want to solve $z^n - 1 = 0$. We know that every polynomial has exactly $n$ roots in $C$\\
+Primitive $n$th root of 1
+$$\omega_n = e^{\frac{2\pi i}{n}} = \cos \frac{2\pi}{n} + i \sin\frac{2\pi}{n}$$
+So for example $\omega_3 = \cos\frac{2}{3}\pi + i\sin\frac{2}{3}\pi = \frac{1}{2}+i\frac{\sqrt{3}}{2}$ for $z^3 - 1 = 0$\\
+So they are counterclockwise on the unitary circle and also unitary roots are cyclic
+$$w_n^k = (\cos \frac{2\pi}{n} + i \sin\frac{2\pi}{n})^k = \cos\frac{2\pi}{n}k + i \sin\frac{2\pi}{n}k = \left(e^{\frac{2\pi i}{n}}\right)^k$$
+\begin{list}{}{}
+	\item $\omega_n^0 = 1$
+	\item $\omega_n^{n+k} = \omega_n^n \cdot \omega_n^k = \omega_n^k$
+	\item $\omega_n^{n-k} = \omega_n^n \cdot \omega_n^{-k} = \omega_n^{-k}$
+\end{list}
+Multiplication and division are easier in the polar form
+$$z_1\cdot z_2 = \rho_1\cdot\rho_2(\cos(\theta_1+\theta_2) + i\sin(\theta_1+\theta_2))$$
+$$\frac{z_1}{z_2} = \frac{\rho_1}{\rho_2}(\cos(\theta_1-\theta_2) + i\sin(\theta_1-\theta_2))$$
+$$z^n = \rho^n\cdot e^{in\theta}$$
+\subsection{Hilbert Spaces} For Quantum Computing only finite dimensional Hilbert spaces meaning complex vector spaces with an inner product.
+\paragraph{Definition} A quantum state space of a system is a vector space (complex) with inner product.\\
+For example, photon polarization: we have a basis and it's a 2-dimensional space. Base states are $|\updownarrow\rangle$ and $|\leftrightarrow\rangle$. We use half-spin patches, $|\uparrow\rangle$ spin up and $|\downarrow\rangle$ spin down.\\
+If we consider a 4-dimensional state space, we have $4$ vectors in the base:$|0\rangle$, $|1\rangle$, $|2\rangle$, $|3\rangle$ denoted with $$|v\rangle=\left(\begin{array}{c}
+v_0\\v_1\\v_2\\v_3
+\end{array}\right)$$ using the ket notation.
+\paragraph{Definition} A quantum state is a vector of unitary length in a quantum state space.\\
+So $\| |v\rangle\| = 1$, $\|v\|=\sqrt{(v,v)}$ with the inner product defined as
+$$(v,w)=\sum_{i=1}^{d-1}v_i^*\cdot w_i$$
+We can use the bra $$\langle v| = (v_0^*,\ldots,v_{d-1}^*)$$
+$$\langle v\:|\:w\rangle = (v,w)\in C$$
+or the ket-bra $$|v\rangle\langle w| = (v_iw_j^*)_{i,j}$$ giving a rank-one matrix.
+\paragraph{} For a system of 1 qubit we have as basis $$|0\rangle = \left(\begin{array}{c}
+1\\0
+\end{array}\right), |1\rangle=\left(\begin{array}{c}
+0\\1
+\end{array}\right)$$ but we can also denote this as $|\uparrow\rangle$ and $|\downarrow\rangle$ and denote as $$|\rightarrow\rangle = \frac{|\uparrow\rangle + |\downarrow\rangle}{\sqrt{2}}$$
+$$|\leftarrow\rangle = \frac{|\uparrow\rangle - |\downarrow\rangle}{\sqrt{2}}$$
+as spin-right and spin-left.\\
+We can define spin-in ("in the board")
+$$|\otimes\rangle = \frac{|\uparrow\rangle + i|\downarrow\rangle}{\sqrt{2}}$$
+and spin-out ("out of the board")
+$$|\bullet\rangle = \frac{|\uparrow\rangle - i|\downarrow\rangle}{\sqrt{2}}$$
+Multiplying a quantum state bu a global phase ($e^{i\theta}$) we do not change the nature of the quantum state. A global phase is a quantity that multiply all the components of the basis vector.
+$$|\rightarrow\rangle = \frac{|\uparrow\rangle + |\downarrow\rangle}{\sqrt{2}} \neq \frac{|\uparrow\rangle + i|\downarrow\rangle}{\sqrt{2}} = |
+\otimes\rangle$$
+In the above case, $i$ is a relative phase.
+\paragraph{Bloch Sphere} %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{11.png}
+\end{center}
+\paragraph{Pauli Matrices} $$X = \sigma_x = \left(\begin{array}{c c}
+0&1\\1&0
+\end{array}\right)$$
+$$\sigma_x|0\rangle = \left(\begin{array}{c c}
+0&1\\1&0
+\end{array}\right)\cdot\left(\begin{array}{c}
+1\\0
+\end{array}\right) = \left(\begin{array}{c}
+0\\1
+\end{array}\right) =|1\rangle$$
+It reflects the points along the $x$ axis. The same goes for $\sigma_x|1\rangle = |0\rangle$.\\
+So for the points on the $x$ axis stay almost the same.
+$$|\rightarrow\rangle = \frac{|0\rangle + |1\rangle}{\sqrt{2}} = \frac{1}{\sqrt{2}}\left(\begin{array}{c}
+1\\1
+\end{array}\right)$$
+$$\sigma_x|\rightarrow\rangle = \frac{1}{\sqrt{2}}\left(\begin{array}{c}
+1\\1
+\end{array}\right)$$
+The $y$ axis Pauli matrix is $$Y = \sigma_y = \left(\begin{array}{c c}
+0&-i\\i&0
+\end{array}\right) = -i|0\rangle\langle1| + i |1\rangle\langle0|$$
+and the last is $$Z = \sigma_z = \left(\begin{array}{c c}
+1&0\\0&-1
+\end{array}\right) = |0\rangle\langle0| - |1\rangle\langle1|$$
+\subparagraph{Theorem} The three Pauli matrices anticommutes
+$$\sigma_i\sigma_j = -\sigma_j\sigma_i$$
+for $i,j\in\{x,y,z\}$ and $i\neq j$\\
+Also $\sigma_i^2 = I$
+\paragraph{Hadamard Matrix} Another important matrix, used for building entangled states.
+$$H=\frac{1}{\sqrt{2}}\left(\begin{array}{c c}
+1&1\\1&-1
+\end{array}\right)$$
+It allow to move from the canonical basis to the right-left basis (also known as +- basis).
+$$H|0\rangle = \frac{1}{\sqrt{2}}\left(\begin{array}{c}
+1\\1
+\end{array}\right) = |\rightarrow\rangle = |+\rangle$$
+$$H|1\rangle = \frac{1}{\sqrt{2}}\left(\begin{array}{c}
+1\\-1
+\end{array}\right) = |\leftarrow\rangle = |-\rangle$$
+Also $H^2 = I$, $H^{-1} = H$ so $|0\rangle\mapsto_H |+\rangle$ and $|+\rangle\mapsto_H |0\rangle$ same with $|1\rangle$ and $|-\rangle$, "back and forth".\\
+$$H|\otimes\rangle = \frac{1}{\sqrt{2}}\left(\begin{array}{c c}
+1&1\\1&-1
+\end{array}\right)\left(\begin{array}{c}
+\frac{1}{\sqrt{2}}\\\frac{1}{\sqrt{2}}i
+\end{array}\right) = |\bullet\rangle$$
+\paragraph{Other common single qubit gates} Already mentioned $X,Y,Z,H$\begin{list}{}{}
+	\item $I = \left(\begin{array}{c c}
+	1&0\\0&1
+	\end{array}\right)$
+	\item $S = \left(\begin{array}{c c}
+	1&0\\0&e^{i\frac{\pi}{2}}
+	\end{array}\right)$
+	\item $T = \left(\begin{array}{c c}
+	1&0\\0&e^{i\frac{\pi}{4}}
+	\end{array}\right)$
+\end{list}
 \end{document}
