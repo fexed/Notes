@@ -108,11 +108,11 @@ Can be used to subtract mean from values and "standardize" the two series.
 $$\hat\gamma_x(\tau) = \frac{1}{N}\sum_{t=1}^{N-|\tau|} (x_{t+|\tau|}-\hat\mu)(x_t - \hat\mu)$$
 \paragraph{Autocorrelation} The correlation of a signal with itself. $$\hat\rho_x(\tau)=\frac{\hat\gamma_x(\tau)}{\hat\gamma_x(0)}$$
 We can compute this with every possible $\tau$, finding the max/min which gives the $\tau$ where the autocorrelation is max/min, which means the lag where the signal starts repeating itself. The lags near zero typically dominates, so we want the maximum lag reasonably far from 0.
-\subparagraph{Autocorrelation plot} %TODO
+\subparagraph{Autocorrelation plot} It's a revealing view on time series statistics.
 \paragraph{Cross-Correlation} A measure of similarity of x$_1$ and x$_2$ as a function of a time lag $\tau$ $$\phi_{\hbox{x}_1\:\hbox{x}_2}(\tau)=\sum_{t = \max\{0,\tau\}}^{\min\{(T_1 - 1 + \tau), (T_2 - 1)\}} \hbox{x}_1(t-\tau)\cdot \hbox{x}_2(t)$$
-\subparagraph{Normalized cross-correlation} Returns an amplitude independent value %TODO
-$$\overline{\phi}_{\hbox{x}_1\:\hbox{x}:2}(\tau) = \frac{\phi_{\hbox{x}_1\:\hbox{x}:2}}{\hbox{\texttt{todo}}} \in [-1,+1]$$
-With $\overline{\phi}_{\hbox{x}_1\:\hbox{x}:2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
+\subparagraph{Normalized cross-correlation} Returns an amplitude independent value
+$$\overline{\phi}_{\hbox{x}_1\:\hbox{x}_2}(\tau) = \frac{\phi_{\hbox{x}_1\:\hbox{x}_2}}{\sqrt{\sum_{t=0}^{T_1-1}(x_1(t))^2\cdot\sum_{t=0}^{T_2-1}(x_2(t))^2}} \in [-1,+1]$$
+With $\overline{\phi}_{\hbox{x}_1\:\hbox{x}_2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
 Note that we measure \textbf{linear correlation}.\\\\
 Cross correlation looks like the convolution $$(f * g)[n]=\sum_{t=-M}^M f(n-t)g(t)$$ but we have a flipped sign ($n-t$ instead of $t-\tau$).\\
 Cross-correlation is not symmetric, whereas convolution is ($f * g = g * f$).
@@ -132,16 +132,17 @@ Estimation of the $\alpha$, $\beta$ is performed with the Levinson-Durbin Recurs
 The order is often estimated with a Bayesian model selection criterion, choosing the largest $K$ and $Q$ possible. E.g.: BIC, AIC\ldots\\
 The set of autoregressive parameters $\alpha_{i,1},\ldots,\alpha_{i,K}$ fitted to a specific time series x$_i$ is used to confront it with other time series. Same thing for $\beta$ so we can use $\alpha$ for both sets.
 \paragraph{Comparing time series by AR}\begin{list}{}{}
-	\item timeseries clustering %TODO
-	\item novelty/anomaly detection %TODO
+	\item timeseries clustering: $d(\hbox{x}_1,\hbox{x}_2)=\|\alpha_1-\alpha_2\|_M^2$
+	\item novelty/anomaly detection: $\hbox{TestErr}(x_t,\hat{x}_t)<\xi$ with $\hat{x}_t$ being the AR predicted value.
 \end{list}
 \subsubsection{Spectral Domain Analysis}
 Analyze the time series in the frequency domain. Key idea: decomposing the time series into a linear combination of sines and cosines with random and uncorrelated coefficients. So a \textbf{regression on sinusoids} with Fourier analysis.
 \paragraph{Fourier Transform} Discrete Fourier Transform (DFT): transform a time series from the time domain to the frequency domain. Can be easily inverted back to the time domain.\\
 Useful to handle periodicity in the time series: seasonal trends, cyclic processes\ldots
-\paragraph{Representing functions} We know that, given an orthonormal system for $E$ we can use linear combinations of the basis $\{e_1,\ldots\}$ to represent any function $f\in E$ $$\sum_{k=1}^\infty \langle f,e_k\rangle e_k$$
+\paragraph{Representing functions} We know that, given an orthonormal system for $E$ we can use linear combinations of the basis $\{e_1,\ldots,e_k\}$ to represent any function $f\in E$ $$\sum_{k=1}^\infty \langle f,e_k\rangle e_k$$
 Given the orthonormal system $$\{\frac{1}{\sqrt{2}}, \sin(x),\cos(x),\sin(2x),\cos(2x),\ldots\}$$
-The linear combination above becomes the Fourier series \texttt{todo} %TODO
+then the linear combination above becomes the Fourier series 
+$$\frac{a_0}{2}+\sum_{k=1}^\infty\left(a_k\cos(kx)+b_k\sin(kx)\right)$$
 \paragraph{Representing function in Complex space} Using $\cos(kx)-i\:\sin(kx) = e^{-ikx}$ with $i=\sqrt{-1}$ we can rewrite the Fourier series as $$\sum_{k=-\infty}^\infty c_k e^{ikx}$$
 on the orthonormal system $$\{1,e^{ix},e^{-ix},e^{2ix},e^{-2ix},\ldots\}$$
 \paragraph{Representing Discrete Time Series} Consider x of length $N$ and $x_n\in R$. Using the exponential formulation, the orthonormal system is finite, from $e_0$ to $e_{N-1}$ each $\in C^N$\\
@@ -151,7 +152,7 @@ And can be inverted $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}
 \paragraph{Basic Spectral Quantities in SFT}
 \begin{list}{}{}
 	\item Amplitude $A_k = |X_k| = \sqrt{Re^2(X_k)+Im^2(X_k)}$
-	\item Power $P_k = \frac{|X_k|^2}{N}$, more used in reality and under some conditions this is a reasonable estimate of %TODO
+	\item Power $P_k = \frac{|X_k|^2}{N}$, more used in reality and under some conditions this is a reasonable estimate of the power spectral density
 \end{list}
 \paragraph{DFT in Action} We use the DFT elements $X_1,\ldots,X_K$ as representation of the signal to train the predictor/classifier.\\
 This representation can reveal patterns that are not clear in the time domain.
@@ -282,8 +283,13 @@ SIFT uses LoG.
 	\includegraphics[scale=0.5]{8.png}
 \end{center}
 \paragraph{MSER} Maximally Stable Extremal Regions\\
-Extract covariant regions (blobs) that are stable connected components of intensity sets of the image. Interesting areas stay the same at different threshold: stable with respect to variations in luminance, not scale dependent and doesn't assume circular regions. Key idea\ldots %TODO
-Blobs generated (locally) by binarizing the image over a large number of thresholds %TODO
+Extract covariant regions (blobs) that are stable connected components of intensity sets of the image. Interesting areas stay the same at different thresholds: stable with respect to variations in luminance, not scale dependent and doesn't assume circular regions. The key idea is to \textbf{take the blobs} (\textbf{extremal regions}) \textbf{which are nearly the same through a wide range of intensity thresholds}.\\
+Blobs are generated (locally) by binarizing the image over a large number of thresholds:\begin{list}{}{}
+	\item Invariance to affine transformation of image intensities
+	\item Stability (they are stable on multiple thresholds)
+	\item Multi-scale (connected components are identified by intensity stability not by scale)
+	\item Sensitive to local lightning effects, shadows\ldots
+\end{list}
 \subparagraph{Intuitions on MSER} Generate frames from the image by thresholding it on all graylevels.\\
 Capture those regions that from a small seed of pixel grow to a stably connected region. Stability is assessed by looking at derivatives of region masks in time (most stable $\Rightarrow$ minima of connected region variation).
 \paragraph{Image Segmentation} The process of partitioning an image into a set of homogeneous pixels, hoping to match objects or their subparts.\\
@@ -350,7 +356,7 @@ Different classes of graphs:
 \end{center}
 \paragraph{Generate new knowledge} Complex data can be generated if the model is powerful enough to capture its distribution.
 \subsection{Probability Refresher}
-\texttt{todo} %TODO
+\texttt{todo}
 \subsubsection{Inference} Bayesian: consider all hypothesis weighted by their probabilities
 $$P(X\:|\:d)=\sum_i P(X\:|\:h_i)P(h_i\:|\:d)$$
 MAP (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
@@ -358,7 +364,10 @@ $$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H} P(d\:|\:h)P(h)$$
 ML assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(d\:|\:h)$$
 Any probability can be obtained from the Joint Probability Distribution $P(X_1,\ldots,X_n)$ by marginalization but at an exponential cost (e.g. $2^{n-1}$ for a marginal distribution from binary RV)
 \subsection{Graphical Models}
-Compact graphical representation for exponentially large joint distribution: simplifies marginalization and inference algorithms %TODO
+Compact graphical representation for exponentially large joint distributions: simplifies marginalization and inference algorithms, allowing to \textbf{incorporate prior knowledge} concerning causal relationships and associations between random variables.\begin{list}{}{}
+	\item Directed graphical models (Bayesian Networks)
+	\item Undirected graphical models (Markov Random Fields)
+\end{list}
 \subsubsection{Bayesian Networks} 
 \begin{multicols}{2}
 Directed Acyclic Graphs (DAG) $G = (V,E)$\begin{list}{}{}
@@ -412,14 +421,14 @@ $$P(A\:|\:Mb(A), Z) = P(A\:|\:Mb(A))\:\:\forall\:Z\not\in Mb(A)$$
 \end{enumerate}
 Generate $i$th sample for each variable, example $s_i\simeq P(S)$, $h_i\simeq P(H\:|\:S=s_i)$
 \subsection{Fundamental Bayesian Network Structures}
-Three fundamental substructures that determine the conditional independence relationships in a Bayesian network. %TODO verify dependent/independent!!!!!
+Three fundamental substructures that determine the conditional independence relationships in a Bayesian network.
 \paragraph{Tail to Tail} Common cause \begin{center}
 	\includegraphics[scale=0.75]{20.png}
 \end{center}
 $$P(Y_1,Y_3\:|\:Y_2)=P(Y_1\:|\:Y_2)P(Y_3\:|\:Y_2)$$
 If $Y_2$ is unobserved, then $Y_1,Y_3$ are marginally dependent $Y_1\not\perp Y_3$\\
 If $Y_2$ is observed, $Y_1,Y_3$ become conditionally independent $Y_1\perp Y_3\:|\:Y_2$ (the path between $Y_1,Y_3$ is blocked by the observed (shaded) $Y_2$)
-\paragraph{Head to Tail} \begin{center}
+\paragraph{Head to Tail} Causal Effect \begin{center}
 	\includegraphics[scale=0.75]{21.png}
 \end{center}
 $$P(Y_1,Y_3\:|\:Y_2)=P(Y_1)P(Y_2\:|\:Y_1)P(Y_3\:|\:Y_2)=P(Y_1\:|\:Y_2)P(Y_3\:|\:Y_2)$$
