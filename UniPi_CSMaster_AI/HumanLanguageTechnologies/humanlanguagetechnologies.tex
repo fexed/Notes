@@ -159,7 +159,11 @@ def gentext(cpd, word, length=20):
 		print(word, end = ' ')
 	print("")
 \end{lstlisting}
-\paragraph{Perils of Overfitting} %TODO
+\paragraph{Perils of Overfitting} N-grams only word well for word prediction if the test corpus looks like the training corpus. In real life, this is often not the case.\\
+We need to train robust models able to adapt.
+\subparagraph{Smoothing} Many rare (but not impossible) combinations of word sequences never occur in training, so MLE incorrectly assigns zero to many parameters (sparse data).\\
+If a new combination occurs during testing, it is given a probability of zero and the entire sequence gets a probability of zero (infinite perplexity).\\
+Parameters are \textbf{smoothed}/regularized to reassign some probability mass to unseen events (meaning removing probability from seen ones in order to maintain the joint distribution that sums to 1)
 \paragraph{Zipf's Law} A small number of events occur with high frequency, while a large number of events occur with small frequency. You can quickly collect statistics on the high frequency events, but you may have to wait an arbitrarily long time to get valid statistics on low frequency events.\\
 The result is that our estimates are sparse. No counts at all for the vast bulk of things we want to estimate. Some of the zeroes in the table are really zeroes, but others are simply low frequency events you haven't seen yet: after all, anything can happen. How to address? By estimating the likelihood of unseen N-grams.
 \begin{center}
@@ -171,7 +175,12 @@ The result is that our estimates are sparse. No counts at all for the vast bulk 
 \end{center}
 \subsection{Evaluation and Perplexity}
 \paragraph{Evaluation} Train parameters of our model on a training set. For the evaluation, we apply the model on new data and look at the model's performance: \textbf{test set}. We need a metric which tells us how well the model is performing: one of such is \textbf{perplexity}.
-\paragraph{Extrinsic Evaluation} Evaluating N-gram models. Put model A in a task (language identification, speech recognizer, machine translation system\ldots) %TODO
+\paragraph{Extrinsic Evaluation} Evaluating N-gram models.\begin{list}{}{}
+	\item Put model A in a task (language identification, speech recognizer, machine translation system\ldots)
+	\item Run the task, get an accuracy for $A$
+	\item Put model B in the task, get accuracy for B
+	\item Compare the accuracies
+\end{list}
 \paragraph{Language Identification Task} Build a model for each language and compute probability that text is of such language.
 $$lang = arg\max_l P_l(text)$$
 \paragraph{Difficulty of Extrinsic Evaluation} Extrinsic evaluation is time-consuming, can take days to run an experiment. Recent benchmarks like GLUE have become popular due to the effectiveness.\\
@@ -347,14 +356,22 @@ For example: positive/negative review identification, author identification, spa
 	\item $C=\{c_1,\ldots,c_K\}$ set of classes
 	\item $c\in C$ predicted class as output
 \end{list}
-The learning has
+The learner has
 \begin{list}{}{}
-	\item Input %TODO
-	\item Output %TODO
+	\item Input: a set of $N$ hand-labeled documents $T=\{(d_1,c_1),\ldots,(d_N,c_N)\}$
+	\item Output: a learned classifier $f:D\rightarrow C$
 \end{list}
 \begin{center}
 	\includegraphics[scale=0.5]{9.png}
 \end{center}
-\paragraph{Hand-Coded Rules} Often very high accuracy, but building and maintaining this rules is expensive.
-\paragraph{Supervised Machine Learning} %TODO
+\paragraph{Hand-Coded Rules} Often very high accuracy, but building and maintaining these rules is expensive. For example: assign category if a document contains a given boolean combination of words (e.g. a blacklist of words for spam classification).
+\paragraph{Supervised Machine Learning} Input \begin{list}{}{}
+	\item A document $d\in D$
+	\item A fixed set of classes $C=\{c_1,\ldots,c_K\}$
+	\item A training set of $N$ hand-labeled documents $T=\{(d_1,c_1),\ldots,(d_N,c_N)\}$
+\end{list}
+As output\begin{list}{}{}
+	\item A learned classifier $\gamma : D \rightarrow C$
+\end{list}
+\subsection{Naive Bayes Intuition}
 \end{document}
