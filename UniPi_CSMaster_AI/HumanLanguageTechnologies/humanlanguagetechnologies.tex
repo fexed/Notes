@@ -374,33 +374,45 @@ As output\begin{list}{}{}
 	\item A learned classifier $\gamma : D \rightarrow C$
 \end{list}
 \subsection{Naive Bayes}
-%TODO
+A method based on the Bayes rule, relying on simple document representation (bag of words)
+\paragraph{Bag of words representation} From a text, we count the frequency of each word.
+\paragraph{Bayes Rule} Allows to swap the conditioning, useful because sometimes is easier estimating one kind of dependence than the other. $$P(B\:|\:A)=\frac{P(A\:|\:B)P(B)}{P(A)}$$
+Applied to documents $d\in D$ and classes $c\in C$
+$$P(c,d) = P(c\:|\:d)P(d) = P(d\:|\:c)P(c)$$
+$$P(c\:|\:d) = \frac{P(d\:|\:c)P(c)}{P(d)}$$
+\paragraph{Text classification problem} Using a supervised learning method, we want to learn a classifier $\gamma:X\rightarrow C$. The supervised learning method is denoted with $\Gamma(T)=\gamma$: it takes the training set $T$ as input and returns the learned classifier $\gamma$ that can be applied to the test set.
 \subsubsection{Naive Bayes Classifiers}
 We represent an instance $D$ based on some attributes $D=(x_1,\ldots, x_n)$\\Task: classify a new instance $D$ based on a tuple of attribute values into one of the calsses $c_j\in C$
-$$C_{MAP}=\arg\max_{c_j\in C} P(x_1,\ldots,x_n\:|$$%TODO
-\subsubsection{Naive Bayes Assumption}
+$$C_{MAP}=\arg\max_{c_j\in C} P(x_1,\ldots,x_n\:|\:c_j)P(c_j)$$
+\paragraph{Naive Bayes Assumption}
 \begin{list}{}{}
 	\item $P(c_j)$ can be estimated from the frequency of classes in the training examples
-	\item $P(x_1,\ldots,x_n\:|\:c_j)$ %TODO
+	\item $P(x_1,\ldots,x_n\:|\:c_j)$ has $O(|X|^n\cdot |C|)$ parameters and could only be estimated if a very very large number of training examples was available.
 \end{list}
-The assumption is: features are independent of each other given the class
+The \textbf{Naive Bayes Conditional Independence Assumption} is to assume that the probability of observating the conjunction of attributes is equal to the product of the individual probabilities $P(x_i\:|\:c_j)$. This means that features are independent of each other given the class
 $$P(x_1,\ldots,x_n\:|\:c_j) = P(x_1\:|\:c_j)\cdot\ldots\cdot P(x_n\:|\:c_j)$$
 \subsubsection{Multinomial Naive Bayes Text Classification}
 $$C_B = \arg\max_{c_j\in C}P(c_j)\prod_i P(x_i\:|\:x_j)$$
 Still too many possibilities. Assume the classification is independent of the position of the words, and use the same parameters for each position. The result is a \textbf{bag of words model} (over tokens, not types).
 \paragraph{Learning the Model} Maximum likelihood estimate: simply use the frequencies in the data
-%TODO formula
+$$\hat{P}(c_j)=\frac{\hbox{doccount}(C = c_j)}{\hbox{doccount}(T)}$$
+$$\hat{P}(x_i\:|\:x_j) = \frac{\hbox{count}(X_i = x_i, C = c_j)}{\hbox{count}(C = c_j)}$$
 Zero probabilities cannot be conditioned away, no matter the other evidence!
 $$l = \arg\max_c \hat{P}(c)\prod_i \hat{P}(x_i\:|\:c)$$
-\paragraph{Smoothing to Avoid Overfitting} For example adding 1 to the counts so that it would never be zero (\textbf{Laplace}) %TODO formula
+\paragraph{Smoothing to Avoid Overfitting} For example adding 1 to the counts so that it would never be zero (\textbf{Laplace}) 
+$$\hat{P}(x_i\:|\:c_j) = \frac{\hbox{count}(X_i = x_i, C = c_j) + 1}{\hbox{count}(C = c_j) + k}$$
+with $k = \#$ values of $X_i$\\
 Other ways: for example Bayes Unigram Prior
+$$\hat{P}(x_{ik}\:|\:c_j)=\frac{\hbox{count}(X_i = x_{ik}, C = c_j) + mp_{ij}}{\hbox{count}(C = c_j) + m}$$
+With $mp_{ik}$ overall fraction in data where $X_i = x_{ik}$ and $m$ extent of "smoothing".
 \paragraph{Classifying} Return the most likely category for a given document$$C_{NB} = \arg\max_{c_j\in C} P(c_j)\prod_i P(w_i\:|\:c_j)$$
 \paragraph{Preventing Underflow} Log space\\
-Multiplying lots of prob can result in floatingpoint underfglw. It's better to perform computations by summing logs of provbabilities since log(xy) = logx+logy\\
-Class with highest final unnormalized log probability is still the moste probable %TODO formula
+Multiplying lots of prob can result in floating point underflow. It's better to perform computations by summing logs of probabilities since $\log(xy) = \log x+\log y$\\
+Class with highest final unnormalized log probability is still the most probable 
+$$C_{NB} = \arg\max_{c_j\in C}\log P(c_j) + \sum_i \log P(x_i\:|\:c_j)$$
+Note: the model is now just a max sum of weights.
 \paragraph{Generate} We can use naive bayes models to generate text, by using the probabilities of the words.
-\paragraph{Naive Bayes and Language Modeling} Not the same thing, in naive we want to generalize and can use any sort of features. But if we only use %TODO
-Each class corresponds to a unigram language model
+\paragraph{Naive Bayes and Language Modeling} Not the same thing, in naive we want to generalize and can use any sort of features. But if we only use word features and use all the words in a text, then Naive Bayes bears similarity to language modeling.
 \paragraph{Evaluating Categorization} Must be done on data independent of the training data. Accuracy is $\frac{c}{n}$ where $n$ is the total number of test instancens and $c$ in the number of instances correctly classiefied.
 \begin{center}
 	\includegraphics[scale=0.5]{10.png}
