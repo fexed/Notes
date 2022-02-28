@@ -373,5 +373,69 @@ The learner has
 As output\begin{list}{}{}
 	\item A learned classifier $\gamma : D \rightarrow C$
 \end{list}
-\subsection{Naive Bayes Intuition}
+\subsection{Naive Bayes}
+%TODO
+\subsubsection{Naive Bayes Classifiers}
+We represent an instance $D$ based on some attributes $D=(x_1,\ldots, x_n)$\\Task: classify a new instance $D$ based on a tuple of attribute values into one of the calsses $c_j\in C$
+$$C_{MAP}=\arg\max_{c_j\in C} P(x_1,\ldots,x_n\:|$$%TODO
+\subsubsection{Naive Bayes Assumption}
+\begin{list}{}{}
+	\item $P(c_j)$ can be estimated from the frequency of classes in the training examples
+	\item $P(x_1,\ldots,x_n\:|\:c_j)$ %TODO
+\end{list}
+The assumption is: features are independent of each other given the class
+$$P(x_1,\ldots,x_n\:|\:c_j) = P(x_1\:|\:c_j)\cdot\ldots\cdot P(x_n\:|\:c_j)$$
+\subsubsection{Multinomial Naive Bayes Text Classification}
+$$C_B = \arg\max_{c_j\in C}P(c_j)\prod_i P(x_i\:|\:x_j)$$
+Still too many possibilities. Assume the classification is independent of the position of the words, and use the same parameters for each position. The result is a \textbf{bag of words model} (over tokens, not types).
+\paragraph{Learning the Model} Maximum likelihood estimate: simply use the frequencies in the data
+%TODO formula
+Zero probabilities cannot be conditioned away, no matter the other evidence!
+$$l = \arg\max_c \hat{P}(c)\prod_i \hat{P}(x_i\:|\:c)$$
+\paragraph{Smoothing to Avoid Overfitting} For example adding 1 to the counts so that it would never be zero (\textbf{Laplace}) %TODO formula
+Other ways: for example Bayes Unigram Prior
+\paragraph{Classifying} Return the most likely category for a given document$$C_{NB} = \arg\max_{c_j\in C} P(c_j)\prod_i P(w_i\:|\:c_j)$$
+\paragraph{Preventing Underflow} Log space\\
+Multiplying lots of prob can result in floatingpoint underfglw. It's better to perform computations by summing logs of provbabilities since log(xy) = logx+logy\\
+Class with highest final unnormalized log probability is still the moste probable %TODO formula
+\paragraph{Generate} We can use naive bayes models to generate text, by using the probabilities of the words.
+\paragraph{Naive Bayes and Language Modeling} Not the same thing, in naive we want to generalize and can use any sort of features. But if we only use %TODO
+Each class corresponds to a unigram language model
+\paragraph{Evaluating Categorization} Must be done on data independent of the training data. Accuracy is $\frac{c}{n}$ where $n$ is the total number of test instancens and $c$ in the number of instances correctly classiefied.
+\begin{center}
+	\includegraphics[scale=0.5]{10.png}
+\end{center}
+\begin{center}
+	Contingency table\\
+	\includegraphics[scale=0.5]{11.png}
+\end{center}
+\paragraph{Micro vs Macro Averaging} Macro: performance for each class.\\
+Micro: decision for all classes, compute contingecy table and evaluate
+\paragraph{Multiclass Classification} More than 2 class, a binary classifier to dinstiguish belongin to a class and \textit{not belonging} to it.
+\paragraph{Training Size} The more the better, usually.
+\paragraph{Violation of Naive Bayes Assumptions} Conditional and positional independence.\\
+Naive Bayss is not so naive. Among state of the art algorithms, being robust to irrelevant features (cancel each others). A good baseline for text classification, but not the best.\\
+Optimal if the independence assumptions hold. Also is very fast, low storage requirements and \textbf{online learning algorithm} (incremental training, on new examples).
+\paragraph{Example: SpamAssassin} Naive Bayes widely used in spam filtering.
+\section{•}
+\paragraph{Regular Expressions}
+Formal language for specifying text strings. Letters inside square brackets, or specified ranges, like [] and [A-Z], or negations.
+\paragraph{Tokenization} To do before analysis, for information retrieval and extraction, and spell-checking. Three tasks:\begin{enumerate}	
+	\item Segmenting/tokenizing words in running text
+	\item Normalizing word formats
+	\item Segmenting sentences in running text
+\end{enumerate}
+\subparagraph{What's a Word?} Not easy. Babbling, in spoken language, or "are \textit{cat} and \textit{cats} the same word?".\\
+Terminology:
+\begin{list}{}{}
+	\item \textbf{Lemma}: a set of lexical forms having the same stem, major part of speect, and rough word sense. What you would find in a dictionary.\\
+	\textit{Cat} and \textit{cats} = same lemma
+	\item \textbf{Wordform}: full inflected surface form.\\
+	\textit{Cat} and \textit{cats} = different wordform
+	\item \textbf{Type}/Form: element of the vocabulary
+	\item \textbf{Token} %TODO
+\end{list}
+How many words? $N$ tokens and $V$ vocabulary, set of types (of size $|V|$)\\$|V|>O(N^{\frac{1}{2}})$\\
+Google N-grams has $N = 1$ trillion and $|V| = 13$ million.
+
 \end{document}
