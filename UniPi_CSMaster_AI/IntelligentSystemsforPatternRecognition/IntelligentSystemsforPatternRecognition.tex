@@ -447,31 +447,38 @@ Given the same distribution I can have two different Bayesian Networks, which im
 \begin{center}
 	\includegraphics[scale=0.5]{23.png}
 \end{center}
-\paragraph{$d$-separation} Let $r = Y_1\leftrightarrow\ldots\leftrightarrow Y_2$ be un undirected path between $Y_1,Y_2$, $r$ is $d$-separated by $Z$ if there exist at least one node $Y_c\in Z$ for which path $r$ is blocked. With $Z$ being the set of variable for which we're assessing this separation.\\
-So it holds if at least one of the following holds:\begin{list}{}{}
-	\item $r$ contains an head-to-tail structure $Y_i\rightarrow Y_c\rightarrow Y_j$ and $Y_c \in Z$
+\paragraph{$d$-separation} Let $r = Y_1\leftrightarrow\ldots\leftrightarrow Y_2$ be an undirected path between $Y_1,Y_2$, $r$ is $d$-separated by $Z$ if there exist at least one node $Y_c\in Z$ for which path $r$ is blocked. With $Z$ being the set of variable for which we're assessing this separation.\\
+In other words, this holds if at least one of the following holds:\begin{list}{}{}
+	\item $r$ contains an head-to-tail structure $Y_i\rightarrow Y_c\rightarrow Y_j$ (or $Y_i\leftarrow Y_c\leftarrow Y_j$) and $Y_c \in Z$
 	\item $r$ contains a tail-to-tail $Y_i\leftarrow Y_c\rightarrow Y_j$ and $Y_c \in Z$
-	\item $r$ contains head-to-head $Y_i\leftarrow Y_c\leftrightarrow Y_j$ and neither $Y_c$ nor its descendants are in $Z$
+	\item $r$ contains head-to-head $Y_i\rightarrow Y_c\leftarrow Y_j$ and neither $Y_c$ nor its descendants are in $Z$
 \end{list}
-Two nodes $Y_i,Y_j$ in a BN $G$ are $d$-separated by $Z\subset V$ if and only if all undirected paths between $Y_i,Y_j$ are $d$-separated by $Z$ (denoted by $Dsep_F(Y_i,Y_j\:|\:Z)$
-\paragraph{Markov Blanket} The Markov Blanket $Mb(Y)$ is the minimal set of nodes which $d$-separates a node $Y$ from all other nodes (i.e. makes $Y$ conditionally independent %TODO
-\paragraph{Are Directed Models Enough?} Bayesian Networks are used to model asymmetric dependencies. But the answer is no, Directed Models cannot express all conditional dependence relationships: expressing some precludes the expressions of others.\\
-What if we want to model symmetric dependencies: bidirectional effects, spatial dependencies... need undirected approaches. Directed models cannot represent some bidirectional dependencies in the distributions.
-%TODO the examples
+Two nodes $Y_i,Y_j$ in a Bayesian Network $G$ are $d$-separated by $Z\subset V$ $\Leftrightarrow$ all undirected paths between $Y_i,Y_j$ are $d$-separated by $Z$ (denoted by $\hbox{Dsep}_G(Y_i,Y_j\:|\:Z)$)
+\paragraph{Markov Blanket} The Markov Blanket $Mb(Y)$ is the minimal set of nodes which $d$-separates a node $Y$ from all other nodes (i.e. makes $Y$ conditionally independent of all other nodes in the Bayesian Network)
+$$Mb(Y) = \{\hbox{Parents}(Y), \hbox{Children}(Y), \hbox{Parents}(\hbox{Children}(Y))\}$$
+\paragraph{Are Directed Models Enough?} Bayesian Networks are used to model asymmetric dependencies. But Directed Models cannot express all conditional dependence relationships: expressing some precludes the expressions of others.\\
+What if we want to model symmetric dependencies: bidirectional effects, spatial dependencies... we need \textbf{undirected approaches}. Directed models cannot represent some bidirectional dependencies in the distributions.
 \subsection{Markov Random Fields}\begin{center}
 	\includegraphics[scale=0.5]{24.png}
 \end{center}
-What is the undirected equivalent of $d$-separation in directed models? It's based on node separation: the two nodes in the middle separate the two parts.\\
-Node subsets $A,B\subset V$ are conditionally independent given $C\subset V\setminus \{A,B\}$ if all paths %TODO
-\paragraph{Joint Probability Factorization} What is the undirected equivalent? We seek a product of functions defined over a set of nodes associated with some local properties of the graph. Markov blanket tells that nodes that are not neighbors are conditionally independent given the remainer of the nodes. %TODO
-\subparagraph{Clique} Subset of nodes that contain an edge between all pair of nodes. Maximal if you cannot add more nodes.
-\paragraph{Maximal Clique Factorization} Define $X = X_1,\ldots,X_n$ as the random variables associated to the $N$ nodes of the undirected graph $G$ $$P(X)=\frac{1}{Z}\prod_C \psi(X_C)$$
-$X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the potential function over the maximal clique $C$ and $Z$ is the partition function ensuring normalization.
-$$Z = $$ %TODO
-Potential functions are not probabilities, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=1$ if $X_1 = X_2$, 4 if $x_2 = 2X_1$ and $0$ otherwise %TODO format
-You can hand-engineer feature functions.\\
-If we restrict to strictly positive potential function the Hammersley-Clifford theorem provides guarantees on the distribution that can be repreesented by the clique factorization.
-\paragraph{Boltzmann Distribution} A conven%TODO
+What is the undirected equivalent of $d$-separation in directed models? It's based on node separation: the two nodes in the middle separate the two lateral parts.\\
+Node subsets $A,B\subset V$ are conditionally independent given $C\subset V\setminus \{A,B\}$ if all paths between nodes in $A$ and $B$ pass through at least one of the nodes in $C$.\\
+The Markov Blanket of a node includes all and only its neighbors.
+\paragraph{Joint Probability Factorization} What is the undirected equivalent? We seek a product of functions defined over a set of nodes associated with some local properties of the graph. Markov blanket tells that nodes that are not neighbors are conditionally independent given the remainder of the nodes.$$P(X_v,X_i\:|\:X_{V\setminus\{v,i\}}) = P(X_v\:|\:X_{V\setminus\{v,i\}})P(X_i\:|\:X_{V\setminus\{v,i\}})$$
+Factorization should be chosen in a way that nodes $X_v$ and $X_i$ are not in the same factor: we use a well-known graph structure that includes only nodes that are pairwise connected.
+\subparagraph{Clique} Subset of nodes $C$ in graph $G$ such that $G$ contains an edge between all pair of nodes in $C$. It's maximal if you cannot add more nodes.
+\subparagraph{Maximal Clique Factorization} Define $X = X_1,\ldots,X_n$ as the random variables associated to the $N$ nodes of the undirected graph $G$ $$P(X)=\frac{1}{Z}\prod_C \psi(X_C)$$
+$X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the \textbf{potential function} over the maximal clique $C$ and $Z$ is the partition function ensuring normalization.
+$$Z = \sum_X\prod_C\psi(X_C)$$
+The partition function $Z$ is the computational bottleneck of undirected modes: $O(K^N)$ for $N$ discrete random variables with $K$ distinct values.
+\paragraph{Potential Functions} Potential functions $\psi(X_C)$ are not probabilities, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=\left\{ \begin{array}{l l}
+1&\hbox{if }X_1 = X_2\\
+4&\hbox{if }X_2 = 2X_1\\
+0&\hbox{otherwise}
+\end{array}\right.$: you can hand-engineer feature functions.\\
+If we restrict to strictly positive potential functions, the Hammersley-Clifford theorem provides guarantees on the distribution that can be repreesented by the clique factorization.
+\paragraph{Boltzmann Distribution} A convenient and widely used strictly positive representation of the potential function is $$\psi(X_C)=e^{-E(X_C)}$$
+where $E(X_C)$ is called \textbf{energy function}.
 \subsubsection{From Directed to Undirected}
 Straightforward when is linear.\\Requires some work with v-structures, e.g. \textbf{moralization} (a.k.a. marrying of the parents).\begin{center}
 	\includegraphics[scale=0.5]{25.png}
@@ -487,8 +494,8 @@ Straightforward when is linear.\\Requires some work with v-structures, e.g. \tex
 \end{list}
 Determining causal relationships between variables entails deciding on arc presence and directing edges.
 \subparagraph{Structure Finding Approaches}\begin{list}{}{}
-	\item \textbf{Search and Score}: model selection approach, a search in the space of the graphs
-	%TODO
+	\item \textbf{Search and Score}\\A model selection approach, a search in the space of the graphs.\\
+	Search the space Graph$(Y)$ of graphs $G_k$ that can be built on the random variables $Y = Y_1,\ldots,Y_N$, scoring each structure by $S(G_k)$ and returning the highest scoring graph $G^*$. So two fundamental aspects: the scoring function and the search strategy.\\
 	\textbf{Scoring function}: two fundamental properties:\begin{list}{}{}
 		\item Consistency: same score for graphs in the same equivalence class
 		\item Decomposability: can be locally computed
@@ -497,7 +504,7 @@ Determining causal relationships between variables entails deciding on arc prese
 		\item Information theoretic: based on data likelihood plus some model-complexity penalization terms
 		\item Bayesian: score the structures using a graph posterior (likelihood plus proper prior choice
 	\end{list}
-	Search strategy:\begin{list}{}{}
+	\textbf{Search strategy}:\begin{list}{}{}
 		\item Finding maximal scoring structures is NP complete
 		\item Constrain search strategy: starting from a candidate structure we modify iteratively by local operations (edge/node addition/deletion). Each operation has a cost, so a cost optimization problem.
 	\end{list}
@@ -506,9 +513,17 @@ Determining causal relationships between variables entails deciding on arc prese
 		\item Search in the space of structure equivalence classes
 		\item Search in the space of node ordering
 	\end{list}
-	\item \textbf{Constraint Based}: use tests of conditional independence, constraining the network
-	%TODO
-	\item \textbf{Hybrid}: model selection of constrained structures
+	\item \textbf{Constraint Based}\\
+	Tests of conditional independence $I(X_i,X_j\:|\:Z)$, constraining the network. Based on measures of association between two variables $X_i$ and $X_j$ given their neighbor nodes $Z$.\\
+	\textbf{Testing strategy}:\begin{list}{}{}
+		\item Choice of the testing order is fundamental in avoiding a super-exponential complexity.
+		\item Level-wise testing: tests $I(X_i,X_j\:|\:Z)$ are performed in order of increasing size of the conditioning set $Z$ starting from $Z = \emptyset$ (PC algorithm)
+		\item Node-wise testing: tests are performed on a single edge at the time, exhausting independence checks on all conditioning variables (TPDA algorithm)
+		\item The nodes entering $Z$ are chosen in the neighborhood of $X_i,X_j$
+	\end{list}
+	\item \textbf{Hybrid}\\
+	Model selection of constrained structures. Multi-stage algorithm combining previous approaches: independence tests to find a good sub-optimal skeleton as starting point, then search and score refining the skeleton.\\
+	Max-Min Hill Climbing (MMHC) model: optimized constraint-based approach to reconstruct the skeleton, using the candidate parents in the skeleton to run a search and score approach.
 \end{list}
 %TODO fine 1/03
 \end{document}
