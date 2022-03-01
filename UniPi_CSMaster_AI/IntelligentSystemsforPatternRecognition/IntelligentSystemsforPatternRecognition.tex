@@ -442,5 +442,73 @@ $$P(Y_1,Y_2,Y_3) = P(Y_1)P(Y_3)P(Y_2\:|\:Y_1,Y_3)$$
 If $Y_2$ is unobserved, then $Y_1,Y_3$ are marginally independent $Y_1\perp Y_3$\\
 If $Y_2$ is observed, then $Y_1,Y_3$ are conditionally dependent $Y_1\not\perp Y_3\:|\:Y_2$\\
 If any $Y_2$ descendants is observed it unlocks the path.
-\paragraph{Derived Conditional Independence Relationships} A Bayesian network represent the local relationship encoded by the 3 basic structures plus the derived relationships.
+\paragraph{Derived Conditional Independence Relationships} A Bayesian network represent the local relationship encoded by the 3 basic structures plus the derived relationships.\\\\
+Given the same distribution I can have two different Bayesian Networks, which implies the same factorization.
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+\paragraph{$d$-separation} Let $r = Y_1\leftrightarrow\ldots\leftrightarrow Y_2$ be un undirected path between $Y_1,Y_2$, $r$ is $d$-separated by $Z$ if there exist at least one node $Y_c\in Z$ for which path $r$ is blocked. With $Z$ being the set of variable for which we're assessing this separation.\\
+So it holds if at least one of the following holds:\begin{list}{}{}
+	\item $r$ contains an head-to-tail structure $Y_i\rightarrow Y_c\rightarrow Y_j$ and $Y_c \in Z$
+	\item $r$ contains a tail-to-tail $Y_i\leftarrow Y_c\rightarrow Y_j$ and $Y_c \in Z$
+	\item $r$ contains head-to-head $Y_i\leftarrow Y_c\leftrightarrow Y_j$ and neither $Y_c$ nor its descendants are in $Z$
+\end{list}
+Two nodes $Y_i,Y_j$ in a BN $G$ are $d$-separated by $Z\subset V$ if and only if all undirected paths between $Y_i,Y_j$ are $d$-separated by $Z$ (denoted by $Dsep_F(Y_i,Y_j\:|\:Z)$
+\paragraph{Markov Blanket} The Markov Blanket $Mb(Y)$ is the minimal set of nodes which $d$-separates a node $Y$ from all other nodes (i.e. makes $Y$ conditionally independent %TODO
+\paragraph{Are Directed Models Enough?} Bayesian Networks are used to model asymmetric dependencies. But the answer is no, Directed Models cannot express all conditional dependence relationships: expressing some precludes the expressions of others.\\
+What if we want to model symmetric dependencies: bidirectional effects, spatial dependencies... need undirected approaches. Directed models cannot represent some bidirectional dependencies in the distributions.
+%TODO the examples
+\subsection{Markov Random Fields}\begin{center}
+	\includegraphics[scale=0.5]{24.png}
+\end{center}
+What is the undirected equivalent of $d$-separation in directed models? It's based on node separation: the two nodes in the middle separate the two parts.\\
+Node subsets $A,B\subset V$ are conditionally independent given $C\subset V\setminus \{A,B\}$ if all paths %TODO
+\paragraph{Joint Probability Factorization} What is the undirected equivalent? We seek a product of functions defined over a set of nodes associated with some local properties of the graph. Markov blanket tells that nodes that are not neighbors are conditionally independent given the remainer of the nodes. %TODO
+\subparagraph{Clique} Subset of nodes that contain an edge between all pair of nodes. Maximal if you cannot add more nodes.
+\paragraph{Maximal Clique Factorization} Define $X = X_1,\ldots,X_n$ as the random variables associated to the $N$ nodes of the undirected graph $G$ $$P(X)=\frac{1}{Z}\prod_C \psi(X_C)$$
+$X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the potential function over the maximal clique $C$ and $Z$ is the partition function ensuring normalization.
+$$Z = $$ %TODO
+Potential functions are not probabilities, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=1$ if $X_1 = X_2$, 4 if $x_2 = 2X_1$ and $0$ otherwise %TODO format
+You can hand-engineer feature functions.\\
+If we restrict to strictly positive potential function the Hammersley-Clifford theorem provides guarantees on the distribution that can be repreesented by the clique factorization.
+\paragraph{Boltzmann Distribution} A conven%TODO
+\subsubsection{From Directed to Undirected}
+Straightforward when is linear.\\Requires some work with v-structures, e.g. \textbf{moralization} (a.k.a. marrying of the parents).\begin{center}
+	\includegraphics[scale=0.5]{25.png}
+\end{center}
+\subsection{Learning Causation from Data}
+\paragraph{Learning with Bayesian Network}
+\begin{center}
+	\includegraphics[scale=0.5]{26.png}
+\end{center}
+\paragraph{Structure Learning Problem} Observations are given for a set of fixed random variables, and network structure is not specified:\begin{list}{}{}
+	\item Determine which arcs exist in the network (causal relationships)
+	\item Compute Bayesian network parameters (conditional probability tables)
+\end{list}
+Determining causal relationships between variables entails deciding on arc presence and directing edges.
+\subparagraph{Structure Finding Approaches}\begin{list}{}{}
+	\item \textbf{Search and Score}: model selection approach, a search in the space of the graphs
+	%TODO
+	\textbf{Scoring function}: two fundamental properties:\begin{list}{}{}
+		\item Consistency: same score for graphs in the same equivalence class
+		\item Decomposability: can be locally computed
+	\end{list}
+	Two approaches:\begin{list}{}{}
+		\item Information theoretic: based on data likelihood plus some model-complexity penalization terms
+		\item Bayesian: score the structures using a graph posterior (likelihood plus proper prior choice
+	\end{list}
+	Search strategy:\begin{list}{}{}
+		\item Finding maximal scoring structures is NP complete
+		\item Constrain search strategy: starting from a candidate structure we modify iteratively by local operations (edge/node addition/deletion). Each operation has a cost, so a cost optimization problem.
+	\end{list}
+	Constrain search space can be\begin{list}{}{}
+		\item Known node order: can reduce the search space to the parents of each node (Markov Blankets)
+		\item Search in the space of structure equivalence classes
+		\item Search in the space of node ordering
+	\end{list}
+	\item \textbf{Constraint Based}: use tests of conditional independence, constraining the network
+	%TODO
+	\item \textbf{Hybrid}: model selection of constrained structures
+\end{list}
+%TODO fine 1/03
 \end{document}
