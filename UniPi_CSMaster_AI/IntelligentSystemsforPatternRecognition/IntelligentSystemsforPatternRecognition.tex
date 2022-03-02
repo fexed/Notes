@@ -556,5 +556,46 @@ $$\pi_i = P(S_1=i)$$
 S_t\\\downarrow\\Y_t
 \end{array}$)
 $$b_i(y_t) = P(Y_t = y_t\:|\:S_t = i)$$
-%TODO 2/03 2a parte
+\paragraph{HMM Joint Probability Factorization} Discrete state HMMs are parameterized by the finite number of hidden states $C$ and $\Theta = (\pi, A, B)$:
+\begin{list}{}{}
+	\item $\pi$ prior distribution
+	\item $A$ state transition
+	\item $B$ emission distribution (or its parameters)
+\end{list}
+$$P(Y = y) = \sum_s P(Y=y,S=s) =$$
+$$= \sum_{s_1,\ldots,s_T}\left( P(S_1=s_1)P(Y_1=y_1\:|\:S_1=s_1)\prod_{t=2}^T P(S_t=s_t\:|\:S_{t-1} = s_{t-1})P(Y_t=y_t\:|\:S_t=s_t)\right)$$
+\paragraph{HMMs as Recursive Models} A graphical framework describing how contextual information is recursiverly encoded by both probabilistic and neural models.
+\begin{center}
+	\includegraphics[scale=0.5]{28.png}
+\end{center}
+Indicates that the hidden state $S_t$ at time $t$ is dependent on context information from
+\begin{list}{}{}
+	\item the previous timestep $s^{-1}$, first-order
+	\item the previous two timesteps $s^{-1},s^{-2}$, second-order
+\end{list}
+and so on.
+\paragraph{HMMs as Automata} Can also be generalized to transducers.
+\begin{center}
+	\includegraphics[scale=0.5]{29.png}
+\end{center}
+\pagebreak
+\subsection{Notable Inference Problems}
+\paragraph{Smoothing} Given a model $\Theta$ and an observed sequence $y$, determine the distribution of the hidden state at time $t$: $P(S_t\:|\:Y=y,\Theta)$\\
+Forward Backwrd
+\paragraph{Learning} Given a dataset of $N$ sequences $D=\{y^1,\ldots,y^N\}$ and the number of hidden states $C$, find the parameters $\pi,A,B$ that maximize the probability model $\Theta = \{\pi,A,B\}$ having generated the sequences in $D$
+\paragraph{Optimal State Assigment} Given a model $\Theta$ and an observed sequence $y$, find an optimal state assignment $s = s_1^*,\ldots,s_T^*$ for the hidden Markov chain.\\
+Viterbi
+\subsubsection{Forward-Backward Algorithm} Smoothing: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$).\\
+I know $\Theta$, the model (its parameters). So I know $P(S_1) = \pi, P(S_t\:|\:S_{t-1} = A$ and $P(y_t\:|\:S_t) = B$: I need to express the quantity I want in terms of $\Theta=\{\pi,A,B\}$.\\
+$\hat{y}$ are all the observations for each timestep $\Rightarrow P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T)$
+$$S_1\rightarrow\ldots\rightarrow S_{t-1}\rightarrow S_t\rightarrow S_{t+1}\rightarrow\ldots\rightarrow S_T$$
+$$\downarrow\rightarrow\ldots\rightarrow \downarrow\rightarrow \downarrow\rightarrow \downarrow\rightarrow\ldots\rightarrow \downarrow$$ %TODO format
+$$y_1\rightarrow\ldots\rightarrow y_{t-1}\rightarrow y_t\rightarrow y_{t+1}\rightarrow\ldots\rightarrow y_T$$
+We are at time $t$, so everything after that is the future ($y_{t+1:T}$), and everything up to $t$ included is the past ($y_{1:t}$).
+$$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) P(S_t=i,y_{1:t})$$
+If I observe $S_T$ we block the path $y_{1:t}$
+\begin{list}{}{}
+	\item $\alpha = P(S_t=i,y_{1:t})$
+	\item $\beta = P(y_{t+1:T}\:|\:S_t=i)$
+\end{list}
 \end{document}
