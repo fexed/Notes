@@ -242,6 +242,41 @@ can be a data parallel computation where on the single item we compute a 2-stage
 Here we have a stream of items that will be processed by a Farm, each item splitted by Map and processed. This can deliver the result faster and access the next item.\\
 So Data parallel with Stream parallel is not very good, Stream parallel with Data parallel is better: \textbf{two tier model}.\\
 So we have an initial part of the pattern which is Stream Parallel, the second part is Data Parallel and eventually the last stages (the leafs of the tree) which are sequential.
-\subsection{Parallel Design Patterns}
+\paragraph{Parallel Design Patterns}
 Also called \textbf{algorithm skeletons}: programming abstraction that model some pattern. The programmer has a framework, libraries, languages and that includes algorithm abstractions.
+\subsection{Composing}
+These are building blocks, so we can \textbf{compose} them. Let's see how that works and what are the expected performances.
+\subsubsection{Pipeline}
+We have a number $k$ of stages for $m$ tasks: Pipeline$(s_1,\ldots,s_k)$ meaning that this is a composition yielding $s_k(\ldots s_1(\:)\ldots)$
+$$\hbox{Input stream}\longrightarrow s_1\rightarrow\ldots\rightarrow s_k\longrightarrow\hbox{Output stream}$$
+With each $\rightarrow$ being a stream $s_i\rightarrow s_{i+1}$ and each $s_i$ taking input from $s_{i-1}$.\\
+The latency of the pipeline is the sum of the latencies of the stages $$L(\hbox{Pipeline}(s_1,\ldots,s_k)) = \sum_{i=1}^k L(s_i)$$
+We do not consider the time required to pass input to the next stage, $t_{comm}$, which would be based on size, nature of the computation\ldots\\
+The steady state is when all the stage are "filled": the longest of the stages will dominate the service time $T_S$
+$$T_S(\hbox{Pipeline}(s_1,\ldots,s_k)) = \max_{i=1}^k\{T_S(s_i)\} = \max_{i=1}^k\{L(s_i)\}$$
+The completion time is $T_C$
+$$T_C(\hbox{Pipeline}(s_1,\ldots,s_k)) = \left(\sum_{i=1}^k L(s_i)\right) + (m-1)\max_{i=1}^k\{L_i\}$$
+and when $m >> k$ we can approximate it with
+$$T_C = mT_S$$
+because the number of tasks required, the "base of the parallelogram", will dominate the number of tasks, the "height of the parallelogram".
+\paragraph{Boundary Conditions} We have to take into account the interarrival time $T_A$, time spent to get another item from the input stream, and the interdeparture time $T_D$, the time spent to get another item into the output stream.\\
+Let's suppose that $L(s_i) = i$ seconds, so ideally $T_S = k$ seconds: we process 1 item each $k$ seconds. If $T_A > L(s_i)$ we have to wait the second item when I finish processing the first, same thing for the next after the second: the interrarival time looks like an interstage between $s_{i-1}$ and $s_i$.\\
+$T_D$ behaves at the same way: we have to wait that $T_D$ finishes before giving it out output, behaving like an interstage.\\
+So the previous behavior, analyzed before, happens $\Leftrightarrow T_A<T_S$ and $T_D<T_S$ \textbf{something that we have always to take into account}.
+\subsubsection{Farm}
+Sometimes we denote as Farm$(s, nw)$, otherwise we omit the number of workers and simply write Farm$(s)$.\\
+We assume to know $L_w$ and $T_w$ of the workers. We have some scheduler (\textbf{emitter} $E$) that distributes the items from the input stream to the workers, and a gatherer (\textbf{collector} $C$) that gets the results from the workers and delivers them to the output stream. Those can simply be data structures: queues, for example.
+$$L(\hbox{Farm}(s,nw)) = t_E + L_w + t_C$$
+This can appear as a pipeline of three stages, where the Emitter produces to the second stage (the workers) which produce to the third stage (the Collector)
+$$T_S(\hbox{Farm}(s,nw)) = \max\left\{t_E, \frac{T_w}{nw}, t_C\right\}$$
+We assume to have $m$ tasks
+$$T_C(\hbox{Farm}(s,nw)) = m\cdot T_S(\hbox{Farm}(s,nw))$$
+With boundary conditions
+$$T_S=\max\{T_s(\hbox{Farm}()),T_A,T_D\}$$
+What if we want to achieve a given performance? Compute a $nw$ suitable to achieve a wanted performance by inverting the very same formulas.\\
+With a target $T_S = T_A = 1$s
+$$T_S = 1\hbox{s} = \max\left\{t_E, t_C, \frac{10\hbox{s}}{nw}\right\}$$
+But $t_E,t_C$ are negligible so $$\frac{10\hbox{s}}{nw} = 1\hbox{s} \Rightarrow nw = 10$$
+%TODO riascoltare 2a parte 2/03
+
 \end{document}
