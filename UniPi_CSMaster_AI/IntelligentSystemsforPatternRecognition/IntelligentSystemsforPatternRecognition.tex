@@ -581,11 +581,11 @@ and so on.
 \pagebreak
 \subsection{Notable Inference Problems}
 \paragraph{Smoothing} Given a model $\Theta$ and an observed sequence $y$, determine the distribution of the hidden state at time $t$: $P(S_t\:|\:Y=y,\Theta)$\\
-Forward Backwrd
+Forward Backward algorithm.
 \paragraph{Learning} Given a dataset of $N$ sequences $D=\{y^1,\ldots,y^N\}$ and the number of hidden states $C$, find the parameters $\pi,A,B$ that maximize the probability model $\Theta = \{\pi,A,B\}$ having generated the sequences in $D$
 \paragraph{Optimal State Assigment} Given a model $\Theta$ and an observed sequence $y$, find an optimal state assignment $s = s_1^*,\ldots,s_T^*$ for the hidden Markov chain.\\
-Viterbi
-\subsubsection{Forward-Backward Algorithm} Smoothing: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$).\\
+Viterbi algorithm.
+\subsubsection{Forward-Backward Algorithm} \textbf{Smoothing}: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$).\\
 I know $\Theta$, the model (its parameters). So I know $P(S_1) = \pi, P(S_t\:|\:S_{t-1} = A$ and $P(y_t\:|\:S_t) = B$: I need to express the quantity I want in terms of $\Theta=\{\pi,A,B\}$.\\
 $\hat{y}$ are all the observations for each timestep $\Rightarrow P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T)$
 $$S_1\rightarrow\ldots\rightarrow S_{t-1}\rightarrow S_t\rightarrow S_{t+1}\rightarrow\ldots\rightarrow S_T$$
@@ -593,9 +593,49 @@ $$\downarrow\rightarrow\ldots\rightarrow \downarrow\rightarrow \downarrow\righta
 $$y_1\rightarrow\ldots\rightarrow y_{t-1}\rightarrow y_t\rightarrow y_{t+1}\rightarrow\ldots\rightarrow y_T$$
 We are at time $t$, so everything after that is the future ($y_{t+1:T}$), and everything up to $t$ included is the past ($y_{1:t}$).
 $$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) P(S_t=i,y_{1:t})$$
-If I observe $S_T$ we block the path $y_{1:t}$
+If I observe $S_t$ we block the path $y_{1:t}$, so $P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) = P(y_{t+1:T}\:|\:S_t=i)$
+$$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i) P(S_t=i,y_{1:t})$$
+I can derive two "messages"
 \begin{list}{}{}
-	\item $\alpha = P(S_t=i,y_{1:t})$
-	\item $\beta = P(y_{t+1:T}\:|\:S_t=i)$
+	\item Past message $\alpha_t(i) = P(S_t=i,y_{1:t})$ (\textbf{forward recursion})
+	\item Future message $\beta_t(i) = P(y_{t+1:T}\:|\:S_t=i)$ (\textbf{backward recursion})
 \end{list}
+$$P(S_t,y_{1:t}) = \sum_{j=1}^c P(S_t, S_{t-1}=j,y_{1:t}) = \sum_{j=1}^c P(y_t\:|\:S_t, S_{t-1} = j, y_{1:t-1})P(S_t,S_{t-1},y_{1:t-1})$$
+But we can get rid of $S_{t-1}=j$ and $y_{1:t-1}$ leaving us with $P(y_t\:|\:S_t)$ which is just the emission.\\
+The second factor can be rewrited as $P(S_t\:|\:S_{t-1}=j,y_{1:t-1}) P (S_{t-1}=j\:|\:y_{1:t-1})$ and observing $S_{t-1}$ allows us to get rid of $y_{1:t-1}$, giving us the transition distribution $P(S_t\:|\:S_{t-1}=j)$ and $\alpha_{t-1}(j)$
+$$\alpha_t(i) = P(S_t=i,y_{1:t}) = \sum_{j=1}^c P(y_t\:|\:S_t=i) P(S_t=i\:|\:S_{t-1}=j)\alpha_{t-1}(j)$$
+$$\alpha_1(j) = P(y_1\:|\:S_1=j)P(S_1=j)$$
+This just by reasoning with conditional independence.\\
+Same thing can be done for $$P(y_{t+1:T}\:|\:S_{t} = i) = \sum_j P(y_{t+1:T},S_{t+1}=j\:|\:S_t=i) = \sum_j P(y_{t+2:T}\:|\:S_t, S_{t+1},y_{t+1})P(S_{t+1},y_{t+1}\:|\:S_t=i)$$
+Same as before, I can exclude $S_t, y_{t+1}$ because we observe $S_{t+1}$ so that factor is $\beta_{t+1}(j)$.\\
+The second factor is rewritten as $P(S_{t+1}\:|\:S_t,y_{t+1})P(y_{t+1}\:|\:S_{t+1})$ which is the transition distribution (we can exclude $y_{t+1}$) times the emission distribution.
+$$\beta_t(i) = \sum_j P(y_{t+1}\:|\:S_{t+1} = j)P(S_{t+1}=j\:|\:S_t=i)\beta_{t+1}(j)$$ %TODO check
+$$\beta_T = 1$$
+\paragraph{Sum-Product Message Passing} The Forward-Backward algorithm is an example of a sum-product message passing algorithm.\\
+A forward recursion computing a generic message $\mu_\alpha$, backward recursion computing a generic message $\mu_\beta$\\
+A general approach to efficiently perform exact inference in graphical models, with $\alpha_t \equiv \mu_\alpha(X_n)$ and $\beta_{t}\equiv \mu_\beta(X_n)$
+$$\mu_\alpha(X_n) = \sum_{X_{n+1}} \psi(X_n, X_{n+1})\mu_\beta(X_{n+1})$$
+\subsubsection{Learning in HMM}
+Learning parameters $\Theta=(\pi,A,B)$ by \textbf{maximum} (log) \textbf{likelihood}
+$$L(\Theta) = \log\prod_{n=1}^N P(Y^n\:|\:\Theta) = \log\prod_{n=1}^N\left(\sum_{S_1^n,\ldots,S_{T_n}^n} P(S_1^n)P(Y_1^n\:|\:S_1^n)\prod_{t=2}^T P(S_t^n\:|\:S_{t-1}^n)P(Y_t^n\:|\:S_t^n)\right)$$
+Maximizing the joint likelihood of the sequences given the parameters considering them independent and identically distributed. We have to deal with the unobserved $S_t^n$ and the nasty sum in the log.\\
+Expectation-Maximization of the \textbf{complete likelihood} $L_c(\Theta)$, optimizing a slightly different problem obtaining a not-reducing similar result. It's completed with indicator variables $z_{ti}^n=\left\{\begin{array}{c l}
+1&\hbox{if }n\hbox{th chain is in state }i\hbox{ at time }t\\
+0&\hbox{otherwise}
+\end{array}\right.$ about the assignments $S_i^n$
+\paragraph{Expectation-Maximization} Gives the red line: touching in the estimating point and not greater in the other points.
+\begin{center}
+	\includegraphics[scale=0.5]{30.png}
+\end{center}
+It's a matter of picking the right $Q(\Theta\:|\:\Theta^k)$\\
+Introduce indicator variables in $L(\Theta)$ together with model parameters $\Theta = (\pi,A,B)$
+$$L_C(\Theta)=\log P(X,Z\:|\:\Theta) =$$%TODO formulona p. 19
+But I built it assuming to know $z$, but I don't know it. The \textit{expectation} part is in this: I don't know $z_{ti}^n$, but you can optimize the function in expectation $E[L_C(\Theta)]$\\
+It's a 2-step iterative algorithm for the maximization of complete likelihood $L_C(\Theta)$ with respect to the model parameters $\Theta$\begin{list}{}{}
+	\item E-step: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:Theta)]$$
+	So compute the expectation of the complete log likelihood with respect to indicator variables\ldots %TODO
+	Expectation with respect to a discrete random variable is $$E_z[Z] = \sum_z z\cdot P(Z=z)$$
+	\item M-step: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$
+\end{list}
+
 \end{document}
