@@ -635,7 +635,86 @@ It's a 2-step iterative algorithm for the maximization of complete likelihood $L
 	\item E-step: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:Theta)]$$
 	So compute the expectation of the complete log likelihood with respect to indicator variables\ldots %TODO
 	Expectation with respect to a discrete random variable is $$E_z[Z] = \sum_z z\cdot P(Z=z)$$
-	\item M-step: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$
+	\item M-step: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$ %TODO
 \end{list}
-
+With appropriate Lagrange multiplier is multinomial.
+\paragraph{Usefulness of HMMs}\begin{list}{}{}
+	\item \textbf{Regime Detection}: for example, you can only observe the volatility and you can model it according to a HMM that can capture it. For example with 2 states a model can be too simple, you can add hidden state (for example a 5-state HMM).\\
+	The hidden states are \textbf{clustering the observations}.
+\end{list}
+\paragraph{Decoding Problem} Find the optimal state assignment s $= s_1^*,\ldots,s_T^*$ for an observed test sequence y given a trained HMM. No unique interpretation of the problem.\\
+Can be done identifying the single hidden states $s_t$ that maximize the posterior $$ $$ %TODO formula
+or find the most likely \textbf{joint hidden state assignment} 
+$$\hbox{s}^* = \arg\max_s P(Y,S = \hbox{s})$$
+\paragraph{Viterbi Algorithm} Efficient dynamic programming algorithm based on a backward-forward recursion, example of max-product message passing algorithm. When exchanging, instead of $\sum$ we maximize the $\prod$.
+%TODO check all
+$$\max_{\hat{s} = s_1,\ldots,s_T} P(\hat{y},\hat{s}) = \max_{\hat{s}}\prod_{t=1}^T P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})$$
+because is emission and prior as always. Let's focus on a simplified problem: first try to find the state that maximize $s_T$. Let's focus on $T$
+$$\max_{s_T}\prod_{t=1}^T P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})=$$
+we can exclude a lot
+$$=\prod_{t=1}^{T-1} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\cdot\max_{s_T}P(y_T\:|\:s_T)P(s_T\:|\:s_{T-1})$$
+which is a unique term, let's call $\epsilon(s_{T-1}) = \max_{s_T}P(y_T\:|\:s_T)P(s_T\:|\:s_{T-1})$, and $s_{T-1}$ has $c$ possible values, the number of hidden states.\\
+So $\epsilon(s_{T-1})$ it's a vector of $c$ positions, and in position $j$ we have $\epsilon(s_{T-1} = j)$
+$$\prod_t^{T-1} P(y_t\:|\:s_t)PSs_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
+Let's try solving 
+$$\max_{s_{T-1}} \prod_t^{T-1} P(y_t\:|\:s_t)PSs_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
+we would do the same procedure. So we can iteratively start from the last item and use the information iteratively to compute the previous one.\\
+In general we compute $$\epsilon(s_{t-1}) = \max_{s_t} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\epsilon(s_t)$$
+So $s_t$ is received by $s_{t-1}$ to compute the new $\epsilon(s_{t-1})$ which is in turn passed to $s_{t-2}$ and so on, ending at the root. In practice we never choose the state, only computing the maximum. At the root, I have no predecessor states and can solve the maximization problem
+$$s_1^* = \arg\max_{s_1}P(y_1\:|\:s_1)P(s_1)$$
+From state $s_1$ we pick up $s_1^*$ and send it to $s_2$, which will use this information and pick the correct state that maximize the $\epsilon$.
+\subsection{Input-output Hidden Markov Models}
+\begin{center}
+	\includegraphics[scale=0.5]{31.png}
+\end{center}
+Translates an input sequence in an output sequence (\textbf{transduction}). State transition and emission depend on input observations (\textbf{input-driven}).\\
+Recursive model highlights analogy with RNNs.
+\paragraph{Bidirectional Input-Driven Models} Remove causality assumption that current observation %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{33.png}
+\end{center}
+\paragraph{Coupled HMMs} Describing interacting processes whose observation follow different dynamics while the underlying generative processes are interlaced.
+\begin{center}
+	\includegraphics[scale=0.5]{32.png}
+\end{center}
+\paragraph{Dynamic Bayesian Networks} HMMs are a specific and the simples case of a class of directed models that represent dynamic processes and data with changing connectivity template. Other examples are: Hierarchical HMMs and structure changing information.\\
+DBNs are graphical models whose structure changes to represent evolution across time and/or between different samples.
+\subsection{Markov Random Fields}
+MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$ ecc. %TODO
+\paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_n$ as the random variables associated to the $N$ nodes in the undirected graph $G$
+$$P(\hbox{X}) = \frac{1}{Z}\prod_c \psi_c(X_c)$$
+$X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the potential function for clique $C$
+With $Z$ normalization term used to transform to probability.
+$$ Z = \sum_X\ldots$$ %TODO
+As already stated, potential functions are not probabilities, they express which configurations of the local variables are preferred.
+$$\psi_C(X_C)=\exp\left(-E(X_C)\right)$$
+with $E(X_C)$ called energy function.\\
+In general we will assume to work with MRF where the partition functions factorize as $$\psi_C(X_C) = \exp\left(-\sum_{k=1}^K\theta_{Ck}f_{Ck}(X_C)\right)$$
+\begin{list}{}{}
+	\item $K$ defines the number of feature functions that we use, so the cardinality of a dictionary of feature functions $f_{Ck}$
+	\item $\theta_{Ck}in R$ are parameters
+\end{list}
+Undirected graphical models do not express the factorization of potentials into feature functions, you cannot express $f$ graphically $\Rightarrow$ \textbf{factor graphs}.
+\paragraph{Factor Graphs} Random Variables are still circular nodes, factors $f_{Ck}$ are denoted with square nodes and edges connect a factor to the random variable.
+\begin{center}
+	\includegraphics[scale=0.5]{34.png}
+\end{center}
+\paragraph{Sum-Product Inference} A powerful class of exact inference algorithms. Use factor graph representation to provide a unique algorithm for directed/undirected models. So factor graph are a "unifying language" to represent both models, directed and undirected.\\
+Inference is \textbf{feasible for chain and tree structures}. We restructure the graph to obtain a tree-like structure to perform message passing (junction tree algorithm) and then approximated inference (variational, sampling).\\
+Even better: we constrain the MRF to obtain tractable classes of undirected models.
+\subparagraph{Restricting to Conditional Probabilities} In ML a part of the random variables can be assumed to be always observable (input data).\begin{list}{}{}
+	\item $X_k$ are observable inputs in the factor $k$
+	\item $Y_k$ are hidden random variables
+	\item $f_k(X_k, Y_k)$ is the factor feature function
+\end{list}
+Instead of $P_\theta(x,y)$ we compute $P_\theta(y\:|\:x)\cdot P_\theta(x)$. Under this assumptio we can directly model the conditional distribution $$P(Y\:|\:X) = \frac{1}{Z(X)}\prod_k \exp\left(\theta_kf_k(X_k,Y_k)\right)$$
+We note that $Z$ depends on $X$
+$$Z(X) = \sum_y\prod_k\exp\left(\theta_kf_k(X_k,Y_k = y)\right)$$
+\subparagraph{Conditional Random Field} CRF are constrained MRF models representing input-conditional distributions.
+\begin{center}
+	\includegraphics[scale=0.5]{35.png}
+\end{center}
+\paragraph{Feature Functions} Represent coupling or constraints between random variables, and are often very simple such as linear functions.
+\paragraph{Discriminative Learning in Graphical Models} $X$ is always observable input while $Y$ \textbf{can} be unobserved.\\
+Let's consider a single $Y$ and multiple $X$s. We can observe the $Y_n$ corresponding to $X_n$ for some $n$, and we can use this information to fit $\theta$ in $P(Y\:|\:X,\theta)$
 \end{document}
