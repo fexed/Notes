@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 
-orig_img = cv2.imread('imgdataset/1_10_s.bmp')
+orig_img = cv2.imread('imgdataset/1_9_s.bmp')
 img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2HSV)
 h, w, c = img.shape
 
@@ -31,5 +31,5 @@ result = cv2.add(result_bg, result_fg)
 
 cv2.imwrite('mask.jpg', mask)
 cv2.imwrite('result.jpg', result)
-#cv2.imwrite('result_bg.jpg', result_bg)
-#cv2.imwrite('result_fg.jpg', result_fg)
+
+out = color.label2rgb(labels, orig_img, kind='avg', bg_label=0)
