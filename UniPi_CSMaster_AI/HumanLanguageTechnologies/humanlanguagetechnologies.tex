@@ -539,4 +539,40 @@ Excluding the denominator because we're taking the maximum. It's composed by lik
 For sequence tagging, sequence models work better: HMMs, MEMMs, conditional random fields, convolutional neural networks\ldots
 \paragraph{Logistic Regression} Model %TODO
 \paragraph{MEMM} HMM works backwards from the tags to the outputs, while MEMM works backwards: from the words to the probabilities of the tags.
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+$$P(T\:|\:W) = \prod P(t_i\:|\:t_{i-1}, w_i)$$
+We can also add \textbf{features} and use them in computing the probabilities.
+\begin{center}
+	\includegraphics[scale=0.33]{17.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.33]{18.png}\\
+	An example of HMM vs MEMM
+\end{center}
+Viterbi algorithm can be used to select sequence of tags optimal given the whole sentence. In MEMM, decoding via Viterbi is
+$$v_t(j) = \max_{i=1} v_{t-1}(i)P(q_j\:|\:q_i, o_t)\:\:\:\:\hbox{ for } 1\leq j\leq N, 1< t\leq T$$
+\begin{center}
+	\includegraphics[scale=0.5]{19.png}
+\end{center}
+\subsubsection{Named Entity Tagging}
+Given a text, find the entities with proper names: person names, city names\ldots the "capitalized things". Typical approach is based on rules, might not be accurate enough. An approach based on ML needs training data, labeling them and using a classifier. Labeling may be easy: annotate each word, but an entity may span more words (name and surname, for example) or be non-continguous, overlapping with other words and perhaps other named entities (examples in biomedical entities).\\
+Typical, named entities systems handle very few categories:
+\begin{center}
+	\includegraphics[scale=0.33]{20.png} %TODO rewrite
+\end{center}
+\paragraph{Approaches} As with partial parsing and chinking, there are two basic approaches (and hybrids):
+\begin{list}{}{}
+	\item \textbf{Rule-based}: patterns to mach things that look like names and environments that classes of names tend to occur in (regular expressions)
+	\item \textbf{ML-based}: get annotated data, extract features and train systems to replicate the annotation. Typical approach today
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.33]{21.png}
+\end{center}
+For $N$ classes we have $2N + 1$ tags, with IOB encoding: an I and a B for each tag.
+\begin{center}
+	\includegraphics[scale=0.5]{22.png}
+\end{center}
+Summary of the approaches.
 \end{document}
