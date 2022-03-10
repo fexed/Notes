@@ -162,6 +162,16 @@ char translate_char(char c) {
 \subsection{Threads}
 We used to write instructions sequentially. At a given point now we \texttt{fork} another flow of computation: we get two flows that are executed together \textbf{in the same address space}, so the new thread inherits all the memory of the original thread.
 \paragraph{Concurrence} \texttt{todo} %TODO
+\paragraph{Packaged Threads}
+\paragraph{Overheads} % repeatedly fork an join an see what happens, measure mean time of fork-join
+All the time spent that is not involved in the sequential execution: time spent organizing the parallel computation, gathering solutions\ldots so there's a tradeoff between the time spent to setup the parallel activity and the time earned because of the parallel execution.\\
+What can we do to get rid of the setup time? I can create the threads once and reuse them when needed: \textbf{threadpools}.
+\paragraph{Cache Coherence Protocols} Snoopy, or directories of shared data consulted any time I access shared data and propagates the edits.\\
+Coherency works at the cache line level!
+\subparagraph{In Stencil} Reuse cache coherence protocols for each write.
+\subparagraph{False Sharing Problem} We use padding techniques to transform the vector in such way that the original vector has some pad values up to the point where the cache line finishes. This is used in maps.
+\subparagraph{Disabling} Sometimes useful to speed up the computations.
+\subparagraph{} So we have to take into account that we have to ensure locality as much as possible and be careful of the possibilities of fault sharing problems, like similar iterations in short time.
 \section{Patterns}
 Computations with particular shapes and semantics that can be understood and implemented depending on the situations, not linked to languages and technicalities. Patterns are a useful concepts, allow programmers to reuse experience of other programmers an not reinventing the wheel.\\
 Parallel patterns:
