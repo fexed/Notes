@@ -763,13 +763,59 @@ Latent variables likelihood $$P(x) = \int_z \prod_{i=1}^N P(x_i\:|\:z)P(z)dz$$ w
 The assumption is %TODO
 \paragraph{Tractability} Hidden variables can make intractable the posteriors. We need stuf that simplify those posteriors.
 \subsection{Kullback-Leiber Divergence}
-An information thoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = \langle\log q(z)\rangle_q - \langle\log p(z)\rangle_p$$ %TODO check
+An information thoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = \langle\log q(z)\rangle_q - \langle\log p(z\:|\:x)\rangle_q$$
 Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
 	\item if $q$ and $p$ high, then good
 	\item if $q$ is high and $p$ is low, the it's unhappy
 	\item if $q$ is low we don't care (due to the expectation)
 \end{list}
+The expectation $E_q$ means taking all possible assignments $z$ weighted according to the probability $q(z)$.
 \paragraph{Jensen Inequality} Property of linear operators on convex/concave functions $$\lambda f(x) + (1-\lambda)f(x)\geq f(\lambda x + (1-\lambda)x)$$
 The curve is longer than the line connecting the two points. With concave we have $\leq$. Applied to probability $$f(E[X])\geq E[f(X)]$$
 $$\log(E[X])\geq E[\log(X)]$$
+The log-likelihood for a model with a single hidden variable $Z$ and parameters $\theta$ with a single sample assumed for simplicity is the following
+$$\log P(x\:|\:\Theta) = \log\int_zP(x,z\:|\:\Theta)dz = \log\int_z\frac{Q(z\:|\:\phi)}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)dz$$
+$Q$ is a distribution, used over $z$ with parameters $\phi$ and $Q(z\:|\:\phi)\neq 0$. That is the definition of expectation, we have $\int_zQ(z\:|\:\phi)\cdot \frac{1}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)$ which is $\sum_z q\cdot g(z)$. Using Jensen we have $$\log P(x\:|\:\Theta)= \log E_Q\left[\frac{P(x,z)}{Q(z)}\right] \geq E_Q\left[\log \frac{P(x,z)}{Q(z)}\right]= E_Q[\log P(x,z)] - E_Q[\log Q(z)] = L(x,\Theta,\phi)$$
+So we are lower bounding $\log P(x\:|\:\Theta)$ with the expected joint distribution minus the entropy. So we have a lower bound on something I want to maximize, so we can maximize the lower bound. Maximizing this term entails that we're supported by the data (using the expectation of joint distribution $E_Q[\log P(x,z)]$).\\
+How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) = ?$ We introduce $Q(z)$ by marginalization $$\int_z Q(z)\log P(x) - \int_z Q(z)\log\frac{P(x,z)}{Q(z)} = \int_z Q(z)\log\frac{P(x)Q(z)}{P(x,z)}=E_Q\left[\log \frac{Q(z)}{P(z\:|\:x)}\right] = KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right)$$
+Because $\frac{P(x)}{P(x,z)} = \frac{1}{P(z\:|\:x)}$. So it's an optimization problem of finding $\Theta$ and $\phi$ that maximize $L(x,\Theta,\phi)$ reduced to a minimization problem with KL.\\
+We can assume the existence of a probability $Q(z\:|\:\phi)$ which allows to bound the likelihood $P(x\:|\:\Theta)$ from below using $L(x,\Theta,\phi)$.\\
+$L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$.\\
+So the problem now becomes maximizing ELBO
+$$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$. If $P(z\:|\:x,\Theta$ is tractable %TODO
+\paragraph{Example} Bag of Words representations are classical examples of multinomial data. A BOW dataset $X$ is the $N\times M$ document matrix, with $N$ number of vocabulary items $w_j$ and $M$ is the number of documents $d_i$ and $x_{ij} = n(w_j,d_i)$ the number of occurrences of $w_j$ in $d_i$.\\
+Often $M$ is very very large ($\simeq 30$k elements). So we want a smaller representation. Mixture of topics: a topic identifies a pattern in the co-occurrence of multinomial items $w_j$ within the documents. Mixture, so we associate an interpretation (topic) to each item in a document, whose interpretation is then a mixture of the items' topics. We use Latent Variables.
+\paragraph{Latent Dirichlet Allocation} LDA models a document as a mixture of topics $z$. We assign one topic $z$ to each item $w$ with probability $P(w\:|\:z,\beta)$ and pick a topic for the whole document with probability $P(z\:|\:\Theta)$
+\begin{center}
+	\includegraphics[scale=0.5]{40.png}
+\end{center}
+Each document has its personal topic proportion $\Theta$ sampled from a distribution. $\Theta$ defines a multinomial distribution, but it is a random variables as well. $\alpha$ is the prior.\\
+%TODO
+\paragraph{Dirichlet distribution} Conjugate prior to multinomial distribution.\\
+If the likelihood is multinomial with a Dirichlet prior, then posterior is Dirichlet.
+$$P(\Theta\:|\:\alpha) = \frac{\Gamma(\sum_{k=1}^K \alpha_k)}{\prod_{k=1}^K\Gamma(\alpha_k)}\prod_{k=1}^K\Theta_k^{\alpha_k-1}$$
+$\Gamma$ is the generalization of the factorial. With a big $\alpha$ we make the topics almost equiprobable, while with lower $\alpha$ we get substatially different proportions (less and less topics active). So big $\alpha$ means that every document can express each topic, while low $\alpha$ is almost deterministic. Usually, $\alpha = 1$ or similar but smaller.\\\\
+LDA finds a set of $K$ projection functions on the $K$-dimensional topic simplex.\begin{center}
+	\includegraphics[scale=0.5]{41.png}
+\end{center}
+\paragraph{LDA Generative Process} For each of the $M$ documents, we choose $\Theta$ with Dirichlet($\alpha$) and for each of the $N$ items, we choose a topic $z$ with Multinomial($\Theta$) and pick an item $w_j$ with %TODO
+$$ $$
+It's a completed likelihood with the conditional independence assumption.
+\subparagraph{Learning} Marginal distribution of a document $d =$ w
+$$P(\hbox{w}\:|\:\alpha,\beta) = \int $$
+given w$_1$,\ldots,w$_M$ find $\alpha,\beta$ that maximize.\\
+Key problem in inferring latent variables posterior
+$$P(\Theta, \hbox{z}\:|\:\hbox{w},\alpha,\beta) = \frac{P(\Theta, \hbox{z}, \hbox{w}\:|\:\alpha,\beta)}{P(\hbox{w}\:|\:\alpha,\beta)}$$
+but the denominator is intractable because of couplings between $\beta$ and $\Theta$ under exponenziation in the summation over topics. So we don't use the posterior, we pick a function $Q$ that helps in solving the problem (variational inference).
+\paragraph{Variational Inference} We write $Q(z\:|\:\phi)$ function that is sufficiently similar to the posterior but tractable. It should be such that $\beta$ and $\Theta$ are no longer coupled, fitting $\phi$ so that is close to the posterior according to KL.\\
+Fast convergence but it's an approximation.\\
+The key idea is to assume that $Q(z\:|\:\phi)$ is tractable: \textbf{mean-field assumption}.
+$$Q(z\:|\:\phi) = Q(z_1,\ldots,z_K\:|\:\phi)=\prod_{k=1}^K Q(z_k\:|\:\phi_k)$$
+Can be generalized by factorizing on groups of latent variables. Does not contain the true posterior because hidden variables are dependent.\\
+We optimize ELNO using $Q(z\:|\:\phi)$ using the factorized distribution. Simple \textbf{coordinate ascent inference}: iteratively optimize each variational distribution holding\ldots %TODO
+so when learning we use the model on the right, breakdown of the independence.\begin{center}
+	\includegraphics[scale=0.5]{42.png}\\
+	\includegraphics[scale=0.5]{43.png}
+\end{center}
+%TODO fine 10/03
 \end{document}
