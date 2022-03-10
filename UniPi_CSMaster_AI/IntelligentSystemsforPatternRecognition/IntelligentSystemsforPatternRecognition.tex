@@ -717,4 +717,59 @@ $$Z(X) = \sum_y\prod_k\exp\left(\theta_kf_k(X_k,Y_k = y)\right)$$
 \paragraph{Feature Functions} Represent coupling or constraints between random variables, and are often very simple such as linear functions.
 \paragraph{Discriminative Learning in Graphical Models} $X$ is always observable input while $Y$ \textbf{can} be unobserved.\\
 Let's consider a single $Y$ and multiple $X$s. We can observe the $Y_n$ corresponding to $X_n$ for some $n$, and we can use this information to fit $\theta$ in $P(Y\:|\:X,\theta)$
+\paragraph{CRF for Sequences} Undirected and dicriminative equivalent of an HMM.\begin{center}
+	\includegraphics[scale=0.5]{36.png}
+\end{center}
+Meaning that $f_t(Y_{t-1}, Y_t)$ and it looks like $P(S_t\:|\:S_{t-1})$ of the HMM. $f_e(X_t, Y_t)$ looks like the emission $P(X_t\:|\:S_t)$, but \textbf{I can place as many feature functions $f_t$ I want between the same variables} while I can't place more transition probabilities. The other difference is the main essences.
+\paragraph{Generalization of HMM} CRF are much more powerful\begin{center}
+	\includegraphics[scale=0.4]{37.png}
+\end{center}
+Each hidden state may depend on the previous, with $f_t$, but also on the emissions for the previous, current and next symbols. This cannot be easily implemented in HMMs. Kind of time stationality.
+$$P(Y\:|\:X,\Theta) = \frac{1}{Z(X)}\prod_t \exp\left(\ldots\right)$$ %TODO formula
+The cliques are simple $(Y_t, X_{t-1}), (Y_t, X_{t}), (Y_t, X_{t+1}), (Y_t, Y_{t-1})$ for each $t$.\\
+We can also model explicitly input influence on transition.
+\begin{center}
+	\includegraphics[scale=0.5]{38.png}
+\end{center}
+$$ $$ %TODO formula senza X_k all'inizio
+Use indicator variables in $f_k$ definition to include or disregard the influence of specific random variables.
+\paragraph{Posterior Inference in LCRF} Is there an equivalent of the smoothing problem? Yes $$P(Y_t, Y_{t-1}\:|\:X)$$
+Solved by exact forward backward inference. Sum-product message passing (alpha-beta recursion) on the LCRF factor graph.
+%TODO formula
+
+Also Viterbi can be done, because we can do Max-Product. The expensive part is the computation of the exponential summation in $Z(X)$. The forward-backward algorithm computes it efficiently as normalization term of $P(Y_t,Y_{t-1}\:|\:X)$. More articulated posteriors interact with $Z(X)$, which is a summation over everything that's not observable, difficult when there's a lot of unobservable variables. Exact inference in CRF other than chain-like is likely to be computationally impractical. We need to approximate: Markov Chain Monte Carlo\ldots %TODO
+
+Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^n\log P(y^n\:|\:x^n,\Theta)$$
+we can substitu the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$
+$$ =\sum_n\sum_t\sum_k a-b $$ %TODO formula
+To get proper marginalization $Z(X^n) = \sum_{y_t,y_{t-1}}\sum_t \exp(\sum_k\Theta_k f_k(y_t,y_{t-1},x^n_t))$\\
+With $\frac{\partial L(\Theta)}{\partial \Theta_k}$ we can maximize it because typically $L(\Theta)$ cannot be maximized in closed form.
+$$ $$ %TODO formulas derivatives
+We have sum of expectations, first when $Y$ is not random, with samples drawn from a finite dataset and on the right the expectation using the posterior so the expectation of the feature function under the model distribution. $$\frac{\partial L(\Theta)}{\partial \Theta_k} = E[f_k(y,y',x^n_t)] - E_{P(Y\:|\:X,\Theta)}[f_k(y,y',x_t^n)]$$
+We need to match those two expectations.\\
+There's a regularization term $\sum_k\frac{\Theta_k^2}{2\sigma^2}$ on $\|\Theta\|^2$, a posteriori regularization on the gaussian $P(\Theta)$ with $\mu=0$ mean and $\sigma^2I$ variance.\\
+In practice, then, $\Theta$ can be learn with stochastic gradient descent or variants.
+\paragraph{Applications} Linear CRF have various applications: POS-tagging, semantic role identification, bioinformatics. Feature functions have the form %TODO
+
+In computer vision they can be used to define bi-dimensioal lattice on images, bg/fg segmentation and to impost constraints.
+\section{Bayesian Learning and Variational Inference}
+Introducing basic concepts of variational learning useful for both generative models and deep learning.
+\paragraph{Latent Variables} Unobserved random variables that define a hidden generative process of observed data. They explain complex relation between many observable variables. An example: hidden states in HMM/CRF.\\
+Latent variables likelihood $$P(x) = \int_z \prod_{i=1}^N P(x_i\:|\:z)P(z)dz$$ with $Z \longrightarrow X$
+\paragraph{Latent Spaces} Spaces where high-dimensional data can be represented. Each of the $M$ samples is made of $N$ features represented with $k<<N$ dimensions.
+\begin{center}
+	\includegraphics[scale=0.5]{39.png}
+\end{center}
+The assumption is %TODO
+\paragraph{Tractability} Hidden variables can make intractable the posteriors. We need stuf that simplify those posteriors.
+\subsection{Kullback-Leiber Divergence}
+An information thoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = \langle\log q(z)\rangle_q - \langle\log p(z)\rangle_p$$ %TODO check
+Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
+	\item if $q$ and $p$ high, then good
+	\item if $q$ is high and $p$ is low, the it's unhappy
+	\item if $q$ is low we don't care (due to the expectation)
+\end{list}
+\paragraph{Jensen Inequality} Property of linear operators on convex/concave functions $$\lambda f(x) + (1-\lambda)f(x)\geq f(\lambda x + (1-\lambda)x)$$
+The curve is longer than the line connecting the two points. With concave we have $\leq$. Applied to probability $$f(E[X])\geq E[f(X)]$$
+$$\log(E[X])\geq E[\log(X)]$$
 \end{document}
