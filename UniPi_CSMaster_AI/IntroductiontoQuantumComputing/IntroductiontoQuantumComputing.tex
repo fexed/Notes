@@ -531,6 +531,23 @@ e^{-i\frac{\beta}{2}}&0\\0&e^{i\frac{\beta}{2}}
 e^{-i\frac{\delta}{2}}&0\\0&e^{i\frac{\delta}{2}}
 \end{array}\right]$$
 Two rotations around $z$ and one around $y$. Any unitary can be decomposed as a product of three rotations times a phase factor.
+\paragraph{Standard Rotations}
+The standard rotation gates are those that define rotations around the Pauli matrices $X, Y, Z$ and are defined as $$R_P(\theta) = e^{-i\theta\frac{P}{2}} = \cos\left(\frac{\theta}{2}\right)I-i\sin\left(\frac{\theta}{2}\right)P$$
+For the $x$ axis
+$$R_x(\theta) = \left(\begin{array}{c c}
+\cos\left(\frac{\theta}{2}\right)&-i\sin\left(\frac{\theta}{2}\right)\\
+i\sin\left(\frac{\theta}{2}\right)&\cos\left(\frac{\theta}{2}\right)
+\end{array}\right)$$
+For the $y$ axis
+$$R_y(\theta) = \left(\begin{array}{c c}
+\cos\left(\frac{\theta}{2}\right)&-\sin\left(\frac{\theta}{2}\right)\\
+\sin\left(\frac{\theta}{2}\right)&\cos\left(\frac{\theta}{2}\right)
+\end{array}\right)$$
+For the $z$ axis
+$$R_z(\theta) = \left(\begin{array}{c c}
+e^{-i\theta\frac{P}{2}}&0\\
+0&e^{i\theta\frac{P}{2}}
+\end{array}\right)$$
 \paragraph{Tensor Products} Way of putting vectors together to form larger Hilbert/vector spaces.\\
 Let's assume 2 qubits. The state space of these 2 qubits?
 $$|00\rangle\:\:|01\rangle\:\:|10\rangle\:\:|11\rangle$$
@@ -543,6 +560,12 @@ z\\w
 \end{array}\right) = \left(\begin{array}{c}
 xz\\xw\\yz\\yw
 \end{array}\right)$$
+With more dimensions
+$$A\otimes B = \left[\begin{array}{c c c}
+a_{11}B & \ldots & a_{1n}B\\
+\vdots & & \vdots\\
+a_{m1}B & \ldots & a_{mn}B
+\end{array}\right]$$
 For example, $|01\rangle$ encodes 1, meaning "1" in position 1 (counting from 0, so second position)
 $$|01\rangle = \left(\begin{array}{c}
 1\\0
@@ -555,7 +578,27 @@ $$|01\rangle = \left(\begin{array}{c}
 $$|11\rangle = \left(\begin{array}{c}
 0\\0\\0\\1
 \end{array}\right)$$
-\paragraph{Degrees of freedom} With 1 qubit $\alpha|0\rangle+\beta|1\rangle$ normalized so the constraint $|\alpha|^2+|\beta|^2 = 1$ and another constraint: we consider the surface of the Bloch sphere of size $2$, so $4-2 = 2$ degrees of freedom.\\
+$$I\otimes\sigma_x = \left[\begin{array}{c c}
+1&0\\0&1
+\end{array}\right]\otimes\left[\begin{array}{c c}
+0&1\\1&0
+\end{array}\right] = \left[\begin{array}{c c c c}
+0&1&0&0\\
+1&0&0&0\\
+0&0&0&1\\
+0&0&1&0
+\end{array}\right]$$
+$$\sigma_x\otimes I = \left[\begin{array}{c c}
+0&1\\1&0
+\end{array}\right]\otimes\left[\begin{array}{c c}
+1&0\\0&1
+\end{array}\right] = \left[\begin{array}{c c c c}
+0&0&1&0\\
+0&0&0&1\\
+1&0&0&0\\
+0&1&0&0
+\end{array}\right]$$
+\subparagraph{Degrees of freedom} With 1 qubit $\alpha|0\rangle+\beta|1\rangle$ normalized so the constraint $|\alpha|^2+|\beta|^2 = 1$ and another constraint: we consider the surface of the Bloch sphere of size $2$, so $4-2 = 2$ degrees of freedom.\\
 With 2 qubits, $2\cdot4-2$\\
 With $n$ qubits $2\cdot 2^n - 2 = 2^{n+1}-2$ degrees\\\\
 This argument allows us to say that there must be 2-qubit states that cannot be expressed as product of 2 qubits, because the dimensions do not fit.
@@ -563,12 +606,27 @@ $$(\alpha|0\rangle_A+\beta|1\rangle_A)\otimes(\delta|0\rangle_B+\gamma|1\rangle_
 You don't get all the possible configurations of 2-qubits. If $|\psi\rangle = |\psi_1\rangle\otimes|\psi_2\rangle$ so the number of qubits in $\psi$ is equal to the sum of the number of qubits in $\psi_1,\psi_2$, then the system is in a \textbf{separable state}, otherwise the state is \textbf{entangled}.\\
 An example of entangled state is the Bell state (EPR state, Einstein Poddsky, Rosen) $$\frac{|01\rangle + |10\rangle}{\sqrt{2}}$$
 So no configuration of $\alpha,\beta,\delta,\gamma$ in the previous formula will give the Bell state.
-\paragraph{Inner product of tensor products} Given
+\subparagraph{Inner product of tensor products} Given
 $$|\psi\rangle = |\psi_1\rangle\otimes|\psi_2\rangle$$
 $$|\phi\rangle = |\phi_1\rangle\otimes|\phi_2\rangle$$
 we have that the inner product is
 $$\langle \psi\:|\:\phi\rangle = \sum_{i=0}^{d-1}\psi_i\cdot\phi_i = \langle \psi_1\:|\:\phi_1\rangle\langle \psi_2\:|\:\phi_2\rangle$$
-\begin{center}
-	\includegraphics[scale=0.5]{12.png} %TODO riscrivere
-\end{center}
+Other properties are\begin{list}{}{}
+	\item $c(|\psi_1\rangle_A\otimes|\psi_2\rangle) = c|\psi_1\rangle_A\otimes |\psi_2\rangle_B = |\psi_1\rangle_A\otimes c|\psi_2\rangle_B$
+	\item $(|\psi_1\rangle_A+|\psi_2\rangle_A)\otimes|\psi_3\rangle_B = |\psi_1\rangle\otimes|\psi_3\rangle_B + |\psi_2\rangle_A\otimes|\psi_3\rangle_B$
+	\item $(A\otimes B)(|\psi\rangle_A\otimes|\phi\rangle_B) = A|\psi\rangle \otimes B|\phi\rangle$
+	\item $(|\psi\rangle\otimes|\phi\rangle)^* = \langle\psi|\otimes\langle\phi|$
+	\item $(A\otimes B)^H = A^H\otimes B^H$
+\end{list}
+\paragraph{No Cloning Theorem} We cannot make a copy of an \textbf{unknown} qubit.
+\subparagraph{Proof} $|\psi\rangle$ unknown qubit in a space of dimension 2, hence $|\psi\rangle|\psi\rangle$ is a space of dimension 4.\\
+$|\psi\rangle|0\rangle$ assumes there exists a $U\:|\:U(|\psi\rangle|0\rangle)=|\psi\rangle|\psi\rangle e^{i\theta}$\\
+$|\phi\rangle|0\rangle$ assumes there exists a $U\:|\:U(|\phi\rangle|0\rangle)=|\phi\rangle|\phi\rangle e^{i\alpha}$
+$$(1\langle\psi|\:_2\langle 0|)U^HU(|\phi\rangle_1|0\rangle_2) = _1\langle\psi|\phi\rangle_1\:_2\langle0|0\rangle_2 = \langle\psi|\phi\rangle$$
+Because $\langle0|0\rangle = 1$.\\
+We have $U|\phi\rangle_1|0\rangle = |\phi\rangle|\phi\rangle e^{i\alpha}$ and also $\langle\psi|\langle 0|U^H = (U|\psi\rangle|0\rangle)^H = (|\psi\rangle|\psi\rangle e^{i\theta})$
+$$(\langle\psi|\langle\psi|)e^{i(\theta-\alpha)}(|\phi\rangle|\phi\rangle) = \langle\psi|\phi\rangle\langle\psi|\phi\rangle = (\langle\psi|\phi\rangle)^2$$
+But $\langle\psi|\phi\rangle = (\langle\psi|\phi\rangle)^2 \Leftrightarrow \langle\psi|\phi\rangle = 0 \vee \langle\psi|\phi\rangle = 1$\\
+Meaning respectively $|\psi\rangle = |\phi\rangle$ (\textbf{equal states}) $\vee$ $|\psi\rangle$ \textbf{orthogonal to} $|\phi\rangle$
+%TODO resto 11/03
 \end{document}
