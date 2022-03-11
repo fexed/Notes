@@ -1,35 +1,57 @@
-from skimage.future.graph import ncut
+import os
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+from skimage import color
+from skimage.future import graph
 
 
-orig_img = cv2.imread('imgdataset/1_9_s.bmp')
-img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2HSV)
-h, w, c = img.shape
+def get_superpixels(image, iter = 10, prior = 2, n_superpixels = 250, n_levels = 10, n_bins = 10, print_intermediate=True, intermediate_name='result.jpg'):
+    converted_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    height, width, channels = converted_image.shape
+    mask_img = np.zeros((height, width, 3), np.uint8)
+    mask_img[:] = (255, 255, 255)
+    seeds = cv2.ximgproc.createSuperpixelSEEDS(width, height, channels, n_superpixels, n_levels, prior, n_bins)
+    seeds.iterate(converted_image, iter)
+    labels = seeds.getLabels()
 
-iter = 10
-prior = 2
-double_step = False
-n_superpixels = 200
-n_levels = 10
-n_bins = 10
+    if (print_intermediate):
+        mask = seeds.getLabelContourMask(False)
+        mask_inv = cv2.bitwise_not(mask)
+        result_bg = cv2.bitwise_and(image, image, mask = mask_inv)
+        result_fg = cv2.bitwise_and(mask_img, mask_img, mask = mask)
+        result = cv2.add(result_bg, result_fg)
+        cv2.imwrite(intermediate_name, result)
 
-seeds = cv2.ximgproc.createSuperpixelSEEDS(w, h, c, n_superpixels, n_levels, prior, n_bins)
-color_img = np.zeros((h, w, 3), np.uint8)
-color_img[:] = (0, 0, 255)
-seeds.iterate(img, iter)
+    return labels
 
-labels = seeds.getLabels()
-labels &= (1 << 2) - 1
-labels *= 1 << (16 - 2)
-mask = seeds.getLabelContourMask(False)
 
-mask_inv = cv2.bitwise_not(mask)
-result_bg = cv2.bitwise_and(orig_img, orig_img, mask = mask_inv)
-result_fg = cv2.bitwise_and(img, orig_img, mask = mask)
-result = cv2.add(result_bg, result_fg)
+def ncut(image, labels):
+    rag = graph.rag_mean_color(image, labels, mode='similarity', sigma=512.0)
+    new_labels = graph.ncut(labels, rag)
+    return new_labels
 
-cv2.imwrite('mask.jpg', mask)
-cv2.imwrite('result.jpg', result)
 
-out = color.label2rgb(labels, orig_img, kind='avg', bg_label=0)
+def save_segmentation(image, labels, name='ncut.jpg'):
+    color_list = [(128,0,0), (0,128,0), (128,128,0), (0,0,128), (128,0,128), (0,128,128), (128,128,128), (64,0,0), (192,0,0), (64,128,0), (192,128,0), (64,0,128), (192,0,128)]
+    out = color.label2rgb(labels, image, kind='overlay', bg_color=(0,0,0), colors=color_list, alpha=1)
+    cv2.imwrite(name, out)
+
+
+for dir in os.listdir(path="imgdataset/"):
+    if (dir[-2:] != "GT"):
+        if not os.path.exists("computedset/" + dir + "_segm"): os.mkdir("computedset/" + dir + "_segm")
+        if not os.path.exists("computedset/" + dir + "_interm"): os.mkdir("computedset/" + dir + "_interm")
+        for imagefile in os.listdir(path="imgdataset/" + dir):
+            print("\rSegmenting " + imagefile, end="")
+            image = cv2.imread("imgdataset/" + dir + "/" + imagefile)
+            labels = get_superpixels(image, intermediate_name="computedset/" + dir + "_interm/" + imagefile)
+            new_labels = ncut(image, labels)
+            save_segmentation(image, new_labels, name = "computedset/" + dir + "_segm/" + imagefile)
+        print("")
+"""
+orig_img = cv2.imread('imgdataset/img_1/1_9_s.bmp')
+labels = get_superpixels(orig_img)
+new_labels = ncut(orig_img, labels)
+save_segmentation(orig_img, new_labels)
+"""
