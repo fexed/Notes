@@ -15,7 +15,7 @@ Algorithm Engineering | [Notes :white_check_mark:](https://github.com/fexed/Note
 Artificial Intelligence Fundamentals | [Notes :white_check_mark:](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/ArtificialIntelligenceFundamentals/aif.pdf)
 Computational Mathematics for Learning and Data Analysis | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/ComputationalMathematicsForLearningAndDataAnalysis/CompMatLearningDataAnalysis.pdf)
 Human Language Technologies | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/HumanLanguageTechnologies/humanlanguagetechnologies.pdf)
-Intelligent Systems for Pattern Recognition | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/IntelligentSystemsforPatternRecognition/IntelligentSystemsforPatternRecognition.pdf)
+Intelligent Systems for Pattern Recognition | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/IntelligentSystemsforPatternRecognition/IntelligentSystemsforPatternRecognition.pdf) | [Midterm 1](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/IntelligentSystemsforPatternRecognition/assignments/midterm1/FedericoMatteoni_Assignment4.ipynb)
 Introduction to Quantum Computing | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/IntroductiontoQuantumComputing/IntroductiontoQuantumComputing.pdf)
 Machine Learning | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/MachineLearning/ML.pdf)
 Parallel and Distributed Systems | [Notes](https://github.com/fexed/Notes/blob/master/UniPi_CSMaster_AI/IntroductiontoQuantumComputing/ParallelandDistributedSystems.pdf)
