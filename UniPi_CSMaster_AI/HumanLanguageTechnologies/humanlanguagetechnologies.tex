@@ -575,4 +575,25 @@ For $N$ classes we have $2N + 1$ tags, with IOB encoding: an I and a B for each 
 	\includegraphics[scale=0.5]{22.png}
 \end{center}
 Summary of the approaches.
+\section{Convolutional Neural Networks for NLP}
+The main CNN idea is to compute vectors for every poissible word subsequence of a certain length, regardless of whether the phrase is grammatially correct, and group them afterwards. Not very linguistically nor cognitively plausible.\\
+Convolution is classically used to extract features from images
+$$(f * g)(n) = \sum_{m=-M}^M f(n-m)g(m)$$
+Much like a "sliding window" across the data.
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+A convolutional layer in a NN is composed by a set of filetrs: combines a local selection of input values into an output value, sweeping across all input.\\
+During training each filter specializes into recognizing some kiind of relevant combination of features. CNNs work well on stationary features (independent from position). Filters have additional parameters that define:\begin{list}{}{}
+	\item Behavior at the start/end of documents (\textbf{padding})
+	\item Size of the sweep step (\textbf{stride})
+	\item Possible presence of holes in the filter window (\textbf{dilation})
+\end{list}
+\paragraph{Distant Supervision} Use the convolutional neural network to further refine the embeddings: word embeddigns from plain text are completely clueless about their sentiment behavior. Collect 10M tweets containing positive emoticons, used as distantly supervised labels to train sentiment-aware embeddings.
+\paragraph{Sentiment Specific Word Embeddings} The idea is to build sentiment specific word embeddings where we return also the polarity of the word, positive, neutral or negative.
+%TODO learning
+\paragraph{Sentiment Classification from a Single Neuron} A char-level LSTM with 4096 units has been trained on 82M reviews from Amazon, only to predict the next character. After training, one of the units had a very high correlation with sentiment, resulting in \textbf{state-of-the-art accuracy when used as a classifier}. The model can also be used to generate text: by setting the value of the sentiment unit, one can control the sentiment of the resulting text.
+\subsection{Regularization} 
+We can use \textbf{dropout}: creating a masking vector $r$ of Bernoulli random variables with probability $p$ (hyperparameter) of being 1 and delete features during training $$h = W(r\otimes z) + b$$
+Prevents overfitting. Not used at test time, scaling final vector by probability $p$. Usually yields an accuracy increase of 2-4\%.
 \end{document}
