@@ -352,5 +352,27 @@ while (more work to do) {
 The threads that gets longer tasks stops asking for more tasks for a while, and more tasks will be executed by the other threads. When tasks are almost finished, it may happen that some thread gets the "last" long task still taking longer than all the other threads. But it's not as impactful as stated before, as it's the worst case.\\
 In general, prefetch $k \simeq 2$ or $3$ tasks
 \paragraph{Job Stealing} Bunch of tasks, cyclic static assignment. With $nw$ threads and $m$ tasks, each thread gets $\frac{m}{nw}$ tasks. With job stealing, the thread that has finished its tasks and perceives that there's more to compute, steals a task from another thread. Problems: "size" of the steal, synchronize accesses, who to target\ldots the solution is a random policy: threads that finishes their own assigned task steal a random number $\in[0, nw]$ and steal that number of tasks.
-\paragraph{Autoscheduling + variable size chunks} 
+\paragraph{Autoscheduling + variable size chunks}  %TODO
+
+%TODO parte 1 16/03
+\paragraph{Template Based Implementation} For each pattern (pipe, farm, map, stencil\ldots) we have templates:\begin{list}{}{}
+	\item for each target architecture (multicore, cloud\ldots)
+	\item activity graph
+	\item performance modelling, also a way to have an idea of what we can achieve in terms of perfomance
+\end{list}
+Let's analyze a template for a pipeline on a shared memory multicore machine (\texttt{template(pipeline, SMmulticore)}):
+$$\longrightarrow\hbox{thread}\rightarrow\hbox{thread}\rightarrow\ldots\rightarrow\hbox{thread}\longrightarrow$$
+With the $\rightarrow$ being communication channels (queues). Modelling the speedup$(m)\simeq m$ with $m$ being the number of stages, so a linear speedup, if and only if $\max\{t_i\}\simeq t_j$ so the times of each stage are more or less the same.\\\\
+But we can have another template
+$$x_m\ldots x_2\:x_1\longrightarrow\hbox{queue}$$
+Where in the queue we put "\texttt{compute} $f$ \texttt{over} $x_i$" as $\langle f,x_i\rangle$ for each $i$. Each worker gets $\langle f,x\rangle$ and puts in the queue $\langle g, f(x)\rangle$. For $\langle g,x\rangle$ returns $\langle h,g(x)\rangle$ and for $\langle h,x\rangle$ returns $\langle$ end$,h(x)\rangle$.\\
+So the queue will have different types of tasks: the input tasks are assigned to $f$ but the intermediate tasks are assigned to $g$ or $h$: it's a pipeline. Of course, the end tasks means outputting on the output queue.\\
+A problem: the queue is a bottleneck. We can use some techniques: set of queues, local queues\ldots Also the ordering, but i can keep the index $i$ for each stage and use it at the end to keep in a buffer and output in the correct order.\\
+With modeling provided sufficient $T_A$, the speedup can be proportional to $nw$ and not $m$.\\\\
+Another template is a round-robin scheduler that assigns to some workers that deliver results to sorter with respect to the input order. The scheduler gives $\langle i, x_i\rangle$ and the output is $h(g(f(x_i)))$ ordered on $i$. Pipeline. Uses $nw+2$ concurrent activities, with a queue for each worker plus a queue for the sorter. With $T_A$ low, we have speedup circa $nw$.\\\\
+Changing architecture, from shared memory multicore to a clustered workstation. I can use any template ported to a cluster. For example
+$$\hbox{workstation}_1\rightarrow_{\hbox{TCP/IP}}\hbox{workstation}_2\ldots$$
+The speedup is circa the number of stages. But we can also have a number of workers in each workstation, with a scheduler and a merger per each. A kind of composed template, the third inside the stages of the first.
+$$T_S\simeq\frac{\max\{T_i\}_{nw}}{nw}$$
+The overhead is in the scheduling and merging parts of each stage. The scheduling is necessary, but in the ordering part we sort data on the input order, but we can do that just at the end of the last stage.
 \end{document}

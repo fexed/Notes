@@ -897,10 +897,38 @@ computing a correlation between ideally $v^\infty,h^\infty$, but of course can't
 	\includegraphics[scale=0.5]{48.png}
 \end{center}
 We start with a training vector on the visible units, alternating between %TODO
-\paragraph{Contrastive divergence Learning} Because Gibbs sampling converges really slowly: clamp a training vector $v^l$ on visible units. CD-1.
-%TODO image p-18
-Learns a very crude approxzimation of the gradient of log-likelihood, not following it closely %TODO
+\paragraph{Contrastive-Divergence Learning} Because Gibbs sampling converges really slowly: clamp a training vector $v^l$ on visible units. CD-1.
+\begin{center}
+	\includegraphics[scale=0.5]{49.png}
+\end{center}
+Clamping a training vector $v^l$ on visible units, update all hidden units in parallel, update all the visible units in parallel to get a reconstuction and update the hidden units again.
+$$\begin{array}{c c c}
+\langle v_ih_j\rangle_0&-&\langle v_ih_j\rangle_1\\
+\hbox{data}& &\hbox{reconstruction}
+\end{array}$$
+Learns a very crude approximation of the gradient of log-likelihood, not following it closely %TODO
 Why use it? Because in practice it works well.
+
+\subsection{Wrap Up}
+We've seen three families of models\begin{list}{}{}
+	\item \textbf{Bayesian Networks}: unsupervised data understanding, interpretability but weak on supervised performance. Directed.
+	\item \textbf{Markov Random Fields}: undirected version of BN, powerful when knowledge and constraints can be expressed with dictionaries. CRF: supervised way to be generative.\\
+	But computationally heavy.
+	\item \textbf{Dynamic Models}: topology unfolds on data structure, structured data processing but complex causal relationships.
+\end{list}
+\paragraph{Tractability} Generative models to be used when:
+\begin{list}{}{}
+	\item Need interpretability
+	\item Need to incorporate prior knowledge
+	\item Unsupervised learning or learning with partially observable supervision
+	\item Need reusable/portable knowledge
+\end{list}
+To be avoided when:
+\begin{list}{}{}
+	\item Having tight computational constraints
+	\item Dealing with raw, noisy, low-level data
+\end{list}
+Variational inference and sampling are efficient ways to learn approximations to intractable distribution. Neural networks can be used as variational functions or to implement sampling processes.
 \section{Sampling Methods} 
 \paragraph{Probability Recap}
 \paragraph{Sampling} Drawing a set of realisations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
@@ -919,7 +947,7 @@ Since $\hat{f}_X$ estimates a value, we could ask:
 \begin{list}{}{}
 	\item %TODO
 \end{list}
-An ubiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning that let $\hat{p}(X)$ the distribution over all posibble realisations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$E_{\hat{p}(X)}[\hat{f}_X] = E_{p(x)}[f(x)]$$
+An unbiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning that let $\hat{p}(X)$ the distribution over all possible realizations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$E_{\hat{p}(X)}[\hat{f}_X] = E_{p(x)}[f(x)]$$
 This is true provided that $\hat{p}(x_l) = p(x_l)$\\
 A sampler with this property is called \textbf{valid} %TODO
 
@@ -964,5 +992,46 @@ Which depends only on the Markov blanket of $s_j$ and $s_{\setminus j} = \{s_1,\
 $\hat{p}(X)$ of Gibbs sampling %TODO
 \paragraph{Markov Chain Monte Carlo Sampling Framework} MCMC
 
-
+\section{Convolutional Neural Networks}
+\paragraph{Deep Learning} Effectively is learning the representation of data.
+\paragraph{CNNs} The principle is complex neurons that take the outputs of simple neurons and assemble it into more complex structures.\\
+For sequences:
+%TODO image
+Apply a bank of 16 convolution kernels to sequences (window of 15 elements) trained by backpropagation with parameter sharing.\\
+For images:
+\begin{center}
+	\includegraphics[scale=0.5]{50.png}
+\end{center}
+\paragraph{Dense Vector Multiplication} E.g. take the 32x32 image and reshape into a vector of 3072. Input-sized weight vector for each hidden neuron $W$ of e.g. 100 neurons: 100$\times$3072 weights, a huge amount of parameters. That's why we want convolutional filters.
+\begin{center}
+	\includegraphics[scale=0.5]{51.png}
+\end{center}
+A set of weights that are applied to a 5$\times$5 region of the image. It's a \textbf{kernel} that outputs into the \textbf{feature map}. No longer a 1:1 correspondence between a pixel and a parameter.
+\begin{center}
+	\includegraphics[scale=0.5]{52.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.5]{53.png}
+\end{center}
+With a number of slices equal to the number of image channels. Basically a filter per channel color, but they are convolved together still giving a $28\times28$ feature map even with 3 color channels for example. The \textbf{convolution map stays bidimensional}.
+\paragraph{Stride} Basic convolution slides the filter on the image one pixel at the time (stride = 1). The slide value is an hyperparameter. The stride reduces the number of multiplication, sumbsampling the image. With a stride of 2 for example we would end up with a $14\times14$ map.
+\paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride and size? From $7\times7$ image, a filter of $K=3$ (meaning $K\times K$)
+%TODO general rule
+\paragraph{Zero Padding} Add columns and rows of zeros to the border of image to handle border pixels, padding of $P$ rows/columns.
+%TODO rule with padding P
+\paragraph{Feature Map Transformation} Convolution is a linear operator, applying an element-wise nonlinearity we obtain a transformed feature map.
+$$\max(0, w^Tx_{ij} + b)$$
+The above is ReLU, used because of the simplicity of computing the gradient.
+\paragraph{Pooling} Operates on the feature map to make the representation: smaller (subsampling) and robust to some transformations.\\
+Very simple: \begin{center}
+	\includegraphics[scale=0.5]{54.png}
+\end{center}
+Max pooling is the one used more frequently, but there's more: average pooling, L2-norm pooling, even random pooling.\\
+It's uncommon to use zero padding with pooling.
+$$W' = \frac{W-K}{S} + 1$$
+\paragraph{Convolutional Architecture}
+\begin{center}
+	\includegraphics[scale=0.5]{55.png}
+\end{center}
+Usually use a certain number of convolutional layers ending in a small final image feeded into some fully connected layers.
 \end{document}

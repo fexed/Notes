@@ -596,4 +596,88 @@ During training each filter specializes into recognizing some kiind of relevant 
 \subsection{Regularization} 
 We can use \textbf{dropout}: creating a masking vector $r$ of Bernoulli random variables with probability $p$ (hyperparameter) of being 1 and delete features during training $$h = W(r\otimes z) + b$$
 Prevents overfitting. Not used at test time, scaling final vector by probability $p$. Usually yields an accuracy increase of 2-4\%.
+\section{Recurrent Neural Networks}
+Up until now, whether we grouped words or not each word/group would be handled independently from the others.
+\paragraph{Recap} A language model assigns to each sentence $W$ a probability $P(W) = P(w_1,\ldots,w_n)$. Alternatively we want to compute $P(w_n\:|\:w_1,\ldots,w_{n-1})$.\\
+The model that computes either probability is called \textbf{Language Model}, and language modeling is the task of estimating a language model.\\
+The Markov assumption is that $w_n$ depends only on the preceding $n-1$ words. $n$-gram models have sparsity (out-of-vocabulary words and never-seen-prefixes) and storage problems (counts for every $n$-gram): bigger $n$ makes the sparsity problem words, typically $n<5$.\\
+\textbf{Neural Language Models} improves over $n$-gram language models: no sparsity and no need to store all observed $n$-grams, but still problems: fixed window is too small, never large enough, and no symmetry in the input where each word is still treated independently and multiplied by completely different weights. We need a \textbf{neural architecture that can process any length input}.
+\paragraph{Recurrent} Because they perform the same process for every element where \textbf{the output depends on the previous elements}. RNNs have a "memory" which captures information about what has been calculated so far. In theory, RNNs can make use of information in arbitrarily long sequences.
+\begin{center}
+	\includegraphics[scale=0.5]{24.png}
+\end{center}
+\paragraph{Hidden Units} The hidden state $s_t$ represents the memory of the network: it captures information about what happened in all the previous time steps.\\
+The output $o_t$ is computes solely based on the memory at time $t$.\\
+$s_t$ typically can't capture information from too many time steps ago. Unlike traditional deep networks, which uses different parameters at each layer, a RNN shares the same parameters across all steps ($U, V$ and $W$ above). This reflects the fact that we are performing the same task at each step, just with different inputs, greatly reducing the total number of parameters we need to learn.
+\paragraph{Advantages} We can process input of any length and model size doesn't increase with longer input. The computation for step $t$ in theory can use information from many steps back.\\
+Weights are shared across timesteps, so representations are shared too.
+\paragraph{Disadvantages} Recurrent computation is really slow. In practice, is difficult to access information from many steps back.
+\paragraph{Simple RNN Language Model}
+\begin{center}
+	\includegraphics[scale=0.5]{25.png} %TODO riscrivere
+\end{center}
+\paragraph{Vanilla RNN}
+\begin{center}
+	\includegraphics[scale=0.5]{26.png}
+\end{center}
+$$h_t = \sigma\left(Wh_{t-1} + Wx_t + b\right)$$
+$$y_t = \sigma\left(Vh_t\right)$$
+Notice that $y$ is computed from the current $h'$ only.
+\paragraph{Training} Tasks:
+\begin{list}{}{}
+	\item for each timestep of the input sequence $x$ we predeict the output $y$ synchronously
+	\item for the input sequence $x$ we predict the scalar value of $y$ (e.g. at the end of the sequence)
+\end{list}
+%TODO
+Backpropropagation through time
+\begin{center}
+	\includegraphics[scale=0.5]{27.png}
+\end{center}
+Applying the chain rule $$\frac{\partial h_2}{\partial h_0} = \frac{\partial h_2}{\partial h_1}\frac{\partial h_1}{\partial h_0}$$
+For time 2:
+$$\frac{\partial E_2}{\partial \Theta} = \sum_{k=0}^2\frac{\partial E_2}{\partial \hat{y}_2}\frac{•}{•}$$ %TODO
+\paragraph{Training RNN Language Model} Get a big corpus of text and feed into the RNN-LM, computing the output distribution for every step $t$.\\
+Loss function on step $t$ is cross-exntropy between the predicted probability distribution $\hat{y}$ and the true next word $y^{(t)}$ (one-hot for $x^{(t+1)}$)
+$$J^{(t)}(\Theta) = \hbox{CrossEntropy}(\hat{y}^{(t)}, y^{(t)}) = -\sum_{w\in V} y_w^{(t)}\log\hat{y}_w^{(t)} = -\log\hat{y}_{x_{t+1}}^{(t)}$$
+Average this to get the overall loss for the entire training set
+$$J(\Theta) = \frac{1}{T}\sum_{i=1}^T J^{(t)}(\Theta) = \frac{1}{T}\sum_{i=1}^T -\log\hat{y}_{x_{t+1}}^{(t)}$$
+In practice: do this for each sentence and repeat through stochastic gradient descent.
+\paragraph{Vanishing Gradients} Known problems: the gradients decay exponentially and networks stops learning without updating, making impossible to learn correlations between temporally distant events. A solution is to use ReLU instead of sigmoids.
+\begin{center}
+	\includegraphics[scale=0.5]{28.png}
+\end{center}
+Smaller weights initialization leads to faster gradient vanishing, and very big initialization make the gradient diverge fast.
+\paragraph{Exploding Gradients} The opposite: large increase in the norm, causing NaNs or large fluctuations in cost functions.
+\begin{center}
+	\includegraphics[scale=0.4]{29.png}
+\end{center}
+Solutions: gradient clipping, reducing learning rates or changing loss function by setting constraints on weights (L1 or L2 norms).
+\subsection{Specializations}
+\paragraph{Notation}\begin{center}
+	\includegraphics[scale=0.33]{30.png}
+\end{center}
+\subsubsection{LSTM}
+\paragraph{Long Short-Term Memory}
+\begin{center}
+	\includegraphics[scale=0.5]{31.png}
+\end{center}
+The core idea is this cells state is changed slowly with only minor interactions. Very easy for information to flow unchanged.\\
+Forget gate and input gate.\\
+The first sigmoid %TODO
+the second sigmoid decides how much input in the next stage\\
+The output gate of the third sigmoid controls what goes in the output.\\
+Why sigmoid or tanh: sigmoid acting as switch %TODO
+\begin{center}
+	\includegraphics[scale=0.33]{32.png} %TODO riscrivere
+\end{center}
+\pagebreak
+\subsubsection{GRU}
+\paragraph{Gated Recurrent Units}
+\begin{center}
+	\includegraphics[scale=0.5]{33.png}
+\end{center}
+Combines forget and input gate into a single update gate, also merging cell state and hidden state. Simpler than LSTM.
+\begin{center}
+	\includegraphics[scale=0.5]{34.png}
+\end{center}
 \end{document}
