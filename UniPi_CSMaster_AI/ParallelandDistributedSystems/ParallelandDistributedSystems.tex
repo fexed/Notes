@@ -375,4 +375,35 @@ $$\hbox{workstation}_1\rightarrow_{\hbox{TCP/IP}}\hbox{workstation}_2\ldots$$
 The speedup is circa the number of stages. But we can also have a number of workers in each workstation, with a scheduler and a merger per each. A kind of composed template, the third inside the stages of the first.
 $$T_S\simeq\frac{\max\{T_i\}_{nw}}{nw}$$
 The overhead is in the scheduling and merging parts of each stage. The scheduling is necessary, but in the ordering part we sort data on the input order, but we can do that just at the end of the last stage.
+\paragraph{Macro Data Flow Implementation} With Data Flow we denote the operations where the order of computations are dictated by the flow of data encountered by the program counter.\\
+So we have nodes that are composed of $\langle$ operator, variables, output$\langle$. For example, $$(a+b)\cdot(c-d)$$ can be represented as 
+\begin{center}
+	\includegraphics[scale=0.5]{7.png}
+\end{center}
+We have tokens on the inputs, that represent when data are available. When all data is available, the node becomes "fireable". This technique can be used to implement parallel patterns, Macro because instead of considering operations as nodes with functions an input/output nodes we consider macros with full portions of code instead of primitive functions.\\
+Let's consider a program \texttt{main.cpp} that uses some pattern internally from a pattern library. First step: from a pattern tree we compile the MDF (Macro Data Flow graph). We have a graph repository and a pool of executors: anytime I have some input data I create a copy of the graph in the repository with the tokens that represent the data.\begin{center}
+	\includegraphics[scale=0.5]{8.png}
+\end{center}
+Each executor executes a loop where they get a fireable instruction, compute and deliver the output tokens.
+\paragraph{Compiler} From the Pattern Tree it outputs the MDF graph.
+\begin{list}{}{}
+	\item Compile(Pipe($f,g$)) $\rightarrow$ $\langle f,$ in, A$\rangle$, $\langle g,$ A, out$\rangle$
+	\item Compile(Seq($f$)) $\rightarrow$ $\langle f,$ in, out$\rangle$
+	\item Compile(Farm($f$)) $\rightarrow$ Compile($f$) for each instance of input
+	\item Compile(Map($f$)) $\rightarrow$ Compile($f$) for each element of the input collection
+	\begin{center}
+		\includegraphics[scale=0.5]{9.png}
+	\end{center}
+	\item Compile(Reduce($f$)) $\rightarrow$ \begin{center}
+		\includegraphics[scale=0.5]{10.png}
+	\end{center}
+\end{list}
+Each one of the graphs has one input token and one output token, mandatory to be able to compose the graph. The Farm parallelism disappears %TODO
+and third %TODO
+\paragraph{Problems}\begin{list}{}{}
+	\item Contention over repository
+	\item Token delivery
+	\item Maintain the list of fireable instructions
+	\item Reordering on the out stream
+\end{list}
 \end{document}

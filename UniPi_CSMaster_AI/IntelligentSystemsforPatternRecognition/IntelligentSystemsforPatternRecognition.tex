@@ -1034,4 +1034,66 @@ $$W' = \frac{W-K}{S} + 1$$
 	\includegraphics[scale=0.5]{55.png}
 \end{center}
 Usually use a certain number of convolutional layers ending in a small final image feeded into some fully connected layers.
+\paragraph{Filter Banks}
+\begin{center}
+	\includegraphics[scale=0.5]{56.png}
+\end{center}
+The number of parameters in this model is $K\times K\times D_I\times D_K$ because pooling is non parametric and feature maps have no parameters, so the parameters are just in the filters.
+\paragraph{CNNs as Sparse Neural Networks}
+Let's use a 1D input sequence to ease graphics.
+\begin{center}
+	\includegraphics[scale=0.5]{57.png}
+\end{center}
+Convolution amounts to sparse connectivity (reduce parameters) with parameter sharing (enforces variance).\\
+$s_i$ is a convolutional neuron with a kernel size $3\times1$
+\subparagraph{Strided Convolution} A neuron after every stride, making connectivity sparser.
+\begin{center}
+	\includegraphics[scale=0.5]{58.png}
+\end{center}
+\subparagraph{Pooling} Just another neuron.
+\begin{center}
+	\includegraphics[scale=0.5]{59.png}
+\end{center}
+\subparagraph{Cross-Channel Pooling and Spatial Invariance}
+\begin{center}
+	\includegraphics[scale=0.5]{60.png}
+\end{center}
+\subparagraph{Hierarchical Feature Organization}
+\begin{center}
+	\includegraphics[scale=0.5]{61.png}
+\end{center}
+\paragraph{CNN Training}
+Training by variants of the standard backpropagation that account for the fact that connections share weights (convolution parameters).
+\begin{multicols}{2}
+\begin{center}
+	\includegraphics[scale=0.5]{62.png}
+\end{center}
+The gradient $\Delta w_i$ is obtained by summing the contributions from all the connections sharing that weight.\\
+We can write convolution as dense multiplication with shared weights.
+\end{multicols}
+\paragraph{Deconvolution}
+\begin{center}
+	\includegraphics[scale=0.5]{63.png}
+\end{center}
+We can obtain the transposed convolution using the same logic of the forward convolution. If you had no padding in the forward convolution you need to use much padding when doing the transposed convolution.
+\paragraph{ReLU} ReLU helps counteract gradient vanish: sigmoid first derivative vanishes as we increase or decrease $z$, ReLU first derivative is 1 when unit is active and 0 otherwise. ReLU second derivative is 0 (no second order effects).\\
+Easy to compute and favors sparsity.
+\paragraph{VGGNet} Standardized convolutional layer:
+\begin{list}{}{}
+	\item 3$\times$3 convolutions of stride 2
+	\item 2$\times$2 convolutions of stride 2
+	\item 16 convolutional layers with 3 fully connected layers
+\end{list}
+Not very good because very limited, need to push for diversity. 
+\paragraph{GoogLeNet} With the Inception module, based on the idea of diversifying the convolution.
+\begin{center}
+	\includegraphics[scale=0.5]{64.png}
+\end{center}
+But many parameters: number of channels times number of convolutional layers times the dimensions. If not careful the application of this module explodes the number of parameters.\\
+Kernels of different size to capture details at varied scale, aggregated before sending to next layer.\\
+1$\times$1 convolutions are helpful.\begin{center}
+	\includegraphics[scale=0.5]{65.png}
+\end{center}
+Only 5M parameters, followed by v2, v3 and v4 which added more filter factorization and introduced heavy use of Batch normalization.
+\paragraph{Batch Normalization} Very deep neural networks are subject to internal covariate shift. Distribution of inputs to a layer $N$ may vary (shift) with different minibatches due to adjustments at layer $N-1$. Layer $N$ can get confused by this, so (simplifying) we normalize for mean and variance in each minibatch.
 \end{document}
