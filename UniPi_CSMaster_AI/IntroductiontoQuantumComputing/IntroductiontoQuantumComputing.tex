@@ -14,6 +14,7 @@
 \usepackage{pgfplots}
 \usepackage{tikz}
 \usepgflibrary{shapes}
+\usepackage{cancel}
 \usepgfplotslibrary{fillbetween}
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
@@ -844,5 +845,55 @@ The relative probability of observing $|00\rangle$ and $|01\rangle$ hasn't chang
 \paragraph{Example} Given $$|\psi\rangle=\sqrt{\frac{1}{11}}|00\rangle+\sqrt{\frac{5}{11}}|01\rangle+\sqrt{\frac{2}{11}}|10\rangle+\sqrt{\frac{3}{11}}|11\rangle$$
 Then the probability of measuring $0$ in the first qubit is $\frac{1 + 5}{11} = \frac{6}{11}$ and the state after measuring it becomes
 $$\sqrt{\frac{11}{6}}\left(\sqrt{\frac{1}{11}}|00\rangle+\sqrt{\frac{5}{11}}|01\rangle\right)$$
-
+\subsection{Superdense Coding}
+Simple yet surprising application of elementary quantum mechanics. It involves two parties, Alice and Bob, who are far away from each other and the goal is the following: Alice in in possession of two classical bits of information which she wishes to send to Bob \textbf{using a single qubit}.\\
+Alice and Bob initially share a pair of qubits in the entangled Bell state $$|\beta_{00}\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}$$
+One qubit is in Alice's possession, the other is in Bob's possession.\\
+How are the Bell states formed?
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}
+\end{center}
+$$|00\rangle \rightarrow H\otimes I\rightarrow \frac{|0\rangle+|1\rangle}{\sqrt{2}}|0\rangle\rightarrow\hbox{CNOT}\rightarrow\frac{|00\rangle+|11\rangle}{\sqrt{2}} = |\beta_{00}\rangle$$
+$$|01\rangle \rightarrow H\otimes I\rightarrow \frac{|0\rangle+|1\rangle}{\sqrt{2}}|1\rangle\rightarrow\hbox{CNOT}\rightarrow\frac{|01\rangle+|10\rangle}{\sqrt{2}} = |\beta_{01}\rangle$$
+$$|10\rangle \rightarrow H\otimes I\rightarrow \frac{|0\rangle-|1\rangle}{\sqrt{2}}|0\rangle\rightarrow\hbox{CNOT}\rightarrow\frac{|00\rangle-|11\rangle}{\sqrt{2}} = |\beta_{10}\rangle$$
+$$|11\rangle \rightarrow H\otimes I\rightarrow \frac{|0\rangle-|1\rangle}{\sqrt{2}}|1\rangle\rightarrow\hbox{CNOT}\rightarrow\frac{|01\rangle-|10\rangle}{\sqrt{2}} = |\beta_{11}\rangle$$
+\textbf{Every vector is this basis is entangled!}
+\paragraph{Sharing a Pair of Entangled Bits}\begin{list}{}{}
+	\item The state $|\beta_{00}\rangle$ would have to be created ahead of time, when the qubits are in a lab together and can be made to interact in a way that will give rise to the entanglement between them.
+	\item After the state is created, Alice and Bob each take one of the two qubits away with them.
+\end{list}
+Alternatively, some third party may prepare the entangled state ahead of time and sens one qubit to Alice and the other to Bob.\\\\
+If they are careful not to let the qubits interact with the environment or other quantum systems, Alice and Bob's joint state will remain entangled.\\
+Note that $|\beta_{00}\rangle$ is a fixed state, there is no need for Alice to have sent any qubit to Bob to prepare this state.
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\paragraph{Procedure}
+\begin{center}
+	\begin{tabular}{c c l}
+\textbf{To send}&\makecell{\textbf{Alice applies to her}\\\textbf{qubit the gate}}&\textbf{Resulting state}\\
+\hline
+00&$I$& $|\beta_{00}\rangle \mapsto |\beta_{00}\rangle$ \\
+01&$X$& $|\beta_{00}\rangle \mapsto \frac{|10\rangle+|01\rangle}{\sqrt{2}} = |\beta_{01}\rangle$\\
+10&$Z$& $|\beta_{00}\rangle \mapsto  \frac{|00\rangle-|11\rangle}{\sqrt{2}} = |\beta_{10}\rangle$\\
+11&$ZX$& \makecell{$|\beta_{00}\rangle \mapsto_{X\otimes I}\frac{|10\rangle+|01\rangle}{\sqrt{2}}\mapsto_{Z\otimes I}\frac{-|10\rangle+|01\rangle}{\sqrt{2}}=|\beta_{11}\rangle$}
+\end{tabular}
+\end{center}
+The resulting state is one of the four Bell states, which form an orthonormal basis and can be distinguished by an appropriate quantum measurement. So after applying the appropriate gate, Alice sends her qubit to Bob. Bob is in possession of one of the four Bell states, depending on the classical bits that Alice wished to send him, so he performs a measurement in the Bell basis and determines which bit string Alice sent.\\
+The measurement can be implemented by first performing a change of basis, then performing a measurement in the computational basis.\\
+The outcome of the Bell measurement reveals to Bob the Bell states he possesses and allows him to determine with certainty the two classical bits.\\
+The measurement gives Bob the values $a,b$ corresponding to the Bell state $|\beta_{ab}\rangle$ in his possession.
+\paragraph{Example} Alice wants to send $10$, so she applies $Z$ to her qubit
+$$|\beta_{00}\rangle = \frac{|00\rangle+|11\rangle}{\sqrt{2}} \mapsto_{Z\otimes I}\frac{|00\rangle-|11\rangle}{\sqrt{2}}$$
+and send the qubit to Bob. Bob performs the measurement: applies a CNOT with the first qubit as control and the second as target, then a Hadamard on the first:
+$$\frac{|00\rangle-|11\rangle}{\sqrt{2}} \mapsto_{\hbox{CNOT}}\frac{|00\rangle-|10\rangle}{\sqrt{2}}\mapsto_{H\otimes I}\frac{1}{\sqrt{2}}\left(\frac{|0\rangle+|1\rangle}{\sqrt{2}}|0\rangle-\frac{|0\rangle-|1\rangle}{\sqrt{2}}|0\rangle\right)=$$
+$$=\frac{1}{2}(\cancel{|00\rangle}+|10\rangle \cancel{-|00\rangle}+|10\rangle) = \frac{1}{2}(2|10\rangle) = |10\rangle$$
+Now Bob has the state $|10\rangle$ and know that Alice sent $10$.\\\\
+Alice, interacting with only a single qubit, is able to transmit two bits of information to Bob. Two qubits are involved in the protocol, but Alice never need to interact with the second qubit. Classically, the task Alice accomplishes would have been impossible had she only transmitted a single classical bit.\\
+Information is physical, and surprising physical theories as Quantum Mechanics may predict surprising information processing abilities.
+\paragraph{Communication Channels}
+\begin{list}{}{}
+	\item \textbf{Quantum Communication Channel} is a communication line (e.g. fiber optic, cable\ldots) which can carry qubits between two remote locations.
+	\item \textbf{Communication Channel} is a line that can carry only classical bits (and not qubits).
+\end{list}
 \end{document}
