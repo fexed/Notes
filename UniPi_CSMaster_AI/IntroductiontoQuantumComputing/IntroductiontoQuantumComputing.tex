@@ -694,4 +694,155 @@ An example is the operator $|0\rangle\langle0|$ $$(|0\rangle\langle0|)^2 = |0\ra
 \paragraph{Example} %TODO
 \paragraph{Expectation}
 $$E_\psi[M] = \langle\psi|M|\psi\rangle$$
+\paragraph{Recap on Measurement Postulate} It's a mathematical formalism for measurements. It doesn't tell us what measurement can be done in practice or with what efficiency. Some measurements can be simple to state mathematically but \textbf{not easy to implement}.\\
+Tells us how to compute the probability $P(m)$ that outcome $m$ occurs and the new state of the system after the measurement with outcome $m$ applying the measurement operators $M_m$ (one operator for each possible outcome).\\
+For projective measurement, these operators, can be derived from the spectral decomposition of the observable $M$ corresponding to the measurement.\\
+An observable is a property of a physical system (a \textbf{physical quantity}) that can be measured: position, polarization\ldots Each physical observable corresponds to a \textbf{Hermitian operator}, all eigenvalues of an observable are real and the eigenvectors are orthogonal. The \textbf{possible outcomes of a measurements are the real eigenvalues of $M$}.
+Any observable $M$ can be written it as its \textbf{spectral decomposition} $$M = \sum_m mP_m = \sum_m m|u_m\rangle\langle u_m|$$
+where \begin{list}{}{}
+	\item $m$ are the real eigenvalues, the outcomes of the measurements
+	\item $|u_m\rangle$ is the eigenvector associated to $m$
+	\item $P_m = |u_m\rangle\langle u_m|$ is the \textbf{projector} onto the eigenspace of $M$ with real eigenvalue $m$
+\end{list}
+The measurement operators are the projectors $P_m = |u_m\rangle\langle u_m|$\\
+The probability of getting result $m$ on the state $|\psi\rangle$ is $$p(m) = \langle\psi\:|\:P_m^+ P_m\:|\:\psi\rangle = \langle\psi|P_m|\psi\rangle $$
+Given that outcome $m$ occurred, the state of the quantum system immediately after is $$\frac{P_m|\psi\rangle}{\sqrt{p(m)}}$$
+The operators $P_m$ satisfy the completeness relation.
+$$\sum_m P_m^+P_m = \sum_m P_m = I$$
+\paragraph{Measurements in the Standard Basis} A measurement in the $|0\rangle, |1\rangle$ basis corresponds to perform a projective measurement with projectors $$P_0 = |0\rangle\langle 0| = \left(\begin{array}{c}1//0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}1&0\\0&0\end{array}\right)$$
+$$P_1 = |1\rangle\langle 1| = \left(\begin{array}{c}1//0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}0&0\\0&1\end{array}\right)$$
+Can be seen as projective measurement with respect to Hermitian matrix $Z$
+$$Z = |0\rangle\langle 0| - |1\rangle\langle 1| = \left(\begin{array}{c c}
+1&0\\0&-1
+\end{array}\right)$$
+Or also with respect to $I$ with eigenvalues equal to 1
+$$I = |0\rangle\langle 0| + |1\rangle\langle 1| = \left(\begin{array}{c c}
+1&0\\0&1
+\end{array}\right)$$
+\paragraph{Measurements in Orthonormal Basis} A measurement in an orthonormal basis $\{|m\rangle\}$ corresponds to perform a projective measurement with projector operators $$P_m=|m\rangle\langle m|$$
+For example in the hadamard basis $|+\rangle, |-\rangle$
+$$|+\rangle = H|0\rangle = \frac{|0\rangle+|1\rangle}{\sqrt{2}}$$
+$$|-\rangle = H|1\rangle = \frac{|0\rangle-|1\rangle}{\sqrt{2}}$$
+Corresponds to perform projective measurement with projectors
+$$P_+ = |+\rangle\langle +| = \frac{1}{2}\left(\begin{array}{c}
+1\\1
+\end{array}\right) (1\:1) = \frac{1}{2}\left(\begin{array}{c c}
+1&1\\1&1
+\end{array}\right)$$
+$$P_- = |-\rangle\langle -| = \frac{1}{2}\left(\begin{array}{c}
+1\\-1
+\end{array}\right) (1\:-1) = \frac{1}{2}\left(\begin{array}{c c}
+1&-1\\-1&1
+\end{array}\right)$$
+And the completeness equation is satisfied $$P_+^+P_+ + P_-^+P_+ = P_+ + P_- = I$$
+Single qubit measurements: measuring the identity but also measures the projection over the $x$ axis. All Pauli matrices have eigenvalues of +1 and -1:
+$$X = |+\rangle\langle +| - |-\rangle\langle -| = \left(\begin{array}{c c}
+0&1\\1&0
+\end{array}\right)$$
+\subparagraph{Measuring example} Measuring the state $$|\psi\rangle =\alpha|0\rangle + \beta|1\rangle$$
+in the $|+\rangle,|-\rangle$ basis gives the result $+$ with probability $$P(+) = \langle\psi|P_+|\psi\rangle = \langle\psi|+\rangle\langle+|\psi\rangle = \frac{1}{2}|\alpha + \beta|^2$$ %TODO
+and state after the measurement is $|+\rangle$, while it gives the result $-$ with probability $$P(-) = \langle\psi|P_-|\psi\rangle = \langle\psi|-\rangle\langle-|\psi\rangle = \frac{1}{2}|\alpha - \beta|^2$$ %TODO
+and state after is $|-\rangle$.\\
+Also relative phase factors are important. Consider the state $|+\rangle,|-\rangle$ differing just for a relative phase factor (plus and minus)
+$$|+\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\:\:\:\:\:|-\rangle = \frac{1}{\sqrt{2}}(|0\rangle - |1\rangle)$$
+We cannot distinguish between them by measuring in the computational basis: both 0,1 outcomes occur with probability $\frac{1}{2}$.\\
+Considering the $|+\rangle,|-\rangle$ basis, which has measurements operators $P_+,P_-$ if we measure the state $|+\rangle$ we always get outcome $+$, $P(+) = 1, P(-) = 0$. Opposite for measuring $|-\rangle$ getting always $-$ as outcome. So measuring in the $|+\rangle,|-\rangle$ basis distinguish the two state perfectly, relative phase matters.\\
+How to measure in a basis different from the computational basis? In the computational basis we have a register, quantum information becomes classical information. How to measure in different basis, for instance the hadamard basis?\\
+First we apply a change of basis from the hadamard back to the computational. Then measure respect to the computational and after we change back to the original basis. Example %TODO
+We measure either $|0\rangle$ or $|1\rangle$, how to change back? Just apply again the change of basis transformation, since the circuits are always reversible.\\
+In general, to implement a measurement with respect to an orthonormal basis $\{\phi_j\rangle\}$:\begin{list}{}{}
+	\item The matrix $U$ is applied to perform a basis change to the computational basis
+	$$U\left(\sum_j\alpha_j|\phi_j\rangle\right) = \sum_j\alpha_jU|\phi_j\rangle = \sum_j\alpha_j|j\rangle$$
+	\item Then a measurement is made in the computational basis obtaining a specific (classical) outcome with probability $|\alpha_j|^2$.\\
+	The state of the system after this measurement is $|j\rangle$
+	\item Finally $U^{-1}$ is applied to change back to the $\{|\phi_j\rangle\}$ basis, leaving the post-measurement state $|\phi_j\rangle$
+\end{list}
+\subsubsection{Composition of Systems}
+The \textbf{state space of a composite physical system is the tensor product of the state spaces of the component subsystems}. Moreover, if we have systems numbered 1 through $n$, and system number $i$ is prepared in the state $|\psi_i\rangle$, then the joint state of the total system is
+$$|\psi_1\rangle\otimes\ldots\otimes|\psi_n\rangle$$
+Often $\otimes$ is omitted and the above formula is rewritten as $|\psi_1,\ldots,\psi_n\rangle$\\
+Tensor product is the mathematical structure used to describe the state space of a composite physical system because we need a new space which captures the interaction of all $n$ systems.\\
+Not all states of acombined system can be separated into the tensor product of states of the individual components.\\
+Notation:
+\begin{list}{}{}
+	\item $|\psi\rangle = \alpha|0\rangle+\beta|1\rangle = \left(\begin{array}{c}
+	\alpha\\\beta
+	\end{array}\right)$
+	\item $|\phi\rangle = \gamma|0\rangle+\delta|1\rangle = \left(\begin{array}{c}
+	\gamma\\\delta
+	\end{array}\right)$
+	\item \textbf{Joint state of the two qubits}
+	$$|\psi\rangle\otimes|\phi\rangle = \left(\begin{array}{c}
+	\alpha\\\beta
+	\end{array}\right)\otimes\left(\begin{array}{c}
+	\gamma\\\delta
+	\end{array}\right) = \left(\begin{array}{c}
+	\alpha\gamma\\\alpha\delta\\\beta\gamma\\\beta\delta
+	\end{array}\right) = \alpha\gamma|00\rangle + \alpha\delta|01\rangle + \beta\gamma|10\rangle + \beta\delta|11\rangle$$
+	\item \textbf{Standard basis notation}
+	$$|00\rangle=\left(\begin{array}{c}1\\0\\0\\0\end{array}\right)\:\:|01\rangle=\left(\begin{array}{c}0\\1\\0\\0\end{array}\right)\:\:|10\rangle=\left(\begin{array}{c}0\\0\\1\\0\end{array}\right)\:\:|11\rangle=\left(\begin{array}{c}0\\0\\0\\1\end{array}\right)$$
+\end{list}
+\paragraph{Separable States} A state $|\psi\rangle\in C^n\otimes C^m$ of a combined system is a \textbf{separable state} if it can be expressed as $|\psi\rangle = |\psi_1\rangle\otimes|\psi_2\rangle$ for some $|\psi_1\rangle\in C^n$ and $|\psi_2\rangle\in C^m$\\
+For example $$\frac{1}{2}(|00\rangle+|01\rangle+|10\rangle+|11\rangle) = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle)\otimes \frac{1}{\sqrt{2}}(|0\rangle+|1\rangle)$$
+For example we get separable state when qubits are prepared independently and kept isolated.\\
+Physical separation does not imply that the joint state must be separable. Two physically separated particles can be entangled (correlated).
+\paragraph{Entangled States} A state of a composite system that cannot be written as a product of states of its component systems is called \textbf{entangled state}.\\
+For example the bell state is entangled, cannot be writted as a product of single-qubit states:
+$$|\psi\rangle=\frac{1}{\sqrt{2}}(|00\rangle+|11\rangle) = \frac{1}{\sqrt{2}}\left(\begin{array}{c}
+1\\0\\0\\1
+\end{array}\right)$$
+%TODO dim
+Either $\alpha$ or $\delta$ must be zero but with alpha zero the first element is zero, with delta zero the last element is zero. Cannot exist.
+\paragraph{Example} 2 qubit composite system $|\psi_1\rangle\otimes|\psi_2\rangle$ where we apply the $X$ (NOT) gate only to the first qubit. So implicitly we apply the identity gate $I$ to the second qubit.
+$$|\psi_1\rangle\otimes|\psi_2\rangle\mapsto X|\psi_1\rangle\otimes I|\psi_2\rangle = (X\otimes I)(|\psi_1\rangle\otimes|\psi_2\rangle)$$
+So for a $n$ qubit composite system $|\psi_1\rangle\otimes\ldots\otimes|\psi_n\rangle$, applying the $X$ gate to the first qubit corresponds to applying the operation $X\otimes I\otimes\ldots\otimes I$ (with $I$ repeated $n-1$ times) to the entire system.
+\paragraph{CNOT Gate} Just as there are 2-qubit states that cannot be written as the product of two 1-qubit states, there are 2-qubit gates (acting on both qubits) that cannot be written as a tensor product of two 1-qubit gates.\\
+The CNOT gate flips the state of the second qubit if the first qubit is in state $|1\rangle$, and does nothing otherwise:
+$$|00\rangle\mapsto|00\rangle$$
+$$|01\rangle\mapsto|01\rangle$$
+$$|10\rangle\mapsto|11\rangle$$
+$$|11\rangle\mapsto|10\rangle$$
+Represented as a matrix:
+$$\left(\begin{array}{c c c c}
+1&0&0&0\\
+0&1&0&0\\
+0&0&0&1\\
+0&0&1&0
+\end{array}\right)$$
+and \textbf{cannot be written as a tensor product of two 1-qubit gates}.
+\paragraph{Measurements on Multiple Qubits} Considering a two qubit state
+$$|\psi\rangle=\alpha|00\rangle+\beta|01\rangle+\gamma|10\rangle+\delta|11\rangle$$
+a complete set of measurement operators in the computational basis would be 
+$$P_{00} = |00\rangle\langle00\rangle\:\:P_{01} = |01\rangle\langle01\rangle\:\:P_{10} = |10\rangle\langle10\rangle\:\:P_{11} = |11\rangle\langle11\rangle$$
+When measuring the two qubits we get\begin{list}{}{}
+	\item the result $00$ with probability $|\alpha|^2$
+	\item the result $01$ with probability $|\beta|^2$
+	\item the result $10$ with probability $|\gamma|^2$
+	\item the result $11$ with probability $|\delta|^2$
+\end{list}
+How do we measure only the first qubit? We \textbf{tensor the desired measurement operator with the identity matrix}: if we measure the first qubit to be in state $|0\rangle$, the measurement operator will consist of projectors onto the state $|00\rangle,|01\rangle$ since we must consider all states consistent with the measurements.
+$$P_{0*} = |00\rangle\langle00| + |01\rangle\langle01| = (|0\rangle\otimes|0\rangle)(\langle0|\otimes\langle0|) + (|0\rangle\otimes|1\rangle)(\langle0|\otimes\langle1|) =$$
+$$=|0\rangle\langle0|\otimes|0\rangle\langle0|+|0\rangle\langle0|\otimes|1\rangle\langle1| = |0\rangle\langle0|\otimes(|0\rangle\langle0|+|1\rangle\langle1|) = |0\rangle\langle0|\otimes I$$
+because $(A\otimes B)(C\otimes D) = (AC)\otimes(BD)$. Similarly
+$$P_{1*} = |10\rangle\langle10|+|11\rangle\langle11| = \ldots = |1\rangle\langle1|\otimes I$$
+\pagebreak
+
+Therefore the probability of measuring the first qubit in state $|0\rangle$ is $$p(0) = \langle\psi|P_{0*}|\psi\rangle = \langle\psi|\:|0\rangle\langle0|\otimes I|\psi\rangle = (\alpha*\:\beta*\:\gamma*\:\delta*)\left(\begin{array}{c c c c}
+1&0&0&0\\
+0&1&0&0\\
+0&0&0&0\\
+0&0&0&0
+\end{array}\right)\left(\begin{array}{c}
+\alpha\\\beta\\\gamma\\\delta
+\end{array}\right) =(\alpha*\:\beta*\:\gamma*\:\delta*)\left(\begin{array}{c}
+\alpha\\\beta\\0\\0
+\end{array}\right) = |\alpha|^2+|\beta|^2$$
+As expected $p(0)$ is the sum of the probabilities of measuring $|00\rangle$ and $|01\rangle$.\\
+The state after the measurement is 
+$$\frac{P_{0*}|\psi\rangle}{\sqrt{p(0)}} = \frac{1}{\sqrt{|\alpha|^2+|\beta|^2}} (|0\rangle\langle0|\otimes I)(\alpha|00\rangle + \beta|01\rangle + \gamma|10\rangle + \delta|11\rangle) = \frac{1}{\sqrt{|\alpha|^2+|\beta|^2}}(\alpha|00\rangle+\beta|01\rangle)$$
+The relative probability of observing $|00\rangle$ and $|01\rangle$ hasn't changed, but by measuring $|0\rangle$ on the first qubit we have eliminated the possibilities that the system is in either the state $|10\rangle$ or $|11\rangle$
+\paragraph{Example} Given $$|\psi\rangle=\sqrt{\frac{1}{11}}|00\rangle+\sqrt{\frac{5}{11}}|01\rangle+\sqrt{\frac{2}{11}}|10\rangle+\sqrt{\frac{3}{11}}|11\rangle$$
+Then the probability of measuring $0$ in the first qubit is $\frac{1 + 5}{11} = \frac{6}{11}$ and the state after measuring it becomes
+$$\sqrt{\frac{11}{6}}\left(\sqrt{\frac{1}{11}}|00\rangle+\sqrt{\frac{5}{11}}|01\rangle\right)$$
+
 \end{document}
