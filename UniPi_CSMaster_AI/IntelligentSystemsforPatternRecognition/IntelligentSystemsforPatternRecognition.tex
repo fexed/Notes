@@ -588,9 +588,11 @@ Viterbi algorithm.
 \subsubsection{Forward-Backward Algorithm} \textbf{Smoothing}: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$).\\
 I know $\Theta$, the model (its parameters). So I know $P(S_1) = \pi, P(S_t\:|\:S_{t-1} = A$ and $P(y_t\:|\:S_t) = B$: I need to express the quantity I want in terms of $\Theta=\{\pi,A,B\}$.\\
 $\hat{y}$ are all the observations for each timestep $\Rightarrow P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T)$
-$$S_1\rightarrow\ldots\rightarrow S_{t-1}\rightarrow S_t\rightarrow S_{t+1}\rightarrow\ldots\rightarrow S_T$$
-$$\downarrow\rightarrow\ldots\rightarrow \downarrow\rightarrow \downarrow\rightarrow \downarrow\rightarrow\ldots\rightarrow \downarrow$$ %TODO format
-$$y_1\rightarrow\ldots\rightarrow y_{t-1}\rightarrow y_t\rightarrow y_{t+1}\rightarrow\ldots\rightarrow y_T$$
+$$\begin{array}{ccccccccccccc}
+S_1&\rightarrow&\ldots&\rightarrow&S_{t-1}&\rightarrow&S_t&\rightarrow&S_{t+1}&\rightarrow&\ldots&\rightarrow&S_T\\
+\downarrow& &\ldots& &\downarrow& &\downarrow& &\downarrow& &\ldots& &\downarrow\\
+y_1&\rightarrow&\ldots&\rightarrow&y_{t-1}&\rightarrow&y_t&\rightarrow&y_{t+1}&\rightarrow&\ldots&\rightarrow&y_T
+\end{array}$$
 We are at time $t$, so everything after that is the future ($y_{t+1:T}$), and everything up to $t$ included is the past ($y_{1:t}$).
 $$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) P(S_t=i,y_{1:t})$$
 If I observe $S_t$ we block the path $y_{1:t}$, so $P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) = P(y_{t+1:T}\:|\:S_t=i)$
@@ -629,13 +631,27 @@ Expectation-Maximization of the \textbf{complete likelihood} $L_c(\Theta)$, opti
 \end{center}
 It's a matter of picking the right $Q(\Theta\:|\:\Theta^k)$\\
 Introduce indicator variables in $L(\Theta)$ together with model parameters $\Theta = (\pi,A,B)$
-$$L_C(\Theta)=\log P(X,Z\:|\:\Theta) =$$%TODO formulona p. 19
+$$L_C(\Theta)=\log P(X,Z\:|\:\Theta) = $$ %TODO formulona p.19 ISPR_7_HMM.pdf
 But I built it assuming to know $z$, but I don't know it. The \textit{expectation} part is in this: I don't know $z_{ti}^n$, but you can optimize the function in expectation $E[L_C(\Theta)]$\\
 It's a 2-step iterative algorithm for the maximization of complete likelihood $L_C(\Theta)$ with respect to the model parameters $\Theta$\begin{list}{}{}
-	\item E-step: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:Theta)]$$
-	So compute the expectation of the complete log likelihood with respect to indicator variables\ldots %TODO
+	\item \textbf{E-step}: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:\Theta)]$$
+	So compute the expectation of the complete log likelihood with respect to indicator variables $z_{ti}^n$ assuming estimated parameters $\Theta^t = (\pi^t, A^t, B^t)$ fixed at time $t$.\\
 	Expectation with respect to a discrete random variable is $$E_z[Z] = \sum_z z\cdot P(Z=z)$$
-	\item M-step: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$ %TODO
+	To compute the conditional expectation $Q^{t+1}(\Theta\:|\:\Theta^t)$ for the complete HMM log likelihood we need to estimate $$E_{Z\:|\:Y,\Theta^k}[z_{ti}] = P(S_t=i\:|\:y)$$
+	$$E_{Z\:|\:Y,\Theta^k}[z_{ti}z_{(t-1)j}] = P(S_t = i, S_{t-1}=j\:|\:y)$$
+	\pagebreak
+	
+	And we know how to compute the posteriors thanks to the forward-backward algorithm:
+	$$y_t(i) = P(S_t = i\:|\:Y) = \frac{\alpha_t(i)\beta_t(i)}{\sum_{j=1}^C\alpha_t(j)\beta_t(j)}$$
+	$$y_{t,t-1}(i,j) = P(S_t = i, S_{t-1} = j\:|\:Y) = \frac{\alpha_{t-1}(j)A_{ij}b_i(y_t)\beta_t(i)}{\sum_{m,l=1}^C \alpha_{t-1}(m)A_{lm}b_j(y_t)\beta_t(l)}$$
+	\item \textbf{M-step}: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$
+	Optimization problem, using the posteriors computed at the E-step. As usual with $$\frac{\partial Q^{t+1}(\Theta\:|\:\Theta^t)}{\partial\Theta}$$
+	where $\Theta = (\pi, A, B)$ are now variables. The parameters can be distributions, so we need to preserve sum-to-one constraints (Lagrange Multipliers).\\
+	State distributions are
+	$$A_{ij}=\frac{\sum_{n=1}^N\sum_{t=2}^{T^n} \gamma_{t,t-1}^n(i,j)}{\sum_{n=1}^N\sum_{t=2}^{T^n}\gamma_{t-1}^n(j)}$$
+	$$\pi_i=\frac{\sum_{n=1}^N\gamma_1^n(i)}{N}$$
+	and the emission distribution, multinomial, is
+	$$B_{ki} = \frac{\sum_{n=1}^N\sum_{t=1}^{T^n}\gamma_t^n(i)\delta(y_t=k)}{\sum_{n=1}^N\sum_{t=1}^{T^n}\gamma_t^n(i)}$$
 \end{list}
 With appropriate Lagrange multiplier is multinomial.
 \paragraph{Usefulness of HMMs}\begin{list}{}{}
@@ -643,7 +659,7 @@ With appropriate Lagrange multiplier is multinomial.
 	The hidden states are \textbf{clustering the observations}.
 \end{list}
 \paragraph{Decoding Problem} Find the optimal state assignment s $= s_1^*,\ldots,s_T^*$ for an observed test sequence y given a trained HMM. No unique interpretation of the problem.\\
-Can be done identifying the single hidden states $s_t$ that maximize the posterior $$ $$ %TODO formula
+Can be done identifying the single hidden states $s_t$ that maximize the posterior $$s_t^*=\arg\max_{i=1,\ldots,C}P(S_t=i\:|\:Y)$$ 
 or find the most likely \textbf{joint hidden state assignment} 
 $$\hbox{s}^* = \arg\max_s P(Y,S = \hbox{s})$$
 \paragraph{Viterbi Algorithm} Efficient dynamic programming algorithm based on a backward-forward recursion, example of max-product message passing algorithm. When exchanging, instead of $\sum$ we maximize the $\prod$.
@@ -669,7 +685,7 @@ From state $s_1$ we pick up $s_1^*$ and send it to $s_2$, which will use this in
 \end{center}
 Translates an input sequence in an output sequence (\textbf{transduction}). State transition and emission depend on input observations (\textbf{input-driven}).\\
 Recursive model highlights analogy with RNNs.
-\paragraph{Bidirectional Input-Driven Models} Remove causality assumption that current observation %TODO
+\paragraph{Bidirectional Input-Driven Models} Removes the causality assumption that current observation doesn't depend on the future and homogeneity assumption that a state transition doesn't depend on the position in the sequence.
 \begin{center}
 	\includegraphics[scale=0.5]{33.png}
 \end{center}
@@ -680,7 +696,7 @@ Recursive model highlights analogy with RNNs.
 \paragraph{Dynamic Bayesian Networks} HMMs are a specific and the simples case of a class of directed models that represent dynamic processes and data with changing connectivity template. Other examples are: Hierarchical HMMs and structure changing information.\\
 DBNs are graphical models whose structure changes to represent evolution across time and/or between different samples.
 \subsection{Markov Random Fields}
-MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$ ecc. %TODO
+MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$, edges $e\in E$ are bi-directional dependencies between variables.
 \paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_n$ as the random variables associated to the $N$ nodes in the undirected graph $G$
 $$P(\hbox{X}) = \frac{1}{Z}\prod_c \psi_c(X_c)$$
 $X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the potential function for clique $C$
