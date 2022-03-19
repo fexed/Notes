@@ -614,7 +614,7 @@ Weights are shared across timesteps, so representations are shared too.
 \paragraph{Disadvantages} Recurrent computation is really slow. In practice, is difficult to access information from many steps back.
 \paragraph{Simple RNN Language Model}
 \begin{center}
-	\includegraphics[scale=0.5]{25.png} %TODO riscrivere
+	\includegraphics[scale=0.5]{25.png}
 \end{center}
 \paragraph{Vanilla RNN}
 \begin{center}
@@ -628,14 +628,14 @@ Notice that $y$ is computed from the current $h'$ only.
 	\item for each timestep of the input sequence $x$ we predeict the output $y$ synchronously
 	\item for the input sequence $x$ we predict the scalar value of $y$ (e.g. at the end of the sequence)
 \end{list}
-%TODO
-Backpropropagation through time
+Main method: \textbf{backpropagation}, reliable and controlled convergence, supported by most ML frameworks. Other methods: evolutionary methods, expectation maximization, particle swarm\ldots\\
+\paragraph{Backpropagation through time}
 \begin{center}
 	\includegraphics[scale=0.5]{27.png}
 \end{center}
 Applying the chain rule $$\frac{\partial h_2}{\partial h_0} = \frac{\partial h_2}{\partial h_1}\frac{\partial h_1}{\partial h_0}$$
 For time 2:
-$$\frac{\partial E_2}{\partial \Theta} = \sum_{k=0}^2\frac{\partial E_2}{\partial \hat{y}_2}\frac{•}{•}$$ %TODO
+$$\frac{\partial E_2}{\partial \Theta} = \sum_{k=0}^2\frac{\partial E_2}{\partial \hat{y}_2}\frac{\partial\hat{y}_2}{\partial h_2}\frac{\partial h_2}{\partial h_k}\frac{\partial h_k}{\partial\Theta}$$
 \paragraph{Training RNN Language Model} Get a big corpus of text and feed into the RNN-LM, computing the output distribution for every step $t$.\\
 Loss function on step $t$ is cross-exntropy between the predicted probability distribution $\hat{y}$ and the true next word $y^{(t)}$ (one-hot for $x^{(t+1)}$)
 $$J^{(t)}(\Theta) = \hbox{CrossEntropy}(\hat{y}^{(t)}, y^{(t)}) = -\sum_{w\in V} y_w^{(t)}\log\hat{y}_w^{(t)} = -\log\hat{y}_{x_{t+1}}^{(t)}$$
@@ -661,21 +661,31 @@ Solutions: gradient clipping, reducing learning rates or changing loss function 
 \begin{center}
 	\includegraphics[scale=0.5]{31.png}
 \end{center}
-The core idea is this cells state is changed slowly with only minor interactions. Very easy for information to flow unchanged.\\
-Forget gate and input gate.\\
-The first sigmoid %TODO
-the second sigmoid decides how much input in the next stage\\
-The output gate of the third sigmoid controls what goes in the output.\\
-Why sigmoid or tanh: sigmoid acting as switch %TODO
+The core idea is this cells state $C_t$ is changed slowly with only minor interactions. Very easy for information to flow unchanged.
+$$C_t = f_tC_{t-1}+i_t\hat{C}_t$$
+The first sigmoid goes to the \textbf{forget gate}, determines how much information goes through.\\
+the second sigmoid is the \textbf{input gate} and decides how much input is added in the cell state (so in the next pass).\\
+The \textbf{output gate} of the third sigmoid controls what goes in the output.\\
+Why sigmoid or tanh: sigmoid are used as 0/1 switches, and the vanishing gradients are already handled in the LSTMs.
 \begin{center}
-	\includegraphics[scale=0.33]{32.png} %TODO riscrivere
+	\includegraphics[scale=0.5]{32.png}
 \end{center}
-\pagebreak
+\begin{center}
+	\includegraphics[scale=0.33]{35.png}
+\end{center}
 \subsubsection{GRU}
 \paragraph{Gated Recurrent Units}
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $z_t = \sigma(W_z\cdot[h_{t-1},x_t])$
+	\item $r_t = \sigma(W_r\cdot[h_{t-1},x_t])$
+	\item $\hat{h}_t = \tanh(W\cdot[r_t\cdot h_{t-1},x_t])$
+	\item $h_t = (1-z_t)\cdot h_{t-1}+z_t\cdot\hat{h}_t$
+\end{list}
 \begin{center}
 	\includegraphics[scale=0.5]{33.png}
 \end{center}
+\end{multicols}
 Combines forget and input gate into a single update gate, also merging cell state and hidden state. Simpler than LSTM.
 \begin{center}
 	\includegraphics[scale=0.5]{34.png}

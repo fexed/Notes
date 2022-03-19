@@ -697,20 +697,21 @@ Recursive model highlights analogy with RNNs.
 DBNs are graphical models whose structure changes to represent evolution across time and/or between different samples.
 \subsection{Markov Random Fields}
 MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$, edges $e\in E$ are bi-directional dependencies between variables.
-\paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_n$ as the random variables associated to the $N$ nodes in the undirected graph $G$
-$$P(\hbox{X}) = \frac{1}{Z}\prod_c \psi_c(X_c)$$
-$X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the potential function for clique $C$
-With $Z$ normalization term used to transform to probability.
-$$ Z = \sum_X\ldots$$ %TODO
-As already stated, potential functions are not probabilities, they express which configurations of the local variables are preferred.
+\paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_N$ as the random variables associated to the $N$ nodes in the undirected graph $G$
+$$P(\hbox{X}) = \frac{1}{Z}\prod_C \psi_C(X_C)$$\\
+$X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the \textbf{potential function} for clique $C$\\
+With $Z$ normalization term used to transform to probability, from a \textbf{partition function}:
+$$Z = \sum_X\prod_C\psi_C(X_C)$$
+As already stated, potential functions are not probabilities, they express which configurations of the local variables are preferred. A conveniently and widely used strictly positive representation of the potential function is the \textbf{Boltzmann Distribution}:
 $$\psi_C(X_C)=\exp\left(-E(X_C)\right)$$
-with $E(X_C)$ called energy function.\\
-In general we will assume to work with MRF where the partition functions factorize as $$\psi_C(X_C) = \exp\left(-\sum_{k=1}^K\theta_{Ck}f_{Ck}(X_C)\right)$$
+with $E(X_C)$ called \textbf{energy function}.\\
+In general we will assume to work with Markov Random Fields where the partition functions factorize as $$\psi_C(X_C) = \exp\left(-\sum_{k=1}^K\theta_{Ck}f_{Ck}(X_C)\right)$$
 \begin{list}{}{}
 	\item $K$ defines the number of feature functions that we use, so the cardinality of a dictionary of feature functions $f_{Ck}$
-	\item $\theta_{Ck}in R$ are parameters
+	\item $\theta_{Ck}\in R$ are parameters
 \end{list}
 Undirected graphical models do not express the factorization of potentials into feature functions, you cannot express $f$ graphically $\Rightarrow$ \textbf{factor graphs}.
+\pagebreak
 \paragraph{Factor Graphs} Random Variables are still circular nodes, factors $f_{Ck}$ are denoted with square nodes and edges connect a factor to the random variable.
 \begin{center}
 	\includegraphics[scale=0.5]{34.png}
@@ -741,44 +742,48 @@ Meaning that $f_t(Y_{t-1}, Y_t)$ and it looks like $P(S_t\:|\:S_{t-1})$ of the H
 	\includegraphics[scale=0.4]{37.png}
 \end{center}
 Each hidden state may depend on the previous, with $f_t$, but also on the emissions for the previous, current and next symbols. This cannot be easily implemented in HMMs. Kind of time stationality.
-$$P(Y\:|\:X,\Theta) = \frac{1}{Z(X)}\prod_t \exp\left(\ldots\right)$$ %TODO formula
-The cliques are simple $(Y_t, X_{t-1}), (Y_t, X_{t}), (Y_t, X_{t+1}), (Y_t, Y_{t-1})$ for each $t$.\\
+$$P(Y\:|\:X,\Theta) = \frac{1}{Z(X)}\prod_t \exp\left(\Theta_pf_p(X_{t-1},Y_t) + \Theta_cf_c(X_t,f_t) + \Theta_sf_s(X_{t+1},Y_t)+\Theta_tf_t(Y_{t-1},Y_t)\right)$$
+The cliques to consider are simply $(Y_t, X_{t-1}), (Y_t, X_{t}), (Y_t, X_{t+1}), (Y_t, Y_{t-1})$ for each $t$.\\
 We can also model explicitly input influence on transition.
 \begin{center}
 	\includegraphics[scale=0.5]{38.png}
 \end{center}
-$$ $$ %TODO formula senza X_k all'inizio
-Use indicator variables in $f_k$ definition to include or disregard the influence of specific random variables.
-\paragraph{Posterior Inference in LCRF} Is there an equivalent of the smoothing problem? Yes $$P(Y_t, Y_{t-1}\:|\:X)$$
+The general Linear Conditional Random Fields likelihood is
+$$P(Y\:|\:X,\Theta)=\frac{1}{Z(X)}\prod_t\exp\left(\Theta_kf_k(Y_t,Y_{t-1},X_t)\right)$$
+Uses indicator variables in $f_k$ definition to include or disregard the influence of specific random variables: e.g. $I_{Y_t=i}, I_{X_t=o}$
+\paragraph{Posterior Inference in LCRF} Is there an equivalent of the smoothing problem? Yes: $P(Y_t, Y_{t-1}\:|\:X)$
 Solved by exact forward backward inference. Sum-product message passing (alpha-beta recursion) on the LCRF factor graph.
-%TODO formula
-
-Also Viterbi can be done, because we can do Max-Product. The expensive part is the computation of the exponential summation in $Z(X)$. The forward-backward algorithm computes it efficiently as normalization term of $P(Y_t,Y_{t-1}\:|\:X)$. More articulated posteriors interact with $Z(X)$, which is a summation over everything that's not observable, difficult when there's a lot of unobservable variables. Exact inference in CRF other than chain-like is likely to be computationally impractical. We need to approximate: Markov Chain Monte Carlo\ldots %TODO
-
-Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^n\log P(y^n\:|\:x^n,\Theta)$$
-we can substitu the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$
-$$ =\sum_n\sum_t\sum_k a-b $$ %TODO formula
+$$P(Y_t,Y_{t-1}\:|\:X)\simeq\alpha_{t-1}(Y_{t-1})\psi_t(Y_t,Y_{t-1},X_t)\beta_t(Y_t)$$
+\begin{list}{}{}
+	\item \textbf{Clique weighting} $\psi_t(Y_t,Y_{t-1},X_t)=\exp(\Theta_cf_c(X_t,Y_t)+\Theta_tf_t(Y_{t-1},Y_t))$
+	\item \textbf{Forward message} $\alpha_t(i) = \sum_j\psi_t(i,j,X_t)\alpha_{t-1}(j)$
+	\item \textbf{Backward message} $\beta_t(i) = \sum_i\psi_{t+1}(i,j,X_{t+1})\beta_{t+1}(i)$
+\end{list}
+Also Viterbi can be used, because we can do Max-Product. The expensive part is the computation of the exponential summation in $Z(X)$. The forward-backward algorithm computes it efficiently as normalization term of $P(Y_t,Y_{t-1}\:|\:X)$. More articulated posteriors interact with $Z(X)$, which is a summation over everything that's not observable, difficult when there's a lot of unobservable variables. Exact inference in CRF other than chain-like is likely to be computationally impractical. We need to approximate: Markov Chain Monte Carlo (sample $y$ rather than estimate $P(y)$) or Variational Belief Propagation (reduce to message passing on trees).
+\paragraph{Training LCRF}Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^n\log P(y^n\:|\:x^n,\Theta)$$
+We can substitute the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$
+$$L(\Theta)=\sum_n\sum_t\sum_k \Theta_kf_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_n\log Z(X^n)\left(-\sum_k\frac{\Theta_k^2}{2\sigma^2}\right)$$
+With the last being a regularization term based on $\|\Theta\|^2$.\\
 To get proper marginalization $Z(X^n) = \sum_{y_t,y_{t-1}}\sum_t \exp(\sum_k\Theta_k f_k(y_t,y_{t-1},x^n_t))$\\
 With $\frac{\partial L(\Theta)}{\partial \Theta_k}$ we can maximize it because typically $L(\Theta)$ cannot be maximized in closed form.
-$$ $$ %TODO formulas derivatives
-We have sum of expectations, first when $Y$ is not random, with samples drawn from a finite dataset and on the right the expectation using the posterior so the expectation of the feature function under the model distribution. $$\frac{\partial L(\Theta)}{\partial \Theta_k} = E[f_k(y,y',x^n_t)] - E_{P(Y\:|\:X,\Theta)}[f_k(y,y',x_t^n)]$$
-We need to match those two expectations.\\
+$$\frac{\partial L(\Theta)}{\partial \Theta_k} = \sum_{n,k}f_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_{n,t}\sum_{y,y'}f_k(y,y',X_t^n)P(y,y'\:|\:X^n)-\frac{\Theta_k}{\sigma^2}$$ 
+We have sum of expectations: the first term is $E[f_k]$ when $Y$ is not random, with samples drawn from a finite dataset (\textbf{empirical distribution}), and the right term is $E[f_k]$ using the posterior so the expectation of the feature function under the \textbf{model distribution}. $$\frac{\partial L(\Theta)}{\partial \Theta_k} = E[f_k(y,y',x^n_t)] - E_{P(Y\:|\:X,\Theta)}[f_k(y,y',x_t^n)]$$
+We need to match those two expectations, meaning that when the gradient is zero these are equal.\\
 There's a regularization term $\sum_k\frac{\Theta_k^2}{2\sigma^2}$ on $\|\Theta\|^2$, a posteriori regularization on the gaussian $P(\Theta)$ with $\mu=0$ mean and $\sigma^2I$ variance.\\
 In practice, then, $\Theta$ can be learn with stochastic gradient descent or variants.
-\paragraph{Applications} Linear CRF have various applications: POS-tagging, semantic role identification, bioinformatics. Feature functions have the form %TODO
-
+\paragraph{Applications} Linear CRF have various applications: POS-tagging, semantic role identification, bioinformatics. Feature functions have the form $f_k(X_k,Y_k)=I_{y_k=\hat{y}_k}q(X_c)$, with $f_k$ non-zero only for a specific output configuration $\hat{y}_k$, and then depending only on $X_k$ (the features not shared by the classes). $q(X_c)$ is the observation functions: word begins with capital, ends with -ing\ldots\\
 In computer vision they can be used to define bi-dimensioal lattice on images, bg/fg segmentation and to impost constraints.
 
 \subsection{Bayesian Learning and Variational Inference}
 Introducing basic concepts of variational learning useful for both generative models and deep learning.
 \paragraph{Latent Variables} Unobserved random variables that define a hidden generative process of observed data. They explain complex relation between many observable variables. An example: hidden states in HMM/CRF.\\
-Latent variables likelihood $$P(x) = \int_z \prod_{i=1}^N P(x_i\:|\:z)P(z)dz$$ with $Z \longrightarrow X$
+Latent variables likelihood $$P(x) = \int_z \prod_{i=1}^N P(x_i\:|\:z)P(z)dz$$ with a graph like $Z \longrightarrow X$ so of nodes $\{Z,X\}$ and a directed arc $(Z,X)$.
 \paragraph{Latent Spaces} Spaces where high-dimensional data can be represented. Each of the $M$ samples is made of $N$ features represented with $k<<N$ dimensions.
 \begin{center}
 	\includegraphics[scale=0.5]{39.png}
 \end{center}
-The assumption is %TODO
-\paragraph{Tractability} Hidden variables can make intractable the posteriors. We need stuf that simplify those posteriors.
+The assumption is that latent variables conditional and marginal distribution are more tractable than the joint distribution $P(X)$.
+\paragraph{Tractability} Hidden variables can make intractable the posteriors. We need stuff that simplify those posteriors: Bayesian learning introduces priors which introduce integrals in the posteriors computation which are not always analytically or computationally tractable.
 \subsubsection{Kullback-Leiber Divergence}
 An information thoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = \langle\log q(z)\rangle_q - \langle\log p(z\:|\:x)\rangle_q$$
 Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
@@ -797,17 +802,15 @@ So we are lower bounding $\log P(x\:|\:\Theta)$ with the expected joint distribu
 How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) = ?$ We introduce $Q(z)$ by marginalization $$\int_z Q(z)\log P(x) - \int_z Q(z)\log\frac{P(x,z)}{Q(z)} = \int_z Q(z)\log\frac{P(x)Q(z)}{P(x,z)}=E_Q\left[\log \frac{Q(z)}{P(z\:|\:x)}\right] = KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right)$$
 Because $\frac{P(x)}{P(x,z)} = \frac{1}{P(z\:|\:x)}$. So it's an optimization problem of finding $\Theta$ and $\phi$ that maximize $L(x,\Theta,\phi)$ reduced to a minimization problem with KL.\\
 We can assume the existence of a probability $Q(z\:|\:\phi)$ which allows to bound the likelihood $P(x\:|\:\Theta)$ from below using $L(x,\Theta,\phi)$.\\
-$L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$.\\
-So the problem now becomes maximizing ELBO
-$$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$. If $P(z\:|\:x,\Theta$ is tractable %TODO
+$L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$ choosing $Q(z\:|\:\phi)=P(z\:|\:x,\Theta)$. So the problem now becomes maximizing ELBO $$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$.\\
+If $P(z\:|\:x,\Theta)$ is tractable then we use it s $Q(z\:|\:\phi)$ (optimal ELBO). Otherwise we choose $Q(z\:|\:\phi)$ as a tractable family of distributions: find $\phi$ that minimize $KL(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta))$ or find $\phi$ that maximize $L(\:,\phi)$.
 \paragraph{Example} Bag of Words representations are classical examples of multinomial data. A BOW dataset $X$ is the $N\times M$ document matrix, with $N$ number of vocabulary items $w_j$ and $M$ is the number of documents $d_i$ and $x_{ij} = n(w_j,d_i)$ the number of occurrences of $w_j$ in $d_i$.\\
 Often $M$ is very very large ($\simeq 30$k elements). So we want a smaller representation. Mixture of topics: a topic identifies a pattern in the co-occurrence of multinomial items $w_j$ within the documents. Mixture, so we associate an interpretation (topic) to each item in a document, whose interpretation is then a mixture of the items' topics. We use Latent Variables.
 \paragraph{Latent Dirichlet Allocation} LDA models a document as a mixture of topics $z$. We assign one topic $z$ to each item $w$ with probability $P(w\:|\:z,\beta)$ and pick a topic for the whole document with probability $P(z\:|\:\Theta)$
 \begin{center}
 	\includegraphics[scale=0.5]{40.png}
 \end{center}
-Each document has its personal topic proportion $\Theta$ sampled from a distribution. $\Theta$ defines a multinomial distribution, but it is a random variables as well. $\alpha$ is the prior.\\
-%TODO
+Each document has its personal topic proportion $\Theta$ sampled from a distribution. $\Theta$ defines a multinomial distribution, but it is a random variable as well. $\alpha$ is the prior.
 \paragraph{Dirichlet distribution} Conjugate prior to multinomial distribution.\\
 If the likelihood is multinomial with a Dirichlet prior, then posterior is Dirichlet.
 $$P(\Theta\:|\:\alpha) = \frac{\Gamma(\sum_{k=1}^K \alpha_k)}{\prod_{k=1}^K\Gamma(\alpha_k)}\prod_{k=1}^K\Theta_k^{\alpha_k-1}$$
@@ -815,13 +818,15 @@ $\Gamma$ is the generalization of the factorial. With a big $\alpha$ we make the
 LDA finds a set of $K$ projection functions on the $K$-dimensional topic simplex.\begin{center}
 	\includegraphics[scale=0.5]{41.png}
 \end{center}
-\paragraph{LDA Generative Process} For each of the $M$ documents, we choose $\Theta$ with Dirichlet($\alpha$) and for each of the $N$ items, we choose a topic $z$ with Multinomial($\Theta$) and pick an item $w_j$ with %TODO
-$$ $$
+\paragraph{LDA Generative Process} For each of the $M$ documents, we choose $\Theta$ with Dirichlet($\alpha$) and for each of the $N$ items, we choose a topic $z$ with Multinomial($\Theta$) and pick an item $w_j$ with multinomial probability $P(w_j\:|\:z,\beta)$.\\
+We get a multinomial topic-item parameter matrix $[\beta]_{k\times V}$
+$$\beta_{kj}=P(w_j=1\:|\:z_k=1)\hbox{ or } P(w_j=1\:|\:z=k)$$
+$$P(\Theta, z, w\:|\:\alpha,\beta) = P(\Theta\:|\:\alpha)\prod_{j=1}^NP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)$$
 It's a completed likelihood with the conditional independence assumption.
 \subparagraph{Learning} Marginal distribution of a document $d =$ w
-$$P(\hbox{w}\:|\:\alpha,\beta) = \int $$
+$$P(\hbox{w}\:|\:\alpha,\beta) = \int \sum_z P(\Theta,z,w\:|\:\alpha,\beta)d\Theta=\int P(\Theta\:|\:\alpha)\prod_{j=1}^N\sum_{z_j=1}^kP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)d\Theta$$
 given w$_1$,\ldots,w$_M$ find $\alpha,\beta$ that maximize.\\
-Key problem in inferring latent variables posterior
+Key problem is inferring latent variables posterior:
 $$P(\Theta, \hbox{z}\:|\:\hbox{w},\alpha,\beta) = \frac{P(\Theta, \hbox{z}, \hbox{w}\:|\:\alpha,\beta)}{P(\hbox{w}\:|\:\alpha,\beta)}$$
 but the denominator is intractable because of couplings between $\beta$ and $\Theta$ under exponenziation in the summation over topics. So we don't use the posterior, we pick a function $Q$ that helps in solving the problem (variational inference).
 \paragraph{Variational Inference} We write $Q(z\:|\:\phi)$ function that is sufficiently similar to the posterior but tractable. It should be such that $\beta$ and $\Theta$ are no longer coupled, fitting $\phi$ so that is close to the posterior according to KL.\\
@@ -829,12 +834,19 @@ Fast convergence but it's an approximation.\\
 The key idea is to assume that $Q(z\:|\:\phi)$ is tractable: \textbf{mean-field assumption}.
 $$Q(z\:|\:\phi) = Q(z_1,\ldots,z_K\:|\:\phi)=\prod_{k=1}^K Q(z_k\:|\:\phi_k)$$
 Can be generalized by factorizing on groups of latent variables. Does not contain the true posterior because hidden variables are dependent.\\
-We optimize ELNO using $Q(z\:|\:\phi)$ using the factorized distribution. Simple \textbf{coordinate ascent inference}: iteratively optimize each variational distribution holding\ldots %TODO
-so when learning we use the model on the right, breakdown of the independence.\begin{center}
+We optimize ELNO using $Q(z\:|\:\phi)$ using the factorized distribution. Simple \textbf{coordinate ascent inference}: iteratively optimize each variational distribution holding the others fixed, so when learning we use the model on the right, breakdown of the independence.\begin{center}
 	\includegraphics[scale=0.5]{42.png}\\
 	\includegraphics[scale=0.5]{43.png}
 \end{center}
-%TODO fine 10/03
+\paragraph{Variational Expectation-Maximization} Find the $\Phi, \Psi$ that maximize the ELBO
+$$L(w,\Phi,\Psi) = E_Q[\log P(\Theta,z,w\:|\:\Psi)] - E_Q[\log Q(\Theta,z,\Psi\:|\:\Phi)]$$
+by alternate maximization:
+\begin{list}{}{}
+	\item Fix $\Psi$ and update variational parameters $\Psi^*$ (\textbf{E-Step})
+	\item Fix $\Phi = \Phi^*$ and update the model parameters $\Psi^*$ (\textbf{M-Step})
+	\item Repeat until little improvement on the likelihood
+\end{list}
+Unlike EM, variational EM has no guarantee to reach a local maximizer of $L$.
 \subsection{Boltzmann Machines}
 Examples of Markov Random Fields:
 \begin{list}{}{}
@@ -912,18 +924,18 @@ computing a correlation between ideally $v^\infty,h^\infty$, but of course can't
 \begin{center}
 	\includegraphics[scale=0.5]{48.png}
 \end{center}
-We start with a training vector on the visible units, alternating between %TODO
+We start with a training vector on the visible units, alternating between updating all the hidden units in parallel and updating all the visibile units in parallel
+$$\frac{\partial L}{\partial M_{ij}} = \langle v_ih_i\rangle_0 - \langle v_jh_j\rangle_\infty = \hbox{data} - \hbox{model}$$
 \paragraph{Contrastive-Divergence Learning} Because Gibbs sampling converges really slowly: clamp a training vector $v^l$ on visible units. CD-1.
 \begin{center}
 	\includegraphics[scale=0.5]{49.png}
 \end{center}
-Clamping a training vector $v^l$ on visible units, update all hidden units in parallel, update all the visible units in parallel to get a reconstuction and update the hidden units again.
+Clamping a training vector $v^l$ on visible units, update all hidden units in parallel, update all the visible units in parallel to get a \textbf{reconstruction} and update the hidden units again.
 $$\begin{array}{c c c}
 \langle v_ih_j\rangle_0&-&\langle v_ih_j\rangle_1\\
 \hbox{data}& &\hbox{reconstruction}
 \end{array}$$
-Learns a very crude approximation of the gradient of log-likelihood, not following it closely %TODO
-Why use it? Because in practice it works well.
+Learns a very crude approximation of the gradient of log-likelihood, not even following it closely. Why use it? Because in practice it works well.
 
 \subsection{Wrap Up}
 We've seen three families of models\begin{list}{}{}
@@ -1010,14 +1022,21 @@ $\hat{p}(X)$ of Gibbs sampling %TODO
 
 \section{Convolutional Neural Networks}
 \paragraph{Deep Learning} Effectively is learning the representation of data.
-\paragraph{CNNs} The principle is complex neurons that take the outputs of simple neurons and assemble it into more complex structures.\\
+\paragraph{CNNs} The principle is complex neurons that take the outputs of simple neurons and assemble it into more complex structures.
+\begin{multicols}{2}
 For sequences:
-%TODO image
-Apply a bank of 16 convolution kernels to sequences (window of 15 elements) trained by backpropagation with parameter sharing.\\
+\begin{center}
+	\includegraphics[scale=0.5]{66.png}
+\end{center}
+Apply a bank of 16 convolution kernels to sequences (window of 15 elements) trained by backpropagation with parameter sharing.
+\columnbreak
+
 For images:
 \begin{center}
-	\includegraphics[scale=0.5]{50.png}
+	\includegraphics[scale=0.35]{50.png}
 \end{center}
+\end{multicols}
+
 \paragraph{Dense Vector Multiplication} E.g. take the 32x32 image and reshape into a vector of 3072. Input-sized weight vector for each hidden neuron $W$ of e.g. 100 neurons: 100$\times$3072 weights, a huge amount of parameters. That's why we want convolutional filters.
 \begin{center}
 	\includegraphics[scale=0.5]{51.png}
@@ -1031,10 +1050,14 @@ A set of weights that are applied to a 5$\times$5 region of the image. It's a \t
 \end{center}
 With a number of slices equal to the number of image channels. Basically a filter per channel color, but they are convolved together still giving a $28\times28$ feature map even with 3 color channels for example. The \textbf{convolution map stays bidimensional}.
 \paragraph{Stride} Basic convolution slides the filter on the image one pixel at the time (stride = 1). The slide value is an hyperparameter. The stride reduces the number of multiplication, sumbsampling the image. With a stride of 2 for example we would end up with a $14\times14$ map.
-\paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride and size? From $7\times7$ image, a filter of $K=3$ (meaning $K\times K$)
-%TODO general rule
+\paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride $S$ and size $K\times K$, on a image $W\times H$?\\
+For example, a $3\times 3$ filter with stride $2$, $K=3, S=2$ on a $7\times 7$ image: output image is $3\times 3$.
+$$W'=\frac{W-K}{S}+1$$
+$$H'=\frac{H-K}{S}+1$$
 \paragraph{Zero Padding} Add columns and rows of zeros to the border of image to handle border pixels, padding of $P$ rows/columns.
-%TODO rule with padding P
+$$W'=\frac{W-K+2P}{S}+1$$
+Zero padding is also used to retain the original size of the image
+$$P=\frac{K-1}{2}$$
 \paragraph{Feature Map Transformation} Convolution is a linear operator, applying an element-wise nonlinearity we obtain a transformed feature map.
 $$\max(0, w^Tx_{ij} + b)$$
 The above is ReLU, used because of the simplicity of computing the gradient.
