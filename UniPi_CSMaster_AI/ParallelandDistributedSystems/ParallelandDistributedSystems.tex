@@ -405,4 +405,28 @@ and third %TODO
 	\item Maintain the list of fireable instructions
 	\item Reordering on the out stream
 \end{list}
+\paragraph{Refactoring Rules}
+The grammar used to write our program is:
+\begin{center}
+	Pat = Seq() $|$ Pipe(Pat$_1$, Pat$_2$) $|$ Comp(Pat$_1$, Pat$_2$) $|$ Farm(Pat, $nw$) $|$ Map(Pat) $|$ Reduce(Map)\\
+	Prog $\Rightarrow$ Pat : $x$\\
+	\includegraphics[scale=0.5]{12.png}
+\end{center}
+Whit \textbf{functional semantics} we mean \textbf{what is computed}. \textbf{Non-functional semantics} refers to \textbf{how} the result \textbf{is computed}.\\
+So refactoring rules describe the equivalences in the \textbf{functional semantics}. So different performance, parallelism degrees\ldots\\
+Some examples:
+\begin{list}{}{}
+	\item Farm($x, n$) $\equiv$ Farm($x, m$) with $n\neq m$
+	\item Pipe($x, y$) $\equiv$ Comp($x, y$)
+	\item Pipe(Farm($x, \_$), Farm($y, \_$)) $\equiv$ Farm(Pipe($x, y$) \_)
+\end{list}
+How to figure out the better ones? We will consider a small set of rules:
+\begin{list}{}{}
+	\item \textbf{Pipe introduction/elimination}: Comp($x,y$) $\equiv$ Pipe($x,y$)
+	\item \textbf{Farm introduction/elimination}: $x \equiv$ Farm$(x)$
+	\item \textbf{Map fusion}: Map(Comp($x,y$)) $\equiv$ Comp(Map($x,y$))
+	\item \textbf{Pardegree change}: Farm($x, n$) $\equiv$ Farm($x, m$) with $n\neq m$
+\end{list}
+The idea is to write a program (so a tree $T_0$) and apply the rules (via a tool) getting $T_1,T_2,\ldots$ all functionally equivalent to $T_0$. Usually the goal is a low $T_{S_i}$. We take the produced trees, mapping each to its $T_S$ and reducing to $\min$ to get the minimum $T_{S_k}$.\\
+But maybe we compute worse trees. I can do another thing: taking $T_0$ trying to find the path in the possible trees. I apply rules and measure the metric (in this example, $T_S$). Then I don't go exploring all the subtrees, applying all applicable rules, but I just go one level down and pick the best one each time. We follow a path that always gives a better (or equivalent) performing solution. But this is \textbf{not possible}.
 \end{document}
