@@ -690,4 +690,147 @@ Combines forget and input gate into a single update gate, also merging cell stat
 \begin{center}
 	\includegraphics[scale=0.5]{34.png}
 \end{center}
+\section{Parsing}
+\paragraph{Dealing with Text}
+\begin{list}{}{}
+	\item Bag Of Words representation: enough for classification and information retrieval
+	\item N-Grams for language modeling, POS tagging\ldots
+	\item Sequences for neural machine translations
+\end{list}
+But we have nothing that's applicable for information extraction or question answering.
+\paragraph{Sentence Structure} Recovering the structure is needed to fully understand the language.\\
+Syntax is the way words are arranged together into larger units, and grammar is a formalism used to describe the syntax of a language.\\
+Structural ambiguity: prepositional attachment, coordination scope, verb phrase attachment.
+\paragraph{Practical uses of parsing} \begin{list}{}{}
+	\item \textbf{Relation Extraction}: knowledge graph enriched from relation extracted from dependency trees
+	\item \textbf{Semantic Relation}
+	\item \textbf{Translation}: helps disambiguating sentences
+	\item \textbf{Sentiment Analysis}: improved by dependency parsing
+	\item \textbf{Negation}: determining the scope of negations
+	\item \textbf{Summarization}: detecting relevant parts
+	\item \textbf{Question Answering}
+\end{list}
+In NLP we've seen information extraction and finding linguistic structure. Can be cast as \textbf{learning mapping}: strings to hidden state sequences (POS tagging), strings to strings (translation), strings to trees (\textbf{parsing}), strings to relational data structures (information extraction).
+\subsection{Parsing Approaches}
+\subsubsection{Constituency Grammar}
+AKA phrase structure grammar or \textbf{context free grammar}.
+\begin{center}
+	\includegraphics[scale=0.5]{36.png}
+\end{center}
+\paragraph{Context Free Grammars} $G = (N,\Sigma, R, S)$
+\begin{list}{}{}
+	\item Set of non-terminal symbols $N$
+	\item Set of terminal symbols $\Sigma$ disjoint from $N$
+	\item set of rules/productions $R$ in the form $A\rightarrow\beta$ with $A$ non-terminal, $\beta$ string of symbols from the infinte set of strings $(\Sigma\cup N)^*$
+	\item A designated start symbol $S \in N$
+\end{list}
+$$L(G) = \{w\in \Sigma^*, S\rightarrow w\}$$
+\paragraph{Constituency Parsing} Requires phase structure grammar and produces phrase structure parse tree.
+\subparagraph{Statistical Parsing} Three components \begin{list}{}{}
+	\item GEN is a function from a string to a set of candidate trees
+	\item $\Phi$ maps a candidate to a feature vector
+	\item $W$ is the parameter vector
+\end{list}
+Training by giving a set of sentences $X$ and the set of possible outputs (trees) $Y$ to learn a function $F_W:X\rightarrow Y$.\\
+Parsing is choosing the highest scoring tree $$F_W(x)=\arg\max_{y\in GEN(x)}\Phi(y)\cdot W$$
+% skip the details
+\subsubsection{Dependency Grammar}
+\paragraph{Dependency Structure} Shows which words depend on (modify or are arguments of) which other words. The syntactic structure of a sentence is described only in terms of the words in a sentence and a set if directed binary grammatical relations among the words.
+\paragraph{Difference Between Constituency Tree and Dependency Trees}
+\begin{center}
+	\includegraphics[scale=0.5]{37.png}
+\end{center}
+Criteria for a syntactic relation between a head $H$ and a dependent $D$ in a construction $C$
+\begin{list}{}{}
+	\item $H$ determines the syntactic category of $C$ ($H$ can replace $C$)
+	\item $H$ determines the semantic category of $C$ ($D$ specifies $H$)
+	\item $H$ is obligatory and $D$ may be optional
+	\item $H$ selects $D$ and determines whether $D$ is obligatory
+	\item The form of $D$ depends on $H$
+	\item The linear position of $D$ is specified with reference to $H$
+\end{list}
+\paragraph{Annotation Constraints} A dependency graph $D = (W, A)$ is a directed rooted tree
+\begin{list}{}{}
+	\item $D$ is weakly connected: $i,j\in V\Rightarrow i\leftrightarrow^* j$
+	\item $D$ is acyclic: $i\rightarrow j \Rightarrow \neg(j\rightarrow^* i)$
+	\item $D$ obeys the \textbf{single-head constraint}: $i\rightarrow j \Rightarrow \neg(i'\rightarrow j)\:\:\forall\:i'\neq i$
+\end{list}
+The single-head constraints causes problems in handling certain linguistic phenomena.
+\paragraph{Data-Driven Dependency Parsing}
+\begin{list}{}{}
+	\item \textbf{Graph Based}: consider the possible dependency graphs and define a score selecting the best scoring one.
+	\item \textbf{Transition Based}: define a transition system that leads to a parse tree while analyzing a sentence one word at a time.
+	\item \textbf{Constraint Satisfaction}: edges are deleted that don't satisfy hard constraints.
+\end{list}
+\subparagraph{Transition-Based Shift-Reduce Parsing} %TODO
+Trained directly on the task of tagging a sentence. Instead, a shift-reduce parser is trained and learns the sequence of parse actions required to build the parse tree. An inductive parser doesn't require grammar, while a traditional parser requires a grammar for generating candidate trees.
+\paragraph{Parsing as Classification} Inductive dependency parsing, based on Shift/Reduce actions: Learn from annotated corpus which action to perform at each step.
+\paragraph{Dependency Graph} Let $R = \{r_1,\ldots,r_m\}$ the set of dependency types (the tags we'll put on the links).\\
+A dependency graph for a sequence of words $W = w_1,\ldots,w_n$ is a labeled directed graph $D = (W,A)$ where\begin{list}{}{}
+	\item $W$ is the set of nodes, i.e. the word tokens in the input sequence
+	\item $A$ is a set of labeled arcs $(w_i, w_j, r)$ with $w_i,w_j\in W$ and $r \in R$
+	\item $\forall\:w_j\in W$ there is at most one arc $(w_i, w_j, r)\in A$
+\end{list}
+The parser build such a graph. Its state at each time is a triple $(S, B, A)$ where
+\begin{list}{}{}
+	\item $S$ is a stack of partially processed tokens
+	\item $B$ is a buffer of remaining input tokens
+	\item $A$ is the arc relation for the dependency graph
+\end{list}
+$(h,d,r)\in A$ represent an arc $h-r\rightarrow d$ tagged with relation $r$.
+\paragraph{Arc Standard Transitions}
+$$\hbox{Shift}\:\:\:\:\:\frac{\langle S, n|B, A\rangle}{\langle S|n, B, A\rangle}$$
+$$\hbox{Left-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S, n|B, A\cup\{(n, s, r\}\rangle}$$
+$$\hbox{Right-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S, s|B, A\cup\{(s,n,r)\}\rangle}$$
+\paragraph{Parser Algorithm} Is fully deterministic, using a trained model to predict the next action, given a representation of the context current state.
+\begin{lstlisting}
+Input Sentence: (w1, w2, ... , wn)
+  S = <>
+  B = <w1, w2, ... , wn>
+  A = {}
+  while B != <> do
+	 x = getContext(S, B, A)
+	 y = selectAction(model, x)
+	 performAction(y, S, B, A)
+\end{lstlisting}
+\paragraph{Oracle} The gold tree of each sentence can be used to suggest which actions to perform in order to rebuild such gold tree. There can be more than one possible sequence to produce the same parse tree.\\
+An Oracle is an algorithm that given the gold tree for a sentence, produces a proper sequence of actions that a parser may use to obtain that gold tree from the input sentence.\\
+Simplest Oracle: arc standard Oracle, emulates the parser knowing what the outcome should be, returning the correct action at each step. Works but cannot handle certain situation: e.g. non-projectivity situations.
+\paragraph{Projectivity} An arc $w_i\rightarrow w_k$ is projective $\Leftrightarrow\forall j,i<j<k$ or $i>j>k$ we have $w_i\rightarrow^* w_j$, so no arc crosses that arc. A dependency tree is projective if and only if every arc is projective.\\
+Intuitively: arcs can be drawn without intersections.
+\paragraph{Arc-Standard Algorithm}\begin{list}{}{}
+	\item Doesn't deal with non-projectivity
+	\item Every transition sequence produces a projective dependency tree (soundness)
+	\item Every projective tree is produces by some transition sequence (completeness)
+	\item Fast deterministic linear algorithm: parsing $n$ words requires $2n$ transition.
+\end{list}
+\paragraph{Arc Eager Transitions}
+$$\hbox{Shift}\:\:\:\:\:\frac{\langle S, n|B, A\rangle}{\langle S|n, B, A\rangle}$$
+$$\hbox{Left-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S, n|B, A\cup\{(n, s, r\}\rangle}$$
+$$\hbox{Right-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S|s, s|B, A\cup\{(s,n,r)\}\rangle}$$
+(Connects without removing, to delay decision and keep words on the stack that might need further connections to children)
+$$\hbox{Reduce}\:\:\:\:\:\frac{\langle S|s, B, A\rangle}{\langle S, B, A\rangle}$$
+\paragraph{Non-Projective Transitions} \begin{list}{}{}
+	\item 
+\end{list}
+\paragraph{Learning Procedure}
+\begin{list}{}{}
+	\item Go through each sentence in the treebank and extract the sequence of actions suggested by the oracle.
+	\item Emulate the parser and at each parser state extract a context representation of the state, in terms of features.
+	\item Provide the features as input and the suggested action as output to the classifier.
+\end{list}
+\paragraph{Dependency Shift-Reduce Parsers}
+\paragraph{CoNLL-X Shared Task} Assign labeled dependency structures for a range of languages by means of a fully automatic dependency parser.
+\paragraph{Problems with Oracles} Only suggest the correct path. If a parser makes mistakes, it finds itself in a state never seen in training and doesn't know how to recover, causing error propagation.
+\subsubsection{Graph-Based Parsing}
+For an input sequence $x$ define a graph $G_x=(V_x, A_x)$ where\begin{list}{}{}
+	\item $V_x=\{0,1,\ldots,n\}$
+\end{list}
+%TODO
+The basic idea is to choose the arc with the highest score from each node. But the risk is to end up with a graph and not a tree.\\
+Another solution is the Chu-Liu-Edmonds: if it's not a tree, identify cycle and contract reculaculating arc weights in and out of the cycle. $O(n^2)$ complexity for non-projective trees (much slower than transition-based parsers).
+\paragraph{NN Graph-Based Parser} Revived graph-based dependency parsing in a neural world, with great results altough slower than neural dependency-based parsers.
+\begin{center}
+	\includegraphics[scale=0.5]{38.png}
+\end{center}
 \end{document}
