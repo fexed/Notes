@@ -429,4 +429,20 @@ How to figure out the better ones? We will consider a small set of rules:
 \end{list}
 The idea is to write a program (so a tree $T_0$) and apply the rules (via a tool) getting $T_1,T_2,\ldots$ all functionally equivalent to $T_0$. Usually the goal is a low $T_{S_i}$. We take the produced trees, mapping each to its $T_S$ and reducing to $\min$ to get the minimum $T_{S_k}$.\\
 But maybe we compute worse trees. I can do another thing: taking $T_0$ trying to find the path in the possible trees. I apply rules and measure the metric (in this example, $T_S$). Then I don't go exploring all the subtrees, applying all applicable rules, but I just go one level down and pick the best one each time. We follow a path that always gives a better (or equivalent) performing solution. But this is \textbf{not possible}.
+%TODO why, 2nd part 22/03
+With a lot of approximations and details ignored, I can figure out the best parallel architecture.
+\paragraph{Normal Form} Speaking of stream parallel computations. Optimizes the service time $T_S$ (more precisely, the throughput).\\
+We can derive the normal form from every pattern tree, only with stream parallel patterns\begin{enumerate}
+	\item \textbf{Get the frontier}, set of all the sequential leaves in the tree, \textbf{left to right}.
+	\item Comp(frontier), so sequential composition in the order they appear.
+	\item Farm(Comp(frontier))
+\end{enumerate}
+This process always aims at optimizing the parallel computation. Unless there are some particular reasons. We take the whole set of things to compute an put them together (1 and 2), meaning creating a chunk of code that do the work: \textbf{increase the grain of the computation}.\\
+This takes also into account resources.
+\paragraph{Performance Models} Used to evaluate or to optimize.\\
+\textbf{Evaluate} meaning that, having a tree, we evaluate a metric (e.g. $T_S$) visiting the tree from the leaves. For each leaf we're interested in the sequential time ($T_S = L$ for the sequential nodes). The we go up one step visiting the parents: we have the parameters of the subtree and can compute $T_S$ of the node given its subtrees. We can repeat until the root.\\
+\textbf{Optimize} the parameters for example the parallel degrees of the stages. In \texttt{rplsh} we used \texttt{optimize main with max resources}. How it's implemented? We take the tree, with Pipe in the root, same as before. We turn the tree with the $nw$ figured out, but we have a certain number of resources. For example we want to shrink the number of resources to match the number of cores.
+\paragraph{RPLShell} \begin{center}
+	\includegraphics[scale=0.5]{13.png}
+\end{center}
 \end{document}
