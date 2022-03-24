@@ -445,4 +445,38 @@ This takes also into account resources.
 \paragraph{RPLShell} \begin{center}
 	\includegraphics[scale=0.5]{13.png}
 \end{center}
+\paragraph{Autonomic Management of Non Functional Features} In long running computations.\\
+For example the classical variations in network load between night and day. Autonomic because %TODO
+Born from industrial processes management, changing behaviors of the systems. Different architectures of the controller:
+\begin{list}{}{}
+	\item \textbf{MAPE Loop} (Monitor, Analyze, Plan, Execute loop)\\
+	Execute activities via actuators, and the system has a set of actuator objects that can be invoked to change the behavior of the system (for instance changing $nw$). The system has sensors, too, that provide data to the monitor part.
+\end{list}
+We have to devise a strategy to be used. E.g.: if $T_A$ drops, most likely I could just increase $nw$ and viceversa if $T_A$ increases I can drop $nw$. Being more clever: let's suppose that $T_A$ goes from $T_{A_{\max}}$ to $T_{A_{\min}}$ in a $\sin$ fashion, when I'm in the minimum I could take time in taking a decision to increase $nw$ while $T_A$ is already increasing. Same for the maximum, I could spend time making the decision and always arriving late. So our strategy can be update: I can observe the changes and avoid situations of alternating opposite changes (in the example, the adding and taking away workers constantly).\\\\
+To implement these strategies, I need \textbf{sensors} and \textbf{actuators}.\\
+We need to observe the interarrival time $T_A$. Also need a data structure to observe the changes, by doesn't require sensors. These sensors would be in the emitter thread.\\
+We need to increase or decrease $nw$, so the actuators must be able to achieve that. To add a worker, e.g. a thread, we need to know the queue for that worker, the collector\ldots so the emitter sounds like a good place.\\\\
+This is implemented in the \textbf{control program} of our manager. Very crude \texttt{if (condition) do actuator;}.
+\paragraph{ECA Rules} Set of \textbf{Event, Condition, Action} rules implemented in a rule system (e.g. \texttt{jboss}).\begin{list}{}{}
+	\item \textbf{Event}: \textbf{triggering action}, e.g. $T_A$ change.\\
+	Not the event per se to be taken into account.
+	\item \textbf{Condition}: \textbf{predicates} on monitored values, internal state and events, that state whenever this particular rule has to be fired or not.
+	\item \textbf{Action}: \textbf{set of actions} on the system or the state that must be \textbf{executed after some triggering event when the condition holds true}.
+\end{list}
+\subparagraph{Example}
+\begin{center}
+	\begin{tabular}{c | c c c}
+	& \textbf{Event} & \textbf{Condition} & \textbf{Action}\\
+	\hline
+	$R_1$ & Change $T_A$ & \makecell{Less than the\\previous one} & Adding a worker\\\\
+	$R_2$ & Change $T_A$ & \makecell{More than the\\previous one} & Removing a worker\\\\
+	$R_3$ & Change $T_A$ & \makecell{Less than the\\previous one AND\\$nw$ just decreased} & \texttt{nop}, update $T_A$\\\\
+	$R_4$ & Change $T_A$ & \makecell{More than the\\previous one AND\\$nw$ just increased} & \texttt{nop}, update $T_A$
+	\end{tabular}
+\end{center}
+\paragraph{Contracts}\begin{enumerate} %TODO
+	\item Propagate the "contract" top-down and try to implement it "best-effort"
+	\item Manage to keep contracts satisfied 
+\end{enumerate}
+We're taking into accounts performance, but often power consumption is more important. These are both non-functional features. If we take into account both, we could implement a manager for each. But the managers may take decision that contrast with each other. A solution is to build a single manager that takes into account both features, into a single MAPE loop. But this requires that both knowledge are in a single place, bad for the separation of concerns. Another solution is to have two managers, one for each feature, each with its MAPE loop, and the two can communicate: the plan phase inform each other in the hope to have authorization for a change that the execute part needs, if we don't get the authorization we go for a \texttt{nop}.
 \end{document}
