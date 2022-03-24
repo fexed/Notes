@@ -897,10 +897,12 @@ Information is physical, and surprising physical theories as Quantum Mechanics m
 	\item \textbf{Communication Channel} is a line that can carry only classical bits (and not qubits).
 \end{list}
 \paragraph{Quantum Teleportation} Process by which a quantum state is transfered from one location to another, without sending directly the quantum state.\\
-Alice has $|\psi\rangle = \alpha|0\rangle+\beta|1\rangle$ and would like to send the quantum stae to Bob.\begin{list}{}{}
-	\item Alice could phycically send
-	\item %TODO
+Alice has $|\psi\rangle = \alpha|0\rangle+\beta|1\rangle$ and would like to send the quantum state to Bob.\begin{list}{}{}
+	\item Alice could physically send the qubit but we rule out this possibility because we want to "teleport".
+	\item Alice could tell Bob the amplitude $\alpha$ and $\beta$ for the quantum state $|\psi\rangle$. To do this, she doesn't need to send a quantum state, but she can simply send the complex numbers $\alpha$ and $\beta$ as ordinary classical information e.g. over the internet. Bob could then re-create the state in his lab.\\
+	But \textbf{in general Alice doesn't know the identity of her quantum state}.
 \end{list}
+\textbf{Quantum teleportation works even when the identity of a the state isn't known to Alice or Bob}.
 The teleportation instead works like this. The circuit is:
 \begin{center}
 	\includegraphics[scale=0.5]{17.png}
@@ -915,8 +917,8 @@ Alice has two qubits, Bob just one.
 No particle have been sent from Alice to Bob, just two classical bits used by Bob to recover the state $|\psi\rangle$. Moving is possible, copying is not possible: $|\psi\rangle$ is not in possession of Alice anymore.\\
 Alice measures in the Bell state because: after step one we have $|\psi\rangle|\beta_{00}\rangle$ and you can prove that this is equal to $$|\psi\rangle|\beta_{00}\rangle = \frac{1}{2}(|\beta_{00}\rangle|\psi\rangle + |\beta_{01}\rangle X|\psi\rangle + |\beta_{10}\rangle Z|\psi\rangle + |\beta_{11}\rangle XZ|\psi\rangle)$$
 \section{Quantum Algorithms}
-The really questions is when quantum computers can outperform classical ones.\\
-With a $$f:\{0,1\}\rightarrow\{0,1\}$$, we have 4 functions
+The really important question is when quantum computers can outperform classical ones.\\
+With a $$f:\{0,1\}\rightarrow\{0,1\}$$ we have 4 functions
 \begin{center}
 	\begin{tabular}{c | c c c c}
 & $f_1$ & $f_2$ & $f_3$ & $f_4$\\
@@ -925,7 +927,7 @@ With a $$f:\{0,1\}\rightarrow\{0,1\}$$, we have 4 functions
 1 & 0 & 1 & 0 & 1
 \end{tabular}
 \end{center}
-We need two queries to see if a function is balanced or constant. In quantum algorithms we need to query the oracle only once because we can exploit quantum parallelism. Feed the circuit with a superposition of inputs and the oracle returns a superposition of outputs. This is the \textbf{Deutsch algorithm}, 1985.
+With classical algorithms we need two queries to see if a function is balanced or constant. In quantum algorithms we need to query the oracle only once because we can exploit quantum parallelism. Feed the circuit with a superposition of inputs and the oracle returns a superposition of outputs. This is the \textbf{Deutsch algorithm}, and the \textbf{Deutsch problem} is the following: given a black box for computing an unknown function $f:\{0,1\}\rightarrow\{0,1\}$, determine if the function is balanced or constant by making queries to $f$.
 \subsection{Classical Computations on Quantum Computers}
 We want to compute functions $$f:\{0,1\}^n\rightarrow\{0,1\}$$ We need to have a \textbf{reversible computation}, so unitary gates: can't feed the entire input sequence into a gate. We take any classical logic circuits computing out function, than change each gate into a reversible version. Once we have a computable function with reversible gate than we can translate it into a quantum ambient.\\
 To translate a gate into a reversible version we use Toffoli gates, which are reversible versions of the AND. Toffoli gates are C-CNOT. With $C= 0$ is AND, with $C=1$ is a NAND.\\
@@ -934,11 +936,26 @@ Toffoli gate and the quantum implementation:
 	\includegraphics[scale=0.5]{19.png}
 \end{center}
 Any classical computation can be implemented by a quantum circuit of Toffoli gates.
-\begin{center} %TODO matrix
-
-\end{center}
-An oracle computing a function is a black-box that computes said function. Quantum if used with quantum bits.\\
+\paragraph{Quantum Parallelism} An oracle computing a function is a black-box that computes said function. Quantum if used with quantum bits.\\
 $U_f$ is implemented, due to reversibility, with input $|x\rangle$ of size $n$ and another qubit $|y\rangle$ used to store the result. The output is $|x\rangle$ and $|y\otimes f(x)\rangle$. It's reversible
 $$|x,y\rangle\mapsto_{U_f} |x,y\otimes f(x)\rangle \mapsto_{U_f} |x, (y\otimes f(x))\otimes f(x) \rangle = |x,y\rangle$$
-\paragraph{Quantum Parallelism in Action} What if I apply a superposition? Let's see with $n=1$.
+In general $|x\rangle$ is of size $n$, meaning $f:\{0,1\}^n\rightarrow\{0,1\}$. To prepare the $|x\rangle$ (data register) in a superposition we apply the Hadamard gate, and we can generalize this procedure on an arbitrary number of qubits:\begin{center}
+	\includegraphics[scale=0.5]{20.png}
+\end{center}
+So we:\begin{list}{}{}
+	\item Prepare the $n+1$ qubit state $|x\rangle^{\otimes n}|y\rangle$
+	\item Apply the $H$ gate to the first $n$ qubits, to obtain the equal superposition of all inputs of $f$
+	\item Apply the quantum circuit implementing $U_f$
+\end{list}
+Obtaining the state $\frac{1}{\sqrt{2^n}}\sum_x|x,f(x)\rangle$\\
+Quantum parallelism enables all possible values of $f$ to be evaluated simultaneously, even if we evaluate $f$ once. This parallelism is not immediately useful: if we measure the state $\frac{1}{\sqrt{2^n}}\sum_x|x,f(x)\rangle$ we obatin $|x,f(x)\rangle$ for a single value of $x$.\\
+To exploit quantum parallelism, we need the ability to extract information about more than one value of $f(x)$ from $\sum_x |x,f(x)\rangle$
+\paragraph{Deutsch's Algorithm}
+\begin{center}
+	\includegraphics[scale=0.5]{21.png}
+\end{center}
+$$f(0)\otimes f(1)=\left\{\begin{array}{c l}
+0 & f\hbox{ is constant}\\
+1 & f\hbox{ is balanced}
+\end{array}\right.$$
 \end{document}
