@@ -532,7 +532,7 @@ $$P(y_t\:|\:y_{t-1})$$
 Also head-to-tail: observation at time $t$ is independent from $t=1,\ldots,t-1$: \textbf{first-order Markov assumption}.\\
 Reference population is a set of independent and identically distributed sequences $y^1, \ldots, y^N$\\
 Difference sequences generally have different lengths $T^1,\ldots,T^N$
-\paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on %TODO
+\paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on the $t-1$ previous nodes.\\
 We have X = $x-1,\ldots,x_T$ that can be represented as 
 $$x_1\rightarrow \ldots\rightarrow x_{t-1}\rightarrow x_t\rightarrow\ldots\rightarrow x_T$$
 So we can write $$P(\hbox{X}) = P(x_1,\ldots,x_T) = P(x_1)\cdot\prod_{i=2}^T P(x_i\:|\:x_{i-1})$$
@@ -963,7 +963,8 @@ Variational inference and sampling are efficient ways to learn approximations to
 If we have a sampling set we can use it to approximate $p(x)$ $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = i]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
 We can also approximate the expectation of a function $f$ $$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l)$$
 We need sampling when $p(x)$ is intractable. For example, in Bayesian models the parameters are random variables but the posteriors are often intractable so we can use sampling to obtain the model parameters.
-\paragraph{Sampling Procedure as Distributions} A sampler $S$ is a procedure that generates a sample set $X$ from a generic distribution $p(x)$. Since $X$ contains %TODO
+\paragraph{Sampling Procedure as Distributions} A sampler $S$ is a procedure that generates a sample set $X$ from a generic distribution $p(x)$. Since $X$ contains realizations of random variables, also $X$ has a probability distribution. We denote with $\hat{p}_S(X)$ the probability to obtain the sample set $X$ from the sampler $S$.\\
+A \textbf{sampler} and its properties \textbf{are fully defined by its distribution} $\hat{p}_S(X)$. In general
 $$\hat{p}(X) \neq p(x)$$
 \begin{list}{}{}
 	\item $p(x)$ is the distribution we would like to sample from, usually intractable
@@ -973,18 +974,16 @@ Let us consider the sampling approximation of the expectation
 $$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l) = \hat{f}_X$$
 Since $\hat{f}_X$ estimates a value, we could ask:
 \begin{list}{}{}
-	\item %TODO
+	\item Is $\hat{f}_X$ an unbiased estimator?
+	\item How much is the variance of the approximation?
 \end{list}
-An unbiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning that let $\hat{p}(X)$ the distribution over all possible realizations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$E_{\hat{p}(X)}[\hat{f}_X] = E_{p(x)}[f(x)]$$
+An unbiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning: let $\hat{p}(X)$ the distribution over all possible realizations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$E_{\hat{p}(X)}[\hat{f}_X] = E_{p(x)}[f(x)]$$
 This is true provided that $\hat{p}(x_l) = p(x_l)$\\
-A sampler with this property is called \textbf{valid} %TODO
-
-The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$ %TODO
-we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average %TODO
-
+A sampler with this property is called \textbf{valid} because it draws samples from the desired distribution.\\\\
+The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$. Let $$\Delta\hat{f}_X = \hat{f}_X - E_{\hat{p}(X)}[\hat{f}_X]$$ then the variance of $\hat{f}(X)$ is given by $$E_{\hat{p}_X}[(\Delta\hat{f}_X)^2]$$
+we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average, i.e. to $E_{p(X)}[f(X)]$.\\\\
 So if the sampler has same marginals and draws sample independently we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\hbox{Var}_{p(x)}[f(x)]$$
-The variance reduces linearly with respect to the number of samples provided that $\hbox{Var}_{p(x)}[f(x)]$ is finite.
-
+The variance reduces linearly with respect to the number of samples provided that $\hbox{Var}_{p(x)}[f(x)]$ is finite.\\\\
 We've shown that we need sampling to approximate expectations and to do inference in Bayesian models. Propertis of the sampling procedure depends on $\hat{p}(X)$: valid sampler and low approximation variance.
 \subsection{Univariate Sampling}
 Easy: random number generator $R$ which produces a value uniformly at random in $[0,1]$ and $p(x)$. We use $p(x)$ to divide $[0,1]$ in bins and sample accordingly.
@@ -1003,23 +1002,48 @@ Using the chain rule we can rewrite the joint distribution as a chain of conditi
 	\item $\hat{s}_n \simeq p(s_n\:|\:\hat{s}_1,\ldots,\hat{s}_{n-1})$
 \end{list}
 Each is univariate, so easy, but unfortunately computing the distribution $p(s_i\:|\:s_{j<i})$ often requires summation over an exponential number of states.\\
-This approach is called \textbf{Ancestral Sampling}. There are cases where it cannot be uses.\\
-Suppose a subset $s_\epsilon$ of variables that are visible, with $s=s_\epsilon\cup s_{\setminus\epsilon}$ we want to sample from $$P(s_{\setminus\epsilon}\:|\:s_\epsilon) = \frac{•}{•}$$ %TODO
+This approach is called \textbf{Ancestral Sampling}. There are cases where it cannot be used.
+\subparagraph{Example} We can apply directly if a distribution $p(s_1,\ldots,s_n)$ is already presented as a belief network:
+\begin{center}
+	\includegraphics[scale=0.5]{67.png}
+\end{center}
+The BN ancestral order tells us the sampling order
+$$\{s_1,s_2,s_4\}\prec\{s_3\}\prec\{s_6\}\prec\{s_5\}$$\begin{list}{}{}
+	\item Sample $\hat{s}_1\simeq p(s_1)$
+	\item Sample $\hat{s}_4\simeq p(s_4)$
+	\item Sample $\hat{s}_2\simeq p(s_2)$
+	\item Sample $\hat{s}_3\simeq p(s_3)$
+	\item Sample $\hat{s}_6\simeq p(s_6)$
+	\item Sample $\hat{s}_5\simeq p(s_5)$
+\end{list}
+We obtain a single sample $x^l = \hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6$.\\\\
+Suppose a subset $s_\epsilon$ of variables that are visible, with $s=s_\epsilon\cup s_{\setminus\epsilon}$ we want to sample from $$P(s_{\setminus\epsilon}\:|\:s_\epsilon) = \frac{p(s_{\setminus\epsilon}, s_\epsilon)}{p(s_\epsilon)}$$
+Can we still use Ancestral Sampling?\begin{list}{}{}
+	\item Clamping variables changes the structure of the bayesian network, and computing the new structure is as complex as running exact inference.
+	\item We could run AS on the original structure and discarding any samples which do not match the evidence.
+\end{list}
 Sampling under evidence is very important, in probabilistic models the inference is based on the posterior which is exactly that. So we need an efficient method of sampling under evidence.
 \paragraph{Gibbs Sampling Procedure}
 The idea is to start from a sample $x^1=\{s_1^1,\ldots,s_n^1\}$ and \textbf{update only one variable at a time}. Dealing with evidence is easy, we just do not select the visible variables.\\
 During the $(l+1)$th iteration:
 \begin{list}{}{}
 	\item Select a variable $s_j$
-	\item we sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\hbox{Parents}(s_j))\prod_{k\in\hbox{Children}(s_j)} P(s_k\:|\:\hbox{Parents}(s_k)) $$ %TODO
+	\item we sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\hbox{Parents}(s_j))\prod_{k\in\hbox{Children}(s_j)} P(s_k\:|\:\hbox{Parents}(s_k)) $$
 \end{list}
-Which depends only on the Markov blanket of $s_j$ and $s_{\setminus j} = \{s_1,\ldots,s_{j-1},s_{j+1},\ldots,s_n\}$
+Which depends only on the Markov blanket of $s_j$ and $s_{\setminus j}$ is clamped to$ \{s_1^l,\ldots,s_{j-1}^l,s_{j+1}^l,\ldots,s_n^l\}$
 \begin{center}
 	\includegraphics[scale=0.5]{45.png}
 \end{center}
-$\hat{p}(X)$ of Gibbs sampling %TODO
-\paragraph{Markov Chain Monte Carlo Sampling Framework} MCMC
-
+\subparagraph{$\hat{p}(X)$ of Gibbs sampling} Considering a set of variables $X=\{x^1,\ldots,x^L\}$ obtained with a Gibbs sampler: each sample $x^{l+1}$ is obtained from the previous sample $x^l$. We can define a probability $q(x^{l+1}\:|\:x^l)$, the probability to obtain $x^{l+1}$ given $x^l$:
+$$q(x^{l+1}\:|\:x^l) = \sum_{j=1}^NP(\hbox{Variable }j\hbox{ is selected})P(\hbox{New value }s_j^l\hbox{ given }x^l)$$
+With $P(\hbox{New value }s_j^l\hbox{ given }x^l)$ from equation 4 and $P(\hbox{Variable }j\hbox{ is selected})$ up to you.\\
+With this we can compute $\hat{p}(X)$ $$\hat{p}(X)=\prod_{l=1}^L q(x^{l+1}\:|\:x^l)$$
+\paragraph{Markov Chain Monte Carlo Sampling Framework} Gibbs sampling is a specialization of the Markov Chain Monte Carlo sampling framework. The idea is to build a Markov Chain whose stationary distribution is $p(x)$.\\
+Let $q(x^{l+1}\:|\:x^l)$ be the Markov Chain state-transition distribution, if the Markov Chain is\begin{list}{}{}
+	\item \textbf{Irreducible}, meaning it's possible to reach any state from anywhere
+	\item \textbf{Aperiodic}, meaning at each time-step we can be anywhere
+\end{list}
+then it has a unique stationary distribution. So we define $q(x^{l+1}\:|\:x^l)$ such that the Markov Chain converges to $p(x)$.
 \section{Convolutional Neural Networks}
 \paragraph{Deep Learning} Effectively is learning the representation of data.
 \paragraph{CNNs} The principle is complex neurons that take the outputs of simple neurons and assemble it into more complex structures.
