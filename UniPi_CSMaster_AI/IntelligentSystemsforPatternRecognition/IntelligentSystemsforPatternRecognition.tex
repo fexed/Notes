@@ -1159,4 +1159,96 @@ Kernels of different size to capture details at varied scale, aggregated before 
 \end{center}
 Only 5M parameters, followed by v2, v3 and v4 which added more filter factorization and introduced heavy use of Batch normalization.
 \paragraph{Batch Normalization} Very deep neural networks are subject to internal covariate shift. Distribution of inputs to a layer $N$ may vary (shift) with different minibatches due to adjustments at layer $N-1$. Layer $N$ can get confused by this, so (simplifying) we normalize for mean and variance in each minibatch.
+\paragraph{Deconvolution Network} Attach a DeConvNet to a target layer, pluggin an input and forward porpagation activations until layers, then backpropagate on the DeConvNet and see what parts of the reconstructed image are affected.
+\begin{center}
+	\includegraphics[scale=0.5]{68.png}
+\end{center}
+\paragraph{Occlusions} Measure what happens to feature maps and object classification if we occlude part of the image. Slide a grey mask across %TODO
+\paragraph{Dense CNN}
+\begin{center}
+	\includegraphics[scale=0.5]{69.png}
+\end{center}
+\paragraph{Causal Convolutions} Basically meaning asymmetrical, to prevent a convolution to see into the future.\begin{center}
+	\includegraphics[scale=0.5]{70.png}
+\end{center}
+Problem is the context size glows slow with depth. So Dilated Convokutions
+\begin{center}
+	\includegraphics[scale=0.5]{71.png}
+\end{center}
+Basically convoluting every now and then. Similar to striding but size is preserved.\\\\
+\paragraph{Fully Convolutional Networks} Due to not maintaining the original dimension we cannot perform semantic segmentation, so we need \textbf{Fully Convolutional Networks}
+\begin{center}
+	\includegraphics[scale=0.5]{72.png}
+\end{center}
+\paragraph{Deconvolutional Architecture} Basically you decompress the segmentation.
+\begin{center}
+	\includegraphics[scale=0.5]{73.png}
+\end{center}
+With Dilated Convolution out of the temporal domain we can perform semantic segmentation efficiently. For example with 3$\times$3 convolutions with no pooling at each level:
+\begin{center}
+	\includegraphics[scale=0.5]{74.png}
+\end{center}
+\section{Autoencoders} The first and the latest deep learning model.
+\paragraph{Basic Autoencoder} Train a model to reconstruct the input, passing through some form of \textbf{information bottleneck}.\begin{center}
+	\includegraphics[scale=0.5]{75.png}
+\end{center}
+$h$ is known as \textbf{latent space projection}, like with probabilistic models.\\
+The architecture is composed of the encoder $f$ ($x\rightarrow h$), and the decoder $g$ ($h\rightarrow\tilde{x}$). In principle $K << D$, the bottleneck. Or you can penalize the model by making $h$ sparsely active.
+\paragraph{Neural Autoencoders} Generally we want to train nonlinear AEs with possibly $K > D$ that do not learn trivial identity. Regularized AE:
+\subparagraph{Sparse Autoencoder} Add a term to the cost function to penalize $h$ (want the number of active units to be small)
+$$J_{SAE}(\Theta) = \sum_{x\in S} (L(x, \tilde{x}) + \lambda\Omega(h))$$
+Typically norm 1
+$$\Omega(h) = \Omega(f(x)) = \sum_j|h_j(x)|$$
+Probabilistic interpretation: training with regularization is MAP inference
+$$\max\log P(h,x)=\max(\log P(x\:|\:h)+\log P(h))$$
+MAP is formed by the likelihood plus the prior $P(h)$
+$$P(h)=\frac{\lambda}{2}\exp\left(-\frac{\lambda}{2}|h|_1\right) \Leftrightarrow \log P(h) = \lambda|h|_1 = \Omega(h)$$
+\subparagraph{Denoising Autoencoders} Train the AE to minimize the function $$L(x,g(f(\hat{x})))$$
+where $\hat{x}$ is a version of the original input corrupted by some noise process $C(\hat{x}\:|\:x)$, so the usual $\hat{x} = x + \epsilon$ with $\epsilon$ from a gaussian of mean $0$ and variance $1$.\\
+Key intuition: learned representations should be robust to partial destruction of the input.\\
+Probabilistic interpretation:\begin{center}
+	\includegraphics[scale=0.5]{76.png}
+\end{center}
+Learns the denoising distribution $P(x\:|\:\hat{x})$ by minizing $-\log P_d(x\:|\:h=f(\tilde{x}))$.\\
+\textbf{Manifold Learning}: learning a vector field (green arrows) approximating the gradient of the unknown data generating distribution.
+\begin{center}
+	\includegraphics[scale=0.5]{77.png}
+\end{center}
+$$C(\hat{x}\:|\:x) = N(\hat{x}\:|\:x,\sigma^2)$$
+$$g(h)-x\propto\frac{\partial\log p(x)}{\partial x}$$
+Remembering that $h$ is the encoding $h(x)$ depending on $x$. So basically compares the reconstruction with the original data.\\
+\textbf{The Manifold Assumption}: assume data lies on a lower dimensional non-linear manifold since variables in data are typically dependent. Regularized AR can afford to represent only variations that are needed to reconstruct training examples. AR mapping is sensitive only to changes in manifold direction.
+\subparagraph{Contractiv Autoencoder} Penalize encoding function for input sensitivity.\begin{center}
+	\includegraphics[scale=0.5]{78.png} %TODO rewrite
+\end{center}
+You can as well penalize on higher order derivatives.
+\subsection{Basic Autoencoders}
+\begin{center}
+	\includegraphics[scale=0.5]{79.png}
+\end{center}
+\begin{list}{}{}
+	\item Unsupervised training
+	\item Hierarchical %TODO
+\end{list}
+\paragraph{Unsupervised Layerwise Pretraining} Incremental unsupervised construction of the deep Autoencoders.
+\begin{center}
+	\includegraphics[scale=0.5]{80.png}
+\end{center}
+Train $h_1$ without $\tilde{x}$ getting all the encoding vectors. Then train a new layer $h_2$ recostructing $h_1$ in output ad so on, obtaining the desired structure.\\
+At the end, fine tune the whole autoencoder to optimize input reconstruction. You can use backpropagation, but it remains a supervised task.\\
+If we rearrange the graph we obtain a stack of restricted Boltzmann machine:\begin{center}
+	\includegraphics[scale=0.5]{81.png}
+\end{center}
+This is called a \textbf{Deep Belief Network}.\begin{center}
+	\includegraphics[scale=0.5]{82.png}
+\end{center}
+It's \textbf{not recurrent}. Training requires attention because of the recurrent interactions from higher layers to the bottom.
+$$P(h_j^1\:|\:x,h^2)=\sigma\left(\sum_jW_{ij}\ldots\right)$$ %TODO
+$$P(x_i\:|\:h^1)=\sigma\left(\sum_jW_{ij}^1h_j^1\right)$$
+To train this, first pretrain the first layers entails fitting this model
+$$P(x\:|\:\Theta)$$ %TODO
+Then pretrain the second layer changes $h^1$ prior by
+$$P(h^1\:|\:W^2) = \sum_{h^2}P(h^1,h^2\:|\:W^2)$$
+A trick, averaging the two models of $h^1$ can be approximated by taking half contribution from $W^1$ and half from $W^2$. Using full both would double count $x$ constributions as $h^2$ depends on $x$.
+\paragraph{Discriminative Fine Tuning}
 \end{document}

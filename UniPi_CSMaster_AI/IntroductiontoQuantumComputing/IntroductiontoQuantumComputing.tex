@@ -952,10 +952,69 @@ Quantum parallelism enables all possible values of $f$ to be evaluated simultane
 To exploit quantum parallelism, we need the ability to extract information about more than one value of $f(x)$ from $\sum_x |x,f(x)\rangle$
 \paragraph{Deutsch's Algorithm}
 \begin{center}
-	\includegraphics[scale=0.5]{21.png}
+	\includegraphics[scale=0.5]{22.png}
 \end{center}
 $$f(0)\otimes f(1)=\left\{\begin{array}{c l}
 0 & f\hbox{ is constant}\\
 1 & f\hbox{ is balanced}
 \end{array}\right.$$
+This circuit solves Deutsch's problem in just one pass. The Hadamard gate on the state $|1\rangle$ is to let the amplitude interfere in order to grasp global properties of the function. The last part measures in the Hadamard basis.
+$$|\psi_1\rangle = |+\rangle|-\rangle = \frac{|0\rangle+|1\rangle}{\sqrt{2}}\frac{|0\rangle-|1\rangle}{\sqrt{2}} = \frac{1}{\sqrt{2}}|0\rangle|-\rangle + \frac{1}{\sqrt{2}}|1\rangle|-\rangle$$
+Recall that the oracle $U_f$ works like this\begin{list}{}{}
+	\item $|x\rangle|-\rangle = |x\rangle\frac{|0\rangle-|1\rangle}{\sqrt{2}} \mapsto_{U_f} |x\rangle\frac{|0\oplus f(x)\rangle - |1\otimes f(x)\rangle}{\sqrt{2}} = |x\rangle\frac{|f(x)\rangle - |\overline{f(x)}\rangle}{\sqrt{2}} = \left\{\begin{array}{l l}
+	|x\rangle\frac{|0\rangle-|1\rangle}{\sqrt{2}} = |x\rangle|-\rangle & f(x) = 0\\
+	|x\rangle\frac{|1\rangle-|0\rangle}{\sqrt{2}} = -|x\rangle|-\rangle & f(x) = 1
+\end{array}	 \right.$\\
+	With $\overline{x}$ being the complement of $x$ (if $x=0$ then $\overline{x} = 1$)\\
+	So the state doesn't change with $f(x) = 0$ and has a phase factor with $f(x) = 1$. A more compact way is $(-1)^{f(x)}|x\rangle|-\rangle$
+\end{list}
+So we have $$|\psi_2\rangle = U_f(|+\rangle|-\rangle) = U_f\left(\frac{|0\rangle|-\rangle}{\sqrt{2}}+\frac{|1\rangle|-\rangle}{\sqrt{2}}\right) = \frac{(-1)^{f(0)}|0\rangle|-\rangle + (-1)^{f(1)}|1\rangle|-\rangle}{\sqrt{2}} = \frac{(-1)^{f(0)}|0\rangle + (-1)^{f(1)}|1\rangle}{\sqrt{2}}|-\rangle =$$
+$$=\left\{\begin{array}{l l}
+\pm\frac{|0\rangle+|1\rangle}{\sqrt{2}}|-\rangle = \pm|+\rangle|-\rangle & f\hbox{ is constant and }f= 0\hbox{ or }1\\
+\pm\frac{|0\rangle-|1\rangle}{\sqrt{2}}|-\rangle = \pm|-\rangle|-\rangle & f\hbox{ is balanced and }f(0) = 0, f(1) = 1\hbox{ or viceversa}
+\end{array}\right. $$
+Then we apply Hadamard on the first qubit
+$$|\psi_3\rangle = (H\otimes I)|\psi_2\rangle = \left\{\begin{array}{l l}
+\pm (H|+\rangle)|-\rangle& f\hbox{ is constant}\\
+\pm (H|-\rangle)|-\rangle& f\hbox{ is balanced}
+\end{array}\right. = \left\{\begin{array}{l l}
+\pm |0\rangle|-\rangle& f\hbox{ is constant}\\
+\pm |1\rangle|-\rangle& f\hbox{ is balanced}
+\end{array}\right.$$
+With a measure on the computational basis we solve the Deutsch's problem, getting 0 $\Leftrightarrow f$ is constant and $1\Leftrightarrow f$ is balanced.
+\paragraph{Deutsch-Jozsa Algorithm} Generalization of the Deutsch's problem
+$$f:\{0,1\}^n\rightarrow\{0,1\}$$
+As input we have a black box for computing an unknown function $f:\{0,1\}^n\rightarrow\{0,1\}$ either constant or balanced.\\
+The problem is to determine whether $f$ is constant or balanced.\\\\
+Classical (exact) solution, in the best case we query twice getting two different answers, then $f$ is balanced for sure. The worst case is $2^{n-1}$ queries with the same result, so $2^{n-1}+1$ queries: if the last value is different then is balanced, otherwise is constant. So classically we need an exponential number of queries. With quantum circuits we do just one query.
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+Very similar, just with a $n$ qubits on state $|0\rangle$ in the query register and 1 qubit in state $|1\rangle$ in the answer register.
+$$|\psi_0\rangle = |0\ldots 0\rangle|1\rangle = |0\rangle^{\otimes n}|1\rangle$$
+$$|\psi_1\rangle = \sum_{x\in\{0,1\}^n}\frac{|x\rangle}{\sqrt{2}}|-\rangle$$
+Query register: uniform superposition of all values.\\
+Answer register: uniform superposition of state $|0\rangle$ and $|1\rangle$.
+$$|\psi_2\rangle = \frac{1}{\sqrt{2^n}}U_f\left(\sum_{x\in\{0,1\}^n}|x\rangle|-\rangle\right) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} U_f(|x\rangle|-\rangle) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} (-1)^{f(x)}|x\rangle|-\rangle$$
+Let's see on a single qubit
+$$H|x_i\rangle = \frac{|0\rangle+(-1)^{x_i}|1\rangle}{\sqrt{2}} = \frac{1}{\sqrt{2}} \sum_{z_i\in\{0,1\}} (-1)^{x_i}|z_1\rangle=\left\{\begin{array}{l l}
+\frac{1}{\sqrt{2}}\frac{|0\rangle+|1\rangle}{\sqrt{2}} & x_i = 0\\
+\frac{1}{\sqrt{2}}\frac{|0\rangle-|1\rangle}{\sqrt{2}} & x_i = 1\\
+\end{array}\right.$$
+So we have
+$$H^{\otimes n}|x\rangle = (H|x_0\rangle)\ldots(H|x_{n-1}\rangle) = \frac{1}{\sqrt{2}}\left(\sum_{z_0=0}^1(-1)^{x_0z_0}|z_0\rangle\right)\ldots\left(\sum_{z_{n-1}=0}^1(-1)^{x_{n-1}z_{n-1}}|z_{n-1}\rangle\right)=$$
+$$=\frac{1}{\sqrt{2^n}} \sum_{z_0=0}^1\ldots\sum_{z_{n-1}=0}^1 (-1)^{x_0z_0+\ldots+x_{n-1}z_{n-1}}|z_0\rangle\ldots|z_{n-1}\rangle = \frac{1}{\sqrt{2^n}}\sum_{z\in\{0,1\}^n} (-1)^{x\cdot z}|z\rangle$$
+So
+$$|\psi_3\rangle = H^{\otimes n}\left(\frac{1}{\sqrt{2^n}}\sum_x(-1)^{f(x)}|x\rangle \right)|-\rangle = \frac{1}{\sqrt{2^n}}\left(\sum_x (-1)^{f(x)}H^{\otimes n}|x\rangle\right)|-\rangle =$$ $$= \frac{1}{\sqrt{2^n}}\left( \sum_x (-1)^{f(x)}\frac{1}{\sqrt{2^n}}\sum_{z\in\{0,1\}^n}(-1)^{x\cdot z}|z\rangle\right)|-\rangle = \frac{1}{2^n}\sum_{z\in\{0,1\}^n}\left(\sum_{x\in\{0,1\}^n}(-1)^{f(x)+x\cdot z}|z\rangle\right)|-\rangle$$
+Let's consider the amplitude of the state $|z\rangle = |0\ldots 0\rangle$
+$$\frac{1}{2^n}\sum_{x\in\{0,1\}^n}(-1)^{f(x)+0} = \frac{1}{2^n}\sum_{x\in\{0,1\}^n}(-1)^{f(x)}=\left\{\begin{array}{l l}
+-1&f\hbox{ is constant and }=0\\
++1&f\hbox{ is constant and }=1\\
+0&f\hbox{ is balanced}\\
+\end{array}\right.$$
+So if $f$ is constant, the amplitude of $|0\ldots0\rangle$ is $\pm 1$ (all other amplitudes are 0 since $|\psi_3\rangle$ is a unit vector), and a measurement in the computational basis is certain to return all zeroes (the binary string 0\ldots 0).\\
+If $f$ is balanced, positive and negative contributes cancel each other and the overall amplitude is 0, the measurement is certain not to return all zeroes.
+\paragraph{Probability Error} $$2\left(\frac{1}{2}\right)^k = \frac{1}{2^{k-1}}$$
+\paragraph{Simon's Algorithm} $$f:\{0,1\}^n\rightarrow\{0,1\}^n$$
+Is $f$ one-to-one (bijection) or two-to-one function?
 \end{document}
