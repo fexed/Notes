@@ -1163,11 +1163,14 @@ Only 5M parameters, followed by v2, v3 and v4 which added more filter factorizat
 \begin{center}
 	\includegraphics[scale=0.5]{68.png}
 \end{center}
-\paragraph{Occlusions} Measure what happens to feature maps and object classification if we occlude part of the image. Slide a grey mask across %TODO
+\paragraph{Occlusions} Measure what happens to feature maps and object classification if we occlude part of the image. Slide a grey mask across the image and project back the response of the best filters using deconvolution.\begin{center}
+	\includegraphics[scale=0.5]{83.png}
+\end{center}
 \paragraph{Dense CNN}
 \begin{center}
 	\includegraphics[scale=0.5]{69.png}
 \end{center}
+Gradient flows well in bypass connections, and each layer in the dense blocks has access to all the information from previous layers.
 \paragraph{Causal Convolutions} Basically meaning asymmetrical, to prevent a convolution to see into the future.\begin{center}
 	\includegraphics[scale=0.5]{70.png}
 \end{center}
@@ -1228,7 +1231,8 @@ You can as well penalize on higher order derivatives.
 \end{center}
 \begin{list}{}{}
 	\item Unsupervised training
-	\item Hierarchical %TODO
+	\item Hierarchical autoencoder
+	\item Extracts a representation of inputs that facilitates: data visualization, exploration, indexing\ldots also facilitates the realization of a supervised task: adding another layer on top we can perform supervised learning using the representation learned by the autoencoder.
 \end{list}
 \paragraph{Unsupervised Layerwise Pretraining} Incremental unsupervised construction of the deep Autoencoders.
 \begin{center}
@@ -1239,16 +1243,17 @@ At the end, fine tune the whole autoencoder to optimize input reconstruction. Yo
 If we rearrange the graph we obtain a stack of restricted Boltzmann machine:\begin{center}
 	\includegraphics[scale=0.5]{81.png}
 \end{center}
-This is called a \textbf{Deep Belief Network}.\begin{center}
+This is called a \textbf{Deep Belief Network}: a stack of pairwise Restricted Boltzmann Machines.\begin{center}
 	\includegraphics[scale=0.5]{82.png}
 \end{center}
-It's \textbf{not recurrent}. Training requires attention because of the recurrent interactions from higher layers to the bottom.
-$$P(h_j^1\:|\:x,h^2)=\sigma\left(\sum_jW_{ij}\ldots\right)$$ %TODO
+A DBM it's \textbf{not recurrent}, is a deep autoencoder but not a deep RBM.\\
+Training of a Deep Boltzmann Machine requires attention because of the recurrent interactions from higher layers to the bottom.
+$$P(h_j^1\:|\:x,h^2)=\sigma\left(\sum_jW_{ij}x_i+\sum_m W^2_{jm}h_m^2\right)$$
 $$P(x_i\:|\:h^1)=\sigma\left(\sum_jW_{ij}^1h_j^1\right)$$
-To train this, first pretrain the first layers entails fitting this model
-$$P(x\:|\:\Theta)$$ %TODO
+To train this, first pretrain the first layers, meaning fitting this model:
+$$P(x\:|\:\Theta) =\sum_{h^1}P(h^1\:|\:W^1)P(x\:|\:h^1,W^1)$$
 Then pretrain the second layer changes $h^1$ prior by
 $$P(h^1\:|\:W^2) = \sum_{h^2}P(h^1,h^2\:|\:W^2)$$
-A trick, averaging the two models of $h^1$ can be approximated by taking half contribution from $W^1$ and half from $W^2$. Using full both would double count $x$ constributions as $h^2$ depends on $x$.
+A trick, averaging the two models of $h^1$ can be approximated by taking half contribution from $W^1$ and half from $W^2$. Using full both would double count $x$ contributions as $h^2$ depends on $x$.
 \paragraph{Discriminative Fine Tuning}
 \end{document}

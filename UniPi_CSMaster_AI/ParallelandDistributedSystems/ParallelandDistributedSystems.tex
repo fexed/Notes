@@ -438,13 +438,20 @@ We can derive the normal form from every pattern tree, only with stream parallel
 	\item Farm(Comp(frontier))
 \end{enumerate}
 This process always aims at optimizing the parallel computation. Unless there are some particular reasons. We take the whole set of things to compute an put them together (1 and 2), meaning creating a chunk of code that do the work: \textbf{increase the grain of the computation}.\\
-This takes also into account resources.
+This optimizes the service time taking also into account resources.
 \paragraph{Performance Models} Used to evaluate or to optimize.\\
-\textbf{Evaluate} meaning that, having a tree, we evaluate a metric (e.g. $T_S$) visiting the tree from the leaves. For each leaf we're interested in the sequential time ($T_S = L$ for the sequential nodes). The we go up one step visiting the parents: we have the parameters of the subtree and can compute $T_S$ of the node given its subtrees. We can repeat until the root.\\
-\textbf{Optimize} the parameters for example the parallel degrees of the stages. In \texttt{rplsh} we used \texttt{optimize main with max resources}. How it's implemented? We take the tree, with Pipe in the root, same as before. We turn the tree with the $nw$ figured out, but we have a certain number of resources. For example we want to shrink the number of resources to match the number of cores.
+\textbf{Evaluate} meaning that, having a tree, we evaluate a metric (e.g. $T_S$) visiting the tree from the leaves. For each leaf we're interested in the sequential time ($T_S = L$ for the sequential nodes). The we go up one step visiting the parents: we have the parameters of the subtree and can compute $T_S$ of the node given its subtrees. We can repeat until the root.\\\
+The visit of a tree is also a pattern, so if I take that pattern (visiting a tree from the leaves upward) passing the tree as a parameter I can get a number of different \textbf{visitors}: $T_S$ in this case is a visitor. For example, for Visitor(\# resources) we would visit the tree in the same way but using a different formula for computing the contribution of each node.\\
+\textbf{Optimize} the parameters, for example the parallel degrees of the stages. In \texttt{rplsh} we used \texttt{optimize main with max resources}. How it's implemented? We take the tree, with Pipe in the root, same as before. We turn the tree with the $nw$ figured out, but we have a certain number of resources. For example we want to shrink the number of resources to match the number of cores.
 \paragraph{RPLShell} \begin{center}
 	\includegraphics[scale=0.5]{13.png}
 \end{center}
+\begin{list}{}{}
+	\item \textbf{Rewriting Rules} are the set of factoring rules.\\
+	For example, we have the facts that allow me to rewrite a given tree $t$ as Farm($t$) or Pipe($t_1,t_2$) as Comp($t_1,t_2$).
+	\item \textbf{Optimiziation Rules} the set of rules that for example transform a Farm(Farm($w$)) into Farm($w$) (because two farms linked are bad for performance), known as farmfarmopt, or the farmopt that is used when we have Farm($w$) with a certain $T_S$ of the $w$ and a certain $T_S$ target of the farm in order to set the $nw$ of the farm to $\frac{T_S}{T_{S,w}}$.
+	\item \textbf{Visitors} the elements that visit the tree upwards.
+\end{list}
 \paragraph{Autonomic Management of Non Functional Features} In long running computations.\\
 For example the classical variations in network load between night and day. Autonomic because %TODO
 Born from industrial processes management, changing behaviors of the systems. Different architectures of the controller:
