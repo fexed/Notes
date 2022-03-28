@@ -1256,4 +1256,73 @@ Then pretrain the second layer changes $h^1$ prior by
 $$P(h^1\:|\:W^2) = \sum_{h^2}P(h^1,h^2\:|\:W^2)$$
 A trick, averaging the two models of $h^1$ can be approximated by taking half contribution from $W^1$ and half from $W^2$. Using full both would double count $x$ contributions as $h^2$ depends on $x$.
 \paragraph{Discriminative Fine Tuning}
+The pretrained DBM matrices can be used to initialize a deep autoencoder. Add input from $h^2$ to the first hidden layer, add output layer and fine tune the RBM matrices by backpropagation.\begin{center}
+	\includegraphics[scale=0.5]{84.png}
+\end{center}
+\paragraph{Multimodal DBM} For example layer fusion.
+\begin{center}
+	\includegraphics[scale=0.5]{85.png}
+\end{center}
+\section{Gated Recurrent Networks}
+Main motivation: difficulty in learning long-term dependencies. Also gradient issues (exploding/vanishing gradients), solved with constant error propagation and adaptive learning.\\\\
+Sequences are variable sized data describing sequentially dependent information.
+\paragraph{RNN Design}\begin{list}{}{}
+	\item \textbf{Inductive Bias}/Expressivness: network structure influences the sequential data processing.
+	\item \textbf{Training}: the network should be easy to train.\\
+	Depends on architecture, initialization and learning algorithm.
+	\item \textbf{Computational Efficiency}: the network should be efficient.
+\end{list}
+\pagebreak
+\paragraph{Supervised Recurrent Tasks}
+\begin{list}{}{}
+	\item \textbf{Element-to-Element}: an output for each element of the input. For example a program where we classify at each timestep.
+	\begin{center}
+		\includegraphics[scale=0.5]{86.png}
+	\end{center}
+	\item \textbf{Sequence-to-Element}
+	\begin{center}
+		\includegraphics[scale=0.5]{87.png}
+	\end{center}
+	\item \textbf{Item-to-Sequence}: for example given the genre produce a song, generative models in general
+	\begin{center}
+		\includegraphics[scale=0.5]{88.png}
+	\end{center}
+	\item \textbf{Sequence-to-Sequence}: for example machine translation
+	\begin{center}
+		\includegraphics[scale=0.5]{89.png}
+	\end{center}
+\end{list}
+\paragraph{Vanilla RNN} Also called Simple or Elman.
+\begin{center}
+	\includegraphics[scale=0.5]{90.png}
+\end{center}
+Given the input, there's an update function $A$ that uses the hiddent state $h_t$ as input to the next one.
+\begin{center}
+	\includegraphics[scale=0.5]{91.png}
+\end{center}
+$$h_t=\tanh(g_t)$$ %TODO
+\paragraph{Unfolding RNN} \textbf{Forward pass}: should be familiar with the unfolding/unrolling on the data.\begin{center}
+	\includegraphics[scale=0.5]{92.png}
+\end{center}
+To be successful, the hiddent state $h_t$ of the RNN should be able to summarize the information on the history of the input signal up to time $t$. In practice, learning long-term dependencies is really difficult, as time grows there's little residual information of the input inside of the memory.
+\paragraph{Backward Propagation}
+%TODO
+We want to bound the update to compensate for the vanishing/exploding gradients. We have $h_l$, so $\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$ where the activation Jacobian is $$D_{l+1} = Diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
+meaning a diagonal matrix with $\tanh^{-1}(\partial_i^t)$ on the diagonal.
+$$\frac{\partial L_t}{\partial h_k} $$ %TODO formula
+where we bound the spectral radius $\sigma$. Can shrink to zero or increase exponentially:\begin{list}{}{}
+	\item $\sigma < 1 \Rightarrow$ \textbf{vanishing}
+	\item $\sigma > 1 \Rightarrow$ \textbf{exploding}
+\end{list}
+\subparagraph{Gradient Clipping for Exploding Gradients} Easiest to solve, by just limiting the gradient.\\
+With $g=\frac{\partial L_t}{\partial W}$ our gradient and $\Theta_0$ our max value for the gradient
+$$\|g\|>\Theta_0\Rightarrow g=\frac{\Theta_0}{\|g\|}g$$
+Rescaling doesn't work for gradient vanish as total gradient is a sum of time dependent gradients (preserving relative contribution from each time makes it exponentially decay).
+\subparagraph{Constant Error Propagation} Solution seem to be having the Jacobian with spectral radius $\sigma = 1$.
+\subparagraph{Activation functions} The popular choices (sigmoids, tanhs) are always contractive ($\sigma < 1$). Alternatives: modReLU (ReLU generalized to the $C$ domain) or identity.
+\subparagraph{Recurrent Weights} Possible to achieve $\sigma = 1$
+\begin{list}{}{}
+	\item Orthogonal matrices $W^TW = 1$
+	\item Unitary matrices $W^H W = 1$
+\end{list}
 \end{document}
