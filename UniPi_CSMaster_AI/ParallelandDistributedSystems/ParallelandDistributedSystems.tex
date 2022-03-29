@@ -486,4 +486,23 @@ This is implemented in the \textbf{control program} of our manager. Very crude \
 	\item Manage to keep contracts satisfied 
 \end{enumerate}
 We're taking into accounts performance, but often power consumption is more important. These are both non-functional features. If we take into account both, we could implement a manager for each. But the managers may take decision that contrast with each other. A solution is to build a single manager that takes into account both features, into a single MAPE loop. But this requires that both knowledge are in a single place, bad for the separation of concerns. Another solution is to have two managers, one for each feature, each with its MAPE loop, and the two can communicate: the plan phase inform each other in the hope to have authorization for a change that the execute part needs, if we don't get the authorization we go for a \texttt{nop}.
+\begin{center}
+	\includegraphics[scale=0.5]{15.png}
+\end{center}
+\section{Vectorization}
+Very old technique. %TODO
+Given $x, y, z$ as vectors of $x_i, y_i, z_i$ from $0$ to $n-1$ and $\forall\:i\in[0,n-1]\:\:z_i=f(x_i,y_i)$, implemented e.g. as a \texttt{for}. If the computation $f(x_i, y_i)$ is indepdendent of the other loop iterations (that is, $x_i$ is independent from all other $x_j, j\neq i$) then this is easily parallelized. A classical example is matrix multiplication: $$\forall\:i\:\:\forall\:j\:\:\forall\:k\:\:c_{ij} = a_{ik}\cdot b_{kj}$$
+2 steps: we need to have zeroes in the first positions and %TODO
+We have ways to load/store vectors to %TODO
+
+Hardware designed specifically, vector processors. Registers that can be seen as vectors of tot bits numbers: 256 bits vector registers seen as 4 64 bits numbers, or 8 32 bits numbers and so on. With special commands, for example \texttt{VADD.I32 R1, R2, R3} meaning R1 = R2 + R3 with I32 meaning 32 bit numbers with I index.
+\paragraph{Conditions} In \texttt{g++} we can explicitly ask with \texttt{-03 -ftree-vectorize} and with \texttt{-fopt-info-vec-[missed/all]} ask what cannot be vectorize.\\
+The conditions are:
+\begin{list}{}{}
+	\item Need to know the number of iterations.\\
+	\texttt{for} is ok, \texttt{while(c$<$k)} sometimes cannot be vectorized
+	\item Cannot call external code in the loop body, functions or libraries.
+	\item No conditional code.\\
+	It'd require compiling two paths, so complicates things.
+\end{list}
 \end{document}

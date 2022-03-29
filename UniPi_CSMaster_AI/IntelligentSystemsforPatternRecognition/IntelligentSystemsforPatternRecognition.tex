@@ -1325,4 +1325,80 @@ Rescaling doesn't work for gradient vanish as total gradient is a sum of time de
 	\item Orthogonal matrices $W^TW = 1$
 	\item Unitary matrices $W^H W = 1$
 \end{list}
+\paragraph{Gating Units} Mixture of experts, origin of gating.
+\begin{center}
+	\includegraphics[scale=0.5]{93.png}
+\end{center}
+The softmax gating network tries to recognize the best expert to apply.
+\paragraph{Forget Gate} Constant Error Carousel (\textbf{CEC})\begin{list}{}{}
+	\item Identify activation function
+	\item Identity weight matrix $h_t = h_{t-1} +\hat{c}(x_t)$
+	\item No forgetting
+	\item Hidden state saturation
+\end{list}
+CEC plus forget gate
+\begin{list}{}{}
+	\item CEC
+	\item Forget gate to "soft reset" units
+	$$f_t = \sigma(W_{fh}h_{t-1} + W_{fx}x_t + b_f)$$
+	$$h_t = f_t\cdot h_{t-1} + \hat{c}(x_t)$$
+	\item Adaptively forgets the past
+	\item Avoid saturation
+	\item No guarantees about constant propagation.
+\end{list}
+\subsection{LSTM Cell}
+\paragraph{Long-Short Term Memory Cell} Let's start with the vanilla RNN Unit
+\begin{center}
+	\includegraphics[scale=0.5]{94.png}
+\end{center}
+We introduce a linear recurrent update, with an additional hidden state which is the cell state $c_t$ with current input $x_t$.\\
+The \textbf{Input Gate} now controls %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{95.png}
+\end{center}
+The \textbf{Forget Gate} controls how past internal state ct-1 contributes to ct $$F_t(x_t,h_{t-1})$$
+\begin{center}
+	\includegraphics[scale=0.5]{96.png}
+\end{center}
+The \textbf{Output Gate} controls what part of the internal state is propagated out of the cell $$O_t(x_t,h_{t-1})$$
+\begin{center}
+	\includegraphics[scale=0.5]{97.png}
+\end{center}
+\paragraph{LSTM in Equations} %TODO
+\begin{list}{}{}
+	\item Compute activation of input and forget gates
+	\item Compute input potential and internal state
+	\item Compute output gate and output state
+\end{list}
+\paragraph{Deep LSTM} LSTM Layers extract information at increasing levels of abstraction (enlarging context)
+\paragraph{Training LSTM} Original LSTM training algorithm was a mixture of RTRL and Backpropagation Through Time:
+\begin{list}{}{}
+	\item BPTT on internal state gradient
+	\item RTRL-like truncation on other recurrent connections
+	\item No exact gradient calculation
+\end{list}
+All current LSTM implementation use full BPTT training, typically with Adam or RMSProp optimizer.
+\paragraph{Regularizing LSTM}\begin{list}{}{}
+	\item \textbf{Dropout}: randomly disconnect units from the network during training. Regulated by unit dropping hyperparameters, preventing \textbf{units coadaptation} (the realying of a unit on other units). The units are dropped for the whole sequence.\\Need to adapt prediction phase.
+	
+\end{list}
+\paragraph{Practicalities} With a minibatch we have the problem of the length of the sequences.
+\subsection{GRU Cell}
+\paragraph{Gated Recurrent Unit}\begin{center}
+	\includegraphics[scale=0.5]{98.png}
+\end{center}
+\textbf{Reset} and \textbf{update} gates are coupled, act as input and forget gates 
+$$z_t =\sigma$$ %TODO
+\textbf{Reset} acts directly on output staet (no internal statre and no output gate. $\odot$ is the element-wise multiplication.
+$$h_t = (1 - z_t)\odot h_{t-1} + z_t\odot h_t$$
+$$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
+\subsection{Applications}
+\paragraph{Bidirectional LSTM} for Character Recognition
+\begin{center}
+	\includegraphics[scale=0.5]{99.png}
+\end{center}
+\paragraph{Language Modeling} Typical benchmark of RNNs.
+\begin{center}
+	\includegraphics[scale=0.5]{100.png}
+\end{center}
 \end{document}
