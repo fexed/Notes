@@ -507,4 +507,14 @@ The conditions are:
 	\item No overlapping pointers.\\
 	
 \end{list}
+\paragraph{\texttt{\#pragma}} Indications to the compiler\\
+\texttt{\#pragma GCC ivdep} tells the compiler whatever it thinks of the loop, to consider it as independent iterations.\\
+\texttt{\#pragma GCC unroll n} tells the compiler that the following loop should be unrolled \texttt{n} times. Useful for short loops.\\\\
+So vectorization very useful for mathematical operations, such as differential equations. Requires to take a bit of care in the core to be able to vectorize. If we don't convince the compiler, we can use the \texttt{pragma}.\\
+If we vectorize Farm($f,nw$), the speedup with the vectorized $f$ with respect to the non-vectorized $f$ is smaller. Because the vectorized code in general is faster, so non-vectorized Speedup($nw$) $Z$ Vectorized Speedup($nw$).\\
+But vectorization can radically change the $T_S$ of the stages of a Farm, for instance, and introduce waiting times for workers. You don't change the sequential fraction, just the non-sequential fraction.
+\paragraph{Libraries} Libraries include operations used often, e.g. \texttt{Blas} (basic linear algebra system) or \texttt{Lapack} or \texttt{NKL}.\\
+For instance \texttt{blas} provides \texttt{gemm} for very optimized matrix multiplications.\\
+Use libraries because they are very optimized, exploiting all the possible optimizations.
+\paragraph{GRPPI} C++ library that implements common parallel patterns, using standard threads or other backends (e.g. omp, tdd or fastflow). The backend is only modeled by the \texttt{execution} parameter.
 \end{document}
