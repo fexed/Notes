@@ -948,5 +948,57 @@ Also known as noisy model
 \begin{center}
 	\includegraphics[scale=0.5]{42.png}
 \end{center}
-
+\paragraph{Fluency $P(T)$} How to measure that a sentence is more fluent than another? E.g. "That car was almost crash onto me" is less fluent than "That car almost hit me".\\
+The answer is language models, $n$-grams! For example, $P($hit$\:|\:$almost$)>P($was$\:|\:$almost$)$.\\
+But can use any other more sophisticated model of grammar. Advantage: it's monolingual knowledge.
+\paragraph{Faithfulness $P(S\:|\:T)$} How to quantify? Intuition: degree to which words in one sentence are plausible translations of words in the other sentence. Product of probabilities that each word in target sentence would generate each word in source sentence.\\
+Need to know, for every target language word, probability of it mapping to every source language word. How to learn this? Parallel texts: lots of times we have two texts that are translations of each other. If we knew which word in Source text mapped to each word in Target text, we could just count.
+\subparagraph{Sentence Alignment} Figuring out which source language sentence maps to which target language sentence.
+\subparagraph{Word Alignment} Figuring out which source language word maps to which target language word. \\\\
+The faithfulness model $P(S\:|\:T)$ just models a "bag of words" which words come from e.g. English to Italian.\\
+$P(S\:|\:T)$ doesn't have to worry about internal facts about target word order, that's the job of $P(T)$.\\
+$P(T)$ can do bag generation: put the following words in order.
+\paragraph{Three Problems for Statistical Machine Translation}
+\begin{list}{}{} %TODO details
+	\item \textbf{Language Model} 
+	\item \textbf{Translation Model}
+	\item \textbf{Decoding Algorithm}
+\end{list}
+\paragraph{Phrase Based Machine Translation}
+\begin{list}{}{}
+	\item Group words into phrases
+	\item Translate each phrase
+	\item Move the phrases around
+\end{list}
+$P(F\:|\:E)$ is modeled by translating phrases in $E$ to phrases in $F$. First segment $E$ into a sequence of phrases $\overline{e}_1,\ldots,\overline{e}_I$, then translate each $\overline{e}_i$ into $\overline{f}_i$ based on translation probability $\phi(\overline{f}_i\:|\:\overline{e}_i)$. Then, reorder translated phrases based on distortion probability $d(i)$ for the $i$the phrase %TODO
+\paragraph{Tranlsation Probabilities} Assuming a phrase aligned parallel coprus is available or constructed that show matchin betewwn phrases in $E$ and $F$. Then compute (MLE) estimate of $\phi$ based on simple frequency counts $$ $$ %TODO
+\paragraph{Distrortion probability} The probability that a phraase in position $X$ in the original sentence moves to position $Y$ in the tranlsation.\\
+Distortion is the measure of distance between positions of corerspondign phrases in the 2 languages. Distortion of phrase $i$ as the distance between the start of the foreign phrase hgenereated bu $\overline{e}_i$ ($a_i$ and the end of the foreign phrase generated bu the previous phrase $\overline{e}_{i-1}$ ($b_{i-1}$). Typically we assume the probability of a distortion decreases exponentially with the distance of the movement $$d(i) = c\alpha^{|a_i-b_{i-1}|}$$ %TODO
+Set $0<\alpha<1$ base on fit to phrase-aligned training data. Then set $c$ to normalize $d(i)$ so that it sums to 1.
+\paragraph{Translation Probabilities} 
+\paragraph{Training $P(F\:|\:E)$} What we mainly need to train is $\phi(f_j\:|\:e_i)$\\
+Suppose we had a large bilingual training corpus: a \textbf{bitext}. Suppose also to know exactly which phrase in the target language was the tranlsation of which phrase in the source language: \textbf{phrase alignment}.\\
+If we had this, we could just count-and-divide
+$$\phi(\overline{f},\overline{e})$$ %TODO
+But we don't have phrase alignemtns. We have \textbf{word alignments}.
+\begin{center}
+	\includegraphics[scale=0.5]{43.png}
+\end{center}
+(Actually we have more restricted word alignments)\\
+Word alignments are mapping between source and target words in parallel sentence. Restriction: each foreign word come from exactly one source word.
+\begin{center}
+	\includegraphics[scale=0.5]{44.png}
+\end{center}
+Advantage: represent alignment by the index of the english word that the french word comes from. The above alignment thus is 2,3,4,5,6,6,6.\\
+\textbf{Spurios words} are words in the foreign sentence that does not align with any word in the source language. We assume one to many alignment: each word in $F$ aligns with 1 word in $E$, with some words in $F$ coming from NULL.
+\paragraph{Computing Word Alignments} IBM-Model 1\\
+%TODO
+\paragraph{Training Alignment Probabilities}\begin{list}{}{}
+	\item Get a parallel corpus
+	\item Sentence alignemnt
+	\item Use EM %TODO
+\end{list}
+\paragraph{Phrase-Based Translation Model}
+\paragraph{Decoding}
+\paragraph{Evaluation}
 \end{document}
