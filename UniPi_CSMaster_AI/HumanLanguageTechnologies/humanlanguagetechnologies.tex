@@ -762,8 +762,8 @@ The single-head constraints causes problems in handling certain linguistic pheno
 	\item \textbf{Transition Based}: define a transition system that leads to a parse tree while analyzing a sentence one word at a time.
 	\item \textbf{Constraint Satisfaction}: edges are deleted that don't satisfy hard constraints.
 \end{list}
-\subparagraph{Transition-Based Shift-Reduce Parsing} %TODO
-Trained directly on the task of tagging a sentence. Instead, a shift-reduce parser is trained and learns the sequence of parse actions required to build the parse tree. An inductive parser doesn't require grammar, while a traditional parser requires a grammar for generating candidate trees.
+\subparagraph{Transition-Based Shift-Reduce Parsing}
+Traditional statistical parsers are trained directly on the task of tagging a sentence. Instead, a shift-reduce parser \textbf{learns the sequence of parse actions required to build the parse tree}. An inductive parser \textbf{doesn't require grammar}, while a traditional parser requires a grammar for generating candidate trees.
 \paragraph{Parsing as Classification} Inductive dependency parsing, based on Shift/Reduce actions: Learn from annotated corpus which action to perform at each step.
 \paragraph{Dependency Graph} Let $R = \{r_1,\ldots,r_m\}$ the set of dependency types (the tags we'll put on the links).\\
 A dependency graph for a sequence of words $W = w_1,\ldots,w_n$ is a labeled directed graph $D = (W,A)$ where\begin{list}{}{}
@@ -825,48 +825,130 @@ $$\hbox{Reduce}\:\:\:\:\:\frac{\langle S|s, B, A\rangle}{\langle S, B, A\rangle}
 \subsubsection{Graph-Based Parsing}
 For an input sequence $x$ define a graph $G_x=(V_x, A_x)$ where\begin{list}{}{}
 	\item $V_x=\{0,1,\ldots,n\}$
+	\item $A_x=\{(i,j,k)\:|\:i,j\in V$ and $k \in L\}$
 \end{list}
-%TODO
-The basic idea is to choose the arc with the highest score from each node. But the risk is to end up with a graph and not a tree.\\
-Another solution is the Chu-Liu-Edmonds: if it's not a tree, identify cycle and contract reculaculating arc weights in and out of the cycle. $O(n^2)$ complexity for non-projective trees (much slower than transition-based parsers).
-\paragraph{NN Graph-Based Parser} Revived graph-based dependency parsing in a neural world, with great results altough slower than neural dependency-based parsers.
+A key observation is that valid dependency trees for $x$ are \textbf{directed spanning trees of $G_x$}.\\
+A spanning tree is a tree that contains all the vertexes of the original tree and a subset of the arcs, only those needed to connect all the vertexes with one and only one path.\\
+The score of the dependency tree $T$ is given by the score of its arcs:
+$$s(T)=\sum_{i,j,k\in T} s(i,j,k)$$
+The learning is about the scoring functions $s(i,j,k)$ for each arc $(i,j,k)$. Inference is the search for the maximum spanning tree $T$ of $G_x$ given $s(\:)$.\\\\
+The basic idea is to choose the arc with the highest score from each node. But the risk is to end up with a graph and not a tree.
+\begin{center}
+	\includegraphics[scale=0.33]{45.png}
+\end{center}
+Another solution is the \textbf{Chu-Liu-Edmonds}: if it's not a tree, identify cycle and contract. Then recalculate arc weights in and out of the cycle. $O(n^2)$ complexity for non-projective trees (much slower than transition-based parsers).
+\paragraph{NN Graph-Based Parser} Revived graph-based dependency parsing in a neural world, with great results although slower than neural dependency-based parsers.\\
+Bidirectional LSTMs over word/tag embeddings.
 \begin{center}
 	\includegraphics[scale=0.5]{38.png}
 \end{center}
-
+\subparagraph{Parser} Two separate FC ReLU (Fully Connected Rectified Linear Units) layers:
+\begin{list}{}{}
+	\item One representing each token as a dependent trying to find its head.
+	\item One representing each token as a head trying to find its dependents.
+\end{list}
+\subparagraph{Dependency Relations} Two separate FC ReLU layers:\begin{list}{}{}
+	\item One representing each token as a dependent trying to determine its label.
+	\item One representing each token as a head trying to determine its dependents labels.
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{46.png}
+\end{center}
+\subparagraph{Self-Attention} Biaffine self-attention layer to score a possible heads for each dependent.
+A $n\times n$ matrix score:
+\begin{center}
+	\includegraphics[scale=0.5]{47.png}
+\end{center}
+$$s_i = H^{\hbox{(arc-head)}}\cdot\left(Wh_i^{\hbox{(arc-dep)}}+b\right)$$
+$$H^{\hbox{(arc-head)}} = \left[h_1^{\hbox{(arc-head)}}\:\ldots\:h_n^{\hbox{(arc-head)}}\right]$$
+Train with cross-entropy and apply a spanning tree algorithm at inference time.
+\subparagraph{Classifier for Labels} Biaffine layer to score possible relations for each best-head/dependent pair, $n\times c$
+\begin{center}
+	\includegraphics[scale=0.5]{48.png}
+\end{center}
+Train with softmax cross-entropy, added to the loss of the unlabeled parser.
 \section{Universal Dependencies}
-Treebank annotation schemes vary across languages, hard to coampare results across them. Also hard to use to build multilingual.
+Treebank annotation schemes vary across languages, hard to compare results across them. Also hard to use to build multilingual.
 \begin{center}
 	\includegraphics[scale=0.5]{39.png}
 \end{center}
-\paragraph{Goal} Facilitate consistent notation of similar constructions across languages. Support multilingual NLP and linguistic research. Build on common usage and existing de-facto standards. Complement and not replate language-specific schemes. \textbf{Community effort}.
-%TODO
+\paragraph{Goal} Facilitate consistent notation of similar constructions across languages. Support multilingual NLP and linguistic research. Build on common usage and existing de-facto standards. Complement and not replace language-specific schemes. \textbf{Community effort}.
+\paragraph{Guiding Principles} Allow parallelism across languages:
+\begin{list}{}{}
+	\item Don't annotate same thing in different ways
+	\item Don't make different things look the same
+	\item Don't annotate things that are not there
+	\item Use a universal pool of categories
+\end{list}
+Allows language-specific axioms.
+\paragraph{Design Principles}\begin{list}{}{}
+	\item \textbf{Dependency}: widely used in practical NLP systems, available in treebanks for many languages.
+	\item \textbf{Lexicalism}: the basic annotation units are syntactic words, they have morphological properties and can enter into syntactic relations.
+	\item \textbf{Recoverability}: transparent mapping from input text to word segmentation.
+\end{list}
 \paragraph{Morphological Annotation} 
+\begin{center}
+	\includegraphics[scale=0.5]{49.png}
+\end{center}
 \begin{list}{}{}
 	\item \textbf{Lemma} represent the semantic content of a word
-	\item \textbf{Part-of-speech} %TODO
+	\item \textbf{Part-of-Speech} tag represent its grammatical class
+	\item \textbf{Morphological Features} represent lexical and grammatical properties of the lemma or the specific word form
 \end{list}
 \paragraph{Syntactic Annotation}
+\begin{center}
+	\includegraphics[scale=0.5]{50.png}
+\end{center}
 \begin{list}{}{}
 	\item \textbf{Content Words} are used as heads of dependency relations
 	\item \textbf{Function Words} attach to the content word they modify
 	\item \textbf{Punctuation} attach to the head of phrase or clause
 \end{list}
-\paragraph{Coordination} The first conjunct is the head of all following conjuncts. Attach coordinating conjunctions and punctuation to the immediately succeeding conjunct.\\
+\paragraph{Coordination} The first conjunct is the head of all following conjuncts.
+\begin{center}
+	\includegraphics[scale=0.6]{51.png}
+\end{center}
+Attach coordinating conjunctions and punctuation to the immediately succeeding conjunct.
+\begin{center}
+	\includegraphics[scale=0.5]{52.png}
+\end{center}
 Except for the right headed constructions.
-\paragraph{Enhanced Dependencies} Making some of the implicit relations between words more explicit, to facilitate relation extractions\begin{list}{}{}
+\begin{center}
+	\includegraphics[scale=0.75]{53.png}
+\end{center}
+\paragraph{Enhanced Dependencies} Making some of the implicit relations between words more explicit, to facilitate relation extractions
+\begin{list}{}{}
 	\item Propagation of conjuncts
-	\item Conkjoined verb and phrases
-	\item Subjcect from controller phrsase
-	%TODO images
+	\begin{center}
+		\includegraphics[scale=0.5]{54.png}
+	\end{center}
+	\item Conjoined verb and phrases
+	\begin{center}
+		\includegraphics[scale=0.5]{55.png}
+	\end{center}
+	\item Subject from controller phrases
+	\begin{center}
+		\includegraphics[scale=0.5]{56.png}
+	\end{center}
 \end{list}
-\paragraph{CoNLL-U Format} %TODO table
+\begin{multicols}{2}
+\paragraph{Basic}
+\begin{center}
+	\includegraphics[scale=0.5]{57.png}\\
+	\includegraphics[scale=0.5]{58.png}
+\end{center}
+\paragraph{Enhanced}
+\begin{center}
+	\includegraphics[scale=0.5]{59.png}\\
+	\includegraphics[scale=0.5]{60.png}
+\end{center}
+\end{multicols}
+\pagebreak
 \paragraph{Dependency Structure} The same concept expressed in different languages is represented in similar ways.
 \begin{center}
 	\includegraphics[scale=0.5]{40.png}
 \end{center}
-Keeping the content words as heads promotes parallelism acros languages. The main grammatical relations involving a passiv verb, a nominal subject and an oblique agent are the same.\\\\
-Taxonomy of 42 universal grammatical realtions, broadly supported across languages in many panguage typologies. Language specific subtypes can be added.
+Keeping the content words as heads promotes parallelism across languages. The main grammatical relations involving a passive verb, a nominal subject and an oblique agent are the same.
 \paragraph{Parsing}
 Can train a parser, also possible to train on multiple languages.
 \section{Machine Translation}
@@ -875,8 +957,12 @@ Main task that let to the creation of the field. MT is translating a text from o
 \begin{list}{}{}
 	\item Sentence segmentation (e.g. 4 English sentences to 1 Chinese sentence)
 	\item Grammatical differences
-	\item Stylistical and cultural differences 
+	\item Stylistic and cultural differences 
 \end{list}
+\paragraph{Alignment}
+\begin{center}
+	\includegraphics[scale=0.5]{61.png}
+\end{center}
 Not just literature! For example, in the European Parliament there are more official languages so all official documents have to be produced in all official languages.
 \paragraph{MT Already Good for...}\begin{list}{}{}
 	\item Tasks for which a rough translation is fine: extracting informations, web pages, email\ldots
@@ -887,7 +973,9 @@ Not just literature! For example, in the European Parliament there are more offi
 	\item Really hard stuff: literature, natural spoken speech\ldots
 	\item Really important stuff: medical translations in hospitals, emergency phone calls\ldots
 \end{list}
-\subsection{Language Similarities and Divergences} \paragraph{Typology} Systematic study of these similarities and divergences. %TODO
+\subsection{Language Similarities and Divergences}
+Some aspects of human language are universal or near-universal, others diverge greatly.
+\paragraph{Typology} Systematic study of these similarities and divergences. What are the dimension along which human languages vary?
 \paragraph{Morphology}
 \begin{list}{}{}
 	\item \textbf{Morpheme}: minimal meaningful unit of language.
@@ -903,10 +991,11 @@ Not just literature! For example, in the European Parliament there are more offi
 		\item Circumfixes
 	\end{list}
 \end{list}
-In isolating languages a word can have one morpheme, while in polysynthetic languages single words can have many morphemes.\\
+\paragraph{Morphological Variation}
+In isolating languages a single word generally have one morpheme, while in polysynthetic languages single words can have many morphemes.\\
 In agglunative languages morphemes have clean boundaries, in fusion languages a single affix can have many morphemes.\\\\
-So there's a wide range of synthesis: from isolating (vietnamese) to englishm to russian to onedia (synthetic).\\
-The other range is fusion: from agglunative (swahili) to russian and oneida (fusion).
+So there's a wide range of synthesis: from vietnamese (isolating) to english to russian to onedia (synthetic).\\
+The other range is fusion: from swahili (agglunative) to russian and oneida (fusion).
 \paragraph{Segmentation Variation} Not every writing system has word boundaries marked between words, also some languages have very long sentences.\\
 Some cold languages require the hearer to do more "figuring out", while in hot languages for example the subject of the sentence is always required.
 \paragraph{Lexical Gaps} For example, Japanese doesn't have a word for "privacy", or English lacks the word for the Japanese "Oyakoko".
@@ -917,17 +1006,49 @@ Some cold languages require the hearer to do more "figuring out", while in hot l
 	\item Interlingua
 \end{list}
 \begin{center}
-	\includegraphics[scale=1]{41.png}
+	\includegraphics[scale=0.75]{41.png}
 \end{center}
-\paragraph{Direct Translation} Proceed word-by-word in the text translating each, without %TODO
+\paragraph{Direct Translation} Proceed word-by-word in the text translating each, without intermediate structures except morphology. Knowledge is in the form of a huge bilingual dictionary and some word-to-word translation information.\\
 The dictionary can be more specific for each word, specifying cases and different translation for each case.\\
 The main problem is that we don't "translate" the different syntactic structures and maintain the order of the words of the original language which is often different in the target language.
-\paragraph{Transfer Model} We use a set of \textbf{transfer rules} that restructure the parse tree. But we need hard to obtain lexical transfer rules.
-\paragraph{Lexical Transfer} Transfer-based systems also need lexical transfer rules, bilingual dictionaries. Can be a list or a word disambiguation system.
-\subparagraph{Systram} Combination of direct and transfer. Performs morphological analysis and chunking. Then transfers with translation of idioms and word sense disambiguation, and apply a rich bilingual dictionary.\\
+\subparagraph{Pros} Fast, simple, cheap, no translation rules hidden in the lexicon.
+\subparagraph{Cons} Unreliable, not powerful, rule proliferation, need major restructuring after lexical subsitution.
+\paragraph{Transfer Model} We use a set of \textbf{transfer rules} that restructure the parse tree. But we need hard to obtain lexical transfer rules. We apply contrastive knowledge: knowledge about the difference between two languages.
+\begin{list}{}{}
+	\item \textbf{Analysis}: syntactically parse source language
+	\item \textbf{Transfer}: rules to turn this parse into parse tree for target language
+	\item \textbf{Generation}: generate target sentence from parse tree
+\end{list}
+\subparagraph{Lexical Transfer} Transfer-based systems also need lexical transfer rules, bilingual dictionaries. Can be a list or a word disambiguation system.
+\subparagraph{Systram} Combination of direct and transfer.\begin{list}{}{}
+	\item Analysis:\begin{list}{}{}
+		\item Morphological analysis, POS tagging
+		\item Chunking of NPs, PPs, phrases
+		\item Shallow dependency parsing
+	\end{list}
+	\item Transfer:\begin{list}{}{}
+		\item Translation of idioms
+		\item Word sense disambiguation
+		\item Assigning prepositions based on governing verbs
+	\end{list}
+	\item Synthesis:\begin{list}{}{}
+		\item Apply rich bilingual dictionary
+		\item Deal with reordering
+		\item Morphological generation
+	\end{list}
+\end{list}
 $N^2$ set of transfer rules, grammar and lexicon full of language-specific stuff, hard to build and maintain.
-\paragraph{Interlingua} Instead of language-to-language rules, we abstract the meaning of the sentence and translate that.
-%TODO pros and cons of all three.
+\paragraph{Interlingua} Instead of language-to-language rules, we abstract the meaning of the sentence and translate that.\begin{enumerate}
+	\item Translate source sentence into meaning representation
+	\item \textbf{Generate} target sentence from meaning
+\end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.5]{62.png}
+\end{center}
+The idea is that some of the MT work that we need to do is part of other NLP tasks: disambiguating eng:book-ita:libro from eng:book-ita:prenotare. So we could have concepts like BOOKVOLUME and PRENOTARE and solve this problem once for each language.
+\subparagraph{Pros} Avoids the $N^2$ problem, and easier to write rules.
+\subparagraph{Cons} Semantics is hard, useful information lost (because we paraphrase).
+
 \subsection{Statistical Machine Translation}
 \paragraph{Example} Start from a parallel corpus: a set of sentences in a language and the corresponding sentences in the other language.\\
 Have a sentence to translate into an unknown target sentence into the target language. For each word in the sentence, look for that into the parallel corpus, trying to figure out the translation. 	
