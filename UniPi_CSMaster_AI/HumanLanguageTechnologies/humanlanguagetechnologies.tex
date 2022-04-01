@@ -1054,15 +1054,17 @@ The idea is that some of the MT work that we need to do is part of other NLP tas
 Have a sentence to translate into an unknown target sentence into the target language. For each word in the sentence, look for that into the parallel corpus, trying to figure out the translation. 	
 \paragraph{What Makes a Good Translation} Two facts to maximize:
 \begin{list}{}{}
-	\item %TODO
+	\item \textbf{Faithfulness} or fidelity: how close is the meaning of the translation to the meaning of the original.\\
+	Even better: does the translation cause the reader to draw the same inferences as the original would have?
+	\item \textbf{Fluency} or naturalness: how natural the translation is, just considering its fluency in the target language.
 \end{list}
-Faithfulness and fluency are formalized: best-translation of a source sentence S
-$$\hat{T}=\arg\max_T \hbox{Fuency}(T)\hbox{Faithfulness}(T,S)$$
+Faithfulness and fluency are formalized: best-translation $\hat{T}$ of a source sentence S
+$$\hat{T}=\arg\max_T \left\{\hbox{Fluency}(T)\cdot\hbox{Faithfulness}(T,S)\right\}$$
 Called the \textbf{IBM model}. It's the Bayes rule
 $$\hat{T} = \arg\max_T P(T)P(S\:|\:T)$$
-More formally: assume we want to translate from a foreign language sentence $F$ to an english language sentence $E$
+More formally: assume we want to translate from a foreign language sentence $F$ to an English language sentence $E$
 $$F = f_1 \ldots f_m$$
-We want to find the best english sentence
+We want to find the best English sentence
 $$\overline{E} = e_1\ldots e_n = \arg\max_E P(F\:|\:E)P(E)$$
 With $P(E)$ from the language model and $P(F\:|\:E)$ from the translation model.\\
 Also known as noisy model
@@ -1080,46 +1082,106 @@ The faithfulness model $P(S\:|\:T)$ just models a "bag of words" which words com
 $P(S\:|\:T)$ doesn't have to worry about internal facts about target word order, that's the job of $P(T)$.\\
 $P(T)$ can do bag generation: put the following words in order.
 \paragraph{Three Problems for Statistical Machine Translation}
-\begin{list}{}{} %TODO details
-	\item \textbf{Language Model} 
-	\item \textbf{Translation Model}
-	\item \textbf{Decoding Algorithm}
-\end{list}
-\paragraph{Phrase Based Machine Translation}
 \begin{list}{}{}
+	\item \textbf{Language Model}: given an English string $e$, assigns $P(e)$ by a formula such that:
+	\begin{list}{}{}
+		\item Good English string $\Rightarrow$ high $P(e)$
+		\item Random word sequence $\Rightarrow$ low $P(e)$
+	\end{list}
+	Can be trained on large, unsupervised mono-lingual corpus for the target language, and could use more sophisticated PCFG language model to caputre long-distance dependencies. Terabytes of web data used to build large 5-gram models.
+	\item \textbf{Translation Model}: given a pair of strings $\langle f,e\rangle$, assigns $P(f\:|\:e)$ by a formula such that:
+	\begin{list}{}{}
+		\item $\langle f,e\rangle$ look like translations $\Rightarrow$ high $P(f\:|\:e)$
+		\item $\langle f,e\rangle$ don't look like translations $\Rightarrow$ low $P(f\:|\:e)$
+	\end{list}
+	\item \textbf{Decoding Algorithm}: given a language model, a translation model and a new sentence $f$, it finds the translation $e$ that maximize $P(e)P(f\:|\:e)$
+\end{list}
+\subsection{Phrase Based Machine Translation}
+Follows three steps
+\begin{enumerate}
 	\item Group words into phrases
 	\item Translate each phrase
 	\item Move the phrases around
-\end{list}
-$P(F\:|\:E)$ is modeled by translating phrases in $E$ to phrases in $F$. First segment $E$ into a sequence of phrases $\overline{e}_1,\ldots,\overline{e}_I$, then translate each $\overline{e}_i$ into $\overline{f}_i$ based on translation probability $\phi(\overline{f}_i\:|\:\overline{e}_i)$. Then, reorder translated phrases based on distortion probability $d(i)$ for the $i$the phrase %TODO
-\paragraph{Tranlsation Probabilities} Assuming a phrase aligned parallel coprus is available or constructed that show matchin betewwn phrases in $E$ and $F$. Then compute (MLE) estimate of $\phi$ based on simple frequency counts $$ $$ %TODO
-\paragraph{Distrortion probability} The probability that a phraase in position $X$ in the original sentence moves to position $Y$ in the tranlsation.\\
-Distortion is the measure of distance between positions of corerspondign phrases in the 2 languages. Distortion of phrase $i$ as the distance between the start of the foreign phrase hgenereated bu $\overline{e}_i$ ($a_i$ and the end of the foreign phrase generated bu the previous phrase $\overline{e}_{i-1}$ ($b_{i-1}$). Typically we assume the probability of a distortion decreases exponentially with the distance of the movement $$d(i) = c\alpha^{|a_i-b_{i-1}|}$$ %TODO
+\end{enumerate}
+$P(F\:|\:E)$ is modeled by translating phrases in $E$ to phrases in $F$. First segment $E$ into a sequence of phrases $\overline{e}_1,\ldots,\overline{e}_I$, then translate each $\overline{e}_i$ into $\overline{f}_i$ based on \textbf{translation probability} $\phi(\overline{f}_i\:|\:\overline{e}_i)$. Then, reorder translated phrases based on \textbf{distortion probability} $d(i)$ for the $i$the phrase.
+\paragraph{Translation Probabilities} Assuming a phrase aligned parallel corpus is available or constructed that show matching between phrases in $E$ and $F$. Then compute (MLE) estimate of $\phi$ based on simple frequency counts $$\phi(\overline{f},\overline{e})=\frac{\hbox{Count}(\overline{f},\overline{e})}{\sum_{f} \hbox{Count}(f,\overline{e})}$$
+\paragraph{Distortion probability} The probability that a phrase in position $X$ in the original sentence moves to position $Y$ in the translation.\\
+Distortion is the measure of distance between positions of corresponding phrases in the 2 languages. Distortion of phrase $i$ as the distance between the start of the foreign phrase generated by $\overline{e}_i$ ($a_i$ and the end of the foreign phrase generated bu the previous phrase $\overline{e}_{i-1}$ ($b_{i-1}$). Typically we assume the probability of a distortion decreases exponentially with the distance of the movement $$d(i) = c\alpha^{|a_i-b_{i-1}|}$$
 Set $0<\alpha<1$ base on fit to phrase-aligned training data. Then set $c$ to normalize $d(i)$ so that it sums to 1.
-\paragraph{Translation Probabilities} 
 \paragraph{Training $P(F\:|\:E)$} What we mainly need to train is $\phi(f_j\:|\:e_i)$\\
 Suppose we had a large bilingual training corpus: a \textbf{bitext}. Suppose also to know exactly which phrase in the target language was the tranlsation of which phrase in the source language: \textbf{phrase alignment}.\\
 If we had this, we could just count-and-divide
-$$\phi(\overline{f},\overline{e})$$ %TODO
-But we don't have phrase alignemtns. We have \textbf{word alignments}.
+$$\phi(\overline{f},\overline{e})=\frac{\hbox{Count}(\overline{f},\overline{e})}{\sum_{f} \hbox{Count}(f,\overline{e})}$$
+But we don't have phrase alignments. We have \textbf{word alignments}.
 \begin{center}
 	\includegraphics[scale=0.5]{43.png}
 \end{center}
-(Actually we have more restricted word alignments)\\
-Word alignments are mapping between source and target words in parallel sentence. Restriction: each foreign word come from exactly one source word.
+Actually we have more restrictive word alignments. Word alignments are mapping between source and target words in parallel sentence. Restriction: each foreign word come from exactly one source word.
 \begin{center}
 	\includegraphics[scale=0.5]{44.png}
 \end{center}
-Advantage: represent alignment by the index of the english word that the french word comes from. The above alignment thus is 2,3,4,5,6,6,6.\\
-\textbf{Spurios words} are words in the foreign sentence that does not align with any word in the source language. We assume one to many alignment: each word in $F$ aligns with 1 word in $E$, with some words in $F$ coming from NULL.
-\paragraph{Computing Word Alignments} IBM-Model 1\\
-%TODO
+Advantage: represent alignment by the index of the English word that the french word comes from. The above alignment thus is 2,3,4,5,6,6,6.\\
+\textbf{Spurious words} are words in the foreign sentence that does not align with any word in the source language. We assume one to many alignment: each word in $F$ aligns with 1 word in $E$, with some words in $F$ coming from NULL.
+\paragraph{Computing Word Alignments} IBM-Model 1. For phrase-based machine translation we need a word-alignment to extract a set of phrases.\\
+A word alignment model gives us $P(F,E)$, and we want this to train our phrase probabilities $\phi(f_j\:|\:e_j)$ as part of $P(F\:|\:E)$.\\
+A word-alignment model allows to compute the translation probability $P(F\:|\:E)$ by summing the probabilities of all possible $(l+1)^m$ "hidden" alignments $A$ between $F$ and $E$
+$$P(F\:|\:E) = \sum_A P(F, A\:|\:E)$$
+IBM-Model 1 assumes the following simple generative model of producing $F$ from $E=e_1,\ldots,e_l$:
+\begin{enumerate}
+	\item Choose length $J$ of $F$ sentence: $F=f_1,\ldots,f_J$
+	\item Choose a 1 to many alignment $A=a_1,\ldots,a_J$
+	\item For each position $j$ in $F$, \textbf{generate} a word $f_j$ from the aligned word $e_{a_j}$ in $E$
+\end{enumerate}
+Its goal is to find the most probable alignment given a prameterized model
+$$\hat{A}=\arg\max_A P(F,A\:|\:E) = \arg\max_A\prod_{j=1}^J t(f_j,e_{a_j})$$
+Since translation choice for each position $j$ is independent, the product is maximized by maximizing each term
+$$a_j = \arg\max_{0\leq i\leq l} t(f_j,e_i)\:\:\:\:\:1\leq j\leq l$$
 \paragraph{Training Alignment Probabilities}\begin{list}{}{}
-	\item Get a parallel corpus
-	\item Sentence alignemnt
-	\item Use EM %TODO
+	\item Get a parallel corpus, e.g.: Europarl, Hansards\ldots
+	\item Sentence alignment. Intuition: use length in words or chars, together with dynamic programming. Ora a simpler MT model.
+	\item Use Expectation Maximization to train word alignments.\\
+	We can bootstrap alignment from a sentence-aligned bilingual corpus using the EM algorithm.\\
+	$P(A\:|\:E,F)$ is the probability of the alignment $A$ given a translated pair of sentences $E$ and $F$
+	$$P(A\:|\:E,F) = \frac{P(F,A\:|\:E)}{P(F\:|\:E)} =\frac{P(F,A\:|\:E)}{\sum_{A'}P(F,A'\:|\:E)}$$
+	Inherent hidden structure is revealed by EM training.
 \end{list}
-\paragraph{Phrase-Based Translation Model}
+\subparagraph{EM Algorithm for Word Alignment}\begin{lstlisting}
+Randomly set model parameters, making sure they represent legal distributions
+Until convergence (i.e. parameter no longer change) do:
+	E Step: compute the probability of all possible alignments
+		of the training data using the current model
+	M Step: use these alignment probability estimates to re-estimate values
+		for all of the parameters
+end
+\end{lstlisting}
+\subsubsection{Phrase-Based Translation Model}
+Major components of a phrase-based model:
+\begin{list}{}{}
+	\item Phrase translation model $\phi(f\:|\:e)$
+	\item Reordering model $\Omega(f\:|\:e)$
+	\item Language model $P_{LM}(e)$
+\end{list}
+Bayes rule
+$$\arg\max_e P(e\:|\:f) = \arg\max_e P(f\:|\:e)P(e) = \arg\max_e\phi(f\:|\:e)P_{LM}(e)\Omega(f\:|\:e)$$
+Sentences $f$ and $e$ are decomposed into $I$ phrases: $\overline{f}_1^I = \overline{f}_1,\ldots,\overline{f}_I$
+$$\phi(f\:|\:e)=\prod_{i=1}^I\phi(\overline{f}_1,\overline{e}_i)d(a_i-b_{i-1})$$
+\paragraph{Phrase Alignment} Alignment algorithms produce one-to-many word translations, and we know that words do not map one-to-one in translations. Better to map "phrases", sequences of words, to phrases and probabilistically reorder them in translation.\\
+Combine $E\rightarrow F$ and $F\rightarrow E$ word alignments to produce a phrase alignment.
 \paragraph{Decoding}
-\paragraph{Evaluation}
+\paragraph{Evaluation} Human subjective evaluation is best but time consuming and expensive. Automated evaluation comparing the output to multiple human reference translations is cheaper and correlates with human judgments.\\
+Better: computer-aided translation evaluation. \textbf{Edit cost}: measure the number of changes that a human translator must make to correct the MT output (number of words changed, amount of time taken, number of keystrokes\ldots).
+\subparagraph{Scores} Based on similarity to the reference translations:
+\begin{list}{}{}
+	\item \textbf{BLEU} (Bilingual Evaluation Understudy): determine the number of $n$-grams of various sizes that the MT output shares with the reference translations. Compute a modified precision measure of the $n$-grams in MT result, averaging $n$-gram precision over all $n$-grams up to size $N$ (typically 4) using the geometric mean:
+	$$p_n = \frac{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}_{\hbox{clip}}(n\hbox{-gram})}{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}(n\hbox{-gram})}$$
+	$$p = \sqrt[N]{\prod_{n=1}^Np_n}$$
+	\textbf{Brevity Penalty} (BP): use a penalty for the translations that are shorter than the reference translation. Define the effective reference length $r$ for each sentence as the length of the reference sentence with the largest number of $N$-gram matches. With $c$ the candidate sentence length:
+	$$BP = \left\{\begin{array}{l l}
+	1&c > r\\
+	e^{\frac{1-r}{c}}& c\leq r
+	\end{array}\right.$$
+	The final BLEU score is 
+	$$BLEU = BP\cdot p$$
+	Correlates with human evaluation when comparing outputs from different SMT systems, but doesn't correlate with human judgments when comparing SMT systems with manually developed MT or MT with human translations.
+\end{list}
 \end{document}
