@@ -1017,4 +1017,108 @@ If $f$ is balanced, positive and negative contributes cancel each other and the 
 \paragraph{Probability Error} $$2\left(\frac{1}{2}\right)^k = \frac{1}{2^{k-1}}$$
 \paragraph{Simon's Algorithm} $$f:\{0,1\}^n\rightarrow\{0,1\}^n$$
 Is $f$ one-to-one (bijection) or two-to-one function?
+\subsection{Quantum Fourier Transform}
+Building block for many important algorithms: QPE, QAA, Shor's, QS\ldots
+\paragraph{Discrete Fourier Transform} DFT, essentially multiplying a unitary matrix by a vector. With Fast Fourier Transform we do it in $O(N\log N)$ with $N = 2^n$.\\
+We have $x_0,\ldots,x_{N-1}$ and $y_0,\ldots,y_{N-1}$ 
+Primitive root of unity $\omega_N = e^{\frac{2\pi i}{N}}$
+$$y_N = \frac{1}{\sqrt{N}} = \sum_{j=0}^{N-1} e^{\frac{2\pi ijk}{N}}x_j= \sum_{j=0}^{N-1} \omega_N^{jk}x_j$$
+So we have $$y = F_N x$$ with $F_N$ unitary matrix, given by the $k$ indexes. $k=0$ we have all ones in the first row.
+$$F_n = \frac{1}{\sqrt{N}}\left[\begin{array}{c c c c}
+1 & \ldots & \ldots & 1\\
+1 & w_N & \ldots & \omega_N^{N-1}\\
+\vdots\\
+1
+\end{array}\right]$$
+$$w_N^{kj}\hbox{ in positions }k,j=0,\ldots,N-1$$
+The conjugation of $w_N^{jk}$ is $\cos \pm i\sin$ changing the sign.
+$$F_N\cdot F_N^H = \frac{1}{N}\left[\begin{array}{c}
+w_{kj}
+\end{array}\right]\left[\begin{array}{c}
+w_{sp}^{-1}
+\end{array}\right] = $$
+$F_N$ needs to be unitary so this multiplication must be $I$, so $(F_N\cdot F_N^H)_{st}=\left\{\begin{array}{l l}
+0&s\neq t\\
+1&s = t
+\end{array}\right.$\\
+It's provable that $\sum_{j=0}^{N-1}\omega_N^{kj}=\left\{\begin{array}{l l}
+N&k= 0\hbox{ mod }N\\
+0&k\neq 0\hbox{ mod }N
+\end{array}\right.$\\
+So essentially we have $$(F_NF_N^H)_{st} = \frac{1}{N}\sum_{j=0}\omega_N^{js}\omega_N^{-jt}= \frac{1}{N}\sum_{j=0}^{N-1}\omega_N^{j(s-t)}$$
+So it's unitary %TODO proof
+\subparagraph{Example} $n=1, N=2$ $$F_2=\frac{1}{\sqrt{2}}\left[\begin{array}{c c}
+1&1\\1&-1
+\end{array}\right] = H$$
+$$\omega_2 = \cos\pi + i\sin\pi$$
+\paragraph{Quantum Fourier Transform} We're in the quantum world, so we're working with quantum states. When we measure we collapse from a state, losing the superposition.\\
+$|y\rangle = H^{\otimes n}|x\rangle$ is already a quantum Fourier transform, over a group $Z_2\otimes Z_2\otimes\ldots\otimes Z_2$, binary.\\
+Thanks to Coppersmith in 1994, we pass from $O(N\log N) = O(2^n n)$ of the fast (classical) Fourier transform to the $O(n^2)$ of the quantum one, so from exponential to polynomial: an exponential speedup. But they don't compute the same quantities.\\\\
+We define QFT on an orthonormal basis $$|0\rangle,|1\rangle\ldots|N-1\rangle$$
+$$|\tilde{j}\rangle = QFT(|j\rangle)$$
+More in general, with $$x=\sum_{j=0}^{N-1} x_j|j\rangle$$ $$|\tilde{x}\rangle = QFT(|x\rangle)$$
+To define, we start from the classical definition applying to each element of the basis
+$$|\tilde{j}\rangle = QFT(|j\rangle) = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1} e^{\frac{2\pi ijk}{N}}|k\rangle$$
+So QFT transforms from the canonical $Z$ basis (computational basis) to the Fourier basis.
+\subparagraph{Example} $n=1$, 1-qubit
+\begin{center}
+	\includegraphics[scale=0.5]{24.png} %TODO rewrite, guarda lezione
+\end{center}
+\subparagraph{$N$-qubits System}\begin{list}{}{}
+	\item Write QFT formally
+	\item Use some rewriting to get the circuit
+\end{list}
+With 1-qubit, $\{|0\rangle,|1\rangle\}$. With 2-qubit $\{|0\rangle,|1\rangle,|2\rangle,|3\rangle\}$ which is a short-hand writing of $\{|00\rangle,|01\rangle,|10\rangle,|11\rangle\}$.\\
+With $N$-qubits we have the basis $\{|0\rangle,|1\rangle,\ldots,|N-1\rangle\}$ keeping in mind that it's a short-hand writing, $2^n$ basis states so $2^n$ configuration of bits. E.g. $|4\rangle = |100\rangle$\\\\
+$n=3$ $$|\tilde{j}\rangle = \frac{1}{\sqrt{8}}\sum_{k=0}^{2^3-1}e^{\frac{1\pi ijk}{8}}|k\rangle$$
+Remembering that
+$$|k\rangle=|k_1k_2k_3\rangle$$
+So the sum must be interpreted as $$\sum_k = \sum_{k_1=0}^1\sum_{k_2=0}^1\sum_{k_3=0}^1$$
+In the general case
+$$|\tilde{j}\rangle = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{\frac{2\pi ijk}{2^n}}|k\rangle =$$
+with $k=k_1k_2\ldots k_n$ which are digits of the binary representation, so can be rewritten in decimal representation as $k = \sum_{s=1}^n k_s2^{n-s}$
+$$= \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{2\pi ij\sum_{s=1}^n k_s2^{-s}}|k_1\ldots k_n\rangle =$$
+$$=\frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\prod_{s=1}^n e^{\frac{2\pi ij k_s}{2^s}}|k_1\ldots k_n\rangle =$$
+If you isolate the first qubit you get a tensor product because of the $\prod$, and the $sum_k$ decomposes into the sums $sum_{k_1}\sum_{k_2}\ldots$
+$$=\frac{1}{\sqrt{N}}\left(|0\rangle+e^{\frac{2\pi ij}{2^1}}|1\rangle \right)\otimes\left(|0\rangle+e^{\frac{2\pi ij}{2^2}}|1\rangle \right)\otimes \ldots\otimes \left(|0\rangle+e^{\frac{2\pi ij}{2^n}}|1\rangle \right)$$
+Each qubit has been transformed into something very similar to an Hadamard gate, except for the exponent of $e$.\\
+So we went from $$|j\rangle = |j_1\ldots j_n\rangle = |j_1\rangle\otimes\ldots\otimes|j_n\rangle$$ to $$|\tilde{j}\rangle=\frac{1}{\sqrt{N}}\left(|0\rangle + e^{\frac{2\pi ij}{2^1}}|1\rangle\right)\otimes\ldots\otimes\left(|0\rangle + e^{\frac{2\pi ij}{2^n}}|1\rangle\right)$$
+with a 1 to 1 correspondence between bits.
+$$|j_s\rangle\mapsto|\tilde{j}_s\rangle=\left(|0\rangle +e^{\frac{2\pi ij}{2^s}}|1\rangle\right)$$
+Each gets a bit of information from each configuration, with $s$ affecting the relative phase.
+\begin{list}{}{}
+	\item $\frac{1}{\sqrt{N}} e^{\frac{2\pi i j}{2}} \rightarrow |10\ldots0\rangle$
+	\item $\frac{1}{\sqrt{N}} e^{\frac{2\pi i j}{2^n}} \rightarrow |0\ldots01\rangle$
+	\item $\frac{1}{\sqrt{N}} e^{\frac{2\pi i j}{2^s}} \rightarrow |0\ldots010\ldots0\rangle$
+	\item $\frac{1}{\sqrt{N}} \left(e^{\frac{2\pi i j}{2}} +\ldots+e^{\frac{2\pi i j}{2^n}}\right) = \frac{1}{\sqrt{N}}e^{2\pi i(\frac{j}{2}+\ldots +\frac{j}{2^n})} \rightarrow |1\ldots1\rangle$
+\end{list}
+So the the phase applied is qubit dependent
+\subparagraph{Example} $n=3, |j\rangle=|101\rangle$
+$$|\tilde{5}\rangle = \frac{1}{N}\left(|0\rangle + e^{2\pi i\frac{5}{2}}|1\rangle\right)\otimes\left(|0\rangle + e^{2\pi i\frac{5}{4}}|1\rangle\right)\otimes\left(|0\rangle + e^{2\pi i\frac{5}{8}}|1\rangle\right)$$
+\paragraph{Building Blocks for the Circuit}\begin{list}{}{}
+	\item $H|j_s\rangle\mapsto\frac{1}{\sqrt{2}}\left(|0\rangle+e^{\frac{2\pi i}{2}j_s}|1\rangle\right)$
+	\item Something that depends on the index and does the right rotation: the $U_s$ rotation gate depending on $s$.\\
+	$U_s|j_t\rangle\mapsto e^{\frac{2\pi i }{2^s}j_t}|j_t\rangle$\\
+	Just applies a phase.
+	\item 
+\end{list}
+\paragraph{The Circuit}
+\begin{center}
+	\includegraphics[scale=0.5]{25.png}
+\end{center}
+\begin{enumerate}
+	\item $|j_1\ldots j_n\rangle$
+	\item $H|j_1\rangle = \frac{1}{\sqrt{2}}\left(|0\rangle e^{\frac{2\pi i}{2}j_1}|1\rangle\right)\otimes |j_2\ldots j_n\rangle$
+	\item Apply the gate only when $j_2$ is 1 (the black dot means that), but that's how $U$ works, it has a 0 on the $|0\rangle$\\
+	$\frac{1}{\sqrt{2}}\left(|0\rangle+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}|1\rangle\right)\otimes|j_2\ldots j_n\rangle$
+	\item $\frac{1}{\sqrt{2}}\left(|0\rangle+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}e^{\frac{2\pi i}{2^3}j_1}|1\rangle\right)\otimes|j_2\ldots j_n\rangle$
+	\item[] \ldots
+	\item[$n$.] $\frac{1}{\sqrt{2}}\left(|0\rangle+e^{2\pi i(\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n})}|1\rangle\right)\otimes|j_2\ldots j_n\rangle=$\\
+	And given that 
+	$j = \sum_{s=1}^nj_s 2^{n-s} = j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0$ so we have
+	$\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n} = \frac{1}{2^n}(j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0)$ we have that\\
+	$=\frac{1}{\sqrt{2}}\left(|0\rangle + e^{\frac{2\pi ij}{2^n}}|1\rangle\right)\otimes |j_2\ldots j_n\rangle$\\
+	But we end up with the $n$th configuration on the first qubit!
+\end{enumerate}
+So we implements QFT in the reverse order, applying for example swap gates at the beginning or changing the configuration of the qubits at the end.
 \end{document}
