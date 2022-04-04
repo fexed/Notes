@@ -1061,16 +1061,13 @@ To define, we start from the classical definition applying to each element of th
 $$|\tilde{j}\rangle = QFT(|j\rangle) = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1} e^{\frac{2\pi ijk}{N}}|k\rangle$$
 So QFT transforms from the canonical $Z$ basis (computational basis) to the Fourier basis.
 \subparagraph{Example} $n=1$, 1-qubit
-\begin{center}
-	\includegraphics[scale=0.5]{24.png} %TODO rewrite, guarda lezione
-\end{center}
-\subparagraph{$N$-qubits System}\begin{list}{}{}
-	\item Write QFT formally
-	\item Use some rewriting to get the circuit
-\end{list}
-With 1-qubit, $\{|0\rangle,|1\rangle\}$. With 2-qubit $\{|0\rangle,|1\rangle,|2\rangle,|3\rangle\}$ which is a short-hand writing of $\{|00\rangle,|01\rangle,|10\rangle,|11\rangle\}$.\\
-With $N$-qubits we have the basis $\{|0\rangle,|1\rangle,\ldots,|N-1\rangle\}$ keeping in mind that it's a short-hand writing, $2^n$ basis states so $2^n$ configuration of bits. E.g. $|4\rangle = |100\rangle$\\\\
-$n=3$ $$|\tilde{j}\rangle = \frac{1}{\sqrt{8}}\sum_{k=0}^{2^3-1}e^{\frac{1\pi ijk}{8}}|k\rangle$$
+$$|\tilde{0}\rangle=\frac{1}{\sqrt{2}}(|0\rangle+|1\rangle)\:\:\:\:\:|\tilde{1}\rangle=\frac{1}{\sqrt{2}}(|0\rangle-|1\rangle)$$
+$$|\tilde{j}\rangle=\frac{1}{\sqrt{2}}(|0\rangle+e^{\pi ij}|1\rangle)$$
+\subparagraph{$N$-qubits System}
+With 1-qubit, $\{|0\rangle,|1\rangle\}$.\\
+With 2-qubit $\{|0\rangle,|1\rangle,|2\rangle,|3\rangle\}$ which is a short-hand writing of $\{|00\rangle,|01\rangle,|10\rangle,|11\rangle\}$.\\
+With $N$-qubits we have the basis $\{|0\rangle,|1\rangle,\ldots,|N-1\rangle\}$ keeping in mind that it's a short-hand writing, $2^n$ basis states so $2^n$ configuration of bits.\\E.g. $|4\rangle = |100\rangle$\\\\
+For $n=3$ $$|\tilde{j}\rangle = \frac{1}{\sqrt{2^3}}\sum_{k=0}^{2^3-1}e^{\frac{2\pi ijk}{2^3}}|k\rangle$$
 Remembering that
 $$|k\rangle=|k_1k_2k_3\rangle$$
 So the sum must be interpreted as $$\sum_k = \sum_{k_1=0}^1\sum_{k_2=0}^1\sum_{k_3=0}^1$$
@@ -1079,7 +1076,7 @@ $$|\tilde{j}\rangle = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{\frac{2\pi ijk}{2^n}}
 with $k=k_1k_2\ldots k_n$ which are digits of the binary representation, so can be rewritten in decimal representation as $k = \sum_{s=1}^n k_s2^{n-s}$
 $$= \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{2\pi ij\sum_{s=1}^n k_s2^{-s}}|k_1\ldots k_n\rangle =$$
 $$=\frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\prod_{s=1}^n e^{\frac{2\pi ij k_s}{2^s}}|k_1\ldots k_n\rangle =$$
-If you isolate the first qubit you get a tensor product because of the $\prod$, and the $sum_k$ decomposes into the sums $sum_{k_1}\sum_{k_2}\ldots$
+If you isolate the first qubit you get a tensor product because of the $\prod$, and the $sum_k$ decomposes into the sums $\sum_{k_1}\sum_{k_2}\ldots$
 $$=\frac{1}{\sqrt{N}}\left(|0\rangle+e^{\frac{2\pi ij}{2^1}}|1\rangle \right)\otimes\left(|0\rangle+e^{\frac{2\pi ij}{2^2}}|1\rangle \right)\otimes \ldots\otimes \left(|0\rangle+e^{\frac{2\pi ij}{2^n}}|1\rangle \right)$$
 Each qubit has been transformed into something very similar to an Hadamard gate, except for the exponent of $e$.\\
 So we went from $$|j\rangle = |j_1\ldots j_n\rangle = |j_1\rangle\otimes\ldots\otimes|j_n\rangle$$ to $$|\tilde{j}\rangle=\frac{1}{\sqrt{N}}\left(|0\rangle + e^{\frac{2\pi ij}{2^1}}|1\rangle\right)\otimes\ldots\otimes\left(|0\rangle + e^{\frac{2\pi ij}{2^n}}|1\rangle\right)$$
@@ -1121,4 +1118,59 @@ $$|\tilde{5}\rangle = \frac{1}{N}\left(|0\rangle + e^{2\pi i\frac{5}{2}}|1\rangl
 	But we end up with the $n$th configuration on the first qubit!
 \end{enumerate}
 So we implements QFT in the reverse order, applying for example swap gates at the beginning or changing the configuration of the qubits at the end.
+\paragraph{Review}
+$$|\tilde{j}\rangle = QFT(j) = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{\frac{2\pi ijk}{N}}|k\rangle$$
+$$|\tilde{j}\rangle = F_N|j\rangle$$
+The $j$th column of $F_N$
+$$F_N=\frac{1}{\sqrt{N}}\left[\begin{array}{c c c}
+1&\ldots&1\\
+\vdots& &\\
+1
+\end{array}\right]\hbox{ with the }(j,k)\hbox{ entry being }e^{\frac{2\pi ijk}{N}}$$
+The circuit is
+\begin{center}
+	\includegraphics[scale=0.5]{26.png}
+\end{center}
+With the swap gates in purple.
+\paragraph{Quantum Phase Estimation} Any unitary matrix is diagonalizable, has an orthonormal basis of eigenvectors and has a set of eigenvalues in the form $e^{i\theta_\psi}$ associated to an eigenstate $|\psi\rangle$
+$$U|\psi\rangle = e^{i\theta_\psi}|\psi\rangle$$
+The \textbf{QPE problem} is formulated as follows: given that we have the ability of preparing $|\psi\rangle$ and to use $U$, can we extract $\theta_\psi$ which is the angle of the rotation (the \textbf{phase})? Yes, also without QFT. Let's see the intuition on how we could do without QFT.
+\begin{center}
+	\includegraphics[scale=0.5]{27.png}
+\end{center}
+\begin{enumerate}
+	\item My state is $|0\rangle|\psi\rangle$
+	\item $|\psi\rangle$ doesn't change and we apply $H$ to $|0\rangle$ which becomes $|+\rangle$\\
+	The state is $\frac{1}{\sqrt{2}}(|0\rangle+|1\rangle)|\psi\rangle = \frac{1}{\sqrt{2}}|0\rangle|\psi\rangle + \frac{1}{\sqrt{2}}|1\rangle|\psi\rangle$
+	\item $U$ applies only on the second qubit.\\
+	The state is $\frac{1}{\sqrt{2}}|0\rangle|\psi\rangle + \frac{1}{\sqrt{2}}e^{i\theta_\psi}|1\rangle|\psi\rangle$
+	\item $H|0\rangle = |+\rangle$ and $H|1\rangle = |-\rangle$, but $H$ applied only on the first qubit.\\
+	The state is $\frac{1}{\sqrt{2}}(\frac{|0\rangle+|1\rangle}{\sqrt{2}})|\psi\rangle + \frac{1}{\sqrt{2}}e^{i\theta_\psi}(\frac{|0\rangle-|1\rangle}{\sqrt{2}})|\psi\rangle = \frac{1}{2}[(1+e^{i\theta_\psi})|0\rangle + (1-e^{i\theta_\psi})|1\rangle]|\psi\rangle$
+\end{enumerate}
+The probability of measuring $|0\rangle$ in the first qubit is the square of the amplitude. So we've encoded the information in the amplitudes, and they are different so I can distinguish them. The drawback is that we perform a complex circuit.\\\\
+With QFE this is different. $\theta$ in general is $\in R$. The beginning of the QPE circuit is this:
+\begin{center}
+	\includegraphics[scale=0.5]{28.png}
+\end{center}
+We apply a power of $U$: $U^{2^{n-1}}$ for $n$ bits, all the powers from $2^{n-1}$ to $2^0$.
+\begin{enumerate}
+	\item $|0\rangle^{\otimes n}|\psi\rangle$
+	\item $\left(\frac{1}{\sqrt{2}}\right)^n (|0\rangle+|1\rangle)^{\otimes n}|\psi\rangle$
+	\item We have that $$U^k|\psi\rangle = \left(e^{i\theta_\psi}\right)^k|\psi\rangle$$
+	The control bit is entangled, so by applying the $U$ gate the phase kicks back to the control bit.
+	$$\left[\begin{array}{c c}
+	I&\\
+	&U
+	\end{array}\right]\left(\left[\begin{array}{c}
+	\alpha\\\beta
+	\end{array}\right]\otimes|\psi\rangle\right)$$
+	\item[Final.] $$\left(\frac{1}{\sqrt{2}}\right)^n (|0\rangle+e^{i\theta_\psi 2^{n-1}}|1\rangle)\otimes(|0\rangle+e^{i\theta_\psi 2^{n-2}}|1\rangle|)\otimes\ldots\otimes(|0\rangle+e^{i\theta_\psi 2^{0}}|1\rangle)\otimes|\psi\rangle$$
+\end{enumerate}
+Now we want to retrieve $\theta_\psi$. The QFT of $|j\rangle$ was $$|\tilde{j}\rangle = \frac{1}{\sqrt{N}}\left(|0\rangle+e^{\frac{2\pi ij}{2}}|1\rangle\right)\otimes\ldots\otimes\left(|0\rangle+e^{\frac{2\pi ij}{2^n}}|1\rangle\right)$$
+These two configurations are very similar, they differ for the exponent. So it's the same of QPE except that $\theta_\psi$ is replace by $\frac{2\pi}{2^n}j$.\\
+The final circuit is composed with the inverse of the QFT, where we need to run the circuit backwards, measuring $|2^n\theta_\psi\rangle$
+\begin{center}
+	\includegraphics[scale=0.5]{29.png}
+\end{center}
+
 \end{document}

@@ -1184,4 +1184,86 @@ Better: computer-aided translation evaluation. \textbf{Edit cost}: measure the n
 	$$BLEU = BP\cdot p$$
 	Correlates with human evaluation when comparing outputs from different SMT systems, but doesn't correlate with human judgments when comparing SMT systems with manually developed MT or MT with human translations.
 \end{list}
+%TODO finire quel set di slide
+\section{Neural Machine Translation}
+Statistical Machine Translation is a huge research field, but requires the compilation and maintainment of extra resources (for example tables of equivalent phrases), thus lots of human effort to maintain.\\
+In 2014 neural machine translation was introduced with an huge impact on the machine translation field.
+\paragraph{NMT} Neural Machine Translation is a way of doing MT with a \textbf{single neural network}, a sequence-to-sequence (seq2seq) one.\begin{center}
+	\includegraphics[scale=0.6]{63.png}
+\end{center}
+A seq2seq model is versatile: a neural network takes an input an produces a neural representation, which is used as input by a second network that produces a sequence as output. These models are useful for more than just MT, many natural language processing tasks can be phrased as sequence-to-sequence:
+\begin{list}{}{}
+	\item Summarization, long text to short text.
+	\item Dialogue, previous utterances to next utterance
+	\item Parsing, input text to sequence of parsing symbols
+	\item Code generation, natural language to e.g. Python code
+\end{list}
+The seq2seq model is an example of \textbf{conditional language model}:\begin{list}{}{}
+	\item \textbf{Language model} because the decoder is predicting the next word of the target sentence $y$
+	\item \textbf{Conditional} because its predictions are also conditioned on the source sentence $x$
+\end{list}
+NMT directly calculates $$P(y\:|\:x) = P(y_1\:|\:x)P(y_2\:|\:y_1,x)\ldots P(y_T\:|\:y_1,\ldots,y_{T-1},x)$$
+To train a NMT system, get a big parallel corpus\ldots
+\begin{center}
+	\includegraphics[scale=0.6]{64.png}
+\end{center}
+\paragraph{Beam Search} We showed how to generate (decode) the target sentence by taking the argmax on each step of the decoder. But this is greedy decoding, taking the most probable word on each step, but it has problems e.g. it has no way to undo decisions! A better option would be to use \textbf{beam search}, to explore several hypothesis and select the best one. Ideally we want to find a translation $y$ that maximizes $$P(y\:|\:x) = \prod_{i=1}^T P(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
+We could try computing all possible sequences $y$: on each step $t$ of the decoder we're tracking $V^t$ possible partial translations with $V$ vocab size. This $O(V^T)$ complexity is too expensive, though, so \textbf{beam search}: we keep track of the $k$ most probable partial translations, with $k$ being the beam size ($k\simeq 5, 10$ in practice).\\
+An hypothesis has a score which is its log probability $$\hbox{score}(y_1,\ldots,y_t) = \sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
+Scores are all negative, the higher the better. We search for high-scoring hypothesis, tracking top $k$ on each step.\\
+Doesn't guarantee to find the most optimal solution, but it's far more efficient.
+\subparagraph{Example} With $k=2$
+\begin{center}
+	\includegraphics[scale=0.6]{65.png}
+\end{center}
+Then we go back finding the complete translations.
+\subparagraph{Stopping Criterion} In greedy decoding, we decode until we find the END token. In beam search, different hypothesis can produce the END tokens on different timesteps: we place it aside and continue exploring other hypothesis. Usually we continue beam search until:\begin{list}{}{}
+	\item we reach a timestep $T$, a predefined cut-off, or
+	\item we have at least $n$ completed hypothesis, another predefined cut-off
+\end{list}
+\subparagraph{Finishing Up} When we have the list of hypothesis, how we select the highest scoring one? Each hypothesis has its score, but longer hypothesis have lower scores so we normalize by length
+$$\hbox{score}(y_1,\ldots,y_t) =\frac{1}{t}\sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
+\paragraph{Pro and Cons}
+%TODO rewrite
+\begin{center}
+	\includegraphics[scale=0.75]{66.png}
+\end{center}
+\textbf{Machine translation is not a solved problem}, many difficulties remain:
+\begin{list}{}{}
+	\item out-of-vocabulary words
+	\item domain mismatch between train and test data
+	\item maintaining context over longer texts
+	\item failures to accurately capture sentence meaning
+	\item pronouns (or zero pronoun) resolution errors
+	\item morphological agreement errors
+	\item low-resource language pair
+\end{list}
+NMT is the flagship task for NLP deep learning: it has pioneered many of the recent innovations of NLP. In 2021 NMT research continues to thrive, researchers have found many improvements to the vanilla seq2seq NMT system presented thus far. But one improvement is so integral that is has become the new vanilla.
+\paragraph{Attention} Seq2seq has a bottleneck: the encoding needs to capture all the information about the source sentence, it's an \textbf{information bottleneck}.\\
+\textbf{Attention} provides a solution to the bottleneck problem. The core idea is: on each step of the decoder, focus on a particular part of the source sequence.
+\begin{center}
+	\includegraphics[scale=0.6]{67.png}
+\end{center}
+\subparagraph{In equations}\begin{list}{}{}
+	\item We have the hidden states in the encoder $h_1,\ldots,h_N\in R^h$
+	\item On timestep $t$ we have the decoded hidden state $s_t \in R^h$
+	\item We get the attention scores $e^t$ for this step 
+	$$e^t=[s_t^Th_1,\ldots,s_t^Th_N]\in R^N$$
+	\item We take the softmax to get the attention distribution for this step (probability distribution that sums to 1)
+	\item %TODO rest
+\end{list}
+Attention significantly improves NMT performance, solving the bottleneck problem and helping with vanishing gradient problem. Also provides some interpretability, and we get alignment for free: we never explicitly tranied an alignment system, the network just learned alignment by itself.
+\subparagraph{Attention Variants} We have some values $h_i\in R^h$ and a query $s\in R^h$. Attention involves:
+\begin{list}{}{}
+	\item Computing the attention scores $e\in R^N$
+	\item Taking softmax to get a attention distribution
+	$$\alpha=\hbox{Softmax}(e) \in R^NJ$$
+	\item Using $\alpha$ to take the weighted sum of values
+	$$\alpha = \sum_{i=1}^N\alpha_ih_i\in R^h$$
+	Thus obtaining the \textbf{attention output} $\alpha$ (sometimes called the \textbf{context vector})
+\end{list}
+We've seen it in translation, but this can be applied to other NLP tasks. It has becomes a general deep learning technique as well. A more general definition of attention is: given a set of vector values, and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query.\\
+We sometimes say that the attention attends to the query.\\ %TODO
+\textbf{Attention is all you need}. Self-attention helps to contextualize words: a limit on word embeddings was that each word had a single vector, with attention we can introduce into the representation the context into which they appears, allowing to observe other words.
+%skip until Google neural MT architecture
 \end{document}
