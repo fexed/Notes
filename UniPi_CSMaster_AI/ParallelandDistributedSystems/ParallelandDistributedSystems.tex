@@ -39,6 +39,25 @@
 	tabsize=2,
 	language=python
 }
+\lstdefinestyle{myC}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{codeblue},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\small\ttfamily,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=2pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	language=C
+}
 \newcommand*\triangled[1]{\tikz[baseline=(char.base)]{
             \node[regular polygon, regular polygon sides=3,draw,inner sep=1pt] (char) {#1};}}
             
@@ -148,7 +167,7 @@ We can use this model %TODO
 \paragraph{Examples}
 A simple program that "translates" an ASCII file by transforming lower letters into capital letters. We split the text into $n_{workers}$ parts, we wait for all the threads to finish and then verify the performances.
 \\The translator is:
-\begin{lstlisting}[style=myPython]
+\begin{lstlisting}[style=myC]
 #include <string>
 
 char translate_char(char c) {
@@ -517,4 +536,115 @@ But vectorization can radically change the $T_S$ of the stages of a Farm, for in
 For instance \texttt{blas} provides \texttt{gemm} for very optimized matrix multiplications.\\
 Use libraries because they are very optimized, exploiting all the possible optimizations.
 \paragraph{GRPPI} C++ library that implements common parallel patterns, using standard threads or other backends (e.g. omp, tdd or fastflow). The backend is only modeled by the \texttt{execution} parameter.
+\section{OpenMP}
+\paragraph{MPi} Directed to clusters and workstations, multicores
+\paragraph{CDA/OpenCL} For GPU
+\paragraph{OpenMP} Parallel for, targets shared memory multicores (and GPU/FPGA). Very dated, since 1997 the version 1.0: no GPU, even multicores were not very popular.\\
+At the beginning very simple API that provided launching threads in parallel and something related to the parallel for. Each version improved on that, introducing: tasks, target accelerators, depend clauses on tasks (to tell that a task must be executed only after the completion of another task), memory management, task reduction (among values of different tasks), task affinity\ldots\\
+When we speak about shared memory multicores, we speak of some situation where in the board we have more than one sockets with multicore in each socket.
+\paragraph{Concepts}\begin{list}{}{}
+	\item \textbf{Directives}, which OpenMP is based on. Directives, in C/C++ environment, are kind of pragmas which can be understood as portions of compiler
+	\item OpenMP is \textbf{compiler-based}
+	
+\end{list}
+As pros:
+\begin{list}{}{}
+	\item Few lines of code are required to run parallel code, opposed to writing all the logic by oneself
+	\item Keep sequential code, means we can perform functional debugging and then adding parallel pragmas
+\end{list}
+As main con we need to rewrite the compiler, not entirely (such as the parser), but everything related to the usage of the pragmas must be generated at compile time.\\
+E.g. the map seen in the GRPPI library is written at higher level but in the library, doesn't touch the compiler.\\\\
+We have something used to \textbf{set up parallel activities} and something different used to \textbf{organize the parallel computation} using the parallel activities available.
+\paragraph{\texttt{\#pragma omp parallel}} This must be placed before a statement, it tells the compiler that the following block must be executed in $nw$ copies (threads) if and only if $nw$ is the number of resources/cores of the current machine.\\
+Most directives have clauses used to specify parameters. E.g. \texttt{num\_threads(nw)} tells to use the variable $nw$ instead of the predefined one (the number of cores).
+\begin{lstlisting}[style=myC]
+#include <iostream>
+#include <omp.h>
+
+using namespace std;
+int main(int argc, char** argv) {
+	int nw = 1;
+	if (argc != 1)
+		nw = atoi(argv[1]);
+	#pragma omp parallel num_threads(nw) // clause
+	{
+		auto id = omp_get_thread_num();
+		cout << "Ciao from id " << id << endl;
+	}
+	return(0);
+}
+\end{lstlisting}
+\paragraph{\texttt{\#pragma omp single}} Specifies that the following statement/block is to be executed by just a single thread.
+\begin{lstlisting}[style=myC]
+#include <iostream>
+#include <omp.h>
+
+using namespace std;
+int main(int argc, char** argv) {
+	int nw = 1;
+	if (argc != 1) {
+		nw = atoi(argv[1]);
+		#pragma omp parallel num_threads(nw)
+		{
+			#pragma single // this will be executed by a single thread, just one enters the following line, use a block for more lines
+			cout << "Id " << omp_get_thread_num() << " of " << omp_get_num_threads() endl;
+		}
+	} else {
+		#pragma omp parallel
+		{
+			auto id = omp_get_thread_num();
+			cout << "Id " << id << " of " << omp_get_num_threads() endl;
+		}
+	}
+	return(0);
+}
+\end{lstlisting}
+\paragraph{\texttt{\#pragma omp critical}} To execute the next code in mutual exclusion.
+\paragraph{To use OpenMP} Compile with flag \texttt{-openmp}.\\
+The \texttt{a.out} compiled, when executed, uses the linked library which provides several things including a lock/mutex machanism. So instead of the \texttt{\#pragma omp critical} we can use \texttt{\#pragma omp parallel} and then just the lock/unlock:
+\begin{lstlisting}[style=myC]
+omp_lock_t lock;
+omp_init_lock(&lock);
+#pragma omp parallel
+{
+	// code
+	omp_set_lock(&lock);
+	// mutex code
+	omp_unset_lock(&lock);
+	// code
+}
+\end{lstlisting}
+With the code/unlock declared with respect to the OpenMP library.
+\paragraph{Different code for different threads} We can do something like
+\begin{lstlisting}[style=myC]
+#pragma omp parallel num_threads(2)
+{
+	if (omp_get_thread_num() == 0) {
+		// code for thread 1
+	} else {
+		// code for thread 2
+	}
+}
+\end{lstlisting}
+This is \textbf{SPMD} code: single program multiple data.
+\paragraph{Sections directive}
+\begin{list}{}{}
+	\item \texttt{\#pragma omp sections}: identifies a command which is filled by other \texttt{section} directives, each executed possibly in parallel
+	\item \texttt{\#pragma omp section}
+\end{list}
+Example
+\begin{lstlisting}[style=myC]
+#pragma omp sections
+{
+	#pragma omp section
+	{
+		//code 1
+	}
+	#pragma omp section
+	{
+		//code 2
+	}
+}
+\end{lstlisting}
+All the \texttt{section} may happen in parallel, how much is defined and can be inherited by other statements. For example I can have a \texttt{\#pragma omp parallel} before the \texttt{\#pragma omp sections}, giving the threads explained before (the number of cores as default, or as specified by \texttt{num\_threads(nw)}.
 \end{document}

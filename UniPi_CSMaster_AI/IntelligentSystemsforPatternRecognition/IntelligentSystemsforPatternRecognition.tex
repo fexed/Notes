@@ -1401,5 +1401,69 @@ $$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
 \begin{center}
 	\includegraphics[scale=0.5]{100.png}
 \end{center}
+\section{Reservoir Computing}
+It's an extremely efficient way of designing and training RNNs.
+\begin{multicols}{2}
+In a RNN we have a state update $$h_t=\tanh(x_t W_{xh} + h_{t-1}W_{hh})$$
 
+and an output function $$y_t = h_tW_{hy}$$
+\begin{center}
+	\includegraphics[scale=0.5]{101.png}
+\end{center}
+\end{multicols}
+Fading/Exploding memory is the situation where the influence of inputs far in the past vanishes/explodes in the current state, due to many non-linear transformation.\\
+Gradients, too, might vanish/explode during propagation through many non-linear transformations, making it difficult to train on long-term dependencies.\\
+To overcome these instabilities, there are lots of approaches:
+\begin{list}{}{}
+	\item Gated architectures: pathways for uninterrupted gradient propagation. Like LSTMs and GRUs. But this makes the training slow
+	\item \textbf{Smart initialization}: reservoir computing. Training is limited.
+\end{list}
+The essential part is introducing randomization in Deep Neural Networks. Trading a little bit of accuracy in favor for efficiency, mainly for energy consumption: ML has a lot of impact on the environment. Also we want to be able to use these systems on embedded applications.\\
+Randomization is computationally cheaper than optimization.
+\begin{center}
+	\includegraphics[scale=0.5]{102.png}
+\end{center}
+Randomization means efficiency: training algorithms become cheaper and simpler. Model transfer: don't need to transmit all the weights. Amenable to neuromorphic implementations (ad hoc hardware implementations).
+\paragraph{Reservoir Computing}
+\begin{center}
+	\includegraphics[scale=0.5]{103.png}
+\end{center}
+I apply learning only on the output layer (\textbf{readout}), not in a recurrent way.\\
+The state function is the classical of the RNN.
+$$h_t = \tanh(x_tW_{xh}+h_{t-1}W_{hh})$$
+But the weight matrices $W_{xh}$ and $W_{hh}$ are randomly initialized under stability conditions (\textbf{Echo State Property}) on the dynamical system and left fixed.\\\\
+The \textbf{reservoir} is a large layer of recurrent units, sparsely connected, randomly initialized under the ESP and left \textbf{untrained}.\\\\
+The \textbf{readout} is a linear combination of the reservoir state variables and can be trained in closed form.
+$$y_y = h_tW_{hy}$$
+$$W_{hy} = (H^TH)^{-1}H^TD$$
+\paragraph{Architecture} Composed of a reservoir and readout
+\paragraph{Setup} Initialize $W_{xh}$ and $W_{hh}$ randomly and scale $W_{hh}$ to meet the contractive/stability property.
+\paragraph{Training} Drive the network with the input signal. Discard an initial transient and train the readout.
+\paragraph{Reservoir} Non-linearly embeds the input into a higher dimensional feature space where the original problem is more likely to be solved linearly (Cover's Theorem). We use this randomized basis expansion computed by a pool of randomized filters. Provides a "rich" set of input-driven dynamics. Dynamics are driven by the state transition function.
+$$F:R^{N_X}\times R^{N_H}\rightarrow R^{N_H}$$
+$$h_t = F(x_t, h_{t-1}) = \tanh(x_tW_{xh} + h_{t-1}W_{hh})$$
+The iterated version is the function applied to an arbitrarily long sequence $s = [x_1,\ldots,x_t]$ returning the final state $h_t$
+$$\hat{F}:(R^{N_X})^*\times R^{N_H}\rightarrow R^{N_H}$$
+For example $$\hat{F}(s,h_0)=\left\{\begin{array}{c l}
+h_0&\hbox{if }s=[]\\
+F(x_t,\hat{F}([x_1,\ldots,x_{t-1}],h_0))&\hbox{if }s=[x_1,\ldots,x_t]
+\end{array}\right.$$
+\paragraph{Echo State Property} A valid ESN should satisfy the ESP.\\
+An ESN satisfies the ESP whenever
+$$\forall\:s\in (R^{N_X})^N \wedge \forall\:h_0,z_0\in R^{N_H}\hbox{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\hbox{ as }N\rightarrow\infty$$
+\textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
+\textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
+We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
+\paragraph{Initialization} Generate a random matrix $W$ %TODO
+\paragraph{Dynamical Transient} If the system is globally asymptotically stable, then all the possible trajectories will synchronize \textbf{after a transient}, not instantaneously.\\
+\textbf{Washout} is initial part of the time-series in which the state could be still affected by initialization condition (where the ESP could still not hold). The washout states of the reservoir should be discarded.
+\paragraph{ESN Training}
+\begin{list}{}{}
+	\item Given a training set $\{(x_t,d_t)\}_{t=1}^N$
+	\item Run the reservoir on the input sequence and collect the states $H=[h_1,\ldots,h_N]$
+	\item Remove the washout $H = H(N_W:N,:)$
+	\item Collect the target data similarly into a matrix $D = [d_{N_W},\ldots,d_N]$
+	\item Solve the linear regression problem for the readout $\min_{W_{hy}}\| \|^2$ %TODO
+\end{list}
+To solve, typically the training is performed offline in closed form.
 \end{document}
