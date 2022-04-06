@@ -1401,6 +1401,110 @@ $$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
 \begin{center}
 	\includegraphics[scale=0.5]{100.png}
 \end{center}
+
+\paragraph{More Differentiable Compositions} CNN-LSTM composition used for \textbf{image-to-sequence} (NeuralTalk)\begin{center}
+	\includegraphics[scale=0.5]{104.png}
+\end{center}
+No only for sequential/structured data: can also used to generate image of digits by learning to sequentially add color to a canvas.
+\subsection{Advanced Topics} 
+\paragraph{Language Modeling - Dynamic Evaluation} Language modeling is an unsupervised task, you can train the model at test time. UIseful when you have domain shifts inside a large document.
+\begin{center}
+	\includegraphics[scale=0.5]{105.png}
+\end{center}
+Meaning the backward pass and gradient descent update during test time, this because it's unsupervised.
+\paragraph{Compression and Online Adaptation} Take a large document and a randomly initialized RNN.\\
+Compression: train and compress the file with arithmetic encoding.\\
+Decompression: train the same random net and use the compressed file for lossless decompression.
+\subsubsection{Seq2Seq Models}
+\begin{center}
+	\includegraphics[scale=0.5]{106.png}
+\end{center}
+Gated RNN are excellent to handle size/topology varying data in input, but how can we handle size/topology varying outputs? \textbf{Sequence-to-sequence models}.\\
+Structured data is compound information: efficient processing needs the ability to focus on certain parts of such information. \textbf{Attention mechanism}.
+\paragraph{Sequence Transduction} Input/output both sequences, maybe with different lengths. Example: machine translation. How to model the context?\\
+We could take a single recurrent model, process the entire input sequence to encode it (and ignoring the outputs in this phase) and then process the output sequence (usually without knowing in advance how long it will be, and giving dummy inputs):
+\begin{center}
+	\includegraphics[scale=0.5]{107.png}
+\end{center}
+This idea doesn't really work well, because\ldots\\ %TODO
+We need two separated models: encoder-decoder scheme:
+\begin{list}{}{}
+	\item \textbf{Encoder} which builds a $c$, originally $c=h_n$
+	\begin{center}
+		\includegraphics[scale=0.5]{108.png}
+	\end{center}
+	\item \textbf{Decoder}, LSTM/GRU layer of $K$ cells seeded by the context vector $c$
+	\begin{center}
+		\includegraphics[scale=0.5]{109.png}
+	\end{center}
+	If we share the parameters between encoder and decoder, we can take $s_1 = c$ (or at least assume that $c$ and $s_1$ have compatible sizes)
+	\begin{center}
+		\includegraphics[scale=0.5]{110.png}
+	\end{center}
+	$$s_i = f(c, s_{i-1}, y_{i-1})$$
+\end{list}
+Different approaches to build this in practice. The problem is the risk of losing memory of $c$ soon.\\
+It's better to work on a one-step-ahead scheme. Remember teacher forcing only at training time.
+\begin{center}
+	\includegraphics[scale=0.5]{111.png}
+\end{center}
+Encoder-decoder can share parameters, but it's uncommon
+$$E_{en} = D^{-1}_{en}$$
+But can be useful especially on lower resources.\\
+Encoder-decoder can be trained end-to-end but also independently.
+\paragraph{Attention} We would like to have alignment in the hidden states.\\Encoder-decoder scheme assumes the hidden activation fo the last input element summarizes sufficient information to the output: it's a bias toward the recent past, and it doesn't work well. Other parts of the input might be very informative for the task, possibly \textbf{elements appearing very far from sequence end}.
+\begin{center}
+	\includegraphics[scale=0.5]{112.png}\\
+	\includegraphics[scale=0.33]{113.png}
+\end{center}
+Context information $S$ is used to remind what's important, used to look at different encodings. What's inside the black box? Gates! 
+\begin{center}
+	\includegraphics[scale=0.5]{114.png}
+\end{center}
+The $\tanh$ layer fuse each encoding with the current context $s$
+$$e_i = a(s, h_i)$$
+$e_i$ is the relevance between the context $s$ and the hidden state $h_i$.\\
+The we have the differentiable softmax max selecto operator
+$$\alpha_i = \frac{e^{e_i}}{\sum_j e^{e_j}}$$
+Then we aggregate with the seed by soft attention voting
+$$c= \sum_i \alpha_ih_i$$
+Basically
+\begin{list}{}{}
+	\item \textbf{Relevance} $e_i = a(s, h_i)$
+	\item \textbf{Normalization} $\alpha_i = \frac{\exp(e_i)}{\sum_j \exp(e_j)}$
+	\item \textbf{Aggregation} $c= \sum_i \alpha_ih_i$
+\end{list}
+Context $s$ is the past output state, the seed takes into account a subset of the input states.\\
+An advanced example: Google Neural Machine Translation (GNMT)
+\begin{center}
+	\includegraphics[scale=0.5]{115.png}
+\end{center}
+\paragraph{Generalized Relevance} This component determines how much each $h$ is correlated/associated with current context $s$:
+\begin{center}
+	\includegraphics[scale=0.5]{116.png}
+\end{center}
+$Net$ could be anything: a feedforward FF($s, h_i$), linear $s^Th_i$\ldots
+\paragraph{Hard Attention} Sample a single encoding using probability $\alpha_i$
+\begin{center}
+	\includegraphics[scale=0.5]{117.png}
+\end{center}
+\paragraph{Transformers} Pure attention model (no recurrence), self-attention. Evolution of GNMT.
+\begin{center}
+	\includegraphics[scale=0.5]{118.png}
+\end{center}
+Encoder-decoder architecture.
+\paragraph{Self Attention} For each element of an input sequence $X_i$ project into three vectors: query, key and value. A kind of associative database.
+\begin{center}
+	\includegraphics[scale=0.5]{119.png}
+\end{center}
+For each vector, we compute attention over all other vectors.
+$$SA(Q_i, K, V) = \sum_j\hbox{Softmax}_j\left(\frac{Q_i\cdot K^T}{\sqrt{d_k}}\right)V_j$$
+Can be done multi-headed as well
+$$\hbox{Attention}(Q,K,V)=\hbox{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+$$\hbox{MultiHead}(Q,K,V) = \hbox{Concat}(\hbox{head}_1,\ldots,\hbox{head}_h)W^O$$
+$$\hbox{head}_i = \hbox{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+Is self-attention a good mechanism to model temporal dependencies? What happens if I randomly shuffle some tokens? The result is going to be shuffled. We have a key for each timestep, but there's nothing that keeps track of time. So attention is order-independent, but we need temporal information.\\
+So we sum word embed plus position embed.
 \section{Reservoir Computing}
 It's an extremely efficient way of designing and training RNNs.
 \begin{multicols}{2}
@@ -1466,4 +1570,5 @@ We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
 	\item Solve the linear regression problem for the readout $\min_{W_{hy}}\| \|^2$ %TODO
 \end{list}
 To solve, typically the training is performed offline in closed form.
+\section{Hirearchical Models}
 \end{document}

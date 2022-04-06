@@ -647,4 +647,26 @@ Example
 }
 \end{lstlisting}
 All the \texttt{section} may happen in parallel, how much is defined and can be inherited by other statements. For example I can have a \texttt{\#pragma omp parallel} before the \texttt{\#pragma omp sections}, giving the threads explained before (the number of cores as default, or as specified by \texttt{num\_threads(nw)}.
+\paragraph{Variables} In most directives you can append clauses that specifies the behavior of variables.\\
+For example in parallel pragmas you can append the clauses\begin{list}{}{}
+	\item\texttt{private(x)} (non initialized local copy local to each thread)
+	\item\texttt{firstprivate(x, y)} (get a local copy initialized from previous value)
+	\item\texttt{shared(y, z)} (inherit value from the global environment)
+	\item\texttt{lastprivate(x)} (this one legal only in sections, not in parallel, local copy then last \texttt{section} copied to global environment, take care last one means in syntactic-fashion, the last syntactic section updating the variables copies to global environment)
+\end{list}
+\paragraph{\texttt{\#pragma omp for}} Most famous and used.\\
+The default behavior is that the iterations, e.g. from $i=0$ to $i=n-1$, are made into $nw$ chunks given each to a thread. Obviously we need independent iterations. There are others scheduling policies, specified with clauses appended to the \texttt{\#pragma omp for}:
+\begin{list}{}{}
+	\item \texttt{static} the default one, with the option of specifying \texttt{chunksize(m)} specifying the number of items in each chunk, so $\frac{n-1}{m}$ chunks of $m$ items, given to the threads in a round-robin fashion
+	\item \texttt{dynamic} where the threads ask for new chunks when they have finished, chunks are assigned on demand. Same of the static for other things
+	\item \texttt{guided} use a number of chunks smaller and smaller: large chunks in the first part of the array, then smaller chunks, then smaller and so on. Intended to be used for unbalanced computations: at the beginning we assign large chunks to each thread, but the threads may finish at different times and get smaller chunks to accomodate for load unbalancing
+	\item \texttt{auto} everything decided by the compiler
+	\item \texttt{runtime} keyword which inherits the scheduling policy from an environment variable which has to be defined before 
+\end{list}
+You also have other clauses
+\begin{list}{}{}
+	\item \texttt{nowait}, removes the implicit barrier to wait all the threads, present in the parallel pragma
+	\item \texttt{reduction([+,*,and,or], x)}
+\end{list}
+\paragraph{\texttt{\#pragma omp task}} Kind of async, suggestion that if there are unusued threads use to compute the task otherwise it's sequential code.
 \end{document}
