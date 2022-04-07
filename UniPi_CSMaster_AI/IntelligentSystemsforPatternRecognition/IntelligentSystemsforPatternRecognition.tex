@@ -1505,6 +1505,60 @@ $$\hbox{MultiHead}(Q,K,V) = \hbox{Concat}(\hbox{head}_1,\ldots,\hbox{head}_h)W^O
 $$\hbox{head}_i = \hbox{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
 Is self-attention a good mechanism to model temporal dependencies? What happens if I randomly shuffle some tokens? The result is going to be shuffled. We have a key for each timestep, but there's nothing that keeps track of time. So attention is order-independent, but we need temporal information.\\
 So we sum word embed plus position embed.
+\subsection{Skipping State Updates}
+This mitigates vanishing gradients, because it reduces the distance between dependencies.
+\begin{center}
+	\includegraphics[scale=0.5]{120.png}
+\end{center}
+\paragraph{Convolutional Seq2Seq} Use convolution instead of recurrence. Better parallelization on GPUs and smaller distance between long-range dependencies.\\\\
+Vanishing gradients depend on the depth of the network.
+\begin{center}
+	\includegraphics[scale=0.5]{121.png} %TODO rewrite table
+\end{center}
+Recurrent are on the opposite side of the spectrum respect to self-attention.
+\paragraph{Hierarchical RNNs} Different approach: adds skip connections to the model (\textbf{static skip}) or learns when to skip updates (\textbf{adaptive skips}). Can skip units, block of units or entire layers.
+\subparagraph{Zoneout Regularization} At each timestep, force some units to keep the same value by random sampling. Hard gate, avoiding the update improves the gradient propagation.
+$$T = d_t\odot \tilde{T}+(1-d_t)\odot 1$$
+For comparison, the dropout is given by the formula
+$$T = d_t\odot\tilde{T}+(1-d_t)\odot 0$$
+which zeroes the value of some units.
+\paragraph{Clockwork RNN} Modular recurrent layer where each module is update at different clock. Modules interconnected only when destination clock time is larger. It works on blocks of units instead of single units.
+\begin{center}
+	\includegraphics[scale=0.5]{122.png}\\
+	\includegraphics[scale=0.5]{123.png}
+\end{center}
+RNN update $$ $$
+Block structure $$ $$
+Conditional update $$ $$
+Example of sequence generation:
+\begin{center}
+	\includegraphics[scale=0.5]{124.png}
+\end{center}
+\paragraph{Skip RNN}
+\begin{center}
+	\includegraphics[scale=0.5]{125.png}
+\end{center}
+$u_t$ is the binary state update gate, that determine if RNN state is going to be updated or copied (skip). Replacing gated update by copying increases the network memory (LSTM has an exponential fading effect due to the multiplicative gate).
+\subsection{Hierarchical Networks}
+Many sequences have latent hierarchical structures that we want to model explicitly. E.g.: Wikipedia represented as a sequence of characters. The hierarchy would be characters, words, sentences, paragraphs, documents.
+\paragraph{Explicit Boundaries} If explicit boundaries are available, we can have different layers for each level of abstraction. Combining representations from the lower layer to obtain representation for the higher layer. The problem is that typically there are no explicit boundaries available.
+\paragraph{Operations}\begin{list}{}{}
+	\item \textbf{Update}: state update (LSTM cells) according to boundary detector
+	\item \textbf{Copy}: copies cell and hidden states from previous timestep to the current
+	\item \textbf{Flush}: sends summary to next layer and re-initialize the current layer's state
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{126.png}
+\end{center}
+\paragraph{Recap}\begin{list}{}{}
+	\item Recurrence: update at each timestep, linear scan of the sequence, path length $=n$
+	\item Convoluzion: update at each timestep but lopok at the last $k$ timesteps, path length $=\log_k(n)$
+	\item Attention: update the entire sequence in parallel, path length $=1$
+	\item Zoneout: randomly disable unit update
+	\item CW-RNN: blocks of units with different update frequencies, static
+	\item Skip-RNN: adaptive gates learns to skip entire update, save computation
+	\item HM-RNN: each layer models more abstract features by learning the boundaries, adaptive
+\end{list}
 \section{Reservoir Computing}
 It's an extremely efficient way of designing and training RNNs.
 \begin{multicols}{2}
@@ -1570,5 +1624,74 @@ We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
 	\item Solve the linear regression problem for the readout $\min_{W_{hy}}\| \|^2$ %TODO
 \end{list}
 To solve, typically the training is performed offline in closed form.
-\section{Hirearchical Models}
+\section{Neural Reasoning}
+Not using classical algorithms because we may not have a proper input but only sensor information (e.g. robot navigation). The model need to learn to encode the structure from the raw data and then solve the problem. Another example is question answering, where we need to memorize facts, the question and the answer: a bit too much for the dynamical RNN memories, so we need an external memory.
+\paragraph{Memory Networks General Idea} \begin{center}
+	\includegraphics[scale=0.5]{127.png}
+\end{center}
+The memory module typically is a matrix of $N$ slots, sometimes with fixed size other times with dynamic memory. The neural network reads/writes from/to the memory module. Where to read and write can be done with attention.
+\subsection{Memory Network}
+\paragraph{Components}\begin{list}{}{}
+	\item \textbf{Input Feature Map} $I$: encodes the input in a feature vector
+	\item \textbf{Generalization} $G$: decide what input (or function of it) to write to memory
+	\item \textbf{Output Feature Map} $O$: reads the relevant memory slots
+	\item \textbf{Response} $R$: returns the prediction given the retrieved memories
+\end{list}
+\pagebreak
+\paragraph{End-to-End Memory Networks}
+\begin{center}
+	\includegraphics[scale=0.75]{128.png}
+\end{center}
+The memory contains the facts $x_i$. We search for memories matching the query, then we have a query driven soft-attention with the softmax. We combine the output memories.\\
+We can have extensions, for example we may need more than a single step for more complex models (stacking multiple memory network layers to get several iterations of reasoning):
+\begin{center}
+	\includegraphics[scale=0.5]{129.png}
+\end{center}
+Often with tied weights.
+\paragraph{Memory Nets for Visual Question Answering with Attention}\begin{center}
+	\includegraphics[scale=0.5]{130.png}
+\end{center}
+\subsection{Neural Turing Machines}
+Memory networks that can read and write memories at both training and test. End-to-end differentiable.
+\begin{center}
+	\includegraphics[scale=0.5]{131.png}
+\end{center}
+\paragraph{Controller} Typically a RNN emitting vectors to control read and write from the memory.\begin{center}
+	\includegraphics[scale=0.5]{132.png}
+\end{center}
+The key to differentiability is to always read and write the whole memory.
+\paragraph{Memory Read}\begin{center}
+	\includegraphics[scale=0.5]{133.png}
+\end{center}
+We have the attention coefficients (attention distribution vector $a$ from the RNB, the darker the color the stronger the coefficient), which weights the sum.
+$$r = \sum_i \alpha_i M_i$$
+\paragraph{Memory Write}\begin{list}{}{}
+	\item \textbf{Location-based Addressing} %TODO
+	\item \textbf{Associative Memory}: key-value pairs, and given an approximated version of a key we want to be able to recover the correspondent key.
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{134.png}
+\end{center}
+Given the value to write, the model builds the attention distribution vector $a$ describing how much we change each memory.
+$$M_i = a_iw + (1-a_i)M_i$$
+Write operation is actually performed by composing adding and erasing operations.
+\paragraph{NTM Attention Focusing}
+
+\begin{enumerate}
+	\item Generate content-based memory indexing
+	\begin{center}
+		\includegraphics[scale=0.33]{135.png}
+	\end{center}
+	\item Interpolate with attention from previous time
+	\begin{center}
+		\includegraphics[scale=0.33]{136.png}
+	\end{center}
+	\item Generate location-based indexing
+	\begin{center}
+		\includegraphics[scale=0.33]{137.png}
+	\end{center}
+	The convolution determines how we move between the locations in memory.\\Then we sharpen the distribution for the final memory access.
+\end{enumerate}
+Not yet of practical use, not straightforward to train.\\
+Has advantages over GRNN when it comes to learn to program.
 \end{document}

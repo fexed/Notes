@@ -668,5 +668,38 @@ You also have other clauses
 	\item \texttt{nowait}, removes the implicit barrier to wait all the threads, present in the parallel pragma
 	\item \texttt{reduction([+,*,and,or], x)}
 \end{list}
-\paragraph{\texttt{\#pragma omp task}} Kind of async, suggestion that if there are unusued threads use to compute the task otherwise it's sequential code.
+\paragraph{\texttt{\#pragma omp task}} Kind of async, suggestion that if there are unusued threads use to compute the task otherwise it's sequential code.\\
+Can define taskgroups to execute in parallel and wait with the implicit barrier at the end.\\
+You can append \texttt{tied} or \texttt{untied}: with the first anytime you assign/reassign the execution of this task then it would be on the same thread.\\
+The taskloop provides something similar to a map, or a pragma for, but subjecting to the rules of the tasks: could be executed in parallel given enough resources ecc.
+\paragraph{Example} Sum of a vector with a reduce(+), base case being a vector of length 1 so return the value v[0]. Otherwise the recursive case is a vector of $n$ positions: compute the half and split in v[0,$\frac{n}{2}$] and v[$\frac{n}{2},n$] recur. So we need a task for the left half, a task for the right part, checking not to be in the base case.
+\begin{lstlisting}[style=myC]
+int sum (int* restricted v, int start, int end) {
+	auto size = end - start;
+	auto mid = size/2;
+	int x, y; //shared for the subtasks, sum from left and right
+	
+	if (size == 1) return v[start]; //base case
+	
+	#pragma omp task shared(x) //to share the result with this "main" thread
+	{
+		x = sum(v, start, start+mid);
+	}
+	#pragma omp task shared(y) //same as befor
+	{
+		y = sum(v, end-mid, end);
+	}
+	#pragma omp taskwait //wait for the termination of the tasks, a "barrier"
+	//now both tasks have finished, we have both x and y
+	return x+y;
+}
+
+int main(int argc, char** argv) {
+	#pragma omp parallel num_threads(nw) //or from the CLI "export OMP_NUM_THREADS=nw"
+	//...
+	#pragma omp single //single or master
+	sum(v, 0, n-1);
+}
+\end{lstlisting}
+\paragraph{Timing routines} Also present.
 \end{document}
