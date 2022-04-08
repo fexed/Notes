@@ -950,7 +950,7 @@ So we:\begin{list}{}{}
 Obtaining the state $\frac{1}{\sqrt{2^n}}\sum_x|x,f(x)\rangle$\\
 Quantum parallelism enables all possible values of $f$ to be evaluated simultaneously, even if we evaluate $f$ once. This parallelism is not immediately useful: if we measure the state $\frac{1}{\sqrt{2^n}}\sum_x|x,f(x)\rangle$ we obatin $|x,f(x)\rangle$ for a single value of $x$.\\
 To exploit quantum parallelism, we need the ability to extract information about more than one value of $f(x)$ from $\sum_x |x,f(x)\rangle$
-\paragraph{Deutsch's Algorithm}
+\subsection{Deutsch's Algorithm}
 \begin{center}
 	\includegraphics[scale=0.5]{22.png}
 \end{center}
@@ -982,7 +982,7 @@ $$|\psi_3\rangle = (H\otimes I)|\psi_2\rangle = \left\{\begin{array}{l l}
 \pm |1\rangle|-\rangle& f\hbox{ is balanced}
 \end{array}\right.$$
 With a measure on the computational basis we solve the Deutsch's problem, getting 0 $\Leftrightarrow f$ is constant and $1\Leftrightarrow f$ is balanced.
-\paragraph{Deutsch-Jozsa Algorithm} Generalization of the Deutsch's problem
+\subsection{Deutsch-Jozsa Algorithm} Generalization of the Deutsch's problem
 $$f:\{0,1\}^n\rightarrow\{0,1\}$$
 As input we have a black box for computing an unknown function $f:\{0,1\}^n\rightarrow\{0,1\}$ either constant or balanced.\\
 The problem is to determine whether $f$ is constant or balanced.\\\\
@@ -1172,5 +1172,125 @@ The final circuit is composed with the inverse of the QFT, where we need to run 
 \begin{center}
 	\includegraphics[scale=0.5]{29.png}
 \end{center}
-
+\subsection{Grover's Algorithm} 
+Searching in an unstructured set of elements, from $O(N)$ to $O(\sqrt{N})$.\\We have a list of $N$ objects in a quantum memory and we want to retrieve a target element.\\
+In the classical world, if the list is sorted we have $O(\log N)$ operations with binary search, otherwise in unsorted lists we may do on average $O(\frac{N}{2})$ accesses. In quantum we can do it in $O(\sqrt{N})$.
+\paragraph{Example} Find $x,y,z,w\in N$ with $x,y,z,w\leq 10^6$ such that $x^4+y^4+z^4=w^4$. With a classical brute force approach we have a total number of queries of $\frac{10^{18}}{6}$ (removing permutations). With the quantum algorithm we can lower this number of queries to $\sqrt{N} = 10^9$.
+\paragraph{Grover Iterations} If you have $M$ solutions (targets), you can lower the complexity to $O\left(\sqrt{\frac{N}{M}}\right)$\\
+With $M=1$, assume the target solution is denoted by $\beta$, the oracle that recognizes the solution is $$\hbox{Oracle}(x) = \left\{\begin{array}{c l}
+0&x=\beta\\1&x\neq\beta
+\end{array}\right.$$
+We need to represent in the quantum world this oracle: $U_\beta|x\rangle$. Our database is $\{|0\rangle,\ldots,|N-\rangle\}$ with the usual convention that we are representing single qubits (so $\log N$ qubits from all zeros to all ones). This works by changing the phase
+$$U_\beta|x\rangle=\left\{\begin{array}{l l}
+|x\rangle&x\neq\beta\\-|x\rangle&x=\beta
+\end{array}\right.$$
+Identity if the state is $\neq\beta$
+$$U_\beta = \left[\begin{array}{c c c c c}
+1\\
+&1\\
+& &\ddots\\
+& & &-1\\
+& & & &\ddots\\
+\end{array}\right]\hbox{ with }-1\hbox{ in position }(\beta,\beta)$$
+$$U_\beta|x\rangle=(-1)^{\hbox{Oracle}(x)}|x\rangle$$
+\paragraph{Construction of the Grover Oracle} Classical boolean functions can be converted to reversible quantum circuits.
+$|x\rangle$ enters the circuit that output $|x\rangle$. The circuit is in xor with a $|0\rangle$ that emits $|f(x)\rangle$ such that if $f(x)=0$ nothing happens, so $|0\rangle\rightarrow|0\rangle = |f(x)\rangle$.\\
+If $f(x) = 1$ then $|0\rangle\rightarrow|1\rangle=|f(x)\rangle$.
+\begin{center}
+	\includegraphics[scale=0.5]{30.png}
+\end{center}
+But we don't want to initialize it to $|0\rangle$ but to $|-\rangle$, such that the last register remains $|-\rangle$ and the Oracle outputs $(-1)^{f(x)}|x\rangle$
+\begin{center}
+	\includegraphics[scale=0.5]{31.png}
+\end{center}
+\paragraph{Grover Algorithm}
+\begin{enumerate}
+	\item Initialize the circuit to uniform superposition (usual Hadamard gates on each qubit), assuming $N=2^n$
+	$$|\psi\rangle=\frac{1}{\sqrt{N}}\sum_{x=0}^{N-1}|x\rangle$$
+	\item Perform $t$ times a \textbf{Grover Iteration}
+	\item Measure in the computational basis
+\end{enumerate}
+The focus is $t$, which we are going to estimate, and proving that the Grover Iterations converge.
+$$U_\beta|\psi\rangle = \frac{1}{\sqrt{N}}\sum_{x=0,x\neq\beta}^{N-1}|x\rangle - \frac{1}{\sqrt{N}}|\beta\rangle$$
+Measuring will yield one of the $N$ configurations: we changed the phase but not the amplitude. So the Grover Iteration has the goal to amplify the amplitude of the target state in order to make it much bigger than the others.
+\subparagraph{Diffuser} The goal is to amplify the amplitude of $\beta$.\\
+Two important states:
+\begin{list}{}{}
+	\item $|\psi\rangle$ superposition of all the state
+	\item $|\beta\rangle$ the target state
+\end{list}
+I consider $span\{|\beta\rangle,|\psi\rangle\}$ which is a plane in $R^N$ (dimension 2). They are not orthogonal
+$$\langle\beta|\psi\rangle = \frac{1}{\sqrt{N}}\neq =0$$
+But for very large $N$ they are \textbf{almost orthogonal}.\\
+We consider $|\phi\rangle\in span\{|\beta\rangle,|\psi\rangle\}$ such that $\langle\phi|\beta\rangle=0$: we can take $|\psi\rangle$ and remove the components in directions of $|\beta\rangle$
+$$|\phi\rangle=\sqrt{\frac{N}{N-1}}\left(\frac{1}{\sqrt{N}}\sum_{x=0}^N|x\rangle\right)-\frac{1}{\sqrt{N}}|\beta\rangle = \frac{1}{\sqrt{N-1}}\sum_{x\neq\beta}|x\rangle$$
+We can also rewrite $|\psi\rangle$
+$$|\psi\rangle = \sin\left(\frac{\theta}{2}\right)|\beta\rangle + \cos\left(\frac{\theta}{2}\right)|\phi\rangle = \frac{1}{\sqrt{N}}|\beta\rangle + \sqrt{\frac{N-1}{N}}|\phi\rangle$$
+Because $\sin\frac{\theta}{2} = \frac{1}{\sqrt{N}}\Leftrightarrow\frac{\theta}{2}=\arcsin\frac{1}{\sqrt{N}}$. So the angle between $|\psi\rangle$ and $|\phi\rangle$ is $\frac{\theta}{2}$
+\begin{center}
+	\includegraphics[scale=0.5]{32.png}\\
+	$\psi$ and $\phi$ are inverted
+\end{center}
+So we start and apply $U_\beta$ to our starting state $|\psi\rangle$
+$$U_\beta|\psi\rangle = \cos\frac{\theta}{2}|\phi\rangle-\sin\frac{\theta}{2}|\beta\rangle$$
+So it reflects along $|\phi\rangle$: $U_\beta$ is a reflection along the space orthogonal to $|\beta\rangle$.
+\begin{center}
+	\includegraphics[scale=0.5]{33.png}\\
+	$\psi$ and $\phi$ are inverted
+\end{center}
+Starting with all equal amplitudes of $\frac{1}{\sqrt{N}}$, the amplitude of $|\beta\rangle$ is inverted!
+\begin{center}
+	\includegraphics[scale=0.5]{34.png}
+\end{center}
+Then the diffuser step $U_\psi$: reflection around $|\psi\rangle$
+$$U_\psi = 2|\psi\rangle\langle\psi|-I$$
+We obtain $U_\psi U_\beta|\psi\rangle$ which reflects $U_\beta|\psi\rangle
+$ around $|\psi\rangle$ with an angle of $\theta$ with $|\psi\rangle$
+\begin{center}
+	\includegraphics[scale=0.5]{35.png}\\
+	$\psi$ and $\phi$ are inverted
+\end{center}
+This reflection is often referred to as inversion around the average. The amplitudes of the configurations $\neq|\beta\rangle$ is lowered to $\frac{N-2}{N\sqrt{N}}$ while the amplitude of $|\beta\rangle$ is amplified.\\
+This reflections is the iterations: start with $|\psi\rangle$, reflect along the $|\phi\rangle$ orthogonal to the target $|\beta\rangle$ and then reflect along $|\psi\rangle$ obtaining $|z\rangle$. Then repeat: reflect $|z\rangle$ along $|\phi\rangle$, reflect along $|\psi\rangle$\ldots\\At the generic step\begin{list}{}{}
+	\item $G=U_\psi U_\beta$
+	\item $|\psi^{(k)}\rangle = G^k|\psi\rangle = G|\psi^{(k-1)}\rangle$
+\end{list}
+Let's denote
+$$|z\rangle = U_\beta|\psi^{(k)}\rangle = \sum_{x=0}^{N-1}\alpha_x|x\rangle$$
+$$|\psi^{(k+1)}\rangle=U_\psi|z\rangle = (2|\psi\rangle\langle\psi| - I)\left(\sum_{x=0}^{N-1}\alpha_x|x\rangle\right) = 1\sum_{x=0}^{N-1}\alpha_x\langle\psi|x\rangle|\psi\rangle-\sum_{x=0}^{N-1}\alpha_x|x\rangle = $$
+$\langle\psi|x\rangle = \frac{1}{\sqrt{N}}$ and $|\psi\rangle$ doesn't depend on $|x\rangle$
+$$2\sum_{x=0}^{N-1}\frac{1}{\sqrt{N}}\alpha_x = \frac{2N}{\sqrt{N}}\frac{1}{N}\sum_{x=0}^{N-1}\alpha_x$$
+The $M = \frac{1}{N}\sum_{x=0}^{N-1}\alpha_x$ is the average of $z$ so we can rewrite as
+$$|\psi^{(k+1)}\rangle=\sum_{x=0}^{N-1}(-\alpha_x + 2M)|x\rangle$$
+The first step
+$$|\psi^{(1)}\rangle = \left(2M-\frac{1}{\sqrt{N}}\right)\sum_{x\neq\beta}|x\rangle+\left(2M+\frac{1}{\sqrt{N}}\right)|\beta\rangle$$
+Can see that the amplitude of $|\beta\rangle$ has increased and the others have decreased by a factor proportional to the mean.
+\paragraph{Number of Iterations}
+$G = U_\psi U_\beta$ is a rotation: \textbf{the composition of two reflectors is a rotation} of an angle $\theta$ where $\sin\frac{\theta}{2}=\frac{1}{\sqrt{N}}\Leftrightarrow\theta = 2\arcsin\frac{1}{\sqrt{N}}$.\\
+$G^k$ has rotated of $\theta^k = (2k+1)\frac{\theta}{2}$ and we want to stop when $(2k+1)\frac{\theta}{2}=\frac{\pi}{2}$, near $|\beta\rangle$ (at 90 degrees).
+$$k\theta + \frac{\theta}{2} = \frac{\pi}{2}$$
+$$k = \left(\frac{\pi}{2}-\frac{\theta}{2}\right)\frac{1}{\theta}$$
+But $\frac{\pi}{2}$ is irrational so we want an approximation
+$(2k+1)\frac{\theta}{2}\simeq\frac{\pi}{2}$
+$$k=\lfloor\frac{\pi}{2\theta}-\frac{1}{2}\rfloor$$
+For a sufficiently large $N$ we can approximate $\arcsin\left(\frac{\theta}{2}\right) = \frac{\theta}{2} = \frac{1}{\sqrt{N}}$ (from the Taylor expansion of $\arcsin$) getting
+$$k\simeq\left(\frac{\pi}{2}-\frac{1}{\sqrt{N}}\right)\frac{\sqrt{N}}{2} = \frac{\pi}{4}\sqrt{N}-\frac{1}{2}$$
+So the number of iterations $$t\simeq\frac{\pi}{4}\sqrt{N}$$
+\begin{center}
+	\includegraphics[scale=0.5]{36.png}
+\end{center}
+The remaining angle is $\frac{\pi}{2}-(2k+1)\frac{\theta}{2}$
+\subparagraph{Theorem} If we perform $k=\lfloor\frac{\pi}{2\theta}-\frac{1}{2}\rfloor\simeq\frac{\pi}{4}\sqrt{N}$ Grover Iterations, the probability of measuring the target state $|\beta\rangle$ is $$P(\hbox{Measuring }|\beta\rangle) = 1-\frac{1}{N}$$
+Projecting along $|\beta\rangle$ at time $k$
+$$P(\hbox{Measuring }|\beta\rangle) = |\langle\beta|\:G^k|\psi\rangle|^2 = \cos^2\left(\frac{\pi}{2}-(2k+1)\frac{\theta}{2}\right) = 1-\sin^2\left(\frac{\theta}{2}\right) = 1-\frac{1}{N}$$
+\paragraph{Circuit for the Grover Iteration $G$}
+We have $H^{\otimes n}|\psi\rangle = |0\rangle^{\otimes n}$ so $|\psi\rangle = H^{\otimes n}|0\rangle$, also $I = H^{\otimes n}H^{\otimes n}$
+$$U_\psi=2|\psi\rangle\langle\psi|-I = H^{\otimes n}(2|0\rangle\langle0|-I)H^{\otimes n}$$
+$$2\left[\begin{array}{c c c c c}
+1\\\\&&0\\&&&\\
+\end{array}\right]-\left[\begin{array}{c c c}
+1\\&\ddots\\&&1
+\end{array}\right] = \left[\begin{array}{c c c c}
+1\\&-1\\&&\ddots\\&&&-1
+\end{array}\right]$$
 \end{document}
