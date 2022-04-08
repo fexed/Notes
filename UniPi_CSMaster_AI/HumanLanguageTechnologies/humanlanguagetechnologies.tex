@@ -1266,11 +1266,110 @@ We've seen it in translation, but this can be applied to other NLP tasks. It has
 We sometimes say that the attention attends to the query.\\ %TODO
 \textbf{Attention is all you need}. Self-attention helps to contextualize words: a limit on word embeddings was that each word had a single vector, with attention we can introduce into the representation the context into which they appears, allowing to observe other words.
 %skip until Google neural MT architecture
-%1a parte 5/04
-\paragraph{Transformer}
-%TODO
+\subsection{Self-Attention}
+Sequence to sequence models with attention are quite effective in transduction tasks, but their sequential nature limits parallelism. The \textbf{transformer} transduction model relies entirely on self-attention to compute representations of its input and output: it doesn't use sequence aligned RNNs nor convolutions.\\
+As a result, training costs are reduced by 1-2 orders of magnitude.\\\\
+So we want \textbf{parallelization} but RNNs are inherently sequential. They also generally need attention mechanism to deal with long range dependencies: path length between states grows with distance otherwise. We may be able to just use attention and skip the need for the RNN.
+\paragraph{Attention} Given a set of vector values and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query.\\
+The intuition is the following: the weighted sum is a selective summary of the information contained in the values, where the query determines which values to focus on. Attention is a way to obtain a fixed-size representation of an arbitrary set of representations (the values), dependent on some other representation (the query).\\\\
+The generic attention, as we have seen before: we have some \textbf{values} $v_1,\ldots,v_N\in R^{d_1}$, some \textbf{keys} $k_1,\ldots,k_N\in R^{d_1}$ and a \textbf{query} $s\in R^{d_2}$\begin{list}{}{}
+	\item Compute the \textbf{attention scores} $e\in R^N$
+	\item Taking softmax to get the \textbf{attention distribution} $\alpha=\hbox{Softmax}(e)\in R^N$
+	\item Using the attention distribution to take the weighted sum of values $$a = \sum_{i=1}^N\alpha_iv_i\in R^{d_1}$$
+	Thus obtaining the \textbf{attention output} or context vector $a$
+\end{list}
+There are variants, several ways to compute $e\in R^{d_1}$:
+\begin{list}{}{}
+	\item Basic dot-product attention $e_i=s^Tk_i\in R$\\
+	This assumes $d_1=d_2$, and is the version used in NMT
+	\item Multiplicative attention $e_i=s^TWk_i\in R$\\
+	Where $W\in R^{d_1\times d_2}$ is a weight matrix
+	\item Additive attention $e_i=w^T\tanh(W_1k_1+W_2s)\in R$\\
+	Where $W_1\in R^{d_3\times d_1}$, $W_2\in R^{d_3\times d_2}$ are weight matrices and $w\in R^{d_3}$ is a weight vector.\\$d_3$ is the attention dimensionality, hyperparameter.
+\end{list}
+\paragraph{Issues with Recurrent Models}\begin{list}{}{}
+	\item O(sequence length) steps for distant word pairs to interact. This means: hard to learn long-distance dependencies (because gradient problems!) and linear order of words "baked in" (and we already know that linear order isn't the right way to think about sentences
+	\item Non-parallelizable
+\end{list}
+What can we use instead of recurrence?
+\paragraph{Word Windows} Word window models aggregate local contexts (also known as 1D convolution). Stacking window layers allow interaction between farther words. The maximum interaction distance is $\frac{\hbox{sequence length}}{\hbox{window size}}$
+\paragraph{Attention} Attention treats each word's representation as a query to access and incorporates information from a set of values. We saw attention from decoder to encoder, let's see attention withing a single sentence. The maximum interaction distance becomes O(1) since all words interact at every layer!
 \paragraph{Self-Attention}
-\subsection{Transformers Library}
+We can think of attention as an approximated hashtable:
+\begin{list}{}{}
+	\item To look up a value we compare a query against keys in the table
+	\item In a hashtable: each query (hash) maps to exactly one key-value pair
+	\item In (self-)attention: each query matches each key to varying degrees. We return a sum of values weighted by the query-key match.
+\end{list}
+Given the \textbf{queries} $q_1,\ldots,q_T\in R^d$, the \textbf{keys} $k_1,\ldots,k_T\in R^d$ and the \textbf{values} $v_1,\ldots,v_T\in R^d$ (but in practice the number of queries can differ from the number of keys and values), in self-attention \textbf{the queries, keys and values are drawn from the same source}. E.g.: if the output of the previous layer is $x_1,\ldots,x_T$ (one vector per word), we could use $v_i=k_i=q_i=x_i$ (same vector for all of them).\\
+The dot product self-attention operation is:
+\begin{list}{}{}
+	\item Compute key-query quantities $$e_{ij} = q_i^Tk_jk$$
+	\item Compute attention weights from affinities $$\alpha_{ij}=\frac{e^{e_{ij}}}{\sum_k e^{e_{ik}}}$$
+	\item Compute outputs as weighted sum of values $$\hbox{Output}_i=\sum_j\alpha_{ij}v_j$$
+\end{list}
+\paragraph{Vector Notation}
+\begin{list}{}{}
+	\item With embeddings stacked in $X$, compute queries, keys and values: $Q=XW^Q, K=XW^K, V=XW^V$
+	\item Compute attention scores between queries and keys $E = QK^T$
+	\item Take the softmax to normalize attention scores $A=$ Softmax$(E)$
+	\item Take a weighted sum of values Output = $AV$
+\end{list}
+$$\hbox{Output}=\hbox{Softmax}(QK^T)V$$
+\paragraph{Self-Attention as a NLP Building Block}
+\begin{center}
+	\includegraphics[scale=0.5]{68.png}
+\end{center}
+This shows a stack of self-attention blocks like we might stack LSTM layers. Self-attention though cannot be a drop-in replacement for recurrence, for it has few issues.
+\subparagraph{No Notion of Order} Self-attention is an operation on sets, meaning it has no inherent notion of order. Self-attention doesn't know the order of its inputs.\\
+We need to encode the order of the sentence in our keys, queries and values. Consider representing each sequence index as a vector: $p_i\in R^d$, for $i\in\{1,\ldots,T\}$ are position vectors. It's easy to incorporate this info into our self-attention block: just add the $p_i$ into our inputs. With $\tilde{v}_i, \tilde{q}_i, \tilde{k}_i$ our old values, queries and keys
+$$v_i = \tilde{v}_i+p_i$$
+$$q_i = \tilde{q}_i+p_i$$
+$$k_i = \tilde{k}_i+p_i$$
+The $p_i$ can be \textbf{sinusoidal position representations}: concatenate sinusoidal functions of varying periods. Periodicity indicates that maybe an "absolute position" isn't important, but it's not learnable. So the $p_i$ can be all learnable: learn a matrix $p\in R^{d\times T}$ and the $p_i$s are columns of that matrix. It's flexible, because each position gets to be learned to fit the data, but can't be used to extrapolate indexes outside $1,\ldots,T$.
+\subparagraph{Adding Non-Linearities} Therea re no elementwise nonlinearieis in self-attention, so stacking more self-attention layers just re-averages value records. A simple fix: we add feed-forward network to post process each output vector:
+\begin{center}
+	\includegraphics[scale=0.5]{69.png}
+\end{center}
+$$m_i = \hbox{MLP}(\hbox{Output}_i) + b_2 = W_2\cdot\hbox{ReLU}(W_1\cdot\hbox{Output}_i + b_1)+b_2$$
+\subparagraph{Future} We need to ensure we don't "look at the future" when predicting a sequence, like in machine translation or language modeling. To mask the future, we could change the set of keys and queries to include only past words but it's inefficient. To enable parallelization, we mask out attention to future words by setting attention scores to $-\infty$
+$$e_{ij}=\left\{\begin{array}{l l}
+q^Tk_j&j<i\\
+-\infty&j\geq i
+\end{array}\right.$$
+\subsection{Transformers}
+The encoder maps an input sequence of symbol representations $(x_1,\ldots,x_n)$ to a sequence of continuous representations $(z_1,\ldots,z_n)$ Given $z$, the decoder then generates an output sequence $(y_1,\ldots,y_m)$ of symbols one element at a time. At each step, the model is \textbf{auto-regressive}, consuming the previously generated symbols as additional input when generating the next.
+\begin{center}
+	\includegraphics[scale=0.5]{70.png} \includegraphics[scale=0.5]{71.png}
+\end{center}
+The encoding component is a stack of encoders, and the decoding component is a stack of decoders of the same number.
+\paragraph{Self-Attention} The encoder's inputs first flow into a self-attention layer, that helps the encoder look at other words in the input sentence as it encodes a specific word. The outputs of the self-attention layer are fed to a feed-forward neural network: the exact same FFNN in independently applied to each position.\\
+The decoder has both those layers, with an attention layer between them that helps the decoder focus on the relevant parts of the input sentence.
+\begin{center}
+	\includegraphics[scale=1]{72.png}
+\end{center}
+\paragraph{Multi-Headed Attention} With a simple self-attention there's only a way for a word to interact with others. We can expand the model ability to focus on different positions: multiple sets of query/key/value weight matrices, apply attention and then concatenate outputs and pipe through linear layer.
+\begin{enumerate}
+	\item From the input sentence
+	\item We embed each word (\textbf{word embeddings})\\
+	In all encoders other than the first we don't need the embedding, we directly use the output of the previous encoder.
+	\item We split into $n$ heads and multiply with weight matrices
+	\item Calculate attention using the resulting $Q$/$K$/$V$ matrices
+	\item Concatenate the resulting $Z$ matrices, then multiply with weight matrix $W^O$ to produce the output layer.
+\end{enumerate}
+\paragraph{Training Tricks}
+\begin{list}{}{}
+	\item \textbf{Residual Connections}: deep networks are bad at learning the identity function. Therefore, directly passing "raw" embeddings to the next layer can be helpful
+	$$x_l = F(x_{l-1} + x_{l-1}$$
+	\item \textbf{Layer Normalization}: may be difficult to train the parameters of a given layer because its input from the layer beneath keeps shifting. Solution: reduce uninformative variation by normalizing to zero mean and std. dev. one within each layer
+	$$x_l' = \frac{x_l - \mu_l}{\sigma_l + \epsilon}$$
+	Helps models to train faster.
+	\item \textbf{Scaled Dot Product Attention}: after layer normalization, the mean and variance of vector elements is 0 and 1, respectively. However the dot product still tends to take on extreme values, as its variance scales with dimensionality $d_k$. The updated self-attention equation is $$\hbox{Output} = \hbox{Softmax}\left(\frac{QK^t}{\sqrt{d_k}}\right)V$$
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.75]{73.png}
+\end{center}
+\subsubsection{Transformers Library}
 \paragraph{Hugging Face Transformers} Installed with \texttt{pip install transformers}.\\
 Typical pattern is to load a model, then initialize two objects:
 \begin{list}{}{}
