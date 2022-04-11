@@ -1293,4 +1293,141 @@ $$2\left[\begin{array}{c c c c c}
 \end{array}\right] = \left[\begin{array}{c c c c}
 1\\&-1\\&&\ddots\\&&&-1
 \end{array}\right]$$
+\subsection{Shor's Algorithm} $N$ composite number: Shor's algorithm can find a factor of $N$ in $O(n^2\cdot\log n\cdot\log\log n)$ steps, with $n=\lceil\log N\rceil$. Can find factors in NP.\\
+The most efficient classical factoring algorithm (general number field sieve) works in subexponential $O(e^{1.9}n^{1/3(\log n)^{2/3}})$\\
+The decision version of the problem is not NP-complete. All current public key cryptography (RSA, DH, ECC) would be broken if Shor's algorithm could be physically realized.
+\paragraph{Complexity Classes}
+\begin{list}{}{}
+	\item \textbf{BQP} (Bounded-error Quantum Polynomial Time): class of decision problems that can be solved in polynomial time on a quantum computer, with bounded error probability (at most $1/3$ as arbitrary choice, can be $1/2$)\\
+	The decision version of %TODO
+	\item \textbf{BPP} (Bounded-error Polynomial Time): class of decision problems that can be solved in polynomial time using randomized algorithms, if a bounded probability of error is allowed in the solution.\\
+	The decision version of factorization is not known to be in BPP.
+\end{list}
+If indeed factorization $\not\in$ BPP, then quantum computer would be the first counterexample to the "strong" Church-Turing Thesis, which states that all reasonable models of computation are polynomially equivalent.\\\\
+Application of QPE: quantum order-finding. Factorization is solved via a reduction to order-finding.
+\paragraph{Order-Finding Problem} We are given coprime integers $a, N$, meaning GCD$(a,N)=1$. The \textbf{order}/period of $a$ is the smallest positive integer $r$ such that $$a^r\hbox{ mod }N = 1$$
+The problem is finding $r$ given $a$ and $N$ with GCD$(a,N)=1$.\\
+Also called period because $f(x) = a^x\hbox{ mod }N$ is periodic with period $r$. Indeed $\forall\:s\:\:f(s+r)=a^{s+r}\hbox{ mod }N = a^s\hbox{ mod }N = f(s)$
+\paragraph{Shor's Algorithm} The idea is to use QPE: given $U|\psi\rangle=e^{2\pi i\theta}|\psi\rangle$ with $|\psi\rangle$ eigenvector and $e^{2\pi i\theta}$ corresponding eigenvalues.
+\begin{center}
+	\includegraphics[scale=0.5]{37.png}
+\end{center}
+\begin{enumerate}
+	\item Find unitary $U_a$ such that eigenvaleus of $U_a$ contain $r$ in the phase
+	\item %TODO 
+\end{enumerate}
+\paragraph{Construction of $U_a$} Given $N, n=\lceil\log_2N\rceil, a$
+$$U_a|y\rangle=\left\{\begin{array}{ll}
+|a\cdot y\hbox{ mod }N\rangle&0\leq y<N\\
+|y\rangle&N\leq y< 2^n
+\end{array}\right.$$
+Example with $N=5, a=3, n=3$$$U_a|y\rangle=\left\{\begin{array}{ll}
+|3\cdot y\hbox{ mod }5\rangle&0\leq y<6\\
+|y\rangle&6\leq y< 8
+\end{array}\right.$$
+Show that $U_a$ is unitary and that it contains the eigenvalue $r$.
+\subparagraph{$U_a$ is unitary} It can be described by a block diagonal matrix.\begin{center}
+	\includegraphics[scale=0.5]{38.png}
+\end{center}
+So to prove that $U_a$ is unitary it's enough to prove that $U$ is unitary, so that $U^+U = I$. Given $0\leq y',y<N$, we need to prove that
+$$\langle y'|U^+U|y\rangle = \delta_{yy'} = \left\{\begin{array}{l l}
+0&y\neq y'\\
+1&y=y
+\end{array}\right.$$
+So we have $$\langle y'|U^+U|y\rangle = <ay'\hbox{ mod }N|ay\hbox{ mod }N\rangle$$
+This can happen $\Leftrightarrow$
+$$ay'\equiv ay\hbox{ mod }N$$
+Remember that $a$ is coprime with $N$, so we have that $\exists\:a^{-1}$
+$$a^{-1}ay'\equiv a^{-1}ay\hbox{ mod }N$$
+$$y'\equiv y\hbox{ mod }N$$
+And $y,y'<N$ so we have an equivalence
+$$y' = y$$
+So the operator is unitary.
+\subparagraph{Eigenvalues of $U_a$} We have $$U_a^r|y\rangle = U_a^{r-1}|ay\hbox{ mod }N\rangle = \ldots = |a^ry\hbox{ mod }N\rangle = |y\rangle$$
+Because $r$ is the order. So we have $$U_a^r|y\rangle = \left\{\begin{array}{ll}
+|y\rangle&0\leq y<N\\
+|y\rangle&N\leq y<2^n
+\end{array}\right.$$
+So $U_a^r = I$ is the identity. This means that the eigenvalues of $U_a$ are the $r$-roots of the unity.
+$$\lambda_s = e^{\frac{2\pi i}{r}s} = \omega^s$$ with $0\leq s<r$ and $e^{\frac{2\pi i}{r}} = \omega$\\
+The phase is $\frac{s}{r}$, and it contains $r$.
+\subparagraph{Eigenvectors of $U_a$} $\forall\:0\leq s< r$ $$|u_s\rangle = \frac{1}{\sqrt{r}}\sum_{k=0}^{r-1}\omega^{-sk}|a^k\hbox{ mod }N\rangle$$
+is the eigenvector with eigenvalues $\omega^s == e^{\frac{2\pi i}{r}s}$\\
+$$U_a|u_s\rangle = \frac{1}{\sqrt{r}}\sum_{k=0}^{r-1}\omega^{-sk}|a^{k+1}\hbox{ mod }N\rangle =$$ $$= \frac{1}{\sqrt{r}}\sum_{k=1}^{r}\omega^{-s(k-1)}|a^k\hbox{ mod }N\rangle =$$ $$=\frac{1}{\sqrt{r}}\sum_{k=1}^{r-1}\omega^s\omega^{-sk)}|a^k\hbox{ mod }N\rangle + \frac{1}{\sqrt{r}}\omega^s\omega^{-sr}|a^r\hbox{ mod }N\rangle= $$ We have that, in the term corresponding to $k=r$, $\omega^{-sr}=1$ and $a^r=1$ by definition of order $$=\frac{1}{\sqrt{r}}\omega^s\sum_{k=1}^{r-1} \omega^{-sk}|a^k\hbox{ mod }N\rangle + \frac{1}{\sqrt{r}}\omega^s\omega^{-s0}|a^0\hbox{ mod }N\rangle  =$$ Observe that the term corresponding to $k=r$ is equal to the term corresponding to $k=0$.
+$$=\frac{1}{\sqrt{r}}\omega^s\sum_{k=0}^{r-1}\omega^{-sk}|a^k\hbox{ mod }N\rangle = \omega^s|u_s\rangle$$
+$$U_a|u_s\rangle = \omega^s|u_s\rangle$$
+$$\omega^s=e^{\frac{2\pi i}{r}s}$$
+To run QPE we need to prepare the state $|u_s\rangle$, but to prepare it we need $r$ which we do not have.\\
+Instead of preparing $|u_s\rangle$ we prepare a superposition of the eigenvectors.
+$$\frac{1}{\sqrt{r}}\sum_{s=0}^{r-1}|u_s\rangle =\frac{1}{\sqrt{r}}\sum_{s=0}^{r-1}\frac{1}{\sqrt{r}}\sum_{k=0}^{r-1}\omega^{-sk}|a^k\hbox{ mod }N\rangle =$$
+$$ = \frac{1}{r}\sum_{s=0}^{r-1}\left( \omega^{-0s}|a^0\hbox{ mod }N\rangle+\sum_{k=1}^{r-1}\omega^{-sk}|a^k\hbox{ mod }B\rangle \right) =$$
+$$= \frac{1}{r}\sum_{s=0}^{r-1}|1\rangle+\frac{1}{r}\sum_{k=1}^{r-1}\left(\sum_{s=0}^{r-1}\omega^{-sk}\right)|a^k\hbox{ mod} N\rangle =$$
+$$=|1\rangle + \frac{1}{r}\sum_{k=1}^{r-1}\left(\frac{1-(\omega^{-sk})^r}{1-\omega^{-sk}}\right)|a^k\hbox{ mod }N\rangle =$$
+And $\omega = e^{\frac{2\pi i}{r}}$ so the sum in parenthesis is $0$, so the superposition of all the states is just 
+$$=|1\rangle = |0\ldots01\rangle$$
+with $n-1$ zeros and a $1$, so $n=\lceil\log N\rceil$ bits.
+\paragraph{Circuit} QPE circuit adapted\begin{center}
+	\includegraphics[scale=0.5]{39.png}
+\end{center}
+$$ t= 2n+1+\lceil\log\left(2+\frac{1}{2\epsilon}\right)\rceil$$
+With $t$ qubits we will obtain an estimate of $\frac{s}{r}$ accurate to $2n+1$ bits with probability of at least $1-\epsilon$. We need that accuracy to be able to recover $r$ from the phase $\frac{s}{r}$ (with a classical algorithm).\\
+The circuit consists of 4 steps
+\begin{enumerate}
+	\item Apply $t$ Hadamard gates to put the first counting qubits register in equal superposition.
+	$$|0\rangle^{\otimes n}|1\rangle\mapsto \frac{1}{\sqrt{2^t}}\sum_{j=0}^{t-1}|j\rangle|1\rangle$$
+	\item Apply the sequence of controlled $U_a^{2^j}$ gates with control on the $j$th qubit.
+	$$\frac{1}{\sqrt{r\cdot2^t}}\sum_{s=0}^{r-1}\sum_{j=0}^{2^t-1}\omega^{sj}|j\rangle|u_s\rangle$$
+	\item Apply the inverse Quantum Fourier Transform on the first register and we get a superposition of eigenvectors $|u_r\rangle$ entangled with estimates of their corresponding eigenvalues
+	$$\frac{1}{\sqrt{r}}\sum_{s=0}^{r-1}|2^t\frac{s}{r}\rangle|u_s\rangle $$
+	So a superposition of estimates instead of a single estimate like in QPE
+	\item Measure the first register, and since there is a superposition we have each estimate with equal probability. The uniform superposition collapses to one of the $r$ eigenvectors $|u_s\rangle$ and QPE returns an estimate of the phase $\frac{s}{r}$ for a random (unknown) $s$ with $0\leq s< r$
+\end{enumerate}
+\paragraph{Implementing $U_a$ Efficiently} Using fast exponentiation: square and multiply (quadrature successive).\\
+The idea is that $$U_a^{2^j}|y\rangle = |a^{2^j}y\hbox{ mod }N\rangle =$$
+But we take the modulo immediately
+$$= |(a^{2^j}\hbox{ mod }N)y\hbox{ mod }N\rangle$$
+So we precompute all values $$a\hbox{ mod }N,a^2\hbox{ mod }N,a^4\hbox{ mod }N,\ldots,a^{2^j}\hbox{ mod }N,\ldots,a^{2^{t-1}}\hbox{ mod }N$$
+These are all $n$ bit numbers, and we can compute all of them with $t-1$ operations, $O(n^2)$ or $O(n\log n\log\log n)$ with fast multiplication. $t$ is $O(n)$ therefore the cost is $O(n^2\log n\log\log n)$ with fast multiplication.
+$$U_a^{2^j}|y\rangle = |(a^{2^j}\hbox{ mod }N)y\hbox{ mod }N\rangle$$
+\paragraph{Recovering $r$ from the Phase $\frac{r}{s}$} This is classical computation, doesn't require quantum computation and is performed on a classical computer applying the \textbf{Continued Fractions Algorithm} CFA.\begin{list}{}{}
+	\item On the first register we measure an integer $x=2^t\frac{s}{r}$ for unknown $r$ and $s$.\\
+	So $\frac{x}{2^t}=\phi \simeq \frac{s}{r}$ is an estimate, we only know $2n+1$ bits of $\phi$.
+	\item \textbf{Easy case}\\
+	Suppose that $r$ divides $2^t$, then we know exactly $\phi$ because $\frac{x}{2^t}=\frac{s}{r}$\\
+	The fraction is known because we know $x$ and $t$, and to get $r$ we reduce the fraction $\frac{x}{2^t}$ to the lowest terms (to an irreducible fraction). Then we test the denominator $r'$ if it's $r$: we compute $a^{r'}\hbox{ mod }N$ and if its $1$ we're done.\\
+	This works if $r,s$ are coprime.
+	\item \textbf{General case}\\
+	We don't know $\phi$ exactly but just $2n+1$ bits of $\phi$. We apply CFA to compute the nearest fraction to $\phi$ with denominator $\leq N$. We take this denominator as tentative order, as $r'$.\\
+	This produces the fraction $\frac{s'}{r'}$ with $s',r'$ without common factors, and we check whether $a^{r'}\hbox{ mod }N =1$. If so, we're done, else we run again. Even in this case, the procedure requires $r,s$ coprime.
+\end{list}
+The overall cost for order-finding with fast multiplication is $O(n^2\log n\log\log n)$, while the best classical algorithm is $O(e^{\sqrt{n\log n}})$, but of course the quantum algorithm can fail because QPE can produce a bad estimate for $\frac{s}{r}$ with probability at most $\epsilon$ thanks to our choice of $t$.\\
+If $r,s$ have a common factor, the number $r$ returned but the CFA is a factor of $r$, not $r$ itself. An expected number of $O(\log n)$ %TODO
+\paragraph{Factorization $\leq$ Order-Finding} Reduction from factoring to order-finding.\\
+$N>1$ composite, odd and not a prime nor a prime power (we can already test these cases and exclude them in the beginning). So $N$ is a product of at least two primes.\\
+We take $a< N$ and coprime with $N$ (GCD$(a,N)=1$). If it's not coprime, we've found a factor of $N$. Suppose that is coprime. We compute the order $r=$ Order($a$). So we know that $a^r$ mod $N=1$, which can be written as $$(a^r-1)\hbox{ mod }N = 0$$
+Suppose that $r$ is even, we can write
+$$(a^{\frac{r}{2}}-1)(a^{\frac{r}{2}}+1)\hbox{ mod }N = 0$$
+$1<a<N$ so the possible cases are:\begin{list}{}{}
+	\item The first factor $a^{\frac{r}{2}}-1\hbox{ mod }N = 0$
+	But this means $$a^{\frac{r}{2}}\hbox{ mod }N = 1$$ which is impossible per definition of order.
+	\item We could have the second factor $a^{\frac{r}{2}}+1\hbox{ mod }N = 0$ means that 
+	$$a^{\frac{r}{2}}\hbox{ mod }N = -1$$
+	This can happen, the reduction fails and we need to start over with a different $a$
+	\item Both terms are $\neq0\hbox{ mod }N$, this means that $N$ divides $(a^{\frac{r}{2}}-1)(a^{\frac{r}{2}}+1)$ and any factor of $N$ is a factor of $(a^{\frac{r}{2}}-1)$ or $(a^{\frac{r}{2}}+1)$ or both. This factor cannot be $N$ (excluded before, non zero modulo $N$).\\
+	Using Euclid's algorithm we compute GCD($a^{\frac{r}{2}}-1,N$) and GCD($a^{\frac{r}{2}}+1,N$) and find a factor of $N$.
+\end{list}
+\paragraph{Shor's Algorithm} 
+Input: a positive integer $N$ with $n=\lceil\log_2 N\rceil$ bits.\\
+Output: a factor $p$ of $N$
+\begin{enumerate}
+	\item If $N$ is even, output 2 and stop
+	\item Use a polynomial time algorithm to determine if $_N$ is a prime or a power of a prime. If this is the case, declare it and stop.
+	\item Randomly choose an integer $a$ such that $1<a<N$ and run Euclid's a %TODO
+	\item If $a$ and $N$ are coprime, use a Quantum Circuit to find the order $r$ of $a$ mod $N$
+	\item If $r$ is even and $a^{r/2}$ mod $N\neq -1$ compute GCD($a^{\frac{r}{2}}-1,N$) and GCD($a^{\frac{r}{2}}+1,N$) and return at least one non trivial factor of $N$.\\
+	Otherwise
+\end{enumerate}
+\paragraph{Observations} The algorithm returns with high probability a non trivial factor of any composite $N$.\\
+All steps 
+\paragraph{Complexity} %TODO ultima parte slides
 \end{document}

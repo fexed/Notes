@@ -1377,4 +1377,65 @@ Typical pattern is to load a model, then initialize two objects:
 	Can use specific tokenizer for specific model
 	\item Model, three types: encoders (e.g. BERT), decoders (e.g. GPT2), encoder-decoders
 \end{list}
+\subsubsection{Transformers Architectures}
+From pretrained word embeddings: start with pretrained word embeddings with no context, and learn to incorporate context in an LSTM or transformer while training on the task.\\
+Issues: the training data we have for out downstream task (like question answering) must be sufficient to teach all contextual aspects of language. Also most of the parameters in our network are randomly initialized.\\\\
+In modern NLP we pretrain the whole model: all (or almost all) NLP networks are initialized via pretraining. Pretraining methods hide parts of the inputs from the model, and then train the model to reconstruct those parts.\\This has been effective at building strong representations of language, parameter initialization for strong NLP models and probability distributions over language that we can sample from.
+\paragraph{Pretraining Transformers} Two-step development\begin{center}
+	\includegraphics[scale=0.5]{74.png}
+\end{center}
+\subparagraph{Pretraining through language modeling} Recall the language modelling task: model $P_\theta(w_t\:|\:w_{1:t-1})$, the probability distributions over words given their past contexts (lots of data for this).\\Pretraining through language modeling is training a neural network to perform language modeling on a large amount of texts and \textbf{saving the parameters for later}.
+\paragraph{Pretraining-Finetuning Paradigm}\begin{enumerate}
+	\item Pretrain on language modeling: learn general things
+	\item Finetune on your task: adapt to the specific task
+\end{enumerate}
+\subparagraph{SGD}
+\begin{list}{}{}
+	\item Pretraining a language model provides base parameters $\hat{\theta}$
+	\item Finetune a model on a task initializing parameters to $\hat{\theta}$
+\end{list}
+The training may help because the SGD sticks (relatively) close to $\hat{\theta}$ during finetuning. So, maybe the finetuning local minima near $\hat{\theta}$ tend to generalize well, and/or the gradients of finetuning loss near $\hat{\theta}$ propagate nicely.
+\paragraph{Pretraining for Three Types of Architectures}
+\begin{list}{}{}
+	\item \textbf{Decoders}: language models, nice to generate from, can't condition on future words.
+	\item \textbf{Encoders}: bidirectional context so can condition on future (how to pretrain?)
+	\item \textbf{Encoder-Decoders}: good parts of both, what's the best way to pretrain them?
+\end{list}
+\subparagraph{Pretraining Decoders} When using language model pretrained decoders, we can ignored that they were trained to model $P_\theta(w_t\:|\:w_{1:t-1})$. We can finetune them by adding a classifier on the last word hidden state
+$$h_1,\ldots,h_T = \hbox{Decoder}(w_1,\ldots,w_T)$$
+$$y\simeq Aw_T + b$$
+Where $A$ and $b$ are randomly initialized and specified by the downstream task. Gradients backpropagate through the whole network.\begin{center}
+	\includegraphics[scale=0.5]{75.png}
+\end{center}
+Red means pretrained, so note how the linear layer hasn't been pretrained and must be learned from scratch.\\
+It's natural to pretrain decoders as languege models and then using them as generators, finetuning their $P_\theta(w_t\:|\:w_{1:t-1})$. This is helpful in tasks where the output is a sequence, with a vocabulaty like that at pretraining time.
+$$h_1,\ldots,h_T = \hbox{Decoder}(w_1,\ldots,w_T)$$
+$$w_t\simeq Aw_{t-1} + b$$
+With $A,b$ pretrained in the language model.\\\\
+\textbf{Generative Pretrained Transformer (GPT)}: how to format inputs to our decoder for finetuning tasks. E.g. in natural language inference we can label pairs of sentences as entailing/contradictory/neutral.
+\paragraph{Pretraining Encoders} Encoders get bidirectional context, can't use language modeling. Idea: replace some fraction of words in the input with a mark "[MASK]" and predict these words
+$$h_1,\ldots,h_T = \hbox{Encoder}(w_1,\ldots,w_T)$$
+$$y_i\simeq Aw_i + b$$
+Only add loss terms from words that are "masked out". If $\tilde{x}$ %TODO
+\paragraph{Problems with previous methods} Language models only use left context \textbf{or} right context, but language understanding is bidirectional. Why are language models unidirectional? Directionality is needed to generate a well-formed probability distribution (we don't care about this) and words can "see themselves" in a bidirectional encoder.
+\subparagraph{BERT} This is the first, deeply bidirectional, unsupervised language representation, pre-trained using only a plain-text corpus.\\
+BERT-base is 12 layers, BERT-large is 24 layers, of transformer encoders.
+\begin{center}
+	\includegraphics[scale=0.5]{76.png}
+\end{center}
+\paragraph{Masked LM} Mask out $k$\% of the words (typically $k=15$) and predict the masked words. Too little masking: too expensive to train.\\
+Problem: mask token never seen at fine-tuning. Solution: $15\%$ of the words to predict don't replace with [MASK] 100\% of the time. Instead: 80\% of the time replace with [MASK], 10\% replace with random word, and 10\% keep the same.\\
+To learn relationships between sentences (\textbf{next sentence prediction}), predict whether Sentence $B$ is actual sentence that follows Sentence $A$, or a random sentence.\\\\
+\textbf{Wordpiece} models give a good balance between the flexibility of single characters and the efficiency of full words for decoding. Also sidesteps the need for special treatment of unknown words: common words are in the vocabulary, whule other words are built from pieces (e.g. hypathia = %TODO
+\paragraph{Pretraining Encoder-Decoders} For them we could do something like language modeling, but where a prefix of every input ois provided to the encoder and is not predicted
+$$h_1,\ldots,h_T = \hbox{Encoder}(w_1,\ldots,w_T)$$
+$$h_{T+1},\ldots,h_2 = \hbox{Decoder}(w_1,\ldots,w_T,h_1,\ldots,h_T)$$
+$$y_i\simeq Aw_i+b\:\:\:i>T$$
+The encoder portion benefits from bidirectional context, the decoder portion %TODO
+\paragraph{What pretraining objective to use?} Span corruption.\\
+Replace different-length spans from the input with unique placeholders, then decode out the spans that where removed. This is implemented in text preprocessing. This model, T5, can be finetuned to answer a wide range of questions, retrieving knowledge from its parameters.
+\paragraph{Pre-training Tasks}
+\begin{center}
+	\includegraphics[scale=0.5]{77.png} %TODO rewrite
+\end{center}
 \end{document}
