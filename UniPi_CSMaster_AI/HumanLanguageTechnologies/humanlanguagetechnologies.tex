@@ -1438,4 +1438,60 @@ Replace different-length spans from the input with unique placeholders, then dec
 \begin{center}
 	\includegraphics[scale=0.5]{77.png} %TODO rewrite
 \end{center}
+\section{Analysis of Language Models}
+Aka BERTology
+\paragraph{Questions About Language Models} \begin{list}{}{}
+	\item What can be learned via language model pretraining?
+	\item What \textbf{can't} be learned via language pretraining?
+	\item What will replace the Transformer?
+	\item What does deep learning try to do?
+	\item What do neural models tell us about language?
+	\item How these models affect people and transfer power? 
+\end{list}
+\paragraph{What Linguistic Knowledge is Present in LM?} POS tagging through word embedding clusters.\\
+NER via Masked Language Model.
+\subparagraph{Unsupervised NER} Given a Masked Language Model, submit a masked sentence, look at possible outputs
+\subparagraph{LM Effectivness} LMs exhibit surprising abilities in several language tasks. But do they really understand language? Consider the Natural Language Inference (NLI) task.
+What if the model is using simple heuristics to get good accuracy? A diagnostic test set is carefully constructed to test for a specific skill or capacity of your neural model. E.g. HANS (Heuristic Analysis for NLI Systems) tests syntactic heuristics in NLI.
+\begin{center}
+	\includegraphics[scale=0.5]{78.png}
+\end{center}
+\subparagraph{LM as Linguistic Test Subjects} How do we understand language behavior in humans? One method: \textbf{minimal pairs}, what sounds "okay" to a speaker but doesn't with a small change?\\
+E.g. "\textit{the chef who made the pizzas is here}" vs "\textit{the chef who made the pizzas \textbf{are} here}". Idea: verbs agree in number with their subjects, subject-verb relationship.\\
+Assign higher probability to the acceptable sentence in the minimal pair. Just like HANS, we can develop a test set with carefully chosen properties: specifically, can language models handle "\textbf{attractors}" in subject-verb agreement?
+\begin{list}{}{}
+	\item 0 attractors: \textit{the chef is here}
+	\item 1 attractor: \textit{the chef who made the \textbf{pizzas} is here}
+	\item 2 attractors: \textit{the chef who made the \textbf{pizzas} and prepped the \textbf{ingredients} is here}
+	\item \ldots
+\end{list}
+Some examples for subject-verb agreement with attractors that a model got wrong: %TODO rewrite
+\begin{center}
+	\includegraphics[scale=0.5]{79.png}
+\end{center}
+\subparagraph{Prediction Explanations} What in the input led to this output? For a single example, what parts of the input led to the observed prediction? \textbf{Saliency maps}: a score for each input word indicating its importance to the model's prediction.\\
+To make a saliency map, there are many ways to encode the intuition of "importance".\begin{list}{}{}
+	\item \textbf{Simple gradient method}: for words $x_1,\ldots,x_n$ and the model's score for a given class (output label) $s_c(x_1,\ldots,x_n)$ take the norm of the gradient of the score with respect to each word
+	$$\hbox{Salience}(x_i)=\|\nabla_{x_i}s_c(x_1,\ldots,x_n)\|$$
+	High gradient norm means changing the word locally would affect the score a lot, so it's very important. Not perfect: linear approximation may not hold well. There are many more methods proposed.
+\end{list}
+Another way is explanation by input reduction, making changes to the document and judge how much it would affect the result. What is the smallest part of the input I could keep and still get the same answer? Idea: run an input saliency method, iteratively removing the less important words.\\
+Another way is analyzing models by breaking them: can we break models by making seemingly innocuous changes to the input?
+\subsection{Probes}
+\paragraph{Probing} Supervised analysis of neural networks.
+\begin{center}
+	\includegraphics[scale=0.5]{80.png}
+\end{center}
+Premise: pretrained transformers provide surprisingly good general-purpose language representations?\\
+Question: what do pretrained representations encode about lingustic properties which we have annotated data?
+\begin{center}
+	\includegraphics[scale=0.5]{81.png}
+\end{center}
+We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in R^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i)$$ with $f\in F$.\\
+The extent to which we can predict $y$ from $h_i$ is a measure of the accessibility of that feature in the representation. This helps in gaining a rough understanding into how the model processes its inputs. Also may help in the search for causal mechanisms.
+\paragraph{Contextual Representation of Language} %TODO
+\paragraph{Finding a Parse Tree-Encoding Distance Metric} Our potentially tree-encodicding distances are parametrixerd by the lkinear transformations $B\in R^{k\times n}$
+$$\|h_i-h_j\|^2$$ %TODO
+\subparagraph{Finding $B$} $B$ chosen to minimize the difference between true parse tree distances from a hguman-parsed corpis and the predicteds distances from teh fixed word representations transformed by $B$
+$$\min_B\sum_l\frac{1}{|s_l|^2}\sum\left(d(w_i,w_j)-\|B(h_i,h_j)\|^2\right)$$
 \end{document}

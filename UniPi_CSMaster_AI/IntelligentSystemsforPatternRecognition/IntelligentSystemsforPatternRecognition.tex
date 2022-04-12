@@ -1694,4 +1694,90 @@ Write operation is actually performed by composing adding and erasing operations
 \end{enumerate}
 Not yet of practical use, not straightforward to train.\\
 Has advantages over GRNN when it comes to learn to program.
+\section{Unsupervised Learning}
+\paragraph{The Problem} Characterize the data: data distribution and variances. Connects to autoencoders and manifold learning.\begin{center}
+	\includegraphics[scale=0.5]{138.png}
+\end{center}
+This to allow: understanding of data, generating new observation\ldots and ultimately reasoning.\\\\
+Another reason is that \textbf{labeled data is costly and difficult to obtain}. A sustainable future for deep learning: learning the latent structure of data, discover important features, learn task independent representations and introduce (if any) supervision only on few examples.
+\paragraph{Why Generative?} Focusing too much on discrimination rather than on characterizing data can cause issues, e.g.: reduced interpretability, adversarial examples.\\
+Generative model try to characterize data distribution. \begin{list}{}{}
+	\item Understand data to understand the world
+	\item Understand data variances to learn to steer them
+	\item Understand normality to detect anomalies
+\end{list}
+\paragraph{Approaching the Problem from a DL Perspective} Given training data, learn a (deep) NN that can generate new samples form (an approximation of) the data distribution.\begin{center}
+	\includegraphics[scale=0.5]{139.png}
+\end{center}
+Two approaches:
+\begin{list}{}{}
+	\item Explicit (learn a model density $P_\theta(x)$), which can be visible (work only< on visible data, tractable densities, sampling RNNs) and latent (assume there's something else, intractable densities).\\
+	Latent can also be variational (Variational Autoencoders) and stochastic (Boltzmann Machines).
+	\item Implicit (learn a process that samples data from $P_\theta(x)\simeq P(x)$). Can be divided into direct models (generative adversarial networks) and stochastic models (generative stochastic networks)
+\end{list}
+\paragraph{Learning With Fully Visible Information} If all information is fully visible, the joint distribution can be computed from the chain rule factorization (Bayesian Networks).
+$$P(x)=\prod_i^NP(x_i\:|\:x_1,\ldots,x_{i-1})$$
+Can be seen as conditioning the color of the pixel $i$ based on previous pixels. Need to be able to define a sensible ordering for the chain rule, and conditional distribution difficult to compute.\\
+We can use RNNs: use their ability to handle previous data. Scan the image according to a schedule and encode the dependency from previous pixels in the states of an RNN.\\\\
+With only visible information we try to learn the $\theta$ parametrized model distribution
+$$P_\theta(x)=\prod_i^NP_\theta(x_i\:|\:x_1,\ldots,x_{i-1})$$
+Then we introduce a latent process regulated by unobservable variables $z$
+$$P_\theta(x)=\int P_\theta(x\:|\:z)P_\theta(z)\:\:dz$$
+But $P_\theta(x\:|\:z)$ it's typically intractable.
+\paragraph{NN With Latent Variables?} An Autoencoder.
+\begin{center}
+	\includegraphics[scale=0.5]{140.png}
+\end{center}
+We introduced a probabilistic twist on AE
+\begin{center}
+	\includegraphics[scale=0.5]{141.png}
+\end{center}
+There's sampling on $z$, so I can't backpropagate from $\tilde{x}$.\\
+We need a \textbf{deeper probabilistic push}: as an additional push in the probabilistic interpretation, we assume to be able to generate the reconstruction from a sampled latent representation.\\
+Transform $z\mapsto\tilde{x}$ with $P(x\:|\:z)$ transformed into something simpler: a stochastic part and a deterministic part. The stochastic part must be as simple as possible, and the deterministic part as powerful as possible. For example, a probability distribution from which we can sample is not multivariate nor discrete, is a Gaussian, so the stochastic part is a Gaussian. Sample $z$ from the Gaussian, into the powerful deterministic part and transform to represent some other distribution.\\
+So we sample latent variables $z$ from the true prior $P(z)$ and sample from the true conditional $P(\tilde{x}\:|\:z)$\\
+Of course we can't access the true distribution, we approximate them with a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$. At training time sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
+$$z\simeq N(\mu(x),\sigma(x))$$
+But it's not so easy, we would like to train maximizing something non differentiable ($P(x_i\:|\:z)P(z)$)
+$$L(D)=\prod_{i=1}^NP(x_i)=\prod_{i=1}^N\int P(x_i\:|\:z)P(z)\:\:dz$$
+$P(x_i)$ is intractable so we lower bound it with variational approximation.\\
+The non-differentiable part we handle with reparametrization.
+\subparagraph{Reparametrization} \begin{center}
+	\includegraphics[scale=0.5]{142.png}
+\end{center}
+We can sample white noise and rescale that noise with the $\mu$ and the $\sigma$
+\begin{center}
+	\includegraphics[scale=0.5]{143.png}
+\end{center}
+The non-differentiable part is in $N(0,1)$ so the gradient can flow to $z$ because sampling is limited to non differentiated variable $\epsilon$.\\
+$\mu$ and $\sigma$ are generated with an encoder.
+\paragraph{Variational Approximation} ELBO (Evidence Lower Bound)
+$$\log P(x\:|\:\theta)\geq E_Q[\log P(x,z)] - E_Q[\log Q(z)] = L(x,\theta,\phi)$$
+The $Q$ function is anything that can approximate the distribution with its own parameters. Maximizing the ELBO allows approximating from below the intractable log-likelihood $\log P(x)$
+$$ L(x,\theta,\phi) = E_Q[\log P(x\:|\:z)] + E_Q[\log P(z)] - E_Q[\log Q(z)]$$
+$E_Q[\log P(z)] - E_Q[\log Q(z)] = KL(Q(z|\phi)\|P(z))$ is the KL, and $P(x\:|\:z)$ is the decoder estimate of the conditional (made possible through reparametrization). $P(z)$ is a probability from which is simple to sample form. $Q(z)$ has parameters, any function that can be matched against the distribution, so the $Q$ can be played by a neural network (the encoder). This KL will enforce $Q$ to behave like the prior.
+\subsection{Variational Autoencoder}\begin{center}
+	\includegraphics[scale=0.6]{144.png}
+\end{center}
+\paragraph{Training} Performed by backpropagation on $\theta,\phi$ to optimize the ELBO
+$$L(x,\theta,\phi) = E_Q[\log P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)] - KL(Q(z|x,\phi)\|P(z|\theta))$$
+To make it an appropriate loss function, the first term ($E_Q$) is the reconstruction and the second term is a regularization ($KL$). The $Q$ function is a Gaussian, $P(z|\theta)$ is also a Gaussian, so $KL$ is between two Gaussians and can be computed in closed form.
+\paragraph{VAE Final Loss} In principle we would like to optimize the following loss by SGD
+$$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
+Which with reparametrization becomes
+$$E_{X\sim D}[E_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
+No expectation is w.r.t. distributions that depend on model parameters: we can move gradients into them.
+\subparagraph{Information Theoretic Interpretation} $$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
+The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. The number of bits required to convert an uninformative %TODO
+\paragraph{Testing} Aka sampling the VAE. At test time detach the decoder, sample a random encoding and generate the sample as the corresponding reconstruction.
+\paragraph{VAE vs Denoising/Contractive AE}
+\begin{center}
+	\includegraphics[scale=0.5]{145.png}
+\end{center}
+\paragraph{Conditional Generation (CVAE)} Learn conditional distributions\begin{center}
+	\includegraphics[scale=0.5]{146.png}\\
+	\includegraphics[scale=0.5]{147.png}
+\end{center}
+Learns the conditional distribution $P(x\:|\:y)$.\\
+This is the simplest possible form of CVAE.
 \end{document}
