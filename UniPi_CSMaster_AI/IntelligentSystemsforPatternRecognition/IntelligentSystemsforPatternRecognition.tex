@@ -1780,4 +1780,61 @@ The second part tells how much information of $x$ we're giving away by picking i
 \end{center}
 Learns the conditional distribution $P(x\:|\:y)$.\\
 This is the simplest possible form of CVAE.
+\subsection{Implicit Models}
+\paragraph{Distribution Learning vs Learning to Sample} Variational AEs  learn to approximate an intractable distribution
+$$P_\theta(x) = \int P_\theta(x\:|\:z)P_\theta(z)\:\:dz$$
+then sample it to generate the output. What if we learn to generate samples rather than learning the distribution? Generative Adversarial Networks (GAN), game theoretic approach.
+\paragraph{The GAN Catch} We need to learn to sample from a complex, high-dimensional training distribution: no straightforward way to do this. The catch: sample from a simple distribution (random noise, Gaussian) and train a differentiable distribution (Neural Network) to transform random noise to the training distribution.\\\\
+Again a two step architecture.
+\begin{center}
+	\includegraphics[scale=0.5]{148.png}
+\end{center}
+$$C = \min_{\theta_G}\max_{\theta_D}\left(E_x[\log D_{\theta_D}(x)]-E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))\right)$$
+With $D$ being the output of the discriminator, and $G$ the output of the GAN. So the term $D_{\theta_D}(x)$ is the discriminator output for real data $x$ and the term $D_{\theta_D}(G_{\theta_G}(z))$ is the discriminator output for fake data $G(z)$.\\
+An alternate optimization:\begin{enumerate}
+\item Discriminator gradient ascent 
+$$C_D = \max_{\theta_D}\left(E_x[\log D_{\theta_D}(x)]-E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))\right)$$
+\item Generator gradient descent
+$$C_G =  \min_{\theta_G}(E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))$$
+\end{enumerate}
+The last doesn't really work well. The cost that the generator receives in response to generating $G(z)$ depends only on the discriminator response.
+\paragraph{Hard Two-Player Game} The optimal solution of a min-max problem is a saddle point. Little stability: initially lot of heuristic work, now converged to more principled solutions.
+\paragraph{Wasserstein Distance Models} Attempts to solve the hardness of training generators by optimizing the Wasserstein distance (EMD) between the generator and empirical distribution filtered through the discriminator function $D$
+$$G^* = \arg\min_G W(\mu,\mu_G) = \arg\min_G\sup_{\|D\|_L\leq 1}(E_{x\sim\mu}[D(x)]-E_{x\sim\mu_G}[D(x)])$$
+This is a constraint satisfaction problem due to $\sup_{\|D\|_L\leq 1}$, which makes the discriminator Lipschitz bounded by 1. In practice it's not easy, we put a constraint on the magnitude of the constraints.
+\paragraph{DCGAN Architecture}
+\begin{center}
+	\includegraphics[scale=0.5]{149.png}
+\end{center}
+\paragraph{Progressive GAN} Train with very small images, and learn to generate them. Then you move to slightly larger step by step.
+\begin{center}
+	\includegraphics[scale=0.5]{150.png}
+\end{center}
+But the jump destroys what we've learned in previous steps. We need smooth transitions:
+\begin{center}
+	\includegraphics[scale=0.5]{151.png}
+\end{center}
+We use residual connections and $\alpha$ to trade between the smaller residual image slowly smoothly giving more weight to the larger image.
+\paragraph{Conditional Generation} Learn a mapping from an observed side information $x$ and a random noise vector $z$ to the fooling samples $y$
+$$G:\{x,z\}\rightarrow y$$
+\begin{center}
+	\includegraphics[scale=0.5]{152.png}
+\end{center}
+\paragraph{Best of two worlds}
+\begin{center}
+	\includegraphics[scale=0.5]{153.png}
+\end{center}
+The discriminator discriminates the $z$s from the encoder from the $z$ from the distribution.
+\paragraph{Training AAE} We replace the second term with an adversarial loss
+$$L(x) = $$ %TODO
+Reconstruction phase: update encoder and decoder to minimize reconstruction error\\
+Regularization phase: update discriminator to distinguish true prior samples from generated samples. Update generator to fool the discriminator.\\
+Adversarial regularization allows to impos prioprs for which we cannote compute the KL divergence.\\
+AAE yields a smoother coverage of the latent space.
+\begin{center}
+	\includegraphics[scale=0.5]{154.png}
+\end{center}
+\paragraph{AEE Style Transfer} Supervised. Incorporate label information explicitly to force $z$ to capture class-independent information (e.g. style).
+%TODO image
+\paragraph{AEE Semi-Supervised Learning} Factorize latent code in one-hot encoding vector $y$ and continuous code $z$. Distribution of $y$ made little distinguishable from a multinomial (induced from data).
 \end{document}

@@ -705,4 +705,124 @@ int main(int argc, char** argv) {
 \paragraph{Taskpool} The idea is to set up $nw$ threads to execute tasks without awaiting any kind of results from the tasks. Some king of \texttt{void} function.\\
 We can use \texttt{auto out = bind(function, parameter);}, with \texttt{void function(float x);},\\
 then \texttt{out} will be a \texttt{function<float()>} so we can call \texttt{out();} because the parameter is already given.
+\section{FastFlow}
+Addresses the idea of structured parallel programming targeting shared-memory multicores. It's a open-source header only library (\texttt{-03 std=c++17}). It's a complete layered system:\begin{list}{}{}
+	\item Parallel Applications
+	\item \begin{list}{}{}
+		\item High level parallel patterns
+		\item Parallel building blocks (pipeline\ldots), and also a small library of transformers (to change shape of structures such as pipelines\ldots)
+		\item Core library of FastFlow: sequential building blocks
+	\end{list}
+	\item Posix threads, RDMA libraries, OpenCL/CUDA
+	\item HW layer: multicore shared-memory, but also GPU and FPGA accelerators, also COW (cluster of workstations) with TCP/IP and MPI
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{16.png}
+\end{center}
+\paragraph{\texttt{ff\_node}} Computes some function and has two queues: a queue where to take items to be computed and a delivery queue.\\
+FastFlow has stream computations and data-parallel computations.\\
+Two nodes can be merged in a \texttt{pipe ff\_node}: this merges the output queue of the first node into the input queue of the second node.\\
+The single nodes implement the business logic, the rest is managed by the framework.\\
+In the \texttt{svc} method, being \texttt{void*} both in parameters and in return type, you can specify whichever type you need to flow through the tasks. You can pass a task as parameter, process it and cast to \texttt{void*} its result to return it. With \texttt{ff\_node\_t<t1, t2>} it's introduced the type checking ad template level.
+\paragraph{Stream} \begin{center}
+	\includegraphics[scale=0.5]{17.png}
+\end{center}
+The stream flows through the program and it could be infinite, in principle. We have the interarrival time to consider, so we cannot look the entire stream as a whole data structures, at most you can see a certain window.
+\begin{list}{}{}
+	\item EOS, End Of Stream: value that signify that the stream has ended. Can be used as a condition to end loops (much like EOF for files)
+	\item \texttt{ff\_send\_out} sends items in the stream. E.g. to end the stream, \texttt{ff\_send\_out(EOS)}
+\end{list}
+Shared-memory multicore, so each activity is a thread basically.\\\\
+In the queues we host pointers, we don't move data. We target the fastest communication possible, non-blocking channels (without condition variables and other mechanisms): the native FastFlow queues has latency of less than tens of nanoseconds, due to cache overhead. But there are other channels, e.g.: the emitter for a farm is a $1:n$ communication channel so we use a father thread, slowing down the process but it's inevitable. This can be changed at compile time to use blocking communication channels (structures with mutexes, variables\ldots).
+\paragraph{\texttt{ff\_node\_t<tin, tout>}} Requires the type of the input and of the output. Requires to implement a methods\begin{list}{}{}
+	\item \texttt{tout* svc(tin* task);} the body, the function computed by the thread.\\
+	Has to \texttt{return(tout*)}, or a \texttt{return(EOS)} when it wants to end (passing to \texttt{svc\_end}, or a \texttt{return(GO\_ON)} that tells the framework that you finished the work but doesn't put anything in the output stream. Like a \texttt{skip} and "give me the next item".
+\end{list}
+Other two method are optional, provided empty but can be rewritten:
+\begin{list}{}{}
+	\item \texttt{int svc\_init();} to initialize data before the computation, executed before \texttt{svc} over the input stream, e.g. to open a file
+	\item \texttt{void svc\_end();} executed at the end, e.g. to close the file
+\end{list}
+\texttt{svc} stands for service.
+\paragraph{Lifecycle of \texttt{ff\_node\_t}}\begin{enumerate}
+	\item \texttt{svc\_init} called once when the thread is started
+	\item \texttt{svc} called for each item appearing on the input stream\\
+	Returns\begin{list}{}{}
+		\item \texttt{tout*}
+		\item \texttt{EOF}
+		\item \texttt{GO\_ON}
+		\item Other special values
+	\end{list}
+	\item \texttt{svc\_end} called right before terminating the thread
+	\item \texttt{EOSnotify()} callback upon receiving \texttt{EOS}, to do something when receive \texttt{EOS} because upon receiving that we don't call \texttt{svc} but go to \texttt{EOSnotify()} and then \texttt{svc\_end}
+\end{enumerate}
+\paragraph{Definition of the program} I can declare several \texttt{ff\_node\_t}\begin{list}{}{}
+	\item \texttt{ff\_node\_t<vector<float>> t1;}
+	\item \texttt{ff\_node\_t<vector<float>> t2;}
+	\item \ldots
+\end{list}
+Then we can put in a pipeline
+\begin{list}{}{}
+	\item \texttt{ff\_Pipe p(t1, t2);}
+\end{list}
+So far no execution, only declaration
+\paragraph{Running} We call the \texttt{run\_and\_wait\_end()} method, for example \texttt{p.run\_and\_wait\_end();} which starts everything.
+\begin{lstlisting}[style=myC]
+ff_node_t<vector<float>> t1;
+ff_node_t<vector<float>> t2;
+ff_Pipe p(t1, t2);
+
+{
+	utimer to("program");  // to time the execution
+	p.run_and_wait_end();
+}
+
+\end{lstlisting}
+\paragraph{Typical Patterns} With capital letter are higher level, the lower letter are lower level patterns \begin{list}{}{}
+	\item \texttt{ff\_Farm(ff\_node\_t worker, int nw);} build a farm with $nw$ parallel degree of \texttt{worker}s as nodes
+	\item \texttt{ff\_Pipe(ff\_node\_t stage, ...);}
+\end{list}
+\pagebreak
+\begin{lstlisting}[style=myC]
+#include <ff/ff.hpp>
+
+struct source : ff_node_t<myTask> {
+	myTask* svc(myTask* t) {  // source started with null as parameter, so t can be omitted
+		for(int i = 0; i < N; i++) {
+			ff_send_out(new myTask(i, ...));  // whatever you need to output
+		}
+		return(EOS);
+	}
+};
+
+struct sink : ff_node_t<myTask> {
+	myTask* svc(myTask* task) {
+		cout << task << endl;
+		return(GO_ON);  // processed and ready for next
+	}
+};
+
+struct f : ff_node_t<myTask> {
+	myTask* svc(myTask* task) {
+		fun(t);  // e.g. it works by side effects
+		return(t);  // whatever the process I need
+	}
+};
+
+int main(int argc, char* argv[]) {
+	// declaration
+	source node1;
+	f node2;
+	sink node3;
+	ff_Pipe<> pipeline(node1, node2, node3);
+	// implies 3 threads, one for each node (parallelism degree = 3)
+	
+	
+	// execution
+	pipeline.run_and_wait_end();
+	return 0;
+}
+\end{lstlisting}
+Compile with at least \texttt{-03 -pthread}. This way uses non-blocking queues.
+
 \end{document}
