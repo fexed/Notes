@@ -11,6 +11,7 @@ def logistic(x):
 
 
 def flatten(x):
+    x = np.where(x > 127, 1, 0)
     return x.reshape(x.shape[0], -1)
 
 
