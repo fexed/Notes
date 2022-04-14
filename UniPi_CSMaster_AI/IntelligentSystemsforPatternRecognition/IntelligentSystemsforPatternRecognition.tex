@@ -1274,6 +1274,7 @@ Sequences are variable sized data describing sequentially dependent information.
 \end{list}
 \pagebreak
 \paragraph{Supervised Recurrent Tasks}
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item \textbf{Element-to-Element}: an output for each element of the input. For example a program where we classify at each timestep.
 	\begin{center}
@@ -1292,25 +1293,41 @@ Sequences are variable sized data describing sequentially dependent information.
 		\includegraphics[scale=0.5]{89.png}
 	\end{center}
 \end{list}
+\end{multicols}
 \paragraph{Vanilla RNN} Also called Simple or Elman.
 \begin{center}
 	\includegraphics[scale=0.5]{90.png}
-\end{center}
-Given the input, there's an update function $A$ that uses the hiddent state $h_t$ as input to the next one.
-\begin{center}
 	\includegraphics[scale=0.5]{91.png}
 \end{center}
-$$h_t=\tanh(g_t)$$ %TODO
+Given the input, there's an update function $A$ that uses the hiddent state $h_t$ as input to the next one.
+$$y_t = f(W_{out}h_t + b_{out})$$
+$$h_t=\tanh(g_t)$$
+$$g_t(h_{t-1},x_t) = W_h h_{t-1}+W_{in}x_t + b_h$$
 \paragraph{Unfolding RNN} \textbf{Forward pass}: should be familiar with the unfolding/unrolling on the data.\begin{center}
 	\includegraphics[scale=0.5]{92.png}
 \end{center}
-To be successful, the hiddent state $h_t$ of the RNN should be able to summarize the information on the history of the input signal up to time $t$. In practice, learning long-term dependencies is really difficult, as time grows there's little residual information of the input inside of the memory.
+To be successful, the hiddent state $h_t$ of the RNN should be able to summarize the information on the history of the input signal up to time $t$. In practice, learning long-term dependencies is really difficult, as time grows there's little residual information of the input inside of the memory. When the time gap between the observation and the state grows
+there is little residual information of the input inside of the memory.
+\paragraph{Exploding/Vanishing Gradients} Gradients propagated over many stages tend to:
+\begin{list}{}{}
+	\item (Often) Vanish $\Rightarrow$ no learning
+	\item (Rarely) Explode $\Rightarrow$ instability and oscillations
+\end{list}
+Weights are shared between timesteps.
 \paragraph{Backward Propagation}
-%TODO
-We want to bound the update to compensate for the vanishing/exploding gradients. We have $h_l$, so $\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$ where the activation Jacobian is $$D_{l+1} = Diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
+\begin{center}
+	\includegraphics[scale=0.5]{156.png}
+\end{center}
+The gradient is
+$$\frac{\partial L_t}{\partial W} = \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\underbrace{\frac{\partial h_t}{\partial h_k}}_{\frac{\partial h_t}{\partial h_{t-1}}\cdot\frac{h_{t-1}}{\partial h_{t-2}}\cdot\ldots\cdot\frac{\partial h_{k+1}}{\partial h_k}}\cdot\frac{\partial h_k}{\partial W}$$
+Inside $\frac{\partial h_t}{\partial h_k}$ we have the chain rule
+$$\frac{\partial L_t}{\partial W} =  \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right)\cdot\frac{\partial h_k}{\partial W}$$
+So the gradient is a recursive product of hidden activation gradients (Jacobian). We want to bound the update to compensate for the vanishing/exploding gradients. We have $$h_l = \tanh(W_{hl}h_{l-1}+W_{in}x_l)$$, so $$\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$$ where the activation Jacobian is $$D_{l+1} = diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
 meaning a diagonal matrix with $\tanh^{-1}(\partial_i^t)$ on the diagonal.
-$$\frac{\partial L_t}{\partial h_k} $$ %TODO formula
-where we bound the spectral radius $\sigma$. Can shrink to zero or increase exponentially:\begin{list}{}{}
+$$\frac{\partial L_t}{\partial h_k} = \frac{\partial L_t}{\partial h_t}\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right) = \frac{\partial L_t}{\partial h_t}\prod_{l=k}^{t-1}D_{l+1}W_{hl}^T $$
+We're interested in the magnitude 
+$$\|\frac{\partial L_t}{\partial h_k}\| = \|\frac{\partial L_t}{\partial h_t}\|\prod_{l=k}^{t-1}\sigma(D_{l+1})\sigma(W_{hl}^T)$$
+We bound the spectral radius $\sigma$. Can shrink to zero or increase exponentially:\begin{list}{}{}
 	\item $\sigma < 1 \Rightarrow$ \textbf{vanishing}
 	\item $\sigma > 1 \Rightarrow$ \textbf{exploding}
 \end{list}
@@ -1349,26 +1366,33 @@ CEC plus forget gate
 \subsection{LSTM Cell}
 \paragraph{Long-Short Term Memory Cell} Let's start with the vanilla RNN Unit
 \begin{center}
-	\includegraphics[scale=0.5]{94.png}
+	\includegraphics[scale=0.33]{94.png}
 \end{center}
 We introduce a linear recurrent update, with an additional hidden state which is the cell state $c_t$ with current input $x_t$.\\
-The \textbf{Input Gate} now controls %TODO
+The \textbf{Input Gate} now controls how the input contributes to the internal state $I_t(x_t, h_{t-1})$ (logistic sigmoid)
 \begin{center}
-	\includegraphics[scale=0.5]{95.png}
+	\includegraphics[scale=0.33]{95.png}
 \end{center}
 The \textbf{Forget Gate} controls how past internal state ct-1 contributes to ct $$F_t(x_t,h_{t-1})$$
 \begin{center}
-	\includegraphics[scale=0.5]{96.png}
+	\includegraphics[scale=0.33]{96.png}
 \end{center}
 The \textbf{Output Gate} controls what part of the internal state is propagated out of the cell $$O_t(x_t,h_{t-1})$$
 \begin{center}
 	\includegraphics[scale=0.5]{97.png}
 \end{center}
-\paragraph{LSTM in Equations} %TODO
+\paragraph{LSTM in Equations}
 \begin{list}{}{}
 	\item Compute activation of input and forget gates
+	$$I_t=\sigma(W_{Ih}h_{t-1} + W_{Iin}x_t + b_I)$$
+	$$F_T=\sigma(W_{Fh}h_{t-1} + W_{Fin}x_t + b_F)$$
 	\item Compute input potential and internal state
+	$$g_t = \tanh(W_hh_{t-1} + W_{in}x_t + b_H)$$
+	$$c_t = f_T\odot c_{t-1} + I_t\odot g_t$$
+	($\odot$ element-wise multuplication)
 	\item Compute output gate and output state
+	$$O_t = \sigma(W_{Oh}h_{t-1} + W_{Oin}x_t + b_O)$$
+	$$h_t = O_t\odot\tanh(c_t)$$
 \end{list}
 \paragraph{Deep LSTM} LSTM Layers extract information at increasing levels of abstraction (enlarging context)
 \paragraph{Training LSTM} Original LSTM training algorithm was a mixture of RTRL and Backpropagation Through Time:
@@ -1388,8 +1412,9 @@ All current LSTM implementation use full BPTT training, typically with Adam or R
 	\includegraphics[scale=0.5]{98.png}
 \end{center}
 \textbf{Reset} and \textbf{update} gates are coupled, act as input and forget gates 
-$$z_t =\sigma$$ %TODO
-\textbf{Reset} acts directly on output staet (no internal statre and no output gate. $\odot$ is the element-wise multiplication.
+$$z_t =\sigma(W_{zh}h_{t-1} + W_{zin}x_t + b_z)$$
+$$r_t =\sigma(W_{rh}h_{t-1} + W_{rin}x_t + b_r)$$
+\textbf{Reset} acts directly on output state (no internal state and no output gate. $\odot$ is the element-wise multiplication.
 $$h_t = (1 - z_t)\odot h_{t-1} + z_t\odot h_t$$
 $$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
 \subsection{Applications}
@@ -1426,8 +1451,7 @@ We could take a single recurrent model, process the entire input sequence to enc
 \begin{center}
 	\includegraphics[scale=0.5]{107.png}
 \end{center}
-This idea doesn't really work well, because\ldots\\ %TODO
-We need two separated models: encoder-decoder scheme:
+This idea doesn't really work well, because of forgetting. We need two separated models: \textbf{encoder-decoder schema}.
 \begin{list}{}{}
 	\item \textbf{Encoder} which builds a $c$, originally $c=h_n$
 	\begin{center}
@@ -1513,7 +1537,7 @@ This mitigates vanishing gradients, because it reduces the distance between depe
 \paragraph{Convolutional Seq2Seq} Use convolution instead of recurrence. Better parallelization on GPUs and smaller distance between long-range dependencies.\\\\
 Vanishing gradients depend on the depth of the network.
 \begin{center}
-	\includegraphics[scale=0.5]{121.png} %TODO rewrite table
+	\includegraphics[scale=0.5]{121.png}
 \end{center}
 Recurrent are on the opposite side of the spectrum respect to self-attention.
 \paragraph{Hierarchical RNNs} Different approach: adds skip connections to the model (\textbf{static skip}) or learns when to skip updates (\textbf{adaptive skips}). Can skip units, block of units or entire layers.
@@ -1612,7 +1636,8 @@ $$\forall\:s\in (R^{N_X})^N \wedge \forall\:h_0,z_0\in R^{N_H}\hbox{ we have }\|
 \textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
 \textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
 We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
-\paragraph{Initialization} Generate a random matrix $W$ %TODO
+\paragraph{Initialization} Generate a random matrix $W$ (e.g. from a uniform distribution $[-1,1]$ and then scale by the desired spectral radius ($<1$) $$W_{hh} =\rho_{desired}\frac{W}{\rho(W)}$$
+Now $\rho(W_{hh}) = \rho_{desired}$: the \textbf{spectral radius is a key hyperparameter of the reservoir}.
 \paragraph{Dynamical Transient} If the system is globally asymptotically stable, then all the possible trajectories will synchronize \textbf{after a transient}, not instantaneously.\\
 \textbf{Washout} is initial part of the time-series in which the state could be still affected by initialization condition (where the ESP could still not hold). The washout states of the reservoir should be discarded.
 \paragraph{ESN Training}
@@ -1621,7 +1646,7 @@ We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
 	\item Run the reservoir on the input sequence and collect the states $H=[h_1,\ldots,h_N]$
 	\item Remove the washout $H = H(N_W:N,:)$
 	\item Collect the target data similarly into a matrix $D = [d_{N_W},\ldots,d_N]$
-	\item Solve the linear regression problem for the readout $\min_{W_{hy}}\| \|^2$ %TODO
+	\item Solve the linear regression problem for the readout $\min_{W_{hy}}\|HW_{hy}-D \|^2_2$
 \end{list}
 To solve, typically the training is performed offline in closed form.
 \section{Neural Reasoning}
@@ -1663,10 +1688,10 @@ The key to differentiability is to always read and write the whole memory.
 \paragraph{Memory Read}\begin{center}
 	\includegraphics[scale=0.5]{133.png}
 \end{center}
-We have the attention coefficients (attention distribution vector $a$ from the RNB, the darker the color the stronger the coefficient), which weights the sum.
+We have the attention coefficients (attention distribution vector $a$ from the RNN, the darker the color the stronger the coefficient), which weights the sum.
 $$r = \sum_i \alpha_i M_i$$
 \paragraph{Memory Write}\begin{list}{}{}
-	\item \textbf{Location-based Addressing} %TODO
+	\item \textbf{Location-based Addressing}
 	\item \textbf{Associative Memory}: key-value pairs, and given an approximated version of a key we want to be able to recover the correspondent key.
 \end{list}
 \begin{center}
@@ -1767,8 +1792,10 @@ $$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
 Which with reparametrization becomes
 $$E_{X\sim D}[E_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
 No expectation is w.r.t. distributions that depend on model parameters: we can move gradients into them.
-\subparagraph{Information Theoretic Interpretation} $$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
-The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. The number of bits required to convert an uninformative %TODO
+\subparagraph{Information Theoretic Interpretation}
+$\log P(x|z)$ tells the number of bits required to reconstruct $x$ from $z$ under the ideal encoding (i.e. $Q(z|x)$ is generally suboptimal).\\
+The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. Meaning that $Q(z|x,\phi)$ is the number of bits required to convert an uninformative sample from $P(z)$ into a sample from $Q(z|x)$.\\
+The information gain is the amount of extra information we get about $X$ when $z$ comes from $Q(z|x)$ instead of from $P(z)$.
 \paragraph{Testing} Aka sampling the VAE. At test time detach the decoder, sample a random encoding and generate the sample as the corresponding reconstruction.
 \paragraph{VAE vs Denoising/Contractive AE}
 \begin{center}
@@ -1826,10 +1853,12 @@ $$G:\{x,z\}\rightarrow y$$
 \end{center}
 The discriminator discriminates the $z$s from the encoder from the $z$ from the distribution.
 \paragraph{Training AAE} We replace the second term with an adversarial loss
-$$L(x) = $$ %TODO
-Reconstruction phase: update encoder and decoder to minimize reconstruction error\\
-Regularization phase: update discriminator to distinguish true prior samples from generated samples. Update generator to fool the discriminator.\\
-Adversarial regularization allows to impos prioprs for which we cannote compute the KL divergence.\\
+$$L(x) = E_Q[\log P(x\:|\:z)]-KL(Q(z\:|\:x)\|P(z))$$
+\begin{list}{}{}
+	\item \textbf{Reconstruction phase}: update encoder and decoder to minimize reconstruction error
+	\item \textbf{Regularization phase}: update discriminator to distinguish true prior samples from generated samples. Update generator to fool the discriminator.
+\end{list}
+$KL(Q(z\:|\:x)\|P(z))$ is replaced by an adversarial loss. Adversarial regularization allows to impose priors for which we cannot compute the KL divergence.\\
 AAE yields a smoother coverage of the latent space.
 \begin{center}
 	\includegraphics[scale=0.5]{154.png}
