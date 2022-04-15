@@ -1413,10 +1413,10 @@ $$h_1,\ldots,h_T = \hbox{Decoder}(w_1,\ldots,w_T)$$
 $$w_t\simeq Aw_{t-1} + b$$
 With $A,b$ pretrained in the language model.\\\\
 \textbf{Generative Pretrained Transformer (GPT)}: how to format inputs to our decoder for finetuning tasks. E.g. in natural language inference we can label pairs of sentences as entailing/contradictory/neutral.
-\paragraph{Pretraining Encoders} Encoders get bidirectional context, can't use language modeling. Idea: replace some fraction of words in the input with a mark "[MASK]" and predict these words
+\paragraph{Pretraining Encoders} Encoders get bidirectional context, can't use language modeling. Idea: replace some fraction of words in the input with a "[MASK]" and predict these words
 $$h_1,\ldots,h_T = \hbox{Encoder}(w_1,\ldots,w_T)$$
 $$y_i\simeq Aw_i + b$$
-Only add loss terms from words that are "masked out". If $\tilde{x}$ %TODO
+Only add loss terms from words that are "masked out". If $\tilde{x}$ is the masked version of $x$, we're learning $p_\theta(x\:|\:\tilde{x})$ called \textbf{Masked LM}.
 \paragraph{Problems with previous methods} Language models only use left context \textbf{or} right context, but language understanding is bidirectional. Why are language models unidirectional? Directionality is needed to generate a well-formed probability distribution (we don't care about this) and words can "see themselves" in a bidirectional encoder.
 \subparagraph{BERT} This is the first, deeply bidirectional, unsupervised language representation, pre-trained using only a plain-text corpus.\\
 BERT-base is 12 layers, BERT-large is 24 layers, of transformer encoders.
@@ -1425,19 +1425,28 @@ BERT-base is 12 layers, BERT-large is 24 layers, of transformer encoders.
 \end{center}
 \paragraph{Masked LM} Mask out $k$\% of the words (typically $k=15$) and predict the masked words. Too little masking: too expensive to train.\\
 Problem: mask token never seen at fine-tuning. Solution: $15\%$ of the words to predict don't replace with [MASK] 100\% of the time. Instead: 80\% of the time replace with [MASK], 10\% replace with random word, and 10\% keep the same.\\
-To learn relationships between sentences (\textbf{next sentence prediction}), predict whether Sentence $B$ is actual sentence that follows Sentence $A$, or a random sentence.\\\\
-\textbf{Wordpiece} models give a good balance between the flexibility of single characters and the efficiency of full words for decoding. Also sidesteps the need for special treatment of unknown words: common words are in the vocabulary, whule other words are built from pieces (e.g. hypathia = %TODO
-\paragraph{Pretraining Encoder-Decoders} For them we could do something like language modeling, but where a prefix of every input ois provided to the encoder and is not predicted
+To learn relationships between sentences (\textbf{next sentence prediction}), predict whether Sentence $B$ is actual sentence that follows Sentence $A$, or a random sentence.
+\paragraph{Wordpiece} These models give a good balance between the flexibility of single characters and the efficiency of full words for decoding. Also sidesteps the need for special treatment of unknown words: common words are in the vocabulary, while other words are built from pieces (e.g. hypathia = h \#\#yp \#\#ati \#\#a)\\
+Wordpiece model: given a training corpus and a number of desired tokes $D$, select $D$ wordpieces such that the resulting corpus is minimal in the number of wordpieces when segmented according to the chosen wordpiece model.
+\paragraph{Pretraining Encoder-Decoders} For those we could do something like language modeling, but where a prefix $w_1,\ldots,w_T$ of every input is provided to the encoder and is not predicted.
 $$h_1,\ldots,h_T = \hbox{Encoder}(w_1,\ldots,w_T)$$
 $$h_{T+1},\ldots,h_2 = \hbox{Decoder}(w_1,\ldots,w_T,h_1,\ldots,h_T)$$
 $$y_i\simeq Aw_i+b\:\:\:i>T$$
-The encoder portion benefits from bidirectional context, the decoder portion %TODO
+The encoder portion benefits from bidirectional context, the decoder portion is used to train the whole model through language modeling
 \paragraph{What pretraining objective to use?} Span corruption.\\
 Replace different-length spans from the input with unique placeholders, then decode out the spans that where removed. This is implemented in text preprocessing. This model, T5, can be finetuned to answer a wide range of questions, retrieving knowledge from its parameters.
 \paragraph{Pre-training Tasks}
-\begin{center}
-	\includegraphics[scale=0.5]{77.png} %TODO rewrite
-\end{center}
+\begin{multicols}{2}
+	\paragraph{Masked LM}\begin{list}{}{}
+		\item Train a deep bidirectional representation, masking some percentage of the input tokens at random, and then predicting those masked tokens.
+		\item The final hidden vectors corresponding to the mask tokens are fed into an output softmax over the vocabulary, as in a standard LM
+	\end{list}
+	\columnbreak
+	\paragraph{Next Sentence Prediction}\begin{list}{}{}
+		\item In order to train a model that understands sentence relationships, we pre-train for a binarized next sentence prediction task generated from any corpus.
+		\item 50\% of the time $B$ is an actual sentence that follows $A$ and 50\% of the time it's a random sentence.
+	\end{list}
+\end{multicols}
 \section{Analysis of Language Models}
 Aka BERTology
 \paragraph{Questions About Language Models} \begin{list}{}{}
@@ -1465,10 +1474,13 @@ Assign higher probability to the acceptable sentence in the minimal pair. Just l
 	\item 2 attractors: \textit{the chef who made the \textbf{pizzas} and prepped the \textbf{ingredients} is here}
 	\item \ldots
 \end{list}
-Some examples for subject-verb agreement with attractors that a model got wrong: %TODO rewrite
-\begin{center}
-	\includegraphics[scale=0.5]{79.png}
-\end{center}
+Some examples for subject-verb agreement with attractors that a model got wrong:
+\begin{list}{}{}
+	\item[$\surd$] The \textbf{ship} that the player drives \textbf{has} a very high speed\\
+	The \textbf{ship} that the player drives \textbf{\textit{have}} a very high speed
+	\item[$\surd$] The \textbf{lead} is also rather long; 5 paragraphs \textbf{is} pretty lengthy\ldots\\
+	The \textbf{lead} is also rather long; 5 paragraphs \textbf{\textit{are}} pretty lengthy\ldots
+\end{list}
 \subparagraph{Prediction Explanations} What in the input led to this output? For a single example, what parts of the input led to the observed prediction? \textbf{Saliency maps}: a score for each input word indicating its importance to the model's prediction.\\
 To make a saliency map, there are many ways to encode the intuition of "importance".\begin{list}{}{}
 	\item \textbf{Simple gradient method}: for words $x_1,\ldots,x_n$ and the model's score for a given class (output label) $s_c(x_1,\ldots,x_n)$ take the norm of the gradient of the score with respect to each word
@@ -1489,10 +1501,25 @@ Question: what do pretrained representations encode about lingustic properties w
 \end{center}
 We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in R^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i)$$ with $f\in F$.\\
 The extent to which we can predict $y$ from $h_i$ is a measure of the accessibility of that feature in the representation. This helps in gaining a rough understanding into how the model processes its inputs. Also may help in the search for causal mechanisms.
-\paragraph{Contextual Representation of Language} %TODO
-\paragraph{Finding a Parse Tree-Encoding Distance Metric} Our potentially tree-encodicding distances are parametrixerd by the lkinear transformations $B\in R^{k\times n}$
-$$\|h_i-h_j\|^2$$ %TODO
-\subparagraph{Finding $B$} $B$ chosen to minimize the difference between true parse tree distances from a hguman-parsed corpis and the predicteds distances from teh fixed word representations transformed by $B$
+\paragraph{Contextual Representation of Language} These pretrained embeddings specify a function which maps elements $v$ in a (word) vocabulary $V$ to vectors $h\in R^d$
+$$f_{vocab} : V\rightarrow R^d$$
+$$v\mapsto h$$
+Subword methods consider also literal character sequence, mapping from tuples of vocabulary item $v$ and character sequence $(c_1,\ldots,c_t)$ to vectors
+$$f_{subword} : (v, (c_1,\ldots,c_t))\mapsto h$$
+Contextual representations of language leverage the intuition that the meaning of a particular word in a particular text depends on the words that surround it at that moment. Let $w_1,\ldots,w_N$ be a sentence, where $w_i\in V$ is a word. A contextual representation of language is 
+$$f_{contextual} : (w_1,\ldots,w_N)\mapsto(h_1,\ldots,h_N)$$
+\paragraph{Structural Probe} In order to perform LM well, with enough data, one implicitly has to know seemingly high-level language information. We think of there existing a latent parse tree on every sentence, which the neural network does not have access to. For the dependency parsing formalism, each word in the sentence has a corresponding node in the parse tree. An example of dependency parse tree:
+\begin{center}
+	\includegraphics[scale=0.5]{82.png}
+\end{center}
+Our first intuition is that vector spaces and graphs both have natural distance metrics. For a parse tree, we have the \textbf{path metric} $d(w_i, w_j)$, which is the number of edges in the path between words $w_i$ and $w_j$ in the tree.
+\subparagraph{Syntax Distance Hypothesis} There exists a linear transformation $B$ of the word representation space under which vector distance encodes parse trees.\\
+Equivalently, there exists an inner product on the word representation space such that distance under the inner product encodes parse trees. This (indefinite) inner product is specified by $B^TB$.
+\subparagraph{Finding a Parse Tree Encoding Distance Metric} Our potentially tree-encoding distances are parametrized by the linear transformations $B\in R^{k\times n}$
+$$\|h_i-h_j\|^2_B = B(h_i-h_j)^TB(h_i-h_j)$$
+$Bh$ is the linear transformation of the word representation, or equivalently it is the parse tree node representation. This is equivalend to finding an L2 distance on the original vector space, parametrized by the positive semi-definite matrix $A=B^TB$
+$$\|h_u-h_j\|^2_A = (h_i-h_j)^TA(h_i-h_j)$$
+\subparagraph{Finding $B$} $B$ is chosen to minimize the difference between true parse tree distances from a human-parsed corpus and the predicted distances from the fixed word representations transformed by $B$
 $$\min_B\sum_l\frac{1}{|s_l|^2}\sum\left(d(w_i,w_j)-\|B(h_i,h_j)\|^2\right)$$
-
+\paragraph{Conclusion} The geometry of english parse trees is approximately discoverable in the geometry of deep models of a language. Dependency syntax is not the only graph structure on might try to find in a linear transformation of a hidden state space, other graph structures might be found as well.
 \end{document}
