@@ -11,7 +11,8 @@ assignment2: assignment2.cpp
 assignment3: assignment3.cpp utimer.cpp
 	g++-11 -pthread -std=c++20 assignment3.cpp -o assignment3
 
-assignment4: assignment4.cpp
+assignment4: assignment4.cpp assignment4_packagedtasks.cpp
 	g++ -O3 -pthread -std=c++20 assignment4.cpp -o assignment4
+	g++ -O3 -pthread -std=c++20 assignment4_packagedtasks.cpp -o assignment4_packagedtasks
 
 .PHONY: clean, all
