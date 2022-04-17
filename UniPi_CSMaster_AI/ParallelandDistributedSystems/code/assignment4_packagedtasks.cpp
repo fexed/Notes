@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
     { // section where we obtain the unique lock
       unique_lock<mutex> lock(ll);
       tasks.push_back(move(f));  // add to the end of the queue
+      // use move to avoid the copy of the task
     }
     cond.notify_one();  // lost if nobody is waiting
   };
