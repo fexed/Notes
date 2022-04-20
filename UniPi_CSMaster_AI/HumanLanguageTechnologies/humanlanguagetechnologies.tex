@@ -1522,4 +1522,77 @@ $$\|h_u-h_j\|^2_A = (h_i-h_j)^TA(h_i-h_j)$$
 \subparagraph{Finding $B$} $B$ is chosen to minimize the difference between true parse tree distances from a human-parsed corpus and the predicted distances from the fixed word representations transformed by $B$
 $$\min_B\sum_l\frac{1}{|s_l|^2}\sum\left(d(w_i,w_j)-\|B(h_i,h_j)\|^2\right)$$
 \paragraph{Conclusion} The geometry of english parse trees is approximately discoverable in the geometry of deep models of a language. Dependency syntax is not the only graph structure on might try to find in a linear transformation of a hidden state space, other graph structures might be found as well.
+\section{Prompt-Based Learning}
+\paragraph{Finetuning} Given a pretrained model and a labeled dataset, update weights of pretrained model by supervised learning on a labeled dataset. Strong performance on many tasks, and the starting point of most state of the art methods today, with smaller dataset for finetuning.\\
+Each trained model is a fork. These models are so big even finetuning often takes complex SPMD programming and a large computing platform.\\
+Serving can be difficult: a different model for each task, need enough requests to keep model saturated, swapping models into memory can take a long time. There's also a \textbf{practical challenge}: large models are costly to share and use.
+\begin{center}
+	\includegraphics[scale=0.5]{83.png}
+\end{center}
+The traditional finetuning technique is to train the model via repeated gradient updates using a large corpus of example tasks.
+%TODO image and description
+\paragraph{Zero-shot} The model predicts the answer given only a natural language description of the task. No gradient updates are performed.
+\begin{center}
+	\includegraphics[scale=0.5]{84.png}
+\end{center}
+Not fine-tuning! Literally just take a pretrained Language Model and give it the prefix "Translate English to French: cheese $\rightarrow$"
+\paragraph{One-Shot} In addition to the task description, the model sees a single example of the task. No gradient updates.
+\begin{center}
+	\includegraphics[scale=0.5]{85.png}
+\end{center}
+Just give it the prefix ""Translate English to French: sea otter $\rightarrow$ loutre de mere, cheese $\rightarrow$"
+\paragraph{Few-Shot} Similarly give it few examples, 100 max.
+\subsection{Prompts}
+Sub-otpimal and sensitive discrete/hard prompts (natural language instruction/tasks descriptions).\\
+Problems: requiring domain expertise/understanding of the model's inner workings, performance still lags behind state-of-the-art model tuning results, and sub-optimal and sensitive. Prompts that humans consider reasonable are not necessarily effective for language models, and pre-trained language models are sensitive to the choice of the prompts.
+\begin{center}
+	\includegraphics[scale=0.5]{86.png}
+\end{center}
+Shifting from discrete/hard to continuous/soft prompts: additional learnable parameters injected into the model. \textbf{Prompt-based learning}:\begin{list}{}{}
+	\item Manual prompt design
+	\item Mining and paraphrasing based methods to automatically augment the prompt sets
+	\item Gradient-based search for improved discrete/hard prompts
+	\item Automatic prompt generation using a separate generative language model
+	\item Learning continuous/soft prompts
+\end{list}
+Remains unclear how to learn continuous/soft prompts effectively:
+\begin{list}{}{}
+	\item Encode dependencies between prompt tokens using a BiLSTM network
+	\item %TODO
+\end{list}
+\paragraph{Prefix Tuning} Freezes the Language Model parameters and only optimizes the prefix. Adds additional parameters to represent the prefix.
+\begin{center}
+	\includegraphics[scale=0.5]{87.png}
+\end{center}
+\paragraph{Prompt Tuning}
+Instead of tuning the model we tune the prompt fed to it.
+\begin{center}
+	\includegraphics[scale=0.5]{88.png}
+\end{center}
+A prompt in prompt tuning is a sequence of additional task-specific tunable tokens prepended to the input text.
+\begin{center}
+	\includegraphics[scale=0.5]{89.png}
+\end{center}
+This approach becomes more competitive with scale:
+\begin{center}
+	\includegraphics[scale=0.5]{90.png}
+\end{center}
+But prompt length matters less with larger pretrained Language Models.
+\paragraph{Prompt-Tuning Ensembles} Efficient ensembling of models: instead of training $N$ models, we train $N$ prompts (far smaller). Instead of $N$ forward passes through $N$ models, prompt tuning lets use replicate the input, prepending different prompts, and perform a single forward pass with a batch size of $N$.
+\paragraph{Interpretability} Soft prompts are learned in embedding spaces, with no need to convert back to tokens. Strong semantic clusters in the top-5 neighbors to each token in the prompt by cosine distance.\\
+We see class labels of neighbors in prompts. They persist in the "class-label" setting and are learned in the other initialization methods.
+\subsection{Soft Prompt Transfer}
+\begin{center}
+	\includegraphics[scale=0.5]{91.png}
+\end{center}
+Task specific
+\begin{center}
+	\includegraphics[scale=0.5]{92.png}
+\end{center}
+Task embeddings capture task relationships: similar tasks are grouped together into clusters.
+\subsection{FLAN}
+\paragraph{Instruction Tuning}
+\begin{center}
+	\includegraphics[scale=0.5]{93.png}
+\end{center}
 \end{document}
