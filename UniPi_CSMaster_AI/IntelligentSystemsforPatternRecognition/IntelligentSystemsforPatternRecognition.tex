@@ -1885,4 +1885,92 @@ Stability-plasticity dilemma, catastrophic forgetting %TODO
 	\includegraphics[scale=0.5]{157.png}
 \end{center}
 Assuming that the knowledge is non-conflicting.
+\section{Reinforcement Learning}
+Reinforcement learning is characterized, with respect to other ML tasks, by:
+\begin{list}{}{}
+	\item no supervisor, only a \textit{reward} signal
+	\item delayed \textbf{asynchronous feedback}
+	\item time matters (sequential data, continual learning)
+	\item agent's actions affect the subsequent data it receives (inherently non-stationarity)
+\end{list}
+Reinforcement learning is used in:
+\begin{list}{}{}
+	\item learning to maneuver vehicles and control robots (walking, navigation, manipulation\ldots)
+	\item playing games
+	\item discovering new molecules
+	\item end-to-end learning with discrete structures
+\end{list}
+\subsection{Fundamentals}
+\paragraph{Rewards} A reward $R_t$ is a scalar feedback signal. It indicates how well an agent is doing at step $t$, and the agent's job is to maximize cumulative reward. Reinforcement learning is based on the \textbf{reward hypothesis}: all goals can be described by the maximization of expected cumulative reward.\\
+Most of the engineering work in reinforcement learning is about the realization of the reward function.
+\paragraph{Sequential Decision Making} Goal: select actions that maximize total future reward. Actions may have long-term consequences, and the reward may be delayed. It may be better to sacrifice immediate reward to gain more long-term reward.\\
+Examples:
+\begin{list}{}{}
+	\item financial investment, may take months to mature
+	\item refueling a helicopter, may prevent a crash in several hours
+	\item blocking opponent moves, might help winning chances many moves from now
+\end{list}
+\paragraph{Agent and Environment} At each step $t$ the agent:
+\begin{list}{}{}
+	\item executes action $A_t$
+	\item receives observation $O_t$
+	\item receives scalar reward $R_t$
+\end{list}
+The environment:
+\begin{list}{}{}
+	\item receives action $A_t$
+	\item emits observation $O_{t+1}$
+	\item emits scalar reward $R_{t+1}$
+\end{list}
+\paragraph{History and State} The \textbf{history} is the sequence of observations, actions and rewards
+$$H_t = O_1;R_1;A_1;\ldots;A_{t-1};O_t;R_t$$
+I.e. all the observable variables up to time $t$. What happens next depends on the history: the agent selects an action, the environment selects observations/rewards.\\
+\textbf{State} $S_t$ is the information used to determine what happens next and is a \textbf{function of history}
+$$S_t = f(H_t)$$
+\paragraph{Environment State} The environment state $S_t^e$ is the environment $e$ private representation at time $t$. Whatever information the environment uses to generate the next observation/reward.\\
+The environment state is not usually visible to the agent (unobservable environment).\\
+Even if $S_t^e$ is visible %TODO
+\paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$. Generally speaking is a function of history.
+\paragraph{Information (Markov) State} An information state (Markov state) contains all useful information from the history. A state $S_t$ is Markov $\Leftrightarrow P(S_{t+1}\:|\:S_1,\ldots,S_t) = P(S_{t+1}\:|\:S_t)$.\\
+The state is a sufficient statistics for the future. %TODO
+\paragraph{Observability}
+\begin{list}{}{}
+	\item \textbf{Partially Observable Environment} %TODO
+\end{list}
+\paragraph{Key Components of a Reinforcement Learning Agent} A RL agent may include one or more of these:
+\begin{list}{}{}
+	\item \textbf{Policy}: agent's behavior function (may be implicit in the value function)
+	\item \textbf{Value function}: how good is each state and/or action
+	\item \textbf{Model}: agent's representation of the environment
+\end{list}
+\subparagraph{Policy} A policy $\pi$ is the agent's behavior. It's a map from state $s$ to action $a$:
+\begin{list}{}{}
+	\item Deterministic policy $a = \pi(s)$
+	\item Stochastic policy $\pi(a\:|\:s) = P(A_t = a\:|\:S_t = s)$
+\end{list}
+\subparagraph{Value Function} How "good" is a specific state/action for an agent? The value function $v$ is a predictor of future reward. Used to evaluate goodness/badness of a states, therefore used to select between actions
+$$v_\pi(s)= E_\pi[R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots\:|\:S_t=s]$$
+Expected (discounted) future reward following policy $\pi$ from state $s$.
+\subparagraph{Model} A model predicts what the environment will do next.\\
+Predict next state $s'$ following an actions $a$
+$$P_{ss'}^a = P(S_{t+1} = s'\:|\:S_t = s, A_t = a)$$
+Predict next reward
+$$R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$$
+\paragraph{Characterizing RL Agents}\begin{list}{}{}
+	\item Value based: implicit policy, value function given
+	\item Policy based
+	\item Model free: might have policy and/or value function, but no model
+	\item Model based
+\end{list}
+\subsection{Problems}
+\paragraph{Learning vs Planning} Two fundamental problems in sequential decision making:
+\begin{list}{}{}
+	\item Reinforcement Learning: environment initially unknown, agent interacts with it and improves its policy
+	\item Planning (reasoning, introspection, search,\ldots): a model of the environment is known, the agent performs computations with its model (no external interaction) and it improves its policy
+\end{list}
+\paragraph{Exploration vs Exploitation} Reinforcement learning is based on trial-and-error. The agent should discover a good policy from its experiences of the environment, without losing too much reward along the way.\\
+Exploration finds more information about the environment, while exploitation exploits known information to maximize reward. Effective reinforcement learning requires a trade between exploration and exploitation.
+\paragraph{Prediction vs Control} Prediction is evaluating the future, given a policy, while control is optimizing the future (finding the best policy).
+\paragraph{Overview} Reinforcement Learning is a general-purpose framework for decision making. It's for an agent with the capacity to act and observe. The state is the sufficient statistics to characterize the future, depends on the history of actions and observations (environment state vs agent state).\\
+Success is measured by a scalar reward signal: the goal is to select actions to maximize future reward (exploit) and in order to be effective we should not forget to explore.
 \end{document}
