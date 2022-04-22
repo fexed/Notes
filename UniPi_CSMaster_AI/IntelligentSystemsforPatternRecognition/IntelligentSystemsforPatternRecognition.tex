@@ -1876,15 +1876,35 @@ We want to make AI sustainable in the long term, and we can achieve this by neve
 	\item At $t_2$, $X_2\Longrightarrow f_\theta :X_1\cup X_2\rightarrow Y_1\cup Y_2 \Longrightarrow Y_2$
 \end{list}
 Higher and realistic time-scale where data (and tasks) become available only during time. \textbf{No access to previously encountered data}.\\
-Constant computational and memory resources (efficiency concern), incremental development of ever more complex knowledge and skills (scalability concern): \textbf{efficiency + scalability = sustainability}.\\
-Stability-plasticity dilemma, catastrophic forgetting %TODO
-\paragraph{Catastrophic Forgetting} %TODO
+Constant computational and memory resources (efficiency concern), incremental development of ever more complex knowledge and skills (scalability concern): \textbf{efficiency + scalability = sustainability}.
+\paragraph{Stability-plasticity dilemma} Remembering past concepts (\textbf{stability}) while learning new concepts (\textbf{plasticity}) and being able to generalize. This is the cause of the first problem in deep learning: catastrophic forgetting.
 \paragraph{} This is not something to add to the existing machine learning systems, but a paradigm-changing approach to machine learning altogether, that will enable systems to continuously improve based on experience.
 \paragraph{Formally}
 \begin{center}
 	\includegraphics[scale=0.5]{157.png}
 \end{center}
 Assuming that the knowledge is non-conflicting.
+\paragraph{Benchmarks} The current focus is multi-task, few big tasks, toy datasets, mostly supervised and focused on accuracy.\\
+A better focus would be single-incremental-task, high-dimensional data streams, natural/unrealistic datasets, mostly unsupervised with focus on scalability and efficiency.
+\paragraph{Scenarios} Three main scenarios:
+\begin{list}{}{}
+	\item \textbf{Task-Incremental}: every experience is a different task
+	\item \textbf{Class-Incremental}: every experience contains example of different classes
+	\item \textbf{Domain-Incremental}: every experience contains examples of the same classes
+\end{list}
+But there are many others! Not only for data streams but also for sequences.
+\paragraph{Common Baselines}\begin{list}{}{}
+	\item \textbf{Naive}/Finetuning: just continuing the backprop
+	\item \textbf{JointTraining}/Offline: the best you can do with all the data starting from scratch
+	\item \textbf{Ensemble}: one model from scratch for each experience
+	\item \textbf{Cumulative}: for each experience, accumulate all data and re-train from scratch
+\end{list}
+\paragraph{Random Replay} Basic approach:
+\begin{list}{}{}
+	\item Sample randomly from the current experience data
+	\item Fill you fixed \textbf{Random Memory} (RM)
+	\item Replace examples randomly to maintain an approximate equal number of examples for experience
+\end{list}
 \section{Reinforcement Learning}
 Reinforcement learning is characterized, with respect to other ML tasks, by:
 \begin{list}{}{}
@@ -1929,15 +1949,25 @@ I.e. all the observable variables up to time $t$. What happens next depends on t
 $$S_t = f(H_t)$$
 \paragraph{Environment State} The environment state $S_t^e$ is the environment $e$ private representation at time $t$. Whatever information the environment uses to generate the next observation/reward.\\
 The environment state is not usually visible to the agent (unobservable environment).\\
-Even if $S_t^e$ is visible %TODO
-\paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$. Generally speaking is a function of history.
+Even if $S_t^e$ is visible, it may contain irrelevant information.
+\paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$: it's whatever information the agent uses to select its next action. Generally speaking is a function of history, $S_t^a = f(H_t)$, and its the information used by reinforcement learning algorithms.
 \paragraph{Information (Markov) State} An information state (Markov state) contains all useful information from the history. A state $S_t$ is Markov $\Leftrightarrow P(S_{t+1}\:|\:S_1,\ldots,S_t) = P(S_{t+1}\:|\:S_t)$.\\
-The state is a sufficient statistics for the future. %TODO
+The future is independent of the past given the present (\textbf{d-separation}), meaning $H_{1:t}\rightarrow S_t \rightarrow GH_{t+1:\infty}$. The state is a \textbf{sufficient statistic for the future}. The environment state $S_t^e$ and the history $H_t$ are Markov.
 \paragraph{Observability}
 \begin{list}{}{}
-	\item \textbf{Partially Observable Environment} %TODO
+	\item \textbf{Fully Observable Environment}: full observability means that the agent \textbf{directly} observes the environment state.
+	$$O_t = S_t^a = S_t^e$$
+	Formally, it's a \textbf{Markov Decision Process} (\textbf{MDP}).
+	\item \textbf{Partially Observable Environment}: partial observability means that the agent \textbf{indirectly} observes the environment. E.g.: a robot with a camera may not know its absolute location, a trading agent only observes current prices, a poker player only observes public cards\ldots\\
+	Formally, $S_t^a\neq S_t^e$ and the problem is a \textbf{Partially Observable Markov Decision Process} (\textbf{POMDP}). The agent need to build its own state representation $S_t^a$:
+	\begin{list}{}{}
+		\item History $S_t^a = H_t$
+		\item Beliefs on environment state $S_t^a = [P(S_t^e=s^1),\ldots,P(S_t^e=s^N)]$
+		\item Dynamic memory (RNN) $S_t^a = \sigma(W_sS_{t-1}^a + W_OO_t)$
+	\end{list}
 \end{list}
-\paragraph{Key Components of a Reinforcement Learning Agent} A RL agent may include one or more of these:
+\subsection{Components}
+A RL agent may include one or more of these:
 \begin{list}{}{}
 	\item \textbf{Policy}: agent's behavior function (may be implicit in the value function)
 	\item \textbf{Value function}: how good is each state and/or action
