@@ -1220,7 +1220,7 @@ Two important states:
 	\item $|\beta\rangle$ the target state
 \end{list}
 I consider $span\{|\beta\rangle,|\psi\rangle\}$ which is a plane in $R^N$ (dimension 2). They are not orthogonal
-$$\langle\beta|\psi\rangle = \frac{1}{\sqrt{N}}\neq =0$$
+$$\langle\beta|\psi\rangle = \frac{1}{\sqrt{N}}\neq 0$$
 But for very large $N$ they are \textbf{almost orthogonal}.\\
 We consider $|\phi\rangle\in span\{|\beta\rangle,|\psi\rangle\}$ such that $\langle\phi|\beta\rangle=0$: we can take $|\psi\rangle$ and remove the components in directions of $|\beta\rangle$
 $$|\phi\rangle=\sqrt{\frac{N}{N-1}}\left(\frac{1}{\sqrt{N}}\sum_{x=0}^N|x\rangle\right)-\frac{1}{\sqrt{N}}|\beta\rangle = \frac{1}{\sqrt{N-1}}\sum_{x\neq\beta}|x\rangle$$
@@ -1251,7 +1251,7 @@ $ around $|\psi\rangle$ with an angle of $\theta$ with $|\psi\rangle$
 	$\psi$ and $\phi$ are inverted
 \end{center}
 This reflection is often referred to as inversion around the average. The amplitudes of the configurations $\neq|\beta\rangle$ is lowered to $\frac{N-2}{N\sqrt{N}}$ while the amplitude of $|\beta\rangle$ is amplified.\\
-This reflections is the iterations: start with $|\psi\rangle$, reflect along the $|\phi\rangle$ orthogonal to the target $|\beta\rangle$ and then reflect along $|\psi\rangle$ obtaining $|z\rangle$. Then repeat: reflect $|z\rangle$ along $|\phi\rangle$, reflect along $|\psi\rangle$\ldots\\At the generic step\begin{list}{}{}
+These reflections are the iterations: start with $|\psi\rangle$, reflect along the $|\phi\rangle$ orthogonal to the target $|\beta\rangle$ and then reflect along $|\psi\rangle$ obtaining $|z\rangle$. Then repeat: reflect $|z\rangle$ along $|\phi\rangle$, reflect along $|\psi\rangle$\ldots\\At the generic step\begin{list}{}{}
 	\item $G=U_\psi U_\beta$
 	\item $|\psi^{(k)}\rangle = G^k|\psi\rangle = G|\psi^{(k-1)}\rangle$
 \end{list}
@@ -1299,7 +1299,7 @@ The decision version of the problem is not NP-complete. All current public key c
 \paragraph{Complexity Classes}
 \begin{list}{}{}
 	\item \textbf{BQP} (Bounded-error Quantum Polynomial Time): class of decision problems that can be solved in polynomial time on a quantum computer, with bounded error probability (at most $1/3$ as arbitrary choice, can be $1/2$)\\
-	The decision version of %TODO
+	The decision version of factoring is in BQP
 	\item \textbf{BPP} (Bounded-error Polynomial Time): class of decision problems that can be solved in polynomial time using randomized algorithms, if a bounded probability of error is allowed in the solution.\\
 	The decision version of factorization is not known to be in BPP.
 \end{list}
@@ -1312,10 +1312,7 @@ Also called period because $f(x) = a^x\hbox{ mod }N$ is periodic with period $r$
 \begin{center}
 	\includegraphics[scale=0.5]{37.png}
 \end{center}
-\begin{enumerate}
-	\item Find unitary $U_a$ such that eigenvaleus of $U_a$ contain $r$ in the phase
-	\item %TODO 
-\end{enumerate}
+The accuracy and the probability of success of QPE depends on the number of counting qubits $t$. Need to define a unitary operator that computes $$f(x) = a^x\hbox{ mod }N$$ and whose eigenvalues contain the order $r$, so that we can apply QPE to estimate the eigenvalues and recover $r$.
 \paragraph{Construction of $U_a$} Given $N, n=\lceil\log_2N\rceil, a$
 $$U_a|y\rangle=\left\{\begin{array}{ll}
 |a\cdot y\hbox{ mod }N\rangle&0\leq y<N\\
@@ -1400,8 +1397,19 @@ $$U_a^{2^j}|y\rangle = |(a^{2^j}\hbox{ mod }N)y\hbox{ mod }N\rangle$$
 	We don't know $\phi$ exactly but just $2n+1$ bits of $\phi$. We apply CFA to compute the nearest fraction to $\phi$ with denominator $\leq N$. We take this denominator as tentative order, as $r'$.\\
 	This produces the fraction $\frac{s'}{r'}$ with $s',r'$ without common factors, and we check whether $a^{r'}\hbox{ mod }N =1$. If so, we're done, else we run again. Even in this case, the procedure requires $r,s$ coprime.
 \end{list}
+\subparagraph{Quantum Order Finding}
+\begin{enumerate}
+	\item Initial state is $|0\rangle|1\rangle$ ($t$ and $n$ qubits)
+	\item Create a superposition on the first register $$\frac{1}{\sqrt{2^t}}\sum_{j=0}^{2^t-1}|j\rangle|1\rangle$$
+	\item Apply the sequence of controlled $U_a^{2^j}$ gates
+	 $$\frac{1}{\sqrt{r2^t}}\sum_{s=0}^{r-1}\sum_{j=0}^{2^t-1}e^{\frac{2\pi isj}{r}}|j\rangle|u_s\rangle$$
+	 \item Apply inverse Fourier transform to the first register
+	 $$\frac{1}{\sqrt{r}}\sum_{s=0}^{r-1}|2^t\frac{s}{r}\rangle|u_s\rangle$$
+	 \item Measure the first register, estimating $\psi$ of $\frac{s}{r}$
+	 \item Apply CFA obtaining $r$
+\end{enumerate}
 The overall cost for order-finding with fast multiplication is $O(n^2\log n\log\log n)$, while the best classical algorithm is $O(e^{\sqrt{n\log n}})$, but of course the quantum algorithm can fail because QPE can produce a bad estimate for $\frac{s}{r}$ with probability at most $\epsilon$ thanks to our choice of $t$.\\
-If $r,s$ have a common factor, the number $r$ returned but the CFA is a factor of $r$, not $r$ itself. An expected number of $O(\log n)$ %TODO
+If $r,s$ have a common factor, the number $r$ returned but the CFA is a factor of $r$, not $r$ itself. So $r,s$ should be co-prime.
 \paragraph{Factorization $\leq$ Order-Finding} Reduction from factoring to order-finding.\\
 $N>1$ composite, odd and not a prime nor a prime power (we can already test these cases and exclude them in the beginning). So $N$ is a product of at least two primes.\\
 We take $a< N$ and coprime with $N$ (GCD$(a,N)=1$). If it's not coprime, we've found a factor of $N$. Suppose that is coprime. We compute the order $r=$ Order($a$). So we know that $a^r$ mod $N=1$, which can be written as $$(a^r-1)\hbox{ mod }N = 0$$
@@ -1422,12 +1430,21 @@ Output: a factor $p$ of $N$
 \begin{enumerate}
 	\item If $N$ is even, output 2 and stop
 	\item Use a polynomial time algorithm to determine if $_N$ is a prime or a power of a prime. If this is the case, declare it and stop.
-	\item Randomly choose an integer $a$ such that $1<a<N$ and run Euclid's a %TODO
+	\item Randomly choose an integer $a$ such that $1<a<N$ and run Euclid's algorithm to determine $GCD(a,N)$. If it's $>1$, return it and stop.
 	\item If $a$ and $N$ are coprime, use a Quantum Circuit to find the order $r$ of $a$ mod $N$
 	\item If $r$ is even and $a^{r/2}$ mod $N\neq -1$ compute GCD($a^{\frac{r}{2}}-1,N$) and GCD($a^{\frac{r}{2}}+1,N$) and return at least one non trivial factor of $N$.\\
 	Otherwise
 \end{enumerate}
 \paragraph{Observations} The algorithm returns with high probability a non trivial factor of any composite $N$.\\
-All steps 
-\paragraph{Complexity} %TODO ultima parte slides
+All steps can be performed efficiently on a classical computer, except (as far as we know) the order-finding step (step 4). By repeating the procedure, we may find a complete prime factorization of $N$.
+\paragraph{Complexity} Polynomial in $n=\lceil\log_2 N\rceil$. It take $O(n^2\log n\log\log n)$ quantum gates using fast multiplication and the square-and-multiply algorithm.
+\paragraph{Success Probability} A single run only returns a factor of $N$ with a certain probability.\begin{list}{}{}
+	\item The order-finding step could return an odd $r$
+	\item The order-finding step could return $r\:|\:a^{r/2}\hbox{ mod }N \equiv -1$
+	\item The reduction to the order-finding problem doesn't work if $r\equiv 1\hbox{ mod }2$ or $a^{r/2}\hbox{ mod }N \equiv -1$
+\end{list}
+\subparagraph{Theorem} Let $N = \prod_{j=1}^kp_j^{n_j}$ be the factorization of $N$, with $p_i\neq p_j$ for $i\neq j$. If $a$ is a random element in $Z_N^*$ (i.e. $0<a<N$ and coprime with $N$), and $r = order(a)$ then
+$$P\left(r\equiv 0\hbox{ mod }2\wedge a^{r/2}\not\equiv -1\hbox{ mod }N\right)\geq 1-\frac{1}{2^k}$$
+The algorithm only needs to be repeated a constant number of times to successfully factor $N$ with a high probability of success. The expected number of iterations needed to find a factor doesn't grow with $N$. Shor's algorithm can factor in a number of operations polynomial in the dimension of $N$.\\
+\textbf{Exponential speed-up} compared to the best classical algorithm.
 \end{document}
