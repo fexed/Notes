@@ -211,19 +211,20 @@ Each dimension corresponds to a separate term.\\
 The VSM considers words as discrete symbols.
 \subparagraph{One Hot Representation} A word occurrence is represented by one-hot vectors, with the vector dimension being the number of words in a vocabulary and $1$ in correspondence of the position of the represented word. Useful for representing a document by the sum of the word occurrence vector, and document similarity given by \textbf{cosine distance} (angle between vectors).
 \subparagraph{tf*idf Measure} Term frequency: frequency of the word.\\
-Inverse document frequency: %TODO
+Inverse document frequency (idf): given $N$ total documents and $df_i=$ document frequency of word $i$, meaning the number of documents with word $i$
+$$idf_i=\log\frac{N}{df_i}$$
 \subparagraph{Classical VSM} Vector is all zeroes with $idf_t$ instead of $1$. The vector of a document is the sum of the vectors of its terms occurrence vectors.\\
 Doesn't capture similarity between terms.
 \paragraph{Problems with Discrete Symbols} All vectors are orthogonal, with no notion of similarity. Search engines try to address the issue using WordNet synonyms but it's better to encode the similarity in the vectors themselves.
-\subparagraph{Intuition} Model the meaning of a word by "embedding" it in a vector space. The meaning of a word is a vectors of numbers (vector models are also called \textbf{embeddings}), so a \textbf{dense vector space}. Constrast: word meaning is represented in many computational %TODO
+\subparagraph{Intuition} Model the meaning of a word by "embedding" it in a vector space. The meaning of a word is a vectors of numbers (vector models are also called \textbf{embeddings}), so a \textbf{dense vector space}. Contrast: word meaning is represented in many computational linguistic applications by a vocabulary index.
 \paragraph{Word Vectors/Embeddings} Build dense vector for each word chosen so that it is similar to vectors of words that appear in similar contexts.\\
 Four kinds:\begin{enumerate}
 	\item[] Sparse Vector Representations
 	\item Mutual-information weighted word co-occurence matrices
 	\item[] Dense Vector Representations
-	\item %TODO
-	\item 
-	\item 
+	\item Singular Value Decomposition (and Latent Semantic Analysis)
+	\item Neural Network Inspired models (word2vec, GloVe, fastText\ldots)
+	\item Brown Clusters
 \end{enumerate}
 \paragraph{Distributional Hypothesis} A word's meaning is given by the words that frequently appear close-by. Old idea but successful just with modern statistical NLP.\\
 When a word $w$ appears in a text, its context is the set of words that appear nearby (within a fixed-size window). Use of the many contexts of $w$ to build a representation of $w$.
@@ -231,10 +232,10 @@ When a word $w$ appears in a text, its context is the set of words that appear n
 \subparagraph{Co-Occurrence Matrix} Words $\equiv$ Context words. Rows of $X$ capture similarity yet $X$ is still high dimensional and sparse. One row per word with counts of occurrencies of any other word.\\
 We can compute the distance vectors between words, but neighboring words are not semantically related.
 \subsection{Word Embeddings}
-\paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddigns})
+\paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddings})
 $$Embed : R^{|V|}\rightarrow R^k$$
 $$Embed(v(t)) = e(t)$$
-Desired properties: remaining dimensions %TODO
+Desired properties: remaining dimensions represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
 \paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and negative examples made replacing center word with random one. The loss for the training is $$Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))$$
 with $x^{(w)}$ obtained by replacing the central word of $x$ with a random word.
 \paragraph{Word2Vec} Framework for learning words, much faster to train. Idea:\begin{list}{}{}
@@ -281,8 +282,8 @@ Procedure
 	\item Generate score vector $z = v_cU$
 	\item Turn the score vector into probabilities $\hat{y} =$ softmax$(z)$
 \end{list}
-$\hat{y}_{c-m},\ldots$ Those are the estimates\\ %TODO
-So the training iterates through the whole corpus predicting sorrounding words given the center word.
+$\hat{y}_{c-m},\ldots$ Those are the estimates of the probabilities of observing each context word. These should match the true probabilities, which are $$y^{c-m},\ldots, y^{(c-1)}, y^{(c+1)}, \ldots, y^{(c+m)}$$
+The training iterates through the whole corpus predicting surrounding words given the center word.
 \subparagraph{Objective Function} For each position $t=1,\ldots,T$ predict context words within a windows of fixed size $m$ given each center word $w_t$ $$\hbox{Likelihood} = L(\Theta) = \prod_{t=1}^T\prod_{-m\leq j\leq m,\:\:j\neq 0} P(w_{t+j}\:|\:w_t,\Theta)$$
 While the objective function $J(\Theta)$ is the average negative log likelihood $$J(\Theta) = -\frac{1}{T}\log L(\Theta) = -\frac{1}{T}\sum_{t=1}^T\sum_{-m\leq j\leq m,\:\:j\neq 0} \log(P(w_{t+j}\:|\:w_t,\Theta)=$$
 To compute $P(o\:|\:c, \Theta)$ we use two vectors per word $w$: $v_w$ when $w$ center word and $u_w$ when $w$ context word. For a center word $c$ and a context word $o$:$$P(o\:|\:c) = \frac{e^{u_o v_c}}{\sum_{w\in V} e^{u_w v_c}}$$
@@ -293,7 +294,8 @@ $J(\Theta)$ is a function of all windows in the corpus, potentially billions: to
 	\item Max because amplifies the probability of largest $x_i$
 \end{list}
 \paragraph{Can we really capture the concept represented by a word?} Philosophical debate.
-\paragraph{Negative Sampling} $\log\sum_{j\in F}e^{u_j}$ has lots of terms, costly to compute. The solution is to compute it only on a small sample of negative samples, i.e. $\log\sum_{j\in E}e^{u_j}$ where words $E$ are a few (e.g. 5) %TODO
+\paragraph{Negative Sampling} $\log\sum_{j\in F}e^{u_j}$ has lots of terms, costly to compute. The solution is to compute it only on a small sample of negative samples, i.e. $\log\sum_{j\in E}e^{u_j}$ where words $E$ are a few (e.g. 5) and sampled using a biased unigram distribution $U$ computed on training data
+$$P(w) = \frac{U(w)^{\frac{3}{4}}}{\sum_{w_j\in V}U(w_j)^{\frac{3}{4}}}$$
 \paragraph{CBoW} Continuous Bag of Words\\
 Mirror of the skip-gram, where context words are used to predict target words.\\
 $h$ is computed from the average of the embeddings of the input context, $z_i$ is the similarity of $h$ with the words embedding of $w_i$ from $U$.
@@ -313,7 +315,7 @@ Idea of Singular Value Decomposition:
 \subparagraph{Which One?} No clear winner. Parameters play a relevant role in the outcome of each method. Both SVD and SGNS performed well on most tasks, never underperforming significantly.\\
 SGNS is suggested to be a good baseline: faster to compute and performs well.
 \paragraph{Parallel word2vec} How to synchronize access to V and U, given multicore CPU to run SGD in parallel? No synchronization is good, because computation is stochastic hence it is approximate anyhow. Parameters are huge: low likelihood of concurrent access to the same memory cell. The effect is a very fast training.
-\paragraph{Computing embeddings} The training cost of word2vec is linear in the size of the input. The training algorithm works well in parallel, given sparsity of words in contexts and use of negative sampling. It can be halted and restarted at anytime. %TODO
+\paragraph{Computing embeddings} The training cost of word2vec is linear in the size of the input. The training algorithm works well in parallel, given sparsity of words in contexts and use of negative sampling. It can be halted and restarted at anytime.
 \paragraph{Gensim} Cython
 \paragraph{Fang} Uses PyTorch
 \subsection{Evaluation}
@@ -324,7 +326,11 @@ It's intrinsic evaluation.
 \paragraph{Extrinsic Vector Evaluation} The proof of the pudding is in the eating. Test on a task, e.g. NER (Named Entity Recognition)
 \subsubsection{Embeddings in Neural Networks} An embedding layer is often used as fist layer in a neural network for processing text.\\
 It consists of a matrix $W$ of size $|V|\times d$ where $d$ is the size of the embedding space. $W$ maps words to dense representations.\\
-It is initialized either with random weights\ldots %TODO
+It is initialized either with random weights or pretrained embeddings. During learning, weights can be:
+\begin{list}{}{}
+	\item kept fixed (makes sense only when using pre-trained weights)
+	\item updated, to adapt embeddings to the task
+\end{list}
 \begin{center}
 	\includegraphics[scale=0.5]{7.png}
 \end{center}
@@ -345,8 +351,10 @@ It is initialized either with random weights\ldots %TODO
 \begin{center}
 	\includegraphics[scale=0.5]{8.png}
 \end{center}
-Given a sequence of $n$ tokens ($x_1,\ldots,x_n$) %TODO
-\paragraph{OpenAI GPT-2}
+Given a sequence of $n$ tokens ($x_1,\ldots,x_n$), the language model learns to predict the probability of next token given the history
+$$P(x_1,\ldots,x_n)=\prod_{i=1}^n P(x_i\:|\:x_1^{i-1})$$
+The model is trained to minimize the negative log likelihood
+$$L = -\sum_{i=1}^n\left(\log P(x_i\:|\:x_1^{i-1})+\log P(x_i\:|\:x_{i+1}^n) \right)$$
 \paragraph{BERT} Semi-supervised training on large amounts of text, or supervised training on a specific task with a labeled dataset.
 \section{Text Classification}
 For example: positive/negative review identification, author identification, spam identification, subject identification\ldots
@@ -445,11 +453,10 @@ Terminology:
 	\item \textbf{Wordform}: full inflected surface form.\\
 	\textit{Cat} and \textit{cats} = different wordform
 	\item \textbf{Type}/Form: element of the vocabulary
-	\item \textbf{Token} %TODO
+	\item \textbf{Token}: an instance of that type during text
 \end{list}
 How many words? $N$ tokens and $V$ vocabulary, set of types (of size $|V|$)\\$|V|>O(N^{\frac{1}{2}})$\\
 Google N-grams has $N = 1$ trillion and $|V| = 13$ million.
-%TODO
 \paragraph{Stanza Tokenizer} Toolkit, ternary classifier to distinguish between: normal character, end of token and end of sentence.
 \paragraph{Clitics} Some languages have composite words: lascia-mi, lascia-me-lo\ldots Splitting clitics is important for parsing, since clitics incorporate relevant syntactic components (e.g. pronouns corresponding to an object of the verb).\\
 Train 4-class tokenizer: normal character, end of token, end of sentence, start of clitic.
@@ -464,14 +471,12 @@ Train 4-class tokenizer: normal character, end of token, end of sentence, start 
 \end{enumerate}
 The data is easier to handle if it's linearly separable. Naive Bayes is slightly more general than DTs.
 \paragraph{Naive Bayes} Simple model, can scale easily to millions of training examples, efficient and fast in training and classification.\\
-A major limitation is the independence assumption %TODO
-It's an inappropriate assumption if there are strong conditional dependencies between the variables.
+A major limitation is the independence assumption, which has two consequences: the linear ordering of words is ignored (bag of words model) and the words are independent of each other given the class.\\
+It's an inappropriate assumption if there are strong conditional dependencies between the variables. Classifiers may end up "double-counting" the effect of highly correlated features, pushing the classifier closer to a given labeled than is justified.
 \paragraph{Decision Trees} Capable to generate understandable rules, and perform classification without requiring much computation. Can handle continuous and categorical variables and provide clear indication of the important features.\\
 But it's prone to errors in classification problems with many classes and small numbers of training examples. Also can be computationally expensive to train: need to compare all possible splits, and pruning can be expensive.
 \paragraph{Linear vs non-linear algorithms} We find out if data is linearly or non linearly separable only empirically.\\
-Linear algorithms when data is linearly separable %TODO
-Non linear when data is not, more accurate but more parameters (e.g. Kernel methods)
-\paragraph{Perceptron algorithm} %TODO
+Linear algorithms, when data is linearly separable, are simpler and uses less parameters, but high dimensional data (like for NLP) usually isn't linearly separable. For non linearly separable data, non linear algorithms are more accurate, although more complicated and with more parameters, like kernel methods.
 \subsection{Linear Binary Classification}
 Data: $\{(x_i,y_i)\}$ for $i=1,\ldots,n$\begin{list}{}{}
 	\item $x \in R^d$
@@ -481,12 +486,13 @@ Question: find a linear decision boundary $$wx + b$$ an hyperplane such that the
 Classification rule: $$y = sign(wx+b)$$
 \paragraph{Perceptron} Solves if linearly separable. Basic idea: go through all existing data patterns whose label is known, if correct continue. If not, add to the weights a quantity proportional to the product of the input pattern with $y$ ($-1$ or $+1$)
 \subsection{Hidden Markov Models}
-\paragraph{Markov Chain} Stochastic model describing a sequence of possible events in which the probability\ldots %TODO
+\paragraph{Markov Chain} Stochastic model describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event.
 \begin{center}
 	\includegraphics[scale=0.5]{12.png}
 \end{center}
 %salta il resto
-\paragraph{Hidden Markov Model} For the chains, the output symbols are the same as the states. In named-entity of part-of-speech tagging (and speech recognition) the output symbols are \textbf{words} and the hidden states are \textbf{something else}: tags\\ %TODO
+\paragraph{Hidden Markov Model} For the chains, the output symbols are the same as the states. In named-entity or part-of-speech tagging (and speech recognition) the output symbols are \textbf{words} and the hidden states are \textbf{something else}: POS tags, named-entity tags.\\
+So we need an extension: a \textbf{hidden Markov model} is an extension of a Markov chain in which the input symbols are not the same as the states. This means \textbf{we don't know which state we're in}.
 \subparagraph{Example: speech} Observed outputs are phones (speech sounds) and hidden states are phonemes (units of sound).\\
 Loopbacks because a phone is circa 100ms but phones are captured every 10ms, so each phone repeats 10 times (simplifying greatly).
 \begin{center}
@@ -500,18 +506,30 @@ Loopbacks because a phone is circa 100ms but phones are captured every 10ms, so 
 \paragraph{Three basic problems}
 \begin{list}{}{}
 	\item \textbf{Evaluation}: given the observation sequence $O = (o_1,\ldots,o_T)$ and a HMM model $\Phi = (A, B)$, how to efficiently compute $P(O\:|\:\Phi)$ the probability of the observation sequence given the model?
-	\item \textbf{Decoding} %TODO
+	\item \textbf{Decoding}: given the observation sequence $O = (o_1,\ldots,o_T)$ and an HMM model $\Phi = (A, B)$, how do we choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$ that is optimal in some sense (i.e. best explains the observations)?
 	\item \textbf{Learning}: how do we adjust the model parameters $\Phi = (A,B)$ (transition and emission probabilities) to maximise $P(O\:|\:\Phi)$?
 \end{list}
-\paragraph{Computing the likelihood} %TODO
+\paragraph{Computing the likelihood} Given an HMM $\lambda = (A, B)$ and an observation sequence $O$, determine the likelihood $P(O, \lambda)$.
+$$P(O\:|\:Q)=\prod_{i=1}^T P(o_i\:|\:q_i)$$
+$$P(O,Q) = P(O\:|\:Q)\cdot P(Q) = \prod_{i=1}^T P(o_i\:|\:q_i)\cdot\prod_{i=1}^n P(q_i\:|\:q_{i-1})$$
+\subparagraph{Forward Algorithm} Dynamic programming algorithm: compute the likelihood of the observable sequence by summing over all possible hidden state sequences, but to do this efficiently we fold all the sequences into a single trellis. We compute $P(o_1,\ldots,o_T,q_T = q_F\:|\:\lambda)$ by recursion.\begin{list}{}{}
+	\item $\alpha_t(j)$: cell of the forward algorithm trellis that represents the probability of being in state $j$ after seeing the first $t$ observations given the automaton.\\
+	Thus the cell expresses the probability $$\alpha_t(j) = P(o_1,\ldots,o_T,q_T=j\:|\:\lambda)$$
+	\item The recursion is as follows:
+	\begin{enumerate}
+		\item \textbf{Initialization} $$\alpha_1(j) = a_{0j}b_j(o_1)\:\:\:\:\:1\leq j\leq N$$
+		\item \textbf{Recursion} (since states 0 and $F$ are non-emitting) $$\alpha_t(j) = \sum_{i=1}^N\alpha_{t-1}(i)a_{ij}b_j(o_t)\:\:\:\:\:1\leq j\leq N, 1<t\leq T$$
+		\item \textbf{Termination} $$P(O\:|\:\lambda) =\alpha_T(q_F)=\sum_{i=1}^N\alpha_T(i)a_{iF}$$
+	\end{enumerate}
+\end{list}
 \begin{center}
 	\includegraphics[scale=0.5]{15.png}
 \end{center}
 \paragraph{Decoding} Given an observation and a HMM, the task of the decoder is to find the best hidden state sequence.\\
-Given the observation sequence $O = (o_1,\ldots,o_T)$, and a HMM $\Phi = (A, B)$, how to choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$\ldots?\\ %TODO
+Given the observation sequence $O = (o_1,\ldots,o_T)$, and a HMM $\Phi = (A, B)$, how to choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$ that is optimal in some sense (i.e. best explains the observations)?\\
 One possibility: for each hidden state sequence $Q$, compute $P(O\:|\:Q)$ and pick the highest, but $N^T$ possibilities.\\
 Instead: \textbf{Viterbi algorithm}, dynamic programming algorithm that uses similar trellis as the Forward algorithm.
-\paragraph{Viterbi Algorithm} %TODO
+\paragraph{Viterbi Algorithm} %TODO p. 38 6-HMM.pdf
 \paragraph{Training} Baum-Welch algorithm (Expectation Maximization), no details.
 \subsubsection{Part of Speech Tagging} The parts-of-speech, or lexical categories/word classes/lexical tags/POS, are nouns, verbs, adjectives, prepositions\ldots we'll use the term POS the most. Examples:
 \begin{list}{}{}
