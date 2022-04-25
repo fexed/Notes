@@ -527,10 +527,31 @@ $$P(O,Q) = P(O\:|\:Q)\cdot P(Q) = \prod_{i=1}^T P(o_i\:|\:q_i)\cdot\prod_{i=1}^n
 \end{center}
 \paragraph{Decoding} Given an observation and a HMM, the task of the decoder is to find the best hidden state sequence.\\
 Given the observation sequence $O = (o_1,\ldots,o_T)$, and a HMM $\Phi = (A, B)$, how to choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$ that is optimal in some sense (i.e. best explains the observations)?\\
-One possibility: for each hidden state sequence $Q$, compute $P(O\:|\:Q)$ and pick the highest, but $N^T$ possibilities.\\
+One possibility: for each hidden state sequence $Q$, compute $P(O\:|\:Q)$ and pick the highest, but we have $N^T$ possibilities.\\
 Instead: \textbf{Viterbi algorithm}, dynamic programming algorithm that uses similar trellis as the Forward algorithm.
-\paragraph{Viterbi Algorithm} %TODO p. 38 6-HMM.pdf
-\paragraph{Training} Baum-Welch algorithm (Expectation Maximization), no details.
+\paragraph{Viterbi Algorithm} We want to compute the joint probability of the observation sequence together with the best state sequence.
+$$\max_{q_0,\ldots,q_T} P(q_0,\ldots,q_T,o_1,\ldots,o_T, q_T=q_F\:|\:\lambda)$$
+$$v_t(j) = \max_{q_0,\ldots,q_T} P(q_0,\ldots,q_{t-1},o_1,\ldots,o_t, q_t=j\:|\:\lambda)$$
+$$v_t(j) = \max_{i=1}^N v_{t-1}(i)a_{ij}b_j(o_t)$$
+The recursion is as follows:
+\begin{enumerate}
+	\item \textbf{Initialization}
+	$$v_1(j) = a_{0j}b_j(o_1)\:\:\:\:\:1\leq j\leq N$$
+	$$bt_1(j) = 0$$
+	\item \textbf{Recursion} (recall that states 0 and $q_F$ are non-emitting)
+	$$v_t(j) = \max_{i=1}^N v_{t-1}(i)a_{ij}b_j(o_t)\:\:\:\:\:1\leq j\leq N, 1<t\leq T$$
+	$$bt_t(j) = \arg\max_{i=1}^Nv_{t-1}(i)a_{ij}b_j(o_t)\:\:\:\:\:1\leq j\leq N, 1<t\leq T$$
+	\item \textbf{Termination}\\
+	Best score: $$P^* = v_t(q_F) = \max_{i=1}^N v_T(i)\cdot a_{iF}$$
+	Start of backtrace: $$q_T^* = bt_T(q_F) = \arg\max_{i=1}^N v_T(i)\cdot a_{iF}$$
+\end{enumerate}
+Processes observations from left to right, filling out the trellis. Each cell $v_t(j) = \max_{i=1}^N v_{t-1}(i)a_{ij}b_j(o_t)$ is composed of:
+\begin{list}{}{}
+	\item $v_{t-1}(j)$ the \textbf{previous Viterbi path probability} from the previous time step
+	\item $a_{ij}$ the \textbf{transition probability} from previous state $q_i$ to current state $q_j$
+	\item $b_j(o_t)$ the \textbf{state observation likelihood} of the observation symbol $o_t$ given the current state $j$
+\end{list}
+\paragraph{Training a HMM} Baum-Welch algorithm (Expectation Maximization), no details.
 \subsubsection{Part of Speech Tagging} The parts-of-speech, or lexical categories/word classes/lexical tags/POS, are nouns, verbs, adjectives, prepositions\ldots we'll use the term POS the most. Examples:
 \begin{list}{}{}
 	\item N, noun
@@ -545,18 +566,50 @@ We want, out of all sequences of $n$ tags $t_1,\ldots,t_n$, the single tag seque
 We can compute it using the Bayes rule to transform it into a set of other probabilities that are easier to compute.
 $$\hat{t}_1^n=\arg\max_{t_1^n} P(w_1^n \:|\: t_1^n)P(t_1^n)$$
 Excluding the denominator because we're taking the maximum. It's composed by likelihood and prior\begin{list}{}{}
-	\item Likelihood $P(w_1^n \:|\: t_1^n) \simeq \prod_{i=1}^n P(w_i\:|\:t_i)$ with the naive bayes assumption
-	\item Prior $P(t_1^n)\simeq \prod$ with the markov assumption %TODO
+	\item Likelihood $P(w_1^n \:|\: t_1^n) \simeq \prod_{i=1}^n P(w_i\:|\:t_i)$ with the naive Bayes assumption
+	\item Prior $P(t_1^n)\simeq \prod_{i=1}^n p(t_i\:|\:t_{i-1})$ with the Markov assumption 
 \end{list}
 \paragraph{Two kinds of probabilities}
 \begin{list}{}{}
-	\item Tag transition probabilities $P(t_i\:|\:t_{i-1})$ %TODO
-	\item Word likelihood probabilities $P(w_i\:|\:t_i)$ %TODO
+	\item Tag transition probabilities $P(t_i\:|\:t_{i-1})$\\
+	The probabilities that a given tag $t_i$ is preceded by another given tag $t_{i-1}$.
+	\item Word likelihood probabilities $P(w_i\:|\:t_i)$\\
+	The probability that given a tag $t_i$, it corresponds to the word $w_i$
 \end{list}
 \subsubsection{Sequence Tagging} For example classifying each token independently using information about the surrounding tokens (sliding window) as input features.\\
 For sequence tagging, sequence models work better: HMMs, MEMMs, conditional random fields, convolutional neural networks\ldots
-\paragraph{Logistic Regression} Model %TODO
-\paragraph{MEMM} HMM works backwards from the tags to the outputs, while MEMM works backwards: from the words to the probabilities of the tags.
+\paragraph{Discriminative Model} Estimate $P(y\:|\:x)$ in order to predict $y$ directly from $x$
+$$\hat{y}=\arg\max_y P(y\:|\:x)$$
+For example: max entropy, logistic regression, Conditional Random Fields, Support Vector Machines, CNNs\ldots
+\paragraph{Generative Model} Use the Bayes rule to obtain $P(y\:|\:x)$ and use argmax for classification
+$$\hat{y} = \arg\max_y P(y)P(x\:|\:y)$$
+For example: naive Bayes, HMMs\ldots
+\begin{multicols}{2}
+\paragraph{Naive Bayes} Compute $$\hat{c}_j=\arg\max_j P(c_j\:|\:x)$$ using the Bayes rule $$\hat{c}_j = \arg\max_j P(c_j)P(x\:|\:c_j)$$
+\columnbreak
+\paragraph{Logistic Regression} Compute the posterior probability directly
+$$P(c_j\:|\:x) = \frac{e^{w_jx}}{\sum_ie^{w_ix}}=\hbox{Sofmax}_j(w_jx)$$
+$$\hat{c}_j = \arg\max_j P(c_j\:|\:x)$$
+\end{multicols}
+In the logistic regression we represent the input $x$ as a vector of features $f_i$
+$$P(c_j\:|\:x) = \frac{e^{w_jf}}{\sum_ie^{w_if}}=\hbox{Sofmax}_j(w_jf)$$
+For example:\begin{list}{}{}
+	\item $f_1(c,x)=\left\{\begin{array}{l l}
+	1&\hbox{if }word_i=\hbox{"race"}\wedge c=\hbox{NN}\\
+	0&\hbox{else}
+	\end{array}\right.$
+	\item $f_4(c,x)=\left\{\begin{array}{l l}
+	1&\hbox{if is\_lower\_case(}word_i\hbox{)}\wedge c= \hbox{VB}\\
+	0&\hbox{else}
+	\end{array}\right.$
+	\item \ldots
+\end{list}
+\paragraph{Problems} Using Classifiers for Sequence Labeling presents some problems. It's not easy to integrate information from hidden labels on both sides. We make an hard decision on each token, when we should rather choose a global optimum: the best labeling for the whole sequence, and keeping each local decision as just a probability, not a hard decision.\\
+Probabilistic sequence models allow integrating uncertainty over multiple, interdependent classifications and collectively determine the most likely global assignment. Some common approaches are: HMMs (Hidden Markov Models), CRFs (Conditional Random Fields), MEMMs as simplified versions of CRFs, RNNs\ldots
+\paragraph{MEMM} HMM works backwards from the tags to the outputs, while a Maximum Entropy Markov Model works backwards: from the words to the probabilities of the tags. An MEMM is a discriminative model that extends a standard maximum entropy classifier by assuming that the unknown values to be learned are connected in a Markov chain.
+$$P(q_1,\ldots,q_N\:|\:o_1,\ldots,o_N)=\prod_t^N P(q_t\:|\:q_{t-1},o_t)$$
+The probability of a certain label $s$ is modeled in the same way as a maximum entropy classifier $$P(q\:|\:q',o)=\frac{e^{w\cdot f(o,q)}}{\sum_{o,q'}e^{w\cdot f(o,q')}}=\hbox{Softmax}_{o,q}(w\cdot f(o,q))$$
+where $f(o,q)$ is a vector of joint $(o,q)$ features and $w$ are the corresponding weights.
 \begin{center}
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
@@ -601,15 +654,34 @@ Much like a "sliding window" across the data.
 \begin{center}
 	\includegraphics[scale=0.5]{23.png}
 \end{center}
-A convolutional layer in a NN is composed by a set of filetrs: combines a local selection of input values into an output value, sweeping across all input.\\
-During training each filter specializes into recognizing some kiind of relevant combination of features. CNNs work well on stationary features (independent from position). Filters have additional parameters that define:\begin{list}{}{}
+A convolutional layer in a NN is composed by a set of filters: combines a local selection of input values into an output value, sweeping across all input.\\
+During training each filter specializes into recognizing some kind of relevant combination of features. CNNs work well on stationary features (independent from position). Filters have additional parameters that define:\begin{list}{}{}
 	\item Behavior at the start/end of documents (\textbf{padding})
 	\item Size of the sweep step (\textbf{stride})
 	\item Possible presence of holes in the filter window (\textbf{dilation})
 \end{list}
 \paragraph{Distant Supervision} Use the convolutional neural network to further refine the embeddings: word embeddigns from plain text are completely clueless about their sentiment behavior. Collect 10M tweets containing positive emoticons, used as distantly supervised labels to train sentiment-aware embeddings.
-\paragraph{Sentiment Specific Word Embeddings} The idea is to build sentiment specific word embeddings where we return also the polarity of the word, positive, neutral or negative.
-%TODO learning
+\paragraph{Sentiment Specific Word Embeddings} The idea is to build sentiment specific word embeddings where we return also the polarity of the word: positive, neutral or negative.\\
+Sentiment Specific Embeddings are learned:
+\begin{list}{}{}
+	\item The generic loss function is $L_{CW}(x, x^c) = \max(0, 1-f_\theta(x)_0 + f_\theta(x^c)_0)$
+	\item The SS loss function is
+	$$L_{SS}(x, x^c) = \max(0, 1 - d_s(x)f_\theta(x)_1 + d_s(x^c)f_\theta(x^c)_1)$$
+	$$L(x,x^c) = \alpha L_{CW}(x,x^c)+(1-\alpha)L_{SS}(x,x^c)$$
+	With gradients
+	$$\left(\begin{array}{c}
+	\frac{\partial L}{\partial f_\theta(x)}\\
+	\frac{\partial L}{\partial f_\theta(x^c)}
+	\end{array}\right)_0 = \left\{\begin{array}{cl}
+	\left(\begin{array}{c}
+	-1\\1
+	\end{array}\right)&\hbox{if }L_{CW}(x, x^c) > 0\\
+	\left(\begin{array}{c}
+	0\\0
+	\end{array}\right)&\hbox{else}\\
+	\end{array}\right.$$
+\end{list}
+With $x$ sentence, $x^c$ corrupted sentence obtained by replacing the center word with a random word, $f(x)\in \{0,1\}^2$ is the function computed by the network and $d_s(x)\in\{1,-1\}$ represents the polarity of $x$.
 \paragraph{Sentiment Classification from a Single Neuron} A char-level LSTM with 4096 units has been trained on 82M reviews from Amazon, only to predict the next character. After training, one of the units had a very high correlation with sentiment, resulting in \textbf{state-of-the-art accuracy when used as a classifier}. The model can also be used to generate text: by setting the value of the sentiment unit, one can control the sentiment of the resulting text.
 \subsection{Regularization} 
 We can use \textbf{dropout}: creating a masking vector $r$ of Bernoulli random variables with probability $p$ (hyperparameter) of being 1 and delete features during training $$h = W(r\otimes z) + b$$
@@ -1193,7 +1265,7 @@ Better: computer-aided translation evaluation. \textbf{Edit cost}: measure the n
 	\item \textbf{BLEU} (Bilingual Evaluation Understudy): determine the number of $n$-grams of various sizes that the MT output shares with the reference translations. Compute a modified precision measure of the $n$-grams in MT result, averaging $n$-gram precision over all $n$-grams up to size $N$ (typically 4) using the geometric mean:
 	$$p_n = \frac{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}_{\hbox{clip}}(n\hbox{-gram})}{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}(n\hbox{-gram})}$$
 	$$p = \sqrt[N]{\prod_{n=1}^Np_n}$$
-	\textbf{Brevity Penalty} (BP): use a penalty for the translations that are shorter than the reference translation. Define the effective reference length $r$ for each sentence as the length of the reference sentence with the largest number of $N$-gram matches. With $c$ the candidate sentence length:
+	\textbf{BP} (Brevity Penalty): uses a penalty for the translations that are shorter than the reference translation. Define the effective reference length $r$ for each sentence as the length of the reference sentence with the largest number of $N$-gram matches. With $c$ the candidate sentence length:
 	$$BP = \left\{\begin{array}{l l}
 	1&c > r\\
 	e^{\frac{1-r}{c}}& c\leq r
@@ -1202,7 +1274,22 @@ Better: computer-aided translation evaluation. \textbf{Edit cost}: measure the n
 	$$BLEU = BP\cdot p$$
 	Correlates with human evaluation when comparing outputs from different SMT systems, but doesn't correlate with human judgments when comparing SMT systems with manually developed MT or MT with human translations.
 \end{list}
-%TODO finire quel set di slide
+\subsection{Syntax Based Statistical Machine Translation} SMT methods that adopt a syntactic transfer approach. Improved results demonstrated for translating between more distant language pairs (e.g. English-Chinese).
+\paragraph{Synchronous Grammar} Multiple parse trees in a single derivation. Describes the hierarchical structures of a sentence and its translation, and also the correspondence between their sub-parts.
+\begin{center}
+	\includegraphics[scale=0.5]{94.png}
+\end{center}
+\paragraph{Synchronous Derivations and Translation Models} Need to make a probabilistic version of synchronous grammars to create a translation model for $P(F\:|\:E)$. Each synchronous production rule is given a weight $\lambda_i$, that is used in a maximum-entropy (log linear) model. Parameters are learned to maximize the conditional log-likelihood of the training data
+$$\lambda^* = \arg\max_\lambda\sum_j\log P_\lambda(f_j\:|\:e_j)$$
+\paragraph{Use of Dependency Parsing} Restrict phrases to those corresponding to parse subtrees, and use the parse trees to learn reordering of source language to make it more similar to target language and train a PBMT system on the rearranged parallel corpus.
+\subsection{Minimum Error Rate Training} Also known as MERT. No longer using the noisy channel model, but MERT: train a \textbf{logistic regression classifier} to directly minimize the final evaluation metric on the training corpus by using various features of a translation
+\begin{list}{}{}
+	\item Language model $P(E)$
+	\item Translation model $P(F\:|\:E)$
+	\item Reverse translation model $P(E\:|\:F)$
+\end{list}
+\paragraph{Conclusions} Statistical PBMT: phrase table derived by symmetrizing word alignments on a sentence-aligned parallel corpus, statistical phrase translation model $P(F\:|\:E)$ and language model $P(E)$.\\
+All these combined in a logistic regression classifier trained to minimize error rate.
 \section{Neural Machine Translation}
 Statistical Machine Translation is a huge research field, but requires the compilation and maintainment of extra resources (for example tables of equivalent phrases), thus lots of human effort to maintain.\\
 In 2014 neural machine translation was introduced with an huge impact on the machine translation field.
@@ -1241,11 +1328,18 @@ Then we go back finding the complete translations.
 \end{list}
 \subparagraph{Finishing Up} When we have the list of hypothesis, how we select the highest scoring one? Each hypothesis has its score, but longer hypothesis have lower scores so we normalize by length
 $$\hbox{score}(y_1,\ldots,y_t) =\frac{1}{t}\sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
-\paragraph{Pro and Cons}
-%TODO rewrite
-\begin{center}
-	\includegraphics[scale=0.75]{66.png}
-\end{center}
+\begin{multicols}{2}
+\subparagraph{Benefits}\begin{list}{}{}
+	\item Better Performance: more fluent, better use of context and of phrase similarities
+	\item Single neural network to be optimized end-to-end: no subcomponents to be individually optimized
+	\item Requires much less human engineering effort: no feature engineering, same method for all language pairs.
+\end{list}
+\columnbreak
+\subparagraph{Disadvantages}\begin{list}{}{}
+	\item NMT is less interpretable and hard to debug
+	\item NMT is difficult to control: can't easily specify rules or guidelines for translations, also safety concerns
+\end{list}
+\end{multicols}
 \textbf{Machine translation is not a solved problem}, many difficulties remain:
 \begin{list}{}{}
 	\item out-of-vocabulary words
@@ -1268,9 +1362,13 @@ NMT is the flagship task for NLP deep learning: it has pioneered many of the rec
 	\item We get the attention scores $e^t$ for this step 
 	$$e^t=[s_t^Th_1,\ldots,s_t^Th_N]\in R^N$$
 	\item We take the softmax to get the attention distribution for this step (probability distribution that sums to 1)
-	\item %TODO rest
+	$$\alpha^t=\hbox{Softmax}(e^t) \in R^N$$
+	\item We use $\alpha^t$ to take a weighted sum of the encoder hidden states to get the attention output $a^t$
+	$$a^t = \sum_{i=1}^N \alpha_i^th_i\in R^h$$
+	\item Finally, we concatenate the attention output with the decoder hidden state and proceed as in the non-attention seq2seq model
+	$$[a_t, s_t]\in R^{2h}$$
 \end{list}
-Attention significantly improves NMT performance, solving the bottleneck problem and helping with vanishing gradient problem. Also provides some interpretability, and we get alignment for free: we never explicitly tranied an alignment system, the network just learned alignment by itself.
+Attention significantly improves NMT performance, solving the bottleneck problem and helping with vanishing gradient problem. Also provides some interpretability, and we get alignment for free: we never explicitly trained an alignment system, the network just learned alignment by itself.
 \subparagraph{Attention Variants} We have some values $h_i\in R^h$ and a query $s\in R^h$. Attention involves:
 \begin{list}{}{}
 	\item Computing the attention scores $e\in R^N$
@@ -1280,8 +1378,8 @@ Attention significantly improves NMT performance, solving the bottleneck problem
 	$$\alpha = \sum_{i=1}^N\alpha_ih_i\in R^h$$
 	Thus obtaining the \textbf{attention output} $\alpha$ (sometimes called the \textbf{context vector})
 \end{list}
-We've seen it in translation, but this can be applied to other NLP tasks. It has becomes a general deep learning technique as well. A more general definition of attention is: given a set of vector values, and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query.\\
-We sometimes say that the attention attends to the query.\\ %TODO
+We've seen it in translation, but this can be applied to other NLP tasks. It has becomes a general deep learning technique as well.\\
+A more general definition of attention is: given a set of vector values, and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query. We sometimes say that the query \textit{attends to} the values. E.g. in the seq2seq + attention model, each decoder hidden state (query) \textit{attends to} all the encoder hidden states (values).\\
 \textbf{Attention is all you need}. Self-attention helps to contextualize words: a limit on word embeddings was that each word had a single vector, with attention we can introduce into the representation the context into which they appears, allowing to observe other words.
 %skip until Google neural MT architecture
 \subsection{Self-Attention}
