@@ -1708,4 +1708,86 @@ Task specific
 	\includegraphics[scale=0.5]{92.png}
 \end{center}
 Task embeddings capture task relationships: similar tasks are grouped together into clusters.
+\section{Reading Comprehension}
+%TODO part 1 26/04
+\subsubsection{BiDAF} Bidirectional Attention Flow Model
+\paragraph{Encoding} %TODO
+\paragraph{Attention} %TODO
+\subsubsection{BERT}
+\paragraph{Comparing BiDAF and BERT}
+\subsubsection{SpanBERT}
+\section{Open Domain Question Answering}
+We've seen how transformer models are suitable for reading comprehension, with or without finetuning.
+\begin{center}
+	\includegraphics[scale=0.5]{95.png}
+\end{center}
+Different from reading comprehension because we don't assume a given passage, no "source" for the answer. Instead, we have access to a large collection of documents (e.g. Wikipedia). We don't know where the answer is located, and the goal is to return the answer for any open-domain question. Much more challenging, then.
+\paragraph{PiQASso} Pisa Question Answering System
+\begin{center}
+	\includegraphics[scale=0.5]{96.png}
+\end{center}
+\paragraph{Deep Neural Networks for Question Answering} Vanilla NN only store memory in their parameters, which can be billions from billions of documents, but cannot be extended through usage
+.\\
+Open Domain Question Answering must combine\begin{list}{}{}
+	\item Access to external memory (\textbf{Document Retriever})
+	\item Reading comprehension (\textbf{Document Reader})
+\end{list}
+\subparagraph{Retriever-Reader Framework} Input: a large collection of documents $D = \{D_1,\ldots,D_n\}$ and a question $Q$.\\
+Output: an answer string $A$
+\begin{list}{}{}
+	\item Retriever $f(D,Q) = P_1,\ldots,P_k$ (with $k$ predefined and small, e.g. 100)
+	\item Reader $g(Q, \{P_1,\ldots,P_k\}) = A$, reading comprehension problem
+\end{list}
+The retriever is a standard TF-IDF information retrieval sparse model (a fixed module). The reader is a neural reading comprehension model trained on SQuAD an other distantly-supervised QA dataset.\\
+Distantly supervised examples $(Q,A)\rightarrow (P,Q,A)$.
+\subparagraph{Document Reader} Each token $p_i$ in a paragraph $\{p_1,\ldots,p_m\}=RNN(\{\tilde{p}_1,\ldots,\tilde{p}_m\})$.\\
+Each feature vector $\tilde{p}_i$ is comprised of the following parts:
+\begin{list}{}{}
+	\item Word embeddings $f_{emb}(p_i) = E(p_i)$
+	\item Exact match $f_{exact}(p_i) = I(p_i \in q_i)$, three simple binary features indicating whether $p_i$ can be exactly matched to one question word in $q$
+	\item Token features $f_{token}(p_i) = (POS(p_i), NER(p_i), TF(p_i))$
+	\item Aligned question embedding $f_{align}(p_i) = \sum_j a_{ij}E(q_j)$ using attention scores $a_{ij}=\frac{e^{\alpha(E(p_i))\alpha(E(q_j))}}{\sum_{j'}e^{\alpha(E(p_i))\alpha(E(q_{j'}))}}$
+\end{list}
+Question encoding $q=\sum_jb_jq_j$ where $b_j$ encodes the importance of each question word $b_j=\frac{e^{wq_j}}{\sum_{j'} e^{wq_{j'}}}$\\
+For the prediction train two classifier\begin{list}{}{}
+	\item $P_{start}(i)\succ e^{p_iW_sq}$
+	\item $P_{end}(i)\succ e^{p_iW_eq}$
+\end{list}
+Find $i$ and $i'$ %TODO
+We can train the retriever too, even joint training of retriever and reader. Each text passage can be encoded as a vector using BERT and the retriever score can be measured as the dot product between the question representation and passage representation. However it's not easy to model, huge number of passages (e.g. 21M in English Wikipedia).
+
+Large language models can do open-domain question answering as well, without an explicit retriever stage. The reader model may be unnecessary as well. It's possible to encode all the phrases using dense vectors and only do nearest neighbor search without a BERT model at inference time.
+\paragraph{Inference QA} Story $T$, question $q$, answer $q$ performing inference over $T$
+\paragraph{Reading Comprehension} Document $D$, question $q$, find span in $D$ representing the answer
+\paragraph{Facebook's bAbI Dataset} Collection of 20 tasks, each check one skill that a reasoning skill should have. Aims at systems able to solve all tasks: no task specific engineering.
+\begin{list}{}{}
+	\item Task 1: single supporting fact.\\
+	Questions where a single supporting fact, previously give, provides the answer. Simplest case: asking for the location of a person.
+	\item Task 2: two supporting facts.\\
+	Questions where two supporting statements have to be chained to answer the question.
+	\item Task 3: three supporting facts.
+	\item Task 4: two argument relations.\\
+	To answer questions the ability to differentiate and recognize subjects and objects is crucial. We consider the extreme case: sentences featuring re-ordered words.
+	\item Task 6: Yes/No questions
+	\item Task 7: Counting
+	\item Task 17: positional reasoning (task 6 is a prerequisite)
+	\item Task 18: reasoning about size (task 3 and 6 are prerequisites)
+	\item Task 19: pathfinding.\\
+	Goal is finding the path between locations. Difficult, it effectively involves search.
+	\item Task 20: agent's motivation
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{97.png}
+\end{center}
+\paragraph{Question Dependent Recurrent Entity Network for Question Answering} Based on the Memory Network Framework as a variant of Recurrent Entity Network.\\
+Input encoder: creates an internal representation.\\
+Dynamic memory: stores relevant information about entities (Person, Location,\ldots)\\
+Output module: generates the output.\\
+The idea %TODO
+\subparagraph{Input encoder} %TODO
+%TODO
+\subparagraph{Architecture}
+\begin{center}
+	\includegraphics[scale=0.5]{98.png}
+\end{center}
 \end{document}

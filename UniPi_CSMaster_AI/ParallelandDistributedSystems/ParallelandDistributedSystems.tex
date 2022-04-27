@@ -824,5 +824,47 @@ int main(int argc, char* argv[]) {
 }
 \end{lstlisting}
 Compile with at least \texttt{-03 -pthread}. This way uses non-blocking queues.
-
+\section{Parsec} Benchmarks
+\begin{list}{}{}
+	\item \textbf{Blockslides} Portfolio of options, to compute the prices require partial differential equations
+	\item \textbf{Cammeal}\\
+	Simulated Annealing
+	\item \textbf{Dedup}
+	\item \textbf{Ferret} Pipeline
+\end{list}
+\begin{enumerate}
+	\item Come up with an initial solution Pipe(S1, S2, S3, S4, S5)
+	\item Refactoring techniques and possible explore the solution space to find the better solution\\
+	Before coding! Insights on possible performance, possible solutions to discern the better one.
+	\item Implementation phase of the better solution: OMP\ldots
+\end{enumerate}
+In the project, figure out from the sequential code the values of interest (e.g. time spent in the stages) and once we have a clear idea, refactoring and then implement the best solution.
+\section{Stateful Computations} So far assumed that stateless stages/workers/components. E.g. in a Pipeline, the stages are functions $f,g,h,\ldots$ where we move $f(x)$ to $g$, $g(f(x))$ to $h$\ldots and we just compute function, no interaction between the stages.\\
+In a stateful computation the computation depends on: input, state and the function. So not $f(x)$ but $f(x, state)$
+\begin{center}
+	\includegraphics[scale=0.5]{18.png}
+\end{center}
+We don't mind the order of accesses in the state but it has to be accessed in mutual exclusion. If the accesses to the state happen at the same time, then it would be difficult to compute the times. So we make another assumption $t_i = t_{state_i} + t_{fun_i}$ with $t_{state_i}$ being the mutex.
+\begin{center}
+	\includegraphics[scale=0.5]{19.png}\\
+	\includegraphics[scale=0.5]{20.png}
+\end{center}
+\paragraph{Accumulator} We have a parallel pattern and a \textbf{state pattern} (accumulator). Each parallel activity updates the pattern using a function $f$ (associative and commutative). The result is the final value of the state.\\
+Characteristics are: type of global states and functions and whether or not the intermediate results means something.
+\paragraph{Successive Approximation} %TODO
+\paragraph{Example} An emitter and $nw$ workers, followed by a collector.\\
+Without state, $t_S=\max\{t_e, t_c, \frac{t_w}{nw}\}$ because $nw$ tasks, $nw$ workers each $t_w$ giving $nw$ results.\\
+With state, $nw$ tasks with $t_f+nw\cdot t_s$ giving $nw$ results. So $\frac{t_f}{nw}+t_s$. The Speedup($nw$) $\simeq nw$. With $m$ tasks
+$$\frac{m(t_f + t_s)}{m(\frac{t_f}{nw}+t_s)}$$
+$$\lim_{nw\to\infty} = \frac{t_f + t_s}{t_s} = \frac{t_f}{t_s} + 1$$
+With $k$ stages, $m$ tasks and $t_f+t_s$ time in each stage per each task
+$$k\cdot m(t_f+t_s) = $$
+\paragraph{Common State Patterns}\begin{list}{}{}
+	\item \textbf{Resource}: lock, replace, unlock
+	\item \textbf{Accumulator}: $x_i, s= f(x_i, state)$ with $f$ associative and commutative.\\
+	We can use the global value (only) or as local state and finally update the global
+	\item \textbf{Owner Computes}: the state is a vector and the $i$th position can only be updated by the $i$th concurrent activity.\\
+	Attention: if using an actual vector this is a source of false sharing overhead, possibly resolved with padding techniques.
+	\item \textbf{Read only}: shared state is read only, we can just copy it
+\end{list}
 \end{document}

@@ -2013,4 +2013,154 @@ Exploration finds more information about the environment, while exploitation exp
 \paragraph{Prediction vs Control} Prediction is evaluating the future, given a policy, while control is optimizing the future (finding the best policy).
 \paragraph{Overview} Reinforcement Learning is a general-purpose framework for decision making. It's for an agent with the capacity to act and observe. The state is the sufficient statistics to characterize the future, depends on the history of actions and observations (environment state vs agent state).\\
 Success is measured by a scalar reward signal: the goal is to select actions to maximize future reward (exploit) and in order to be effective we should not forget to explore.
+\paragraph{MDP} Markov decision processes formally describe an environment for reinforcement learning: environment is \textbf{fully observable}, i.e. the current state completely characterizes the process. Almost all Reinforcement Learning problems can be formalized as MDPs, for example:
+\begin{list}{}{}
+	\item Partially observable problems can be converted into MDPs
+	\item Bandits are MDPs with one state
+	\item Optimal control primarily deals with continuous MDPs
+\end{list}
+A Markov decision process is a Markov chain with rewards and actions. It is an environment in which all states are Markov: it's a tuple $(S, A, P, R, \gamma)$ where\begin{list}{}{}
+	\item $S$ finite \textbf{set of states}
+	\item $A$ finite \textbf{set of actions} $a$
+	\item $P$ state \textbf{transition matrix} such that $P_{ss'}^a = P(S_{t+1}=s'\:|\:S_t=s, A_t=a)$
+	\item $R$ is a \textbf{reward function} such that $R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$
+	\item $\gamma\in [0,1]$ \textbf{discount factor}
+\end{list}
+The \textbf{return} $G_t$ is the total discounted reward from time-step $t$
+$$G_t = R_{t+1} + \gamma R_{t+1}+\ldots = \sum_{k=0}^\infty \gamma^kR_{t+k+1}$$
+The values of receiving reward $R$ after $k+1$ timesteps is $\gamma^k R$. $\gamma$ values immediate reward vs delayed reward:
+\begin{list}{}{}
+	\item $\gamma\simeq 0$ leads to "myopic" evaluation
+	\item $\gamma\simeq 1$ leads to "fat-sighted" evaluation
+\end{list}
+The discount term is mathematically\ldots %TODO
+An example: student Markov decision process
+\begin{center}
+	\includegraphics[scale=0.5]{160.png}
+\end{center}
+\subparagraph{Value Function} Measures the long-term value of being in a certain state $s$. The state-value function $v(s)$ of a Markov decision process is the \textbf{expected return starting from state $s$}
+$$v(s)=E[G_t\:|\:S_t=s]$$
+\paragraph{Bellman Equation for MDPs} The value function $v(S_t)$ can be decomposed into two parts
+\begin{list}{}{}
+	\item Immediate reward $R_{t+1}$
+	\item Discounted value of successor state $\gamma v(S_{t+1})$
+\end{list}
+$$v(s)=E[G_t\:|\:S_t=s] = E\left[\sum_{k=0}^\infty\gamma^kR_{t+k+1}\:|\:S_t\right]=$$
+$$= E\left[R_{t+1}+\sum_{k=1}^\infty\gamma^k R_{t+k+1}\:|\:S_t\right]= E\left[R_{t+1}+\gamma\left(R_{t+2}+\sum_{k=2}^\infty\gamma^k R_{t+k+1}\right)\:|\:S_t\right]=$$
+$$= E[R_{t+1}+\gamma G_{t+1}\:|\:S_t] = E[R_{t+1}+\gamma v(S_{t+1})\:|\:S_t] =$$
+$$= E[R_{t+1}\:|\:S_t=s] + \gamma E[v(S_{t+1})\:|\:S_t=s]=$$
+$$=R_s+\gamma\sum_{s'}P_{ss'}v(s')$$
+With $E[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
+\subparagraph{Policy} A policy $\pi$ is a distribution over actions $a$ given states $s$ $$\pi(a\:|\:s) = P(A_t=a\:|\: S_t=s)$$
+Defines the behavior of an agent, MDP policises depends only on the current state (\textbf{Markovian}) and are \textbf{stationary} (time-independent): $A_t\sim \pi(\:\:\:|\:s)$ %TODO
+\subparagraph{Value Function with Policy} The action-value function $q_\pi(s,a)$ is the expected return starting from state $s$ taking action $a$ and then following the policy $\pi$
+$$q_\pi(s,a) = E_\pi[G_t\:|\:S_t=s, A_t=a]$$
+\begin{center}
+	\includegraphics[scale=0.5]{161.png}
+\end{center}
+\paragraph{Bellman Expectation Equation with Value and Action-Value function}
+The state-value function can be decomposed into immediate reward plus discounted value of successor state
+$$v_\pi(s) = E_\pi[R_{t+1} + \gamma v_\pi(S_{t+1})\:|\:S_t=s] = \sum_{a\in A }\pi(a\:|\:s)q_\pi(s,a)$$
+Similarly we can decompose the action-value function
+$$q_\pi(s,a) = E_\pi[R_{t+1}+\gamma q_\pi(S_{t+1}, A_{t+1})\:|\:S_t=s, A_t=a] = R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_\pi(s')$$
+One more step of nesting: the expected return of being in a state reachable from $s$ through action $a$ and then continue following the policy $\pi$
+$$v_\pi(s) = \sum_{a\in A} \pi(a\:|\:s) \left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v\pi(s')\right)$$
+The expected return of any action $a'$ taken from states reachable from $s$ through action $a$ (and then following policy $\pi$)
+$$q_\pi(s,a) = R_s^a + \gamma\sum_{s'\in S}P_{ss'}^a \sum_{a'\in A}\pi(a'\:|\:s')q_\pi(s',a')$$
+Matrix form: linear system
+$$v_\pi = R^\pi + \gamma P^\pi v_\pi$$
+With direct solution
+$$v_\pi = (I-\gamma P^\pi)^{-1}R^\pi$$
+\begin{center}
+	\includegraphics[scale=0.5]{162.png}
+\end{center}
+\paragraph{Optimal Value Function} The optimal state-value function $v_*(s)$ is the maximum value function over all policies $$v_*(s) = \max_\pi v_\pi(s)$$
+The optimal action-value function $q_*(s,a)$ is the maximum action-value function over all policies $$q_*(s,a)=\max_\pi q_\pi(s,a)$$
+The optimal value function determines the best possible performance in the MDP. And MDP is solved when we know the optimal value function.
+\begin{center}
+	\includegraphics[scale=0.5]{163.png}\\
+	\includegraphics[scale=0.5]{164.png}
+\end{center}
+\paragraph{Optimal Policy} Define a partial ordering over policies $$\pi\geq \pi'\hbox{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
+\subparagraph{Theorem} For any Markov Decision process\begin{list}{}{}
+	\item There exist an optimal policy %TODO
+\end{list}
+An optimal policy can be found by maximizing over $q_*(s,a)$
+$$\pi_*(a\:|\:s)=\left\{\begin{array}{l l}
+1&\hbox{if }a=\arg\max_{a\in A} q_*(s,a)\\
+0&\hbox{otherwise}
+\end{array}\right.$$
+There is always a deterministic optimal policy for any MDP. If we know $q_*(s,a)$ we straightforwardly find the optimal policy.
+\subparagraph{Bellman Optimality Equations} Optimal value functions are recursively related Bellman-style
+$$v_*(s)=$$ %TODO
+\subsection{Model-Based Planning}
+\paragraph{Dynamic Programming} Dynamic: problem with sequential or temporal component.\\
+Programming: optimizing a program, i.e. a policy.\\
+It's a method for solving complex problems by breaking them down into subproblems: solve the subproblems and combine the partial solutions.\\
+Something already seen in the Viterbi Algorithm.
+\paragraph{Planning by Dynamic Programming} Dynamic programming assumes full knowledge of the MDP.\\
+Prediction:\begin{list}{}{}
+	\item input: MDP (S,A,P,R,$\gamma$) and policy $\pi$ or MKRP (S,P,R,$\gamma$)
+	\item output: value function $v_\pi$
+\end{list}
+Control:
+\begin{list}{}{}
+	\item Input: MDP (S,A,P,R,$\gamma$)
+	\item output: optimal value function $v_{\pi_*}$ and an optimal policy $\pi_*$
+\end{list}
+\paragraph{Iterative Policy Evaluation} Problem: evaluating a given policy $\pi$.\\
+Solution: iterative application of Bellman expectation backup
+$$v_1\rightarrow \ldots \rightarrow v_\pi$$
+Using \textbf{synchronous backup}:
+\begin{list}{}{}
+	\item At each iteration $k+1$
+	\item for each state $s\in S$
+	\item Update $v_{k+1}(s)$ from $v_k(s')$ where $s'$ is a successor state of $s$
+\end{list}
+Formally
+$$v_{k+1}(s) = \sum_{a\in A} \pi(a\:|\:s)\left(R_s^a+\gamma\sum_{s'\in S}P_{ss'}^av_k(s')\right)$$
+$$v_{k+1} = R^\pi +\gamma P^\pi v_k$$
+\paragraph{Improving a Policy} Given a policy $\pi$\begin{list}{}{}
+	\item Evaluate the policy: $v_\pi(s) = E[R_{t+1} + \gamma R_{t+2} + \ldots\:|\:S_t =s]$
+	\item Improve the policy by acting grededily with respect to $v_\pi$:
+	$\pi' = \hbox{Greedy}(\pi)$
+	\item Repeat
+\end{list}
+This process always converges to $\pi_*$, under the assumption that the improvement is greedy.
+\paragraph{Formal Improvement}
+\begin{center}
+	\includegraphics[scale=0.5]{165.png}
+\end{center}
+\begin{list}{}{}
+	\item Policy Evaluation: estimate $v_\pi$, iterative policy evaluation
+	\item Policy Improvement: generate $\pi' \geq \pi$, greedy policy improvement
+\end{list}
+Consider a deterministic policy $a=\pi(s)$, we can improved it by acting greedily $$\pi'(s)=\arg\max_{a\in A} q_\pi(s,a)$$
+This improves the value from any state $s$ over one step $$q_\pi(s,\pi'(s)) = \max_{a\in A} q_\pi(s,a)\geq q_\pi(s,\pi(s)) = v_\pi(s)$$
+Therefore improving the value function
+$$v_{\pi'}(s)\geq v_\pi(s)$$
+If improvement stops
+$$q_\pi(s,\pi'(s)) =$$ %TODO
+\subparagraph{Modified Policy Improvement} Does policy evaluation need to converge to $v_{\pi_*}$? Introduce a stopping condition, e.g. $\epsilon$-convergence of value function or stopping after $k$ iterations (e.g. $k=3$ sufficient in smallgridworld).\\
+Why update the policy every iteration? Stop after $k=1$, equivalent to value iteration.\\
+\textbf{Generalized policy iteration}\begin{list}{}{}
+	\item Policy Evaluation: estimate $v_\pi$, \textbf{any} policy evaluation
+	\item Policy Improvement: generate $\pi' \geq \pi$, \textbf{any} policy improvement algorithm
+\end{list}
+\paragraph{Optimality Principle} Any optimal policy can be subdivided into two components:
+\begin{list}{}{}
+	\item An optimal first action $a^*$
+	\item Followed by an optimal policy from successor state $s'$
+\end{list}
+\subparagraph{Theorem} %TODO
+\paragraph{Deterministic Value Iteration} If we know the solution to subproblems $v_*(s')$, then solution $v_*(s)$ can be found by one-step lookeahead
+$$v_*(s) = \max_{a\in A} R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_*(s')$$
+Value iteration applies these updates iteratively. Intuition: start with final rewards and work backwards (sill works with loopy, stochastic MDPs).
+\paragraph{Value Iteration} Problem %TODO
+Formally
+$$v_{k+1}(s) = \max_{a\in A}\left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v_k(s')\right)$$
+$$v_{k+1} = \max_{a\in A}(R^a + \gamma P^a v_k)$$
+\paragraph{Extensions}
+\subparagraph{Asynchronous DP}
+\subparagraph{In-Place Dynamic Programming}
 \end{document}
