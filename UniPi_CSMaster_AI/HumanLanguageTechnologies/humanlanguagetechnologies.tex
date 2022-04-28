@@ -1726,7 +1726,14 @@ Different from reading comprehension because we don't assume a given passage, no
 \begin{center}
 	\includegraphics[scale=0.5]{96.png}
 \end{center}
-\paragraph{Deep Neural Networks for Question Answering} Vanilla NN only store memory in their parameters, which can be billions from billions of documents, but cannot be extended through usage
+\paragraph{Question Analysis} Given the question:
+\begin{enumerate}
+	\item \textbf{Parsing}: natural language question is parsed
+	\item \textbf{Keywords extraction}: POS tags are used to select search keywords
+	\item \textbf{Answer type detection}: expected answer type is determined applying heuristic rules to the dependency tree
+	\item \textbf{Relation detection}: additional relations are inferred and the answer entity is identified
+\end{enumerate}
+\paragraph{Memory} Vanilla NN only store memory in their parameters, which can be billions from billions of documents, but cannot be extended through usage
 .\\
 Open Domain Question Answering must combine\begin{list}{}{}
 	\item Access to external memory (\textbf{Document Retriever})
@@ -1746,19 +1753,31 @@ Each feature vector $\tilde{p}_i$ is comprised of the following parts:
 	\item Word embeddings $f_{emb}(p_i) = E(p_i)$
 	\item Exact match $f_{exact}(p_i) = I(p_i \in q_i)$, three simple binary features indicating whether $p_i$ can be exactly matched to one question word in $q$
 	\item Token features $f_{token}(p_i) = (POS(p_i), NER(p_i), TF(p_i))$
-	\item Aligned question embedding $f_{align}(p_i) = \sum_j a_{ij}E(q_j)$ using attention scores $a_{ij}=\frac{e^{\alpha(E(p_i))\alpha(E(q_j))}}{\sum_{j'}e^{\alpha(E(p_i))\alpha(E(q_{j'}))}}$
+	\item Aligned question embedding $f_{align}(p_i) = \sum_j a_{ij}E(q_j)$ using attention scores $$a_{ij}=\frac{e^{\alpha(E(p_i))\alpha(E(q_j))}}{\sum_{j'}e^{\alpha(E(p_i))\alpha(E(q_{j'}))}}$$ with $\alpha$ being a ReLU dense layer.
 \end{list}
 Question encoding $q=\sum_jb_jq_j$ where $b_j$ encodes the importance of each question word $b_j=\frac{e^{wq_j}}{\sum_{j'} e^{wq_{j'}}}$\\
 For the prediction train two classifier\begin{list}{}{}
-	\item $P_{start}(i)\succ e^{p_iW_sq}$
-	\item $P_{end}(i)\succ e^{p_iW_eq}$
+	\item $P_{start}(i)\propto e^{p_iW_sq}$
+	\item $P_{end}(i)\propto e^{p_iW_eq}$
 \end{list}
-Find $i$ and $i'$ %TODO
-We can train the retriever too, even joint training of retriever and reader. Each text passage can be encoded as a vector using BERT and the retriever score can be measured as the dot product between the question representation and passage representation. However it's not easy to model, huge number of passages (e.g. 21M in English Wikipedia).
-
+Find $i,i'\:|\:i\leq i'\leq i+15\wedge P_{start}(i)\cdot P_{end}(i')$ is maximized.\\\\
+We can train the retriever too, even joint training of retriever and reader. Each text passage can be encoded as a vector using BERT and the retriever score can be measured as the dot product between the question representation and passage representation. However it's not easy to model, huge number of passages (e.g. 21M in English Wikipedia). We can also just train the retriever using question-answer pairs (DPR, Dense Passage Retrieval).\\
+Recent works shows that it is beneficial to generate answers instead of extracting answers.\\
 Large language models can do open-domain question answering as well, without an explicit retriever stage. The reader model may be unnecessary as well. It's possible to encode all the phrases using dense vectors and only do nearest neighbor search without a BERT model at inference time.
-\paragraph{Inference QA} Story $T$, question $q$, answer $q$ performing inference over $T$
-\paragraph{Reading Comprehension} Document $D$, question $q$, find span in $D$ representing the answer
+\begin{multicols}{2}
+\paragraph{Inference Question Answering}
+\begin{list}{}{}
+	\item Story $T$
+	\item Question $q$
+	\item Answer $q$ performing inference over $T$
+\end{list}
+\paragraph{Reading Comprehension}
+\begin{list}{}{}
+	\item Document $D$
+	\item Question $q$
+	\item Find span in $D$ representing the answer
+\end{list}
+\end{multicols}
 \paragraph{Facebook's bAbI Dataset} Collection of 20 tasks, each check one skill that a reasoning skill should have. Aims at systems able to solve all tasks: no task specific engineering.
 \begin{list}{}{}
 	\item Task 1: single supporting fact.\\
@@ -1779,13 +1798,39 @@ Large language models can do open-domain question answering as well, without an 
 \begin{center}
 	\includegraphics[scale=0.5]{97.png}
 \end{center}
-\paragraph{Question Dependent Recurrent Entity Network for Question Answering} Based on the Memory Network Framework as a variant of Recurrent Entity Network.\\
-Input encoder: creates an internal representation.\\
-Dynamic memory: stores relevant information about entities (Person, Location,\ldots)\\
-Output module: generates the output.\\
-The idea %TODO
-\subparagraph{Input encoder} %TODO
-%TODO
+\paragraph{Question Dependent Recurrent Entity Network for Question Answering} Based on the Memory Network Framework as a variant of Recurrent Entity Network.
+\begin{list}{}{}
+	\item Input encoder: creates an internal representation.
+	\item Dynamic memory: stores relevant information about entities (Person, Location,\ldots)
+	\item Output module: generates the output.
+\end{list}
+The idea is to \textbf{include the question $q$ in the memorization process}.
+\subparagraph{Input encoder} Set of sentences $\{s_1,\ldots,s_t\}$ and a question $q$
+\begin{list}{}{}
+	\item $E\in R^{|V|\times d}$ embedding matrix, $E(w) = e\in R^d$
+	\item $\{e_1^{(s_t)},\ldots,e_m^{(s_t)}\}$ vectors for the words in $s_t$
+	\item $\{e_1^{(q)},\ldots,e_k^{(q)}\}$ vectors for the words in $q$
+	\item $f^{(s/q)} = \{f_1,\ldots,f_m\}$ multiplicative mask with $f_i\in R^d$
+\end{list}
+$$s_t = \sum_{i=1}^m e_i^{(s)}\odot f_i^{(s)}$$
+$$q_t = \sum_{i=1}^k e_i^{(q)}\odot f_i^{(q)}$$
+\begin{center}
+	\includegraphics[scale=0.5]{100.png}
+\end{center}
+\subparagraph{Dynamic Memory} Consists in a set of blocks meant to represent entities in the story. A block is made by a key $k_i$ that identifies the entity and a hidden state $h_i$ that store information about it.
+$$g_i^{(t)} = \sigma(s_t^Th_i^{(t-1)} + s_t^Tk_i^{(t-1)} + s_t^Tq)$$
+$$\hat{h}_i^{(t)} = \phi(Uh_i^{(t-1)} + Vk_i^{(t-1)} + Ws_t)$$
+$$h_i^{(t)} = h_i^{(t-1)} + g_i^{(t)}\odot\hat{h}_i^{(t)}$$
+$$h_i^{(t)}= \frac{h_i^{(t)}}{\|h_i^{(t)}\|}$$
+\begin{center}
+	\includegraphics[scale=0.5]{99.png}
+\end{center}
+\subparagraph{Output Module} Scores memories $h_i$ using $q$, with an embedding matrix $E\in R^{|V|\times d}$ to generate the output $\hat{y}$
+$$p_i = \hbox{Softmax}(q^Th_i)$$
+$$u = \sum_{j=1}^z p_ih_i$$
+$$\hat{y} = R\phi(q + Hu)$$
+where $\hat{y}\in R^{|V|}$ represents the model answer.
+\subparagraph{Training} Given $\{(x_i,y_i)\}_{i=1}^n$, use the Cross Entropy loss function $H(y,\hat{y})$ in an end-to-end training with standard backpropagation through time (BPTT) algorithm.
 \subparagraph{Architecture}
 \begin{center}
 	\includegraphics[scale=0.5]{98.png}
