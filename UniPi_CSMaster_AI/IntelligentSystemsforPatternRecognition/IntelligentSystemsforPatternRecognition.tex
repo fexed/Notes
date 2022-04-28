@@ -2163,4 +2163,150 @@ $$v_{k+1} = \max_{a\in A}(R^a + \gamma P^a v_k)$$
 \paragraph{Extensions}
 \subparagraph{Asynchronous DP}
 \subparagraph{In-Place Dynamic Programming}
+\subsection{Model-Free Reinforcement Learning}
+So far: solve a known MDP (states, transition, rewards, actions). In a model-free context: no environment model neither knowledge of MDP transition/rewards %TODO
+\subsubsection{Monte-Carlo Reinforcement Learning}
+\paragraph{MC} MV methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of DMP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
+Uses the simplest idea: the value is the mean return across %TODO
+\subparagraph{MC Policy Evaluation} Goal: learn $v_\pi$ from episodes of experience under policy $\pi$
+$$S_1,A_1,R_2,\ldots,R_k\sim \pi$$
+Recall that return is the total discounted reward
+$$G_t = R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{T-1}R_T$$
+At time $t$ I am in state $S_t$. Recall the value function is the expected return $$v_\pi(s)=E[G_t\:|\:S_t=s]$$
+MC policy evaluation uses empirical mean return instead of expected return.
+\subparagraph{Incremental Mean MC Update} Update $V(s)$ incrementally after episode $S_1,A_1,R_2,\ldots, R_T$. For each state $S_t$ with return $G_t$\begin{list}{}{}
+	\item Increment counter $N(s) = N(s) + 1$ (number of time I've seen state $s$)
+	\item Update value function with incremental mean
+	$$V(S_t) = V(S_t) + \frac{G_t - V(S_t)}{N(S_t)}$$
+\end{list}
+In non-stationary problems track a running mean (forget old episodes)
+$$V(S_t) = V(S_t) +\alpha(G_t-V(S_t))$$
+\subsubsection{Temporal-Difference Learning}
+TD methods learn directly from episodes of experience. Model-free (no knowledge of MDP transition/rewards), \textbf{also learns from incomplete episodes} by bootstrapping, and updates a guess towards a guess.
+\paragraph{MC vs TD} Goal: learn $v_\pi$ from episodes of experience under policy $\pi$
+\begin{list}{}{}
+	\item Incremental every-visit MC\\
+	Update value $V(S_t)$ toward actual return $G_t$
+	$$V(S_t) = V(S_t) +\alpha(G_t-V(S_t))$$
+	\item Simplest temporal-difference learning algorithm (TD(0))\\
+	Update value $V(S_t)$ toward estimated return $R_t + \gamma V(S_{t+1})$
+	$$V(S_t) = V(S_t) + \alpha(R_t+\gamma V(S_{t+1}) - V(S_t))$$
+\end{list}
+$R_t+\gamma V(S_{t+1})$ is TD target and  $R_t+\gamma V(S_{t+1}) - V(S_t)$ is TD error $\delta_t$
+\paragraph{Bias-Variance Tradeoff} Return $G_t = R_{t+1} + \gamma R_{t+2}+\ldots$ is a unbiased estimate of $v_\pi(S_t)$. (MC zero bias)\\
+True TD target $R_{t+1} + \gamma v_\pi(S_{t+1})$ is unbiased estimate of $v_\pi(S_t)$.\\
+TD target $R_{t+1} + \gamma V(S_{t+1})$ is a biased estimate of $v_\pi(S_t)$\\
+TD target is much lower variance than the return: return depends on many random actions-transition-rewards, TD target depends on one random action-transition-reward.
+\begin{list}{}{}
+	\item MC hash high variance, zero bias\\
+	Good convergence properties, even with function approximation. Not very sensitive to initial value and very simple to understand and use.
+	\item TD has low variance, some bias\\
+	Usually more efficient than MC. TD(0) converges to $v_\pi(s)$ but not always with function approximation. Is also more sensitive to initial value.
+\end{list}
+\paragraph{Batch MC and TD} MC and TD converge $V(s) \rightarrow v_\pi(s)$ as experience $\rightarrow \infty$. But what about batch solution for finite experience?
+$$s_1^1,a_1^1r_2^1,\ldots,s_{T_1}^1$$
+$$\vdots$$
+$$s_1^K,a_1^Kr_2^K,\ldots,s_{T_1}^K$$
+E.g. repeatedly sample episode $k\in [1,K]$
+%TODO
+\subparagraph{Simple example} $V(B)=\frac{6}{8}=75\%$ on MC, sum over number of visits, and $0.75$ for TD.\\
+$V(A)=0$ on MC but $0.75=75\%$ on TD.
+%TODO desc and image
+\paragraph{Certainty Equivalence}
+\begin{list}{}{} %TODO formulas
+	\item MC converges to solution with minimum mean-squared error
+	\item TD(0) converges to solution of maximum likelihood Markov model
+\end{list}
+TD exploits Markov property (usually more efficient in Markov environments), while MC doesn't (usually more effective in non-Markov environments).
+\subsubsection{Unifying and Generalizing}
+\paragraph{MC Update}
+\begin{center}
+	\includegraphics[scale=0.5]{166.png}
+\end{center}
+\paragraph{Dynamic Programming}
+\begin{center}
+	\includegraphics[scale=0.5]{167.png}
+\end{center}
+\paragraph{TD Update}
+\begin{center}
+	\includegraphics[scale=0.5]{168.png}
+\end{center}
+Are there something in between MC and TD? Yes, TD(0) because looks just one step ahead.
+\paragraph{$n$-step Prediction}
+\begin{center}
+	\includegraphics[scale=0.5]{169.png} %TODO rewrite
+\end{center}
+\paragraph{$\lambda$-returns (Forward View)} The $\lambda$-return $G_t^\lambda$ combines all $n$-step returns $G_t^{(n)}$.\\
+Using weight $(1-\lambda)\lambda^{n-1}$
+$$G_t^\lambda = (1-\lambda)\sum_{n=1}^\infty \lambda^{n-1}G_t^{(n)}$$ %TODO
+Update as appropriate (TD($\lambda$))
+$$V(S_t) = V(S_t) + \alpha(G_t^\lambda - V(S_t))$$
+But this Forward View need until infinity, so I need to do the computation in a smart way.\\
+The TD($\lambda$) weight function is:
+\begin{center}
+	\includegraphics[scale=0.5]{170.png}
+\end{center}
+\paragraph{Eligibility Traces} Tradeoff between
+\begin{list}{}{}
+	\item Frequency heuristic
+	\item Recency heuristic
+\end{list}
+Eligibility trace combines both
+$$E_0(s) = 0$$
+$$E_t(s) = \lambda\gamma E_{t-1}(s) + 1(S_t;s)$$
+With fading memory of the past (frequency) and adds 1 whenever $S_t = s$ (recency)
+\paragraph{Backward View TD($\lambda$)} Keep an eligibility trace for every state $s$. Update value $V(s)$ for every state $s$, in proportion to TD-error $\delta_t$ and eligibility trace $E_t(s)$
+$$\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$$
+$$V(s) = V(s) + \alpha\delta_t E_t(s)$$
+\begin{center}
+	\includegraphics[scale=0.5]{171.png}
+\end{center}
+\subsubsection{Control}
+\paragraph{Model-Free Policy Iteration Using Action-Value Function}
+\begin{list}{}{}
+	\item Greedy policy improvement over $V(s)$ requires model of MDP
+	$$ $$ %TODO
+	problem is $P_{ss'}^a$
+	\item Greedy %TODO
+\end{list}
+\paragraph{$\epsilon$-greedy Exploration} Simplest idea for ensuring continual exploration.\\
+All $m$ actions are tried with non-zero probability:\begin{list}{}{}
+	\item With probability $1-\epsilon$ choose the greedy action
+	\item With probability $\epsilon$ choose an action at random
+\end{list}
+$$\pi(a\:|\:s)= \left\{\begin{array}{c l}
+\frac{\epsilon}{m}+(1-\epsilon)&\hbox{if }a^*=\arg\max_{a\in A}Q(s,a)\\
+\frac{\epsilon}{m}&\hbox{otherwise}
+\end{array}\right.$$
+\paragraph{Monte-Carlo Control} Every episode
+\begin{list}{}{}
+	\item Policy Evaluation: Monte-Carlo policy evaluation $Q\simeq q_\pi$
+	\item Policy Improvement: $\epsilon$-greedy policy improvement
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{172.png}
+\end{center}
+\paragraph{On-Policy Control with SARSA} With TD-learning, every time-step
+\begin{list}{}{}
+	\item Policy Evaluation: SARSA $Q\simeq q_\pi$
+	\item Policy Improvement: $\epsilon$-greedy policy improvement
+\end{list}
+\subparagraph{Updating Action-Value Functions with SARSA}
+\begin{center}
+	\includegraphics[scale=0.5]{173.png}
+\end{center}
+Expected SARSA\\
+We sample also future action $A'\simeq \pi$ (instead of leveraging policy %TODO
+\subsection{Off-Policy Learning} Evaluate target policy $\pi(a\:|\:s)$ to compute $v_\pi(s)$ or $q_\pi(s,a)$, while following behavior policy $\mu(a\:|\:s)$
+$$\{S_1,\ldots,$$ %TODO
+\paragraph{Q-Learning} Off-policy learning of action-values $Q(s,a)$
+\begin{list}{}{}
+	\item Next action is chosen using behavior policy $A_{t+1}\sim \mu(\:\:|\:S_t)$
+	\item But we consider alternative successor action $A'\sim\pi(\:\:|\:S_t)$
+	\item And update $Q(S_t,A_t)$ toward value of alternative action
+	$$Q(S_t,A_t) = Q(S_t,A_t) + \alpha(R_{t+1} + \gamma Q(S_{t+1},A') - Q(S_t,A_t))$$
+	Note that $R_{t+1} + \gamma Q(S_{t+1},A')$ is TD learning
+\end{list}
+\paragraph{Off-Policy Control by Q-Learning}
+%TODO finire
 \end{document}

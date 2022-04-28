@@ -867,4 +867,39 @@ $$k\cdot m(t_f+t_s) = $$
 	Attention: if using an actual vector this is a source of false sharing overhead, possibly resolved with padding techniques.
 	\item \textbf{Read only}: shared state is read only, we can just copy it
 \end{list}
+\section{MPI} \paragraph{Message Passing Interface} Set of processes plus this MPI that allows to send/receive data or to act with more structured communications. So no pointers but buffers, that are copied.
+\paragraph{SPMD} Single Program Multiple Data: %TODO
+\paragraph{MPI} On clusters/network of workstations
+\paragraph{OpenMP} On shared-memory multicores.
+\paragraph{Use the library} With \texttt{mpicc} compiler.\\
+\texttt{MPI\_Init(\&argc, \&argv)} at the beginning of the main.\\
+\texttt{MPI\_Finalize()} at the end of the main.\\
+Runs on all the instances.\\
+Relies on the concept of \textbf{communicator}: set of processes capable of communicating. Simplest communicator: \texttt{MPI\_COMM\_WORLD}, hosts all the processes in MPI. Can be splitted in subcommunicators: scatter is a broadcast (everyone gets data including the one that scatters).\\
+To know who I am: \texttt{MPI\_Comm\_rank(communicator, \&me)} getting in \texttt{me} my ID (one of the numbers between 0-15 if called with \texttt{mpirun -np 16})\\
+To know how many we are: \texttt{MPI\_Comm\_size(communicator, \&me)}, returns the total number.\\
+These calls can also be done into a subcommunicator. Use the subcommunicators for example for two set of workers.
+\paragraph{Send/Receive} Many ways to send and receive.\\
+The message has an envelope. The message has a pointer, size of the data (send contiguous addresses) and type of data. The envelope has $\langle$from, to, tag$\rangle$. Tag can be used to discern normal messages, init messages, EOS messages\ldots\\\\
+\texttt{MPI\_Send(void* data, int count, MPI\_Datatype type, ind dest, int tag, MPI\_COMM communicator)}\\
+\texttt{MPI\_Receive(void* data, int count, MPI\_Datatype, int source, int tag, MPI\_COMM comm, MPI\_Status* status)}\\
+They are blocking calls but the sender only waits until the message is copied in the buffer, and the received only waits until the buffer is full.
+\begin{lstlisting}[style=myC]
+MPI_Init(...)
+MPI_Comm_rank(..., &me)
+switch(me):
+	case 0:
+		MPI_Send(...)
+		MPI_Receive(...)
+		break;
+	case 1:
+		MPI_Send(...)
+		MPI_Receive(...)
+		break;
+\end{lstlisting}
+\paragraph{Collective} Distributing data. E.g. \texttt{MPI\_Bcast}, broadcast, one sending (root) and all receiving (sender included): the data in the buffer of the sender is copied in each receiver's buffer.\\
+\texttt{MPI\_Scatter} is similar, but the the buffer of the sender is divided and each receiver gets a portion. You specify the cell counts.\\
+\texttt{MPI\_Reduce} takes the values in the buffers of the processes applying the operation (e.g. plus) and puts the result in the root's buffer.\\
+\texttt{MPI\_AllReduce} is similar but the result is duplicated in each processe's buffer.\\
+\texttt{MPI\_Gather} gets the values and concantenate them into the root's buffer, no operations. \texttt{MPI\_AllGather} for putting the results in each process's buffer. Remember that it's not shared memory, so with \texttt{MPI\_Gather} the result can be seen only by the root and there's no way of getting it from the other processes.
 \end{document}
