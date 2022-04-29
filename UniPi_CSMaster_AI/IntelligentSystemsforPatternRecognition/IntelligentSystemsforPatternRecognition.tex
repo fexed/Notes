@@ -2194,10 +2194,15 @@ Dynamic programming is effective for medium-sized problems (millions of states),
 \paragraph{Sample Backup} From now on we will consider sample backups. Using sample rewards and sample transitions $(S,A,R,S')$, instead of reward function $R$ and transition function $P$.\\
 Pros: model-free (no advance knowledge of MDP required), breaks the curse of dimensionality through sampling, the cost of backup is constant, independent of $n = |S|$.
 \subsection{Model-Free Reinforcement Learning}
-So far: solve a known MDP (states, transition, rewards, actions). In a model-free context: no environment model neither knowledge of MDP transition/rewards %TODO
+So far: solve a known MDP (states, transition, rewards, actions). In a model-free context: no environment model, neither knowledge of MDP transition/rewards.
+\begin{list}{}{}
+	\item Model-Free Prediction: estimate the value function of an unknown MDP
+	\item Model-Free Control: optimize the value function of an unknown MDP
+\end{list}
 \subsubsection{Monte-Carlo Reinforcement Learning}
 \paragraph{MC} MV methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of DMP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
-Uses the simplest idea: the value is the mean return across %TODO
+Uses the simplest idea: the value is the mean return across episodes.\\
+But can only apply Monte-Carlo to episodic MDPs, where \textbf{all episodes must terminate}.
 \subparagraph{MC Policy Evaluation} Goal: learn $v_\pi$ from episodes of experience under policy $\pi$
 $$S_1,A_1,R_2,\ldots,R_k\sim \pi$$
 Recall that return is the total discounted reward
@@ -2237,15 +2242,34 @@ TD target is much lower variance than the return: return depends on many random 
 $$s_1^1,a_1^1r_2^1,\ldots,s_{T_1}^1$$
 $$\vdots$$
 $$s_1^K,a_1^Kr_2^K,\ldots,s_{T_1}^K$$
-E.g. repeatedly sample episode $k\in [1,K]$
-%TODO
-\subparagraph{Simple example} $V(B)=\frac{6}{8}=75\%$ on MC, sum over number of visits, and $0.75$ for TD.\\
+E.g. repeatedly sample episode $k\in [1,K]$, apply MC or TD(0) to episode $k$.
+\subparagraph{Simple example} 
+\begin{multicols}{2}
+Two states, A, B, no discounting, 8 episodes of experience:
+\begin{enumerate}
+	\item A, 0, B, 0
+	\item B, 1
+	\item B, 1
+	\item B, 1
+	\item B, 1
+	\item B, 1
+	\item B, 1
+	\item B, 0
+\end{enumerate}
+$V(B)=\frac{6}{8}=75\%$ on MC, sum over number of visits, and $0.75$ for TD.\\
 $V(A)=0$ on MC but $0.75=75\%$ on TD.
-%TODO desc and image
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{174.png}
+\end{center}
+\end{multicols}
 \paragraph{Certainty Equivalence}
-\begin{list}{}{} %TODO formulas
-	\item MC converges to solution with minimum mean-squared error
-	\item TD(0) converges to solution of maximum likelihood Markov model
+\begin{list}{}{}
+	\item MC converges to solution with minimum mean-squared error, best fit to the observed returns
+	$$\sum_{k=1}^K\sum_{t=1}^{T_k}\left(G_t^k-V(s_t^k)\right)^2$$
+	\item TD(0) converges to solution of maximum likelihood Markov model, solution to the MDP $(S, A, P, R, \gamma)$ that best fits the data
+	$$\hat{P}_{ss'}^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} 1(s_t^k,a_t^k,s_{t+1}^k; s, a, s')$$
+	$$\hat{R}_s^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} 1(s_t^k,a_t^k;s,a)r_t^k$$
 \end{list}
 TD exploits Markov property (usually more efficient in Markov environments), while MC doesn't (usually more effective in non-Markov environments).
 \subsubsection{Unifying and Generalizing}
@@ -2262,15 +2286,19 @@ TD exploits Markov property (usually more efficient in Markov environments), whi
 	\includegraphics[scale=0.5]{168.png}
 \end{center}
 Are there something in between MC and TD? Yes, TD(0) because looks just one step ahead.
-\paragraph{$n$-step Prediction}
+\paragraph{$n$-step Prediction} TD looks and targets $n$ steps in the future
 \begin{center}
-	\includegraphics[scale=0.5]{169.png} %TODO rewrite
+	\includegraphics[scale=0.5]{169.png}
 \end{center}
+Define the $n$-step return
+$$G_t^{(n)} = R_{t+1}+\gamma R_{t+1}+\ldots+ \gamma^{n-1}R_{t+n} + \gamma^n V(S_{t+n})$$
+Learn based on the $n$-step inference
+$$V(S_t) = V(S_t) + \alpha\left(G_t^{(n)} - V(S_t)\right)$$
 \paragraph{$\lambda$-returns (Forward View)} The $\lambda$-return $G_t^\lambda$ combines all $n$-step returns $G_t^{(n)}$.\\
 Using weight $(1-\lambda)\lambda^{n-1}$
-$$G_t^\lambda = (1-\lambda)\sum_{n=1}^\infty \lambda^{n-1}G_t^{(n)}$$ %TODO
+$$G_t^\lambda = (1-\lambda)\sum_{n=1}^\infty \lambda^{n-1}G_t^{(n)}$$
 Update as appropriate (TD($\lambda$))
-$$V(S_t) = V(S_t) + \alpha(G_t^\lambda - V(S_t))$$
+$$V(S_t) = V(S_t) + \alpha\left(G_t^\lambda - V(S_t)\right)$$
 But this Forward View need until infinity, so I need to do the computation in a smart way.\\
 The TD($\lambda$) weight function is:
 \begin{center}
@@ -2291,13 +2319,14 @@ $$V(s) = V(s) + \alpha\delta_t E_t(s)$$
 \begin{center}
 	\includegraphics[scale=0.5]{171.png}
 \end{center}
-\subsubsection{Control}
+\subsubsection{On-Policy Learning}
 \paragraph{Model-Free Policy Iteration Using Action-Value Function}
 \begin{list}{}{}
 	\item Greedy policy improvement over $V(s)$ requires model of MDP
-	$$ $$ %TODO
-	problem is $P_{ss'}^a$
-	\item Greedy %TODO
+	$$\pi'(s) = \arg\max_{a\in A}R_s^a + P_{ss'}^aV(s')$$
+	The problem is $P_{ss'}^a$, which is the model
+	\item Greedy policy improvement over $Q(s,a)$ is model-free
+	$$\pi'(s) = \arg\max_{a\in A}Q(s,a)$$
 \end{list}
 \paragraph{$\epsilon$-greedy Exploration} Simplest idea for ensuring continual exploration.\\
 All $m$ actions are tried with non-zero probability:\begin{list}{}{}
@@ -2325,10 +2354,11 @@ $$\pi(a\:|\:s)= \left\{\begin{array}{c l}
 \begin{center}
 	\includegraphics[scale=0.5]{173.png}
 \end{center}
-Expected SARSA\\
-We sample also future action $A'\simeq \pi$ (instead of leveraging policy %TODO
-\subsection{Off-Policy Learning} Evaluate target policy $\pi(a\:|\:s)$ to compute $v_\pi(s)$ or $q_\pi(s,a)$, while following behavior policy $\mu(a\:|\:s)$
-$$\{S_1,\ldots,$$ %TODO
+Expected SARSA
+$$q_*(s,a) = R_s^a+\gamma\sum_{a'\in A}\pi(a'\:|\:s')q_*(s',a')$$
+We sample also future action $A'\simeq \pi$ (instead of leveraging policy to compute expectation).
+\subsubsection{Off-Policy Learning} Evaluate target policy $\pi(a\:|\:s)$ to compute $v_\pi(s)$ or $q_\pi(s,a)$, while following behavior policy $\mu(a\:|\:s)$
+$$\{S_1,A_1,R_2\ldots,S_T\}\sim\mu$$
 \paragraph{Q-Learning} Off-policy learning of action-values $Q(s,a)$
 \begin{list}{}{}
 	\item Next action is chosen using behavior policy $A_{t+1}\sim \mu(\:\:|\:S_t)$
@@ -2337,6 +2367,17 @@ $$\{S_1,\ldots,$$ %TODO
 	$$Q(S_t,A_t) = Q(S_t,A_t) + \alpha(R_{t+1} + \gamma Q(S_{t+1},A') - Q(S_t,A_t))$$
 	Note that $R_{t+1} + \gamma Q(S_{t+1},A')$ is TD learning
 \end{list}
-\paragraph{Off-Policy Control by Q-Learning}
-%TODO finire
+\paragraph{Off-Policy Control by Q-Learning} Allow both behavior and target policies to improve. The target policy $\pi$ is greedy with respect to $Q(S_t,A_t)$
+$$\pi(S_{t+1})=\arg\max_{a'} Q(S_{t+1}, a')$$
+The behavior policy $mu$ is $\epsilon$-greedy with respect to $Q(s,a)$.\\
+The Q-learning target then simplifies to
+$$R_{t+1}+\gamma Q(S_{t+1}, A') = R_{t+1} + \gamma Q(S_{t+1}, \arg\max_{a'} Q(S_{t+1}, a'))= R_{t+1} + \max_{a'} \gamma Q(S_{t+1}, a')$$
+\subparagraph{Theorem} Q-learning control converges to the optimal action-value function, $Q(s,a)\rightarrow q_*(s,a)$
+$$Q(S,A) = Q(S,A) + \alpha(R + \max_{a'} \gamma Q(S'_{t+1}, a') - Q(S,A))$$
+\paragraph{Wrap-Up}
+\begin{center}
+	\includegraphics[scale=0.5]{175.png}
+\end{center}
+Model-free prediction is value function estimation of an unknown MDP, based on sample updates, Monte-Carlo methods (estimating value function by averaging sample returns on episodic tasks) or TD learning (learn from existing estimates of future return, generalization to $n$th step).\\
+Model-free control leverages action-value function: need to maintain sufficient exploration ($\epsilon$-greedy), off-policy controls learns a value function of a target policy from data generated by a different behavior policy. SARSA($\lambda$) on-policy and Q-learning off-policy.
 \end{document}
