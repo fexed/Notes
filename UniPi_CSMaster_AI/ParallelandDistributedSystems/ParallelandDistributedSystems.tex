@@ -719,11 +719,11 @@ Addresses the idea of structured parallel programming targeting shared-memory mu
 \begin{center}
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
-\paragraph{\texttt{ff\_node}} Computes some function and has two queues: a queue where to take items to be computed and a delivery queue.\\
+\paragraph{\texttt{ff\_node}} Computes some function and has two queues: a queue from where it takes items to be computed and a delivery queue.\\
 FastFlow has stream computations and data-parallel computations.\\
 Two nodes can be merged in a \texttt{pipe ff\_node}: this merges the output queue of the first node into the input queue of the second node.\\
 The single nodes implement the business logic, the rest is managed by the framework.\\
-In the \texttt{svc} method, being \texttt{void*} both in parameters and in return type, you can specify whichever type you need to flow through the tasks. You can pass a task as parameter, process it and cast to \texttt{void*} its result to return it. With \texttt{ff\_node\_t<t1, t2>} it's introduced the type checking ad template level.
+In the \texttt{svc} method, being \texttt{void*} both in parameters and in return type, you can specify whichever type you need to flow through the tasks. You can pass a task as parameter, process it and cast to \texttt{void*} its result to return it. With \texttt{ff\_node\_t<t1, t2>} it's introduced the type checking at template level.
 \paragraph{Stream} \begin{center}
 	\includegraphics[scale=0.5]{17.png}
 \end{center}
@@ -733,10 +733,10 @@ The stream flows through the program and it could be infinite, in principle. We 
 	\item \texttt{ff\_send\_out} sends items in the stream. E.g. to end the stream, \texttt{ff\_send\_out(EOS)}
 \end{list}
 Shared-memory multicore, so each activity is a thread basically.\\\\
-In the queues we host pointers, we don't move data. We target the fastest communication possible, non-blocking channels (without condition variables and other mechanisms): the native FastFlow queues has latency of less than tens of nanoseconds, due to cache overhead. But there are other channels, e.g.: the emitter for a farm is a $1:n$ communication channel so we use a father thread, slowing down the process but it's inevitable. This can be changed at compile time to use blocking communication channels (structures with mutexes, variables\ldots).
+In the queues we host pointers, we don't move data. We target the fastest communication possible, non-blocking channels (without condition variables and other mechanisms): the native FastFlow queues has latency of less than tens of nanoseconds, due to cache overhead. But there are other channels, e.g.: the emitter for a farm is a 1:$n$ communication channel so we use a father thread, slowing down the process but it's inevitable. This can be changed at compile time to use blocking communication channels (structures with mutexes, variables\ldots).
 \paragraph{\texttt{ff\_node\_t<tin, tout>}} Requires the type of the input and of the output. Requires to implement a methods\begin{list}{}{}
 	\item \texttt{tout* svc(tin* task);} the body, the function computed by the thread.\\
-	Has to \texttt{return(tout*)}, or a \texttt{return(EOS)} when it wants to end (passing to \texttt{svc\_end}, or a \texttt{return(GO\_ON)} that tells the framework that you finished the work but doesn't put anything in the output stream. Like a \texttt{skip} and "give me the next item".
+	Has to \texttt{return(tout*)}, or a \texttt{return(EOS)} when it wants to end (passing to \texttt{svc\_end}, or a \texttt{return(GO\_ON)} that tells the framework that you finished the work but doesn't put anything in the output stream. Kinda like a "\texttt{skip} and give me the next item").
 \end{list}
 Other two method are optional, provided empty but can be rewritten:
 \begin{list}{}{}
@@ -754,7 +754,7 @@ Other two method are optional, provided empty but can be rewritten:
 		\item Other special values
 	\end{list}
 	\item \texttt{svc\_end} called right before terminating the thread
-	\item \texttt{EOSnotify()} callback upon receiving \texttt{EOS}, to do something when receive \texttt{EOS} because upon receiving that we don't call \texttt{svc} but go to \texttt{EOSnotify()} and then \texttt{svc\_end}
+	\item \texttt{EOSnotify()} callback upon receiving \texttt{EOS}, to do something when it receives \texttt{EOS} because upon receiving that we don't call \texttt{svc} but go to \texttt{EOSnotify()} and then \texttt{svc\_end}
 \end{enumerate}
 \paragraph{Definition of the program} I can declare several \texttt{ff\_node\_t}\begin{list}{}{}
 	\item \texttt{ff\_node\_t<vector<float>> t1;}
@@ -782,6 +782,8 @@ ff_Pipe p(t1, t2);
 	\item \texttt{ff\_Farm(ff\_node\_t worker, int nw);} build a farm with $nw$ parallel degree of \texttt{worker}s as nodes
 	\item \texttt{ff\_Pipe(ff\_node\_t stage, ...);}
 \end{list}
+%TODO lesson 25
+%TODO lesson 26
 \pagebreak
 \begin{lstlisting}[style=myC]
 #include <ff/ff.hpp>
@@ -824,6 +826,70 @@ int main(int argc, char* argv[]) {
 }
 \end{lstlisting}
 Compile with at least \texttt{-03 -pthread}. This way uses non-blocking queues.
+\paragraph{\texttt{ParallelFor}}
+With the \texttt{\#pragma omp for} we can append many clauses, e.g. \texttt{reduction(+:sum)} (with an operator followed by a variable in the parentheses). For instance, in the following code
+\begin{lstlisting}[style=myC]
+#pragma omp for reduction(+:sum)
+for ( ) {
+	sum += x[i];
+}
+\end{lstlisting}
+the sum is managed in parallel exploiting the threads: each thread has its own \texttt{sum}$_i$ variable and each intermediate sum are summed together (because we specified $+$) when the parallel for finishes.\\
+The \texttt{ParallelForReduce} supports the name of the variable and the lambda function to apply. An example: need to compute dot product between $a$ and $b$, so $\sum_i a_i\cdot b_i$. Usually would do (sequential code)
+\begin{lstlisting}[style=myC]
+int sum = 0;
+for (i = 0; i < n; i++) {
+	sum += a[i] * b[i];
+}
+\end{lstlisting}
+With parallel for
+\begin{lstlisting}[style=myC]
+// variable, zero value to initialize, starting from, ending to, increment, chunk size, lambda, final lambda, parallel degree
+pfr.parallel_reduce(sum, 0, 0, n, 1, 0,
+					[&](const int i) {sum += a[i]*b[i];},
+					[&](int &s, const int ps) {s += ps;},
+					nw);
+\end{lstlisting}
+\texttt{ParallelFor} is a \textbf{data parallel} pattern. At the end of the for there's a barrier that waits for all the threads involved to finish.
+\paragraph{Divide and Conquer Pattern} \texttt{ff\_DC(divide, combine, base, cond, input, outpu, nw)}
+\begin{list}{}{}
+	\item \texttt{divide} splits the input
+	\item \texttt{combine} puts together partial results
+	\item \texttt{base} function applied to short portions/single elements
+	\item \texttt{cond} is a condition that tells if you are in a short portion/single element
+	\item \texttt{input} and \texttt{output} are the input and output vectors
+	\item \texttt{nw} is the parallel degree
+\end{list}
+\paragraph{Macro Data Flow Pattern} Used to describe custom patterns: use tags to specify nodes and dependencies. An example: compute the following graph
+\begin{center}
+	\includegraphics[scale=0.5]{21.png}
+\end{center}
+With a function that computes the sum \texttt{sum(a, b)} and one for the multiplication \texttt{mul(a, b)}. We setup some parameter info structures that tells the kind of usage of the parameters
+\begin{lstlisting}[style=myC]
+// A = A+B
+param_info _1 = {&A, input};
+param_info _2 = {&B, input};
+param_info _3 = {&A, output};
+// we've described that A and B are read and A is a result
+// mdf is the Macro Data Flow object initialized before somewhere
+mdf.add_task(P, sum, &A, &B, size); // append the node specifying the task
+\end{lstlisting}
+\paragraph{FastFlow Building Blocks} Few kind of blocks: sequential, parallel\ldots
+\subparagraph{Sequential Building Blocks} Different kind based on number of inputs and number of outputs.
+\begin{center}
+	\includegraphics[scale=0.5]{22.png}
+\end{center}
+These can be combined sequentially.
+\subparagraph{Parallel Building Blocks} Pipelines with: single block, two blocks, two blocks with a feedback channel of the second toward the first.\\
+Farm style building blocks: emitter which connect to a set of nodes (workers), collector which takes from the workers. The emitter and collector are sequential building blocks that can be linked to parallel building blocks as workers.\\
+All-to-all building blocks
+\begin{center}
+	\includegraphics[scale=0.5]{23.png}
+\end{center}
+\subparagraph{Graph Transformers} For example having a Pipeline with a Farm as intermediate stage, meaning \texttt{ff.Pipe<int> mPipe(S1, Farm2, S3);}, we can optimize it including the sequential computation of the first stage S1 in the emitter of the Farm and the sequential computation of the last stage S3  in the collector of the Farm. We can declare a \texttt{optlevel opt;} optimizer and then set \texttt{opt.remove\_collector = true;}, \texttt{opt.merge\_with\_emitter = true;} and optimize with \texttt{optimize\_static(mPipe, opt);}. All this at declaration phase.
+\paragraph{Concurrency Throttling} Useful to handle the pressure from the input, adding or removing workers accordingly. It's possible to declare a Farm with a given $nw$ and freeze some of the workers. Meaning that the emitter only perceives the non-frozen workers, the frozen workers are "ghosts" and may be unfrozen when needed.
+%TODO lesson 28
+
 \section{Parsec} Benchmarks
 \begin{list}{}{}
 	\item \textbf{Blockslides} Portfolio of options, to compute the prices require partial differential equations
