@@ -782,8 +782,6 @@ ff_Pipe p(t1, t2);
 	\item \texttt{ff\_Farm(ff\_node\_t worker, int nw);} build a farm with $nw$ parallel degree of \texttt{worker}s as nodes
 	\item \texttt{ff\_Pipe(ff\_node\_t stage, ...);}
 \end{list}
-%TODO lesson 25
-%TODO lesson 26
 \pagebreak
 \begin{lstlisting}[style=myC]
 #include <ff/ff.hpp>
@@ -826,7 +824,97 @@ int main(int argc, char* argv[]) {
 }
 \end{lstlisting}
 Compile with at least \texttt{-03 -pthread}. This way uses non-blocking queues.
-\paragraph{\texttt{ParallelFor}}
+\paragraph{Pipeline} \texttt{ff\_Pipe<> pipeline(...);}
+\paragraph{Usage statistics} Use \texttt{-DTRACE\_FASTFLOW} for debugging purposes, for usage statistics.
+\paragraph{Creating tasks} For example a vector of \texttt{ff\_node} pointers, with \texttt{vecto<unique\_ptr<ff\_node>> W;}.\\
+The \texttt{unique\_ptr} is an abstraction provided by C++ to associate a usage counter to a pointer, allocated by the system.\\
+We then add the workers to the vector with \texttt{W.push\_back(make\_unique<funstageF>());}.
+\pagebreak
+\begin{lstlisting}[style=myC]
+float fun(float x) {
+	this_thread::sleep_for(2*tf);
+	return x/2.0 + 1.5;
+}
+
+struct funstageF : ff_node_t<myTask> {
+	myTask* svc(myTask* task) {
+		task->x = fun(task->x);
+		return task;
+	}
+}
+
+int main(int argc, char* argv[]) {
+	int m = atoi(argv[1]);
+	int d = atoi(argv[2]);
+	source s1(m, d);
+	
+	vector<unique_ptr<ff_node>> W;
+	for (int i = 0; i < 5; i++) {
+		W.push_back(make_unique<funstageF>());
+	}
+	cout << "Worker N. " << W.size() << endl;
+	ff_Farm<myTask> f2(move(W));
+	sing s4;
+	
+	ff_Pipe<> myPipe(s1, f2, s4);
+	myPipe.run_and_wait_end();
+	myPipe.ffStats(cout);  // compile with -DTRACE_FASTFLOW
+	
+	return 0;
+}
+\end{lstlisting}
+\paragraph{Other types of nodes} You can use \textbf{Multiple Output nodes} \texttt{ff\_monode\_t} and \textbf{Multiple Input nodes} \texttt{ff\_minode\_t}.\\
+In a classical \texttt{ff\_node\_t} you may just \texttt{return(something)} or \texttt{ff\_send\_out(something)} something that goes in the output queue.\\
+In the multiple output node you can use \texttt{ff\_send\_out\_to(something, worker)} where you specify which worker may receive the data.\\
+In the multiple input node you can use \texttt{ff\_get\_channel\_id()} used to understand which channel provided the result. You also have \texttt{from\_input()} that can be used to distinguish that type of channel (feedback channel or not).
+\paragraph{RoundRobin} The default policy is round robin.\\
+If compiled with \texttt{-DFF\_BOUNDED\_BUFFER} and \texttt{-DDEFAULT\_BUFFER\_CAPACITY=k}, program wide the queues will be bounded to $k$ elements. When the emitter finds all the queues full, it simply waits, looking for empty spots in all the queues.
+\paragraph{Scheduling} In a farm, there's the method \texttt{farm.set\_scheduling\_ondemand()}. It's not a true on demand, meaning that a worker without work asks the emitter for something. Instead, this forces the input buffers to be short, kind of on demand because the queues will empty faster and the emitter will fill them faster, a good approximation of the worker asking for a task without the need of a feedback channel from each worker to the emitter.
+\paragraph{OFarm} \texttt{ff\_OFarm} has the same rules as the farm pattern but Ordered, meaning that the collector of this farm sorts the results.\\
+Limitations: workers cannot change the length of the string (no \texttt{GO\_ON} or multiple \texttt{ff\_send\_out} upon receiving a task), and workers has to be sequential.
+\paragraph{Master Worker Pattern} Master directs tasks to workers and receives results. Can be achieved with a \texttt{ff\_Farm} playing with the parameters: eliminate collector, wrap-around (feedback loop) the workers. The problem is that with the wrap-around we have to be careful in handling the feedback loops.\\
+The master also needs to discern the results of the workers (from the feedback loop) from the queue of tasks it has to send out coming from its queue. So we call the first time when there are no tasks in the queue, getting NULL as task in, and start the tasks returning \texttt{GO\_ON}, then waits for the results from the feedback channel.
+\begin{lstlisting}[style=myC]
+TASK* svc(TASK* tin) {
+	if (tin == NULL) { //first run, start tasks
+		for (int i = 0; i < m; i++) {
+			TASK* t = new TASK{i, ((float) rand())/((float) INT_MAX), (rand()%100)};
+			ff_send_out(t);
+		}
+		return GO_ON;
+	} else { // getting tasks from feedback channels
+		std::cout << "Feedback " << tin->taskno << " " << tin->x << std::endl;
+		sum += tin -> x
+		m--;
+		if (m == 0) return EOS;
+		else return GO_ON;
+	}
+}
+\end{lstlisting}
+\paragraph{\texttt{ParallelFor}} Needs \texttt{\#include <ff/parallel\_for.hpp>} because it's a higher level pattern.
+\begin{lstlisting}[style=myC]
+#include <ff/parallel_for.hpp>
+
+ParallelFor pf; //we'll see the parameters later
+
+pf.parallel_for(0, // initial value of the iteration value, e.g. 0 if int i = 0
+				n, // limit of the iteration value, e.g. n if i < n
+				1, // step incremen, e.g. 1 if i++
+				0, // chunk size
+				[](const int i) { }, // lambda for the ith iteration
+				nw); // parallel degree
+\end{lstlisting}
+For example:
+\begin{lstlisting}[style=myC]
+for (i = 0; i < n; i++) {
+	v[i] = f(v[i]);
+}
+\end{lstlisting}
+becomes
+\begin{lstlisting}[style=myC]
+pf.parallel_for(0, n, 1, 0,	[&](const int i) { v[i] = f(v[i]); }, nw);
+\end{lstlisting}
+Chunksize of 0 means that the vector in $nw$ blocks of equal size and each worker gets a contiguous chunk of $\simeq \#$iterations$/\#$workers (\textbf{static scheduling}). With a chunksize of $>0$, we have \textbf{dynamic scheduling} with task granularity equal to chunksize (meaning that the vector is divided into blocks of chunksize elements, dynamically means that a idle worker gets a chunk), and with chunksize $<0$ we have \textbf{static scheduling} with blocks of chunksize elements same as before.\\\\
 With the \texttt{\#pragma omp for} we can append many clauses, e.g. \texttt{reduction(+:sum)} (with an operator followed by a variable in the parentheses). For instance, in the following code
 \begin{lstlisting}[style=myC]
 #pragma omp for reduction(+:sum)
@@ -888,9 +976,8 @@ All-to-all building blocks
 \end{center}
 \subparagraph{Graph Transformers} For example having a Pipeline with a Farm as intermediate stage, meaning \texttt{ff.Pipe<int> mPipe(S1, Farm2, S3);}, we can optimize it including the sequential computation of the first stage S1 in the emitter of the Farm and the sequential computation of the last stage S3  in the collector of the Farm. We can declare a \texttt{optlevel opt;} optimizer and then set \texttt{opt.remove\_collector = true;}, \texttt{opt.merge\_with\_emitter = true;} and optimize with \texttt{optimize\_static(mPipe, opt);}. All this at declaration phase.
 \paragraph{Concurrency Throttling} Useful to handle the pressure from the input, adding or removing workers accordingly. It's possible to declare a Farm with a given $nw$ and freeze some of the workers. Meaning that the emitter only perceives the non-frozen workers, the frozen workers are "ghosts" and may be unfrozen when needed.
-%TODO lesson 28
 
-\section{Parsec} Benchmarks
+\section{Parsec} Benchmarks %TODO lesson 28
 \begin{list}{}{}
 	\item \textbf{Blockslides} Portfolio of options, to compute the prices require partial differential equations
 	\item \textbf{Cammeal}\\
