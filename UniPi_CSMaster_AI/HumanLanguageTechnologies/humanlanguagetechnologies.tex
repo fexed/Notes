@@ -1835,4 +1835,78 @@ where $\hat{y}\in R^{|V|}$ represents the model answer.
 \begin{center}
 	\includegraphics[scale=0.5]{98.png}
 \end{center}
+\section{Coreference Resolution}
+\paragraph{Coreference Resoultion} Is identifying all mentions that refer to the same real-world entity.
+\begin{center}
+	\includegraphics[scale=0.5]{101.png}
+\end{center}
+\paragraph{Applications}
+\begin{list}{}{}
+	\item Full text understanding: information extraction, question answering, summarization\ldots
+	\item Machine Translation
+	\item Dialogue Systems
+\end{list}
+\paragraph{Coreference Resolution in two steps}
+\begin{enumerate}
+	\item Detect the mentions, which can be nested, easy
+	\item Cluster the mentions, hard
+\end{enumerate}
+\paragraph{Mention Detection} Mention: a span of text referring to some entity. Three kinds of mentions:
+\begin{list}{}{}
+	\item \textbf{Pronouns}: "I", "your", "him"\ldots
+	\item \textbf{Named Entities}: "people", "places"\ldots
+	\item \textbf{Noun Phrases}: "a dog", "the big fluffy cat stuck in the tree"\ldots
+\end{list}
+For detection, use other NLP systems. E.g.: for pronouns use POS tagger, name entities use a NER system (like hw3), for noun phrases use a parser.\\
+Mention detection is not so simple, marking all pronouns, named entities and noun phrases as mentions over-generates mentions. Could train a classifier to filter out spurious mentions, or keep all mentions as "candidate" mentions. After the coreference system is done running, discard all singleton mentions (the one not marked as coreference with anything else).
+\paragraph{Can We Avoid a Pipelined System?} We could instead train a classifier specifically for mention detection instead of using a POS tagger + NER system + parser. Or even jointly do mention-detection and coreference resolution end-to-end instead of two steps.
+\paragraph{Anaphora} A related linguistic concept to coreference is \textbf{anaphora}: when a term (anaphor) refers to another term (antecedent). The interpretation of the anaphor is in some way determined by the interpretation for the antecedent.\\
+Coreference are two words to the same entity, while anaphora are a word ("he") referring another word ("Obama") which refers an entity (the President Barack Obama).\\
+But not all anaphoric relations are coreferential. Not all nouns phrases have reference.\\
+"\textit{We went to see \textbf{a concert} last night. \textbf{The tickets} were really expensive}." This is referred to as bridging anaphora, no direct link but an implicit one.
+\begin{center}
+	\includegraphics[scale=0.5]{102.png}
+\end{center}
+Usually, the antecedent comes before the anaphor, but not always.
+\paragraph{Context} It's often said that language is interpreted "in context". We've seen some examples, like word-sense disambiguation. Coreference is another key example of this. As we progress through an article, dialogue, webpage\ldots we build up a (potentially very complex) \textbf{discourse model}, and we interpret new sentences/utterances with respect to our model of what's come before. Coreference and anaphora are all we see in this class of whole-discours meaning, but it's a big part of human language understanding.
+\subsection{Coreference Models}
+Three approaches
+\begin{list}{}{}
+	\item Rule-based
+	\item Mention pair/ranking
+	\item Clustering
+\end{list}
+\subsubsection{Rule-Based Approach}
+\paragraph{Hobb's Naive Algorithm}
+\begin{center}
+	\includegraphics[scale=0.5]{103.png}
+\end{center}
+%TODO racconto algoritmo fine 1a parte 02/05
+\begin{enumerate}
+	\item Begin at the NP immediately dominating the pronoun
+	\item Go up the tree to first NP or S, and call this X and the path $p$
+	\item Traverse all branches below X to the left of $p$, left-to-right breadth-first.\\
+	Propose as antecedent any NP that has a NP or S between it and X
+	\item If X is the highest S in the sentence, traverse the parse trees of the previous sentences in the order of recency. Traverse each tree left-to-right, breadth-first. When an NP is encountered, propose as antecedent.\\
+	If X is not the highest node, go to step 5.
+	\item From node X go up the tree to the first NP or S. Call it X, and the path $p$.
+	\item If X is an NP and the path $p$ to X came from a non-head phrase of X (a specifier or adjunt, such a possessive, PP, apposition, or relative clause), propose X as antecedent
+	\item Travers all branches below X to the left of the path, in a left-to-right breadth-first manner. Propose any NP encountered as the antecedent
+	\item If X is an S node, traverse all branches of X to the right of the path, but do not go below any NP or S encountered. Propose any NP as the antecedent
+	\item Go to step 4
+\end{enumerate}
+%TODO commentary
+\paragraph{Knowledge-based Pronominal Coreference} %TODO
+\textbf{Winograde Schema}, recently proposed as an alternative to the Turing test. If you've fully solved coreference, arguably you've solved AI.
+\subsubsection{Mention Pair/Mention Ranking} Train a binary classifier that assigns every pair of mentions a probability of being coreferent.
+\paragraph{Mention Pair Tuning} $N$ mentions in a document, $1_{ij}=1$ if mentions $m_i,m_j$ are coreferent, $-1$ otherwise. Just train with regular binary cross-entropy loss
+$$J = -\sum_{i=2}^N\sum_{j=1}^i y_{ij}p(m_j,m_i)$$
+%TODO
+\paragraph{End-To-End Model} %TODO
+\paragraph{BERT-based coref: now has the best results} Pretrained transformers can learn long-distance semantic dependencies in text
+\begin{list}{}{}
+	\item Span-BERT: pretrains BERT models to be better at span-based prediction tasks like coref and question answering
+	\item BERT-WA for coref %TODO 
+\end{list}
+\paragraph{Mention Linking}
 \end{document}

@@ -1605,4 +1605,37 @@ $$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+ \psi_1\ket{d_1}\ket{\theta_1}_R+\su
 The final formula is
 $$\ket{Q} = \sum_{l=0}^{M-1}  \psi_{d_l}\ket{d_l}(\cos\theta_l\ket{0}_R + \sin\theta_l\ket{1}_R) + \sum_{j\not\in\{d_l\}} \psi_j\ket{j}\ket{0}_R$$
 So we allocate more space than needed. If $M = 3$ we still allocate 4 memory addresses: $\theta_1, \theta_2,\theta_3$ are real data, and $\theta_4$ is a dummy value. How to manage it? We don't want the $\sum_{j=0,j\neq d_0,j\neq d_1}^{M-1} \psi_k\ket{j}_B\ket{0}_R$ part, we simply need a post selection on qubit $\ket{\:}_R$, ignoring the unused addresses.
+\section{Towards a Quantum Programming Language}
+\paragraph{Quantum Computation} We've seen it mostly from the point of view of gates and circuits. This covers the \textbf{data flow} aspects, but not the \textbf{control flow} aspect.\\
+Selinger (2002) moves the perspective to programming languages for quantum devices, with the typical constructs: conditionals, loops\ldots in this sense we find both data flow and control flow aspects, hardware independent.\\
+The slogan is "\textbf{quantum data but classical control}". In this sense, we can still exploit quantum superposition, but the control state is classical: no notion of quantum branching, no statement superposition\ldots this allows to keep things simpler. There are languages with quantum control state, but the math is heavy.\\
+Also, \textbf{functional} approach: atomic and composite statements and we focus on the way in which they transform the input in the output.\\
+Graphical language (flow charts) and \textbf{statically typed} (program well-formed at compile time, so no runtime checks).\\
+Loops and recursion are allowed, through an intuitive denotational semantics (pictorial, visual format).\\
+The \textbf{fundamental operations} are: \textbf{unitary transformations} and \textbf{measurements}.\\
+Quantum algorithms interleave classical and quantum computation.
+\paragraph{Hardware} Not important for now: Knull's QRAM model, classical device sends quantum circuits to a quantum device which returns some measurement. The classical controller can then decide what to do next. We assume to have some idealized hardware: no limits of memory, any unitary transformation, no noise, no error correction needed\ldots
+\paragraph{Approach} States are exactly not state vectors, but they are density matrices. Several advantages: \begin{list}{}{}
+	\item Pure states $\ket{\psi}$ are representable together with \textbf{mixed states} (e.g. measure, so collapse, but don't look at the measurement, getting $a_1\ket{\psi_1}+\ldots+a_n\ket{\psi_n}$ which is not a superposition)
+	\item For the recursion, we need a complete partial order, state vectors do not follow it but density matrices do
+	\item Abstract away from the global phase
+	\item Main advantage: drastically reduce the number of square roots
+\end{list} 
+\paragraph{Classical Flow Chart}
+\begin{center}
+	\includegraphics[scale=0.5]{42.png}
+\end{center}
+%TODO
+\paragraph{Probabilistic Flow Charts} Not single value but probability distribution over values.\\
+$\Gamma_0$ typing context like $b,c:$bit, syntax.\\
+$A,B,C$ tuples of probabilities called annotations, semantic.
+%TODO
+\paragraph{Quantum Flow Charts} New type, qbit, and need to handle unitary transformations:
+\begin{list}{}{}
+	\item $q*=S$ apply $S$ to $q$
+	\item $p,q*=S$ binary quantum transformation
+	\item $q\oplus =1$ NOT
+	\item $q\oplus =p$ CNOT gate, $p$ control bit
+\end{list}
+Also need measurements %TODO
 \end{document}
