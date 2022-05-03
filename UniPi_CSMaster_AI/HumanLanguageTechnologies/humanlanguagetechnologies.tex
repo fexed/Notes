@@ -1908,5 +1908,99 @@ $$J = -\sum_{i=2}^N\sum_{j=1}^i y_{ij}p(m_j,m_i)$$
 	\item Span-BERT: pretrains BERT models to be better at span-based prediction tasks like coref and question answering
 	\item BERT-WA for coref %TODO 
 \end{list}
-\paragraph{Mention Linking}
+\paragraph{Mention Linking} %TODO
+\section{Integrating Knowledge in Language Models}
+\paragraph{Recap} Standard LMs predict the next word in a sequence of text and can compute the probability of a sequence. Alternatively, masked LMs (e.g. BERT) predict a masked token in a sequence of text using bidirectional context. Both types can be trained over huge amounts of unlabeled text!\\
+Traditionally LMs used for many tasks involving generating or evaluating the probability of text. Recently, LMs commonly used to generate pretrained representations of text that encode some notion of language understanding for downstream NLP tasks. \textbf{Can a LM be used as a knowledgebase?}
+\paragraph{Eliciting Knowledge} Prompting can be used to direct LM towards an answer: often the answers look plausible but are incorrect. Alternatively, one can use the LM to extract an answer from text by a reliable source.\\
+Predictions generally makes sens but are not all factually correct. Why?\begin{list}{}{}
+	\item Unseen facts: some facts may not have occurred in the training corpora
+	\item Rare facts: LM hasn't seen enough examples during training to memorize the fact
+	\item Model sensitivity: LM may have seen the fact during training, but is sensitive to the phrasing of the prompt (e.e. "made" instead of "created")
+\end{list}
+\textbf{LMs} have some knowledge but \textbf{fail to reliably recall knowledge}. Serious challenge.\\\\
+Knowledge-aware LMs are important. LM pretrained representations can benefit downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base %TODO
+\subparagraph{Querying Traditional Knowledgebases}
+\begin{center}
+	\includegraphics[scale=0.5]{104.png}
+\end{center}
+\paragraph{Querying LM as Knowledgebases} Pretrain LM over unsdtructured  text and then query with natural language.
+\begin{center}
+	\includegraphics[scale=0.5]{105.png}
+\end{center}
+\paragraph{Advantages of LMs over traditional KBs} LMs are pretrained over large amounts of unstructured and unlabeled text, while KBs require manual annotation or complex NLP pipelines to populate.\\
+LMs support more flexible natural language queries, while traditional KBs would have more restricted ways of asking queries.\\
+However, there are many open challenges:
+\begin{list}{}{}
+	\item Hard to interpret, i.e. why does the LM produce an answer
+	\item Hard to trust, i.e. the LM may produce a realistic but incorrect answer
+	\item Hard to modify, i.e. not easy to remove or update knowledge in the LM
+\end{list}
+\subsection{Adding Knowledge to LMs}
+\paragraph{Add pretrained entity embeddings} ERNIE, QAGNN/GraseLM
+\begin{center}
+	\includegraphics[scale=0.5]{106.png}
+\end{center}
+Facts about the world are usually in terms of entities. Pretrained word embeddings do not have a notion of entities: different word embeddings for the same entity. What if we assign an ambedding per entity? \textbf{Single entity embedding}.\\
+Goal: get pretrained entity embeddings that encode factual knowledge, and add to language model. To build entity embeddings, one needs to do \textbf{entity linking}.
+\subparagraph{Entity Linking} Links mentions in text to entities in a knowledgebase. Entity linking tells us which entity embeddings are relevant to the text.\\\\
+Entity embeddings are like word embeddings, but for entities in a knowledgebase. Many techniques:
+\begin{list}{}{}
+	\item Knowledge graphg mebieddings methods
+	\item Woerd-entity embeddings methods
+	\item transofrmer encodings of entity descriptions
+\end{list}
+\subparagraph{Incorporate Entity Embeddings from a Different Embeddings Space} Learn a \textbf{fusion layer} to combine context and embedding information
+$$h_j  = F(W_tw_j + E_we_k + b)$$
+With $w_j$ embedding of word $j$ in a sequence of words and $e_k$ the corresponding entity embedding.\\
+Intuition: there's an alignment between entities and words i nthe sentence, such that projections $W_tw_j$ and $W_ee_k$ are in the same vector space.
+\subparagraph{ERNIE} Enhanced Language Representation with Informative Entities
+\begin{list}{}{}
+	\item Text encoder: multi-layer bidirectional transformer encoder over the words in the sentence
+	\item Knowledge encoder: stacked blocks composed of
+	\begin{list}{}{}
+		\item Two multi-headed attentions (MHAs) over entity embeddings and token embeddings
+		\item A fusion layer to combine the output of the MHAs
+	\end{list}
+\end{list}
+$$ h_j^{(i)} = \sigma(\tilde{W}_t^{(i)}\tilde{w}_t^{(i)} + \tilde{W}_e^{(i)}\tilde{w}_e^{(i)}+\tilde{b}^{(i)})$$
+$$w_j^{(i)} = \sigma(W_t^{(i)}h_j+b_t^{(i)})$$
+$$ $$ %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{109.png}
+\end{center}
+Pretrained with three tasks
+\begin{list}{}{}
+	\item Masked LM 
+	\item Next sentence prediction
+	\item Knowledge pretraining task (dEA): randomly mask token-entity alignments and predict corresponding entity for a token from the entities in the sequence
+	$$p(e_j\:|\:w_i) = \frac{•}{•}$$ %TODO
+	$$f_{ERNIE} = $$ %TODO
+\end{list}
+Strenghts:
+\begin{list}{}{}
+	\item Combine entity and context info through fusion layers and knowledge pretraining task
+	\item Improves perormance downstream on knowledge-driven tasks
+\end{list}
+Limitations:
+\begin{list}{}{}
+	\item Needs text data with entities annotated as input, even for downstream tasks
+	\item It's challenging to get a good entity linker for any domain of text or tasks
+	\item Requires further (expensive) pretraineing of the LM
+\end{list}
+\paragraph{Use an external memory} KGLM
+\begin{center}
+	\includegraphics[scale=0.5]{107.png}
+\end{center}
+Previous methods rely on the pretrained entity embeddings to encode the factual knowledge from KBs for the language model. Are there more direct ways than pretrained entity embeddings to provide the model factual knowledge? Yes, give the model access to an external memory (a key-value store for KG triples or facts) in a ways that is independent of learned model parameters.\\
+Advantages: can directly update facts in the extrnal memory without re-training the model, also interpretable because it's more visible which fact in external memory the LM used to make prediction (it's hard to debug model prediction if we use entity embeddings).
+\subparagraph{KGLM} %TODO
+\paragraph{Modify Pretrained Data} WKLM, ERNIE, Salient Span Masking
+\begin{center}
+	\includegraphics[scale=0.5]{108.png}
+\end{center}
+Previous methods incorporated knowledge explicitly through pretrained embeddings and/or external memory. Can knowledge also be incorporated implicitly through unstructured text? Yes, mask or corrupt the data to introduce additional training tasks that require factual knowledge.\\
+Advantages: no additional memory/computation, no modifications to the architecture.
+\subparagraph{WKLM} %TODO
+\subparagraph{Inductive Biases Through Masking} Cam we encourage LM %TODO
 \end{document}
