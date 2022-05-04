@@ -1895,20 +1895,111 @@ Three approaches
 	\item If X is an S node, traverse all branches of X to the right of the path, but do not go below any NP or S encountered. Propose any NP as the antecedent
 	\item Go to step 4
 \end{enumerate}
-%TODO commentary
-\paragraph{Knowledge-based Pronominal Coreference} %TODO
-\textbf{Winograde Schema}, recently proposed as an alternative to the Turing test. If you've fully solved coreference, arguably you've solved AI.
-\subsubsection{Mention Pair/Mention Ranking} Train a binary classifier that assigns every pair of mentions a probability of being coreferent.
-\paragraph{Mention Pair Tuning} $N$ mentions in a document, $1_{ij}=1$ if mentions $m_i,m_j$ are coreferent, $-1$ otherwise. Just train with regular binary cross-entropy loss
+"\textit{The naive approach is quite good. Computationally speaking, it will be a long time before a semantically based alghorithm is sophisticated enough to perform as well, and these results set a very high standard for any other approach to aim for.\\Yet, there is every reason to pursue a semantically based approach. The naive algorithm does not work. Any one can think of examples where it fails. In these cases it not only fails, it gives no indication that it has failed and offers no help in finding the real antecedent.}"
+\paragraph{Knowledge-based Pronominal Coreference} Two examples:
+\begin{list}{}{}
+	\item She poured water from \textbf{the pitcher} into \textbf{the cup} until \underline{it} was full\\
+	She poured water from \textbf{the pitcher} into \textbf{the cup} until \underline{it} was empty
+	\item \textbf{The city council} refused \textbf{the women} a permit because \underline{they} feared violence\\
+	\textbf{The city council} refused \textbf{the women} a permit because \underline{they} advocated violence
+\end{list}
+\textbf{Winograd Schema}, recently proposed as an alternative to the Turing test. If you've fully solved coreference, arguably you've solved AI.
+\subsubsection{Mention Pair/Mention Ranking} Train a binary classifier that assigns every pair of mentions a probability of being coreferent. E.g., for "she" look at all candidate antecedents and decide which are coreferent with it. Positive $\Rightarrow$ $P(m_i, m_j)$ near 1, while negative $\Rightarrow$ $P(m_i, m_j)$ near 0.
+\paragraph{Mention Pair Training} $N$ mentions in a document, $y_{ij}=1$ if mentions $m_i,m_j$ are coreferent, $-1$ otherwise. Just train with regular binary cross-entropy loss
 $$J = -\sum_{i=2}^N\sum_{j=1}^i y_{ij}p(m_j,m_i)$$
-%TODO
-\paragraph{End-To-End Model} %TODO
+\paragraph{Mention Pair Prediction} Coreference resolution is a clustering task, but we are only scoring pairs of mentions. What to do? Pick some threshold (e.g. 0.5) and add coreference links between mention pairs where $P(m_i, m_j)$ is above the threshold. Take the transitive closure to get the clustering.
+\begin{center}
+	\includegraphics[scale=0.5]{111.png}
+\end{center}
+\paragraph{Coreference Models}
+\subparagraph{Mention Ranking} Assign each mention its highest scoring candidate antecedent according to the model. Dummy NA mention allows model to decline linking the current mention to anything ("singleton" or "first" mention.
+\begin{center}
+	\includegraphics[scale=0.5]{110.png}
+\end{center}
+\subparagraph{Training} We want the current mention $m_j$ to be linked to any one of the candidate antecedents it's coreferent with. Mathematically, we want to maximize the following probability
+$$\sum_{j=1,i=1}1(y_{ij}=1)P(m_j,m_i)$$
+iterating through candidate antecedents, for ones that are coreferent to $m_j$ we want the model to assign a high probability.\\
+The model could produce $0.9$ probability for one of the correct antecedents, and low probability for everything else, and the sum will still be large.\\
+How to compute the probabilities?
+\begin{list}{}{}
+	\item \textbf{Non-Neural Statistical Classifier}. Features that has to be considered:
+	\begin{list}{}{}
+		\item Person/Number/Gender agreement
+		\item Semantic compatibility
+		\item Certain syntactic constraints
+		\item More recently mentioned entities are preferred
+		\item Grammatical role, prefer entities in the subject position
+		\item Parallelism
+	\end{list}
+	\item \textbf{Simple Neural Network}. Standard FFNN, with word embeddings and few categorical features as input layer.
+	Embeddings: previous two words, first word, last word, head word\ldots of each mention. Still need some other features: distance, document genre, speaker information\ldots
+	\begin{center}
+		\includegraphics[scale=0.5]{112.png}
+	\end{center}
+	\item More advanced models using LSTMs, attention, transformers\ldots
+\end{list}
+\paragraph{End-To-End Neural Coref Model}Improves over simple FFNN with LSTM, and attention. It does mention detection and coreference end-to-end: no mention detection step, instead considers every span of text of up to a certain length as a candidate mention (span = contiguous sequence of words).\\
+The model is composed of:
+\begin{list}{}{}
+	\item First embed the words in the document using a word embedding matrix and a character-level CNN
+	\item Then run a bidirectional LSTM over the document
+	\item Next represent each span of text $i$ going from START$(i)$ to END$(i)$ as a vector
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{113.png}
+\end{center}
+$\hat{x}_i$ is an attention-weighted average of the word embeddings in the span.
+\begin{list}{}{}
+	\item \textbf{Attention scores} $$\alpha_t = W_\alpha\cdot \hbox{FFNN}_\alpha(x^*_t)$$
+	dot product of weight vector and transformed hidden state
+	\item \textbf{Attention distribution} $$a_{ij} = \frac{e^{\alpha_t}}{\sum_{k=\hbox{START}(i)}^{\hbox{END}(i)}e^{\alpha_k}}$$
+	just a softmax over attention scores for the span
+	\item \textbf{Final Representation} $$\hat{x}_i = \sum_{k=\hbox{START}(i)}^{\hbox{END}(i)} a_{ij}x_t$$
+	attention-weighted sum of word embeddings
+\end{list}
+The vector that represents the span of text is
+$$g_i = [x_{\hbox{START}(i)},x_{\hbox{END}(i)},\hat{x}_i, \phi(i)]$$
+which contains
+\begin{list}{}{}
+	\item $x_{\hbox{START}(i)},x_{\hbox{END}(i)}$ the hidden states for span's start and end, representing the context to the left and right of the span
+	\item $\hat{x}_i$ attention-based representation, which represents the span itself
+	\item $\phi(i)$ additional features, which represents other information not in the text
+\end{list}
+Lastly, score every pair of spans to decide if they are coreferent mentions
+$$s(i,j) = s_m(i) + s_m(j) + s_a(i,j)$$
+Scoring functions take the span representation as input
+\begin{list}{}{}
+	\item $s(i,j)=$ are spans $i$ and $j$ coreferent mentions?
+	\item $s_m(x)= W_m\cdot\hbox{FFNN}(g_x)=$ is $x$ a mention?
+	\item $s_a(i,j)= W_a\cdot\hbox{FFNN}([g_i,g_j,g_i\cdot g_j, \phi(i,j)])=$ do they look coreferent? $g_i\cdot g_j$ to include multiplicative interactions between the representations, and again with $\phi(i,j)$ we include some extra features.\\
+It's intractable to score every pair of spans: $O(T^2)$ spans of text in a document with $T$ words, meaning $O(T^4)$ runtime. So we have to do lots of pruning to make it work, only considering a few of the spans that are likely to be mentions. Attention learns which words are important in a mention, a bit like head words.
+\end{list}
 \paragraph{BERT-based coref: now has the best results} Pretrained transformers can learn long-distance semantic dependencies in text
 \begin{list}{}{}
 	\item Span-BERT: pretrains BERT models to be better at span-based prediction tasks like coref and question answering
-	\item BERT-WA for coref %TODO 
+	\item BERT-QA for coref, treat coreference like a deep question answering task: "points to" a mention and asks "what is its coreferent?", answer span is a coreference link.
+	\item Maybe you don't have to do it with spans after all, and you can go back to a representation of a word (maybe the head) and make things $O(T^2)$
 \end{list}
-\paragraph{Mention Linking} %TODO
+\paragraph{CorefQA}
+\begin{center}
+	\includegraphics[scale=0.5]{114.png}
+\end{center}
+\begin{enumerate}
+	\item The input passage is fed into the \textbf{Mention Proposal Module} to obtain candidate mentions
+	\item The \textbf{Mention Linking Module} is used to extract coreferent mentions from the passage for each proposed mention
+	\item The coreference clusters are obtained using the scores produced in the above two stages
+\end{enumerate}
+\subparagraph{Mention Proposal} Consider all span up to a given length and prune the candidate spans greedily during both training and evaluation. The mention score is $$s_m(i) = \hbox{FFNN}_m([x_{\hbox{FIRST}(i)}, x_{\hbox{LAST}(i)}])$$
+\subparagraph{Mention Linking} Use the question answering framework to compute $s_a(i,j)$. Transformer input triple: $\{$context, query, answers$\}=\{X,q,a\}$\begin{list}{}{}
+	\item $X$ context: input document
+	\item $q(e_i)$ query: sentence containing $e_i$ replace by $<$mention$>e_i<$/mention$>$
+	\item $a$ answers: coreferent mentions of $e_i$
+\end{list}
+IOB tagging for mention words $$p_i^{tag}=\hbox{Softmax}(\hbox{FFNN}_{tag}(x_i))$$
+Anaphora score $$s_a(j\:|\:i) = \frac{1}{|e_j|}\left(\log p^B_{\hbox{FIRST}(j)}+\sum_{k=\hbox{FIRST}(j)+1}^{\hbox{LAST}(j)} \log p_k^I\right)$$
+The overall score is $$s(i,j) = s_m(i) + s_m(j) + s_a(i,j)$$
+\subparagraph{Mention Pruning} Number of mention pairs is intractable, $O(n^4)$. For each query $q(e_i)$ collect only $C$ span candidates based on the $s_a(j\:|\:i)$ scores.
+\paragraph{Coreference Evaluation} %TODO p.65 23-coref.pdf 2/5/22
 \section{Integrating Knowledge in Language Models}
 \paragraph{Recap} Standard LMs predict the next word in a sequence of text and can compute the probability of a sequence. Alternatively, masked LMs (e.g. BERT) predict a masked token in a sequence of text using bidirectional context. Both types can be trained over huge amounts of unlabeled text!\\
 Traditionally LMs used for many tasks involving generating or evaluating the probability of text. Recently, LMs commonly used to generate pretrained representations of text that encode some notion of language understanding for downstream NLP tasks. \textbf{Can a LM be used as a knowledgebase?}
