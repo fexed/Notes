@@ -2094,4 +2094,139 @@ Previous methods incorporated knowledge explicitly through pretrained embeddings
 Advantages: no additional memory/computation, no modifications to the architecture.
 \subparagraph{WKLM} %TODO
 \subparagraph{Inductive Biases Through Masking} Cam we encourage LM %TODO
+\section{Dialogue Systems}
+Chatbots are a very challenging application of all the elements we've seen so far: from tokenization, to question answering, to learning, to information retrieval\ldots
+\paragraph{Early Approaches} ELIZA, 1966: used clever hand-written templates to generate replies that resembled the user's input utterances. Several programming frameworks available today for building dialog agents, Google Assistant, Amazon Alexa\ldots
+\subparagraph{Templates and Rules} Hand-written rules to generate replies and simple pattern-matching or keyword retrieval techniques are employed to handle the user's input utterances. Rules are used to transform a matching patter or keyword into a reply.
+
+\begin{center}
+	\includegraphics[scale=0.33]{115.png}
+\end{center}
+\pagebreak
+\begin{multicols}{2}
+\paragraph{Open Domain (harder)}
+\begin{list}{}{}
+	\item The user can take the conversation anywhere
+	\item No necessarily a well-defined goal or intention
+	\item conversations on social media sites like Twitter and Reddit are typically open domain
+\end{list}
+\paragraph{Task Oriented (easier)}
+\begin{list}{}{}
+	\item The space of possible inputs and outputs is somewhat limited
+	\item The system is trying to achieve a very specific goal
+	\item Technical customer support or shopping assistants are examples of closed domain problems
+\end{list}
+\end{multicols}
+\begin{multicols}{2}
+\paragraph{Retrieval Based (easier)}
+\begin{list}{}{}
+	\item Use a repository of predefined response and some heuristics to pick an appropriate response based on the input and context
+	\item The heuristic could be as simple as rule-based expression match, or as complex as an ensemble of ML classifiers
+	\item These systems don't generate any new text, they just pick a response from a fixed set
+	\item No grammatical mistakes
+	\item Unable to handle unseen cases
+	\item Can't refer back to contextual entity information like names mentioned earlier in the conversation
+\end{list}
+\paragraph{Generative (harder)}
+\begin{list}{}{}
+	\item Don't rely on predefined responses
+	\item Generate new response from scratch
+	\item Generative models typically based on transducer techniques
+	\item They "transduce" an input into an output (response)
+	\item Can refer back to entities and give the impression of a talking person
+	\item Hard to train
+	\item Likely to make grammatical mistakes, especially on longer sentences
+	\item Typically require huge amount of training data
+\end{list}
+\end{multicols}
+
+\begin{multicols}{2}
+\paragraph{Short Conversation (easier)}
+\begin{list}{}{}
+	\item Goal: create a single response to a single input\\
+	E.g.: answering a specific question from a user with an appropriate answer
+\end{list}
+\paragraph{Long Conversation (harder)}
+\begin{list}{}{}
+	\item Bot goes through multiple turns and must keep track of what has been said
+	\item Alexa Prize Challenge aims at building a socialbot capable of engaging users for 20 minutes
+\end{list}
+\end{multicols}
+\subsection{Task-Oriented}
+Task-oriented dialogue systems interact with a user in order to complete a specific task.
+\begin{list}{}{}
+	\item Must understand the dialogue context
+	\item Must track belief state over dialogue context
+	\item Often need to interpret structured database output
+	\item Must follow task-specific dialogue policy
+	\item Must generate natural language responses
+\end{list}
+A possible pipeline is
+\begin{center}
+	\includegraphics[scale=0.5]{116.png}
+\end{center}
+\paragraph{Natural Language Understanding} It involves several key tasks
+\begin{list}{}{}
+	\item \textbf{Intent Prediction}: what is the user's intent/goal
+	\item \textbf{Slot Filling}: what are the slot values (e.g. what is the time)
+	\item \textbf{State Tracking}: track user information/goals throughout the dialogue
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{117.png}
+\end{center}
+\paragraph{Dialogue Manager} Controls the architecture and structure of dialogue.\\
+Takes input from ASR (speech recognizer) and NLU components, maintains belief/dialogue state (some sort of internal state). Iterfaces with database and passes output to natural language generation/text-to-speech modules.\\
+Can train an LSTM that takes in text and entities and directly chooses an action to take (reply or API call). Trained using a combination of supervised and reinforcement learning.
+\begin{center}
+	\includegraphics[scale=0.5]{118.png}
+\end{center}
+\paragraph{Dialogue State} It consists of all the information given so far, including user-specified constraints on the slots.
+%TODO example of dialogue
+\paragraph{Dialogue Act Labeling and Slot Filling} Given an user utterance, the system needs to identify
+\begin{list}{}{}
+	\item The dialogue act label
+	\item The slots that are being filled/constrained
+\end{list}
+\subparagraph{Slot Filling with ConVEx} Pre-training paradigm specifically for slot filling, with strong few-shot/zero-shot performance.\\
+We have template sentences with the mask BLANK on some of the words and input sentences with the slot value present (and highlighted, e.g. in bold)
+\subparagraph{DialoGPT} Continue pre-training GPT-2 on conversations from Reddit, filtering: long utterances, non-English utterances, URLs and toxic comments. Train on 174M dialogue instances (1.8B words).\\
+Human-level response generation ability.\\
+\textbf{GenSF} adapts pre-trained DialoGPT model to the slot filling task.
+\begin{center}
+	\includegraphics[scale=0.5]{119.png}
+\end{center}
+\textbf{TripPy}
+\begin{center}
+	\includegraphics[scale=0.5]{120.png}
+\end{center}
+\pagebreak
+\subsection{Generation-Oriented}
+\paragraph{Transducer Model} Train machine translation system to perform translation from utterance to response.
+\begin{center}
+	\includegraphics[scale=0.5]{121.png}
+\end{center}
+\paragraph{Neural Models for Dialogue Response Generation} %TODO
+\paragraph{Seq2Seq} Can be used, even before transformers and attention were invented.
+\begin{center}
+	\includegraphics[scale=0.5]{122.png}
+\end{center}
+\subsection{Retrieval-Based}
+Most system today rely on retrieval
+\paragraph{Templates} Many requests can be answered with templates. Select the most relevant response from a collection of templates, determine the slots required to fill it and instantiate the template with those values. Slots filler %TODO
+\paragraph{Retrieval-Based Chat} Basic idea: given an utterance, find the most similar in the database and return it. Similarity based on exact word match %TODO
+\paragraph{Neural Response Retrieval} Idea: use neural models to soften the connection between input and output and do more flexible matching.
+\subsection{Challenges}
+Four main challenges: incorporating context, coherence, diversity, personality.
+\paragraph{Incorporating Context} To produce sensible response systems may need to incorporate both linguistic and physical context. In long dialogues people keep track of what has been said and what information has been exchanged..
+\paragraph{Coherence} Considering only a single previous utterance will lead to local coherence but global incoherence: need to consider more context. Contrast to MT, where context sometimes is helpful and sometimes isn't.\\\\
+A simple solution is to \textbf{concatenate utterances}.\\
+Or a hierarchical encoder-decoder model, also have utterance-level RNN track overall dialogue state: 2RNN for words, RNN for utterance, no attention.
+\paragraph{Diversity} For translation, there is lexical variation but content remains.\\\\
+Discourse-level Variable Autoencoder\\\\ %TODO
+Diversity promoting objective to mitigate %TODO
+Basic idea: we want responses that are likely given the context, unlikely otherwise. Method: subtract weighted unconditioned log probability from conditioned probability.
+\paragraph{Personality} If we train on all of our data, our agent will be a mish-mash of personalities. We would like our agents to be consistent.\\\\
+\textbf{Personality infused dialogue} can address this. Train a generation system with controllable "knobs" based on personality traits, e.g. extraversion. Non-neural\\\\ %TODO
+Another idea is \textbf{speaker embeddings}, that may learn general facts associated with the specific speaker.
+\subsection{Google DialogFlow} DialogFlow is %TODO
 \end{document}
