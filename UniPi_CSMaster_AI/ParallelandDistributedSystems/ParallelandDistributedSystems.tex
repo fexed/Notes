@@ -1055,4 +1055,29 @@ switch(me):
 \texttt{MPI\_Reduce} takes the values in the buffers of the processes applying the operation (e.g. plus) and puts the result in the root's buffer.\\
 \texttt{MPI\_AllReduce} is similar but the result is duplicated in each processe's buffer.\\
 \texttt{MPI\_Gather} gets the values and concantenate them into the root's buffer, no operations. \texttt{MPI\_AllGather} for putting the results in each process's buffer. Remember that it's not shared memory, so with \texttt{MPI\_Gather} the result can be seen only by the root and there's no way of getting it from the other processes.
+\section{Accelerators}
+\subsection{GPUs}
+\paragraph{Graphic Processing Units} Aimed mainly at managing objects on the screen, mainly moving (copying) shapes on the screen. For each pixel, you can do a number of operations, typically in a data parallel fashion.
+\paragraph{GP-GPUs} General Purpose. We use the same devices engineered to operate in parallel, because the general idea is \textbf{vector processing}.\\\\
+GPU's memories have larger access paths that allow to access more addresses at the same time. Can use the most significant bit to select the memory module (each with $k\times$wordsize capacity), using a multiplexer with that bit as selector. If I want to read more than one position at the same time, I can select the other bits to get the "same" address in each module at the same time. This in theory.
+\subparagraph{Global Memory} Coalesced Access
+\subparagraph{Local Memory} Bind to the cores, accessed by clock cycle\\\\
+GPU are used as accelerators, meaning that they are external devices with respect to the CPU.
+%TODO
+\subparagraph{Modern GPUs} Still GP-GPUs with dedicated interconnection between them.
+\paragraph{Using the GPU}
+\begin{enumerate}
+	\item Manage data: moving data to/from GPU memory and also managing allocations in GPU memory.
+	\item Orchestrate parallel computation, meaning managing communication and synchronization: telling to streaming processors and to cores what to do, meaning what to compute and to which data.\\
+	Usually vendors provide abstractions.
+\end{enumerate}
+\paragraph{Warps} Threads need to execute linear, non-diverging codes
+\paragraph{Usage}
+\begin{lstlisting}[style=myC]
+cuda Malloc*
+cuda Memcpy* //data from host to device
+<< >>() //kernel computation
+cuda Memcpy* //device to host
+cuda free*
+\end{lstlisting}
 \end{document}

@@ -1709,13 +1709,161 @@ Task specific
 \end{center}
 Task embeddings capture task relationships: similar tasks are grouped together into clusters.
 \section{Reading Comprehension}
-%TODO part 1 26/04
+\paragraph{Taxonomy of Question Answering}
+\begin{list}{}{}
+	\item Information source: a text passage, all web documents, knowledge bases, tables, images\ldots
+	\item Question types: factoid vs non-factoid, open-domain vs close-domain, simple vs compositional\ldots
+	\item Answer type: a short segment of text, a paragraph, a list, yes or no\ldots
+\end{list}
+Mort state-of-the-art question answering systems are built on top of end-to-end training and pre-trained language models (e.g. BERT)
+\paragraph{Difference Between QA Tasks}
+\begin{list}{}{}
+	\item Open Domain Question Answering\\
+	Relies on external memory consisting of large corpora of documents that may be preprocessed to build information retrieval systems (inverted index, ranking\ldots)
+	\item Answer Selection\\
+	Focuses on choosing on the fly most likely passage containing the right answer from a small given list
+	\item Reading Comprehension\\
+	Find the answer withing a given paragraph (no preprocessing, no memory)
+	\item Dialogue Systems\\
+	Must provide answers to questions and also keep memory of dialog context, remembering previous statements. May rely on Open Domain Question Answering for answering general questions
+	\item Inferential Question Answering\\
+	Provide an answer that requires inference from knowledge resources
+\end{list}
+\paragraph{Machine Comprehension} "A machine comprehends a passage of text if, for any question regarding that text that can be answered correctly by a majority of native speakers, that machine can \textbf{provide a string which} those speakers would agree both \textbf{answers that question} and \textbf{does not contain information irrelevant} to the question."\\
+It's a useful technique for many practical applications, and an important testbed for evaluating how well computer systems understand human language. Also, many NLP tasks can be reduced to reading comprehension.\\
+"Since questions can be devised to query any aspect of text comprehension, the ability to answer questions is the strongest possible demonstration of understanding."
+\paragraph{SQuAD} Stanford Question Answering Dataset: 100k annotated (passage, question, answer) triples. Passages are selected from English Wikipedia, 100-150 words, and questions are crowd-sourced. Each answer is a short segment of text in the passage: this is a \textbf{limitation}, not all questions can be answered this way.\\
+Large scale supervised datasets are also a key ingredient for training effective neural models for reading comprehension. SQuAD is a popular reading comprehension dataset. It's "almost solved" today, and the state-of-the-art exceeds the estimated human performance.
+\subparagraph{Evaluation} Authors collected 3 gold answers. Systems are scored on two metrics:
+\begin{list}{}{}
+	\item \textbf{Exact Match}: 1/0 accuracy on whether you match one of the 3 answers
+	\item \textbf{F1}: take system and each gold answer as a bag of words and evaluate
+	\begin{list}{}{}
+		\item \textbf{Precision}: $P= \frac{TP}{TP+FP}$
+		\item \textbf{Recall}: $R=\frac{TP}{TP+FN}$
+		\item \textbf{F1}: $\frac{2\cdot P\cdot R}{P + R}$
+	\end{list}
+\end{list}
+The score is a (macro-)average of per-question F1 scores. The F1 measure is seen as more reliable and taken as primary: it's less based on choosing exactly the same span that humans choose, which is susceptible to various effects including line breaks.\\
+Both metrics ignore punctuation and articles.\\
+Estimated human performance is $EM=82.3$, while the $F1=91.2$
+\paragraph{SQuAD 2.0} A defect of SQuAD is that all questions have answers in the paragraph. System implicitly rank candidates and choose the best one, you don't have to judge whether a span answers or not the question.\\
+In SQuAD 2.0, 33\% of the training questions have no answer and about 50\% of the dev/test questions have no answer. For NoAnswer examples, NoAnswer receives a score of 1 and any other response gets 0, both for exact match and F1.\\
+The simplest system to approach this is to have a threshold score for whether a span answers a question, or you could have a second component that confirms answering, like Natural Language Inference or "Answer Validation".
+\subsection{Neural Models for Reading Comprehension}
+How can we build a model to solve SQuAD? Problem formulation:
+\begin{list}{}{}
+	\item Input, $c_i,q_i\in V$
+	\begin{list}{}{}
+		\item $C=(c_1,\ldots,c_N), N\simeq 100$
+		\item $Q=(q_1,\ldots,q_M), M\simeq 15$
+	\end{list}
+	\item Output: $1\leq$ start $\leq$ end $\leq N$
+\end{list}
+\pagebreak
+\paragraph{LSTM-based vs BERT-based}
+\begin{center}
+	\includegraphics[scale=0.33]{123.png}
+\end{center}
+\paragraph{Seq2Seq w/ Attention (recap)} Instead of a source and a target sentences, we have two sequences: passage and question, with unbalanced lengths. We need to model which words in the passage are most relevant to the question and which question words. Attention is the key ingredient, similar to which words in the source sentence are most relevant to the current target word. We don't need an autoregressive decoder to generate the target sentence word-by-word. Instead, we just need to train two classifiers to predict the start and end positions of the answers.
 \subsubsection{BiDAF} Bidirectional Attention Flow Model
-\paragraph{Encoding} %TODO
-\paragraph{Attention} %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{124.png}
+\end{center}
+\paragraph{Encoding}
+\begin{center}
+	\includegraphics[scale=0.5]{125.png}
+\end{center}
+Use a concatenation of word embedding (GloVe) and character embedding (CNNs over character embeddings) for each word in context and query.
+\begin{multicols}{2}
+\vfill
+$$e(c_i) = f([\hbox{GloVe}(c_i);\hbox{charEmb}(c_i)])$$
+\vfill
+\columnbreak
+\vfill
+$$e(q_i) = f([\hbox{GloVe}(q_i);\hbox{charEmb}(q_i)])$$
+\vfill
+\end{multicols}
+Then use two \textbf{bidirectional} LSTMs separately to produce contextual embeddings for both context and query.
+\begin{multicols}{2}
+\vfill
+$$\overrightarrow{c}_i = \hbox{LSTM}(\overrightarrow{c}_{i-1}, e(c_i))\in R^H$$
+$$\overleftarrow{c}_i = \hbox{LSTM}(\overleftarrow{c}_{i-1}, e(c_i))\in R^H$$
+$$c_i = [\overrightarrow{c_i};\overleftarrow{c_i}]\in R^{2H}$$
+\vfill
+\columnbreak
+\vfill
+$$\overrightarrow{q}_i = \hbox{LSTM}(\overrightarrow{q}_{i-1}, e(q_i))\in R^H$$
+$$\overleftarrow{q}_i = \hbox{LSTM}(\overleftarrow{q}_{i-1}, e(q_i))\in R^H$$
+$$q_i = [\overrightarrow{q_i};\overleftarrow{q_i}]\in R^{2H}$$
+\vfill
+\end{multicols}
+\paragraph{Attention} 
+\begin{center}
+	\includegraphics[scale=0.5]{126.png}
+\end{center}
+Context-to-query attention: for each context word, choose the most relevant words from the query words.
+\begin{list}{}{}
+	\item First, compute a similarity score for every pair $(c_i,q_i)$ with $w_{sim}\in R^{6H}$
+	$$S_{ij} = w^T_{sim}[c_i;q_i;c_i\odot q_i] \in R$$
+	\item Context-to-query attention (which question words are more relevant to $c_i$)
+	$$\alpha_{ij} = \hbox{Softmax}_i(S_{ij})\in R$$
+	$$a_i = \sum_{j=1}^M \alpha_{ij}q_j \in R^{2H}$$
+	\item Query-to-context attention (which context words are relevant to some question words):
+	$$\beta_i = \hbox{Softmax}_i\left(\max_{j=1}^M(S_{ij})\right) \in R^N$$
+	$$b = \sum_{i=1}^N\beta_ic_j\in R^{2H}$$
+\end{list}
+The final output is
+$$g_i=[c_i;q_i;c_i\odot a_i;c_i\odot b]\in R^{8H}$$
+\paragraph{Modeling and Output Layers}
+\begin{center}
+	\includegraphics[scale=0.5]{127.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Modeling Layer} pass $g_i$ to another two layers of bidirectional LSTMs.\\
+	Attention layer is modeling interaction between query and context, while modeling layer is modeling interaction within context words
+	$$m_i=\hbox{BiLSTM}(g_i) \in R^{2H}$$
+	\item \textbf{Output Layer} two classifiers predicting the start and end positions
+	$$p_{start} = \hbox{Softmax}_i(w_{start}^T[g_i;m_i])$$
+	$$p_{end} = \hbox{Softmax}_i(w_{end}^T[g_i;m'_i])$$
+	$$m'_i = \hbox{BiLSTM}(m_i)\in R^{2H}$$
+	$$w_{start},w_{end}\in R^{10H}$$
+\end{list}
+The final training loss is
+$$L= - \log p_{start}(s^*) - \log p_{end}(e^*)$$
+\pagebreak
 \subsubsection{BERT}
+BERT is a deep bidirectional Transformer encoder pre-trained on large amounts of text with two training objectives:
+\begin{list}{}{}
+	\item MLM (Masked Language Model)
+	\item NSP (Next Sentence Prediction)
+\end{list}
+\paragraph{BERT for Reading Comprehension}
+The question is the first text segment, Segment A, and the passage is Segment B. The answer is predicting two endponts in Segment B.
+$$L= - \log p_{start}(s^*) - \log p_{end}(e^*)$$
+$$p_{start} = \hbox{Softmax}_i(w_{start}^TH)$$
+$$p_{end} = \hbox{Softmax}_i(w_{end}^TH)$$
+with $H = [h_1,\ldots,h_N]$ the hidden vectors of the paragraph returned by BERT.\\
+All the BERT parameters, 100M, as well as the newly introduced parameters $h_{start},h_{end}$ (768$\cdot$2=1536) are optimized together for $L$. It works amazingly well, stronger pre-trained language models can lead to even better performance and SQuAD become a standard dataset for testing pre-trained models.
 \paragraph{Comparing BiDAF and BERT}
-\subsubsection{SpanBERT}
+\begin{list}{}{}
+	\item BERT has 110M-330M parameters, while BiDAF has $\simeq$2.5M
+	\item BERT is built on top of Transformers, while BiDAF is built on top of several BiLSTMs
+	\item BERT is pre-trained while BiDAF is only built on top of GloVe
+\end{list}
+\subsubsection{Stanford Attentive Reader} Demonstrated a minimal, highly successful architecture for reading comprehension and question answering.
+\begin{center}
+	\includegraphics[scale=0.5]{128.png}
+\end{center}
+
+\subsubsection{SpanBERT} Better pre-training. Two ideas:
+\begin{list}{}{}
+	\item Masking contiguous spans of words instead of 15\% random words.
+	\item Using the two end points of span to predict all the masked words in between = compressing the information of a span into its two endpoints.
+	$$y_i = f(x_{s-1}, x_{e+1}, p_{i-s+1})$$
+\end{list}
+\subsection{State-of-the-Art}
+\paragraph{Is Reading Comprehension Solved?} We have already surpassed human performance on SQuAD, but of course reading comprehension isn't solved. The current systems still perform poorly on adversarial examples or examples from out-of-domain distributions. Also, systems trained on one dataset can't generalize to other datasets.
 \section{Open Domain Question Answering}
 We've seen how transformer models are suitable for reading comprehension, with or without finetuning.
 \begin{center}
