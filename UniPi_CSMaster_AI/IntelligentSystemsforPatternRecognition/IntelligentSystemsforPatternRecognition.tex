@@ -2425,12 +2425,17 @@ For example:
 Objective function is quadratics in parameters $W$.\\
 Stochastic gradient descent converges to global optimum, simple (LMS) update rule
 $$\nabla_W\hat{v}(S;W)=x(S)$$
-$$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W))$$ %TODO
+$$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W)x(S))$$
 \subparagraph{Lookup Table and Features} A special case of linear value approximation. Using table lookup features
 $$x(S)=\left[\begin{array}{c}
-
+1(S;s_1)\\\vdots\\1(S;s_n)
 \end{array}\right]$$
-Parameter vector $W$ %TODO
+Parameter vector $W$ values each state
+$$\hat{v}(S;W)=\left[\begin{array}{c}
+1(S;s_1)\\\vdots\\1(S;s_n)
+\end{array}\right]^T\left[\begin{array}{c}
+W_1\\\vdots\\W_n
+\end{array}\right]$$
 \subsubsection{Incremental Prediction}
 So far we assumed access to true $v_\pi(s)$, but in RL there is no supervisor, only rewards. In practice we substitute a target for $v_\pi(S)$
 \begin{list}{}{}
@@ -2442,10 +2447,24 @@ So far we assumed access to true $v_\pi(s)$, but in RL there is no supervisor, o
 	$$\Delta W=$$
 \end{list}
 \paragraph{Value Function Approximation with MC} Reinforcement learning with some supervised learning.\\
-Return $G_t$ is an unbiased %TODO
-\paragraph{Value Function Approximation with TD(0)} The thing changes, because it's biased. %TODO
-\paragraph{Value Function Approximation with TD($\lambda$)} Forward in the theoretical way, but we don't have that information so we use the backward
-%TODO
+Return $G_t$ is an unbiased, noisy sample of true value $v_\pi(S_t)$. Can therefore apply supervised learning to training samples
+$$(S_1,G_1),\ldots,(S_T,G_T)$$
+Linear Monte-Carlo policy evaluation
+$$\Delta W= \alpha(G_t-\hat{v}(S_t;W))\nabla_W\hat{v}(S_t;W)=\alpha(G_t-\hat{v}(S_t;W))x(S_t)$$
+Monte-Carlo evaluation converges to a local optimum, even when using non-linear value function approximation.
+\paragraph{Value Function Approximation with TD(0)} The thing changes, because TD-target is a biased sample of true value $v_\pi(S_t)$. Can still apply supervised learning to training samples
+$$(S_1,R_2+\gamma\hat{v}(S_2;W)),\ldots,(S_{T-1},R_T)$$
+Linear TD(0) policy evaluation
+$$\Delta W = \alpha(R + \gamma\hat{v}(S';W)-\hat{v}(S;W))\nabla_W\hat{v}(S;W) = \alpha\delta x(S)$$
+Linear TD(0) converges close to global optimum.
+\paragraph{Value Function Approximation with TD($\lambda$)} $\lambda$-return $G_t^\lambda$ is also a biased sample of the true value $v_\pi(S_t)$. Again, supervised learning to training samples
+$$(S_1,G_1^\lambda),\ldots,(S_{T-1},G_{T-1}^\lambda)$$
+Forward view linear TD($\lambda$)
+$$\Delta W = \alpha(G_t^\lambda-\hat{v}(S_t;W))\nabla_W\hat{v}(S_t;W)=\alpha(G_t^\lambda - \hat{v}(S_t;W))x(S_t)$$
+Forward in the theoretical way, but we don't have that information so we use the backward view linear TD($\lambda$)
+$$\delta_t = R_{t+1} + \gamma\hat{v}(S_{t+1};W)-\hat{v}(S_t;W)$$
+$$E_t=\lambda\gamma E_{t-1} + x(S_t)$$
+$$\Delta W = \alpha\delta_t E_t$$
 \subsubsection{Incremental Control}
 We need to adapt
 \begin{list}{}{}
@@ -2453,9 +2472,16 @@ We need to adapt
 	On $q$, not $v$, because we want model free and $v$ requires knowledge about the model.
 	\item Policy improvement: $\epsilon$-greedy policy improvement
 \end{list}
-Approximate the action-value function $\hat{q}$ %TODO
-So the update is %TODO
-\paragraph{Linear Action-Value Function Approximation} Use table feature action-states %TODO
+Approximate the action-value function $\hat{q}(S,A;W)\simeq q_\pi(S,A)$\\
+Minimize the MSE between approximate action value $\hat{q}(S,A;W)$ and the true action-value $q_\pi(S,A)$
+$$J(W) = E_\pi[(q_\pi(S,A)-\hat{q}(S,A,W))^2]$$
+Use stochastic gradient descent to find a local minimum
+$$-\frac{1}{2}\nabla_W J(W) = (q_\pi(S,A) - \hat{q}(S,A;W))\nabla_W\hat{q}(S,A;W)$$
+$$\Delta W=\alpha(q_\pi(S,A) - \hat{q}(S,A;W))\nabla_W\hat{q}(S,A;W)$$
+\paragraph{Linear Action-Value Function Approximation} Use table feature action-states 
+$$x(S,A) = \left[\begin{array}{c}
+x_1(S,A)\\\vdots\\x_n(S,A)
+\end{array}\right]$$
 Represent action-value function by linear combination of features
 $$\hat{q}(S,A;W) = x(S,A)^TW$$
 Stochastic gradient descent update
@@ -2463,14 +2489,23 @@ $$\nabla_W\hat{q}(S,A;W) = x(S,A)$$
 $$\Delta W= \alpha(q_\pi(S,A)-\hat{q}(S,A;W)=)x(S,A)$$
 \paragraph{Incremental Control Algorithms} Again, we need non-oracular target for $q_\pi(S,A)$
 \begin{list}{}{}
-	\item %TODO
+	\item Monte-Carlo: target is return $G_t$
+	$$\Delta W=\alpha(\underline{G_t} - \hat{q}(S_t,A_t;W))\nabla_W\hat{q}(S_t,A_t;W)$$
+	\item TD(0): target is the TD target $R_{t+1}+\gamma\hat{q}(S_{t+1},A_{t+1};W)$
+	$$\Delta W=\alpha(\underline{R_{t+1}+\gamma\hat{q}(S_{t+1},A_{t+1};W)} - \hat{q}(S_t,A_t;W))\nabla_W\hat{q}(S_t,A_t;W)$$
+	\item Forward TD($\lambda$): target is the action-value $\lambda$-return
+	$$\Delta W=\alpha(\underline{q_t^\lambda} - \hat{q}(S_t,A_t;W))\nabla_W\hat{q}(S_t,A_t;W)$$
+	\item Backward TD($\lambda$): equivalent target
+	$$\delta_t = R_{t+1} + \gamma\hat{q}(S_{t+1},A_{t+1};W)-\hat{q}(S_t,A_t;W)$$
+	$$E_t=\lambda\gamma E_{t-1} + \nabla_W\hat{q}(S_t,A_t;W)$$
+	$$\Delta W = \alpha\delta_t E_t$$
 \end{list}
 \paragraph{Baird's Counterexample}
 \begin{center}
 	\includegraphics[scale=0.5]{177.png}
 \end{center}
 We have a MDP on the left, a policy $b$ and a discount factor $\gamma$.
-\paragraph{Deadly Triad} Loos guarantees of convergence, you can find counterexample that show you cannot converge %TODO
+\paragraph{Deadly Triad} \textbf{Function approximation}, \textbf{bootstrapping} and \textbf{off policy training}. With all three you lose guarantees of convergence, you can find counterexample that show you cannot converge.
 \paragraph{Convergence of Prediction Algorithms}
 \begin{center}
 	\includegraphics[scale=0.5]{178.png}
@@ -2481,8 +2516,9 @@ Gradient descent is simple and appealing, but not sample efficient. Batch method
 $$D=\{(S_1,v_1^\pi),\ldots,(S_T,v_T^\pi)\}$$
 Repeat
 \begin{enumerate}
-	\item Sample state value from experience %TODO
-	\item Apply stochastic gradient descent update %TODO
+	\item Sample state value from experience $$(s,v^\pi)\sim D$$
+	\item Apply stochastic gradient descent update
+	$$\Delta W=\alpha(v^\pi - \hat{v}(s;W))\nabla_W\hat{v}(s;W)$$
 \end{enumerate}
 Converges to least square solution
 $$W=\arg\min_W LS(W)$$
@@ -2506,5 +2542,53 @@ Network architecture and hyperparameters fixed across all games.
 	\includegraphics[scale=0.5]{179.png}
 	\includegraphics[scale=0.5]{180.png}
 \end{center}
-\paragraph{Improvements on Original DQN} %TODO
+\paragraph{Improvements on Original DQN}
+\begin{list}{}{}
+	\item \textbf{Double DQN}: remove upward bias caused by $\max_a Q(s,a;W)$:
+	\begin{list}{}{}
+		\item Current $Q$-network $W$ used to select actions
+		\item Older $Q$-network $W^-$ used to evaluate actions
+	\end{list}
+	$$L_i = \left(r+\gamma Q\left(s',\arg\max_{a'}Q(s',a';W);W^-\right)-Q(s,a;W)\right)^2$$
+	\item \textbf{Prioritize Replay}: weight experience according to surprise.\\
+	Store experience in a priority queue according to DQN error
+	\item \textbf{Dueling Network}: split $Q$-network into two channels
+	\begin{list}{}{}
+		\item Action-independent value function $V(s)$
+		\item Action-dependent advantage function $A(s,a;W)$
+	\end{list}
+	$$Q(s,a) = V(s) + A(s,a;W)$$
+\end{list}
+\subsection{Least Squares Prediction and Control}
+\paragraph{Linear Least Squares Prediction} Experience replay finds least squares solution, but it may take many iterations. Using linear value function approximation $\hat{v}(s;W) = x(s)^TW$ we can solve the least squares solution directly.
+\subparagraph{Batch} At minimum of $LS(W)$ the expected update $E_D[\Delta W]$ must be zero.
+$$\alpha\sum_{t=1}^T x(S_t)(v_t^\pi -x(S_t)^TW) = 0$$
+$$W = \left(\sum_{t=1}^Tx(S_t)x(S_t)^T\right)^{-1}\sum_{t=1}^T x(S_t)v_t^\pi$$
+\subparagraph{Algorithms} Again we don't know the true $v_t^\pi$\\
+Training data use noisy or biased samples of $v_t^\pi$
+\begin{list}{}{}
+	\item LSMC (Least Squares Monte-Carlo) uses return $v_t^\pi\simeq G_t$\\
+	The update is $$W = \left(\sum_{t=1}^Tx(S_t)x(S_t)^T\right)^{-1}\sum_{t=1}^Tx(S_t)G_t$$
+	\item LSTD (Least Squares TD) uses TD target $v_t^\pi\simeq R_{t+1}+\gamma\hat{v}(S_{t+1};W)$\\
+	The update is $$W = \left(\sum_{t=1}^Tx(S_t)(x(S_t)-\gamma x(S_{t+1}))^T\right)^{-1}\sum_{t=1}^Tx(S_t)R_{t+1}$$
+	\item LSTD($\lambda$) (Least Squares TD($\lambda$)) uses $\lambda$-return policy $v_t^\pi\simeq G_t^\lambda$\\
+	The update is $$W = \left(\sum_{t=1}^TE_t(x(S_t)-\gamma x(S_{t+1}))^T\right)^{-1}\sum_{t=1}^Tx(S_t)R_{t+1}$$
+\end{list}
+In each case we solve directly for fixed point.
+
+\paragraph{Linear Least Squares Control} Policy evaluation by least squares $Q$-learning, and greedy policy improvement.\\
+We want to efficiently use all experience for policy evaluation. For control, we also want to improve the policy. This experience is generated from many policies, so to evaluate $q_\pi(S,A)$ we must learn off-policy. Same idea as $Q$-learning
+\begin{list}{}{}
+	\item Use experience generated by old policy $S_t,A_t,R_{t+1},S_{t+1}\sim\pi_{old}$
+	\item Consider alternative successor action $A'\sim\pi_{new}(S_{t+1})$
+	\item Update $\hat{q}(S_t,A_t,W)$ towards value of alternative action $R_{t+1}+\gamma\hat{q}(S_{t+1},A';W)$
+\end{list}
+\paragraph{Linear Least Squares $Q$-learning} Consider the following linear $Q$-learning update
+$$\delta_t = R_{t+1}+\gamma\hat{q}(S_{t+1},\pi(S_{t+1});W)-\hat{q}(S_t,A_t;W)$$
+$$\Delta W_t = \alpha\delta_t x(S_t,A_t)$$
+\textbf{LSTDQ algorithm}: solve for total update $\Delta W_t$ equal to zero
+$$W = \left(\sum_{t=1}^T s(S_t,A_t)(x(S_t,A_t)-\gamma x(S_{t+1},\pi(S_{t+1})))^T\right)^{-1}\sum_{t=1}^Tx(S_t,A_t)R_{t+1}$$
+\begin{center}
+	\includegraphics[scale=0.5]{181.png}
+\end{center}
 \end{document}
