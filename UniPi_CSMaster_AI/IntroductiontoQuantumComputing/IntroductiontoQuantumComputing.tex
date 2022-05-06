@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
+\usepackage{amsfonts}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -13,7 +14,7 @@
 \usepackage{qtree}
 \usepackage{pgfplots}
 \usepackage{tikz}
-\usetikzlibrary{quantikz}
+\usetikzlibrary{quantikz, shapes, arrows}
 \usepackage{blochsphere}
 \usepgflibrary{shapes}
 \usepackage{cancel}
@@ -1621,21 +1622,236 @@ Quantum algorithms interleave classical and quantum computation.
 	\item Abstract away from the global phase
 	\item Main advantage: drastically reduce the number of square roots
 \end{list} 
-\paragraph{Classical Flow Chart}
+\pagebreak
+\paragraph{Classical Flow Chart} An example\\
+\tikzstyle{decision} = [diamond, draw, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, node distance=3cm]
+\begin{multicols}{2}
+\textbf{State} of the program: $\langle$edge, $\rho\rangle$ with $\rho:$ var $\rightarrow$ Values
+\begin{list}{}{}
+	\item $\langle e_0,$ bc $\mapsto$ 10$\rangle$
+	\item[$\mapsto$] $\langle e_2,$ bc $\mapsto$ 10$\rangle$
+	\item[$\mapsto$] $\langle e_3,$ bc $\mapsto$ 00$\rangle$
+	\item[$\mapsto$] $\langle e_4,$ bc $\mapsto$ 00$\rangle$
+	\item[$\mapsto$] $\langle e_5,$ bc $\mapsto$ 00$\rangle$
+\end{list}
+\columnbreak
 \begin{center}
-	\includegraphics[scale=0.5]{42.png}
+\begin{tikzpicture}[node distance = 1cm, auto]
+	\node [block] (init) {\texttt{input b,c:bit}};
+	\node [decision, below of = init] (decision) {\texttt{branch b}};
+	\path [line] (init) -> (decision) node [near start] {$e_0$};
+	\node [block, below right of = decision, node distance=3cm] (bc) {\texttt{b := c}};
+	\path [line] (decision) -> (bc) node [near start] {1}  node [near end] {$e_2$};
+	\node [block, below of = bc, node distance=2cm] (c0) {\texttt{c := 0}};
+	\path [line] (bc) -> (c0) node [near start] {$e_3$};
+	\node [block, below left of = c0, node distance=3cm] (output) {\texttt{output b,c:bit}};
+	\path [line] (c0) -> (output) node [near start] {$e_4$};
+	\path [line] (decision) -> (output) node [near start] {0} node [near end] {$e_1$};
+\end{tikzpicture}
 \end{center}
-%TODO
+\end{multicols}
 \paragraph{Probabilistic Flow Charts} Not single value but probability distribution over values.\\
 $\Gamma_0$ typing context like $b,c:$bit, syntax.\\
-$A,B,C$ tuples of probabilities called annotations, semantic.
-%TODO
-\paragraph{Quantum Flow Charts} New type, qbit, and need to handle unitary transformations:
+$A,B,C$ tuples of probabilities called annotations, semantic: $(A,B)$ corresponds to probability of first bit being 0 and first bit being 1 respectively.
+$$\Gamma = A$$
+\subparagraph{Syntax and Semantics}
+\begin{list}{}{}
+	\item \textbf{Allocate bit}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {};
+			\node [block, below of = phantom1, node distance = 1.5cm] (allocate) {\texttt{new bit b := 0}};
+			\node [below of = allocate, node distance = 1.5 cm] (phantom2) {};
+			\path [line] (phantom1) -> (allocate) node [near start] {$\Gamma = A$};
+			\path [line] (allocate) -> (phantom2) node [near start] {\texttt{b:bit},$\Gamma = (A,0)$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\item \textbf{Discard bit}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {};
+			\node [block, below of = phantom1, node distance = 1.5cm] (discard) {\texttt{discard b}};
+			\node [below of = discard, node distance = 1.5 cm] (phantom2) {};
+			\path [line] (phantom1) -> (discard) node [near start] {\texttt{b:bit},$\Gamma = (A,B)$};
+			\path [line] (discard) -> (phantom2) node [near start] {$\Gamma = (A + B)$};
+		\end{tikzpicture}
+	\end{center}
+	\pagebreak
+	\item \textbf{Assignment}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {};
+			\node [block, below of = phantom1, node distance = 1.5cm] (assign) {\texttt{b := 1}};
+			\node [below of = assign, node distance = 1.5 cm] (phantom2) {};
+			\path [line] (phantom1) -> (assign) node [near start] {\texttt{b:bit},$\Gamma = (A,B)$};
+			\path [line] (assign) -> (phantom2) node [near start] {$\Gamma = (0, A + B)$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\item \textbf{Branching}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {};
+			\node [decision, below of = phantom1, node distance = 1.5cm] (branch) {\texttt{branch b}};
+			\node [below right of = branch, node distance = 3 cm] (phantom2) {};
+			\node [below left of = branch, node distance = 3 cm] (phantom3) {};
+			\path [line] (phantom1) -> (branch) node [near start] {\texttt{b:bit},$\Gamma = (A,B)$};
+			\path [line] (branch) -> (phantom2) node [near start] {1} node [near end] {\texttt{b:bit},$\Gamma = (0, B)$};
+			\path [line] (branch) -> (phantom3) node [near start] {0} node [near end] {\texttt{b:bit},$\Gamma = (A, 0)$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\item \textbf{Merge}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {};
+			\node [cloud, below right of = phantom1, node distance = 1.5cm] (merge) {};
+			\node [above right of = merge, node distance = 1.5cm] (phantom2) {};
+			\node [below of = merge] (phantom3) {};
+			
+			
+			\path [line] (phantom1) -> (merge) node [near start] {$\Gamma = A$};
+			\path [line] (phantom2) -> (merge) node [near start] {$\Gamma = B$};
+			\path [line] (merge) -> (phantom3) node [near start] {$\Gamma = A + B$};
+		\end{tikzpicture}
+	\end{center}
+	
+	\item \textbf{Initial}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [cloud] (init) {};
+			\node [below of = init, node distance = 1.5cm] (phantom1) {};
+
+			\path [line] (init) -> (phantom1) node [near start] {$\Gamma = 0$};
+		\end{tikzpicture}
+	\end{center}
+	\item \textbf{Permutation}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {$b_1,\ldots,b_n$:bit$=A_0,\ldots,A_{2^n-1}$};
+			\node [block, below of = phantom1, node distance = 1.5cm] (permute) {\texttt{permute $\phi$}};
+			\node [below of = permute, node distance = 1.5cm] (phantom2) {$b_{\phi(1)},\ldots,b_{\phi(n)}$:bit$=A_{2^\phi(0)},\ldots,A_{2^\phi(2^n-1)}$};
+
+			\path [line] (phantom1) -> (permute) node [near start] {};
+			\path [line] (permute) -> (phantom2) node [near start] {};
+		\end{tikzpicture}
+		$$\phi : \{1,\ldots,n\}\rightarrow \{1,\ldots,n\}$$
+		$$2^\phi : \{0,1\}^n\rightarrow \{0,1\}^n$$
+		$$2^\phi(x_1,\ldots,x_n) = (x_{\phi^{-1}(1)},\ldots,x_{\phi^{-1}(n)})$$
+	\end{center}
+\end{list}
+\paragraph{Quantum Flow Charts} New type, \texttt{qbit}, and need to handle unitary transformations:
 \begin{list}{}{}
 	\item $q*=S$ apply $S$ to $q$
 	\item $p,q*=S$ binary quantum transformation
 	\item $q\oplus =1$ NOT
 	\item $q\oplus =p$ CNOT gate, $p$ control bit
 \end{list}
-Also need measurements %TODO
-\end{document}
+The output of a quantum flowchart is in general mixed state. The map associated with a QFC must send mixed states to mixed states.
+\paragraph{Notation} $c\in C, \overline{c} \in C$, $C^{n\times m}$ with $n$ rows and $m$ columns.\\
+$I$ identity matrix, $A= (a_{ij})_{ij}$, $A^* = (\overline{a}_{ji})_{ij}$ \textbf{conjugate transposed}\\
+With $A,B,C,D\in C^{n\times m}$ we can write
+$$\left(\begin{array}{c c}
+A & B \\ C & D
+\end{array}\right)$$
+\paragraph{Trace} $tr(A) = \sum_i a_{ii}$
+\subparagraph{Lemma} $tr(AB) = tr(BA)$\\
+Dim: $tr(AB) = \sum_i (AB)_{ii} = \sum_i \sum_k a_{ik}b_{ki} = \sum_k\sum_i b_{ki}a_{ik} = \sum_k (BA)_{kk} = tr(BA)$
+\paragraph{Norm} $|A|$ such that $|A|^2 = tr(A^*A) = \sum_{ij}\overline{a}_{ij}a_{ij}$
+\paragraph{Unitary} $S^*S = I$
+\subparagraph{Lemma} If $S$ is unitary, $A = SBS^*$, then $tr(A) = tr(B)\wedge |A| = |B|$
+\paragraph{Hermitian Matrices} $A = A^*$\\
+With $A$ Hermitian, $u^*Au\in R$. Positive Hermitian if $\forall\:u\in C^n\:\:u^*Au \geq 0$\\
+$A$ Hermitian $\Leftrightarrow A = SDS^*$ for some unitary $S$ and diagonal $D$.\\
+$A$ Hermitian is positive $\Leftrightarrow$ all entries of $D$ are non-negative.\\
+$A$ positive $\Rightarrow |A| \leq tr(A)$\\
+Remark that any positive matrix is a linear combination of positive matrices.
+\paragraph{Pure Matrices} $A = VV^*$, $\ket{\psi}\bra{\psi}$ and $\cancel{\braket{\psi}{\psi}}$
+\subparagraph{Theorem} Every pure matrix is positive.\\
+Every positive matrix is a non-negative linear combination of pure matrices.
+\paragraph{Selinger's Notation}
+$$q = \alpha\mathbf{00} + \beta\mathbf{01} + \gamma\mathbf{10} + \delta\mathbf{11} = \left(\begin{array}{c}
+\alpha\\\beta\\\gamma\\\delta
+\end{array}\right)$$
+Order is important: lexicographic order taken
+\subparagraph{Unitary Transformations}
+\begin{list}{}{}
+	\item Create quantum superposition $H0 = \frac{1}{\sqrt{2}}\mathbf{0} + \frac{1}{\sqrt{2}}\mathbf{1}$
+	\item Entanglement CNOT$(H\mathbf{0}\otimes\mathbf{0})=\frac{1}{\sqrt{2}}\mathbf{00}+\frac{1}{\sqrt{2}}\mathbf{11}$
+\end{list}
+\paragraph{Measurements} Capability to observe the value of a qubit and convert it into a classical bit. E.g. $q = \alpha\ket{1}+\beta\ket{1}$ has overall probability of $|\alpha|^2+|\beta|^2=1$ and we measure $q=0$ with probability $|\alpha|^2$ and $q=1=$ with probability $|\beta|^2$.\\
+Given 
+$$\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}$$
+If we measure the first qubit we end up in $\alpha\ket{00}+\beta\ket{01}$ with probability $P_0=|\alpha|^2+|\beta|^2$ and in $\gamma\ket{10}+\delta\ket{11}$ with probability $P_0=|\gamma|^2+|\delta|^2$. If we measure the second qubit from $P_0$ we may end up in $\alpha\ket{00}$ with probability $P_{00}\frac{|\alpha|^2}{|\alpha|^2+|\beta|^2}$.\\
+The overall probability of measuring $\alpha\ket{00}$ is $P_{0}\cdot P_{00} = |\alpha|^2$
+\subparagraph{Selinger's Convention} We normalize each state in such a way that the sum of the squares of the amplitudes is equal to the overall probability that this state is reached. No necessary to renormalize each state after every measurement.\\\\
+Recall that, given a state vector $u\in C^{2^n}$ of $n$ qubits that completely describes the state of the quantum system. But an external observer has only partial knowledge: may be in state $u$ or $v$ with equal probability (e.g. measure qubit but don't observe the result)
+$$\frac{1}{2}\{u\}+\frac{1}{2}\{v\}$$
+A \textbf{mixed state} looks like $\lambda_1\{u_1\}+\ldots+\lambda_n\{u_n\}$ and $\sum_i \lambda_i = 1$
+%TODO
+\paragraph{Density Matrices} For a pure state we consider $u\cdot u^*$
+\subparagraph{Example} %TODO
+Important: no essential information is lost with this transformation. If two vector differs by a global phase they have the same density matrix, but the global phase is not observable.\\
+There are some advantages:
+\begin{list}{}{}
+	\item if $u = \gamma v$ with $|\gamma|=1$ then $uu^* = \gamma v\overline{\gamma}v^* = \gamma\overline{\gamma}vv^* = vv^*$
+	\item Trace tr($uu^*$) = $|u|^2$
+	\item Density matrix can account for mixed states as well\\
+	Given a mixed state $\sum_i \lambda_i\{u_i\}$, it's a linear combination of pure states, so the corresponding density matrix would be $\sum_i \lambda_i \{u_iu_i^*\}$
+	\item No observable difference between two mixed states that share the same density matrix
+\end{list}
+Note: $A$ positive matrix with tr($A$) $\leq 1\Leftrightarrow A$ is a matrix in the form $\sum_i \lambda_i(u_iu_i^*)$ for unit vectors $u_i$ and non-negative coefficients $\lambda_i$ such that $\sum_i \lambda_i \leq 1$
+\paragraph{Definition} A density matrix is a positive $A$ such that tr$(A)\leq 1$\\
+$n$ dimensional density matrix
+$$D_n\subseteq C^{n\times n}$$
+\paragraph{Unitary transformations for density matrices}
+$$u\mapsto Su$$
+$$uu^*\mapsto Su(Su)^* = Suu^*S^*$$
+Essentially $A\mapsto SAS^*$
+\paragraph{Measurements on density matrices} With one vector $u=\left(\begin{array}{c}
+V\\W
+\end{array}\right)$ then we measure 0 collapsing to $\left(\begin{array}{c}
+V\\0
+\end{array}\right)$ with probability $|V|^2$ and we measure 1 collapsing to $\left(\begin{array}{c}
+0\\W
+\end{array}\right)$ with probability $|W|^2$.\\
+With $uu^* = \left(\begin{array}{c c}
+
+\end{array}\right)$ we measure %TODO
+%TODO scheme example
+So measurement is also a linear transformation.
+\paragraph{Complete Partial Order of Density Matrices} $D_n=\{AGC^{n\times n}\:|\: A$ positive, tr$(A)\leq 1\}$\\
+We define the CPO with $A\sqsubseteq B$ if $B-A$ is positive. $B$ "improves" the precision of $A$. The bottom element is $\perp = 0$ the 0 matrix.\\
+Increasing sequence $A_0 \sqsubseteq A_1\sqsubseteq\ldots\sqsubseteq A_n\sqsubseteq\ldots$, noting that the traces are also increasing and real valued, bounded by $1$ $\Rightarrow$ they have a limit $\in R$, meaning that $\{A_i\}$ will converge to some matrix.
+\subsection{Quantum Flow Charts} $\Gamma$ %TODO
+$\overline{q}$ a finite list of quantum bits.
+\paragraph{Allocate a qubit} $\Gamma = A$ arrives with density $A$\\
+\texttt{new qubit q := 0} $\rightarrow$ q:bit, $\Gamma=\left(\begin{array}{c c}
+A & 0\\0&0
+\end{array}\right)$
+\paragraph{Discard a qubit} We arrive with q:bit, $\Gamma = \left(\begin{array}{c c}
+A & B\\C&D
+\end{array}\right)$ and \texttt{discard q}, ending with $\Gamma = A + D$, $B,C$ are lost
+\paragraph{Unitary transformation} We arrive with $\overline{q}$:qbits, $\Gamma =A$ and apply $\overline{q}$\texttt{*=}$S$ ending with $\overline{q}$:qbits, $\Gamma = (S\otimes I)A$ (other bits stays the same with $I$) %TODO
+\paragraph{Measurement} %TODO
+\paragraph{Merge} Mutually exclusive %TODO
+\paragraph{Initialization} %TODO
+\paragraph{Permutation} %TODO
+\paragraph{Example}
+\paragraph{Combining classical data with quantum data} Classical data corresponds to control paths, quantum data to quantum paths.\\
+In the combined language, we have two data types: bit and qubit. The typing context are those defined before. An edge with $n$ bits and $m$ qubits can be replaced by $2^n$ edges (all combinations of the bits) labeled with $m$ qubits only.\\
+A typing context $\Gamma$ is a $2^n$ tuple $(A_0,\ldots, A_{2^n-1})$ of density matrices, each of dimension $2^n\times 2^n$.\\\\
+$$tr(A_0,\ldots,A_{2^n-1}) = \sum_{i=0}^{2^n-1} tr(A_i)$$
+$$(A_0,\ldots,A_{2^n-1})^* = (A_0^*,\ldots,A_{2^n-1}^*)$$
+$$S(A_0,\ldots,A_{2^n-1}) = (SA_0,\ldots,SA_{2^n-1})$$
+$$|(A_0,\ldots,A_{2^n-1})|^2 = \sum_{i=0}^{2^n-1} |A_i|^2$$
+Flow charts are acyclic graphs whose edges are typed with typing contexts, and whose nodes can be any of the previously seen components.
+\subparagraph{Property} The annotation of a flowchart is uniquely determined by the annotation of its input edges. Calculated in a top-down fashion apply the rules we've seen.\\
+To each flowchart is associated a linear transformation from its input to its output edges, because we've seen only linear transformations and composing them linearly preserve the linearity.
+\end{document} 

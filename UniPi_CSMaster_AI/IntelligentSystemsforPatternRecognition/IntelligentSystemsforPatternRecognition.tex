@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
+\usepackage{amsfonts}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -145,7 +146,7 @@ then the linear combination above becomes the Fourier series
 $$\frac{a_0}{2}+\sum_{k=1}^\infty\left(a_k\cos(kx)+b_k\sin(kx)\right)$$
 \paragraph{Representing function in Complex space} Using $\cos(kx)-i\:\sin(kx) = e^{-ikx}$ with $i=\sqrt{-1}$ we can rewrite the Fourier series as $$\sum_{k=-\infty}^\infty c_k e^{ikx}$$
 on the orthonormal system $$\{1,e^{ix},e^{-ix},e^{2ix},e^{-2ix},\ldots\}$$
-\paragraph{Representing Discrete Time Series} Consider x of length $N$ and $x_n\in R$. Using the exponential formulation, the orthonormal system is finite, from $e_0$ to $e_{N-1}$ each $\in C^N$\\
+\paragraph{Representing Discrete Time Series} Consider x of length $N$ and $x_n\in \mathbb{R}$. Using the exponential formulation, the orthonormal system is finite, from $e_0$ to $e_{N-1}$ each $\in C^N$\\
 The $n$-th component of the $k$-th vector is $$[e_k]n=e^{\frac{-2\pi ink}{2}}$$
 \paragraph{Discrete Fourier Transform} Given a time series x = $x_0,\ldots,x_{N-1}$ its DFT is the sequence $$\hbox{Spectral domain}\:\:\:X_k = \sum_{n=1}^{N-1}x_ne^{\frac{-2\pi ink}{N}}\:\:\:\hbox{Time domain}$$
 And can be inverted $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}$$
@@ -710,7 +711,7 @@ with $E(X_C)$ called \textbf{energy function}.\\
 In general we will assume to work with Markov Random Fields where the partition functions factorize as $$\psi_C(X_C) = \exp\left(-\sum_{k=1}^K\theta_{Ck}f_{Ck}(X_C)\right)$$
 \begin{list}{}{}
 	\item $K$ defines the number of feature functions that we use, so the cardinality of a dictionary of feature functions $f_{Ck}$
-	\item $\theta_{Ck}\in R$ are parameters
+	\item $\theta_{Ck}\in\mathbb{R}$ are parameters
 \end{list}
 Undirected graphical models do not express the factorization of potentials into feature functions, you cannot express $f$ graphically $\Rightarrow$ \textbf{factor graphs}.
 \pagebreak
@@ -1624,17 +1625,17 @@ $$W_{hy} = (H^TH)^{-1}H^TD$$
 \paragraph{Setup} Initialize $W_{xh}$ and $W_{hh}$ randomly and scale $W_{hh}$ to meet the contractive/stability property.
 \paragraph{Training} Drive the network with the input signal. Discard an initial transient and train the readout.
 \paragraph{Reservoir} Non-linearly embeds the input into a higher dimensional feature space where the original problem is more likely to be solved linearly (Cover's Theorem). We use this randomized basis expansion computed by a pool of randomized filters. Provides a "rich" set of input-driven dynamics. Dynamics are driven by the state transition function.
-$$F:R^{N_X}\times R^{N_H}\rightarrow R^{N_H}$$
+$$F:\mathbb{R}^{N_X}\times \mathbb{R}^{N_H}\rightarrow \mathbb{R}^{N_H}$$
 $$h_t = F(x_t, h_{t-1}) = \tanh(x_tW_{xh} + h_{t-1}W_{hh})$$
 The iterated version is the function applied to an arbitrarily long sequence $s = [x_1,\ldots,x_t]$ returning the final state $h_t$
-$$\hat{F}:(R^{N_X})^*\times R^{N_H}\rightarrow R^{N_H}$$
+$$\hat{F}:(\mathbb{R}^{N_X})^*\times \mathbb{R}^{N_H}\rightarrow \mathbb{R}^{N_H}$$
 For example $$\hat{F}(s,h_0)=\left\{\begin{array}{c l}
 h_0&\hbox{if }s=[]\\
 F(x_t,\hat{F}([x_1,\ldots,x_{t-1}],h_0))&\hbox{if }s=[x_1,\ldots,x_t]
 \end{array}\right.$$
 \paragraph{Echo State Property} A valid ESN should satisfy the ESP.\\
 An ESN satisfies the ESP whenever
-$$\forall\:s\in (R^{N_X})^N \wedge \forall\:h_0,z_0\in R^{N_H}\hbox{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\hbox{ as }N\rightarrow\infty$$
+$$\forall\:s\in (\mathbb{R}^{N_X})^N \wedge \forall\:h_0,z_0\in\mathbb{R}^{N_H}\hbox{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\hbox{ as }N\rightarrow\infty$$
 \textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
 \textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
 We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$

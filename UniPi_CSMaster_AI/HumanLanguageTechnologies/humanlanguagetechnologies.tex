@@ -2151,15 +2151,15 @@ The overall score is $$s(i,j) = s_m(i) + s_m(j) + s_a(i,j)$$
 \subparagraph{B-CUBED} For each mention, compute a precision and a recall, and average them.
 \section{Integrating Knowledge in Language Models}
 \paragraph{Recap} Standard LMs predict the next word in a sequence of text and can compute the probability of a sequence. Alternatively, masked LMs (e.g. BERT) predict a masked token in a sequence of text using bidirectional context. Both types can be trained over huge amounts of unlabeled text!\\
-Traditionally LMs used for many tasks involving generating or evaluating the probability of text. Recently, LMs commonly used to generate pretrained representations of text that encode some notion of language understanding for downstream NLP tasks. \textbf{Can a LM be used as a knowledgebase?}
+Traditionally LMs are used for many tasks involving generating or evaluating the probability of text. Recently, LMs are commonly used to generate pretrained representations of text that encode some notion of language understanding for downstream NLP tasks. \textbf{Can a LM be used as a knowledgebase?}
 \paragraph{Eliciting Knowledge} Prompting can be used to direct LM towards an answer: often the answers look plausible but are incorrect. Alternatively, one can use the LM to extract an answer from text by a reliable source.\\
 Predictions generally makes sens but are not all factually correct. Why?\begin{list}{}{}
-	\item Unseen facts: some facts may not have occurred in the training corpora
-	\item Rare facts: LM hasn't seen enough examples during training to memorize the fact
-	\item Model sensitivity: LM may have seen the fact during training, but is sensitive to the phrasing of the prompt (e.e. "made" instead of "created")
+	\item \textbf{Unseen facts}: some facts may not have occurred in the training corpora
+	\item \textbf{Rare facts}: LM hasn't seen enough examples during training to memorize the fact
+	\item \textbf{Model sensitivity}: LM may have seen the fact during training, but is sensitive to the phrasing of the prompt (e.e. "made" instead of "created")
 \end{list}
-\textbf{LMs} have some knowledge but \textbf{fail to reliably recall knowledge}. Serious challenge.\\\\
-Knowledge-aware LMs are important. LM pretrained representations can benefit downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base %TODO
+\textbf{LMs} have some knowledge but \textbf{fail to reliably recall knowledge}, a serious challenge.\\\\
+Knowledge-aware LMs are important. LM pretrained representations can benefit downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base for a fact, e.g. with SQL, query the LM with a natural language prompt. Of course this requires the LM to have high quality on recalling facts.
 \subparagraph{Querying Traditional Knowledgebases}
 \begin{center}
 	\includegraphics[scale=0.5]{104.png}
@@ -2177,7 +2177,7 @@ However, there are many open challenges:
 	\item Hard to modify, i.e. not easy to remove or update knowledge in the LM
 \end{list}
 \subsection{Adding Knowledge to LMs}
-\paragraph{Add pretrained entity embeddings} ERNIE, QAGNN/GraseLM
+\subsubsection{Add pretrained entity embeddings} ERNIE, QAGNN/GraseLM
 \begin{center}
 	\includegraphics[scale=0.5]{106.png}
 \end{center}
@@ -2190,7 +2190,7 @@ Entity embeddings are like word embeddings, but for entities in a knowledgebase.
 	\item Woerd-entity embeddings methods
 	\item transofrmer encodings of entity descriptions
 \end{list}
-\subparagraph{Incorporate Entity Embeddings from a Different Embeddings Space} Learn a \textbf{fusion layer} to combine context and embedding information
+\paragraph{Incorporate Entity Embeddings from a Different Embeddings Space} Learn a \textbf{fusion layer} to combine context and embedding information
 $$h_j  = F(W_tw_j + E_we_k + b)$$
 With $w_j$ embedding of word $j$ in a sequence of words and $e_k$ the corresponding entity embedding.\\
 Intuition: there's an alignment between entities and words i nthe sentence, such that projections $W_tw_j$ and $W_ee_k$ are in the same vector space.
@@ -2203,19 +2203,23 @@ Intuition: there's an alignment between entities and words i nthe sentence, such
 		\item A fusion layer to combine the output of the MHAs
 	\end{list}
 \end{list}
+Fusion representation:
 $$ h_j^{(i)} = \sigma(\tilde{W}_t^{(i)}\tilde{w}_t^{(i)} + \tilde{W}_e^{(i)}\tilde{w}_e^{(i)}+\tilde{b}^{(i)})$$
+Token embedding output, fed to next block:
 $$w_j^{(i)} = \sigma(W_t^{(i)}h_j+b_t^{(i)})$$
-$$ $$ %TODO
+Entity embedding output, fed to next block:
+$$e_j^{(i)} = \sigma(W_e^{(i)}h_j + b_e^{(i)}) $$
 \begin{center}
 	\includegraphics[scale=0.5]{109.png}
 \end{center}
+\pagebreak
 Pretrained with three tasks
 \begin{list}{}{}
 	\item Masked LM 
 	\item Next sentence prediction
 	\item Knowledge pretraining task (dEA): randomly mask token-entity alignments and predict corresponding entity for a token from the entities in the sequence
-	$$p(e_j\:|\:w_i) = \frac{•}{•}$$ %TODO
-	$$f_{ERNIE} = $$ %TODO
+	$$p(e_j\:|\:w_i) = \frac{\exp(Ww_i\cdot e_j)}{\sum_{k=1}^m \exp(Ww_i\cdot e_k)}$$
+	$$f_{ERNIE} = f_{MLM} + f_{NSP} + f_{dEA}$$
 \end{list}
 Strenghts:
 \begin{list}{}{}
@@ -2228,21 +2232,68 @@ Limitations:
 	\item It's challenging to get a good entity linker for any domain of text or tasks
 	\item Requires further (expensive) pretraineing of the LM
 \end{list}
-\paragraph{Use an external memory} KGLM
+\subparagraph{QAGNN/GreaseLM} Key idea: when adding entity embeddings to LM, dynamically update them, together with neighbor or related entities, in \textbf{knowledge graph} as well as text.
+\begin{center}
+	\includegraphics[scale=0.5]{129.png}
+\end{center}
+Benefits:
+\begin{list}{}{}
+	\item \textbf{Robust to non-perfect entity linking}: can include all entity  candidates and let the model figure out what to use
+	\item \textbf{Better contextualize knowledge}: helpful for joint reasoning about text and knowledge (e.g. QA tasks)
+\end{list}
+A \textbf{Graph Neural Network} (\textbf{GNN}) is a neural network designed for encoding graph data. It updates each node representation by aggregating message vectors from neighbor nodes.
+$$a_k^{(v)} = \hbox{Aggregate}^{(k)}\left(\left\{h_u^{(k-1)}\:|\:u\in N(v)\right\}\right)$$
+$$h_v^{(k)} = \hbox{Combine}^{(k)}\left(h_v^{(k-1)},a_v^{(k)}\right)$$
+The text is encoded by a LM, the knowledge graph (KG) is encoded by a GNN and they are fused together for multiple rounds.
+\begin{center}
+	\includegraphics[scale=0.5]{130.png}
+\end{center}
+QAGNN and GreaseLM outperform previous BERT-based models on knowledge-intensive question answering tasks.
+\subsubsection{Use an external memory} KGLM
 \begin{center}
 	\includegraphics[scale=0.5]{107.png}
 \end{center}
 Previous methods rely on the pretrained entity embeddings to encode the factual knowledge from KBs for the language model. Are there more direct ways than pretrained entity embeddings to provide the model factual knowledge? Yes, give the model access to an external memory (a key-value store for KG triples or facts) in a ways that is independent of learned model parameters.\\
 Advantages: can directly update facts in the extrnal memory without re-training the model, also interpretable because it's more visible which fact in external memory the LM used to make prediction (it's hard to debug model prediction if we use entity embeddings).
-\subparagraph{KGLM} %TODO
-\paragraph{Modify Pretrained Data} WKLM, ERNIE, Salient Span Masking
+\subparagraph{KGLM} Key idea: condition the language model on knowledge graph (KG).\\
+The LM predict the next word computing ($x^{(1)},\ldots,x^{(t)}$ is a sequence of words)
+$$P(x^{(t+1)}\:|\:x^{(t)},\ldots,x^{(1)})$$
+Goal: \textbf{predict} the next word \textbf{using entity information} by computing ($\epsilon^{(t)}$ is the set of KG entities mentioned at timestep $t$)
+$$P(x^{(t+1)},\epsilon^{(t+1)}\:|\:x^{(t)},\ldots,x^{(1)},\epsilon^{(t)},\ldots,\epsilon^{(1)})$$
+Builds a "local" KG as it iterates over the sequence. Local KG is a subset of the full KG with only the entities relevant to the sequence so far. Can provide a strong signal for predicting what comes as the next word. When should the LM use the local KG to predict the next word?\\
+First, use the LSTM hidden state to predict the type of the next word: related entity (in the local KG), new entity (not in the local KG) or not an entity.
+\begin{list}{}{}
+	\item \textbf{Related entity}: find the top-scoring parent and relation in the local KG using the LSTM hidden state and pretrained entity and relation embeddings.\\
+	$P(p_t)=\hbox{Softmax}(v_ph_t)$ where $p_t$ is the "parent" entity, $v_p$ is the corresponding entity embedding and $h_t$ is from the LSTM hidden state. Similarly for predicting top relation.\\
+	New entity: tail entity from KG triple of (top parent entity, top relation, tail entity)\\
+	Next word: most likely next token over vocabulary expanded to include the tail entity and its aliases
+	\item \textbf{New entity}: find the top-scoring entity in the full KG using the LSTM hidden state and pretrained entity embeddings.\\
+	Next entity: directly predict top-scoring entity\\
+	Next word: most likely next token over vocabulary + entity aliases
+	\item \textbf{Not an entity}\\
+	Next entity: none\\
+	Next word: most likely next token over standard vocabulary
+\end{list}
+It supports modify/updating facts.
+\subsubsection{Modify Pretrained Data} WKLM, ERNIE, Salient Span Masking
 \begin{center}
 	\includegraphics[scale=0.5]{108.png}
 \end{center}
 Previous methods incorporated knowledge explicitly through pretrained embeddings and/or external memory. Can knowledge also be incorporated implicitly through unstructured text? Yes, mask or corrupt the data to introduce additional training tasks that require factual knowledge.\\
 Advantages: no additional memory/computation, no modifications to the architecture.
-\subparagraph{WKLM} %TODO
-\subparagraph{Inductive Biases Through Masking} Cam we encourage LM %TODO
+\subparagraph{WKLM} Key idea: train the model to distinguish between true and false knowledge. Replace mentions in the text with mentions that refer to different entities of the same type, to create negative knowledge statements. Model predicts whether entity has been replaced or not. Type-constraint is used to enforce linguistcally correct sentences, otherwise the model may trivially predict "replaced" using linguistic signal instead of knowledge.
+\begin{center}
+	\includegraphics[scale=0.5]{131.png}
+\end{center}
+Trained using an \textbf{entity replacement loss}, to train the model in distinguishing between true and false mentions
+$$L_{entRep} = 1_{e\in E^+}\log P(e\:|\:C)+ (1-1_{e\in E^+})\log(1 - P(e\:|\:C))$$
+with $e$ entity, $C$ context and $E^+$ represent a true entity mention.\\
+The total loss is the combination of standard masked language model loss (MLM) and the entity replacement loss. MLM is defined at the token-level, while entRep is defined at the entity-level. Treating a whole entity (could be multi-word) instead of a token as one unit can make LMs more knowledge-aware.
+\subsubsection{Inductive Biases Through Masking} Can we encourage the LM to learn factual knowledge by clever masking? A thread in recent works.
+\paragraph{ERNIE}
+\paragraph{Salient span masking} Outperforms other masking/corruption strategies on retrieval and QA tasks.
+\subsection{Evaluation on Downstream Tasks}
+\paragraph{Knowledge-Intensive Downstream Tasks} Measures how well the knowledge-enhanced LM transfers its knowledge to downstream tasks. Unlike probes, this evaluation usually involves finetuning the LM on downstream tasks, like evaluating BERT on GLUE tasks. Common knowledge-intensive tasks are: relation extraction, entity typing, question answering.
 \section{Dialogue Systems}
 Chatbots are a very challenging application of all the elements we've seen so far: from tokenization, to question answering, to learning, to information retrieval\ldots
 \paragraph{Early Approaches} ELIZA, 1966: used clever hand-written templates to generate replies that resembled the user's input utterances. Several programming frameworks available today for building dialog agents, Google Assistant, Amazon Alexa\ldots
