@@ -1793,18 +1793,32 @@ The overall probability of measuring $\alpha\ket{00}$ is $P_{0}\cdot P_{00} = |\
 \subparagraph{Selinger's Convention} We normalize each state in such a way that the sum of the squares of the amplitudes is equal to the overall probability that this state is reached. No necessary to renormalize each state after every measurement.\\\\
 Recall that, given a state vector $u\in C^{2^n}$ of $n$ qubits that completely describes the state of the quantum system. But an external observer has only partial knowledge: may be in state $u$ or $v$ with equal probability (e.g. measure qubit but don't observe the result)
 $$\frac{1}{2}\{u\}+\frac{1}{2}\{v\}$$
-A \textbf{mixed state} looks like $\lambda_1\{u_1\}+\ldots+\lambda_n\{u_n\}$ and $\sum_i \lambda_i = 1$
-%TODO
+A \textbf{mixed state} looks like $\lambda_1\{u_1\}+\ldots+\lambda_n\{u_n\}$ with $\sum_i \lambda_i = 1$
+\paragraph{Unitary Transformation for Mixed States}
+$$S\left(\sum_i\lambda_i\{u_i\}\right) = \sum_i\lambda_i\{Su_i\}$$
+$$q=\alpha\mathbf{0}+\beta\mathbf{1}\mapsto|\alpha|^2\{\mathbf{0}\}+|\beta|^2\{\mathbf{1}\}$$
 \paragraph{Density Matrices} For a pure state we consider $u\cdot u^*$
-\subparagraph{Example} %TODO
+\subparagraph{Example} $$u=\frac{1}{\sqrt{2}}\mathbf{0}-\frac{1}{\sqrt{2}}\mathbf{1}$$
+$$uu^*=\left(\begin{array}{c c}
+\frac{1}{\sqrt{2}}\\-\frac{1}{\sqrt{2}}
+\end{array}\right)\left(\begin{array}{c c}
+\frac{1}{\sqrt{2}}&-\frac{1}{\sqrt{2}}
+\end{array}\right)=\left(\begin{array}{c c}
+\frac{1}{\sqrt{2}}&-\frac{1}{\sqrt{2}}\\
+-\frac{1}{\sqrt{2}}&\frac{1}{\sqrt{2}}
+\end{array}\right)$$
 Important: no essential information is lost with this transformation. If two vector differs by a global phase they have the same density matrix, but the global phase is not observable.\\
 There are some advantages:
 \begin{list}{}{}
 	\item if $u = \gamma v$ with $|\gamma|=1$ then $uu^* = \gamma v\overline{\gamma}v^* = \gamma\overline{\gamma}vv^* = vv^*$
-	\item Trace tr($uu^*$) = $|u|^2$
+	\item Trace $tr(uu^*) = |u|^2$
 	\item Density matrix can account for mixed states as well\\
 	Given a mixed state $\sum_i \lambda_i\{u_i\}$, it's a linear combination of pure states, so the corresponding density matrix would be $\sum_i \lambda_i \{u_iu_i^*\}$
+	$$\frac{1}{2}\{\mathbf{0}\}+\frac{1}{2}\{\mathbf{1}\}$$
+	$$\frac{1}{2}\left(\begin{array}{c c}1&0\\0&0\end{array}\right) + \frac{1}{2}\left(\begin{array}{c c}0&0\\0&1\end{array}\right) = \left(\begin{array}{c c}\frac{1}{2}&0\\0&\frac{1}{2}\end{array}\right)$$
 	\item No observable difference between two mixed states that share the same density matrix
+	$$u=\frac{1}{\sqrt{2}}\mathbf{0}+\frac{1}{\sqrt{2}}\mathbf{1}\:\:\:\:\:v=\frac{1}{\sqrt{2}}\mathbf{0}-\frac{1}{\sqrt{2}}\mathbf{1}$$
+	$$\frac{1}{2}\{\mathbf{u}\}+\frac{1}{2}\{\mathbf{v}\} \simeq \frac{1}{2}\{\mathbf{0}\}+\frac{1}{2}\{\mathbf{1}\}$$
 \end{list}
 Note: $A$ positive matrix with tr($A$) $\leq 1\Leftrightarrow A$ is a matrix in the form $\sum_i \lambda_i(u_iu_i^*)$ for unit vectors $u_i$ and non-negative coefficients $\lambda_i$ such that $\sum_i \lambda_i \leq 1$
 \paragraph{Definition} A density matrix is a positive $A$ such that tr$(A)\leq 1$\\
@@ -1822,28 +1836,121 @@ V\\0
 0\\W
 \end{array}\right)$ with probability $|W|^2$.\\
 With $uu^* = \left(\begin{array}{c c}
-
-\end{array}\right)$ we measure %TODO
-%TODO scheme example
+VV^*&VW^*\\WV^*&WW^*
+\end{array}\right)$ we measure with probability $|V|^2=tr(VV^*)$ collapsing to $\left(\begin{array}{c c}
+VV^*&0\\0&0
+\end{array}\right)$ or with probability $|W|^2=tr(WW^*)$ collapsing to $\left(\begin{array}{c c}
+0&0\\0&WW^*
+\end{array}\right)$
+\begin{center}
+	\includegraphics[scale=0.5]{43.png} %TODO scheme example
+\end{center}
 So measurement is also a linear transformation.
 \paragraph{Complete Partial Order of Density Matrices} $D_n=\{AGC^{n\times n}\:|\: A$ positive, tr$(A)\leq 1\}$\\
 We define the CPO with $A\sqsubseteq B$ if $B-A$ is positive. $B$ "improves" the precision of $A$. The bottom element is $\perp = 0$ the 0 matrix.\\
 Increasing sequence $A_0 \sqsubseteq A_1\sqsubseteq\ldots\sqsubseteq A_n\sqsubseteq\ldots$, noting that the traces are also increasing and real valued, bounded by $1$ $\Rightarrow$ they have a limit $\in R$, meaning that $\{A_i\}$ will converge to some matrix.
-\subsection{Quantum Flow Charts} $\Gamma$ %TODO
-$\overline{q}$ a finite list of quantum bits.
-\paragraph{Allocate a qubit} $\Gamma = A$ arrives with density $A$\\
-\texttt{new qubit q := 0} $\rightarrow$ q:bit, $\Gamma=\left(\begin{array}{c c}
-A & 0\\0&0
-\end{array}\right)$
-\paragraph{Discard a qubit} We arrive with q:bit, $\Gamma = \left(\begin{array}{c c}
-A & B\\C&D
-\end{array}\right)$ and \texttt{discard q}, ending with $\Gamma = A + D$, $B,C$ are lost
-\paragraph{Unitary transformation} We arrive with $\overline{q}$:qbits, $\Gamma =A$ and apply $\overline{q}$\texttt{*=}$S$ ending with $\overline{q}$:qbits, $\Gamma = (S\otimes I)A$ (other bits stays the same with $I$) %TODO
-\paragraph{Measurement} %TODO
-\paragraph{Merge} Mutually exclusive %TODO
-\paragraph{Initialization} %TODO
-\paragraph{Permutation} %TODO
+\subsection{Quantum Flow Charts} Label $\Gamma$ typing context (syntax) and annotation $A$ density matrices (semantics). Quantum bits can be allocated (initialized to 0) and deallocated. $\overline{q}$ a finite list of quantum bits.
+\paragraph{Allocate a qubit} 
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {$\Gamma = A$};
+			\node [block, below of = phantom1, node distance = 1.5cm] (allocate) {\texttt{new qbit q := 0}};
+			\node [below of = allocate, node distance = 1.5 cm] (phantom2) {\texttt{q:qbit},$\Gamma = \left(\begin{array}{c c} A&0\\0&0\end{array}\right)$};
+			\path [line] (phantom1) -> (allocate) node [near start] {};
+			\path [line] (allocate) -> (phantom2) node [near start] {};
+		\end{tikzpicture}
+	\end{center}
+\pagebreak
+\paragraph{Discard a qubit} 
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {\texttt{q:qbit},$\Gamma = \left(\begin{array}{c c} A&B\\C&D\end{array}\right)$};
+			\node [block, below of = phantom1, node distance = 1.5cm] (allocate) {\texttt{discard q}};
+			\node [below of = allocate, node distance = 1.5 cm] (phantom2) {$\Gamma = A + D$};
+			\path [line] (phantom1) -> (allocate) node [near start] {};
+			\path [line] (allocate) -> (phantom2) node [near start] {};
+		\end{tikzpicture}
+	\end{center}
+\paragraph{Unitary transformation}
+Apply $\overline{q}$\texttt{*=}$S$ ending with $\overline{q}$:qbits, $\Gamma = (S\otimes I)A(S\otimes I)^*$ (other bits stays the same with $I$)
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {\texttt{$\overline{q}$:qbits},$\Gamma = A$};
+			\node [block, below of = phantom1, node distance = 1.5cm] (allocate) {\texttt{$\overline{q}$ *= S}};
+			\node [below of = allocate, node distance = 1.5 cm] (phantom2) {\texttt{$\overline{q}$:qbits},$\Gamma = (S\otimes I)A(S\otimes I)^*$};
+			\path [line] (phantom1) -> (allocate) node [near start] {};
+			\path [line] (allocate) -> (phantom2) node [near start] {};
+		\end{tikzpicture}
+	\end{center}
+\paragraph{Measurement}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{cc}A&B\\C&D\end{array}\right)$};
+			
+			\node [below right of = branch, node distance = 3 cm] (phantom2) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{cc}0&0\\0&D\end{array}\right)$};
+			\node [below left of = branch, node distance = 3 cm] (phantom3) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{cc}A&0\\0&0\end{array}\right)$};
+			\path [line] (phantom1) -> (branch) node [near start] {};
+			\path [line] (branch) -> (phantom2);
+			\path [line] (branch) -> (phantom3);
+		\end{tikzpicture}
+	\end{center}
+\paragraph{Merge} 
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {$\Gamma = A$};
+			\node [cloud, below right of = phantom1, node distance = 1.5cm] (merge) {};
+			\node [above right of = merge, node distance = 1.5cm] (phantom2) {$\Gamma = B$};
+			\node [below of = merge] (phantom3) {$\Gamma = A+B$};
+			\path [line] (phantom1) -> (merge) node [near start] {};
+			\path [line] (phantom2) -> (merge) node [near start] {};
+			\path [line] (merge) -> (phantom3) node [near start] {};
+		\end{tikzpicture}
+	\end{center}
+\paragraph{Initialization}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [cloud] (init) {};
+			\node [below of = init, node distance = 1.5cm] (phantom1) {};
+
+			\path [line] (init) -> (phantom1) node [near start] {$\Gamma = 0$};
+		\end{tikzpicture}
+	\end{center}
+\pagebreak
+\paragraph{Permutation}
+	\begin{center}
+		\begin{tikzpicture}[node distance = 1cm, auto]
+			\node [] (phantom1) {$q_1,\ldots,q_n$:qbits$=(a_{ij})_{ij}$};
+			\node [block, below of = phantom1, node distance = 1.5cm] (permute) {\texttt{permute $\phi$}};
+			\node [below of = permute, node distance = 1.5cm] (phantom2) {$q_{\phi(1)},\ldots,q_{\phi(n)}$:qbits$=(a_{2^\phi(i)2^\phi(j)})_{ij}$};
+
+			\path [line] (phantom1) -> (permute) node [near start] {};
+			\path [line] (permute) -> (phantom2) node [near start] {};
+		\end{tikzpicture}
+	\end{center}
 \paragraph{Example}
+\begin{center}
+		\begin{tikzpicture}[node distance = 2cm, auto]
+			\node [] (ph1) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A&B\\C&D\end{array}\right)$};
+			\node [decision, below of = ph1] (branch) {\texttt{measure q}};
+			\node [below left of = branch, node distance = 3 cm] (m0) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A&0\\0&0\end{array}\right)$};
+			\node [below right of = branch, node distance = 3 cm] (m1) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}0&0\\0&D\end{array}\right)$};
+			\node [block, below of = m1] (not) {\texttt{q $\oplus$= 1}\\(not gate)};
+			\node [below of = not] (notres) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}D&0\\0&0\end{array}\right)$};
+			\node [cloud, below left of = notres] (merge) {};
+			\node [below of = merge] (end) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A+D&0\\0&0\end{array}\right)$};
+			
+			\path [line] (ph1) -> (branch);
+			\path [line] (branch) -- (m0);
+			\path [line] (m0) -> (merge);
+			\path [line] (branch) -- (m1);
+			\path [line] (m1) -- (not);
+			\path [line] (not) -- (notres);
+			\path [line] (notres) -- (merge);
+			\path [line] (merge) -- (end);
+		\end{tikzpicture}
+	
+\end{center}
+\pagebreak
 \paragraph{Combining classical data with quantum data} Classical data corresponds to control paths, quantum data to quantum paths.\\
 In the combined language, we have two data types: bit and qubit. The typing context are those defined before. An edge with $n$ bits and $m$ qubits can be replaced by $2^n$ edges (all combinations of the bits) labeled with $m$ qubits only.\\
 A typing context $\Gamma$ is a $2^n$ tuple $(A_0,\ldots, A_{2^n-1})$ of density matrices, each of dimension $2^n\times 2^n$.\\\\
@@ -1853,5 +1960,6 @@ $$S(A_0,\ldots,A_{2^n-1}) = (SA_0,\ldots,SA_{2^n-1})$$
 $$|(A_0,\ldots,A_{2^n-1})|^2 = \sum_{i=0}^{2^n-1} |A_i|^2$$
 Flow charts are acyclic graphs whose edges are typed with typing contexts, and whose nodes can be any of the previously seen components.
 \subparagraph{Property} The annotation of a flowchart is uniquely determined by the annotation of its input edges. Calculated in a top-down fashion apply the rules we've seen.\\
-To each flowchart is associated a linear transformation from its input to its output edges, because we've seen only linear transformations and composing them linearly preserve the linearity.
+To each flowchart is associated a linear transformation from its input to its output edges, because we've seen only linear transformations and composing them linearly preserve the linearity. This linear function preserver both positivity and traces (the sum of input traces equals to the sum of output traces). Without loops only!
+%TODO examples 6/05
 \end{document} 
