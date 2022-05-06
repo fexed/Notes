@@ -1961,5 +1961,81 @@ $$|(A_0,\ldots,A_{2^n-1})|^2 = \sum_{i=0}^{2^n-1} |A_i|^2$$
 Flow charts are acyclic graphs whose edges are typed with typing contexts, and whose nodes can be any of the previously seen components.
 \subparagraph{Property} The annotation of a flowchart is uniquely determined by the annotation of its input edges. Calculated in a top-down fashion apply the rules we've seen.\\
 To each flowchart is associated a linear transformation from its input to its output edges, because we've seen only linear transformations and composing them linearly preserve the linearity. This linear function preserver both positivity and traces (the sum of input traces equals to the sum of output traces). Without loops only!
-%TODO examples 6/05
+\paragraph{Examples}
+\begin{center}
+		\begin{tikzpicture}[node distance = 2cm, auto]
+			\node [] (ph1) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A&B\\C&D\end{array}\right)$};
+			\node [decision, below of = ph1] (branch) {\texttt{measure q}};
+			\node [below left of = branch, node distance = 3 cm] (m0) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A&0\\0&0\end{array}\right)$};
+			\node [below right of = branch, node distance = 3 cm] (m1) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}0&0\\0&D\end{array}\right)$};
+			\node [cloud, below left of = m1] (merge) {};
+			\node [below of = merge] (state) {\texttt{q:qbit},$\Gamma=\left(\begin{array}{c c}A&0\\0&D\end{array}\right)$};
+			\node [block, below of = state] (discard) {\texttt{discard q}};
+			\node [below of = discard] (end) {$\Gamma=A+D$};
+			
+			\path [line] (ph1) -> (branch);
+			\path [line] (branch) -> (m0);
+			\path [line] (branch) -> (m1);
+			\path [line] (m0) -> (merge);
+			\path [line] (m1) -> (merge);
+			\path [line] (merge) -> (state);
+			\path [line] (state) -> (discard);
+			\path [line] (discard) -> (end);
+			
+		\end{tikzpicture}
+	
+\end{center}
+\pagebreak
+Another example: $\forall\:x$ flow char
+
+\begin{center}
+		\begin{tikzpicture}[node distance = 2cm, auto]
+			\node [] (ph1) {\texttt{q:qbit},$\Gamma_1$};
+			\node [block, below of = ph1] (discard1) {\texttt{discard q}};
+			\path [line] (ph1) -> (discard1);
+			\node [below of = discard1] (state1) {$\Gamma_1$};
+			\path [line] (discard1) -> (state1);
+			\node [right of = ph1] (phdots) {\ldots};
+			\node [right of = phdots] (phn) {\texttt{q:qbit},$\Gamma_n$};
+			\node [block, below of = phn] (discardn) {\texttt{discard q}};
+			\path [line] (phn) -> (discardn);
+			\node [below of = discardn] (staten) {$\Gamma_n$};
+			\path [line] (discardn) -> (staten);
+			
+			\node [block, below of = phdots, node distance = 5.5 cm] (X) {$X$};
+			\path [line] (state1) -> (X);
+			\path [line] (staten) -> (X);
+			
+			\node [below left of = X] (end1) {$\Delta_1$};
+			\path [line] (X) -> (end1);
+			\node [below of = X] (enddots) {\ldots};
+			\node [below right of = X] (endn) {$\Delta_n$};
+			\path [line] (X) -> (endn);
+		\end{tikzpicture}
+\end{center}
+\textbf{Loops} can be realized with this:
+\begin{center}
+		\begin{tikzpicture}[node distance = 2cm, auto]
+			\node [cloud] (merge) {};
+			\node [above left of = merge, node distance = 3 cm] (ph1) {$A$};
+			\path [line] (ph1) -> (merge);
+			\node [above right of = merge] (ph21) {};
+			\node [right of = ph21] (ph22) {};
+			\path [line] (ph21) -> (merge);
+			\path [line] (ph22) -> (ph21);
+			\node [decision, below of = merge, node distance = 1.5 cm] (branch) {\texttt{measure}};
+			\path [line] (merge) -> (branch);
+			\node [below left of = branch] (false) {};
+			\path [line] (branch) -> (false);
+			\node [below of = false, node distance = 3 cm] (end) {$G(A)$};
+			\path [line] (false) -> (end);
+			\node [block, below right of = branch] (true) {$X$};
+			\path [line] (branch) -> (true);
+			\node [below of = true] (ph24) {};
+			\path [line] (true) -> (ph24);
+			\node [right of = ph24] (ph23) {};
+			\path [line] (ph24) -> (ph23);
+			\path [line] (ph23) -> (ph22);
+		\end{tikzpicture}
+\end{center}
 \end{document} 
