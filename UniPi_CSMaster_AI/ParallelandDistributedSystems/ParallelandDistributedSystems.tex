@@ -1058,20 +1058,39 @@ switch(me):
 \section{Accelerators}
 \subsection{GPUs}
 \paragraph{Graphic Processing Units} Aimed mainly at managing objects on the screen, mainly moving (copying) shapes on the screen. For each pixel, you can do a number of operations, typically in a data parallel fashion.
-\paragraph{GP-GPUs} General Purpose. We use the same devices engineered to operate in parallel, because the general idea is \textbf{vector processing}.\\\\
-GPU's memories have larger access paths that allow to access more addresses at the same time. Can use the most significant bit to select the memory module (each with $k\times$wordsize capacity), using a multiplexer with that bit as selector. If I want to read more than one position at the same time, I can select the other bits to get the "same" address in each module at the same time. This in theory.
-\subparagraph{Global Memory} Coalesced Access
-\subparagraph{Local Memory} Bind to the cores, accessed by clock cycle\\\\
-GPU are used as accelerators, meaning that they are external devices with respect to the CPU.
-%TODO
-\subparagraph{Modern GPUs} Still GP-GPUs with dedicated interconnection between them.
+\paragraph{GP-GPUs} General Purpose. We use the same devices engineered to operate in parallel, because the general idea is \textbf{vector processing}. They are composed of processors, each takes the instruction flow from the memory and sorts it into smaller children units. In CUDA terminology the processors are called SM (Streaming Processor) and the child units are Cores (powerful ALUs). It follows the SIMD (Single Instruction Multiple Data) model: single instruction to the processor and instructions with multiple data to the cores (vector processing).\\
+GPU's memories have wider access paths that allow to access more addresses at the same time. Can use the most significant bit to select the memory module (each with $k\times$wordsize capacity), using a multiplexer with that bit as selector. If I want to read more than one position at the same time, I can select the other bits to get the "same" address in each module at the same time. This in theory, with \textbf{Coalesced Accesses}: accessing blocks of memory that start with the same bits (e.g. changing only the last $k$ bits).
+\paragraph{Memory} Most GPUs distinguish between global, read only and local memory.\\
+Read only for historical reason, kind of RAM, e.g. storing fixed image patterns used many times.\\
+\textbf{Global memory} is accessible by each core but its slower.\\
+\textbf{Local Memory} is bind to the cores, accessed by clock cycle. Not like normal registers but close.
+\paragraph{External} GPU are used as accelerators, meaning that they are external devices with respect to the CPU, connected with the PCIe bus. It has its own memory, so when you need to do something on the GPU you need to transfer data to it. In order to compute, for example, a $map(C,f)$ so $\forall\:i\in C\:\:i'=f(i)$, we can do it on the CPU like we've done until now or on the GPU with three steps:
+\begin{enumerate}
+	\item Assuming $C$ is in the central memory $M$, we need to copy $C$ from $M$ to the GPU's global memory
+	\item Execute the $map$ on the GPU that'll write the resulting collection $C'$ somewhere in the GPU's global memory
+	\item So we need to copy $C'$ from the GPU's memory to $M$
+\end{enumerate}
+PCIe has a number of lanes, e.g. 16.\\
+GP-GPU usually have a DMA device that are able to do independent transfers on the PCIe from/to the general memory of the CPU where the bus is attached. The DMA devices are often two, with a specific intent: moving data to/from the GPU while the GPU is computing something else. This means we have to program them.
+\paragraph{Integrated GPUs} Two kinds:
+\begin{list}{}{}
+	\item GPU on the same chip with a sort of dedicated PCIe express connecting directly to the CPU, otherwise same mechanisms as before
+	\item Still GPU on the same chip with a dedicated interconnection with the CPU and possibly with the memory (cache), and perhaps its own memory. This means faster connection because, being a dedicated link there's less overhead due to management protocols.
+\end{list}
+\paragraph{Modern GPUs} Still GP-GPUs with the option of having dedicated interconnection between them (SLI) such that if we have $n$ GPUs of $x$ SM each, we see the whole assembly as a single $nx$ SMs GPU.
 \paragraph{Using the GPU}
 \begin{enumerate}
 	\item Manage data: moving data to/from GPU memory and also managing allocations in GPU memory.
 	\item Orchestrate parallel computation, meaning managing communication and synchronization: telling to streaming processors and to cores what to do, meaning what to compute and to which data.\\
 	Usually vendors provide abstractions.
 \end{enumerate}
-\paragraph{Warps} Threads need to execute linear, non-diverging codes
+\paragraph{Abstractions} nVidia terminology
+\begin{list}{}{}
+	\item Grids: groups of threads
+	\item Group of threads: a number of warps
+	\item \textbf{Warps}: groups of threads (usually 16) need to execute linear, non-diverging codes. Coalescent accesses, one per cycle
+\end{list}
+So a single activity is denoted by a triple $\langle$grid component number, block number, thread number$\rangle = \langle GC, B, th\rangle$ (at least block and thread number). This means that what we have to tell the GPU is what the single thread performs: the unit of computation is called \textbf{kernel} and tells what to do in the $\langle x,y,z\rangle$ thread. The values are taken with abstractions provided by the GPU, and you only need to write the computation.
 \paragraph{Usage}
 \begin{lstlisting}[style=myC]
 cuda Malloc*
@@ -1079,5 +1098,73 @@ cuda Memcpy* //data from host to device
 << >>() //kernel computation
 cuda Memcpy* //device to host
 cuda free*
+\end{lstlisting}
+We move $O(m)$ data to the device, compute $O(m)$ and then move back the $O(m)$ resulting data. From the point of view of times: start at $t_0$ setting up the bus, then send $O(m)$ with a time depending on the speed of the bus, compute $O(m)$ and take back $O(m)$ results. The transfers to and from the GPU is overhead (from our point of view of parallel computation, it's in the range of setting up the data and collecting it, not useful computation). More overhead we have more parallel computation we need to amortize it. So the GPU is useful when the computation on $O(m)$ data is far longer than the time needed to transfer the same $O(m)$ data back and forth. E.g., matrix multiplication: transfer $O(n^2)$, compute $O(n^3)$ operations and transfer $O(n^2)$.\\
+In both cases we can use the \textbf{stream}.
+\paragraph{Streams} Object we declare to send operations to the GPU, made of copies, in and out, and kernels. For example, with DMA$_1$ copying from the GPU and DMA$_2$ copying to the GPU, with the cores computing, we can have a situation like
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Stream$_1 = $ cpyin(ds$_1$), kernel, cpyout(ds$_1$)
+	\item Stream$_2 = $ cpyin(ds$_2$), kernel, cpyout(ds$_2$)
+	\item Stream$_3 = $ cpyin(ds$_3$), kernel, cpyout(ds$_3$)
+\end{list}
+\begin{center}
+	\includegraphics[scale=0.5]{24.png}
+\end{center}
+\end{multicols}
+\pagebreak
+\paragraph{Code example}
+
+\begin{lstlisting}[style=myC]
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+using namespace std;
+
+void vecaddGPU(float *r, float *a, float *b, int n) {
+	#pragma acc kernels loop copyin(a[0:n], b[0:n]) copyout(r[0:n])
+	for (int i = 0; i < n; i++) r[0] = a[i] + b[i];
+}
+
+// note that the GPU memory is managed automatically and not explicitly by the programmer
+int main(int argc, char* argv[]) {
+	int n; // vector length
+	float * a, * b, * r, * e; // inputs, output and expected vectors
+	int i, errs;
+
+	if (argc > 1) n = atoi(argv[1]);
+	else n = 100000; // default vector length
+	if (n <= 0) n = 100000;
+
+	// allocate vectors on the CPU
+	a = (float*) malloc(n*sizeof(float));
+	b = (float*) malloc(n*sizeof(float));
+	r = (float*) malloc(n*sizeof(float));
+	e = (float*) malloc(n*sizeof(float));
+	// populate vectors
+	for (i = 0; i < n; i++) {
+		a[i] = (float) i+1;
+		b[i] = (float) 1000*i;
+	}
+
+	// compute on the GPU
+	vecaddGPU(r, a, b, n);
+
+	// compute on host to compare
+	clock_t start = clock();
+	for (i = 0; i < n; i++) e[i] = a[i] + b[i];
+	clock_t stop = clock();
+	printf("Seq time is: %f\n", ((double) (stop - start)/CLOCKS_PER_SEC));
+
+	//compare results
+	errs = 0;
+	for (i = 0; i < n; i++) {
+		if (r[i] != e[i]) errs++;
+	}
+
+	printf("%d errors found\n", errs);
+	return errs;
+}
 \end{lstlisting}
 \end{document}
