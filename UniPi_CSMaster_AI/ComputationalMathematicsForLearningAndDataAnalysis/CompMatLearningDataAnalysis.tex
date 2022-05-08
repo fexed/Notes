@@ -2,6 +2,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
+\usepackage{amsfonts}
+\usepackage{amsmath}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -11,6 +13,7 @@
 \usepackage{listings}
 \usepackage{makecell}
 \usepackage{mathrsfs}
+\usepackage{cancel}
 
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
@@ -50,20 +53,18 @@
 \renewcommand*\contentsname{Index}
 
 \maketitle
-\begin{multicols}{2}
 \tableofcontents
-\end{multicols}
 \pagebreak
 \section{Introduction}
 Exam: project (groups of 2) + oral exam.\\
 This course's goal is to make sense of the huge amounts of data, take something big and unwieldy and produce something small that can be used, a \textbf{mathematical model}.\\
 The mathematical model should be accurate, computationally inexpensive and general, but generally is not possible to have all three. General models are convenient (work once, apply many), they are parametric so we need to learn the right values of the parameters. Fitting is finding the model that better represents the phenomenon given a family of possible models (usually, infinitely many). Is an optimization model and usually this is the computational bottleneck.\\
 Machine Learning is better than fitting because fitting reduces the training error, the empirical risk, but ML reduces the test error, so the generalization error.\\
-Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}\|Ax - b\|_2$ which is easier and can be solved exactly.
+Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in \mathbb{R}^n}\|Ax - b\|_2$ which is easier and can be solved exactly.
 \chapter{Numerical Analysis}
 \section{Quick recap of linear algebra}
 \begin{list}{}{}
-	\item \textbf{Matrix - Vector multiplication}, with $A\in R^{4\times 3}, c\in R^3, b\in R^4$
+	\item \textbf{Matrix - Vector multiplication}, with $A\in \mathbb{R}^{4\times 3}, c\in \mathbb{R}^3, b\in \mathbb{R}^4$
 	$$\left[\begin{array}{c c c}
 		A_{11} & A_{12} & A_{13}\\
 		\vdots & \vdots & \vdots\\
@@ -73,7 +74,7 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}\|Ax 
 	\end{array}\right] = \left[\begin{array}{c}
 		b_1\\b_2\\b_3\\b_4
 	\end{array}\right]\:\:\:\:\:\:\begin{array}{l}
-		b_i = \sum_{j=1}^4 A_{ij}c_j\\
+		b_i = \sum_{j=1}^3 A_{ij}c_j\\
 		A_{11}c_1 + A_{12}c_2 + A_{13}c_3 = b_1
 	\end{array}$$
 	or linear combination of the columns
@@ -113,9 +114,9 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}\|Ax 
 	\item \textbf{Image} $Im A$ = set of vectors $b$ that we can reach with $A$
 	\item \textbf{Kernel} $Ker A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
 	\item \textbf{Invertible} $A$ if this problem has exactly one solution:\\
-	$\forall\:b\in R^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix $|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
+	$\forall\:b\in \mathbb{R}^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix $|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
 	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A $\setminus$ b}.
-	\item \textbf{Cost}, with $A\in R^{m\times n}, B\in R^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
+	\item \textbf{Cost}, with $A\in \mathbb{R}^{m\times n}, B\in \mathbb{R}^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
 	In particular, $A, B$ squared $\Rightarrow AB$ costs $O(m^3)$. With $A, v$ vector $\Rightarrow$ $Av$ costs $O(m^2)$. Faster alternatives are not worth it usually. And remember that $AB \neq BA$ generally, and also that $CA = CB \not\Rightarrow A = B$ with $C$ matrix.\\
 	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
 \end{list}
@@ -123,108 +124,229 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in R^n}\|Ax 
 But $R^k$ with $k > 1$ has no total order $\Rightarrow$ no \textit{best} solution, only non-dominated ones.\\
 Two practical solutions: maximize return with budget on maximum risk or maximize\ldots\\
 Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, if the problem $P$ is unbounded below). Hardly ever happens in ML, because losses and regularizations are $\geq 0$\\
-Also impossible if $f > -\infty$ but $\not\exists x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions ($\epsilon$-optima). On PC $x\in R$ is in fact $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
+Also impossible if $f > -\infty$ but $\not\exists x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions ($\epsilon$-optima). On PC $x\in \mathbb{R}$ is in fact $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
 Anyway finding the exact $x_*$ is impossible in general.
 \paragraph{Norms}\begin{list}{}{}
-	\item $||x||_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
+	\item $\|x\|_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
 	x_1\\\vdots\\x_b
 	\end{array}\right]$\\
 	Many matrices preserve norm 2
 \end{list}
-\paragraph{Orthogonal} A square matrix $U\in R^{n\times n}$ is orthogonal if $U^TU = I \vee UU^T = I \vee U^{-1} = U^T$ equivalently\\
-\textbf{Theorem}: for an orthogonal matrix $U\in R^{n\times n}$ and every vector $x$, $||Ux|| = ||x||$\\
-More generally, $x^T y = (Ux)^T(Xy)$ for all vectors $x,y\in R^n$\\
+\paragraph{Orthogonal} A square matrix $U\in \mathbb{R}^{n\times n}$ is orthogonal if $U^TU = I \vee UU^T = I \vee U^{-1} = U^T$ equivalently\\
+\textbf{Theorem}: for an orthogonal matrix $U\in \mathbb{R}^{n\times n}$ and every vector $x$, $\|Ux\| = \|x\|$\\
+More generally, $x^T y = (Ux)^T(Xy)$ for all vectors $x,y\in \mathbb{R}^n$\\
 The columns of a orthogonal matrix are \textbf{orthonormal}: $u_i^Tu_j = \left\{\begin{array}{l l}
 1 &\hbox{if } i = j\\0&\hbox{otherwise}
 \end{array}\right.$\\
-If $U,V\in R^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
-\paragraph{Eigenvalues and eigenvectors} Given a square matrix $A\in R^{m\times m}$, if $Av = \lambda v$ for $v\in R^m, \lambda\in R$ then we call $\lambda$ and \textbf{eigenvalue} and $v$ an \textbf{eigenvector} of $A$.\\
+If $U,V\in \mathbb{R}^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
+\paragraph{Eigenvalues and eigenvectors} Given a square matrix $A\in \mathbb{R}^{m\times m}$, if $Av = \lambda v$ for $v\in \mathbb{R}^m, \lambda\in \mathbb{R}$ then we call $\lambda$ and \textbf{eigenvalue} and $v$ an \textbf{eigenvector} of $A$.\\
 For many matrices we can find $v_1,\ldots,v_m$ eigenvectors that are a basis of $R^m$, i.e. $[v_1|\ldots|v_m] = V$ is invertible.\\
 $A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda$, with $\Lambda = \left[\begin{array}{c c c}
 \lambda_1 & & 0\\
 & \ddots \\
 0& & \lambda_m
 \end{array}\right]$\\
-Given $x\in R^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
+Given $x\in \mathbb{R}^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
 Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
 Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same for $\alpha v+\beta w$ (linear combination). Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a basis.
 \paragraph{Symmetry} $A$ is symmetric if $A = A^T$
-\paragraph{Spectral Theorem} For a symmetric matrix $A\in R^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
-\paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in R^{m\times m}$ we can consider the function $x\in R^m\mapsto f(x) = x^T Qx \in R$\\
-\textbf{Theorem} For all symmetric matrix $Q \in R^{m\times m}$, $\lambda_{\min}||x||^2 \leq x^TQx\leq \lambda_{\max}||x||^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
-\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite ($Q \succeq 0$) if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in R^m$\\
-Positive definite ($Q \succ 0$) if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in R^m, x\neq 0$
+\paragraph{Spectral Theorem} For a symmetric matrix $A\in \mathbb{R}^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
+\paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in \mathbb{R}^{m\times m}$ we can consider the function $x\in \mathbb{R}^m\mapsto f(x) = x^T Qx \in \mathbb{R}$\\
+\textbf{Theorem} For all symmetric matrix $Q \in \mathbb{R}^{m\times m}$, $\lambda_{\min}\|x\|^2 \leq x^TQx\leq \lambda_{\max}\|x\|^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
+\paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite ($Q \succeq 0$) if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in \mathbb{R}^m$\\
+Positive definite ($Q \succ 0$) if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in \mathbb{R}^m, x\neq 0$
 \paragraph{Recall theorem} $\lambda_{\min}(x^T x) \leq x^T Q x \leq \lambda_{\max}(x^T x)$ for all symmetric $Q$ so $\lambda_{\min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{\max}$\\
-Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for all vectors $z$ with $||z|| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = ||x||$ and a vector $z$ with $||z|| = 1$
+Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for all vectors $z$ with $\|z\| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = \|x\|$ and a vector $z$ with $\|z\| = 1$
 $$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
-\paragraph{Generalization for complex matrices} $||x||^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
+\paragraph{Generalization for complex matrices} $\|x\|^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
 % fine recap lin alg
 \section{SVD}
-\paragraph{Singular Value Decomposition} Each $A\in R^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_i$ on the diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
+\paragraph{Singular Value Decomposition} Each $A\in \mathbb{R}^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
 The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
 Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
 \sigma_1\\ & \sigma_2\\ & & \ddots\\ & & & \sigma_m
 \end{array} \right]\left[\begin{array}{c}
 v_1^T\\v_2^T\\\vdots\\v_m^T
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
-Geometric idea: there is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
+\subparagraph{Geometric idea} There is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
 $\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}\\
-Rectangular SVD: each $A\in R^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in R^{m\times m}$, $V \in R^{n\times n}$ are orthogonal and $\Sigma\in R^{m\times n}$ is diagonal, so $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
+\subparagraph{Rectangular SVD} Each $A\in \mathbb{R}^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in \mathbb{R}^{m\times m}$, $V \in \mathbb{R}^{n\times n}$ are orthogonal and $\Sigma\in \mathbb{R}^{m\times n}$ is diagonal, so there's a padding $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
-$= u_i\sigma_1 v_1^T + \ldots + u_{\min(m, n)} \sigma_{\min(m, n)} v_{\min(m, n)}^T$\\
-In Matlab, \texttt{svd(A, 'econ')} costs $max(m,n)\cdot \min(m,n)^2$, still cubic but linear in the largest dimension. the full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $max(m,n)\times max(m,n)$, so it will cost more in time and memory.\\\\
-The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots$ so at one point a $\sigma_r > \sigma_{r+1} = \ldots = \sigma_{\min(m,n)} = 0$\\
-Given $A = U\Sigma V^T$ we can compute $A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proved that the eigenvalues of $A^T A$ Are the squares of the singular values of $A$ plus additional zeroes for dimension reasons.
-$$||A||_2 = ||U\Sigma V^T||_2 = ||\Sigma V^T||_2 = ||\Sigma||_2 = \Sigma_1$$
-$$||A|| = max_{||z|| = 1} ||\Sigma V^T|| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1||z|| = \sigma_1$$
-$$||A||_F = ||U\Sigma U^T|| = \ldots = \Sigma_1$$
+$= u_i\sigma_1 v_1^T + \ldots + u_{\min(m, n)} \sigma_{\min(m, n)} v_{\min(m, n)}^T$
+\subparagraph{Cost in Malab} \texttt{svd(A, 'econ')} costs $\max(m,n)\cdot \min(m,n)^2$, still cubic but linear in the largest dimension.\\
+The full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $\max(m,n)\times \max(m,n)$, so it will cost more in time and memory.
+\subparagraph{Properties} The SVD reveals rank, image and kernel of a matrix.
+\begin{list}{}{}
+	\item \textbf{Rank}\\
+The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots\geq\sigma_r > \sigma_{r+1} = \ldots = \sigma_{\min(m,n)} = 0$
+	\item \textbf{Image}\\
+	For each $x\in\mathbb{R}^n, Ax$ is a linear combination of $u_1,\ldots,u_r$
+	\item \textbf{Kernel}\\
+	Any linear combination $y$ of $v_{r+1},\ldots,v_n$ satisfies $Ay = 0$
+\end{list}
+Given $A = U\Sigma V^T$ we can compute $$A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proved that the eigenvalues of $A^T A$ Are the squares of the singular values of $A$ plus additional zeroes for dimension reasons.
+\paragraph{Norms} The norm of a matrix $A\in \mathbb{R}^{m\times n}$ is 
+$$\|A\|=\max_{z\in \mathbb{R}^n, \|z\|=1}\|Az\| = \max_{x\in\mathbb{R}^n,x\neq 0}\frac{\|Ax\|}{\|x\|}$$
+$$\|Ax\|\leq \|A\|\cdot\|x\|$$
+With $\|x\|_2 = \sqrt{x^Tx}$ and $\|Ux\|=\|x\|$ for orthogonal $U$.\\
+Note that this definition is different from the \textbf{Frobenius norm}
+$$\|A\|_F=\sqrt{a_{11}^2+a_{12}^2+\ldots+a_{21}^2+a_{22}^2+\ldots+a_{mn}^2}$$
+\subparagraph{Properties of the Norms}
+\begin{list}{}{}
+	\item $\|A\|\geq 0$ and $\|A\|=0\Leftrightarrow A=0$
+	\item $\|\alpha A\|=|\alpha|\cdot\|A\|$
+	\item $\|A+B\| \leq \|A\|+\|B\|$
+	\item $\|AB\| \leq \|A\|\cdot\|B\|$
+	\item $\|Av\| \leq \|A\|\cdot\|v\|$
+	\item For the 2-norm ($\|x\|_2\rightarrow \|A\|_2$) it holds that for every $A$ and for every orthogonal matrix $U$, $\|AU\| = \|A\|$ and $\|UA\|=\|A\|$
+\end{list}
+Given $A$ with SVD $A=U\Sigma V^T$
+$$\|A\|_2 = \|U\Sigma V^T\|_2 = \|\Sigma V^T\|_2 = \|\Sigma\|_2 = \sigma_1$$
+$$\|A\| = \max_{\|z\| = 1} \|\Sigma V^T\| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1\|z\| = \sigma_1$$
+$$\|A\|_F = \|U\Sigma U^T\|_F = \|\left[\begin{array}{c c c}
+\sigma_1\\
+&\ddots\\
+&& \sigma_{\min(m,n)}
+\end{array}\right]\|_F = \sqrt{\sigma_1^2+\ldots+\sigma_{\min(m,n)}^2}$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
-We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{rank(X) \leq K}||A - X||$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $\min{rank(X) \leq X}||A - X||$ is $X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T$\\where $A = u_1\sigma_1 v_1^T + \ldots + u_{\min(m,n)}\sigma_{\min(m,n)} v_{\min(m,n)}^T$ is an SVD, $A = U\Sigma V^T$.
+We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{rank(X) \leq K}\|A - X\|$. The theorem states that the solution is related to SVD.\\
+The optimal solution of $\min{rank(X) \leq X}\|A - X\|$ is $$X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T = \left[\begin{array}{c c c}
+\\
+u_1&\ldots&u_k\\
+\\
+\end{array}\right]\left[\begin{array}{c c c}
+\sigma_1\\
+&\ddots\\
+&&\sigma_k
+\end{array}\right]\left[\begin{array}{c c c}
+&v_1^T&\\&\vdots&\\&v_k^T&
+\end{array}\right] = \sum_{i=1}^ku_i\sigma_iv_i^T$$
+where $$A = u_1\sigma_1 v_1^T + \ldots + u_{\min(m,n)}\sigma_{\min(m,n)} v_{\min(m,n)}^T$$ is an SVD, $A = U\Sigma V^T$.
 \paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
+\paragraph{Excercise}
+$$\left(\sum(a_{ij}-x_{ij})^2\right)^{\frac{1}{2}} = \|A-X_k\|_F=\|U\Sigma V^T-U\left[\begin{array}{c c c c c c}
+\sigma_1\\
+&\ddots\\
+&&\sigma_k\\
+&&&0\\
+&&&&\ddots\\
+&&&&&0
+\end{array}\right]V^T\|_F=$$
+$$=\|U\left(\left[\begin{array}{c c c c c c}
+\sigma_1\\
+&\ddots\\
+&&\sigma_k\\
+&&&\sigma_{k+1}\\
+&&&&\ddots\\
+&&&&&\sigma_{\min(m,n)}
+\end{array}\right]-\left[\begin{array}{c c c c c c}
+\sigma_1\\
+&\ddots\\
+&&\sigma_k\\
+&&&0\\
+&&&&\ddots\\
+&&&&&0
+\end{array}\right]\right)V^T\|_F=$$
+$$\|U\left[\begin{array}{c c c c c c}
+0\\
+&\ddots\\
+&&0\\
+&&&\sigma_{k+1}\\
+&&&&\ddots\\
+&&&&&\sigma_{\min(m,n)}
+\end{array}\right]V^T\|_F=\|\left[\begin{array}{c c c c c c}
+0\\
+&\ddots\\
+&&0\\
+&&&\sigma_{k+1}\\
+&&&&\ddots\\
+&&&&&\sigma_{\min(m,n)}
+\end{array}\right]\|=\sqrt{\sum_{i=k+1}^{\min(m,n)}\sigma_i^2}$$
 \subsection{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
 As a statistical estimator: suppose my scores are of the form $A_{ij} = u_i v_j + \epsilon_{ij}$ with $\epsilon_{ij}$ being the error in the score for instance gaussian with variance $\lambda$.\\
-The rank 1 approx of $(u_1\sigma_1)$, $v_1$ given by SVD is the one that minimizes $\sum (A_{ij} - u_iv_j)^2 = ||A-X_1||_F^2 = \sum \epsilon_{ji}^2$. This is the maximum-likelihood estimation of abilities $(u_1)_i, (v_1)_j$.\\\\
-The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which can be viewed as first approximation plus corrections.\\\\
-$\sigma_1 >> \sigma_2,\ldots$ then $A$ very close to rank 1.\\
-$\sigma_1, \sigma_2 >> \sigma_3,\ldots$ then $A$ very close to rank 2, and so on.
-\subparagraph{Best approximations} $X =$ best rank-1 approx of $I$, $X = u_1\sigma_1 v_1^T$, $x_{ij} = (u_1)_j \sigma_1 (v_1^T)_j$\\
-Best rank-2 $X_2 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T$\\
-Best rank-3 $X_3 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T + u_3 \sigma_3 v_3^T$
-And so on\ldots\\
-The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.\\\\
-What is $||A - X_k||_F = \sqrt{\sum (a_{ij} - x_{ij})^2} = ||U\Sigma V^T - U[$main diagonal of $\sigma_i$ until $\sigma_k] V^T|| = ||U([\ldots$ %TODO
-$= \sqrt{\sum_{i=k+1}^{min(m,n)} \sigma_i^2}$
-\paragraph{Linear Least Squares problems} Given vectors $a_1,\ldots,a_n\in R^m$, so that $A = [a_1|\ldots|a_n]\in R^{m\times n}$, and targets $b\in R^m$, find $x_1,\ldots,x_n\in R\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
-Not always solvable, for example $\left[\begin{array}{c}
+The rank 1 approx of $(u_1\sigma_1)$, $v_1$ given by SVD is the one that minimizes $\sum (A_{ij} - u_iv_j)^2 = \|A-X_1\|_F^2 = \sum \epsilon_{ji}^2$. This is the maximum-likelihood estimation of abilities $(u_1)_i, (v_1)_j$.\\\\
+The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which can be viewed as first approximation plus corrections.
+\begin{list}{}{}
+	\item $\sigma_1 >> \sigma_2,\ldots$ then $A$ very close to rank 1
+	\item $\sigma_1, \sigma_2 >> \sigma_3,\ldots$ then $A$ very close to rank 2, and so on
+\end{list}
+\subparagraph{Best approximations} 
+\begin{list}{}{}
+	\item $X =$ best rank-1 approx of $I$, $X = u_1\sigma_1 v_1^T$, $x_{ij} = (u_1)_j \sigma_1 (v_1^T)_j$
+	\item Best rank-2 $X_2 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T$
+	\item Best rank-3 $X_3 = u_1\sigma_1 v_1^T + u_2 \sigma_2 v_2^T + u_3 \sigma_3 v_3^T$
+	\item And so on\ldots
+\end{list}
+The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.
+\paragraph{Latent Semantic Analysis}
+\paragraph{Principal Component Analysis} Given columns $x_1,\ldots,x_n$ we define another vector $\mu$ and compute $\hat{x}_i$ for each $i$
+$$\mu = \frac{x_1+\ldots+x_n}{n}$$
+$$\hat{x}_{i} = x_i - \mu$$
+$$\hat{A} = \left[\begin{array}{c c c}
+\hat{x}_1&\ldots&\hat{x}_n
+\end{array}\right] = U\left[\begin{array}{c c c}
+\sigma_1\\
+&\ddots\\
+&&\sigma_n
+\end{array}\right]V^T$$
+Then try to categorize $x$'s using signs in $U$ and $V$. Sometimes this is presented with the \textbf{covariance matrix} $M$ and its eigenvalues
+$$M=\frac{1}{n}\sum_{i=1}^n \hat{x}_i\hat{x}_i^T$$
+This is the same thing as using SVD of $\hat{A}$, indeed
+$$M=\frac{1}{n}\left[\begin{array}{c c c}
+\hat{x}_1&\ldots&\hat{x}_n
+\end{array}\right]\left[\begin{array}{c}
+\hat{x}_1^T\\\vdots\\\hat{x}_n^T
+\end{array}\right]=\frac{1}{n}\hat{A}\hat{A}^T$$
+$$\hat{A} = USV^T \Rightarrow M = \frac{1}{n}US\underset{=I}{\underbrace{V^TV}}S^TU^T = \frac{1}{n}U\left[\begin{array}{c c c}
+\sigma_1^2\\
+&\ddots\\
+&&\sigma_{\min(m,n)}^2
+\end{array}\right]U^T$$
+which is an eigenvalue decomposition of matrix $M$: it has eigenvector matrix $U$, the same as the SVD of $\hat{A}$.\\
+Remark: SVD($\hat{A}$) is more numerically accurate than eig($M$) and eig($A\cdot A^T$)
+\section{(Linear) Least Squares problems}
+Given 
+\begin{list}{}{}
+	\item vectors $a_1,\ldots,a_n\in \mathbb{R}^m$ so that $A = [a_1|\ldots|a_n]\in \mathbb{R}^{m\times n}$
+	\item targets $b\in \mathbb{R}^m$
+\end{list}
+find $x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
+In general $$\min_{x\in \mathbb{R}^m} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^m} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
+Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
+1\\2\\0
+\end{array}\right]}x_1 + \underset{a_2}{\left[\begin{array}{c}
+1\\3\\0
+\end{array}\right]}x_2 = \underset{b}{\left[\begin{array}{c}
+5\\5\\1
+\end{array}\right]}$$ is not solvable because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? In this case, I can get $$\left[\begin{array}{c}
 1\\2\\0
 \end{array}\right]x_1 + \left[\begin{array}{c}
 1\\3\\0
 \end{array}\right]x_2 = \left[\begin{array}{c}
-5\\5\\1
-\end{array}\right]$ because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? I can get $\left[\begin{array}{c}
 5\\5\\0
-\end{array}\right]$\\
-In general $\min{x\in R^m} ||Ax - b||_2 = \min{x\in R^m} \sqrt{\sum ((Ax)_i - b_i)^2}$\\
-The special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible. Typical case il $A$ long thin, we cannot get all vectors $b$ but still $min_{x\in R^m} ||Ax - b||_2$ is a question that makes sense. 
-\paragraph{Polynomial Fitting} Statistical version: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{coeff}||Ax - y||_2^2$
-\paragraph{Theory of least-squares problems} When does $\min ||Ax-b||_2$ have a unique solution? With $A \in R^{m\times n}$\\
-We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = \min||Ax-b||$ with unique $x$.\\
-We say that $A\in R^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\} \Leftrightarrow$ there is no $z\in R^n z\neq 0\:|\:Az=0\Leftrightarrow rk(A) = n$ and this can only happen is $m\geq n$\\
-\subparagraph{Theorem}The least-squares problem $\min ||Ax-b||$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
+\end{array}\right]$$
+\paragraph{Geometric View} The closest part on the hyperplane $Im(A)$ to $b$ is its orthogonal projection.
+\paragraph{Cases} A special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible.\\
+\textbf{Typical case} is $A$ long thin, we cannot get all vectors $b$ but still $\min_{x\in \mathbb{R}^m} \|Ax - b\|_2$ is a question that makes sense. 
+\paragraph{Polynomial Fitting} Find polynomial that best approximates given data points $(x_i,y_i)$ for $i=1,\ldots,m$ of degree $<n$.\\
+\textbf{Statistical version}: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{coeff}\|Ax - y\|_2^2$
+\paragraph{Theory of Least-Squares Problems} With $A \in \mathbb{R}^{m\times n}$, when does $\min \|Ax-b\|_2$ have a unique solution?\\
+We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = \min\|Ax-b\|$ with unique $x$.\\
+We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n z\neq 0\:|\:Az=0\Leftrightarrow rk(A) = n$ and this can only happen if $m\geq n$
+\subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
 \textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
-\textbf{Proof} $Ax \neq 0\:\:\forall\:z\in R^n, z\neq 0$
+\textbf{Proof} $Ax \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
 \begin{list}{$\Leftrightarrow$}{}
-	\item $||Az||_2 \neq 0\:\:\forall\:z\in R^n, z\neq 0$
-	\item $||Az||_2^2 \neq 0\:\:\forall\:z\in R^n, z\neq 0$
-	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in R^n, z\neq 0$
-	\item $z^TA^TAz\neq 0\:\:\forall\:z\in R^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
+	\item $\|Az\|_2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $\|Az\|_2^2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
 \end{list}
-By manipulating the original problem $\min_{x\in R^n} ||Ax-b||_2$ we obtain $$\min ||Ax-b||_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
+By manipulating the original problem $\min_{x\in \mathbb{R}^n} \|Ax-b\|_2$ we obtain $$\min \|Ax-b\|_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
 $f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\\\
-So the least-squares problem $\min_x ||Ax-b||$ has unique solution
+So the least-squares problem $\min_x \|Ax-b\|$ has unique solution
 \begin{list}{$\Leftrightarrow$}{}
 	\item $f(x)$ has a unique minimum point
 	\item $2A^TA = Q \succ 0$ (positive definite)
@@ -235,7 +357,7 @@ $x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
 \subparagraph{Algorithm}
 \begin{enumerate}
 	\item Form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
-	\item Form $A^Tb$, costs $2mn$ flops lower order terms
+	\item Form $A^Tb$, costs $2mn$ flops plus lower order terms
 	\item Solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
 \end{enumerate}
 If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD.\\
@@ -245,42 +367,43 @@ Possible optimizations:
 	\item Already a cheap step
 	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
 \end{enumerate}
-\paragraph{Pseudoinverse} $x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in R^{m\times n}$ then $A^+ \in R^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in R^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in R^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
-As consequences, if $x_1$ is solution of $\min||Ax - b_1||$ and $x_2$ is solution of $\min||Ax - b_2||$ then $x_1+x_2$ is solution of $\min||Ax - (b_1 + b_2)||$\\\\Sometimes ML problems are formulated "from the left side". With $w\in R^{1\times n}$ row vector of weights, then $X\in R^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
-$y \in R^{1\times m}$ row vector "target"\\
-The problem is $\min||wX - y||$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
-\section{QR factorization} Given $x\in R^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
+\paragraph{Pseudoinverse} $x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in \mathbb{R}^{m\times n}$ then $A^+ \in \mathbb{R}^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in \mathbb{R}^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in \mathbb{R}^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
+As consequences, if $x_1$ is solution of $\min\|Ax - b_1\|$ and $x_2$ is solution of $\min\|Ax - b_2\|$ then $x_1+x_2$ is solution of $\min\|Ax - (b_1 + b_2)\|$\\\\Sometimes ML problems are formulated "from the left side". With $w\in \mathbb{R}^{1\times n}$ row vector of weights, then $X\in \mathbb{R}^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
+$y \in \mathbb{R}^{1\times m}$ row vector "target"\\
+The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
+\section{QR factorization} Given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]$ with $e_1 = \left[\begin{array}{c}
 1\\0\\\vdots\\0
 \end{array}\right]$\\
-Since $H$ is orthogonal, $||Hx|| = ||x|| = ||\left[\begin{array}{c}
+Since $H$ is orthogonal, $\|Hx\| = \|x\| = \|\left[\begin{array}{c}
 s\\0\\\vdots\\0
-\end{array}\right]|| = |s| \Rightarrow s = \pm||x||$. We will find $H$ in a very specific form $$H = I - \frac{2}{v^Tv}vv^T=$$ $$= I - \frac{2}{||v||^2}vv^T =$$ $$= I - 2uu^T$$ for a certain $v\in R^n$ with $u = \frac{v}{||v||}$, so it has norm $=1$ and is parallel to $v$. This form is called \textbf{Householder reflector}.\\
-\textbf{Lemma}: for every $v\in R^n$, $H$ is orthogonal \textit{and} symmetric. Proof:
+\end{array}\right]\| = |s| \Rightarrow s = \pm\|x\|$. We will find $H$ in a very specific form $$H = \underset{n\times n}{I} - \underset{|x|}{\frac{2}{v^Tv}}\cdot\underset{n\times 1}{v}\cdot\underset{1\times n}{v^T}= I - \frac{2}{\|v\|^2}vv^T = I - 2uu^T$$ for a certain $v\in \mathbb{R}^n$ with $u = \frac{v}{\|v\|}$, so it has norm $=1$ and is parallel to $v$. This form is called \textbf{Householder reflector}.
+\paragraph{Geometric Picture} These are reflection (mirror symmetries) with respect to the plane perpendicular to $u$
+\paragraph{Lemma}$\forall\:v\in \mathbb{R}^n$, $H$ is orthogonal \textit{and} symmetric. Proof:
 \begin{list}{}{}
 	\item Symmetric: $H^T = (I-2uu^T)^T = I^T - (2uu^T)^T = I - 2uu^T = H$
-	\item Orthogonal: $H^TH = H^2 = (I-2uu^T)(I-2uu^T) = I - 2uu^T - 2uu^T + 4uu^Tuu^T$ but $u^Tu = ||u||^2 = 1$ so $= I - \not 4uu^T + \not 4uu^T = I$
+	\item Orthogonal: $H^TH = H^2 = (I-2uu^T)(I-2uu^T) = I - 2uu^T - 2uu^T + 4uu^Tuu^T$ but $u^Tu = \|u\|^2 = 1$ so $= I - \not 4uu^T + \not 4uu^T = I$
 \end{list}
-By computing $Hx$ as $x - 2u(u^T x)$, meaning you compute $\alpha = u^Tx$ in $O(n)$ and then compute $x-2u\alpha$ in $O(n)$, you can reduce the complexity of $Hx$ from $O(n^2)$ to $O(n)$. By doing the same on every column you reduce $HA$ for an arbitrary $A\in R^{n\times n}$ from $O(n^3)$ to $O(n^2)$.\\
-\textbf{Lemma}: given any two vectors $x,y\in R^n$ with $||x|| = ||y||$, the Householder reflector built with $v = x-y$ is such that $Hx = y$
-\subparagraph{Numerical problems} If $x_1$ is close to $s = ||x||$ there are problems, because we do a subtraction between close numbers. Quick fix: switch to $s = -||x||$, then $x_1 - s = x_1 + \sqrt{x_1^2+x_2^2+\ldots+x_n^2}$, an addition between positive numbers whenever $x_1 > 0$. In general, we choose:
+By computing $Hx$ as $x - 2u(u^T x)$, you compute $\alpha = u^Tx$ in $O(n)$ and then compute $x-2u\alpha$ in $O(n)$, you can reduce the complexity of $Hx$ from $O(n^2)$ to $O(n)$. By doing the same on every column you reduce $HA$ for an arbitrary $A\in \mathbb{R}^{n\times n}$ from $O(n^3)$ to $O(n^2)$.
+\paragraph{Lemma} Given any two vectors $x,y\in \mathbb{R}^n$ with $\|x\| = \|y\|$, the Householder reflector built with $v = x-y$ is such that $Hx = y$
+\paragraph{Numerical problems} If $x_1$ is close to $s = \|x\|$ there are problems, because we do a subtraction between close numbers. Quick fix: switch to $s = -\|x\|$, then $x_1 - s = x_1 + \sqrt{x_1^2+x_2^2+\ldots+x_n^2}$, an addition between positive numbers whenever $x_1 > 0$. In general, we choose:
 \begin{list}{}{}
-	\item if $x_1 \geq 0$, we take $s = -||x||$ and $y = \left[\begin{array}{c}
-	-||x||\\0\\\vdots\\0
+	\item if $x_1 \geq 0$, we take $s = -\|x\|$ and $y = \left[\begin{array}{c}
+	-\|x\|\\0\\\vdots\\0
 	\end{array}\right]$
-	\item if $x_1 < 0$, we take $s = ||x||$ and $y = \left[\begin{array}{c}
-	||x||\\0\\\vdots\\0
+	\item if $x_1 < 0$, we take $s = \|x\|$ and $y = \left[\begin{array}{c}
+	\|x\|\\0\\\vdots\\0
 	\end{array}\right]$
 \end{list}
 This way $x_1 - s$ is never a "true subtraction", because $x_1$ and $s$ have different signs.
-\paragraph{Theorem} $\forall\:A\in R^{m\times n}\:\:\exists\:Q\in R^{m\times m}$ orthogonal, $R\in R^{m\times n}$ upper triangular $|\:A = QR$\\
-When $n = 1$ we already solved: $\forall\:x\in R^{m\times 1}\:\:\exists$ a Householder reflector $H\:|\:Hx = \left[\begin{array}{c}
+\paragraph{Theorem} $\forall\:A\in \mathbb{R}^{m\times n}\:\:\exists\:Q\in \mathbb{R}^{m\times m}$ orthogonal, $R\in \mathbb{R}^{m\times n}$ upper triangular $|\:A = QR$\\
+When $n = 1$ we already solved: $\forall\:x\in \mathbb{R}^{m\times 1}\:\:\exists$ a Householder reflector $H\:|\:Hx = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right] \Leftrightarrow x = H\left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]$ with $x$ being the $m\times 1$ matrix, $H$ orthogonal and the array is upper triangular.\\
-The general case is $A\in R^{m\times n}$:
+The general case is $A\in \mathbb{R}^{m\times n}$:
 \begin{enumerate}
 	\item $[u_1, s_1]$ \texttt{= householder\_vector($A$(:,1))} $H_1 = I-2u_1u_1^T$\\
 	$H_1A = \left[\begin{array}{c c c c}
@@ -348,75 +471,127 @@ $$\not Q_3^T\not Q_3Q_2Q_1A = Q_3^TQ_4^TR$$
 $$\not Q_2^T\not Q_2Q_1A = Q_2^TQ_3^TQ_4^TR$$
 $$\not Q_1^T\not Q_1A = Q_1^TQ_2^TQ_3^TQ_4^TR$$
 So $A = Q_1^TQ_2^TQ_3^TQ_4^T R$, and $Q_i = Q_i^T$ so we can omit transpose, giving $A = QR$ with $Q$ orthogonal and $R$ triangular.\\\\
-The QR factorization can be used to solve least squares problems $\min ||Ax-b||_2$ with $A\in R^{m\times n}$ and $m\geq n$, $b\in R^m$.\\$A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
-R_1\\\hline\\0
-\end{array}\right]$ with $Q_1\in R^{m\times n}, Q_2\in R^{m\times m-n}, R_1\in R^{n\times n}$ and the last part of $n\times m-n$ zeroes. We rework the objective function $$||Ax-b|| = ||QRx-b||=||Q^T(QRx-b)||=||Rx-Q^Tb|| = \:\:\vline\:\vline\left[\begin{array}{c}
+The QR factorization can be used to solve least squares problems $\min \|Ax-b\|_2$ with $A\in \mathbb{R}^{m\times n}$ and $m\geq n$, $b\in \mathbb{R}^m$.
+\paragraph{Optimizations}
+\begin{enumerate}
+	\item Instead of $HA(j:m,j:n)$ we write
+	$$(I-2u_ju_j^T)A_{j:m,j:n}=\underset{O((m+1-j)(n+1-j))}{\underbrace{A_{j:m,j:n}-\underset{O((m+1-j)(n+1-j))}{\underbrace{2u \underset{O((m+1-j)(n+1-j))}{\underbrace{(u^TA_{j:m,j:n})}}}}}}$$
+	$$(m+1-j)(n+1-j)\leq mn$$
+	At each step of the for loop, giving $O(mn^2)$
+	\item Storing $Q \in \mathbb{R}^{m\times m}$ may be expensive, especially if $A$ is tall thin ($m>>n$)
+\end{enumerate}
+\subparagraph{Thin QR} If $m>n$ $A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
+R_1\\\hline0
+\end{array}\right]$ with $Q_1\in \mathbb{R}^{m\times n}, Q_2\in \mathbb{R}^{m\times m-n}, R_1\in \mathbb{R}^{n\times n} = Q_1R_1+Q_20 = Q_1R_1$ (the last part is made of $n\times m-n$ zeroes).\\
+Much cheaper to store in memory, $O(mn)$ entries instead of $O(m^2)$.\\
+We can compute this in two ways:
+\begin{enumerate}
+	\item Just return $u_1,\ldots,u_n$.\\
+	$Q$ is already represented implicitly by the vectors $u_1\in\mathbb{R}^m,u_2\in\mathbb{R}^{m-1},\ldots,u_n\in\mathbb{R}^{m-n+1}$
+	$$Q=\left[\begin{array}{c}
+	I-2u_1u_1^T
+	\end{array}\right]\cdot\left[\begin{array}{c c}
+	1\\
+	&I-2u_2u_2^T
+	\end{array}\right]\cdot\left[\begin{array}{c c c}
+	1\\
+	&1\\
+	&&I-2u_3u_3^T
+	\end{array}\right]\cdot\ldots\cdot\left[\begin{array}{c c}
+	I_{n-1}\\
+	&I-2u_nu_n^T
+	\end{array}\right]$$
+	Because of the properties of Householder reflectors, with this representation you can compute products $Qx,y^TQ, QB\ldots$ at the same cost, or cheaper, as using the entries of $Q$.
+	\item Compute $Q_1=Q\cdot\left[\begin{array}{c}
+	I_{n\times n}\\0
+	\end{array}\right]\in\mathbb{R}^{m\times n}$, which extracts the first $n$ columns of $Q$
+	$$\forall\:j=n,\ldots,1\:\:Q_1(j:m,1:n) = H_j\cdot Q_1(j:m,1:n)$$
+\end{enumerate}
+The computational cost of thin QR ($m\geq n$) is $2mn^2-\frac{2}{3}n^3+ O(mn)$ flops.
+\begin{list}{}{}
+	\item When $m\simeq n \Rightarrow \frac{4}{3}n^3$, twice as much as LU/Gaussian elimination
+	\item When $m>>n\Rightarrow 2mn^2$
+\end{list}
+\paragraph{Least Squares with QR} We can use the QR factorization to solve least squares problems $\min\|Ax-b\|_2$ with $A\in\mathbb{R}^{m\times n}, m\geq n$ and $b\in R^m$
+$$A = QR = \left[\begin{array}{c c}
+Q_1&Q_2
+\end{array}\right]\cdot\left[\begin{array}{c}
+R_1\\0
+\end{array}\right]$$
+We rework the objective function $$\|Ax-b\| = \|QRx-b\|=\|Q^T(QRx-b)\|=\|Rx-Q^Tb\| =\|\left[\begin{array}{c}
 R_1\\0
 \end{array}\right]x-\left[\begin{array}{c}
 Q_1^T\\Q_2^T
-\end{array}\right]b\:\:\vline\:\vline = \:\:\vline\:\vline\left[\begin{array}{c}
+\end{array}\right]b\| = \|\left[\begin{array}{c}
 R_1x-Q_1^Tb\\-Q_2^Tb
-\end{array}\right]\:\:\vline\:\vline$$
-How to make this norm as small as possible? The norm of the second block, $-Q_2^Tb$, doesn't depend on $x$. The norm of the first block does. Can I obtain $R_1x - Q_1^Tb = 0$? If $R_1$ is invertible, $R_1x=Q_1^Tb$ is a square linear system of solution $x = R_1^{-1}Q_1^Tb$. Algorithm:
+\end{array}\right]\|$$
+How to make this norm as small as possible? The norm of the second block, $-Q_2^Tb$, doesn't depend on $x$. The norm of the first block does. Can I obtain $R_1x - Q_1^Tb = 0$? If $R_1$ is invertible, $R_1x=Q_1^Tb$ is a square linear system of solution $x = R_1^{-1}Q_1^Tb$.\\
+Algorithm:
 \begin{enumerate}
 	\item Compute the $QR$ factorization $A = QR = Q_1R_1$ (thin is enough) in $\frac{4}{3}n^3,2mn^2$ operations.
 	\item Compute $c = Q_1^Tb$, with $2mn$ operations
 	\item Solve the linear system $R_1x=c$ with back-substitution, $n^2$ operations
 \end{enumerate}
-Step 1 is the most expensive, cubic. When is $R_1$ invertible? Recall that the least-squares problem has unique solution $\Leftrightarrow$ A has full column rank $\Leftrightarrow$ $A^TA$ is positive definite $\Leftrightarrow$ $A^TA$ invertible $\Leftrightarrow$ $R_1$ invertible
+Step 1 is the most expensive, cubic.\\
+When is $R_1$ invertible? Recall that the least-squares problem has unique solution $\Leftrightarrow$ A has full column rank $\Leftrightarrow$ $A^TA$ is positive definite $\Leftrightarrow$ $A^TA$ invertible $\Leftrightarrow$ $R_1$ invertible
 $$A^TA = (QR)^TQR = R^T\not Q^T\not QR = [R_1^T 0]\left[\begin{array}{c}
 R_1\\0
 \end{array}\right] = R_1^TR_1$$
-The least-squares problem can also be solved with $SVD$. Given $A=USV^T$ we have $$||Ax-b|| = ||USV^Tx-b|| = ||U^T(USV^Tx - b)|| = ||SV^Tx-U^Tb|| =$$
+So $A^TA$ invertible $\Leftrightarrow R_1$ invertible. Remark: the factorization $A^TA=R_1^TR_1$ is a Cholensky factorization)
+\pagebreak
+\paragraph{Least Squares with SVD}
+The least-squares problem can also be solved with $SVD$. Given $A=USV^T$ we have $$\|Ax-b\| = \|USV^Tx-b\| = \|U^T(USV^Tx - b)\| = \|SV^Tx-U^Tb\| =$$
 With $S =\left[\begin{array}{c c c}
 \sigma_1\\
 & \ddots\\
 & & \sigma_n\\
 & 0
 \end{array}\right]$ and $V^Tx = y$ we have
-
-$$=\:\:\vline\:\vline\left[\begin{array}{c}
+$$=\|\left[\begin{array}{c}
 \sigma_1y_1\\\vdots\\\sigma_ny_n\\0\\\vdots\\0
 \end{array}\right] - \left[\begin{array}{c}
 u_1^Tb\\\vdots\\u_m^tb
-\end{array}\right] \:\:\vline\:\vline = \:\:\vline\:\vline\left[\begin{array}{c}
+\end{array}\right] \| = \|\left[\begin{array}{c}
 \sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ny_n-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
-\end{array}\right]\:\:\vline\:\vline$$
+\end{array}\right]\|$$
 The first $n$ entries become $0$ if $y_i = \frac{u_i^Tb}{\sigma_i}$\\
 $$x = Vy = v_1y_1 + \ldots + v_ny_n = v_1\frac{u_1^Tb}{\sigma_1} + \ldots + v_n\frac{u_n^Tb}{\sigma_n}$$
 $$x = VS_1^{-1}U_1^Tb = A^+b$$
-The solution of $min ||Ax-b||$ is unique $\Leftrightarrow A^TA$ is invertible $\Leftrightarrow A^TA=(USV^T)^TUSV^T = VS^T\not U^T\not USV^T = V\left[\begin{array}{c c c}
+The solution of $\min \|Ax-b\|$ is unique $\Leftrightarrow A^TA$ is invertible $\Leftrightarrow A^TA=(USV^T)^TUSV^T = VS^T\cancel{U^TU}SV^T = V\left[\begin{array}{c c c}
 \sigma_1^2\\
 & \ddots\\
 & & \sigma_n^2
 \end{array}\right]V^T$ which is the eigenvalue decomposition for $A^TA$\\
 So $A^TA$ is invertible $\Leftrightarrow$ non of the $\sigma_i$ are zeroes $\Leftrightarrow S_1$ is invertible.\\
-What happens if $\sigma_1\geq \sigma_2 \geq \ldots \sigma_r > \sigma_{r+1} = \ldots \sigma_n = 0$? We would have $\:\:\vline\:\vline\left[\begin{array}{c}
-\sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ry_r-u_r^Tb\\-u_{r+1}^Tb\\\vdots\\-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
-\end{array}\right]\:\:\vline\:\vline$\\How to choose a special solution here? Let's define another problem: $min ||x||$ of all $x\in$ solutions of $min ||Ax-b||$. It's minimized when $y_1 = \frac{u_1^Tb}{\sigma_1}, \ldots, y_r = \frac{u_r^Tb}{\sigma_r}, y_{r+1} = 0,\ldots,y_n = 0$\\
-The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
-\paragraph{Effect of noise in data} Suppose to know $A+E = \overline{A}$, with $A$ exact data, $E$ error/noise/etc. and $\overline{A}$ the observed data. We have
+What happens if $\sigma_1\geq \sigma_2 \geq \ldots \sigma_r > \sigma_{r+1} = \ldots \sigma_n = 0$? We would have $$\|Ax-b\|=\|\left[\begin{array}{c}
+\sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ry_r-u_r^Tb\\\cancel{\sigma_{r+1}y_{r+1}}-u_{r+1}^Tb\\\vdots\\\cancel{\sigma_ny_n}-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
+\end{array}\right]\|$$
+Which is minimized if $y_1=\frac{u_1^Tb}{\sigma_1},\ldots,y_r=\frac{u_r^Tb}{\sigma_r},y_{r+1}=$ anything,$\ldots,y_n =$ anything.
+\paragraph{Special Solution} How to choose a special solution here? Let's define another problem: $$\min_{x\in\hbox{ solutions of }\min\|Ax-b\|} \|x\|$$
+$\|x\|=\|y\|$ minimized if $y_{r+1} = 0,\ldots,y_n = 0$. The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
+\paragraph{Effect of noise in data} Suppose to know $A+E = \tilde{A}$, with $A$ exact data, $E$ error/noise/etc. and $\tilde{A}$ the observed data. We have
 \begin{list}{}{}
 	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
-	\item $\overline{\sigma_1},\ldots,\overline{\sigma_n} =$ SVD$(\overline{A})$
+	\item $\tilde{\sigma_1},\ldots,\tilde{\sigma_n} =$ SVD$(\tilde{A})$
 \end{list}
-Then $|\sigma_i - \overline{\sigma_i}| \leq ||E||_2$\\
+Then $|\sigma_i - \tilde{\sigma_i}| \leq \|E\|_2$\\
 The effect of noise is that there are longer relative changes to smaller singular values, another reason why it's beneficial to drop them.
-\paragraph{Tikhonov Regularization/Ridge Regression} Another solution, alternative to truncated SVD. Change the problem to $\min_{x\in R^n} ||Ax-b||^2 + \lambda^2||x||^2 = \min||\left[\begin{array}{c}
+\paragraph{Tikhonov Regularization/Ridge Regression} Another solution, alternative to truncated SVD. Change the problem to $\min_{x\in \mathbb{R}^n} \|Ax-b\|^2 + \lambda^2\|x\|^2 = \min\|\left[\begin{array}{c}
 A\\\lambda I
 \end{array}\right]x - \left[\begin{array}{c}
 b\\0
-\end{array}\right]||^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
+\end{array}\right]\|^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
+%TODO l10 from here
 \paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $A,b\mapsto X=A^{-1}b$ or $(x_i,y_i)\mapsto$ weights\ldots\\
 If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
 $$f(x+\delta) = f(x)+\delta\cdot f'(x) + O(\delta^2)$$
 The (absolute) condition number of a function $f$ (of an input $x$) is the best possible bound $K$ of the form
 $$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$ with $K$ being the \textbf{condition number}\\
 The absolute condition number of (differentiable) $f$ in $x$ is $|f'(x)| = K_{abs}(f,x)$
-For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:R^m\rightarrow R^n$ is the best constant $K$ that I can use to bound $$||f(x+\delta)-f(x)|| \leq K\cdot||\delta|| + o(||\delta||)$$
-The absolute condition number $K_{abs}$ is $K_{abs}(f,x) = \lim_{\delta\to 0} sup_{||d||\leq \delta}\frac{||f(x+\delta)-f(x)||}{||d||}$$ $$K_{abs}(f,x) = ||\bigtriangledown_x f||$ 2-norm of the gradient, if $f$ differentiable.\\
+For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:R^m\rightarrow R^n$ is the best constant $K$ that I can use to bound $$\|f(x+\delta)-f(x)\| \leq K\cdot\|\delta\| + o(\|\delta\|)$$
+The absolute condition number $K_{abs}$ is $K_{abs}(f,x) = \lim_{\delta\to 0} sup_{\|d\|\leq \delta}\frac{\|f(x+\delta)-f(x)\|}{\|d\|}$$ $$K_{abs}(f,x) = \|\bigtriangledown_x f\|$ 2-norm of the gradient, if $f$ differentiable.\\
 The \textbf{condition number measures the sensitivity of a problem to changes in input}.
-\subparagraph{Example} $x\in R^2, x=\left[\begin{array}{c}
+\subparagraph{Example} $x\in \mathbb{R}^2, x=\left[\begin{array}{c}
 x_1\\x_2
 \end{array}\right], f(x) = x_1 + x_2, d = \left[\begin{array}{c}
 1\\1
@@ -428,31 +603,31 @@ x_1\\x_2
 \end{array}\right] = \left[\begin{array}{c}
 x_1+\delta\\x_2+\delta
 \end{array}\right]$
-$$\frac{||f(x+\delta d) - f(x)||}{||\delta d||} = \frac{||x_1+\delta+x_2+\delta-x_1-x_2||}{|| \left[\begin{array}{c}
+$$\frac{\|f(x+\delta d) - f(x)\|}{\|\delta d\|} = \frac{\|x_1+\delta+x_2+\delta-x_1-x_2\|}{\| \left[\begin{array}{c}
 \delta\\\delta
-\end{array}\right]||} = \frac{||2\delta||}{\sqrt{\delta^2 + \delta^2}} = \frac{2\delta}{\sqrt{2}\delta} = \sqrt{2}$$ which is the rate of change of perturbations parallel to $d$.\\
+\end{array}\right]\|} = \frac{\|2\delta\|}{\sqrt{\delta^2 + \delta^2}} = \frac{2\delta}{\sqrt{2}\delta} = \sqrt{2}$$ which is the rate of change of perturbations parallel to $d$.\\
 With $d = \left[\begin{array}{c}
 1\\-1
 \end{array}\right]$ we would have $= 0$, and with $d = \left[\begin{array}{c}
 1\\0
 \end{array}\right]$ we would have $= 1$\\
-Also checking other directions, it turns out that $\sqrt{2}$ is the largest possible rate of change (no coincidence that it is $||\bigtriangledown_x f||$)
+Also checking other directions, it turns out that $\sqrt{2}$ is the largest possible rate of change (no coincidence that it is $\|\bigtriangledown_x f\|$)
 \paragraph{Linear Systems} The condition number of solving square systems of linear equations.\\
-$Ax = b, A\in R^{n\times n}, b\in R^n$, we perturb input $b$ to $\overline{b}\in R^n$ and call $\overline{x}$ the solution of $A\overline{x} = \overline{b}$, while $x$ solution of $Ax=b$.\\
-The absolute bound is $$||\overline{x}-x|| = ||A^{-1}\overline{b} - A^{-1}b|| = ||A^{-1}(\overline{b}-b)||\leq ||A^{-1}||\cdot ||\overline{b}-b||$$ and $$||b|| = ||Ax|| \leq ||A||\cdot||x||$$Putting all together gives $$\frac{||\overline{x} - x||}{||x||} \leq ||A^{-1}||\cdot||A||\cdot\frac{||\overline{b}-b||}{||b||}$$ because $K(A) = ||A||\cdot||A^{-1}||$ the condition number of $A$ matrix.\\\\
-What if we perturb $\overline{A} = A + \Delta$? One can prove, if $\overline{x}$ is solution of $\overline{A}\overline{x} = b$, that $$\frac{||\overline{x} - x||}{||x||} \leq ||A||\cdot||A^{-1}||\cdot\frac{||\overline{A}-A||}{||A||}+o(||\Delta||)$$ In terms of SVD we know that $||A|| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $||A^{-1}|| = \frac{1}{\sigma_n}$, so $K(A) = ||A||\cdot||A^{-1}|| = \frac{\sigma_1}{\sigma_n}$.\\
-A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in R^{n\times n}$ is singular if $rk(B)<n$. By the Eckhart-Young theorem, $min_{B\:sing}||A-B|| = min_{rk(B)\leq n-1}||A-B|| = \sigma_n$ because $B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$. Hence $\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{min_{B\:sing}||A-B||}{||A||}$
-\paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in R^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
-\paragraph{Theorem} The condition number of the least-squares problem $min||Ax-b||$ for a full column rank matrix $A\in R^{m\times n},b\in R^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{||Ax||}{||b||}$$
-\paragraph{Condition Number} "Local" bound of the form $$\frac{||\overline{y} - y||}{||y||} \leq k\frac{||\overline{x} - x||}{||x||}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\overline{x}$ of $x$, $\overline{y} = f(\overline{x})$
+$Ax = b, A\in \mathbb{R}^{n\times n}, b\in \mathbb{R}^n$, we perturb input $b$ to $\overline{b}\in \mathbb{R}^n$ and call $\overline{x}$ the solution of $A\overline{x} = \overline{b}$, while $x$ solution of $Ax=b$.\\
+The absolute bound is $$\|\overline{x}-x\| = \|A^{-1}\overline{b} - A^{-1}b\| = \|A^{-1}(\overline{b}-b)\|\leq \|A^{-1}\|\cdot \|\overline{b}-b\|$$ and $$\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$$Putting all together gives $$\frac{\|\overline{x} - x\|}{\|x\|} \leq \|A^{-1}\|\cdot\|A\|\cdot\frac{\|\overline{b}-b\|}{\|b\|}$$ because $K(A) = \|A\|\cdot\|A^{-1}\|$ the condition number of $A$ matrix.\\\\
+What if we perturb $\overline{A} = A + \Delta$? One can prove, if $\overline{x}$ is solution of $\overline{A}\overline{x} = b$, that $$\frac{\|\overline{x} - x\|}{\|x\|} \leq \|A\|\cdot\|A^{-1}\|\cdot\frac{\|\overline{A}-A\|}{\|A\|}+o(\|\Delta\|)$$ In terms of SVD we know that $\|A\| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $\|A^{-1}\| = \frac{1}{\sigma_n}$, so $K(A) = \|A\|\cdot\|A^{-1}\| = \frac{\sigma_1}{\sigma_n}$.\\
+A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in \mathbb{R}^{n\times n}$ is singular if $rk(B)<n$. By the Eckhart-Young theorem, $min_{B\:sing}\|A-B\| = min_{rk(B)\leq n-1}\|A-B\| = \sigma_n$ because $B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$. Hence $\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{min_{B\:sing}\|A-B\|}{\|A\|}$
+\paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in \mathbb{R}^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
+\paragraph{Theorem} The condition number of the least-squares problem $min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
+\paragraph{Condition Number} "Local" bound of the form $$\frac{\|\overline{y} - y\|}{\|y\|} \leq k\frac{\|\overline{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\overline{x}$ of $x$, $\overline{y} = f(\overline{x})$
 \section{Floating Point Numbers}
 \paragraph{Quick recap} Binary exponential notation.\\
 \textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\overline{x}$ such that\\$\frac{|\overline{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$
-\paragraph{Error analysis} Given a function $y = f(x)$ and $x\in R$, how accurately can I compute $y=f(x)$ on a computer? In general, I can only ask the computer to compute $f(\overline{x})$ where $\overline{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\overline{y}=f(\overline{x})$ from $y=f(x)$?
+\paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer? In general, I can only ask the computer to compute $f(\overline{x})$ where $\overline{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\overline{y}=f(\overline{x})$ from $y=f(x)$?
 $$\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
 This is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\overline{x}-x}{x} = \delta \Leftrightarrow \overline{x} - x = x\delta \Leftrightarrow \overline{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
 $a\oplus b = (a+b)(1+\delta)$, the same for $\ominus$, $\otimes$ ecc: \textbf{error analysis requires keeping track of all these errors}.
-\subparagraph{Example} Error analysis of the scalar product $a\cdot b$ with $a,b \in R^3$
+\subparagraph{Example} Error analysis of the scalar product $a\cdot b$ with $a,b \in \mathbb{R}^3$
 $$y = a\cdot b = a^Tb = \left[\begin{array}{c c c}
 a_1 & a_2 & a_3
 \end{array}\right] \left[\begin{array}{c}
@@ -473,18 +648,18 @@ A \textbf{trick}: $\overline{y}$ is the exact result of a scalar product with a 
 	\item $\hat{b_3} = b_3(1+\delta_3)(1+\delta_5)$
 \end{list}
 This way $\overline{y} = a_1\hat{b_1}+a_2\hat{b_2}+a_3\hat{b_3}$ is the exact result of the operation on perturbated inputs.\\
-We have $\hat{a} = a$ and $\hat{b}\:|\:|\hat{b_i}-b_i|\leq 3u|b_i|+O(u^2)$, so $||\hat{b}-b||\leq 3u||b||+O(u^2)$ which gives that $\frac{||\hat{b}-b||}{||b||} = 3u$\\
+We have $\hat{a} = a$ and $\hat{b}\:|\:|\hat{b_i}-b_i|\leq 3u|b_i|+O(u^2)$, so $\|\hat{b}-b\|\leq 3u\|b\|+O(u^2)$ which gives that $\frac{\|\hat{b}-b\|}{\|b\|} = 3u$\\
 Now we can use the condition number bound to estimate
-$$\frac{||\overline{y}-y||}{||y||}\leq K_{rel}(\cdot,b)\cdot\frac{||\hat{b}-b||}{||b||} + O(u^2)$$
+$$\frac{\|\overline{y}-y\|}{\|y\|}\leq K_{rel}(\cdot,b)\cdot\frac{\|\hat{b}-b\|}{\|b\|} + O(u^2)$$
 Comparing it with the intrinsic error $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(\cdot,b)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(\cdot,b)\cdot u + O(u^2)$ we get that the  algorithm is "as good as possible", apart from the factor $3$, given the intrinsic error.
-\paragraph{Backward Stability} An algorithm to compute $y=f(x)$ is called \textbf{backward stable} if it computes $\overline{y}$ such that $\overline{y}=f(\overline{x})$ for an $\overline{x}$ with $\frac{||\overline{x}-x||}{||x||}\leq O(u)$.\\
+\paragraph{Backward Stability} An algorithm to compute $y=f(x)$ is called \textbf{backward stable} if it computes $\overline{y}$ such that $\overline{y}=f(\overline{x})$ for an $\overline{x}$ with $\frac{\|\overline{x}-x\|}{\|x\|}\leq O(u)$.\\
 Usually $O(u)$ hides polynomial factors in the dimensions, e.g. $3m^2nu = O(u)$.
-\subparagraph{Theorem} Backward stable algorithms are "almost optimal": they compute $\overline{y}$ with an error that is of the same order of magnitude of the (unavoidable) intrinsic error for a generic input $x\in R$.\\
+\subparagraph{Theorem} Backward stable algorithms are "almost optimal": they compute $\overline{y}$ with an error that is of the same order of magnitude of the (unavoidable) intrinsic error for a generic input $x\in \mathbb{R}$.\\
 \textbf{Proof}: $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot O(u) + O(u^2)$ is only a $O(\:)$ factor away from the intrinsic bound $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u + O(u^2)$\\\\
-Not all algorithms are backward stable: the outer product $ab^T$ isn't. But multiplying by orthogonal matrices is backward stable. If you want an algorithm that computes $B=QA$ (for instance, the householder product), then typically you can write $\overline{B} = QA + E$ with $||E||=||A||\cdot O(u)$
-$$\overline{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$||F||=||Q^TE||=||E||=||A||\cdot O(u)$$
-With non-orthogonal $Q$ I'd get an additional factor $K(Q) = ||Q||\cdot||Q^{-1}||$\\\\
-The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\overline{x}$ exact solution of a least squares problems with $\overline{A} = A +\Delta A, \overline{b} = b+\Delta b$ with $\frac{||\overline{A}-A||}{||A||}=O(u),\frac{||\overline{b}-b||}{||b||}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
+Not all algorithms are backward stable: the outer product $ab^T$ isn't. But multiplying by orthogonal matrices is backward stable. If you want an algorithm that computes $B=QA$ (for instance, the householder product), then typically you can write $\overline{B} = QA + E$ with $\|E\|=\|A\|\cdot O(u)$
+$$\overline{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$\|F\|=\|Q^TE\|=\|E\|=\|A\|\cdot O(u)$$
+With non-orthogonal $Q$ I'd get an additional factor $K(Q) = \|Q\|\cdot\|Q^{-1}\|$\\\\
+The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\overline{x}$ exact solution of a least squares problems with $\overline{A} = A +\Delta A, \overline{b} = b+\Delta b$ with $\frac{\|\overline{A}-A\|}{\|A\|}=O(u),\frac{\|\overline{b}-b\|}{\|b\|}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
 Normal equations is not backward stable, of a general linear system with a poisitive definite $C$ \begin{list}{}{}
 	\item $C = A^TA$
 	\item $d = A^Tb$
@@ -493,21 +668,21 @@ Normal equations is not backward stable, of a general linear system with a poisi
 $A^T$ is not orthogonal. Even if the first two steps are perfectly accurate, the third causes error.
 $C=A^TA\Rightarrow K(C) = \frac{\sigma_1^2}{\sigma_n^2} = K(A)^2) \Rightarrow K_{LS,A\rightarrow x} = K(A)+K(A)^2\cdot\tan\theta$\\
 This may be larger than the condition number of the problem, especially for $\theta\simeq 0$.
-\paragraph{Residuals and a-posteriori stability checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\overline{x}$ that (approximately) solves the problem. How low can $||r|| = ||Ax-b||$ be? Backward stable algorithms usually get residuals of the order of $u$. If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\overline{x}$ is the exact solution of $\overline{A}\overline{x}=\hat{b}$, i.e. $(A+E)\overline{x}=b+f$ with $\frac{||E||}{||A||},\frac{||f||}{||b||} = O(u)$, so $A\overline{x}+E\overline{x}=b+f$ and $||b|| = ||Ax|| \leq ||A||\cdot||x||$
-$$||A\overline{x}-b||=||f-E\overline{x}||\leq ||f||+||E||\cdot||\overline{x}||=O(u)\cdot[||b||+||A||\cdot||x||]=O(u)\cdot||A||\cdot||x||$$
-$$\frac{||A\overline{x}-b||}{||A||\cdot||x||}=O(u)$$
-And typically $||A||\cdot||x||\simeq ||b||$\\
+\paragraph{Residuals and a-posteriori stability checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\overline{x}$ that (approximately) solves the problem. How low can $\|r\| = \|Ax-b\|$ be? Backward stable algorithms usually get residuals of the order of $u$. If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\overline{x}$ is the exact solution of $\overline{A}\overline{x}=\hat{b}$, i.e. $(A+E)\overline{x}=b+f$ with $\frac{\|E\|}{\|A\|},\frac{\|f\|}{\|b\|} = O(u)$, so $A\overline{x}+E\overline{x}=b+f$ and $\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$
+$$\|A\overline{x}-b\|=\|f-E\overline{x}\|\leq \|f\|+\|E\|\cdot\|\overline{x}\|=O(u)\cdot[\|b\|+\|A\|\cdot\|x\|]=O(u)\cdot\|A\|\cdot\|x\|$$
+$$\frac{\|A\overline{x}-b\|}{\|A\|\cdot\|x\|}=O(u)$$
+And typically $\|A\|\cdot\|x\|\simeq \|b\|$\\
 So with backward stable algorithms we have \textbf{small} (relative) \textbf{residuals} $O(u)$.\\
-Suppose $\overline{x}$ computed somehow has a small $||r||=||A\overline{x}-b||$. Is this a guarantee for $\frac{||\overline{x}-x||}{||x||}$ to be small?
-\subparagraph{Theorem} $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{||\overline{x}-x||}{||x||}\leq K(A)\cdot\frac{||r||}{||b||}$$
-\textbf{Proof}: $\overline{x}$ is the exact solution of $A\overline{x}=b+r$ and the condition number bound gives $\frac{||\overline{x}-x||}{||x||}\leq K(A)\frac{||(b+r)-b||}{||b||}$\\
-We can ask the same question for LS problems: when is small? Not $r$ in general. The gradient of $f(x) = ||Ax-b||^2$ is though 
+Suppose $\overline{x}$ computed somehow has a small $\|r\|=\|A\overline{x}-b\|$. Is this a guarantee for $\frac{\|\overline{x}-x\|}{\|x\|}$ to be small?
+\subparagraph{Theorem} $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A)\cdot\frac{\|r\|}{\|b\|}$$
+\textbf{Proof}: $\overline{x}$ is the exact solution of $A\overline{x}=b+r$ and the condition number bound gives $\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A)\frac{\|(b+r)-b\|}{\|b\|}$\\
+We can ask the same question for LS problems: when is small? Not $r$ in general. The gradient of $f(x) = \|Ax-b\|^2$ is though 
 $$\nabla f(x) = 2A^TAx-2A^Tb = 2\cdot(\hbox{residual of normal equations}) = 2r$$
-$\frac{||\overline{x}-x||}{||x||}\leq K(A^TA) = K(A)^2$, and the relative error bound on $A^TAx=A^Tb$ is $\frac{||r||}{||A^Tb||}$, possibly larger than the condition number of the least squares problem.\\
-Recalling that with $A=Q_1R_1$ QR factorization, $||Ax-b||=||\left[\begin{array}{c}
+$\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A^TA) = K(A)^2$, and the relative error bound on $A^TAx=A^Tb$ is $\frac{\|r\|}{\|A^Tb\|}$, possibly larger than the condition number of the least squares problem.\\
+Recalling that with $A=Q_1R_1$ QR factorization, $\|Ax-b\|=\|\left[\begin{array}{c}
 Q_1^T(Ax-b)\\Q_2^T(Ax-b)
-\end{array}\right]||$
-we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $\min||Ax-b||$, then $\frac{||\overline{x}-x||}{||x||}\leq K_{rel, b\rightarrow x}\cdot\frac{||r_1||}{||b||}$\\
+\end{array}\right]\|$
+we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $\min\|Ax-b\|$, then $\frac{\|\overline{x}-x\|}{\|x\|}\leq K_{rel, b\rightarrow x}\cdot\frac{\|r_1\|}{\|b\|}$\\
 \textbf{Proof}: replay the solution of the LS problems via QR with $\overline{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: $$\|A\overline{x}-\hat{b}\| = \|\left[\begin{array}{c}
 Q_1^T(A\overline{x}-\hat{b})\\Q_2^T(A\overline{x}-\hat{b})
 \end{array}\right]\|=\|\left[\begin{array}{c}
@@ -532,13 +707,13 @@ And this $\Rightarrow\overline{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
 Ly=b\\Ux=y
 \end{array}\right.$ is $2n^2$\\
-Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $||\overline{A}-A||\leq O(u)\cdot||L||\cdot||U||$, so all fine if $||L||$ and $||U||$ are not too larger than $||A||$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max|b_i|$ for $i=k,k+1,\ldots,n$\\
+Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $\|\overline{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max|b_i|$ for $i=k,k+1,\ldots,n$\\
 Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
 $$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
 $$PA = LU$$
 $$A = P^TLU$$
 With an overhead of $O(n^2)$ swaps and comparisons.
-\subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow ||L||$ stays bounded. However, in the worst case, $\frac{||U||}{||A||} = 2^n$ (exponentially larger). The average case is that $\frac{||U||}{||A||}$ bounded polynomially.
+\subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow \|L\|$ stays bounded. However, in the worst case, $\frac{\|U\|}{\|A\|} = 2^n$ (exponentially larger). The average case is that $\frac{\|U\|}{\|A\|}$ bounded polynomially.
 \subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure.
 \subsection{Symmetric Gaussian Elimination} Even if $A$ is symmetric, $L_2A$ is not symmetric but $L_1AL_1^T$ is.\\
 After $n-1$ steps we have $$L_{n-1}\ldots L_1AL_1^T\ldots L_{n-1}^T = D$$
@@ -548,15 +723,15 @@ With $L$ lower triangular with $1$ on the diagonal, $D$ diagonal and $L^T$ trans
 \subparagraph{Theorem} For any $A=A^T$, \textit{if we do not encounter zero pivots} we can find $L,D\:|\:A = L DL^T$ with $L$ lower triangular with $1$ on the diagonal and $D$ diagonal.\\
 Small pivots, even non-zero, brings instability. We will need pivoting (row exchanges). To preserve symmetry, one needs to exchange not only rows but columns too: $PAP^T$ swaps both rows and columns. Unfortunately this is still not enough to ensure large pivots. To avoid this, one needs to allow for $2\times 2$ blocks in $D$\\
 $(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\\\
-Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in R^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
-\subparagraph{Lemma} If $A\in R^{n\times n}$ is positive definite, we have two properties:
+Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in \mathbb{R}^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
+\subparagraph{Lemma} If $A\in \mathbb{R}^{n\times n}$ is positive definite, we have two properties:
 \begin{list}{}{}
 	\item $A_{k,k}>0$ for $k=1,\ldots,n$
-	\item For all invertible $M\in R^{n\times n}$, $MAM^T$ is also positive definite
+	\item For all invertible $M\in \mathbb{R}^{n\times n}$, $MAM^T$ is also positive definite
 \end{list}
 Let's prove this: \begin{list}{}{}
 	\item $A_{k,k}=e_k^TAe_k > 0$ with $e_k$ array of zeroes with 1 in $k$
-	\item $x^TMAM^Tx = y^TAy > 0$ for all $x\in R^n, x\neq 0\Rightarrow y= M^Tx \neq 0$
+	\item $x^TMAM^Tx = y^TAy > 0$ for all $x\in \mathbb{R}^n, x\neq 0\Rightarrow y= M^Tx \neq 0$
 \end{list}
 Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$. So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
 \subsection{Cholesky factorization} $D = \left[\begin{array}{c c c}
@@ -574,7 +749,7 @@ d_{1,1}& & 0\\
 \end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$\\
 $A = LDL^T = LD^{\frac{1}{2}}D^{\frac{1}{2}}L^T = R^T R$ with $R$ upper triangular.\\
 Every $A \succ 0$ can be written as $A = R^T R$ where $R$ is upper triangular.\\
-Cholensky and LDL for positive definite matrices are stable even without pivoting $||R||=||A||^{\frac{1}{2}}$
+Cholensky and LDL for positive definite matrices are stable even without pivoting $\|R\|=\|A\|^{\frac{1}{2}}$
 \subsection{Algorithms for solving linear systems}
 \begin{list}{}{}
 	\item Symmetric Positive Definite $\Rightarrow$ Cholensky, $\frac{1}{3}n^3$
@@ -590,8 +765,8 @@ Black-box methods: they only need a black-box function $\lambda_0v=Av$ that comp
 	\item $\nabla f(x_2) = Ax_2-b=$ linear combination of $A^2b$, $Ab$ and $b$, and $x_3=x_2+\alpha\nabla f(x_2) =$ linear combination of $A^2b$, $Ab$ and $b$
 	\item[$\Rightarrow$] all vectors we construct up to stop $k$ belong to $span(b,Ab,\ldots,A^{k-1}b)$ of $k$ different vectors
 \end{list}
-$$span(b,Ab,\ldots,A^{k-1}b) = \{v=\alpha_0b+\alpha_1Ab+\alpha_2A^2b+\ldots+\alpha_{k-1}A^{k-1}b\:|\:\alpha_i\in R\}=$$
-$$=\{v = (\alpha_0I+\alpha_1A+\alpha_2A^2+\ldots+\alpha_{k-1}A^{k-1})b\:|\:\alpha_i\in R\} = $$
+$$span(b,Ab,\ldots,A^{k-1}b) = \{v=\alpha_0b+\alpha_1Ab+\alpha_2A^2b+\ldots+\alpha_{k-1}A^{k-1}b\:|\:\alpha_i\in \mathbb{R}\}=$$
+$$=\{v = (\alpha_0I+\alpha_1A+\alpha_2A^2+\ldots+\alpha_{k-1}A^{k-1})b\:|\:\alpha_i\in \mathbb{R}\} = $$
 $$ = \{v=p(A)b\:|\:\hbox{for all polynomials }p(t)=\alpha_0+\alpha_1t+\ldots+a_{k-1}t^{k-1}\hbox{ of degree }<k\}$$
 
 \paragraph{Krylov Subspace} This is the Krylov Subspace: $K_k(A,b)\Rightarrow$ \textbf{Krylov space methods}\\
@@ -600,21 +775,21 @@ $K_n(A,b)$ is a linear subspace means that $v,w\in K_n(A,b)\Rightarrow \alpha v+
 $v\in K_n(A,b)\Rightarrow v=(\alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1} A^{n-1})b$ with $\alpha_{n-1}\neq 0 \Rightarrow Av = (\alpha_0A + \alpha_1 A^2+\ldots + \alpha_n A^n)b \in K_{n+1}(A,b)$ and also $v\in K_n(A,b) - K_{n-1}(A,b)\Rightarrow Av \in K_{n+1}(A,b)- K_n(A,b)$\\
 By composing $b$, linear combinations of already computed vectors and products of already computed vectors times $A$, one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you combine.\\ % (3).\\
 Can we look for the best approximation of the solution of a certain problem, for instance a linear system $Ax=b$, inside $K_n(A,b)$?
-$$K_n(A,b) = \{\alpha_0b+\ldots + \alpha_{n-1}A^{n-1}b\:|\:\alpha_i\in R\} =$$ $$= \left\{\left[\begin{array}{c | c | c | c | c}
+$$K_n(A,b) = \{\alpha_0b+\ldots + \alpha_{n-1}A^{n-1}b\:|\:\alpha_i\in \mathbb{R}\} =$$ $$= \left\{\left[\begin{array}{c | c | c | c | c}
 b & Ab &A^2b & \ldots & A^{n-1}b
 \end{array}\right]\cdot\left[\begin{array}{c}
 \alpha_0\\\vdots\\\alpha_{n-1}
 \end{array}\right]\:|\:\left[\begin{array}{c}
 \alpha_0\\\vdots\\\alpha_{n-1}
-\end{array}\right]\in R^n \right\} = \{V_n\cdot y\:|\:y \in R^n\}$$
-So each vector in $K_n(A,b)$ is written as $V_ny$ for some $y\in R^n$ and the problem becomes a least squares problem with the matrix $AV_n\in R^{m\times n}$:
-$$\min_{x_n\in K_n(A,b)} ||Ax_n - b|| = \min_{y\in R^n} ||(AV_n)y-b||$$
+\end{array}\right]\in \mathbb{R}^n \right\} = \{V_n\cdot y\:|\:y \in \mathbb{R}^n\}$$
+So each vector in $K_n(A,b)$ is written as $V_ny$ for some $y\in \mathbb{R}^n$ and the problem becomes a least squares problem with the matrix $AV_n\in \mathbb{R}^{m\times n}$:
+$$\min_{x_n\in K_n(A,b)} \|Ax_n - b\| = \min_{y\in \mathbb{R}^n} \|(AV_n)y-b\|$$
 But this problem is very unstable to solve because $V_n = \left[\begin{array}{c | c | c | c | c}
 b & Ab &A^2b & \ldots & A^{n-1}b
 \end{array}\right]$ has columns that tend to be all multiples of the same vector as $n$ increases.
 \paragraph{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$\\
 The idea is that given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\
-The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a $p$ of degree exactly $j-1$.
+The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a $p$ of degree exactly $j-1$.
 \begin{enumerate}
 	\item Generate a vector $\in K_{j+1}$ that wasn't already in $K_j$
 	$$w = Aq_j = q_1\beta_1+\ldots + q_j\beta_j + q_{j+q}\beta_{j+1}$$
@@ -625,16 +800,16 @@ The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{||b||}\
 	\item Repeat!
 	$$q_i^Tw = q_i^Tq_i\beta_i + q_i^Tq_{i+1}\beta_{i+1}+\ldots+q_1^Tq_{j+1}\beta_{j+1} = \beta_i$$
 	$$w = w - q_i\beta_i = q_{i+1}\beta_{i+1} + \ldots + q_{j+1}\beta_{j+1}$$
-	\item After $j$ steps, $w = \beta_{j+1}q_{j+1}$, and $q_{j+1}$ must have norm 1 so set $q_{j+1}=\frac{1}{||w||}w$ and $\beta_{j+1}= ||w||$
+	\item After $j$ steps, $w = \beta_{j+1}q_{j+1}$, and $q_{j+1}$ must have norm 1 so set $q_{j+1}=\frac{1}{\|w\|}w$ and $\beta_{j+1}= \|w\|$
 \end{enumerate}
 \subparagraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
 \beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
-\end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in R^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
+\end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in \mathbb{R}^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
 \subparagraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
-\paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $||Ax_n-b||$ with $x_n = Q_ny$.\\
-I.e. $\min_{x_n\in K_n(A,b)}||Ax_n-b|| = \min_{y\in R^n} ||AQ_ny -b||$, the least squares problem wit the matrix $AQ_n\in R^{m\times n}$, in $O(mn^2)$\\
-$= ||\underline{H}_n y - e_1||b||\,||$, the least squares problem with matrix $\underline{H}\in R^{(n+1)\times n}$, in $O(n^3)$
-\subparagraph{Convergence of GMRES} $x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$ with deg$(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$. So $$\min_{x_n\in K_n(A,b)} ||Ax_n-b|| = \min_{p\:|\:deg(p)<n}||Ap(A)b - b|| = !!(Ap(A)-I)b|| \leq ||Ap(A)-I||\cdot||b||$$
+\paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x_n = Q_ny$.\\
+I.e. $\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|$, the least squares problem wit the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$\\
+$= \|\underline{H}_n y - e_1\|b\|\,\|$, the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$, in $O(n^3)$
+\subparagraph{Convergence of GMRES} $x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$ with deg$(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$. So $$\min_{x_n\in K_n(A,b)} \|Ax_n-b\| = \min_{p\:|\:deg(p)<n}\|Ap(A)b - b\| = !!(Ap(A)-I)b\| \leq \|Ap(A)-I\|\cdot\|b\|$$
 And if $A = V\Lambda V^{-1}$ diagonalizable (with $\Lambda = \left[\begin{array}{c c c}
 \lambda_1\\
 & \ddots\\
@@ -644,7 +819,7 @@ q(\lambda_1)\\
 & \ddots\\
 & & q(\lambda_m)
 \end{array}\right] V^{-1}$\\
-First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} ||Ax_n - b|| = 0$\\
+First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} \|Ax_n - b\| = 0$\\
 This extends inexactly to matrices that have clustered eigenvalues.\\\\
 Arnoldi can be used to compute eigenvalues too. If there is a lucky breakdown $\Leftrightarrow h_{n+1,n}=0$, $\underline{H}_n=\left[\begin{array}{c c c c}
 x & x & \ldots & x\\
@@ -657,7 +832,7 @@ x & x & \ldots & x\\
 In this case, even if one can figure out $q_{n+1}$ and continue up to step $n=m$, one gets $AQ_m = Q_m\ldots$ which means that the eigenvalues of $H_n$ are a subset of the eigenvalues of $A$. So the lucky breakdown at step $n$ given me exactly $n$ eigenvalues of $A$.\\
 If $(\lambda_1,w_1),\ldots,(\lambda_n,w_n)$ are the eigenvalues/eigenvectors of $H_n$, then $(\lambda_1,Q_nw_1),\ldots,(\lambda_n,Q_nw_n)$ are the eigenvalues/eigenvectors of $A$. This because $AQ_n = Q_nH_n \Rightarrow AQ_nw_i = Q_nH_nw_i = Q_nw_i\lambda_i$.\\
 Even without the breakdown, the quantities $(\lambda_i, Q_nw_i)$ where $(\lambda_i, w_i)$ are eigenpairs of $H_n$, are good approximations of some eigenpairs of $A$, for most matrices, and are called \textbf{Ritz values}/vectors/pairs of $A$.\\
-This explanation starts from $A^kb = V \Lambda^k V^{-1} b = v_1\lambda_1^kc_1+\ldots+v_m\lambda_m^kc_m$ with $V^{-1}b = c$. As $k$ increases, the largest summands are the ones with large $|\lambda_i| \Rightarrow$ the spaces $K_n(A,b)=span(b,Ab,\ldots,A^{n-1}b)$ and $span(v_1,\ldots,v_n)$ are similar. One can guarantee a good approximation of the eigenvectors "a posteriori" by checking if $||Av-v\lambda||$ is small respect to $||A||\cdot||v||\Rightarrow$ Arnoldi works well to approximate few eigenvectors with largest modulus of a large and sparse matrix $A$.\\\\
+This explanation starts from $A^kb = V \Lambda^k V^{-1} b = v_1\lambda_1^kc_1+\ldots+v_m\lambda_m^kc_m$ with $V^{-1}b = c$. As $k$ increases, the largest summands are the ones with large $|\lambda_i| \Rightarrow$ the spaces $K_n(A,b)=span(b,Ab,\ldots,A^{n-1}b)$ and $span(v_1,\ldots,v_n)$ are similar. One can guarantee a good approximation of the eigenvectors "a posteriori" by checking if $\|Av-v\lambda\|$ is small respect to $\|A\|\cdot\|v\|\Rightarrow$ Arnoldi works well to approximate few eigenvectors with largest modulus of a large and sparse matrix $A$.\\\\
 What if I need the \textbf{smallest} eigenvalues of $A$? A trick: if $A=V\Lambda V^{-1} = V\left[\begin{array}{ccc}
 \lambda_1\\
 &\ddots\\
@@ -673,11 +848,11 @@ If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \text
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MNRES.
 \subsection{Conjugate Gradient}
 \paragraph{Conjugate} We say that $u,v$ are $A$-orthogonal, or \textbf{conjugate}, if $u^TAv = 0$.\\
-The $A$-norm of $u\in R^m$ is $||u||_A = \sqrt{u^TAv}$
+The $A$-norm of $u\in \mathbb{R}^m$ is $\|u\|_A = \sqrt{u^TAv}$
 \paragraph{Conjugate Gradient} Supposing $A=A^T \succ 0$ (symmetric and positive definite), we can find the solution to $Ax = b$ by minimizing the strictly convex function $f(x) = \frac{1}{2}x^TAx-b^Tx +$ const, which $\nabla f = Ax-b$\\
 At each step there are 3 ingredients:
 \begin{list}{}{}
-	\item Current iterate: $x_j\in R^m$
+	\item Current iterate: $x_j\in \mathbb{R}^m$
 	\item Residual: $r_j = b-Ax_j = -\nabla f(x_j)$ 
 	\item Search direction: $d_j$
 \end{list}
@@ -744,7 +919,7 @@ R^Ty = b\\Rx=y
 \end{array}\right.$\\
 \textbf{Fill-in reducing permutation} $P^TAP = R^TR\Leftrightarrow A = PR^TRP$\\
 For example, \texttt{symrcm} "reverse Cuthill McKee".
-\paragraph{Preconditioning} $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in R^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods.\\
+\paragraph{Preconditioning} $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods.\\
 $P$ "looks like" inv$(A)$, $P =$ deg$(A)^{-1}$ %TODO
 \subparagraph{Incomplete $LU$} Construct sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute.\begin{list}{}{}
 	\item $L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$ and take $P = U_I^{-1}L_I^{-1}$
@@ -765,8 +940,8 @@ Instead of solving $(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$, given that $(L^T)^{
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be: accurate (describes well the process), computationally inexpensive (fast), general (can be applied to many different processes). Typically impossible to have all three. Developing general models is useful, work once apply many. But the shape of the model controls the computational cost. How to get accuracy for any given application? A \textbf{model is parametric} and must \textbf{learn the right values of the parameters}. In other words, \textbf{fitting}: within the family of (usually) infinitely many models with the given shape, find the one that better represent your phenomenon. This is an optimization problem, and solving fitting is typically the bottleneck.\\\\
 Fitting means minimizing training error, while machine learning means minimizing the generalization error.
 \subparagraph{Example: Linear estimation} Phenomenon measured by one number $y$ and believed to depend on a vector $x = [x_1,\ldots,x_n]$. Available set of observations $(x_1,y_i), \ldots, (x_m, y_m)$.\\
-And optimistic assumption: the dependence is linear, hence $y = \sum_{i=1}^n w_ix_i+w_0 = w_x + w_0$ for fixed $n+1$ real parameters $w = [w_0, w_+=[w_1,\ldots,w_n]]$ and find the $w$ for which is less untrue $\min_w\:\:L(w)=||y-xw||$
-\subparagraph{Example: Low-rank approximation} A large, sparse matrix $M\in R^{n\times m}$ describes a phenomenon depending on pairs. Find a tall and thin $A\in R^{n\times k}$ and a fat and large $B\in R^{k\times m}$, meaning $k << n,m$, such that $A\cdot B = M$ with $\min_{A,B} L(A,B) = ||M-AB||$\\
+And optimistic assumption: the dependence is linear, hence $y = \sum_{i=1}^n w_ix_i+w_0 = w_x + w_0$ for fixed $n+1$ real parameters $w = [w_0, w_+=[w_1,\ldots,w_n]]$ and find the $w$ for which is less untrue $\min_w\:\:L(w)=\|y-xw\|$
+\subparagraph{Example: Low-rank approximation} A large, sparse matrix $M\in \mathbb{R}^{n\times m}$ describes a phenomenon depending on pairs. Find a tall and thin $A\in \mathbb{R}^{n\times k}$ and a fat and large $B\in \mathbb{R}^{k\times m}$, meaning $k << n,m$, such that $A\cdot B = M$ with $\min_{A,B} L(A,B) = \|M-AB\|$\\
 $A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge and dense matrix. Efficiently solving this problem requires
 \begin{list}{}{}
 	\item Low complexity computation
@@ -775,10 +950,10 @@ $A,B$ can be obtained from eigenvectors of $M^T$ and $MM^T$, but possibly huge a
 	\item Ensuring that the solution is numerically stable.
 \end{list}
 \subparagraph{Example: Support Vector Machines} Same setting as the first example, but $y_h\in\{1,-1\}$: want to linearly separate the two sets. Which separating hyperplane to choose? Intuitively, based on the margin: more margin, more robust classification.\\
-The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{||w_+||}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -1$\\
-The \textbf{maximum margin separating hyperplane} is the solution of $\min_w\{||w_+||^2\:|\:y_h(w_+x_h + w_0)\geq 1), h=1,\ldots,m\}$, and the margin is $\frac{2}{||w_+||}$ assuming any exists.\\
-If it doesn't exists, soft-margin SVM: $\min_w ||w_+||^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
-Non differentiable, reformulation $\min_{w,\xi} ||w_+||^2 + C\sum_{h=1}^m \xi_h$
+The distance of parallel hyperplanes $(w_+, w_0)$ and $(w_+, w_0')$ is $\frac{|w_0 - w_0'|}{\|w_+\|}$. We can always take the hyperplane in the middle and scale $w$: $w_+x_h + w_0 \geq 1$ if $y_h = 1$, $w_+x_h + w_0 \leq 1$ if $y_h = -1$\\
+The \textbf{maximum margin separating hyperplane} is the solution of $\min_w\{\|w_+\|^2\:|\:y_h(w_+x_h + w_0)\geq 1), h=1,\ldots,m\}$, and the margin is $\frac{2}{\|w_+\|}$ assuming any exists.\\
+If it doesn't exists, soft-margin SVM: $\min_w \|w_+\|^2 + C\cdot L(w) = \sum_{h=1}^m\:max(1-y_h(w_+x_h + w_0), 0)$, \textbf{$C$ weight loss}\\
+Non differentiable, reformulation $\min_{w,\xi} \|w_+\|^2 + C\sum_{h=1}^m \xi_h$
 \pagebreak
 \section{Optimization problems}
 Given $X$ \textit{any} set and $f:X\rightarrow R$ \textit{any} function, we have an optimization problem in the form $$(P)\:\:\:\:\:\:f_*=\min\{f(x) : x\in X\}$$
@@ -809,7 +984,7 @@ It's also impossible if $f_* > -\infty$ but $\not\exists\:x_*$, for example $f(x
 1&\hbox{if }x = 0\\
 |x|&\hbox{if }x \neq 0
 \end{array}\right.$, but there are plenty of $\epsilon$-approximate solutions ($\epsilon$-optima) $$f(x_\epsilon)\leq f_* + \epsilon\:\:\:\:\forall\:\epsilon>0$$
-and on computers $x\in R$ is actually $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but too slow, so ML is actually going the opposite way (float, half, small integers\ldots). And anyway, finding the exact $x_*$ is impossible in general.
+and on computers $x\in \mathbb{R}$ is actually $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but too slow, so ML is actually going the opposite way (float, half, small integers\ldots). And anyway, finding the exact $x_*$ is impossible in general.
 %\paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
 %With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
 %Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\overline{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \overline{\alpha}]$\\
@@ -948,44 +1123,44 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
 \section{Unconstrained optimization}
-From now on we'll use $f:R^n\rightarrow R$, i.e. $f(x_1,x_2,\ldots,x_n) = f(x)$ with $x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in R^n$. Note that $R^n = R\times R \times\ldots\times R$, which is \textbf{exponentially larger} than $R$.\\
+From now on we'll use $f:R^n\rightarrow R$, i.e. $f(x_1,x_2,\ldots,x_n) = f(x)$ with $x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in \mathbb{R}^n$. Note that $R^n = R\times R \times\ldots\times R$, which is \textbf{exponentially larger} than $R$.\\
 $I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal).\\\\
 We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. \textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
 \subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\equiv$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
 \paragraph{Notation}\begin{list}{}{}
 	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
-	\item \textbf{Norm} $||x|| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
-	\item \textbf{Distance} $d(x,y) = ||x-y|| = \sqrt{(x_1-y_1)^2+\ldots+(x_n-y_n)^2}$
-	\item \textbf{Ball} with center $r\in R^n$ and radius $r > 0$ is $B(x,r) = \{y\in R^n\:|\:||y-x||\leq r\}$
+	\item \textbf{Norm} $\|x\| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
+	\item \textbf{Distance} $d(x,y) = \|x-y\| = \sqrt{(x_1-y_1)^2+\ldots+(x_n-y_n)^2}$
+	\item \textbf{Ball} with center $r\in \mathbb{R}^n$ and radius $r > 0$ is $B(x,r) = \{y\in \mathbb{R}^n\:|\:\|y-x\|\leq r\}$
 \end{list}
 Usually $f:D\rightarrow R$ with $D = dom(f)$ domain of $f$ which may not be all $R^n$, but usually ok to ignore $dom(f)$ and assume $f(x)=\infty$ for $x\not\in D$
 \begin{list}{}{}
-	\item \textbf{Graph} of $f$ lives in $R^{n+1}$: $gr(f) = \{(f(x),x)\:|\:x\in R^n\}$
-	\item \textbf{Epigraph} of $f$ lives in $R^{n+1}$: $epi(f)=\{(v,x) \in R^{n+1}\:|\:v\geq f(x)\}$
-	\item \textbf{Level set} at value $v$: $L(f,v)=\{x\in R^n\:|\:f(x)=v\}$
-	\item \textbf{Sublevel set} at value $v$: $S(f,v)=\{x\in R^n\:|\:f(x)\leq v\}$
+	\item \textbf{Graph} of $f$ lives in $R^{n+1}$: $gr(f) = \{(f(x),x)\:|\:x\in \mathbb{R}^n\}$
+	\item \textbf{Epigraph} of $f$ lives in $R^{n+1}$: $epi(f)=\{(v,x) \in \mathbb{R}^{n+1}\:|\:v\geq f(x)\}$
+	\item \textbf{Level set} at value $v$: $L(f,v)=\{x\in \mathbb{R}^n\:|\:f(x)=v\}$
+	\item \textbf{Sublevel set} at value $v$: $S(f,v)=\{x\in \mathbb{R}^n\:|\:f(x)\leq v\}$
 \end{list}
 We have that $x_* \in S(f,v)\:\:\:\forall\:v\geq f_*$ and $S(f,v) = \emptyset\:\:\:\forall\:v<f_*$
 
-\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in R^n$ origin and $d\in R^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ \textbf{tomography} of $f$ from $x$ along $d$.\\
+\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in \mathbb{R}^n$ origin and $d\in \mathbb{R}^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ \textbf{tomography} of $f$ from $x$ along $d$.\\
 $\phi_{x,d}$ can always be pictured, but there are infinitely many of them: which $x,d$?\begin{list}{}{}
-	\item $||d||$ only changes the scale: $\phi_{x,\beta d}(\alpha) = \phi_{x,d}(\beta \alpha)$ so often convenient to use normalised direction ($||d|| = 1$)
+	\item $\|d\|$ only changes the scale: $\phi_{x,\beta d}(\alpha) = \phi_{x,d}(\beta \alpha)$ so often convenient to use normalised direction ($\|d\| = 1$)
 	\item Simplest case: restriction along $i$-th coordinate\\
-	$f_x^i(\alpha) = f(x_1,\ldots,x_{i-1},\alpha,x_{i+1},\ldots,x_n) = \phi_{0,u^i}(\alpha)$ with $||u^i|| = 1$
+	$f_x^i(\alpha) = f(x_1,\ldots,x_{i-1},\alpha,x_{i+1},\ldots,x_n) = \phi_{0,u^i}(\alpha)$ with $\|u^i\| = 1$
 	\item When $x,d$ clear from context, then $\phi(\alpha)$
 \end{list}
 \paragraph{Simple Functions} \begin{list}{}{}
-	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c, b \in R^n, c\in R$\\
-	Tomography $f(x) = \langle b,x\rangle, x = 0, ||d||=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha||b||cos(\theta)$\\
+	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c, b \in \mathbb{R}^n, c\in \mathbb{R}$\\
+	Tomography $f(x) = \langle b,x\rangle, x = 0, \|d\|=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha\|b\|cos(\theta)$\\
 	Plotting this gives a line, increasing because "$b$ same direction as $d$", more collinear $\Rightarrow$ steeper. Collinear means steepest line, less collinear means less steap. 90° angle means a flat line. Decreasing if opposite directions.\\
 	min $f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
-	\item \textbf{Quadratic} with fixed $Q\in R^{n\times n}, q\in R^n$ we have $f(x) = \frac{1}{2}x^TQx + qx$. If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
+	\item \textbf{Quadratic} with fixed $Q\in \mathbb{R}^{n\times n}, q\in \mathbb{R}^n$ we have $f(x) = \frac{1}{2}x^TQx + qx$. If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
 	Tomography $\phi(\alpha) = f(\alpha d) = \alpha^2(d^TQd)\Rightarrow$ sign and steepness depend on $d^TQd$, so we need to know about signs of $d^TQd$. Steeper when $d$ along one axe, least steep when $d$ along the other axe and intermediate steepness when "in between". Again, steeper along the opposite of one axe and least steep along the opposite of the other axe.\\
 	With $q\neq 0$ but $Q$ nonsingular then $\lambda_i\neq 0\:\:\:\forall\:i$, then $f(x)=\frac{1}{2}(x-x_*)^TQ(x-x_*) [+c]$ for $x_* = -Q^{-1}q$ and $x_* \neq 0$ center of the level sets (which shapes are determined by the eigenvalues).\\
 	$y = x - x_*, f_*(y) = y^TQy [+c]$
 \end{list}
-\paragraph{Directional/partial derivatives} The directional derivative of $f:R^n\rightarrow R$ at $x\in R^n$ along the direction $d\in R^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
-How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial d}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in R^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
+\paragraph{Directional/partial derivatives} The directional derivative of $f:R^n\rightarrow R$ at $x\in \mathbb{R}^n$ along the direction $d\in \mathbb{R}^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
+How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial d}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in \mathbb{R}^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
 The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f(x) = \left[\begin{array}{c}
 \frac{\partial f}{\partial x_1}(x)\\
 \vdots\\
@@ -993,7 +1168,7 @@ The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f
 \end{array}\right]$$
 $$f(x) = \langle b,x\rangle \Rightarrow\nabla f(x) = b$$
 $$f(x) = \frac{1}{2}x^TQx + qx \Rightarrow\nabla f(x) = Qx + q$$
-$f$ differentiable at $x$ if $\exists$ linear function $\psi(h) =\langle b,h\rangle + f(x)$ such that $$\lim_{||h||\to 0}\frac{|f(x+h) - \psi(h)}{||h||} = 0$$ $$\Rightarrow \psi(0) = f(x) \Rightarrow c = f(x)$$
+$f$ differentiable at $x$ if $\exists$ linear function $\psi(h) =\langle b,h\rangle + f(x)$ such that $$\lim_{\|h\|\to 0}\frac{|f(x+h) - \psi(h)}{\|h\|} = 0$$ $$\Rightarrow \psi(0) = f(x) \Rightarrow c = f(x)$$
 $\psi$ is equivalent to the first order model of $f$ at $x$, the error of this equivalence vanishes faster than linearity. So $f$ differentiable at $x\Rightarrow b = \nabla f(x)$ and\begin{list}{}{}
 	\item $\Rightarrow \frac{\partial f}{\partial x_i}(x)$ exists for every $i$ (but $\Leftrightarrow$ not true)
 	\item $\Rightarrow$ first order model of $f$ at $x$ is $L_x(y) = \nabla f(x)(y-x)$
@@ -1035,11 +1210,11 @@ Another condition necessary and almost sufficient: $f\in C^2$.
 At least $\{f_i = f(x_i)\} \rightarrow f_*$: \textbf{minimizing sequence}, and clearly $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}$ minimizing sequence, but $\not\Leftarrow$\\
 Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 \begin{list}{}{}
-	\item \textbf{Line search}: first choose $d_i\in R^n$ (\textbf{direction}), then choose $\alpha_i\in R$ (\textbf{step size} $\equiv$ learning rate in ML)
-	\item \textbf{Trust region}: first choose $\alpha_i\in R$ (\textbf{trust radius}), then $d_i$
+	\item \textbf{Line search}: first choose $d_i\in \mathbb{R}^n$ (\textbf{direction}), then choose $\alpha_i\in \mathbb{R}$ (\textbf{step size} $\equiv$ learning rate in ML)
+	\item \textbf{Trust region}: first choose $\alpha_i\in \mathbb{R}$ (\textbf{trust radius}), then $d_i$
 \end{list}
 The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
-\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in arg\min\{L_i(x) : x\in R^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
+\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in arg\min\{L_i(x) : x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
 It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = arg\min\{\lim_{t\to 0} \frac{f(x+td)}{t}\} = -\nabla f(x_i) =$ steepest descent direction.\\
 $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
 \paragraph{Step selection} The issue is to find the Goldilocks Step $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
@@ -1051,31 +1226,31 @@ $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(
 \end{list}
 Of course, something in the middle is better. $\phi'_i$ low-degree polynomial $\Rightarrow f(x_i+\alpha d_i) = \phi_{x_i,d_i}(\alpha) = \phi_i(\alpha)$
 \paragraph{Gradient for quadratic functions} $f(x) = \frac{1}{2}x^TQx + qx$ with $Q\geq 0$ otherwise $f$ is unbounded below. $x_*$ solves $Qx = -q$ if it exists, which is linear algebra but the linear system requires at most $O(n^3)$ while computing $d_i = -\nabla f(x_i) = -Qx_i - q$ is $O(n^2)$\\
-Line search is easy, $O(n^2)$ with $\alpha_i = \frac{||d_i||^2}{d_i^TQd_i}$
+Line search is easy, $O(n^2)$ with $\alpha_i = \frac{\|d_i\|^2}{d_i^TQd_i}$
 \begin{lstlisting}[style=myPython]
 procedure x = SDQ(Q, q, x, eps):
-	while (||nablf(x)||>eps):
+	while (\|nablf(x)\|>eps):
 		d = -nablf(x)
-		alpha = ||d||^2/dT*Q*d
+		alpha = \|d\|^2/dT*Q*d
 		x = x + alpha*d
 \end{lstlisting}
 With \texttt{nablf} being $\nabla f$
 \subparagraph{Analysis} Never obvious because we have to use properties of $x_*$ which is unknown, but in this case there's a nifty trick
 $$f_*(x) = \frac{1}{2}(x-x_*)^TQ(x-x_*) = f(x) - f_*(x) = A(x)$$
-for which, with $Q$ positive definite $$A(x_{i+1}) = \left(1-\frac{||d_i||^4}{(d_i^TQd_i)(d_i^TQ^{-1}d_i)} \right)A(x_i)$$
+for which, with $Q$ positive definite $$A(x_{i+1}) = \left(1-\frac{\|d_i\|^4}{(d_i^TQd_i)(d_i^TQ^{-1}d_i)} \right)A(x_i)$$
 This becomes linear convergences ($\lambda_1,\lambda_{n}$ being respectively the max and min eigenvalues of $Q$)
 \begin{list}{}{}
 	\item Simple $A(x_{i+1}) \leq (1-\frac{\lambda_n}{\lambda_1})A(x_i)$
 	\item Elaborated $A(x_{i+1}) \leq \frac{\lambda_1 - \lambda_n}{(\lambda_1 - \lambda_n)^2}A(x_i)$
 \end{list}
 The good news is that $n$ doesn't appear, it's \textbf{dimension-independent} so doable for very large scale machine learning. The bad news is that the rate of convergence $r\rightarrow 1$ as conditioning of $Q = \frac{\lambda_1}{\lambda_n}\rightarrow\infty$
-\paragraph{When linear convergence may not be enough} The convergence is fast if $\lambda_1\simeq \lambda_n$ (one iteration for $||x||^2$) and rather slow if $\lambda_1 >> \lambda_n$. Intuitively, the algorithm zig-zags a lot when level sets are very elongated. Another bad news is that there may be an "hidden dependency": $\lambda_1$ and $\lambda_n$ may depend on $n$ and $\frac{\lambda_1}{\lambda_n}$ may grow as $n\rightarrow\infty$.\\
+\paragraph{When linear convergence may not be enough} The convergence is fast if $\lambda_1\simeq \lambda_n$ (one iteration for $\|x\|^2$) and rather slow if $\lambda_1 >> \lambda_n$. Intuitively, the algorithm zig-zags a lot when level sets are very elongated. Another bad news is that there may be an "hidden dependency": $\lambda_1$ and $\lambda_n$ may depend on $n$ and $\frac{\lambda_1}{\lambda_n}$ may grow as $n\rightarrow\infty$.\\
 Let's extend it to every function.
 \subsubsection{Gradient methods for general functions}
 Given $f$ a general nonlinear function, the algorithm is almost the same:
 \begin{lstlisting}[style=myPython]
 procedure x = SDQ(f, x, eps):
-	while (||nablf(x)||>eps):
+	while (\|nablf(x)\|>eps):
 		d = -nablf(x)
 		alpha = stepsize(f, x, d)
 		x = x + alpha*d
@@ -1088,34 +1263,34 @@ procedure x = SDQ(f, x, eps):
 With $\frac{\partial f}{\partial d_i}(x_i)<0$ hence $\alpha_i\rightarrow 0$ we avoid Scylla but may hit Charybdis.\\
 \texttt{stepsize(f, x, d)} $= LS(\phi_{x,d}, [0,\infty], \epsilon')$ is attractive but $\epsilon' = 0$ in general is not possible: how to choose it? Depends on the stopping criterion in $LS()$, let's assume $|\phi_{x,d}(\alpha)| \leq \epsilon'$. A fundamental property is $$\phi'_i(\alpha) = \frac{\partial f}{\partial d_i}(x_i + \alpha d_i) = \langle\nabla f(x_i+\alpha d_i), d_i\rangle$$
 $$\Rightarrow |\phi_i'(\alpha_i)| = |\langle d_i, \nabla f(x_{i+1})\rangle| = |\langle \nabla f(x_i),\nabla f(x_{i+1})\rangle|$$
-The good news is that only an approximate stationary point of $\phi_i$ is needed, no global minimum (and not even a local minimum, can be a local maximum or a saddle point) $\Rightarrow f$ convex/unimodal is not needed. Also we can prove that the algorithm works with $\epsilon' = \epsilon ||\nabla f(x_i)||$\\
+The good news is that only an approximate stationary point of $\phi_i$ is needed, no global minimum (and not even a local minimum, can be a local maximum or a saddle point) $\Rightarrow f$ convex/unimodal is not needed. Also we can prove that the algorithm works with $\epsilon' = \epsilon \|\nabla f(x_i)\|$\\
 A bad news is that the LS should become more accurate as the algorithm proceeds, and the LS can be very approximate ("far from $x_*$").\\
 Usually works well in practice with arbitrary fixed $\epsilon'$
 \paragraph{Notes on the stopping criterion} One would want $A(x_i)<\epsilon$ or $R(x_i) < \epsilon$ as stopping criterion, the issue is that $f_*$ is often unknown and cannot be used online. We need a lower bound $\underline{f} \leq f_*$, tight at least towards termination, but in general there are no good $\underline{f}$ available because good estimates of $f_*$ are hard to get.\\
-We can use $||\nabla f(x_i)||$ as proxy of $A(x_i)$ (small $\Rightarrow$ small) but the exact relationship is hard to assess, so choosing $\epsilon$ is not obvious.\\
-Sometimes we use a relative stopping condition $||\nabla f(x_i)||\leq \epsilon||\nabla f(x_0)||$, and sometimes $||\nabla f||$ has some meaning that can be used. Sometimes, we don't really care if $A(x_i)$ or $R(x_i)$ are small (machine learning).
+We can use $\|\nabla f(x_i)\|$ as proxy of $A(x_i)$ (small $\Rightarrow$ small) but the exact relationship is hard to assess, so choosing $\epsilon$ is not obvious.\\
+Sometimes we use a relative stopping condition $\|\nabla f(x_i)\|\leq \epsilon\|\nabla f(x_0)\|$, and sometimes $\|\nabla f\|$ has some meaning that can be used. Sometimes, we don't really care if $A(x_i)$ or $R(x_i)$ are small (machine learning).
 \paragraph{Efficiency} The efficiency is basically the same.\\
 With $f\in C^2, x_*$ local minimum such that $\nabla^2f(x_*)$ positive definite, exact LS $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}_{i\geq k}\rightarrow f_*$ linearly for large enough $k$, with $r = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}^2$ with $\lambda_1,\lambda_n$ those of $\nabla^2 f(x_*)$\\
 The result can be extended to inexact LS with $r\simeq 1-\frac{\lambda_n}{\lambda_1}$ (worse), with "$\simeq$" depending on LS parameters.
 \subsubsection{Fixed Stepsize}
 With $\alpha_i = \overline{\alpha}$ for each $i$ it's much simpler but also rigid. Easier to avoid Charybdis: $\sum_{i=1}^\infty \alpha_i = \infty$\\
-Yet $d_i = -\nabla f(x_i) \Rightarrow$ one wants $\{||d_i||\}\rightarrow 0$, so care is still required. We also have that $\alpha_i\rightarrow 0$ surely avoid Scylla, but it's not possible here.\\
-The fundamental trick is $d_i = -\nabla f(x_i) \Rightarrow ||x_{i+1} - x_i||$ automatically changes along iterations even if $\alpha_i$ is fixed.\\
-$d_i = \frac{-\nabla f(x_i)}{||\nabla f(x_i)||} \equiv ||d_i|| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
-\paragraph{L-smoothness} $$f \hbox{ L-smooth }\Rightarrow \phi(\alpha) \leq \phi(0) + ||\nabla f(x)||^2\left(\frac{L\alpha^2}{2-\alpha}\right)$$
-Powerful general idea: find $\alpha$ giving the best worst-case improvement, meaning $v(\alpha) = \frac{L\alpha^2}{2-\alpha}, \alpha_* = \frac{1}{L}$ (constant!), $v(\alpha_*) = -\frac{1}{2L}$ hence $$f(x_{i+1}) - f(x_i) \leq -\frac{||\nabla f(x_i)||^2}{2L}$$ Can't do better if you trust the quadratic bound (which you should not).\\
-The error decreases sublinearly: a term is subtracted to $a_i$ rather than multiplied $a_{i+1} = f(x_{i+1}) - f_* \leq a_i - \frac{||\nabla f(x_i)||^2}{2L}$\\
-In fact $a_i\leq \frac{2L||x_0 - x_*||^2}{i+3} \Rightarrow i\geq O(\frac{LD^2}{\epsilon})$ (note that the initial point matters)\\
+Yet $d_i = -\nabla f(x_i) \Rightarrow$ one wants $\{\|d_i\|\}\rightarrow 0$, so care is still required. We also have that $\alpha_i\rightarrow 0$ surely avoid Scylla, but it's not possible here.\\
+The fundamental trick is $d_i = -\nabla f(x_i) \Rightarrow \|x_{i+1} - x_i\|$ automatically changes along iterations even if $\alpha_i$ is fixed.\\
+$d_i = \frac{-\nabla f(x_i)}{\|\nabla f(x_i)\|} \equiv \|d_i\| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
+\paragraph{L-smoothness} $$f \hbox{ L-smooth }\Rightarrow \phi(\alpha) \leq \phi(0) + \|\nabla f(x)\|^2\left(\frac{L\alpha^2}{2-\alpha}\right)$$
+Powerful general idea: find $\alpha$ giving the best worst-case improvement, meaning $v(\alpha) = \frac{L\alpha^2}{2-\alpha}, \alpha_* = \frac{1}{L}$ (constant!), $v(\alpha_*) = -\frac{1}{2L}$ hence $$f(x_{i+1}) - f(x_i) \leq -\frac{\|\nabla f(x_i)\|^2}{2L}$$ Can't do better if you trust the quadratic bound (which you should not).\\
+The error decreases sublinearly: a term is subtracted to $a_i$ rather than multiplied $a_{i+1} = f(x_{i+1}) - f_* \leq a_i - \frac{\|\nabla f(x_i)\|^2}{2L}$\\
+In fact $a_i\leq \frac{2L\|x_0 - x_*\|^2}{i+3} \Rightarrow i\geq O(\frac{LD^2}{\epsilon})$ (note that the initial point matters)\\
 However we used $Q$ nonsingular $\Leftrightarrow \lambda_n > 0$, which does make a difference.
 \paragraph{Stronger forms of convexity}
-$f$ convex means that $\forall\:x,y\in R^n$ we have $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\geq f(x) + \langle \nabla f(x), y-x\rangle$$
+$f$ convex means that $\forall\:x,y\in \mathbb{R}^n$ we have $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\geq f(x) + \langle \nabla f(x), y-x\rangle$$
 \textbf{Strictly} convex means $$\alpha f(x) + (1-\alpha)f(y)> f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle$$
-Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n||x||_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\equiv \lambda_n$-convex.\\
-$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $f(x)-\frac{\tau}{2}||x||_2^2$ is convex $\Leftrightarrow$ $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)||y-x||^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}||y-x||^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
+Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n\|x\|_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\equiv \lambda_n$-convex.\\
+$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $f(x)-\frac{\tau}{2}\|x\|_2^2$ is convex $\Leftrightarrow$ $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
 $f \in C^2,$ $L$-smooth and $\tau$-convex $\equiv \tau I \preceq \nabla^2 f\preceq LI \equiv \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
-\paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{||\nabla f(x_i)||^2}{2\tau} \Rightarrow ||\nabla f(x_i)||^2\geq 2\tau(f(x_i)-f(x_*))$$
+\paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{\|\nabla f(x_i)\|^2}{2\tau} \Rightarrow \|\nabla f(x_i)\|^2\geq 2\tau(f(x_i)-f(x_*))$$
 "If $a_i = f(x_i) - f_*$ is large then the gradient must also be large."\\
-$L$-smooth $\Rightarrow a_{i+1}\leq a_i - \frac{||\nabla f(x_i)||^2}{2L} \Rightarrow a_{i+1}\leq a_i(1-\frac{\tau}{L})$\\
+$L$-smooth $\Rightarrow a_{i+1}\leq a_i - \frac{\|\nabla f(x_i)\|^2}{2L} \Rightarrow a_{i+1}\leq a_i(1-\frac{\tau}{L})$\\
 A small difference in $f$ makes a big difference in convergence $\Rightarrow$ properties of $f$ more important than the algorithm.
 \subsubsection{Inexact Line Search}
 \paragraph{Armijo} If FS works, then any rough LS also should work provided that $f_i$ decreases enough.\\
@@ -1124,8 +1299,8 @@ The \textbf{Armijo condition} is $0 < m_1 < 1$
 	\item[$(A)$] $\phi(\alpha)\leq \phi(0)+m_1\alpha\phi'(0)$
 \end{list}
 $\alpha \rightarrow 0$ satisfies $(A)$. But if we avoid Charybdis then we "converge".\\
-$\alpha_i\geq \overline{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{||\nabla f(x_i)||\}\rightarrow 0$\\
-All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = ||\nabla f(x_i)||^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\overline{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\overline{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \overline{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
+$\alpha_i\geq \overline{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{\|\nabla f(x_i)\|\}\rightarrow 0$\\
+All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = \|\nabla f(x_i)\|^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\overline{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\overline{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \overline{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
 \paragraph{Wolfe} \textbf{Goldstein condition} $m_1 < m_2 < 1$
 \begin{list}{}{}
 	\item[$(G)$] $\phi(\alpha)\geq \phi(0) + m_2\alpha\phi'(0)$
@@ -1153,10 +1328,10 @@ Recall that $\exists\:\overline{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alp
 $$\overline{\alpha}_i \geq \overline{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \hbox{\textbf{convergence}}$$
 We need conditions on $f$ to get it:
 \begin{list}{}{}
-	\item $f$ $L$-smooth $\Rightarrow \phi$ is $[L||d||^2]$-smooth
-	\item $\Rightarrow -\phi'(0) = ||d||^2 = ||\nabla f(x)||^2$
-	\item $\phi$ is $[L||d||^2]$-smooth $\Rightarrow \alpha'$ and $\overline{\alpha}$ are "large":\\
-	$L||d||^2(\alpha - 0)\geq \phi'(\alpha')-\phi'(0) > (1-m_3)(-\phi'(0)) = (1-m_3)||d||^2$
+	\item $f$ $L$-smooth $\Rightarrow \phi$ is $[L\|d\|^2]$-smooth
+	\item $\Rightarrow -\phi'(0) = \|d\|^2 = \|\nabla f(x)\|^2$
+	\item $\phi$ is $[L\|d\|^2]$-smooth $\Rightarrow \alpha'$ and $\overline{\alpha}$ are "large":\\
+	$L\|d\|^2(\alpha - 0)\geq \phi'(\alpha')-\phi'(0) > (1-m_3)(-\phi'(0)) = (1-m_3)\|d\|^2$
 	\item $\Rightarrow \overline{\alpha} > \alpha' > \frac{1-m_3}{L}$
 	\item If $f$ also $\tau$-convex $\Rightarrow$ convergence linear with $r\simeq \frac{1-\tau}{L}$, depending on $m_1,m_3$
 \end{list}
@@ -1166,15 +1341,15 @@ Might be rather slow, need something better.
 \paragraph{General descent methods} So far, the crucial assumption was $d_i = -\nabla f(x_i)$\\
 The crucial convergence arguments are:
 \begin{list}{}{}
-	\item $\phi_i'(0) = -||\nabla f(x_i)||^2$, or "far from $x_*$ the derivative is very negative"
+	\item $\phi_i'(0) = -\|\nabla f(x_i)\|^2$, or "far from $x_*$ the derivative is very negative"
 	\item "You can get a non-vanishing fraction of the descent promised by $\phi_i'(0)$", the "exact" LS or Armijo or FS + $L$-smooth $\Rightarrow \alpha_i$ doesn't not go to 0 too fast.
 \end{list}
-so that there's a significant decrease at each step unless $||\nabla f(x_i)||\rightarrow 0$.\\
-There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -||\nabla f(x_i)||^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
+so that there's a significant decrease at each step unless $\|\nabla f(x_i)\|\rightarrow 0$.\\
+There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -\|\nabla f(x_i)\|^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
 In $R^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
 \subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $\frac{\partial f}{\partial d_i}(x_i) < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$ meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
-\textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty, (A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)||\nabla f(x_i)||^2<\infty$\\
-A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{||\nabla f(x_i)||\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
+\textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty, (A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$\\
+A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{\|\nabla f(x_i)\|\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
 Very many $d_i$, but which is better than $-\nabla f$? Need to look farther than the first order model.
 \paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)\Rightarrow$ Newton's direction $d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$ (just $R^n$ version). No problem with the step, we use $\alpha_i = 1$.\\
 The \textbf{Newton's Method} is $x_{i+1} = x_i + d_i$, a step of $\alpha_i = 1$ along $d_i$.\\
@@ -1195,7 +1370,7 @@ $g = -\nabla h(y) = -y-R^{-1}q \Rightarrow \nabla h(y+g) = 0$
 \subparagraph{Nonconvex case} The Newton's method is a space dilation: a linear map making $\nabla^2 f$ "simple", but it's not necessarily $\nabla^2f(x_i)^{-1}$ especially when $\not\succeq 0$
 $$d_i=-H_{i}\nabla f(x_i),\tau I\preceq H_i\preceq LI, (A)\cap (W)\Rightarrow\hbox{Global convergence}$$
 Any $\epsilon_i > -\lambda_n$ works (but numerical issues). Also algorithmic issues: $\lambda_n(\nabla^2 f(x_i)+\epsilon I)$ is very small, so the axes are very elongated and $x_{i+1}$ far from $x_i$ (not good for a local model)\\
-Simple form $\epsilon = max\{0,\delta - \lambda_n\}$ for appropriately chosen $\delta$. This solves $min\{||H-\nabla^2 f(x_i)||_2\:|\:H\succeq \delta I\}$, works for other norms too.\\
+Simple form $\epsilon = max\{0,\delta - \lambda_n\}$ for appropriately chosen $\delta$. This solves $min\{\|H-\nabla^2 f(x_i)\|_2\:|\:H\succeq \delta I\}$, works for other norms too.\\
 In every case, $\{x_i\}\rightarrow x_*$ with $\nabla^2 f(x_*)\succeq \delta I\Rightarrow \epsilon_i = 0 \Leftrightarrow H_i = \nabla^2 f(x_i)$ eventually (quadratic convergence in the tail)
 \paragraph{Quasi-Newton} The space of $H_i$ that gives fast convergence is big. Superlinear convergence if $H_i$ looks like $\nabla^2 f(x_i)$ along $d$.\\
 General derivation of Quasi-Newton methods $m_i(x) = \nabla f(x_i)(x-x_i)+\frac{1}{2}(x-x_i)^TH_i(x-x_i), x_{i+1} = x_i+\alpha_id_i$\\
@@ -1206,7 +1381,7 @@ We would like $H_{i+1}$ to have the following properties:
 	\item $H_{i+1}\succ 0$ (new model is strongly convex)
 	\item $\nabla m_{i+1}(x_i) = \nabla f(x_i)$ (new model agrees with old information)\\
 	Secant equation $H_{i+1}(x_{i+1}-x_i)=\nabla f(x_{i+1})-\nabla f(x_i)$
-	\item $||H_{i+1} - H_i||$ "small" (new model is not too different)
+	\item $\|H_{i+1} - H_i\|$ "small" (new model is not too different)
 \end{list}
 Depending on the choices at iteration $i$, it may not be possible to achieve both the first and second properties.\\
 \textbf{Notation} $s_i = x_{i+1}- x_i = \alpha_id_i$, $y_i = \nabla f(x_{i+1}) -\nabla f(x_i)$\\
@@ -1214,8 +1389,8 @@ Secant equation $(S)\:\:\:\:H_{i+1}s_i = y_i$\\
 $(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$ and the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
 So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
 Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$. Assuming an AWLS, $(C)$ can always be satisfied.
-\paragraph{DFP} With the three properties we have $H_{i+1} = arg\min\{||H-H_i||\:|\:(S), H\succeq 0\}$\\
-Needs appropriate $||\:\:||$: \textbf{Davidon-Fletcher-Powell formula}
+\paragraph{DFP} With the three properties we have $H_{i+1} = arg\min\{\|H-H_i\|\:|\:(S), H\succeq 0\}$\\
+Needs appropriate $\|\:\:\|$: \textbf{Davidon-Fletcher-Powell formula}
 \begin{list}{}{}
 	\item[$(DFP)$] $H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$
 \end{list}
@@ -1227,7 +1402,7 @@ Actually need $B_{i+1} = H_{i+1}^{-1}$: \textbf{Sherman-Morrison-Woodbury formul
 \end{list}
 $O(n^2)$ per iteration, just matrix-vector products and no inverses.\\
 This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficient but can do better.
-\paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = arg\min\{||B-B_i||\:|\:(S),B\succeq 0\}$\\
+\paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = arg\min\{\|B-B_i\|\:|\:(S),B\succeq 0\}$\\
 \textbf{Broyden-Felcther-Goldfarb-Shanno formulae} still $O(n^2)$\begin{list}{}{}
 	\item[$(BFGS)$] $H_{i+1} = \frac{H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{s_i^TH_is_i}$
 	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T = B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
@@ -1242,7 +1417,7 @@ Possible with quadratic $f\equiv$ linear systems, with two conditions:
 Can't use $d_i = -\nabla f(x_i)$, have to deflect $-\nabla f(x_i)$ using $d_{i-1}$: $d_0 = 0$ and $d_i = -\nabla f(x_i) + \beta_id_{i-1}$\\
 The crucial, but only, decision is $\beta_i$: \textbf{Fletcher-Reeves} (closed) \textbf{formula}:
 \begin{list}{}{}
-	\item $\beta_i = \frac{\nabla f(x_i)^T Qd_{i-1}}{d_{i-1}^TQd_{i-1}} = \frac{||\nabla f(x_i)||^2}{||\nabla f(x_{i-1})||^2}$
+	\item $\beta_i = \frac{\nabla f(x_i)^T Qd_{i-1}}{d_{i-1}^TQd_{i-1}} = \frac{\|\nabla f(x_i)\|^2}{\|\nabla f(x_{i-1})\|^2}$
 \end{list}
 $f$ quadratic + exact LS $\Rightarrow$ quadratic conjugate gradient (CG): $\nabla f(x) = 0 \equiv Qx = -q$ in at most $n$ iterations. If properly preconditioned $<< n$ iterations.\\
 Also many $\beta$ formulae, all equivalent for quadratic $f$ but not so here.\\
@@ -1253,34 +1428,34 @@ Restart: from time to time take plain $-\nabla f$. It's a good idea especially f
 $n$ CG steps $\simeq 1$ Newton steps, in $n$ steps CG exactly solves a quadratic function. Powerful approach, not easy to manage.
 \paragraph{Deflected Gradients method} CG's idea: use previous direction while computing the current one. Simple form: $x_{i+1} = x_i - \alpha_i\nabla f(x_i) + \beta_i(x_i-x_{i-1})$ with $\beta_i$ called \textbf{momentum}, $x_i$ \textbf{heavy} and $\nabla f(x_i)$ the \textbf{force} steering the trajectory.\\
 \textbf{Not a descent algorithm}, may zig-zags: specific analysis. For $L$-smooth and $\tau$-convex, better linear convergence
-$$||x_{i+1} - x_*||\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\right]||x_i-x_*||\:\:\:\:(\sqrt{L}<<L)$$
+$$\|x_{i+1} - x_*\|\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\right]\|x_i-x_*\|\:\:\:\:(\sqrt{L}<<L)$$
 Gridsearch required to find $\alpha_i$ and $\beta_i$ in practice. For non-convex $f$, converges if $\beta\in[0,1), \alpha\in(0,2\frac{1-\beta}{L})$\\
 $\nabla f$ computed after momentum but before descent: not at all a gradient-like method, almost entirely different.\\
 It's \textbf{optimal} $O(\frac{LD^2}{\sqrt{\epsilon}}$ for $L$-smooth not $\tau$-convex.
 %TODO poormans' directions, heavy ball gradient and accelerated gradient
 \subsection{Less-Than-Gradient Methods}
 \paragraph{Stochastic Gradient} The motivation comes from the incremental a.k.a. stochastic gradient in ML.\\
-We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in R^h\}_{i\in I}$ inputs and $y=\{y_i\in R^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):R^h\rightarrow R^k$ parametric on $w\in R^n$ with $l:R^k\times R^k \rightarrow R$ \textbf{loss function} (could be $l_i$), fitting $$\min\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in R^n\}$$
+We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in \mathbb{R}^h\}_{i\in I}$ inputs and $y=\{y_i\in \mathbb{R}^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):R^h\rightarrow R^k$ parametric on $w\in \mathbb{R}^n$ with $l:R^k\times R^k \rightarrow R$ \textbf{loss function} (could be $l_i$), fitting $$\min\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in \mathbb{R}^n\}$$
 $\nabla f(w) = \sum_{i\in I}\nabla f_i(w)$ with $m >> n$ we have a sum of a very large number of terms.\\
 A trivial case: $\pi(x;w) = \langle x,w\rangle$, $l=\frac{d^2}{2}\equiv$ linear least squares.$$f_i(w) = \frac{(y_i-\langle X_i, w\rangle)^2}{2}\:\:\:\:\:\:\:\:\nabla f_i(w) = -X_i(y_i - \langle X_i, w\rangle)$$
 Each $\nabla f_i$ is cheap, but computing the full $\nabla f$ is already costly.\\
 \textbf{Intuition}: $X_i$ are independent and identically distributed $\Rightarrow\nabla f_i$ are i.i.d. too $\Rightarrow$ "many of them will cancel out" so a \textbf{small sample} is enough to compute a close $\simeq$ to the "true" $\nabla f$: $K\subseteq I$ "small", so $\nabla f_K(w) = \sum_{i\in K}\nabla f_i(w) =$ incremental gradient. Cheaper but $-\nabla f_K$ is not a descent direction, a different analysis is needed.\\\\
 How to choose $K$? What is the better $|K|$? Apparently, no better way than \textbf{random}: \textbf{stochastic gradient}. With $K = I$ we have a "batch" and with $K\subset I \Leftrightarrow |K| < m$ a "mini-batch". An extreme version, on-line: observations used one-by-one and discarded (no memory).
-\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$\min\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in R^n\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{||w||_2^2}{2}\in C^1$ with $\nabla\Omega(w) = w$.\\
+\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$\min\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in \mathbb{R}^n\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{\|w\|_2^2}{2}\in C^1$ with $\nabla\Omega(w) = w$.\\
 The regularization simplifies the model and reduces the number of parameters (feature selection).
 \paragraph{Smooth methods fail on nonsmooth functions} With a nonsmooth function, many directions point outside, not giving a descent direction. But if $f$ is convex, it can be exploited.
 \subsubsection{Convex Nondifferentiable Functions}
-\paragraph{Subgradients and subdifferentials} $s$ \textbf{subgradient} of $f$ at $x$: $f(y)\geq f(x) + s(y-x)$, $\forall\:y\in R^n$\\
+\paragraph{Subgradients and subdifferentials} $s$ \textbf{subgradient} of $f$ at $x$: $f(y)\geq f(x) + s(y-x)$, $\forall\:y\in \mathbb{R}^n$\\
 By changing $s$ we have \textbf{too much information} of the first-order. So $s$ it's a \textbf{direction}.
 \begin{center}
 	\includegraphics[scale=0.5]{7.png}
 \end{center}
-For $x$ on the border of dom$(f)$, $||s||\rightarrow\infty$, while for $s=0\Rightarrow x$ local/global minimum (but there can be many $s\neq 0$ at local minimum).\\\\
-\textbf{Subdifferential} is a set $\partial f(x) =\{s\in R^n\:|\:s$ is a subgradient at $x\}$
+For $x$ on the border of dom$(f)$, $\|s\|\rightarrow\infty$, while for $s=0\Rightarrow x$ local/global minimum (but there can be many $s\neq 0$ at local minimum).\\\\
+\textbf{Subdifferential} is a set $\partial f(x) =\{s\in \mathbb{R}^n\:|\:s$ is a subgradient at $x\}$
 \begin{list}{}{}
 	\item $\partial f(x) = \{\nabla f(x)\}\Leftrightarrow f$ differentiable at $x$
 	\item $\frac{\partial f}{\partial d}(x) \leq \langle s,d\rangle\:\:\forall s \in \partial f(x)\Rightarrow d$ is a descent direction $\Leftrightarrow \langle s,d\rangle < 0\:\: \forall s\in\partial f(x)$
-	\item $s_* = -arg\min\{||s||\:|\:s\in\partial f(x)\}$ \textbf{steepest descent direction}
+	\item $s_* = -arg\min\{\|s\|\:|\:s\in\partial f(x)\}$ \textbf{steepest descent direction}
 	\item $x$ \textbf{global minimum} $\Leftrightarrow 0\in \partial f(x)$
 \end{list}
 \paragraph{Subgradients in $R^n$} If $\partial f(X) = \{g=\nabla f(x)\}$, $g\perp (f,f(x))$ i.e. $-g$ points towards $x_*$, then we can take $d\:|\:\langle g,d\rangle < 0$ (descent direction). But if $f$ is nondifferentiable in $x$, there are many different $g$ and all of them are $\perp S(f,f(x))$ ($x$ = kink point), but \textbf{not all of them are descent directions}.\\
@@ -1309,20 +1484,20 @@ Furthemore, "fixed-step" cannot work for $f\not\in C^1$
 For $f\in C^1$ \textbf{the gradient is unique}, $d=-\nabla f(x)$:
 \begin{list}{}{}
 	\item $f(x+\alpha d) < f(x)\:\:\forall\alpha > 0$ small enough
-	\item $||d||$ is a two-sided proxy of $A(x)$: $||d||$ "small" $\Leftrightarrow f(x)$ "close" to $f_*\equiv ||d||\leq \epsilon$ is an effective stopping criterion
-	\item Can use fixed step since $||x_{i+1}-x_i||\rightarrow 0$ automatically: $||d_i||\rightarrow 0$ even if $\alpha_i \geq \overline{\alpha} > 0$
+	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Leftrightarrow f(x)$ "close" to $f_*\equiv \|d\|\leq \epsilon$ is an effective stopping criterion
+	\item Can use fixed step since $\|x_{i+1}-x_i\|\rightarrow 0$ automatically: $\|d_i\|\rightarrow 0$ even if $\alpha_i \geq \overline{\alpha} > 0$
 \end{list}
 For $f\not\in C^1$, there can be \textbf{many different subgradients} $d = -[g\in\partial f(x)]$, and for any one of them (can't choose):
 \begin{list}{}{}
 	\item $f(x+\alpha d)$ may be $\geq f(x)\:\:\forall\alpha$
-	\item $||d||$ is a two-sided proxy of $A(x)$: $||d||$ "small" $\Rightarrow f(x)$ "close" to $f_*$, but $f(x)$ "close" $\not\Rightarrow ||d||$ "small"! So $||d||\leq \epsilon$ is an ineffective stopping criterion (almost never happens)
-	\item Can't use fixed step since $||d||$ can be big even if $x = x_*$: to ensure $||x_{i+1}-x_i||\rightarrow 0$ one has to force $\alpha_i\rightarrow 0$ (but not too fast).
+	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Rightarrow f(x)$ "close" to $f_*$, but $f(x)$ "close" $\not\Rightarrow \|d\|$ "small"! So $\|d\|\leq \epsilon$ is an ineffective stopping criterion (almost never happens)
+	\item Can't use fixed step since $\|d\|$ can be big even if $x = x_*$: to ensure $\|x_{i+1}-x_i\|\rightarrow 0$ one has to force $\alpha_i\rightarrow 0$ (but not too fast).
 \end{list}
 \subsubsection{Subgradient methods}
 \paragraph{Fundamental relationship} Any (-)subgradient "points towards $x_*$", so an \textbf{appropriate step} along $-g$ brings closer to $x_*$, meaning that $x_{i+1} = x_i - \alpha_ig_i$ \textbf{makes sense with the right $\alpha_i$}.\\
-A fundamental relationship: $$||x_{i+1}-x_*||^2 = ||x_i - \alpha_ig_i - x_*||^2 =$$
+A fundamental relationship: $$\|x_{i+1}-x_*\|^2 = \|x_i - \alpha_ig_i - x_*\|^2 =$$
 $$\begin{array}{c}
-= ||x_i-x_*||^2+2\alpha_i\langle g_i, x_*-x_i\rangle + \alpha_i^2||g_i||^2 \leq ||x_i - x_*||^2\\\:
+= \|x_i-x_*\|^2+2\alpha_i\langle g_i, x_*-x_i\rangle + \alpha_i^2\|g_i\|^2 \leq \|x_i - x_*\|^2\\\:
 \end{array}
 \begin{array}{c}
 +\\\:
@@ -1332,16 +1507,16 @@ $$\begin{array}{c}
 \end{array}\begin{array}{c}
 +\\\:
 \end{array}\begin{array}{c}
-\alpha_i^2||g_i||^2\\>0
+\alpha_i^2\|g_i\|^2\\>0
 \end{array}$$
 As $\alpha \rightarrow 0$ (short step), the $2\alpha_i(f_*-f(x_i))$ term dominates $\Rightarrow x_{i+1}$ closer to $x_*$ than $x_i$.\\
 \textbf{Short but not too short}: \textbf{Diminishing-Square Summable} stepsize (\textbf{DSS}) $$\sum_{i=1}^\infty\alpha_i = \infty\wedge\sum_{i=1}^\infty\alpha_i^2<\infty$$
 So $\alpha_i\rightarrow 0$ but not fast enough that the series converges ($\alpha_i = \frac{1}{i}$).\\
 DSS just works: $\lim_{i\to\infty} inf\{f_h\:|\:h\geq i\} = f_*$\\
 Incredibly robust result: $\alpha_i$ chosen a priori, $f(x_i)$ not even used (only $g_i$), but \textbf{convergence is very slow}.\\
-If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $\min\{a\alpha_i^2+2b\alpha_i\}\equiv \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{||g_i||^2} \geq 0$.\\
-\textbf{Polyak stepsize} (\textbf{PSS}): $$\alpha_i = \beta_i\frac{f(x_i)-f_*}{||g_i||^2}$$ With $\beta_i = 1$ we have a "optimal step", but works $\forall\:\beta_i\in(0,2)$ since this $\Rightarrow ||x_{i+1}-x_*||^2 < ||x_i-x_*||^2\Rightarrow \{x_i\}\rightarrow x_*$\\
-In pratice is vastly better, but as far as it can go (not much): $\min\{f(x_h)\:|\:g\leq i\}-f_*\leq L\frac{||x_1-x_*||}{\sqrt{i}}\Rightarrow O\left(\frac{1}{\epsilon^2}\right)$\\
+If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $\min\{a\alpha_i^2+2b\alpha_i\}\equiv \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{\|g_i\|^2} \geq 0$.\\
+\textbf{Polyak stepsize} (\textbf{PSS}): $$\alpha_i = \beta_i\frac{f(x_i)-f_*}{\|g_i\|^2}$$ With $\beta_i = 1$ we have a "optimal step", but works $\forall\:\beta_i\in(0,2)$ since this $\Rightarrow \|x_{i+1}-x_*\|^2 < \|x_i-x_*\|^2\Rightarrow \{x_i\}\rightarrow x_*$\\
+In pratice is vastly better, but as far as it can go (not much): $\min\{f(x_h)\:|\:g\leq i\}-f_*\leq L\frac{\|x_1-x_*\|}{\sqrt{i}}\Rightarrow O\left(\frac{1}{\epsilon^2}\right)$\\
 From $\epsilon=1$e$-3$ to $\epsilon=1$e$-4$ we get 100x the iterations. The good news is that PSS would be optimal if we knew $f_*$, which we don't $\rightarrow$ \textbf{target level stepsize} (vanishing), "\textit{if you don't know it estimate it, but be ready to revise your estimate}".\\
 Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With a "good improvement", $f_{ref}$ gets smaller and also does the target level. If there are too many steps without improvement, $\delta$ gets smaller so the target level increases.\\
 \textbf{Too many parameters} $\rho\in(0,1),\beta\in(0,2),\delta_0>0,R>0$. $\{f_{rec,i}\}\rightarrow f_*$ but there's no reasonable stopping criterion, just "stop after a while". So slow convergence.
@@ -1353,17 +1528,17 @@ Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With
 \columnbreak
 \begin{list}{}{}
 	\item \textbf{Stepsize-restricted}, deflection-first\\
-	$$\alpha_i = \beta_i\frac{f(x_i)-f_*}{||d_i||^2}\hbox{ and }\beta_i\leq\gamma_i$$
+	$$\alpha_i = \beta_i\frac{f(x_i)-f_*}{\|d_i\|^2}\hbox{ and }\beta_i\leq\gamma_i$$
 	"As deflection increases, stepsize has to decrease".
 	\item \textbf{Deflection-restricted}, stepsize-first\\
-	$$\frac{\alpha_{i-1}||d_{i-1}||^2}{(f(x_i)-f_*)+\alpha_{i-1}||d_{i-1}||^2}\leq \gamma_i$$
+	$$\frac{\alpha_{i-1}\|d_{i-1}\|^2}{(f(x_i)-f_*)+\alpha_{i-1}\|d_{i-1}\|^2}\leq \gamma_i$$
 	"As $f(x_i)$ approaches $f_*$, deflection has to decrease"
 \end{list}
 \end{multicols}
 In both cases, target level to replace $f_*$.\\
-A closed formula, $\gamma_i\in$ argmin$\{||\gamma g_i+(1-\gamma)d_{i-1}||^2\:|\:\gamma\in[0,1]\}$
+A closed formula, $\gamma_i\in$ argmin$\{\|\gamma g_i+(1-\gamma)d_{i-1}\|^2\:|\:\gamma\in[0,1]\}$
 \subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\overline{z}$ optimal for $x\Rightarrow A\overline{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\overline{z}$).\\
-\textbf{Smoothed} $f_\mu(x)=\max\{x^TAz-\mu\frac{||z||^2}{2}\:|\:z\in Z\}\in C^1$ hopefully easy.\\
+\textbf{Smoothed} $f_\mu(x)=\max\{x^TAz-\mu\frac{\|z\|^2}{2}\:|\:z\in Z\}\in C^1$ hopefully easy.\\
 In practice is slowish, superlinear in a doubly-logarithmic chart after a long flat leg. Subgradients are faster but flatline at $\epsilon\simeq 1$e$-4$, smoothed does at $\epsilon\simeq 1$e$-6$.
 \subsubsection{Bundle Methods}
 \paragraph{Basic Idea} Cutting-plane model. Being $f$ convex, the first-order information that we have is globally valid: I can collect it along the way and use it all.\\
@@ -1375,10 +1550,10 @@ $f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy 
 $f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B\leftarrow B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
 The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#B\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
 So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\epsilon}\right)^{\frac{n}{2}}\right)$
-\subparagraph{Why} $x_{B,*}$ may be infinitely far from $x_*$, the iterates have no local property ($||x_{i+1}-x_i||$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail.\\
+\subparagraph{Why} $x_{B,*}$ may be infinitely far from $x_*$, the iterates have no local property ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail.\\
 It's unavoidable: linear functions have no curvature, and we need many of them to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
 \subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_B$ is a good model of $f$).\\
-Stabilized master problem $$\min\{f_B(x)+\mu\frac{||x-\overline{x}||^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+Stabilized master problem $$\min\{f_B(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
 \section{Constrained Optimality and Duality}
 \paragraph{Constrained Optimization} Back to the full $(P) f_* = \min\{f(x)\:|\:x\in X\}$ with $x\subset R^n$\begin{list}{}{}
 	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
@@ -1398,14 +1573,14 @@ Constrained (local) optimality conditions $\neq\nabla f(x)=0$, only if $x$ not i
 \subsection{First-Order Optimality Conditions}
 \subsubsection{Geometric Version}
 \paragraph{The Tangent Cone} Crucial Object $T_X(x) =$ tangent cone of $X$ at $x$
-$$\{d\in R^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\}$$
+$$\{d\in \mathbb{R}^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\}$$
 Tangent Cone Condition (TCC): $\langle\nabla f(x),d\rangle \geq 0\:\:\forall d\in T_X(x)$\\Zooming into $x$, $X$ looks like a cone, so we build the cone $T_X(x)$ with $x$ as the vertex.
 \begin{center}
 	\includegraphics[scale=0.75]{9.png}
 \end{center}
 Note that TCC $\not\Rightarrow$ local optimum, even less global optimum, \textbf{unless} $X$ is such that $X\subseteq x + T_X(x)$\\
 Turns out that $X$ convex $\Rightarrow$ this.
-\paragraph{Convex Sets} $x,y\in R^n,\{z=\alpha x+(1-\alpha)y\:|\:\alpha\in[0,1]\} = \hbox{conv}(x,y) =$ segment joining $x$ and $y$
+\paragraph{Convex Sets} $x,y\in \mathbb{R}^n,\{z=\alpha x+(1-\alpha)y\:|\:\alpha\in[0,1]\} = \hbox{conv}(x,y) =$ segment joining $x$ and $y$
 \begin{list}{}{}
 	\item $C\subset R^n$ \textbf{convex}: $\forall\:x,y\in C\:\:\hbox{conv}(x,y)\subseteq C$
 	\item $C\subset R^n$ \textbf{nonconvex}: $\exists\:x,y\in C\:|\:\hbox{conv}(x,y)\not\subseteq C$
@@ -1426,7 +1601,7 @@ Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest conv
 	\item $x_*$ global optimum $\Rightarrow x_*$ local optimum $\Rightarrow$ (TCC)
 \end{list}
 (TCC) sufficient in the convex case, but is always necessary. Not always sufficient because it holds in saddle point of $\partial X$, for example, despite not being a minimum.\\
-$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in R^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\equiv\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in R^n\equiv \nabla f(x) = 0$\\
+$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in \mathbb{R}^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\equiv\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in \mathbb{R}^n\equiv \nabla f(x) = 0$\\
 In fact, $f,X$ convex $\Rightarrow$ (TCC) $\equiv \not\exists$ feasible descent direction: every direction is feasible, hence only descent matters. So "$x$ satifies (TCC)" is a direct constrained generalization of "$x$ stationary point".\\
 Necessary, \textbf{not sufficient} but the only one you can reasonably check. But how to compute this in practice? How to prove something doesn't exists? How to characterize $T_X$ depends on how you characterize $X$.
 \subsubsection{Algebraic Version}
@@ -1440,12 +1615,12 @@ The obvious ways is via constraints:
 \end{list}
 Usually multiple constraints, $f_1(x)\leq 0, f_2(x)\leq 0$ means logical conjunction (first condition \textit{and} second condition), so an \textbf{intersection} of (sub) level sets.\\\\
 One of the standard forms of constrained nonlinear optimization:
-$$X=\{x\in R^n\:|\:g_i(x)\leq 0\:\:i\in I, h_j(x)=0\:\:j\in J\}$$
+$$X=\{x\in \mathbb{R}^n\:|\:g_i(x)\leq 0\:\:i\in I, h_j(x)=0\:\:j\in J\}$$
 with $I$ set of inequality constraints and $J$ set of equality constraints. Often useful is the compact version via vector-valued functions:
 \begin{list}{}{}
 	\item $G(x) = [g_i(x)]_{i\in I} : R^n\rightarrow R^{|I|}$
 	\item $H(x) = [h_j(x)]_{j\in J} : R^n\rightarrow R^{|J|}$
-	\item $X=\{x\in R^n\:|\:G(x)\leq 0, H(x) = 0\}$
+	\item $X=\{x\in \mathbb{R}^n\:|\:G(x)\leq 0, H(x) = 0\}$
 \end{list}
 \textbf{There are many different ways to express the same $X$}. Often, choosing the right formulation is crucial for being able to solve a problem. We will not see this, but a few trivial observation are useful:
 \begin{list}{}{}
@@ -1465,33 +1640,33 @@ Sublevel sets of convex functions are convex $\Rightarrow g_i(x)\leq 0$ with $g_
 So, \textbf{to have a convex $X$ all equality constraints must be linear}.
 \paragraph{Linear Equality Constraints} $(P)\:\:\min\{f(x)\:|\:Ax=b\}$\\
 $x\in X \Leftrightarrow x\in \partial X$ plus "$\partial X$ looks the same everywhere".\\
-$S(f,\cdot)$ and $X=\{x\in R^n\:|\:Ax=b\}$: optimum touches the inner level set.\\
-$F_X(x) = \{d\in R^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$\\
+$S(f,\cdot)$ and $X=\{x\in \mathbb{R}^n\:|\:Ax=b\}$: optimum touches the inner level set.\\
+$F_X(x) = \{d\in \mathbb{R}^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$\\
 (TCC) $\equiv \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$\\
-$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\equiv\nabla f(x)\in $ range$(A)\equiv\exists\:\mu\in R^m\:|\:\nabla f(x) = \mu A$\\
-Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in R^m\:|\:\mu A = \nabla f(x)$\\
+$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\equiv\nabla f(x)\in $ range$(A)\equiv\exists\:\mu\in \mathbb{R}^m\:|\:\nabla f(x) = \mu A$\\
+Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in \mathbb{R}^m\:|\:\mu A = \nabla f(x)$\\
 $f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
 \paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
 $x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
 Active constraints at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
-\textbf{First-order feasible direction cone} at $x\in X$: $D_X(x) = \{d\in R^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=\{d\in R^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$
-\paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in R^n\:|\:Ad\leq 0\}$ for some $A\in R^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
+\textbf{First-order feasible direction cone} at $x\in X$: $D_X(x) = \{d\in \mathbb{R}^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=\{d\in \mathbb{R}^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$
+\paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in \mathbb{R}^n\:|\:Ad\leq 0\}$ for some $A\in \mathbb{R}^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
 Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
-\textbf{Farkas' Lemma}: $\forall\:c\in R^n$:
+\textbf{Farkas' Lemma}: $\forall\:c\in \mathbb{R}^n$:
 \begin{list}{}{}
 	\item either $\exists\:\lambda\geq 0\:|\:c = \sum_{i=1}^k \lambda_iA_i$
 	\item or $\exists\:d\:|\:Ad\leq 0\wedge\langle c,d\rangle > 0$
 \end{list}
 One and only one is true.\\
-$\langle c,d\rangle \leq 0\:\:\forall\:d\in C, c\in C^*$ actually a $\neq$ definition: polar cone $C^\circ=\{c\in R^n\:|\:\langle c,d\rangle\leq 0\:\:\forall\:d\in C\}=C^*$ so Farkas' lemma says that $\forall\:c\in R^n$ either $c\in C^*$ or $c\not\in C^*$\\\\
+$\langle c,d\rangle \leq 0\:\:\forall\:d\in C, c\in C^*$ actually a $\neq$ definition: polar cone $C^\circ=\{c\in \mathbb{R}^n\:|\:\langle c,d\rangle\leq 0\:\:\forall\:d\in C\}=C^*$ so Farkas' lemma says that $\forall\:c\in \mathbb{R}^n$ either $c\in C^*$ or $c\not\in C^*$\\\\
 $x_*$ optimum $\Rightarrow \langle\nabla f(x_*),d\rangle\geq 0\:\:\forall\:d\:|\:$
 \begin{list}{}{}
 	\item $\langle\nabla g_i(x_*),d\rangle\leq 0\:\:i\in A(x)$
 	\item $\langle\nabla h_j(x_*),d\rangle = 0\:\:j\in J$
 \end{list}
-$\equiv\lambda\in R_+^{|A(x)|}$ and $\mu \in R^{|J|}\:|\:\nabla f(x_*) + \sum_{i\in A(x)}\lambda_i\nabla g_i(x_*) + \sum_{j\in J} \mu_j\nabla h_j(x_*)=0$\\
+$\equiv\lambda\in \mathbb{R}_+^{|A(x)|}$ and $\mu \in \mathbb{R}^{|J|}\:|\:\nabla f(x_*) + \sum_{i\in A(x)}\lambda_i\nabla g_i(x_*) + \sum_{j\in J} \mu_j\nabla h_j(x_*)=0$\\
 So a constructive way to prove the conditions is to find $\lambda$ and $\mu$.
-\paragraph{KKT Conditions} $\exists\:\lambda\in R_+^{|I|}$ and $\mu\in R^{|J|}\:|$\begin{list}{}{}
+\paragraph{KKT Conditions} $\exists\:\lambda\in \mathbb{R}_+^{|I|}$ and $\mu\in \mathbb{R}^{|J|}\:|$\begin{list}{}{}
 	\item[(KKT-F)] $g_i(x)\leq 0\:\:i\in I$, $h_j(x) = 0\:\:j\in J$
 	\item[(KKT-G)] $\nabla f(x) + \sum_{i\in I}\lambda_i\nabla g_i(x) + \sum_{j\in J}\mu_h\nabla h_j(x) = 0$
 	\item[(KKT-CS)] $\sum_{i\in I}\lambda_i(-g_i(x)) = 0$ \textbf{complementary slackness} $\equiv \lambda_ig_i(x) = 0\:\:\forall\:i\in I$
@@ -1501,7 +1676,7 @@ For $(P)$ convex, (KKT) $\Rightarrow x$ global optimum: (KKT) $\Rightarrow \lang
 \subsection{Second-Order Optimization}
 If $(P)$ is not convex then (KKT) is not sufficient, need to use second order but clearly not just "$\nabla^2 f(x_*)\succeq 0$". Fundamental concept: \textbf{Lagrangian function} $$L(x;\lambda, \mu)=f(x) + \sum_{i\in I} \lambda_ig_i(x) + \sum_{j\in J}\mu_jh_j(x)$$ with $x$ variables and $\lambda,\mu$ parameters. Fundamental observation $(x,\lambda,\mu)$ satisfies (KKT-G) $\Leftrightarrow \nabla L(x;\lambda,\mu) = 0$ (gradient on $x$ alone) $\Rightarrow x$ stationary point of $L(\cdot;\lambda,\mu)$. When a stationary point is also a minimum?
 \paragraph{Lagrangian Relaxation} Lagrangian function is objective and constraints together. (KKT-G) $\Leftrightarrow x$ stationary point of $L()$ for the right $\lambda\geq 0$ and $\mu$. Assume we know them, can we find $x$?\\
-Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in R^n\}$$\\
+Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in \mathbb{R}^n\}$$\\
 The relaxation is another optimization problem carefully constructed in order to provide a lower bound on $v(P)$ for $(P)\:\:\min\{f(x)\:|\:x\in X\}$\\
 $(\underline{P})\:\:\min\{\underline{f}(x)\:|\:x\in \underline{X}\}$ relaxation of $(P) \Rightarrow v(\underline{P})\leq v(P)$ if $\underline{X}\supseteq X$ and $\underline{f}(x)\leq f(x)\:\:\forall\:x\in X$\\
 $(R_{\lambda,\mu})$ is a relaxation of $(P)\:\:\forall\:\lambda\geq 0$ and $\mu\Rightarrow$ weak duality $\forall\:\:x\in X$, $\psi(\lambda,\mu)\leq v(P)\leq f(x)$\\
@@ -1511,13 +1686,13 @@ But how to choose $\lambda\geq 0$ and $\mu$? The dual function $\psi$ is \begin{
 	\item $\overline{x}$ optimal in ($R_{\lambda,\mu}$) $\Rightarrow [G(\overline{x}), H(\overline{x})]\in \partial\psi(\lambda,\mu)$
 	\item $\psi\not\in C^1$ even if $f,g_i,h_j$ are, but $\overline{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\overline{x}), H(\overline{x})]$
 \end{list}
-The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in R_+^{|I|},\mu\in R^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
+The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in \mathbb{R}_+^{|I|},\mu\in \mathbb{R}^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
 When is $v(D) = v(P)$ (strong duality)?  \textbf{Convexity} $\Rightarrow$ \textbf{Strong Duality}, so not always but yes if $(P)$ convex, meaning that $x_*$ optimum, $T_X(x_*)=D_X(x_*)\Rightarrow v(D) = v(P)$\\
 Under further conditions, solving $(D)$ actually solves $(P)$
 \paragraph{Specialized Lagrangians} Lagrangian dual is powerful but cumbersome: $\min$/$\max$, simplifies to have "just max".\begin{list}{}{}
 	\item For linear programs $(P)\:\:\min\{cx\:|\:Ax\geq b\}$\\
 	$L(x;\lambda) = cs + \lambda(b-Ax)=\lambda +(c-\lambda A)x$ lagrangian function\\
-	$\psi(\lambda)=\min_{x\in R^n} L(x;\lambda)=\left\{\begin{array}{l l}
+	$\psi(\lambda)=\min_{x\in \mathbb{R}^n} L(x;\lambda)=\left\{\begin{array}{l l}
 	-\infty& \hbox{if }c-\lambda A\neq 0\\
 	0& \hbox{if }c-\lambda A= 0\\
 	\end{array}\right.$\\
@@ -1525,16 +1700,16 @@ Under further conditions, solving $(D)$ actually solves $(P)$
 	Strong duality almost always holds.
 	\item For quadratic programs $(P)\:\:\min\{\frac{1}{2}\|x\|_2^2\:|\:Ax = b\}$\\
 	 $L(x;\mu)=\frac{1}{2}\|x\|_2^2+\mu(Ax-b)$\\
-	 $\psi(\mu)=\min_{x\in R^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
-	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in R^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
+	 $\psi(\mu)=\min_{x\in \mathbb{R}^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
+	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in \mathbb{R}^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
 \end{list}
 \subsection{Constrained Optimization Algorithms} Algorithms for $(P)\:\:\:\min\{f(x)\:|\:G(x)\leq 0, H(x) = 0\}$\\
 Usually ok to ignore $H(\:)$, just $G(x)\leq 0$ (implementation details). Only linear inequalities $Ax\leq b$, because of their convenience: always convex, satisfy (Linl), numerically stable, cheap to compute\ldots\\
-Important notation: \textbf{sub-system} (a relaxation) $A\in R^{m\times n}, b\in R^m, B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes $\equiv$ constraints $\Rightarrow$ sub-matrix/vector/system $A_B=[A_i]_{i\in B}$/$b_B=[b_i]_{i\in B}$/$A_Bx \leq b_B$\\
-\textbf{Polyhedral cone} $F_X(x)=\{d\in R^n\:|\:A_{\mathscr{A}(x)} d\leq 0\}$ with $\mathscr{A}(x)$ being the 
+Important notation: \textbf{sub-system} (a relaxation) $A\in \mathbb{R}^{m\times n}, b\in \mathbb{R}^m, B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes $\equiv$ constraints $\Rightarrow$ sub-matrix/vector/system $A_B=[A_i]_{i\in B}$/$b_B=[b_i]_{i\in B}$/$A_Bx \leq b_B$\\
+\textbf{Polyhedral cone} $F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}(x)} d\leq 0\}$ with $\mathscr{A}(x)$ being the 
 \textbf{active constraints} at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$
 \subsubsection{Quadratic Problem with Linear Equality Constraints}
-\paragraph{Equality-Constrained QP} $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax=b\}$ with $A\in R^{m\times n}$, rank$(A)=m<n \equiv$ rows of $A$ are linearly independent. Usually $(P)$ convex $\equiv Q\succeq 0$ (otherwise $v(P)=-\infty$ likely).\\
+\paragraph{Equality-Constrained QP} $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax=b\}$ with $A\in \mathbb{R}^{m\times n}$, rank$(A)=m<n \equiv$ rows of $A$ are linearly independent. Usually $(P)$ convex $\equiv Q\succeq 0$ (otherwise $v(P)=-\infty$ likely).\\
 For a minimum/saddle point, just solve the $KKT$ system (normal equations)
 $$\begin{array}{c}
 (a)\\(b)
@@ -1564,7 +1739,7 @@ Exploit information from previous iteration to speed up KKT system solution: upd
 No more exact solution but hopefully fast iterative approaches, e.g. (quasi-)Newton on the reduced problem.\\
 Which $\epsilon$? How many iterations? How about one of the gradient methods?
 \subsubsection{Projected Gradient Method} Nonlinear problem with linear constraints $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b\}$, feasible $x$: if $-\nabla f(x)\in F_X(x)$ trivial, just LS/FS along $d=-\nabla f(x)$. In general, find $d\in F_X(x)$ "closer" to $-\nabla f(x)$ then FS/LS along $d$.\\
-Projection of $d\in R^n$ on $S\subset R^n$: $p_S(d)=\min\{\|d-x\|\:|\:x\in S\}$ so $$p_{F_X(x)}(-\nabla f(x))=\min\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\}$$
+Projection of $d\in \mathbb{R}^n$ on $S\subset R^n$: $p_S(d)=\min\{\|d-x\|\:|\:x\in S\}$ so $$p_{F_X(x)}(-\nabla f(x))=\min\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\}$$
 a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\equiv x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
 $p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.\\\\
 Box constraints $\underline{x}\leq x\leq \overline{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \overline{x}_i] \Rightarrow$\\$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i), F_{[\underline{x},\overline{x}]}(x) = \left\{\begin{array}{l}
@@ -1581,7 +1756,7 @@ Other cases where projection is easy: simplex constraints $\sum_{i=1}^n x_i = 1,
 \paragraph{Goldstein's Version} What if projection is easy on the whole $X$, not only $F_X(x)$? Goldstein's projected gradient method: move first, project second: $y_i \leftarrow x_i - \alpha_i\nabla f(x_i);\:\:\:x_{i+1}\leftarrow p_X(y_i);$\\
 Not a descent method, more like a heavy ball, and only converges with appropriate stepsize, typical $\alpha=\frac{1}{L}$. Convergence result similar to unconstrained gradient (for good and bad): $O\left(\left(\frac{L}{\tau}\right)\log\left(\frac{1}{\epsilon}\right)\right)$ for $f$ $\tau$-convex, $O\left(\frac{LD}{\epsilon}\right)$ otherwise.
 \paragraph{Rosen's Version} General $Ax\leq b$: $p_{F_X(x)}$ can be too costly.\\
-Make it easier by projecting on $\partial F_X(x)=\{d\in R^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\overline{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
+Make it easier by projecting on $\partial F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\overline{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
 	\item $\mu=-[\overline{A}\,\overline{A}^T]^{-1}\overline{A}\nabla f(x)$
 	\item $d = (I-\overline{A}^T[\overline{A}\,\overline{A}^T]^{-1}\overline{A})(-\nabla f(x))$
 	\begin{list}{}{}
@@ -1658,7 +1833,7 @@ We would like: unconstrained, $\in C^2$ and $x$ feasible. The first and last are
 	\includegraphics[scale=0.6]{15.png}
 \end{center}
 \begin{list}{}{}
-	\item $X=\{x\in R^n\:|\:Ax\leq b\}$
+	\item $X=\{x\in \mathbb{R}^n\:|\:Ax\leq b\}$
 	\item $f_\gamma(x)=  \infty$ for $x\not\in X$ (like $\chi_X$)
 	\item $f_\gamma(x)=  \infty$ for $x\in \partial X$ (unlike $\chi_X$)
 	\item $\forall\:\gamma>0\:\:\exists!\:x_\gamma$ optimal of $(P_\gamma)$
