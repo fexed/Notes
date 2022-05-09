@@ -2038,4 +2038,129 @@ Another example: $\forall\:x$ flow char
 			\path [line] (ph23) -> (ph22);
 		\end{tikzpicture}
 \end{center}
-\end{document} 
+\subsection{Quantum Imperative Programming Language}
+\paragraph{Classical Imperative Programming Language} Many familiar commands: \texttt{S ::=}
+\begin{list}{}{}
+	\item \texttt{skip} does nothing
+	\item \texttt{u := t} assignment, $u$ variable and $t$ expression
+	\item \texttt{s1;s2} sequential composition
+	\item \texttt{if b then s1 else s2 fi} conditional, with $b$ boolean expression
+	\item \texttt{while b do s od} loop, again $b$ boolean expression
+\end{list}
+In order to move to the quantum world, we need to \textbf{generalize the conditional statement}.
+\subparagraph{Generalized Conditional Statement} \begin{list}{}{}
+	\item \texttt{if G1 $\rightarrow$ S1}
+	\item \texttt{$\square$ G2 $\rightarrow$ S2}
+	\item \ldots
+	\item \texttt{$\square$ Gn $\rightarrow$ Sn}
+	\item \texttt{fi}
+\end{list}
+With $G_i$ boolean expression and \textbf{only the first $S_i$ which $G_i$ holds true is executed}.\\
+\texttt{if ($\underset{i}{\square}$ Gi $\rightarrow$ Si) fi}
+\paragraph{\texttt{qVar}} Set of quantum variables, ranged over by \texttt{q, q', q0,\ldots}, each \texttt{q} $\in$ Var has values in $H_2$.\\
+$\overline{q}$ denotes a quantum register, a finite sequence of \textbf{distinct} variables in \texttt{qVar}.
+\begin{list}{}{}
+	\item $\overline{q}\in H_{\overline{q}} = \bigotimes_{i=1}^n H_{q_i}$
+	\item $H_{all} = \bigotimes_{q\in\hbox{qVar}} H_q$ Hilbert space of all quantum variables
+	\item $\ket{\psi}_{q_i}$ denotes that $\ket{\psi}$ is the state of the variable $q_i$\\
+	We extend this notation to $\ket{\psi}_{q_i}\bra{\phi}$ outer produt of state $\ket{\psi}$ and $\ket{\phi}$ of $q_i$\\
+	In general the state of a quantum register in $H_{\overline{q}}$ is $\ket{\psi_1}_{q_1}\ldots\ket{\psi_n}_{q_n}$ if each $q_i$ is in its state $\ket{\psi_i}$ for every $1\leq i\leq n$
+	\item $\overline{q} = q_1\ldots q_n$, $A$ operator in $H_{\overline{q}}$ has a cylindrical extension $A\otimes I$ that operates in $H_{all}$, where $I$ is the identity operator $\bigotimes_{q\in\hbox{qVar}\setminus \overline{q}} H_q$\\
+	For brevity we shall write $A$ in place of $A\otimes I$
+\end{list}
+\subsubsection{Quantum Programs}
+\texttt{S::=}
+\begin{list}{}{}
+	\item \texttt{skip} does nothing
+	\item \texttt{q:=$\ket{0}$} sets $q$ to the initial state $\ket{0}$
+	\item \texttt{$\overline{q}$:=U[$\overline{q}$]} applies the unitary transformation $U$ to the register $\overline{q}$
+	\item \texttt{S1;S2} sequential composition
+	\item \texttt{if ($\underset{m}{\square}$ M[$\overline{q}$] = $m\rightarrow$ S$m$) fi} quantum case statement %TODO explanation
+	\item \texttt{while M[$\overline{q}$] = 1 do S od} quantum loop\\
+	Yes/true is 1 and no/false is 0
+\end{list}
+Note: for any state $\ket{\psi}$ we can find a unitary transformation $U$ such that with \texttt{q:=$\ket{0}$;q:=U[q]} we get \texttt{q=$\ket{\psi}$}, so being able to initialize exclusively to $\ket{0}$ is not a limitation.\\
+Also note $M = \{M_m\} = \{M_{m_1},\ldots,M_{m_n}\}$ is a family of measurements.
+\paragraph{Difference with the classical case for conditionals} The state of the program is changed after performing the measure.\\
+"\textbf{Quantum data, classical flow}", referring to conditional and loops: in order to make a decision we must make a measure.
+\paragraph{•} \texttt{qvar : S $\rightarrow$ P(qVar)} variables appearing in a statement. For example:
+\begin{list}{}{}
+	\item qvar(skip) = emptyset
+	\item qvar(q:=|0>) = \{q\}
+	\item qvar($\overline{q}$:=U[$\overline{q}$]) = $\overline{q}$
+	\item qvar(\texttt{S1;S2}) = qvar(\texttt{S1}) $\cup$ qvar(\texttt{S2})
+	\item qvar(\texttt{if ($\underset{m}{\square}$ M[$\overline{q}$] = $m\rightarrow$ S$m$) fi}) = $\overline{q}\cup\bigcup_m$ qvar(\texttt{S$m$})
+	\item qvar(\texttt{while M[$\overline{q}$] = 1 do S od}) = $\overline{q}\cup$ qvar(\texttt{S})
+\end{list}
+Given a statement \texttt{S}, $H_{all}$ can be understood as $H_{qvar(\texttt{S})}$
+\paragraph{Quantum Configuration} $\langle \texttt{S},\rho\rangle$ where
+\begin{list}{}{}
+	\item \texttt{S} is a quantum statement or, taking into account the termination of the computation, the special statement for the empty program ($\epsilon$)\\
+	$\langle \texttt{S},\rho\rangle$ = nothing to be done, terminated in state $\rho$
+	\item $\rho\in D(H_{all})$ is a partial density operators denoting the global state of quantum variables.\\
+	$tr(\rho)=1\Rightarrow$ density operator, $tr(\rho)\leq 1\Rightarrow$ partial density operator.\\
+	$D(H)$ is the sate of all partial density operators of Hilbert space $H$
+\end{list}
+\paragraph{Small Step Semantics} Transition system $\langle \texttt{S}, \rho\rangle\rightarrow\langle\texttt{S}',\rho'\rangle$\\
+Transition between configurations to be read as "after executing one step of \texttt{S} in $\rho$, we reach the state $\rho'$ where $\texttt{S}'$ is yet to be executed. If $\texttt{S}'=\epsilon$, then the program terminates in state $\rho'$.
+\subparagraph{Inference Rules} Induction on the structure of the statements.
+$$\frac{\hbox{premises}}{\hbox{conclusion}}$$
+To be read as "if the premises hold, then the conclusion is true".\\
+Some \textbf{axioms}, rules without premises:
+\begin{list}{}{}
+	\item[(\texttt{SK})] $\frac{\hbox{}}{\langle\texttt{skip},\rho\rangle\rightarrow\langle\epsilon,\rho\rangle}$
+	\item[(\texttt{IN})] $\frac{\hbox{}}{\langle\texttt{q:=}\ket{0},\rho\rangle\rightarrow\langle\epsilon,\rho_0^q\rangle}$ with $rho_0^q = \ket{0}_q\bra{0}\rho\ket{0}_q\bra{0} + \ket{0}_q\bra{1}\rho\ket{1}_q\bra{0}$ (transform all zero of $q$ into zero and all ones of $q$ into ones) %TODO format
+	\item[(\texttt{UT})] $\frac{}{\langle \overline{q}\texttt{:=U[}\overline{q}\texttt{]},\rho\rangle\rightarrow\langle\epsilon U\rho U^*\rangle}$
+	\item[(\texttt{SC}] $\frac{\langle \texttt{S1},\rho\rangle\rightarrow\langle \texttt{S1}',\rho'\rangle}{\langle\texttt{S1;S2},\rho\rangle\rightarrow\langle\texttt{S1}'\texttt{;S2},\rho'\rangle}$\\
+	Special case for $\texttt{S1}' = \epsilon$ %TODO
+	\item[(\texttt{IF})]
+	\item[(\texttt{LO})]
+	\item[(\texttt{LI})]
+	\item[(\texttt{IF$'$})]
+\end{list}
+Non-deterministic rotation system.
+\paragraph{Denotational Semantics} Assign the transformation function from input to output for every statement. We exploit %TODO
+We look at all the possible executions %TODO
+We write $$\langle S,\rho\rangle\rightarrow^n\langle S', \rho'\rangle \Leftrightarrow \langle S,\rho\rangle\rightarrow \langle S_1,\rho_1\rangle\rightarrow\ldots\rightarrow\langle S_{n-1},\rho_{n-q}\rangle\rightarrow\langle S',\rho'\rangle$$
+$$\langle S,\rho\rangle\rightarrow^*\langle S',\rho'\rangle\Leftrightarrow\exists\:n\in\mathbb{N}\langle S,\rho\rangle\rightarrow^n\langle S',\rho'\rangle$$
+$[S] : D(H_{all})\rightarrow D(H_{all})$ defined by the following
+$$[S]\rho =\sum\{\rho'\:|\:\langle S,\rho\rangle\rightarrow^*\langle\epsilon,\rho'\rangle\}$$
+Important to account for all paths. \textbf{Lemma}: it's a linear function. Proof by structural induction, all the transformations applied at each steps are linear.
+\paragraph{Theorem} $[\texttt{while M[q] = 1 do S od}]\rho = M_0\rho M_0^* + [\texttt{while M[q] = 1 do S od}]([S]M_1\rho M_1^*)$\\
+So it's equal to stopping now or appling to the resulting state.
+\paragraph{Prop} Remembering that the trace is the overall probability, in general with non-terminating paths $tr([S]\rho) \leq tr(\rho)$\\
+Intuitively, $tr([S]\rho)$ is the probability of termination from $\rho$, meaning that the probability of divergence is\\$tr(\rho)-tr([S]\rho)$.
+\paragraph{Hoare Triples in Classical Programming Recap} $$\{P\}S\{Q\}$$
+For any input that satisfies the predicate $P$, the execution of $S$ will produce an output that satisfies $Q$
+\pagebreak
+\paragraph{Quantum Predicate} In classical logic, a predicate expresses some properties of individuals or systems. In the quantum world, a quantum predicate must be something that we can physically observe.\\
+In general, we take an Hermitian operator $M$ in its Hilbert space $H$ and we know that $$M\ket{\phi}=\lambda\ket{\psi}$$ with $\lambda\in\mathbb{R}$ eigenvalues and $\psi$ eigenvector. The eigenspace is
+$$X_\lambda=\{\ket{\psi}\in H\:|\:M\ket{\phi} = \lambda\ket{\psi}\}$$ and $\lambda$ can be understood as the truth value of the propositions in $X_\lambda$. We can restrict the eigenspace in the range $[0,1]$ by requiring $0\leq \lambda\leq 1$
+\subparagraph{Definition} A \textbf{quantum predicate} in a Hilbert space $H$ is an Hermitian operator $M\in H$ such that all its eigenvalues lay within the interval $[0,1]$.\\
+$P(H)$ is the set of quantum predicates over $H$.\\
+$tr(M\rho)$ is the expectation of the value of the measurement outcome of observable $M$ in a mixed state $\rho$. The average truth value of the predicate $M$ in $\rho$. Of course it's $0\leq tr(M\rho)\leq 1$.
+\subparagraph{Lemma} $M\sqsubseteq N \Leftrightarrow \forall\:\rho\:\:tr(M\rho)\leq tr(N\rho)$
+\paragraph{Weakest Precondition} The weakest property that the input must satisfy in order to achieve a given property of the output.\\
+In the quantum setting: given two quantum predicates $M,N\in P(H)$ and $\epsilon$ quantum operator (typically the semantics of some statements $\epsilon = [S]$), we write $\{M\}\epsilon\{N\}$ if $\forall\:\rho\in D(H)\:\: tr(M\rho)\leq tr(N\epsilon\rho)$\\
+If the state $\rho$ satisfies $M$, then $\epsilon\rho$ satisfies $N$\\
+$wp(\epsilon)(N)$ is the weakest precondition of $N$ with respect to the transformation $\epsilon$ if:\begin{list}{}{}
+	\item is itself a precond $\{wp(\epsilon)(N)\}\epsilon\{N\}$
+	\item $\forall\:\{M\}\epsilon\{N\}\Rightarrow M\sqsubseteq wp(\epsilon)(N)$ so any other precondition is weaker
+\end{list}
+\paragraph{Correctness}
+\begin{list}{}{}
+	\item \textbf{Total Correctness} $vDash_{tot}\{P\}S\{Q\}\equiv\{P\}[S]\{Q\}$ if $\forall\:\rho\in D(H_{all}) tr(P\rho)\leq tr(Q[S]\rho)$ 
+	\item \textbf{Partial} $vDash_{par}\{P\}S\{Q\}$ if $tr(P\rho)\leq tr(Q[S]\rho)+(\underset{\hbox{divergence probability}}{tr(\rho)-tr([S]\rho)})$ accounts for divergence\\
+	Intuitively, if input $\rho$ satisfies the precondition $P$ then either $S$ terminates on $\rho$ and $[S]\rho$ satisfies $Q$ or $S$ diverges on $\rho$
+\end{list}
+These relations are also linear: for both total or partial, $vDash\{P_i\}S\{Q_i\}$ for $i=1,2$ then $\{\lambda_1P_1+\lambda_2P_2\}S\{\lambda_1Q_1+\lambda_2Q_2\}$ for any $\lambda_1,\lambda_2$ %TODO
+\paragraph{Proof System for Partial Correctness} There are a set of rules to derive partial correctness (for total too but it's far more complicated). Allows to derive all and only %TODO
+\begin{list}{}{}
+	\item[(Ax-SK)]
+	\item[(Ax-UT)]
+	\item[(R-SC)]
+	\item[(R-IF)]
+	\item[(R-LP)]
+	\item[(R-OP)]
+\end{list}
+\end{document}  
