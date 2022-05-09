@@ -581,15 +581,14 @@ A\\\lambda I
 \end{array}\right]x - \left[\begin{array}{c}
 b\\0
 \end{array}\right]\|^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
-%TODO l10 from here
 \paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $A,b\mapsto X=A^{-1}b$ or $(x_i,y_i)\mapsto$ weights\ldots\\
 If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
 $$f(x+\delta) = f(x)+\delta\cdot f'(x) + O(\delta^2)$$
 The (absolute) condition number of a function $f$ (of an input $x$) is the best possible bound $K$ of the form
 $$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$ with $K$ being the \textbf{condition number}\\
-The absolute condition number of (differentiable) $f$ in $x$ is $|f'(x)| = K_{abs}(f,x)$
-For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:R^m\rightarrow R^n$ is the best constant $K$ that I can use to bound $$\|f(x+\delta)-f(x)\| \leq K\cdot\|\delta\| + o(\|\delta\|)$$
-The absolute condition number $K_{abs}$ is $K_{abs}(f,x) = \lim_{\delta\to 0} sup_{\|d\|\leq \delta}\frac{\|f(x+\delta)-f(x)\|}{\|d\|}$$ $$K_{abs}(f,x) = \|\bigtriangledown_x f\|$ 2-norm of the gradient, if $f$ differentiable.\\
+The absolute condition number of (differentiable) $f$ in $x$ is $|f'(x)| = K_{abs}(f,x)$. E.g. for $f(x)=x^2$\\$f(x+\delta)=(x+\delta)^2 = x^2+2x\delta+\delta^2$ and $|\frac{f(x+\delta)-f(x)}{\delta}|=|2x+\delta|$ which can be ignored for small enough changes.\\\\
+For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:\mathbb{R}^m\rightarrow \mathbb{R}^n$ is the best constant $K$ that I can use to bound $$\|f(x+\delta)-f(x)\| \leq K\cdot\|\delta\| + o(\|\delta\|)$$
+The absolute condition number $K_{abs}$ is $$K_{abs}(f,x) = \lim_{\delta\to 0} \sup_{\|d\|\leq \delta}\frac{\|f(x+\delta)-f(x)\|}{\|d\|}$$ $$K_{abs}(f,x) = \|\nabla_x f\|$$ 2-norm of the gradient, or \textbf{Jacobian}, if $f$ differentiable.\\
 The \textbf{condition number measures the sensitivity of a problem to changes in input}.
 \subparagraph{Example} $x\in \mathbb{R}^2, x=\left[\begin{array}{c}
 x_1\\x_2
@@ -611,21 +610,33 @@ With $d = \left[\begin{array}{c}
 \end{array}\right]$ we would have $= 0$, and with $d = \left[\begin{array}{c}
 1\\0
 \end{array}\right]$ we would have $= 1$\\
-Also checking other directions, it turns out that $\sqrt{2}$ is the largest possible rate of change (no coincidence that it is $\|\bigtriangledown_x f\|$)
-\paragraph{Linear Systems} The condition number of solving square systems of linear equations.\\
-$Ax = b, A\in \mathbb{R}^{n\times n}, b\in \mathbb{R}^n$, we perturb input $b$ to $\overline{b}\in \mathbb{R}^n$ and call $\overline{x}$ the solution of $A\overline{x} = \overline{b}$, while $x$ solution of $Ax=b$.\\
-The absolute bound is $$\|\overline{x}-x\| = \|A^{-1}\overline{b} - A^{-1}b\| = \|A^{-1}(\overline{b}-b)\|\leq \|A^{-1}\|\cdot \|\overline{b}-b\|$$ and $$\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$$Putting all together gives $$\frac{\|\overline{x} - x\|}{\|x\|} \leq \|A^{-1}\|\cdot\|A\|\cdot\frac{\|\overline{b}-b\|}{\|b\|}$$ because $K(A) = \|A\|\cdot\|A^{-1}\|$ the condition number of $A$ matrix.\\\\
-What if we perturb $\overline{A} = A + \Delta$? One can prove, if $\overline{x}$ is solution of $\overline{A}\overline{x} = b$, that $$\frac{\|\overline{x} - x\|}{\|x\|} \leq \|A\|\cdot\|A^{-1}\|\cdot\frac{\|\overline{A}-A\|}{\|A\|}+o(\|\Delta\|)$$ In terms of SVD we know that $\|A\| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $\|A^{-1}\| = \frac{1}{\sigma_n}$, so $K(A) = \|A\|\cdot\|A^{-1}\| = \frac{\sigma_1}{\sigma_n}$.\\
-A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in \mathbb{R}^{n\times n}$ is singular if $rk(B)<n$. By the Eckhart-Young theorem, $min_{B\:sing}\|A-B\| = min_{rk(B)\leq n-1}\|A-B\| = \sigma_n$ because $B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$. Hence $\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{min_{B\:sing}\|A-B\|}{\|A\|}$
+Also checking other directions, it turns out that $\sqrt{2}$ is the largest possible rate of change (no coincidence that it is $\|\nabla_x f\|$)\\\\
+For the function $f(x) = x^2$, around $x=1000$, if one perturbs $\tilde{x}=1000.01$ then $$f(\tilde{x})-f(x) = 1000020.0001-1000000 = 20.0001$$ $$0.01\mapsto 20.0001 \Rightarrow K_{abs}(f,x) = 2000$$
+A better way is to use relative errors to measure the change.
+\paragraph{Relative Change}\begin{list}{}{}
+	\item Relative change in input: $\frac{\|\tilde{x}-x\|}{\|x\|}$
+	\item Relative change in output: $\frac{\|f(\tilde{x})-f(x)\|}{\|f(x)\|}$
+\end{list}
+It's also a Ballpark Estimate of the number of significant digits that are correct: if you change $x=1$ to $\tilde{x}=1.001$, $3$ significative digits are correct $\frac{|\tilde{x}-x|}{|x|}=0.001 = 10^{-3}$\\
+Remember that the condition number measure the sensitivity of a \textbf{problem} to changes in input.
+\paragraph{Condition Numbers in Linear Systems}
+$Ax = b, A\in \mathbb{R}^{n\times n}, b\in \mathbb{R}^n$, we perturb input $b$ to $\tilde{b}\in \mathbb{R}^n$ and call $\tilde{x}$ the solution of $A\tilde{x} = \tilde{b}$, while $x$ solution of $Ax=b$.\\
+The absolute bound is $$\|\tilde{x}-x\| = \|A^{-1}\tilde{b} - A^{-1}b\| = \|A^{-1}(\tilde{b}-b)\|\leq \|A^{-1}\|\cdot \|\tilde{b}-b\|$$ and $$\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$$Putting all together gives $$\frac{\|\tilde{x} - x\|}{\|x\|} \leq \|A^{-1}\|\cdot\|A\|\cdot\frac{\|\tilde{b}-b\|}{\|b\|}$$ because $K(A) = \|A\|\cdot\|A^{-1}\|$ the condition number of $A$ matrix.\\\\
+What if we perturb $\tilde{A} = A + \Delta$? One can prove, if $\tilde{x}$ is solution of $\tilde{A}\tilde{x} = b$, that $$\frac{\|\tilde{x} - x\|}{\|x\|} \leq \|A\|\cdot\|A^{-1}\|\cdot\frac{\|\tilde{A}-A\|}{\|A\|}+o(\|\Delta\|)$$
+In terms of SVD we know that $\|A\| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $\|A^{-1}\| = \frac{1}{\sigma_n}$, so $K(A) = \|A\|\cdot\|A^{-1}\| = \frac{\sigma_1}{\sigma_n}$.\\
+A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in \mathbb{R}^{n\times n}$ is singular if $rk(B)<n$.\\
+By the Eckhart-Young theorem, $$\min_{B\:sing}\|A-B\| = \min_{rk(B)\leq n-1}\|A-B\| = \sigma_n$$ Because $$B=\sum_{i=1}^{n-1} u_i\sigma_iv_i^T$$ Hence $$\frac{1}{K(A)} = \frac{\sigma_n}{\sigma_1} = \frac{\min\limits_{B\:sing}\|A-B\|}{\|A\|}$$
 \paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in \mathbb{R}^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
-\paragraph{Theorem} The condition number of the least-squares problem $min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
-\paragraph{Condition Number} "Local" bound of the form $$\frac{\|\overline{y} - y\|}{\|y\|} \leq k\frac{\|\overline{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\overline{x}$ of $x$, $\overline{y} = f(\overline{x})$
+\paragraph{Theorem} The condition number of the least-squares problem $\min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
+\paragraph{Condition Number} "Local" bound of the form $$\frac{\|\tilde{y} - y\|}{\|y\|} \leq k\frac{\|\tilde{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\tilde{x}$ of $x$, $\tilde{y} = f(\tilde{x})$
+\pagebreak
 \section{Floating Point Numbers}
 \paragraph{Quick recap} Binary exponential notation.\\
-\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\overline{x}$ such that\\$\frac{|\overline{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$
-\paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer? In general, I can only ask the computer to compute $f(\overline{x})$ where $\overline{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\overline{y}=f(\overline{x})$ from $y=f(x)$?
-$$\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
-This is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\overline{x}-x}{x} = \delta \Leftrightarrow \overline{x} - x = x\delta \Leftrightarrow \overline{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
+\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
+\paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
+In general, I can only ask the computer to compute $f(\tilde{x})$ where $\tilde{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\tilde{y}=f(\tilde{x})$ from $y=f(x)$?
+$$\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
+This is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\tilde{x}-x}{x} = \delta \Leftrightarrow \tilde{x} - x = x\delta \Leftrightarrow \tilde{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
 $a\oplus b = (a+b)(1+\delta)$, the same for $\ominus$, $\otimes$ ecc: \textbf{error analysis requires keeping track of all these errors}.
 \subparagraph{Example} Error analysis of the scalar product $a\cdot b$ with $a,b \in \mathbb{R}^3$
 $$y = a\cdot b = a^Tb = \left[\begin{array}{c c c}
@@ -633,34 +644,33 @@ a_1 & a_2 & a_3
 \end{array}\right] \left[\begin{array}{c}
 b_1\\b_2\\b_3
 \end{array}\right]=a_1b_1+a_2b_2+a_3b_3$$
-We have an algorithm on the computer that performs this, with $|\delta_i|\leq u$ $$\overline{y} = a_1\otimes b_1\oplus a_2\otimes b_2\oplus a_3\otimes b_3 = a_1b_1(1+\delta_1)+a_2b_2(1+\delta_2)+a_3b_3(1+\delta_3) = $$
+We have an algorithm on the computer that performs this, with $|\delta_i|\leq u$ $$\tilde{y} = a_1\otimes b_1\oplus a_2\otimes b_2\oplus a_3\otimes b_3 = a_1b_1(1+\delta_1)+a_2b_2(1+\delta_2)+a_3b_3(1+\delta_3) = $$
 $$ = \left((a_1b_1(1+\delta_1) + a_2b_2(1+\delta_2)) (1+\delta_4) + a_3b_3(1+\delta_3)\right)(1+\delta_5) =$$
-$$ = a_1b_1(1+\delta_1)(1+\delta_4)(1+\delta_5) + a_2b_2(1+\delta_2)(1+\delta_4)(1+\delta_5) + a_3b_3(1+\delta_3)(1+\delta_5) = $$
-$$ = a_1b_1+a_2b_2+a_3b_3 + a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5) + O(u^2) = $$
+$$ = a_1\underset{\hat{b_1}}{\underbrace{b_1(1+\delta_1)(1+\delta_4)(1+\delta_5)}} + a_2\underset{\hat{b_2}}{\underbrace{b_2(1+\delta_2)(1+\delta_4)(1+\delta_5)}} + a_3\underset{\hat{b_3}}{\underbrace{b_3(1+\delta_3)(1+\delta_5)}} = $$
+$$ = \underset{y}{\underbrace{a_1b_1+a_2b_2+a_3b_3}} + a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5) + O(u^2) = $$
 Being $a_1b_1+a_2b_2+a_3b_3 = y$ we have 
-$$|\overline{y} - y| = |a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5)| + O(u^2)$$
+$$|\tilde{y} - y| = |a_1b_1(\delta_1+\delta_4+\delta_5) + a_2b_2(\delta_2+\delta_4+\delta_5) + a_3b_3(\delta_3+\delta_5)| + O(u^2)$$
 $$\leq |a_1b_1|\cdot3u + |a_2b_2|\cdot3u + |a_3b_3|\cdot2u + O(u^2)$$
-$$\leq (|a_1b_1|+|a_2b_2|+|a_3b_3|)\cdot 3u$$
-Noting that $|a_1b_1|+|a_2b_2|+|a_3b_3|\neq y$\\
-A \textbf{trick}: $\overline{y}$ is the exact result of a scalar product with a perturbated input. We define \begin{list}{}{}
+$$\leq \underset{\neq y}{\underbrace{\left(|a_1b_1|+|a_2b_2|+|a_3b_3|\right)}}\cdot 3u + O(u^2)$$
+A \textbf{trick}: $\tilde{y}$ is the exact result of a scalar product with a perturbated input. We define \begin{list}{}{}
 	\item $\hat{b_1} = b_1(1+\delta_1)(1+\delta_4)(1+\delta_5)$
 	\item $\hat{b_2} = b_2(1+\delta_2)(1+\delta_4)(1+\delta_5)$
 	\item $\hat{b_3} = b_3(1+\delta_3)(1+\delta_5)$
 \end{list}
-This way $\overline{y} = a_1\hat{b_1}+a_2\hat{b_2}+a_3\hat{b_3}$ is the exact result of the operation on perturbated inputs.\\
+This way $\tilde{y} = a_1\hat{b_1}+a_2\hat{b_2}+a_3\hat{b_3}$ is the exact result of the operation on perturbated inputs.\\
 We have $\hat{a} = a$ and $\hat{b}\:|\:|\hat{b_i}-b_i|\leq 3u|b_i|+O(u^2)$, so $\|\hat{b}-b\|\leq 3u\|b\|+O(u^2)$ which gives that $\frac{\|\hat{b}-b\|}{\|b\|} = 3u$\\
 Now we can use the condition number bound to estimate
-$$\frac{\|\overline{y}-y\|}{\|y\|}\leq K_{rel}(\cdot,b)\cdot\frac{\|\hat{b}-b\|}{\|b\|} + O(u^2)$$
-Comparing it with the intrinsic error $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(\cdot,b)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(\cdot,b)\cdot u + O(u^2)$ we get that the  algorithm is "as good as possible", apart from the factor $3$, given the intrinsic error.
-\paragraph{Backward Stability} An algorithm to compute $y=f(x)$ is called \textbf{backward stable} if it computes $\overline{y}$ such that $\overline{y}=f(\overline{x})$ for an $\overline{x}$ with $\frac{\|\overline{x}-x\|}{\|x\|}\leq O(u)$.\\
+$$\frac{\|\tilde{y}-y\|}{\|y\|}\leq K_{rel}(\:,b)\cdot\frac{\|\hat{b}-b\|}{\|b\|} + O(u^2)$$
+Comparing it with the intrinsic error $\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(\:,b)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(\:,b)\cdot u + O(u^2)$ we get that the  algorithm is "as good as possible", apart from the factor $3$, given the intrinsic error.
+\paragraph{Backward Stability} An algorithm to compute $y=f(x)$ is called \textbf{backward stable} if it computes $\tilde{y}$ such that $\tilde{y}=f(\tilde{x})$ for an $\tilde{x}$ with $\frac{\|\tilde{x}-x\|}{\|x\|}\leq O(u)$.\\
 Usually $O(u)$ hides polynomial factors in the dimensions, e.g. $3m^2nu = O(u)$.
-\subparagraph{Theorem} Backward stable algorithms are "almost optimal": they compute $\overline{y}$ with an error that is of the same order of magnitude of the (unavoidable) intrinsic error for a generic input $x\in \mathbb{R}$.\\
-\textbf{Proof}: $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot O(u) + O(u^2)$ is only a $O(\:)$ factor away from the intrinsic bound $\frac{|\overline{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\overline{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u + O(u^2)$\\\\
-Not all algorithms are backward stable: the outer product $ab^T$ isn't. But multiplying by orthogonal matrices is backward stable. If you want an algorithm that computes $B=QA$ (for instance, the householder product), then typically you can write $\overline{B} = QA + E$ with $\|E\|=\|A\|\cdot O(u)$
-$$\overline{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$\|F\|=\|Q^TE\|=\|E\|=\|A\|\cdot O(u)$$
+\subparagraph{Theorem} Backward stable algorithms are "almost optimal": they compute $\tilde{y}$ with an error that is of the same order of magnitude of the (unavoidable) intrinsic error for a generic input $x\in \mathbb{R}$.\\
+\textbf{Proof}: $\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot O(u) + O(u^2)$ is only a $O(\:)$ factor away from the intrinsic bound $\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u + O(u^2)$\\\\
+Not all algorithms are backward stable: the outer product $ab^T$ isn't. But multiplying by orthogonal matrices is backward stable. If you want an algorithm that computes $B=QA$ (for instance, the householder product), then typically you can write $\tilde{B} = QA + E$ with $\|E\|=\|A\|\cdot O(u)$
+$$\tilde{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$\|F\|=\|Q^TE\|=\|E\|=\|A\|\cdot O(u)$$
 With non-orthogonal $Q$ I'd get an additional factor $K(Q) = \|Q\|\cdot\|Q^{-1}\|$\\\\
-The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\overline{x}$ exact solution of a least squares problems with $\overline{A} = A +\Delta A, \overline{b} = b+\Delta b$ with $\frac{\|\overline{A}-A\|}{\|A\|}=O(u),\frac{\|\overline{b}-b\|}{\|b\|}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
-Normal equations is not backward stable, of a general linear system with a poisitive definite $C$ \begin{list}{}{}
+The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\tilde{x}$ exact solution of a least squares problems with $\tilde{A} = A +\Delta A, \tilde{b} = b+\Delta b$ with $\frac{\|\tilde{A}-A\|}{\|A\|}=O(u),\frac{\|\tilde{b}-b\|}{\|b\|}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
+Normal equations are not backward stable: of a general linear system with a poisitive definite $C$ \begin{list}{}{}
 	\item $C = A^TA$
 	\item $d = A^Tb$
 	\item $x = C \backslash d$
@@ -668,36 +678,38 @@ Normal equations is not backward stable, of a general linear system with a poisi
 $A^T$ is not orthogonal. Even if the first two steps are perfectly accurate, the third causes error.
 $C=A^TA\Rightarrow K(C) = \frac{\sigma_1^2}{\sigma_n^2} = K(A)^2) \Rightarrow K_{LS,A\rightarrow x} = K(A)+K(A)^2\cdot\tan\theta$\\
 This may be larger than the condition number of the problem, especially for $\theta\simeq 0$.
-\paragraph{Residuals and a-posteriori stability checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\overline{x}$ that (approximately) solves the problem. How low can $\|r\| = \|Ax-b\|$ be? Backward stable algorithms usually get residuals of the order of $u$. If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\overline{x}$ is the exact solution of $\overline{A}\overline{x}=\hat{b}$, i.e. $(A+E)\overline{x}=b+f$ with $\frac{\|E\|}{\|A\|},\frac{\|f\|}{\|b\|} = O(u)$, so $A\overline{x}+E\overline{x}=b+f$ and $\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$
-$$\|A\overline{x}-b\|=\|f-E\overline{x}\|\leq \|f\|+\|E\|\cdot\|\overline{x}\|=O(u)\cdot[\|b\|+\|A\|\cdot\|x\|]=O(u)\cdot\|A\|\cdot\|x\|$$
-$$\frac{\|A\overline{x}-b\|}{\|A\|\cdot\|x\|}=O(u)$$
+\paragraph{Residuals and A-Posteriori Stability Checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\tilde{x}$ that (approximately) solves the problem. How low can $\|r\| = \|Ax-b\|$ be?\\ Backward stable algorithms usually get residuals of the order of $u$, e.g.: $[\tilde{Q},\tilde{R}]=qr(A)$, $\tilde{Q}\tilde{R}=\hat{A}=A+F$ with $\|F\|=\|A\|\cdot O(u)$, the \textbf{residual of the QR factorization} is $$\frac{\|\tilde{Q}\tilde{R}-A\|}{\|A\|}=\frac{\|F\|}{\|A\|} = \frac{\cancel{\|A\|}\cdot O(u)}{\cancel{\|A\|}} = O(u)$$
+If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\tilde{x}$ is the exact solution of $\tilde{A}\tilde{x}=\hat{b}$, i.e. $(A+E)\tilde{x}=b+f$ with $\frac{\|E\|}{\|A\|},\frac{\|f\|}{\|b\|} = O(u)$, so $A\tilde{x}+E\tilde{x}=b+f$ and $\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$
+$$\|A\tilde{x}-b\|=\|f-E\tilde{x}\|\leq \|f\|+\|E\|\cdot\|\tilde{x}\|=O(u)\cdot[\|b\|+\|A\|\cdot\|x\|]=O(u)\cdot\|A\|\cdot\|x\|$$
+$$\frac{\|A\tilde{x}-b\|}{\|A\|\cdot\|x\|}=O(u)$$
 And typically $\|A\|\cdot\|x\|\simeq \|b\|$\\
 So with backward stable algorithms we have \textbf{small} (relative) \textbf{residuals} $O(u)$.\\
-Suppose $\overline{x}$ computed somehow has a small $\|r\|=\|A\overline{x}-b\|$. Is this a guarantee for $\frac{\|\overline{x}-x\|}{\|x\|}$ to be small?
-\subparagraph{Theorem} $A$ square invertible, $x$ exact solution of $Ax = b$ and $\overline{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A)\cdot\frac{\|r\|}{\|b\|}$$
-\textbf{Proof}: $\overline{x}$ is the exact solution of $A\overline{x}=b+r$ and the condition number bound gives $\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A)\frac{\|(b+r)-b\|}{\|b\|}$\\
+Suppose $\tilde{x}$ computed somehow has a small $\|r\|=\|A\tilde{x}-b\|$. Is this a guarantee for $\frac{\|\tilde{x}-x\|}{\|x\|}$ to be small?
+\subparagraph{Theorem} $A$ square invertible, $x$ exact solution of $Ax = b$ and $\tilde{x}$ another vector with $r = A\overline{x}-b$, then $$\frac{\|\tilde{x}-x\|}{\|x\|}\leq K(A)\cdot\frac{\|r\|}{\|b\|}$$
+\textbf{Proof}: $\tilde{x}$ is the exact solution of $A\tilde{x}=b+r$ and the condition number bound gives $\frac{\|\tilde{x}-x\|}{\|x\|}\leq K(A)\frac{\|(b+r)-b\|}{\|b\|}$\\\\
 We can ask the same question for LS problems: when is small? Not $r$ in general. The gradient of $f(x) = \|Ax-b\|^2$ is though 
 $$\nabla f(x) = 2A^TAx-2A^Tb = 2\cdot(\hbox{residual of normal equations}) = 2r$$
-$\frac{\|\overline{x}-x\|}{\|x\|}\leq K(A^TA) = K(A)^2$, and the relative error bound on $A^TAx=A^Tb$ is $\frac{\|r\|}{\|A^Tb\|}$, possibly larger than the condition number of the least squares problem.\\
-Recalling that with $A=Q_1R_1$ QR factorization, $\|Ax-b\|=\|\left[\begin{array}{c}
+$$\frac{\|\tilde{x}-x\|}{\|x\|}\leq K(A^TA) = K(A)^2$$
+The relative error bound on $A^TAx=A^Tb$ is $\frac{\|r\|}{\|A^Tb\|}$, possibly larger than the condition number of the least squares problem.\\
+Recalling that with $A=Q_1R_1$ QR factorization $$\|Ax-b\|=\|\left[\begin{array}{c}
 Q_1^T(Ax-b)\\Q_2^T(Ax-b)
-\end{array}\right]\|$
-we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\overline{x}-b)$ and $x$ the exact solution of $\min\|Ax-b\|$, then $\frac{\|\overline{x}-x\|}{\|x\|}\leq K_{rel, b\rightarrow x}\cdot\frac{\|r_1\|}{\|b\|}$\\
-\textbf{Proof}: replay the solution of the LS problems via QR with $\overline{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: $$\|A\overline{x}-\hat{b}\| = \|\left[\begin{array}{c}
-Q_1^T(A\overline{x}-\hat{b})\\Q_2^T(A\overline{x}-\hat{b})
+\end{array}\right]\|$$
+we have a better error bound \textbf{theorem}: let $r_1 = Q_1^T(A\tilde{x}-b)$ and $x$ the exact solution of $\min\|Ax-b\|$, then $$\frac{\|\tilde{x}-x\|}{\|x\|}\leq K_{rel, b\rightarrow x}\cdot\frac{\|r_1\|}{\|b\|}$$
+\textbf{Proof}: replay the solution of the LS problems via QR with $\tilde{x}$ instead of $x$ and $\hat{b}=b+Q_1r_1$ in place of $b$: $$\|A\tilde{x}-\hat{b}\| = \|\left[\begin{array}{c}
+Q_1^T(A\tilde{x}-\hat{b})\\Q_2^T(A\tilde{x}-\hat{b})
 \end{array}\right]\|=\|\left[\begin{array}{c}
-Q_1^T(A\overline{x}-b-Q_1r_1)\\
-Q_2^T(A\overline{x}-\hat{b})
+Q_1^T(A\tilde{x}-b-Q_1r_1)\\
+Q_2^T(A\tilde{x}-\hat{b})
 \end{array}\right]\|=$$
 $$=\|\left[\begin{array}{c}
-Q_1^T(A\overline{x}-b)-Q_1^TQ_1r_1)\\
-Q_2^T(A\overline{x}-\hat{b})
+Q_1^T(A\tilde{x}-b)-Q_1^TQ_1r_1)\\
+Q_2^T(A\tilde{x}-\hat{b})
 \end{array}\right]\|=\|\left[\begin{array}{c}
 0\\
-Q_2^T(A\overline{x}-\hat{b})
+Q_2^T(A\tilde{x}-\hat{b})
 \end{array}\right]\|$$
 because $Q_1^TQ_1=I$.\\
-And this $\Rightarrow\overline{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
+And this $\Rightarrow\tilde{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 \section{Algorithms for square linear systems $Ax=b$}
 \subsection{Gaussian Elimination}
 \paragraph{Complexity} $\frac{2}{3}n^3$ (half of QR)
@@ -707,7 +719,8 @@ And this $\Rightarrow\overline{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
 Ly=b\\Ux=y
 \end{array}\right.$ is $2n^2$\\
-Stability can be a problem. Error analysis with $\overline{L}\,\overline{U} = \overline{A}$, we have $\|\overline{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max|b_i|$ for $i=k,k+1,\ldots,n$\\
+%TODO l13 from here
+Stability can be a problem. Error analysis with $\tilde{L}\,\tilde{U} = \tilde{A}$, we have $\|\tilde{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max|b_i|$ for $i=k,k+1,\ldots,n$\\
 Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
 $$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
 $$PA = LU$$
@@ -987,7 +1000,7 @@ It's also impossible if $f_* > -\infty$ but $\not\exists\:x_*$, for example $f(x
 and on computers $x\in \mathbb{R}$ is actually $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but too slow, so ML is actually going the opposite way (float, half, small integers\ldots). And anyway, finding the exact $x_*$ is impossible in general.
 %\paragraph{Optimality conditions} If derivative non zero, point no local minimum. Hence $f'(x)=0$ in all local minima but also local maxima as well in saddle.\\
 %With $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$)\\
-%Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\overline{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \overline{\alpha}]$\\
+%Theorems proofs breed algorithms: by contradiction $x$ local minimum but $\nabla f(x)\neq 0$. Mathematically speaking, $\exists\:\tilde{\alpha} > 0\:|\:\phi(\alpha) < f(x) = \phi(0)\:\:\forall\:\alpha\in[0, \tilde{\alpha}]$\\
 %SVM are constructed by creating a convex function as stated in the notes.
 \paragraph{Optimization need to be approximate} \begin{list}{}{}
 	\item \textbf{Absolute gap}: $\{a_i = A(x_i) = f(x_i) - f_*\}$ so $A(x) = f(x) - f_*$ ($\geq 0$)
@@ -1119,7 +1132,7 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 \begin{center}
 	\includegraphics[scale=0.5]{2.png}
 \end{center}
-"Easily" find local $\equiv$ global minimum $\overline{x}$ giving \underline{$f$}$(\overline{x}) \leq f_* \leq f(\overline{x})$. If the gap $f(\overline{x}) - \underline{f}(\overline{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\overline{x}) \geq$ best $f$-value so far, then that partition is killed.\\
+"Easily" find local $\equiv$ global minimum $\tilde{x}$ giving \underline{$f$}$(\tilde{x}) \leq f_* \leq f(\tilde{x})$. If the gap $f(\tilde{x}) - \underline{f}(\tilde{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\tilde{x}) \geq$ best $f$-value so far, then that partition is killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
 \section{Unconstrained optimization}
@@ -1219,7 +1232,7 @@ It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarr
 $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
 \paragraph{Step selection} The issue is to find the Goldilocks Step $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
 \begin{list}{}{}
-	\item \textbf{Fixed Stepsize} (FS): $\forall\:i\:\:\:\alpha_i = \overline{\alpha}$ (how is chosen?)\\
+	\item \textbf{Fixed Stepsize} (FS): $\forall\:i\:\:\:\alpha_i = \tilde{\alpha}$ (how is chosen?)\\
 	Most inexpensive.
 	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in arg\min\{f(x_i+\alpha d_i\}\:|\:\alpha\geq 0\}$\\
 	Most expensive but may converge faster.
@@ -1273,7 +1286,7 @@ Sometimes we use a relative stopping condition $\|\nabla f(x_i)\|\leq \epsilon\|
 With $f\in C^2, x_*$ local minimum such that $\nabla^2f(x_*)$ positive definite, exact LS $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}_{i\geq k}\rightarrow f_*$ linearly for large enough $k$, with $r = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}^2$ with $\lambda_1,\lambda_n$ those of $\nabla^2 f(x_*)$\\
 The result can be extended to inexact LS with $r\simeq 1-\frac{\lambda_n}{\lambda_1}$ (worse), with "$\simeq$" depending on LS parameters.
 \subsubsection{Fixed Stepsize}
-With $\alpha_i = \overline{\alpha}$ for each $i$ it's much simpler but also rigid. Easier to avoid Charybdis: $\sum_{i=1}^\infty \alpha_i = \infty$\\
+With $\alpha_i = \tilde{\alpha}$ for each $i$ it's much simpler but also rigid. Easier to avoid Charybdis: $\sum_{i=1}^\infty \alpha_i = \infty$\\
 Yet $d_i = -\nabla f(x_i) \Rightarrow$ one wants $\{\|d_i\|\}\rightarrow 0$, so care is still required. We also have that $\alpha_i\rightarrow 0$ surely avoid Scylla, but it's not possible here.\\
 The fundamental trick is $d_i = -\nabla f(x_i) \Rightarrow \|x_{i+1} - x_i\|$ automatically changes along iterations even if $\alpha_i$ is fixed.\\
 $d_i = \frac{-\nabla f(x_i)}{\|\nabla f(x_i)\|} \equiv \|d_i\| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
@@ -1299,8 +1312,8 @@ The \textbf{Armijo condition} is $0 < m_1 < 1$
 	\item[$(A)$] $\phi(\alpha)\leq \phi(0)+m_1\alpha\phi'(0)$
 \end{list}
 $\alpha \rightarrow 0$ satisfies $(A)$. But if we avoid Charybdis then we "converge".\\
-$\alpha_i\geq \overline{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{\|\nabla f(x_i)\|\}\rightarrow 0$\\
-All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = \|\nabla f(x_i)\|^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\overline{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\overline{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \overline{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
+$\alpha_i\geq \tilde{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{\|\nabla f(x_i)\|\}\rightarrow 0$\\
+All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = \|\nabla f(x_i)\|^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\tilde{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\tilde{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \tilde{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
 \paragraph{Wolfe} \textbf{Goldstein condition} $m_1 < m_2 < 1$
 \begin{list}{}{}
 	\item[$(G)$] $\phi(\alpha)\geq \phi(0) + m_2\alpha\phi'(0)$
@@ -1324,15 +1337,15 @@ procedure alpha = BLS(phi, alpha, m1, tau)  # tau < 1
 		alpha = tau*alpha
 \end{lstlisting}
 With \texttt{dphi(0)} meaning $\phi'(0)$\\
-Recall that $\exists\:\overline{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\overline{\alpha}_i]$. Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with\\$h_i\geq \min\{k\:|\:\tau^k\leq \overline{\alpha}_i\}$
-$$\overline{\alpha}_i \geq \overline{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \hbox{\textbf{convergence}}$$
+Recall that $\exists\:\tilde{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\tilde{\alpha}_i]$. Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with\\$h_i\geq \min\{k\:|\:\tau^k\leq \tilde{\alpha}_i\}$
+$$\tilde{\alpha}_i \geq \tilde{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \hbox{\textbf{convergence}}$$
 We need conditions on $f$ to get it:
 \begin{list}{}{}
 	\item $f$ $L$-smooth $\Rightarrow \phi$ is $[L\|d\|^2]$-smooth
 	\item $\Rightarrow -\phi'(0) = \|d\|^2 = \|\nabla f(x)\|^2$
-	\item $\phi$ is $[L\|d\|^2]$-smooth $\Rightarrow \alpha'$ and $\overline{\alpha}$ are "large":\\
+	\item $\phi$ is $[L\|d\|^2]$-smooth $\Rightarrow \alpha'$ and $\tilde{\alpha}$ are "large":\\
 	$L\|d\|^2(\alpha - 0)\geq \phi'(\alpha')-\phi'(0) > (1-m_3)(-\phi'(0)) = (1-m_3)\|d\|^2$
-	\item $\Rightarrow \overline{\alpha} > \alpha' > \frac{1-m_3}{L}$
+	\item $\Rightarrow \tilde{\alpha} > \alpha' > \frac{1-m_3}{L}$
 	\item If $f$ also $\tau$-convex $\Rightarrow$ convergence linear with $r\simeq \frac{1-\tau}{L}$, depending on $m_1,m_3$
 \end{list}
 Might be rather slow, need something better.
@@ -1358,7 +1371,7 @@ $$\langle \nabla f(x_i), d_i\rangle = -\nabla f(x_i)^T[\nabla^2f(x_i)]^{-1}\nabl
 but it's not enough, we need it "negative enough".
 \paragraph{Globalised Netwtod} Simply add AWLS/BLS with $\alpha_0 = 1$. The convergence requires $f\in C^2, L$-smooth and $\tau$-convex
 \subparagraph{Theorem 1} $\cos(\theta_i)$ bounded away from $0 \Rightarrow$ global convergence.\\
-Meaning $\cos(\theta_i)\geq \overline{\theta} > 0$
+Meaning $\cos(\theta_i)\geq \tilde{\theta} > 0$
 \subparagraph{Theorem 2} $f\in C^3, \nabla f(x_*) = 0, \nabla^2 f(x_*)\succ 0\Rightarrow\exists B(x_*, r)\:|\:x_0\in B\Rightarrow$ "pure" Newton sequence with $\alpha_i = 1$ that $\{x_i\}\rightarrow x_*$ quadratically.
 \subparagraph{Theorem 3} If $\{x_i\}\rightarrow x_* \exists\:h\:|\:\alpha_i = 1$ satisfies $(A)$ for all $i\geq h$\\
 Requires $m_1\leq \frac{1}{2}$, because $m_1>\frac{1}{2}$ cuts away the minimum when $f$ quadratic.\\\\
@@ -1485,7 +1498,7 @@ For $f\in C^1$ \textbf{the gradient is unique}, $d=-\nabla f(x)$:
 \begin{list}{}{}
 	\item $f(x+\alpha d) < f(x)\:\:\forall\alpha > 0$ small enough
 	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Leftrightarrow f(x)$ "close" to $f_*\equiv \|d\|\leq \epsilon$ is an effective stopping criterion
-	\item Can use fixed step since $\|x_{i+1}-x_i\|\rightarrow 0$ automatically: $\|d_i\|\rightarrow 0$ even if $\alpha_i \geq \overline{\alpha} > 0$
+	\item Can use fixed step since $\|x_{i+1}-x_i\|\rightarrow 0$ automatically: $\|d_i\|\rightarrow 0$ even if $\alpha_i \geq \tilde{\alpha} > 0$
 \end{list}
 For $f\not\in C^1$, there can be \textbf{many different subgradients} $d = -[g\in\partial f(x)]$, and for any one of them (can't choose):
 \begin{list}{}{}
@@ -1537,7 +1550,7 @@ Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With
 \end{multicols}
 In both cases, target level to replace $f_*$.\\
 A closed formula, $\gamma_i\in$ argmin$\{\|\gamma g_i+(1-\gamma)d_{i-1}\|^2\:|\:\gamma\in[0,1]\}$
-\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\overline{z}$ optimal for $x\Rightarrow A\overline{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\overline{z}$).\\
+\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\tilde{z}$ optimal for $x\Rightarrow A\tilde{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\tilde{z}$).\\
 \textbf{Smoothed} $f_\mu(x)=\max\{x^TAz-\mu\frac{\|z\|^2}{2}\:|\:z\in Z\}\in C^1$ hopefully easy.\\
 In practice is slowish, superlinear in a doubly-logarithmic chart after a long flat leg. Subgradients are faster but flatline at $\epsilon\simeq 1$e$-4$, smoothed does at $\epsilon\simeq 1$e$-6$.
 \subsubsection{Bundle Methods}
@@ -1552,15 +1565,15 @@ The min in the master problem focuses $\{x_*\}$ in the right place, with a pract
 So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\epsilon}\right)^{\frac{n}{2}}\right)$
 \subparagraph{Why} $x_{B,*}$ may be infinitely far from $x_*$, the iterates have no local property ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail.\\
 It's unavoidable: linear functions have no curvature, and we need many of them to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
-\subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_B$ is a good model of $f$).\\
-Stabilized master problem $$\min\{f_B(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+\subparagraph{Stabilizing} $\tilde{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\tilde{x} f_B$ is a good model of $f$).\\
+Stabilized master problem $$\min\{f_B(x)+\mu\frac{\|x-\tilde{x}\|^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\tilde{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
 \section{Constrained Optimality and Duality}
 \paragraph{Constrained Optimization} Back to the full $(P) f_* = \min\{f(x)\:|\:x\in X\}$ with $x\subset R^n$\begin{list}{}{}
 	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
 	\item $x\in X$ feasible solution, $x\not\in X$ unfeasible solution
 	\item $x_*\in X\:|\:f(x_*)\leq f(x)\:\:\forall\:x\in X$ optimal solution $\Leftrightarrow$ global optimum
 \end{list}
-Constraints can be hidden in the objective $\chi_X : R^n\rightarrow \overline{R}$ \textbf{indicator function of $X$} with $\chi_X(x)=\left\{\begin{array}{l l}
+Constraints can be hidden in the objective $\chi_X : R^n\rightarrow \tilde{R}$ \textbf{indicator function of $X$} with $\chi_X(x)=\left\{\begin{array}{l l}
 0&\hbox{if }x\in X\\
 \infty&\hbox{if }x\not\in X
 \end{array}\right.$ which is convex if $X$ is, but extended-valued.
@@ -1590,10 +1603,10 @@ $$\hbox{conv}(S) = \bigcup\{\hbox{conv}(x,y)\:|\:x,y\in S\} = \bigcap\{C\:|\:C\h
 Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest convex set containing $S$".\begin{list}{}{}
 	\item $C$ convex $\Leftrightarrow C = \hbox{conv}(C)$: a convex set is equal to its convex hull
 	\item $f$ convex $\Leftrightarrow epi(f)$ convex $\Rightarrow S(f,v)$ convex $\forall v$ ($\not\Leftarrow$)
-	\item $d$ is a \textbf{feasible direction} of $X$ at $x$ if $\exists\:\overline{\epsilon}>0\:|\:x+\overline{\epsilon}d \in X$
+	\item $d$ is a \textbf{feasible direction} of $X$ at $x$ if $\exists\:\tilde{\epsilon}>0\:|\:x+\tilde{\epsilon}d \in X$
 	\item $F_X(x)$ is the \textbf{set of feasible directions of $X$ at $x$}
 	\item $X$ convex and $d\in F_X(x)\Rightarrow x+\epsilon d\in X\:\:\forall
-	\epsilon\in [0,\overline{\epsilon}]$ ($F_X$ cone)
+	\epsilon\in [0,\tilde{\epsilon}]$ ($F_X$ cone)
 	\item $X$ convex and $d$ feasible at $x \Rightarrow d\in T_X(x)$ with $z_i = x + dt_i \equiv F_X(x)\subseteq T_X(x)$\\
 	In fact they are almost the same, except from the borders
 	\item $f,X$ convex, $x_*$ global optimum $\Leftrightarrow\langle\nabla f(x_*),d\rangle \geq 0\:\:\forall\:d\in F_X(x_*)$
@@ -1683,8 +1696,8 @@ $(R_{\lambda,\mu})$ is a relaxation of $(P)\:\:\forall\:\lambda\geq 0$ and $\mu\
 But how to choose $\lambda\geq 0$ and $\mu$? The dual function $\psi$ is \begin{list}{}{}
 	\item Often easy to compute
 	\item Concave, but note that $\psi(\lambda,\mu)=-\infty$ might happen
-	\item $\overline{x}$ optimal in ($R_{\lambda,\mu}$) $\Rightarrow [G(\overline{x}), H(\overline{x})]\in \partial\psi(\lambda,\mu)$
-	\item $\psi\not\in C^1$ even if $f,g_i,h_j$ are, but $\overline{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\overline{x}), H(\overline{x})]$
+	\item $\tilde{x}$ optimal in ($R_{\lambda,\mu}$) $\Rightarrow [G(\tilde{x}), H(\tilde{x})]\in \partial\psi(\lambda,\mu)$
+	\item $\psi\not\in C^1$ even if $f,g_i,h_j$ are, but $\tilde{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\tilde{x}), H(\tilde{x})]$
 \end{list}
 The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in \mathbb{R}_+^{|I|},\mu\in \mathbb{R}^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
 When is $v(D) = v(P)$ (strong duality)?  \textbf{Convexity} $\Rightarrow$ \textbf{Strong Duality}, so not always but yes if $(P)$ convex, meaning that $x_*$ optimum, $T_X(x_*)=D_X(x_*)\Rightarrow v(D) = v(P)$\\
@@ -1731,10 +1744,10 @@ or try to exploit the large scale structure (saddle-point system).
 	\includegraphics[scale=0.75]{10.png}
 \end{center}
 Can compute feasible initial $x$ autonomously.\\
-\textbf{Always exploit all the structure of your problem}: quadratic program with \textbf{box constraints}\\$(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:\underline{x}\leq x\leq \overline{x}\}$\\
-Active constraint $\equiv$ inactive variable, $B\subseteq N=\{1,2,\ldots,n\}, B = (L,U)$ with $L\cap U=\emptyset, L\cup U \subset N, F = N\setminus (L\cup U)\Rightarrow A_Bx=b_B \equiv x = [x_L, x_F, x_U]=[\underline{x}_L, x_F, \overline{x}_U]$ so only $x_F$ "free". $\underline{x} = 0 (x\leftarrow x+\underline{x})\Rightarrow x=[0, x_F, \overline{x}_U]$\\
-$(P)$ can become $(P)\:\:\:\min\{\frac{1}{2}x_F^TQ_{FF}x_F+(q_F+\overline{x}_U^TQ_{UF})x_F\}$ \textbf{unconstrained} and in a (possibly much) smaller space. Initial feasible $x$ straightforward.
-\subparagraph{In practice} If (Linl)-type not satisfied, $B$ needs to be more carefully managed to handle possible degenerate steps $(\overline{\alpha}=0)$. For instance, only one constraint at a time is added to $B$, not very efficient in practice and different nontrivial rules are used.\\
+\textbf{Always exploit all the structure of your problem}: quadratic program with \textbf{box constraints}\\$(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:\underline{x}\leq x\leq \tilde{x}\}$\\
+Active constraint $\equiv$ inactive variable, $B\subseteq N=\{1,2,\ldots,n\}, B = (L,U)$ with $L\cap U=\emptyset, L\cup U \subset N, F = N\setminus (L\cup U)\Rightarrow A_Bx=b_B \equiv x = [x_L, x_F, x_U]=[\underline{x}_L, x_F, \tilde{x}_U]$ so only $x_F$ "free". $\underline{x} = 0 (x\leftarrow x+\underline{x})\Rightarrow x=[0, x_F, \tilde{x}_U]$\\
+$(P)$ can become $(P)\:\:\:\min\{\frac{1}{2}x_F^TQ_{FF}x_F+(q_F+\tilde{x}_U^TQ_{UF})x_F\}$ \textbf{unconstrained} and in a (possibly much) smaller space. Initial feasible $x$ straightforward.
+\subparagraph{In practice} If (Linl)-type not satisfied, $B$ needs to be more carefully managed to handle possible degenerate steps $(\tilde{\alpha}=0)$. For instance, only one constraint at a time is added to $B$, not very efficient in practice and different nontrivial rules are used.\\
 Exploit information from previous iteration to speed up KKT system solution: update factorizations, use $x$ to warm-start iterative approaches\ldots many different variants.\\
 No more exact solution but hopefully fast iterative approaches, e.g. (quasi-)Newton on the reduced problem.\\
 Which $\epsilon$? How many iterations? How about one of the gradient methods?
@@ -1742,9 +1755,9 @@ Which $\epsilon$? How many iterations? How about one of the gradient methods?
 Projection of $d\in \mathbb{R}^n$ on $S\subset R^n$: $p_S(d)=\min\{\|d-x\|\:|\:x\in S\}$ so $$p_{F_X(x)}(-\nabla f(x))=\min\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\}$$
 a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\equiv x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
 $p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.\\\\
-Box constraints $\underline{x}\leq x\leq \overline{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \overline{x}_i] \Rightarrow$\\$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i), F_{[\underline{x},\overline{x}]}(x) = \left\{\begin{array}{l}
+Box constraints $\underline{x}\leq x\leq \tilde{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \tilde{x}_i] \Rightarrow$\\$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i), F_{[\underline{x},\tilde{x}]}(x) = \left\{\begin{array}{l}
 R_+\hbox{ if }x=\underline{x}\\
-R_-\hbox{ if }x=\overline{x}\\
+R_-\hbox{ if }x=\tilde{x}\\
 R\hbox{ otherwise}\\
 \end{array} \right.$\\
 $g(d) = \|d-v\|^2$ decomposable: $g(d)=\sum_{i=1}^n [g_i(d_i)=(d_i-v_i)^2]$\\
@@ -1756,12 +1769,12 @@ Other cases where projection is easy: simplex constraints $\sum_{i=1}^n x_i = 1,
 \paragraph{Goldstein's Version} What if projection is easy on the whole $X$, not only $F_X(x)$? Goldstein's projected gradient method: move first, project second: $y_i \leftarrow x_i - \alpha_i\nabla f(x_i);\:\:\:x_{i+1}\leftarrow p_X(y_i);$\\
 Not a descent method, more like a heavy ball, and only converges with appropriate stepsize, typical $\alpha=\frac{1}{L}$. Convergence result similar to unconstrained gradient (for good and bad): $O\left(\left(\frac{L}{\tau}\right)\log\left(\frac{1}{\epsilon}\right)\right)$ for $f$ $\tau$-convex, $O\left(\frac{LD}{\epsilon}\right)$ otherwise.
 \paragraph{Rosen's Version} General $Ax\leq b$: $p_{F_X(x)}$ can be too costly.\\
-Make it easier by projecting on $\partial F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\overline{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
-	\item $\mu=-[\overline{A}\,\overline{A}^T]^{-1}\overline{A}\nabla f(x)$
-	\item $d = (I-\overline{A}^T[\overline{A}\,\overline{A}^T]^{-1}\overline{A})(-\nabla f(x))$
+Make it easier by projecting on $\partial F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\tilde{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
+	\item $\mu=-[\tilde{A}\,\tilde{A}^T]^{-1}\tilde{A}\nabla f(x)$
+	\item $d = (I-\tilde{A}^T[\tilde{A}\,\tilde{A}^T]^{-1}\tilde{A})(-\nabla f(x))$
 	\begin{list}{}{}
 		\item $d = 0$ may happen: good if $\mu \geq 0$, un-good otherwise
-		\item $d = 0$ surely happens if $\overline{A}\in A^{n\times n}$ ($x$ a vertex, $\mathscr{A}(x)$ a base)
+		\item $d = 0$ surely happens if $\tilde{A}\in A^{n\times n}$ ($x$ a vertex, $\mathscr{A}(x)$ a base)
 	\end{list}
 \end{list}
 $A_{\mathscr{A}(x)}$ not full rank in general: must work with $A_B$ full rank with $B\subset \mathscr{A}(x) \Rightarrow$ rather more complicated logic.\\
@@ -1794,8 +1807,8 @@ What if I collect it along the way and use it all?
 	\item $\{x_i\}\rightarrow$ \textbf{bundle} $\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
 	\item \textbf{Cutting-plane model} $f_\mathscr{B}(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in \mathscr{B}\}$, a $(1+\epsilon)$-order model.
 \end{list}
-$\overline{x}\leftarrow arg\min\{f_\mathscr{B}(x)\:|\:Ax\leq b\}$ \textbf{constrained cutting-plane algorithm}, completely equivalent to the unconstrained version, even better if $Ax\leq b$ is compact.\\
-$x\leftarrow arg\min\{f_\mathscr{B}(y)+\gamma\|y-\overline{x}\|^2\:|\:Ay\leq b\}$ \textbf{constrained Bundle method}.\\
+$\tilde{x}\leftarrow arg\min\{f_\mathscr{B}(x)\:|\:Ax\leq b\}$ \textbf{constrained cutting-plane algorithm}, completely equivalent to the unconstrained version, even better if $Ax\leq b$ is compact.\\
+$x\leftarrow arg\min\{f_\mathscr{B}(y)+\gamma\|y-\tilde{x}\|^2\:|\:Ay\leq b\}$ \textbf{constrained Bundle method}.\\
 More difficult to exploit the structure, but not impossible.
 \paragraph{Frank-Wolfe++} Sequential Quadratic Programming: want a better direction? Use a better model! Of course, second order model if you have one, or add appropriate trust region constraint to the master problem.\\
 Can approximate $\nabla^2 f(x)$ with quasi-Newton formula. Fast convergence if done properly.\\
