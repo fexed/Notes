@@ -3,6 +3,7 @@
 \usepackage[italian]{babel}
 \usepackage{multicol}
 \usepackage{amsfonts}
+\usepackage{amsmath}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -83,7 +84,7 @@ Data is thrown into a neural network. A single stage process with a data crushin
 \subsection{Signals}
 Signals are time series: a sequence of measurements in time. Examples of sources are: medicine, finance, geology, IoT, biometrics\ldots
 \paragraph{Formalization} A time series x is a sequence of measurements in time $t$
-$$\hbox{x} = x_0,\ldots,x_N$$
+$$\text{x} = x_0,\ldots,x_N$$
 where $x_t$ or $x(t)$ is the measurement at time $t$.
 \begin{list}{}{}
 	\item Observation can be at \textbf{irregular} time intervals.
@@ -110,10 +111,10 @@ $$\hat\gamma_x(\tau) = \frac{1}{N}\sum_{t=1}^{N-|\tau|} (x_{t+|\tau|}-\hat\mu)(x
 \paragraph{Autocorrelation} The correlation of a signal with itself. $$\hat\rho_x(\tau)=\frac{\hat\gamma_x(\tau)}{\hat\gamma_x(0)}$$
 We can compute this with every possible $\tau$, finding the max/min which gives the $\tau$ where the autocorrelation is max/min, which means the lag where the signal starts repeating itself. The lags near zero typically dominates, so we want the maximum lag reasonably far from 0.
 \subparagraph{Autocorrelation plot} It's a revealing view on time series statistics.
-\paragraph{Cross-Correlation} A measure of similarity of x$_1$ and x$_2$ as a function of a time lag $\tau$ $$\phi_{\hbox{x}_1\:\hbox{x}_2}(\tau)=\sum_{t = \max\{0,\tau\}}^{\min\{(T_1 - 1 + \tau), (T_2 - 1)\}} \hbox{x}_1(t-\tau)\cdot \hbox{x}_2(t)$$
+\paragraph{Cross-Correlation} A measure of similarity of x$_1$ and x$_2$ as a function of a time lag $\tau$ $$\phi_{\text{x}_1\:\text{x}_2}(\tau)=\sum_{t = \max\{0,\tau\}}^{\min\{(T_1 - 1 + \tau), (T_2 - 1)\}} \text{x}_1(t-\tau)\cdot \text{x}_2(t)$$
 \subparagraph{Normalized cross-correlation} Returns an amplitude independent value
-$$\overline{\phi}_{\hbox{x}_1\:\hbox{x}_2}(\tau) = \frac{\phi_{\hbox{x}_1\:\hbox{x}_2}}{\sqrt{\sum_{t=0}^{T_1-1}(x_1(t))^2\cdot\sum_{t=0}^{T_2-1}(x_2(t))^2}} \in [-1,+1]$$
-With $\overline{\phi}_{\hbox{x}_1\:\hbox{x}_2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
+$$\overline{\phi}_{\text{x}_1\:\text{x}_2}(\tau) = \frac{\phi_{\text{x}_1\:\text{x}_2}}{\sqrt{\sum_{t=0}^{T_1-1}(x_1(t))^2\cdot\sum_{t=0}^{T_2-1}(x_2(t))^2}} \in [-1,+1]$$
+With $\overline{\phi}_{\text{x}_1\:\text{x}_2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
 Note that we measure \textbf{linear correlation}.\\\\
 Cross correlation looks like the convolution $$(f * g)[n]=\sum_{t=-M}^M f(n-t)g(t)$$ but we have a flipped sign ($n-t$ instead of $t-\tau$).\\
 Cross-correlation is not symmetric, whereas convolution is ($f * g = g * f$).
@@ -133,8 +134,8 @@ Estimation of the $\alpha$, $\beta$ is performed with the Levinson-Durbin Recurs
 The order is often estimated with a Bayesian model selection criterion, choosing the largest $K$ and $Q$ possible. E.g.: BIC, AIC\ldots\\
 The set of autoregressive parameters $\alpha_{i,1},\ldots,\alpha_{i,K}$ fitted to a specific time series x$_i$ is used to confront it with other time series. Same thing for $\beta$ so we can use $\alpha$ for both sets.
 \paragraph{Comparing time series by AR}\begin{list}{}{}
-	\item timeseries clustering: $d(\hbox{x}_1,\hbox{x}_2)=\|\alpha_1-\alpha_2\|_M^2$
-	\item novelty/anomaly detection: $\hbox{TestErr}(x_t,\hat{x}_t)<\xi$ with $\hat{x}_t$ being the AR predicted value.
+	\item timeseries clustering: $d(\text{x}_1,\text{x}_2)=\|\alpha_1-\alpha_2\|_M^2$
+	\item novelty/anomaly detection: $\text{TestErr}(x_t,\hat{x}_t)<\xi$ with $\hat{x}_t$ being the AR predicted value.
 \end{list}
 \subsubsection{Spectral Domain Analysis}
 Analyze the time series in the frequency domain. Key idea: decomposing the time series into a linear combination of sines and cosines with random and uncorrelated coefficients. So a \textbf{regression on sinusoids} with Fourier analysis.
@@ -148,7 +149,7 @@ $$\frac{a_0}{2}+\sum_{k=1}^\infty\left(a_k\cos(kx)+b_k\sin(kx)\right)$$
 on the orthonormal system $$\{1,e^{ix},e^{-ix},e^{2ix},e^{-2ix},\ldots\}$$
 \paragraph{Representing Discrete Time Series} Consider x of length $N$ and $x_n\in \mathbb{R}$. Using the exponential formulation, the orthonormal system is finite, from $e_0$ to $e_{N-1}$ each $\in C^N$\\
 The $n$-th component of the $k$-th vector is $$[e_k]n=e^{\frac{-2\pi ink}{2}}$$
-\paragraph{Discrete Fourier Transform} Given a time series x = $x_0,\ldots,x_{N-1}$ its DFT is the sequence $$\hbox{Spectral domain}\:\:\:X_k = \sum_{n=1}^{N-1}x_ne^{\frac{-2\pi ink}{N}}\:\:\:\hbox{Time domain}$$
+\paragraph{Discrete Fourier Transform} Given a time series x = $x_0,\ldots,x_{N-1}$ its DFT is the sequence $$\text{Spectral domain}\:\:\:X_k = \sum_{n=1}^{N-1}x_ne^{\frac{-2\pi ink}{N}}\:\:\:\text{Time domain}$$
 And can be inverted $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}$$
 \paragraph{Basic Spectral Quantities in SFT}
 \begin{list}{}{}
@@ -317,9 +318,9 @@ We slice the signal in "time slots" in time analysis and "frequency slots" in fr
 	\item Compare signal to a wavelet
 	\item Compute coefficient of similarity
 \end{enumerate}
-Split the signal with an orthonormal basis generate by translation and dilation of a mother wavelet $$\sum_t \hbox{x}(t)\phi_{j,k}(t)$$
+Split the signal with an orthonormal basis generate by translation and dilation of a mother wavelet $$\sum_t \text{x}(t)\phi_{j,k}(t)$$
 Terms $k,j$ regulate scaling and shifting of the wavelet
-$$\phi_{t,k}(\hbox{x}) = 2^{\frac{k}{2}}\phi\left(\frac{t-j2^k}{2^k}\right)$$
+$$\phi_{t,k}(\text{x}) = 2^{\frac{k}{2}}\phi\left(\frac{t-j2^k}{2^k}\right)$$
 With many different options for the mother wavelet $\phi$
 \begin{center}
 	\includegraphics[scale=0.5]{13.png}
@@ -382,7 +383,7 @@ Directed Acyclic Graphs (DAG) $G = (V,E)$\begin{list}{}{}
 \end{center}
 \end{multicols}
 \paragraph{Conditional Probability Tables} CPTs are local to each node and describe the probability distribution \textbf{given its parents}.
-$$P(Y_1,\ldots,Y_n) = \prod_{i=1}^N P(Y_i\:|\:\hbox{Parents}(Y_i))$$
+$$P(Y_1,\ldots,Y_n) = \prod_{i=1}^N P(Y_i\:|\:\text{Parents}(Y_i))$$
 \paragraph{Plate notation} If the same causal relationship is replicated for a number of variables, we can compactly represent it with plate notation.
 $$P(Y_1,\ldots,Y_N,C) = P(C)\prod_{i=1}^N P(Y_i\:|\:C)$$
 \begin{center}
@@ -404,7 +405,7 @@ Often arranged in a structure that is coherent with the data/constraint we want 
 Often used in image processing to impose spatial constraints (e.g. smoothness)
 \subsection{Conditional Independence and Causality}
 Can we reason on the structure of the graph to infer direct/indirect relationships between random variables?
-\paragraph{Local Markov Property} Each node (random variable) is conditionally independent of all its non-descendants given a joint state of its parents. $$Y_v\perp Y_{V\setminus \hbox{Children(v)}}\hbox{ given }Y_{\hbox{Parent}(v)}\:\:\forall\:v\in V$$
+\paragraph{Local Markov Property} Each node (random variable) is conditionally independent of all its non-descendants given a joint state of its parents. $$Y_v\perp Y_{V\setminus \text{Children(v)}}\text{ given }Y_{\text{Parent}(v)}\:\:\forall\:v\in V$$
 There are substructures in the Bayesian networks with which we can build everything.
 \paragraph{Markov Blanket} A Markov blanket $Mb(A)$ of a node $A$ is the minimal set of vertices that isolates/shields the node from the rest of the Bayesian network. If I know the variables in $Mb(A)$ then I know everything I need to know about $A$\begin{center}
 	\includegraphics[scale=0.5]{19.png}
@@ -454,9 +455,9 @@ In other words, this holds if at least one of the following holds:\begin{list}{}
 	\item $r$ contains a tail-to-tail $Y_i\leftarrow Y_c\rightarrow Y_j$ and $Y_c \in Z$
 	\item $r$ contains head-to-head $Y_i\rightarrow Y_c\leftarrow Y_j$ and neither $Y_c$ nor its descendants are in $Z$
 \end{list}
-Two nodes $Y_i,Y_j$ in a Bayesian Network $G$ are $d$-separated by $Z\subset V$ $\Leftrightarrow$ all undirected paths between $Y_i,Y_j$ are $d$-separated by $Z$ (denoted by $\hbox{Dsep}_G(Y_i,Y_j\:|\:Z)$)
+Two nodes $Y_i,Y_j$ in a Bayesian Network $G$ are $d$-separated by $Z\subset V$ $\Leftrightarrow$ all undirected paths between $Y_i,Y_j$ are $d$-separated by $Z$ (denoted by $\text{Dsep}_G(Y_i,Y_j\:|\:Z)$)
 \paragraph{Markov Blanket} The Markov Blanket $Mb(Y)$ is the minimal set of nodes which $d$-separates a node $Y$ from all other nodes (i.e. makes $Y$ conditionally independent of all other nodes in the Bayesian Network)
-$$Mb(Y) = \{\hbox{Parents}(Y), \hbox{Children}(Y), \hbox{Parents}(\hbox{Children}(Y))\}$$
+$$Mb(Y) = \{\text{Parents}(Y), \text{Children}(Y), \text{Parents}(\text{Children}(Y))\}$$
 \paragraph{Are Directed Models Enough?} Bayesian Networks are used to model asymmetric dependencies. But Directed Models cannot express all conditional dependence relationships: expressing some precludes the expressions of others.\\
 What if we want to model symmetric dependencies: bidirectional effects, spatial dependencies... we need \textbf{undirected approaches}. Directed models cannot represent some bidirectional dependencies in the distributions.
 \subsection{Markov Random Fields}\begin{center}
@@ -473,9 +474,9 @@ $X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the \te
 $$Z = \sum_X\prod_C\psi(X_C)$$
 The partition function $Z$ is the computational bottleneck of undirected modes: $O(K^N)$ for $N$ discrete random variables with $K$ distinct values.
 \paragraph{Potential Functions} Potential functions $\psi(X_C)$ are not probabilities, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=\left\{ \begin{array}{l l}
-1&\hbox{if }X_1 = X_2\\
-4&\hbox{if }X_2 = 2X_1\\
-0&\hbox{otherwise}
+1&\text{if }X_1 = X_2\\
+4&\text{if }X_2 = 2X_1\\
+0&\text{otherwise}
 \end{array}\right.$: you can hand-engineer feature functions.\\
 If we restrict to strictly positive potential functions, the Hammersley-Clifford theorem provides guarantees on the distribution that can be repreesented by the clique factorization.
 \paragraph{Boltzmann Distribution} A convenient and widely used strictly positive representation of the potential function is $$\psi(X_C)=e^{-E(X_C)}$$
@@ -536,7 +537,7 @@ Difference sequences generally have different lengths $T^1,\ldots,T^N$
 \paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on the $t-1$ previous nodes.\\
 We have X = $x-1,\ldots,x_T$ that can be represented as 
 $$x_1\rightarrow \ldots\rightarrow x_{t-1}\rightarrow x_t\rightarrow\ldots\rightarrow x_T$$
-So we can write $$P(\hbox{X}) = P(x_1,\ldots,x_T) = P(x_1)\cdot\prod_{i=2}^T P(x_i\:|\:x_{i-1})$$
+So we can write $$P(\text{X}) = P(x_1,\ldots,x_T) = P(x_1)\cdot\prod_{i=2}^T P(x_i\:|\:x_{i-1})$$
 because $P(x_i\:|\:x_{i-1})$ is the same whenever the $t$.\\
 $P(x_1)$ is the \textbf{prior distribution} ($x_1$ has nothing "before" it) and $P(x_i\:|\:x_{i-1})$ is the \textbf{transition distribution}.\\\\
 If I assume $x_t\in\{a,\ldots,z\}$, so of 25 elements, this gives $P(x_1) = P(x_1 =$ letter$)$ so $P(x_1)$ is a vector with each position being the probability of $x_1$ being that letter. Summing the vector elements gives 1, because it's a distribution of probabilities.\\
@@ -623,8 +624,8 @@ Learning parameters $\Theta=(\pi,A,B)$ by \textbf{maximum} (log) \textbf{likelih
 $$L(\Theta) = \log\prod_{n=1}^N P(Y^n\:|\:\Theta) = \log\prod_{n=1}^N\left(\sum_{S_1^n,\ldots,S_{T_n}^n} P(S_1^n)P(Y_1^n\:|\:S_1^n)\prod_{t=2}^T P(S_t^n\:|\:S_{t-1}^n)P(Y_t^n\:|\:S_t^n)\right)$$
 Maximizing the joint likelihood of the sequences given the parameters considering them independent and identically distributed. We have to deal with the unobserved $S_t^n$ and the nasty sum in the log.\\
 Expectation-Maximization of the \textbf{complete likelihood} $L_c(\Theta)$, optimizing a slightly different problem obtaining a not-reducing similar result. It's completed with indicator variables $z_{ti}^n=\left\{\begin{array}{c l}
-1&\hbox{if }n\hbox{th chain is in state }i\hbox{ at time }t\\
-0&\hbox{otherwise}
+1&\text{if }n\text{th chain is in state }i\text{ at time }t\\
+0&\text{otherwise}
 \end{array}\right.$ about the assignments $S_i^n$
 \paragraph{Expectation-Maximization} Gives the red line: touching in the estimating point and not greater in the other points.
 \begin{center}
@@ -664,7 +665,7 @@ With appropriate Lagrange multiplier is multinomial.
 \paragraph{Decoding Problem} Find the optimal state assignment s $= s_1^*,\ldots,s_T^*$ for an observed test sequence y given a trained HMM. No unique interpretation of the problem.\\
 Can be done identifying the single hidden states $s_t$ that maximize the posterior $$s_t^*=\arg\max_{i=1,\ldots,C}P(S_t=i\:|\:Y)$$ 
 or find the most likely \textbf{joint hidden state assignment} 
-$$\hbox{s}^* = \arg\max_s P(Y,S = \hbox{s})$$
+$$\text{s}^* = \arg\max_s P(Y,S = \text{s})$$
 \paragraph{Viterbi Algorithm} Efficient dynamic programming algorithm based on a backward-forward recursion, example of max-product message passing algorithm. When exchanging, instead of $\sum$ we maximize the $\prod$.
 %TODO check all
 $$\max_{\hat{s} = s_1,\ldots,s_T} P(\hat{y},\hat{s}) = \max_{\hat{s}}\prod_{t=1}^T P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})$$
@@ -701,7 +702,7 @@ DBNs are graphical models whose structure changes to represent evolution across 
 \subsection{Markov Random Fields}
 MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$, edges $e\in E$ are bi-directional dependencies between variables.
 \paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_N$ as the random variables associated to the $N$ nodes in the undirected graph $G$
-$$P(\hbox{X}) = \frac{1}{Z}\prod_C \psi_C(X_C)$$\\
+$$P(\text{X}) = \frac{1}{Z}\prod_C \psi_C(X_C)$$\\
 $X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the \textbf{potential function} for clique $C$\\
 With $Z$ normalization term used to transform to probability, from a \textbf{partition function}:
 $$Z = \sum_X\prod_C\psi_C(X_C)$$
@@ -823,14 +824,14 @@ LDA finds a set of $K$ projection functions on the $K$-dimensional topic simplex
 \end{center}
 \paragraph{LDA Generative Process} For each of the $M$ documents, we choose $\Theta$ with Dirichlet($\alpha$) and for each of the $N$ items, we choose a topic $z$ with Multinomial($\Theta$) and pick an item $w_j$ with multinomial probability $P(w_j\:|\:z,\beta)$.\\
 We get a multinomial topic-item parameter matrix $[\beta]_{k\times V}$
-$$\beta_{kj}=P(w_j=1\:|\:z_k=1)\hbox{ or } P(w_j=1\:|\:z=k)$$
+$$\beta_{kj}=P(w_j=1\:|\:z_k=1)\text{ or } P(w_j=1\:|\:z=k)$$
 $$P(\Theta, z, w\:|\:\alpha,\beta) = P(\Theta\:|\:\alpha)\prod_{j=1}^NP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)$$
 It's a completed likelihood with the conditional independence assumption.
 \subparagraph{Learning} Marginal distribution of a document $d =$ w
-$$P(\hbox{w}\:|\:\alpha,\beta) = \int \sum_z P(\Theta,z,w\:|\:\alpha,\beta)d\Theta=\int P(\Theta\:|\:\alpha)\prod_{j=1}^N\sum_{z_j=1}^kP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)d\Theta$$
+$$P(\text{w}\:|\:\alpha,\beta) = \int \sum_z P(\Theta,z,w\:|\:\alpha,\beta)d\Theta=\int P(\Theta\:|\:\alpha)\prod_{j=1}^N\sum_{z_j=1}^kP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)d\Theta$$
 given w$_1$,\ldots,w$_M$ find $\alpha,\beta$ that maximize.\\
 Key problem is inferring latent variables posterior:
-$$P(\Theta, \hbox{z}\:|\:\hbox{w},\alpha,\beta) = \frac{P(\Theta, \hbox{z}, \hbox{w}\:|\:\alpha,\beta)}{P(\hbox{w}\:|\:\alpha,\beta)}$$
+$$P(\Theta, \text{z}\:|\:\text{w},\alpha,\beta) = \frac{P(\Theta, \text{z}, \text{w}\:|\:\alpha,\beta)}{P(\text{w}\:|\:\alpha,\beta)}$$
 but the denominator is intractable because of couplings between $\beta$ and $\Theta$ under exponenziation in the summation over topics. So we don't use the posterior, we pick a function $Q$ that helps in solving the problem (variational inference).
 \paragraph{Variational Inference} We write $Q(z\:|\:\phi)$ function that is sufficiently similar to the posterior but tractable. It should be such that $\beta$ and $\Theta$ are no longer coupled, fitting $\phi$ so that is close to the posterior according to KL.\\
 Fast convergence but it's an approximation.\\
@@ -864,8 +865,8 @@ Linear energy function $$E(s) = -\frac{1}{2}\sum_{ij}M_{ij}s_is_j - \sum_jb_js_j
 with symmetric and no self-recurrent connectivity. Model parameters $\Theta = \{M, b\}$ encode the interactions between the variables (observable and not).\\
 \textbf{Boltzmann machines are a type of Recurrent Neural Networks}. They can be interpreted as stochastic neural network: the state of a unit at a given timestep is sampled from a given probability distribution and the network learns a probability distribution $P(V)$ from the training patterns. The network includes both visible $v$ and hidden $h$ units, and the activity is a sample from posterior probability given the inputs (visible data).
 \paragraph{Stochastic Binary Neurons} Binary output $s_j$ at any time $t$. Typically discrete time model with time into small $\Delta t$ intervals. At each time interval $t+1 = t+\Delta t$ the neuron can emit a spike with probability $p_j^{(t)}$ $$s_j^{(t)} = \left\{\begin{array}{c l}
-1&\hbox{with probability }p_j^{(t)}\\
-0&\hbox{with probability }1-p_j^{(t)}
+1&\text{with probability }p_j^{(t)}\\
+0&\text{with probability }1-p_j^{(t)}
 \end{array}\right.$$
 The key is in the definition of the spiking probability (local potential $x_j$ $$p_j^{(t)} \simeq \sigma(x_j^{(t)})$$
 The Boltzmann machine has $N$ neurons with binary activations $s_j$, a weight matrix $M = [M_{ij}]_{i,j} \in \{1,\ldots,N\}$ and a bias vector $b = [b_j]_j\in\{1,\ldots,N\}$\\
@@ -928,7 +929,7 @@ computing a correlation between ideally $v^\infty,h^\infty$, but of course can't
 	\includegraphics[scale=0.5]{48.png}
 \end{center}
 We start with a training vector on the visible units, alternating between updating all the hidden units in parallel and updating all the visibile units in parallel
-$$\frac{\partial L}{\partial M_{ij}} = \langle v_ih_i\rangle_0 - \langle v_jh_j\rangle_\infty = \hbox{data} - \hbox{model}$$
+$$\frac{\partial L}{\partial M_{ij}} = \langle v_ih_i\rangle_0 - \langle v_jh_j\rangle_\infty = \text{data} - \text{model}$$
 \paragraph{Contrastive-Divergence Learning} Because Gibbs sampling converges really slowly: clamp a training vector $v^l$ on visible units. CD-1.
 \begin{center}
 	\includegraphics[scale=0.5]{49.png}
@@ -936,7 +937,7 @@ $$\frac{\partial L}{\partial M_{ij}} = \langle v_ih_i\rangle_0 - \langle v_jh_j\
 Clamping a training vector $v^l$ on visible units, update all hidden units in parallel, update all the visible units in parallel to get a \textbf{reconstruction} and update the hidden units again.
 $$\begin{array}{c c c}
 \langle v_ih_j\rangle_0&-&\langle v_ih_j\rangle_1\\
-\hbox{data}& &\hbox{reconstruction}
+\text{data}& &\text{reconstruction}
 \end{array}$$
 Learns a very crude approximation of the gradient of log-likelihood, not even following it closely. Why use it? Because in practice it works well.
 
@@ -985,8 +986,8 @@ This is true provided that $\hat{p}(x_l) = p(x_l)$\\
 A sampler with this property is called \textbf{valid} because it draws samples from the desired distribution.\\\\
 The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$. Let $$\Delta\hat{f}_X = \hat{f}_X - E_{\hat{p}(X)}[\hat{f}_X]$$ then the variance of $\hat{f}(X)$ is given by $$E_{\hat{p}_X}[(\Delta\hat{f}_X)^2]$$
 we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average, i.e. to $E_{p(X)}[f(X)]$.\\\\
-So if the sampler has same marginals and draws sample independently we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\hbox{Var}_{p(x)}[f(x)]$$
-The variance reduces linearly with respect to the number of samples provided that $\hbox{Var}_{p(x)}[f(x)]$ is finite.\\\\
+So if the sampler has same marginals and draws sample independently we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\text{Var}_{p(x)}[f(x)]$$
+The variance reduces linearly with respect to the number of samples provided that $\text{Var}_{p(x)}[f(x)]$ is finite.\\\\
 We've shown that we need sampling to approximate expectations and to do inference in Bayesian models. Propertis of the sampling procedure depends on $\hat{p}(X)$: valid sampler and low approximation variance.
 \subsection{Univariate Sampling}
 Easy: random number generator $R$ which produces a value uniformly at random in $[0,1]$ and $p(x)$. We use $p(x)$ to divide $[0,1]$ in bins and sample accordingly.
@@ -1031,15 +1032,15 @@ The idea is to start from a sample $x^1=\{s_1^1,\ldots,s_n^1\}$ and \textbf{upda
 During the $(l+1)$th iteration:
 \begin{list}{}{}
 	\item Select a variable $s_j$
-	\item we sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\hbox{Parents}(s_j))\prod_{k\in\hbox{Children}(s_j)} P(s_k\:|\:\hbox{Parents}(s_k)) $$
+	\item we sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\text{Parents}(s_j))\prod_{k\in\text{Children}(s_j)} P(s_k\:|\:\text{Parents}(s_k)) $$
 \end{list}
 Which depends only on the Markov blanket of $s_j$ and $s_{\setminus j}$ is clamped to$ \{s_1^l,\ldots,s_{j-1}^l,s_{j+1}^l,\ldots,s_n^l\}$
 \begin{center}
 	\includegraphics[scale=0.5]{45.png}
 \end{center}
 \subparagraph{$\hat{p}(X)$ of Gibbs sampling} Considering a set of variables $X=\{x^1,\ldots,x^L\}$ obtained with a Gibbs sampler: each sample $x^{l+1}$ is obtained from the previous sample $x^l$. We can define a probability $q(x^{l+1}\:|\:x^l)$, the probability to obtain $x^{l+1}$ given $x^l$:
-$$q(x^{l+1}\:|\:x^l) = \sum_{j=1}^NP(\hbox{Variable }j\hbox{ is selected})P(\hbox{New value }s_j^l\hbox{ given }x^l)$$
-With $P(\hbox{New value }s_j^l\hbox{ given }x^l)$ from equation 4 and $P(\hbox{Variable }j\hbox{ is selected})$ up to you.\\
+$$q(x^{l+1}\:|\:x^l) = \sum_{j=1}^NP(\text{Variable }j\text{ is selected})P(\text{New value }s_j^l\text{ given }x^l)$$
+With $P(\text{New value }s_j^l\text{ given }x^l)$ from equation 4 and $P(\text{Variable }j\text{ is selected})$ up to you.\\
 With this we can compute $\hat{p}(X)$ $$\hat{p}(X)=\prod_{l=1}^L q(x^{l+1}\:|\:x^l)$$
 \paragraph{Markov Chain Monte Carlo Sampling Framework} Gibbs sampling is a specialization of the Markov Chain Monte Carlo sampling framework. The idea is to build a Markov Chain whose stationary distribution is $p(x)$.\\
 Let $q(x^{l+1}\:|\:x^l)$ be the Markov Chain state-transition distribution, if the Markov Chain is\begin{list}{}{}
@@ -1525,11 +1526,11 @@ Encoder-decoder architecture.
 	\includegraphics[scale=0.5]{119.png}
 \end{center}
 For each vector, we compute attention over all other vectors.
-$$SA(Q_i, K, V) = \sum_j\hbox{Softmax}_j\left(\frac{Q_i\cdot K^T}{\sqrt{d_k}}\right)V_j$$
+$$SA(Q_i, K, V) = \sum_j\text{Softmax}_j\left(\frac{Q_i\cdot K^T}{\sqrt{d_k}}\right)V_j$$
 Can be done multi-headed as well
-$$\hbox{Attention}(Q,K,V)=\hbox{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
-$$\hbox{MultiHead}(Q,K,V) = \hbox{Concat}(\hbox{head}_1,\ldots,\hbox{head}_h)W^O$$
-$$\hbox{head}_i = \hbox{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+$$\text{Attention}(Q,K,V)=\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+$$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1,\ldots,\text{head}_h)W^O$$
+$$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
 Is self-attention a good mechanism to model temporal dependencies? What happens if I randomly shuffle some tokens? The result is going to be shuffled. We have a key for each timestep, but there's nothing that keeps track of time. So attention is order-independent, but we need temporal information.\\
 So we sum word embed plus position embed.
 \subsection{Skipping State Updates}
@@ -1630,12 +1631,12 @@ $$h_t = F(x_t, h_{t-1}) = \tanh(x_tW_{xh} + h_{t-1}W_{hh})$$
 The iterated version is the function applied to an arbitrarily long sequence $s = [x_1,\ldots,x_t]$ returning the final state $h_t$
 $$\hat{F}:(\mathbb{R}^{N_X})^*\times \mathbb{R}^{N_H}\rightarrow \mathbb{R}^{N_H}$$
 For example $$\hat{F}(s,h_0)=\left\{\begin{array}{c l}
-h_0&\hbox{if }s=[]\\
-F(x_t,\hat{F}([x_1,\ldots,x_{t-1}],h_0))&\hbox{if }s=[x_1,\ldots,x_t]
+h_0&\text{if }s=[]\\
+F(x_t,\hat{F}([x_1,\ldots,x_{t-1}],h_0))&\text{if }s=[x_1,\ldots,x_t]
 \end{array}\right.$$
 \paragraph{Echo State Property} A valid ESN should satisfy the ESP.\\
 An ESN satisfies the ESP whenever
-$$\forall\:s\in (\mathbb{R}^{N_X})^N \wedge \forall\:h_0,z_0\in\mathbb{R}^{N_H}\hbox{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\hbox{ as }N\rightarrow\infty$$
+$$\forall\:s\in (\mathbb{R}^{N_X})^N \wedge \forall\:h_0,z_0\in\mathbb{R}^{N_H}\text{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\text{ as }N\rightarrow\infty$$
 \textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
 \textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
 We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
@@ -2082,7 +2083,7 @@ The optimal value function determines the best possible performance in the MDP. 
 	\includegraphics[scale=0.5]{163.png}\\
 	\includegraphics[scale=0.5]{164.png}
 \end{center}
-\paragraph{Optimal Policy} Define a partial ordering over policies $$\pi\geq \pi'\hbox{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
+\paragraph{Optimal Policy} Define a partial ordering over policies $$\pi\geq \pi'\text{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
 \subparagraph{Theorem} For any Markov Decision process\begin{list}{}{}
 	\item There exist an optimal policy $\pi_*$ that is better or equal than all the other: $\forall\pi\:\:\pi_*\geq \pi$
 	\item All optimal policies achieve the optimal value function: $v_{\pi_*}(s) = v_*(s)$
@@ -2090,8 +2091,8 @@ The optimal value function determines the best possible performance in the MDP. 
 \end{list}
 An optimal policy can be found by maximizing over $q_*(s,a)$
 $$\pi_*(a\:|\:s)=\left\{\begin{array}{l l}
-1&\hbox{if }a=\arg\max_{a\in A} q_*(s,a)\\
-0&\hbox{otherwise}
+1&\text{if }a=\arg\max_{a\in A} q_*(s,a)\\
+0&\text{otherwise}
 \end{array}\right.$$
 There is always a deterministic optimal policy for any MDP. If we know $q_*(s,a)$ we straightforwardly find the optimal policy.
 \subparagraph{Bellman Optimality Equations} Optimal value functions are recursively related Bellman-style
@@ -2127,7 +2128,7 @@ $$v_{k+1} = R^\pi +\gamma P^\pi v_k$$
 \paragraph{Improving a Policy} Given a policy $\pi$\begin{list}{}{}
 	\item Evaluate the policy: $v_\pi(s) = E[R_{t+1} + \gamma R_{t+2} + \ldots\:|\:S_t =s]$
 	\item Improve the policy by acting grededily with respect to $v_\pi$:
-	$\pi' = \hbox{Greedy}(\pi)$
+	$\pi' = \text{Greedy}(\pi)$
 	\item Repeat
 \end{list}
 This process always converges to $\pi_*$, under the assumption that the improvement is greedy.
@@ -2335,8 +2336,8 @@ All $m$ actions are tried with non-zero probability:\begin{list}{}{}
 	\item With probability $\epsilon$ choose an action at random
 \end{list}
 $$\pi(a\:|\:s)= \left\{\begin{array}{c l}
-\frac{\epsilon}{m}+(1-\epsilon)&\hbox{if }a^*=\arg\max_{a\in A}Q(s,a)\\
-\frac{\epsilon}{m}&\hbox{otherwise}
+\frac{\epsilon}{m}+(1-\epsilon)&\text{if }a^*=\arg\max_{a\in A}Q(s,a)\\
+\frac{\epsilon}{m}&\text{otherwise}
 \end{array}\right.$$
 \paragraph{Monte-Carlo Control} Every episode
 \begin{list}{}{}
@@ -2592,4 +2593,184 @@ $$W = \left(\sum_{t=1}^T s(S_t,A_t)(x(S_t,A_t)-\gamma x(S_{t+1},\pi(S_{t+1})))^T
 \begin{center}
 	\includegraphics[scale=0.5]{181.png}
 \end{center}
+\subsection{Policy-Based Reinforcement Learning}
+Up until now:
+\begin{list}{}{}
+	\item Approximate value or action-value function using parameters $\theta$
+	$$V_\theta(s)\simeq V^\pi(s)$$
+	$$Q_\theta(s,a)\simeq Q^\pi(s,a)$$
+	\item Generate policy from the value function, e.g.: using $\epsilon$-greedy
+\end{list}
+Now we take a different approach: \textbf{parametrize the policy} $$\pi_\theta(s,a) = P(a\:|\:s,\theta)$$
+Focus again on \textbf{model-free} reinforcement learning.
+\paragraph{Advantages}
+\begin{list}{}{}
+	\item Better convergence properties
+	\item Effective in high-dimensional or continuous action spaces
+	\item Can learn stochastic policies
+\end{list}
+\paragraph{Disadvantages}
+\begin{list}{}{}
+	\item Typically converge to a local rather than global optimum
+	\item Evaluating a policy is typically inefficient and high variance
+\end{list}
+\subparagraph{Example} In a two-player game of rock-paper-scissors, consider policies for iterated play: a deterministic policy is easily exploited, so a \textbf{uniform random policy is optimal} (i.e. Nash equilibrium)
+\subsubsection{Policy Gradient}
+\paragraph{Policy Objective Functions} Goal: given a policy $\pi_\theta(s,a)$ with parameters $\theta$, find the best $\theta$.\\
+How to measure the quality of a policy $\pi_\theta$?
+\begin{list}{}{}
+	\item \textbf{Episodic Environments}: use start value
+	$$J_1(\theta) = V^{\pi_\theta}(s_1) = E_{\pi_\theta}[v_1]$$
+	\item \textbf{Continuous Environments}:
+	\begin{list}{}{}
+		\item \textbf{Average Value} $$J_{\overline{V}}(\theta) = \sum_s d^{\pi_\theta}(s)V^{\pi_\theta}(s)$$
+		\item \textbf{Average reward} per timestep: $$J_{\overline{R}}(\theta) = \sum_s d^{\pi_\theta}(s)\sum_a\pi_\theta(s,a)R_s^a$$
+		\item $d^{\pi_\theta}(s)$ is \textbf{stationary distribution} of Markov chain for $\pi$
+	\end{list}
+\end{list}
+\paragraph{Policy Gradient} Let $J(\theta)$ be any policy objective function. Policy gradient algorithms search for a local maximum in $J(\theta)$ by ascending the gradient for the policy with respect to $\theta$
+$$\Delta\theta=\alpha\cdot\underset{\text{Policy gradient}}{\underbrace{\nabla_\theta J(\theta)}}$$
+\subparagraph{Theorem} For any differentiable policy $\pi_\theta(s,a)$, for any of the policy objective function $J_1,J_{\overline{R}},\frac{1}{1-\gamma}J_{\overline{V}}$, the policy gradient is
+$$\nabla_\theta J(\theta)= E_{\pi_\theta}\left[\nabla_\theta\log\pi_\theta(s,a)Q^{\pi_\theta}(s,a)\right]$$
+\paragraph{Score Function} Compute the policy gradient analytically. Then, assume policy $\pi_\theta$ is differentiable whenever it is non-zero and we know the gradient $\nabla_\theta\pi_\theta(s,a)$.\\
+The \textbf{likelihood ratios} exploit the following fundamental identity
+$$\nabla_\theta\pi_\theta(s,a)=\pi_\theta(s,a)\frac{\nabla_\theta\pi_\theta(s,a)}{\pi_\theta(s,a)} = \pi_\theta(s,a)\nabla_\theta\log\pi-\theta(s,a)$$
+The \textbf{score function} is $\nabla_\theta\log\pi_\theta(s,a)$
+\subparagraph{Softmax Policy} Weight actions using a linear combination features $\phi(s,a)^T\theta)$. The probability of action is proportional to exponentiated weight $$\pi_\theta(s,a)\sim e^{\phi(s,a)^T\theta}$$
+The \textbf{score function} is $$\nabla_\theta\log\pi_\theta(s,a)=\phi(s,a)-E_{\pi_\theta}[\phi(s,\:)]$$
+\subparagraph{Gaussian Policy} Natural choice in continuous action spaces.\\
+The mean is a linear combination of state features $\mu(s) = \phi(s)^T\theta)$.\\
+The variance $\sigma^2$ may be fixed or parametrized.\\
+The Gaussian policy is $$a\sim N(\mu(s),\sigma^2)$$
+The \textbf{score function} is $$\nabla_\theta\log\pi_\theta(s,a)=\frac{(a-\mu(s))\phi(s)}{\sigma^2}$$
+\paragraph{Reinforce: MC Policy Gradient} Update parameters by stochastic gradient ascent, using policy gradient theorem.\\
+Using return $v_t$ as an unbiased sample of $Q^{\pi_\theta}(s_t,a_t)$
+$$\Delta\theta_t = \alpha\nabla_\theta\log\pi-\theta(s_t,a_t)v_t$$
+\pagebreak
+\subparagraph{Evaluate the MC Policy Gradient}
+\begin{multicols}{2}
+$$J(\theta) = E_{\pi_\theta}[r]\simeq\frac{1}{N}\sum_{i=1}^N\sum_{t=1}^T v_t^i$$
+$$\nabla_\theta J(\theta) \simeq \underset{\text{Generate samples}}{\underbrace{\frac{1}{N}\sum_{i=1}^N}}\left(\sum_{t=1}^T\nabla_\theta\log\pi_\theta(s_t,a_t)\right)\underset{\text{Run episode}}{\underbrace{\left(\sum_{t=1}^Tv_t^i\right)}}$$
+$$\underset{\text{Improve the policy}}{\underbrace{\theta = \theta + \alpha\nabla_\theta J(\theta)}}$$
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{182.png}
+\end{center}
+\end{multicols}
+\begin{multicols}{2}
+$$\overset{\text{Policy gradient}}{\nabla_\theta J(\theta) \simeq \frac{1}{N}\sum_{i=1}^N \left(\sum_{t=1}^T\nabla_\theta\log\pi_\theta(s_t,a_t)\right)\left(\sum_{t=1}^Tv_t^i\right)}$$
+
+$$\overset{\text{Maximum likelihood}}{\nabla_\theta J_{ML}(\theta) \simeq \frac{1}{N}\sum_{i=1}^N \left(\sum_{t=1}^T\nabla_\theta\log\pi_\theta(s_t,a_t)\right)}$$
+\end{multicols}
+\begin{center}
+	\includegraphics[scale=0.5]{183.png}
+\end{center}
+With Gaussian policy: good things are made more likely, bad things are made less likely, formalizing the notion of "trial and error".\\
+Policy gradient is on-policy.\\
+Neural networks change only slightly with each gradient step. Naive on-policy learning can be extremely inefficient.
+\subsubsection{Actor Critic}
+Monte-Carlo Policy Gradient has high variance. We use a critic to estimate the action-value function
+$$Q_w(s,a)\simeq Q^{\pi_\theta}(s,a)$$
+Actor-critic algorithms maintain two sets of parameters:
+\begin{list}{}{}
+	\item \textbf{Critic}: updates action-value function parameters $w$
+	\item \textbf{Actor}: updates policy parameters $\theta$ in the direction suggested by the critic
+\end{list}
+They follow an approximated policy gradient
+$$\nabla_\theta J(\theta) \simeq E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)Q_w(s,a)]$$
+$$\Delta\theta = \alpha\nabla_\theta\log\pi_\theta(s,a)Q_w(s,a)$$
+\paragraph{Estimating the Action-Value Function} The critic is solving a familiar problem: policy evaluation, how good is policy $\pi_\theta$ for current parameters $\theta$?\\
+This problem was explored previously with: Monte-Carlo policy evaluation, Temporal-Difference learning, TD($\lambda$).
+\pagebreak
+\paragraph{Action-Value Actor-Critic}
+Simple actor-critic algorithm based on action-value critic.
+\begin{center}
+	\includegraphics[scale=0.5]{184.png}
+\end{center}
+Using linear approximation $$Q_w(s,a) = \phi(s,a)^Tw$$
+\begin{list}{}{}
+	\item Critic: updates $w$ by linear TD(0)
+	\item Actor: update $\theta$ by policy gradient
+\end{list}
+\paragraph{Bias in Actor-Critic Algorithms} \textbf{Approximating} the policy gradient \textbf{introduces a bias}. A biased policy gradient may not find the right solution.\\
+Luckily, if we choose a value function approximation carefully, we can avoid introducing any bias: we can still follow the exact policy gradient, compatible with the Function Approximation Theorem.
+\paragraph{Reducing Variance Using a Baseline} We subtract a baseline function $B(s)$ from the policy gradient.\\
+Can reduce variance without changing expectation. A good baseline is the state value function $B(s) = V^{\pi_\theta}(s)$, so we can rewrite the policy gradient using the advantage function $A^{\pi_\theta}(s,a)$
+$$A^{\pi_\theta}(s,a) =Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s)$$
+$$\nabla_\theta J(\theta) = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)A^{\pi_\theta}(s,a)]$$
+\paragraph{Estimating the Advantage Function} The advantage function can significantly reduce variance of policy gradient, so the critic should really estimate the advantage function. For example, by estimating both $V^{\pi_\theta}(s)$ and $Q^{\pi_\theta}(s,a)$ using two function approximators and two parameter vectors
+$$V_v(s)\simeq V^{\pi_\theta}(s)$$
+$$Q_w(s,a)\simeq Q^{\pi_\theta}(s,a)$$
+$$A(s,a) = Q_w(s,a)-V_v(s)$$
+and updating both value functions by, e.g., TD learning.\\
+Given a true value function $V^{\pi_\theta}(s)$ and the TD error $\delta^{\pi_\theta}$ $$\delta^{\pi_\theta} = r+\gamma V^{\pi_\theta}(s')-V^{\pi_\theta}(s)$$
+is an unbiased estimate of the advantage function
+$$E[\delta^{\pi_\theta}\:|\:s,a]=E[r+\gamma V^{\pi_\theta}(s')\:|\:s,a]-V^{\pi_\theta}(s) = Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s) = A^{\pi_\theta}(s,a)$$
+We can use the TD error to compute the policy gradient
+$$\nabla_\theta J(\theta) = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\delta^{\pi_\theta}]$$
+In practice, need to approximate TD error
+$$\delta_v = r+\gamma V_v(s')-V_v(s)$$
+Only one set of critic parameters $v$ is needed.
+\pagebreak
+\subsubsection{Natural Policy Gradient}
+\paragraph{Alternative Policy Gradient Directions} Gradient ascent algorithms can follow any ascent direction. A good one can significantly speed convergence. Also, a policy can often be reparametrized without changing action probabilities (e.g. increasing the scores of all actions in a softmax policy).\\
+The vanilla gradient is sensitive to these reparametrizations. In practice, since changing some parameters can affect probabilities (i.e. policy) more than others, is there a mean to rescale the gradient to avoid this effect?
+\paragraph{Covariant/Natural Policy Gradient} Parametrization independent. It fits ascent direction that is closest to vanilla gradient, when changing policy by a small fixed amount
+$$\nabla_\theta^{nat}\pi_\theta(s,a) = G_\theta^{-1}\nabla_\theta\pi_\theta(s,a)$$
+where $G_\theta$ is the \textbf{Fisher information matrix} $$G_\theta = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\nabla_\theta\log\pi_\theta (s,a)^T]$$
+\paragraph{Trust Region Policy Optimization} Generalizes natural policy gradient.\\
+Optimizes expected advantage under new policy state distribution.
+$$E_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t}A_t\right]\text{ such that }E_t\left[KL\left(\pi_{\theta_{old}}(s_t,a_t)\:|\:\pi_\theta(s_t,a_t)\right)\right]\leq \delta$$
+Uses importance sampling to align old-new policies in expectation (regularizes to stay close to old policy)
+$$\theta'=\theta+\alpha G_\theta^{-1}\nabla_\theta\pi_\theta(s,a)$$
+$$\alpha=\sqrt{\frac{2\epsilon}{\nabla_\theta\pi_\theta(s,a)^TG_\theta\nabla_\theta\pi_\theta(s,a)}}$$
+\paragraph{Proximal Policy Optimization} Build on Trust Region Policy Optimization efficacy and efficiency, but sticking to first-order optimization. Use a penalty instead of a KL constraint in the loss
+$$\max_\theta E_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t}A_t\right]-\beta\overline{KL}_{\pi_{\theta_{old}}}(\pi_\theta)$$
+Clipped Proximal Policy Optimization simplifies the objective function to
+$$\max_\theta E_t[\min(r_t(\theta)A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t)]$$
+\subsubsection{Deep Policy Networks}
+Represent policy by deep network with weights $u$
+$$a=\pi_u(a\:|\:s)\text{ or } a=\pi_u(s)$$
+Define objective function as total discounted reward
+$$J(u) = E[r_1+\gamma r_2+\gamma^2r_3+\ldots\:|\:u]$$
+Optimize objective end-to-end by stochastic gradient descent.\\
+Adjust policy parameters $u$ to achieve more reward.
+\paragraph{Policy Gradients} How to make high-value actions more likely:
+\begin{list}{}{}
+	\item The gradient of a stochastic policy $\pi(a\:|\:s,u)$ is given by $$\nabla_u J(u) = E_\pi[\nabla_u\log\pi_u(a\:|\:s)Q^\pi(s,a)]$$
+	\item The gradient of a deterministc policy $a=\pi(s)$ is given by
+	$$\nabla_u J(u) = E_\pi[\nabla_aQ^\pi(s,a)\nabla_u a]$$
+\end{list}
+Assuming $a$ continuous and $Q$ differentiable.
+\paragraph{Actor-Critic Algorithm}
+\begin{list}{}{}
+	\item Estimate value function $Q_w(s,a)\simeq Q^{\pi_\theta}(s,a)$
+	\item Update policy parameters $u$ by stochastic gradient ascent
+	$$\frac{\partial J(u)}{u} = \frac{\partial\log\pi_u(a\:|\:s)}{\partial u}Q_w(s,a)$$
+	or
+	$$\frac{\partial J(u)}{u} = \frac{\partial Q_w(s,a)}{\partial u}\frac{\partial a}{\partial u}$$
+\end{list}
+\paragraph{A3C} Asynchronous Advantage Actor-Critic
+\begin{list}{}{}
+	\item Estimate state-value function
+	$$V_v(s) = E[r_1+\gamma r_2 + \gamma^2 r_3+\ldots\:|\:s]$$
+	\item Q-value estimated by an $n$-step sample
+	$$q_t = r_{t+1} + \gamma r_{t+2} + \ldots + \gamma^{n-1}r_{t+n} + \gamma^n V_v(s_{t+n})$$
+	\item Actor is updated towards target
+	$$\frac{\partial J(u)}{u} = \frac{\partial\log\pi_u(a_t\:|\:s_t)}{\partial u}(q_t-V_v(s_t))$$
+	Critic is updated to minimize MSE with respect to target
+	$$J(v) = (q_t-V_v(s_t))^2$$
+\end{list}
+\paragraph{Deep Reinforcement Learning with Continuous Actions} How can we deal with high-dimensional continuous action spaces? Cannot easily compute $\max\limits_a Q(s,a)$: actor-critic algorithms learn without $\max$.\\
+Q-values are differentiable with respect to $a$: deterministic policy gradients exploit knowledge of $\frac{\partial Q(s,a)}{\partial a}$
+\paragraph{Deep Deterministic Policy Gradients} DPG is the continuous analogue of Deep Q Networks (DQN).
+\begin{list}{}{}
+	\item \textbf{Experience Replay}: build dataset from agent's experience
+	\item \textbf{Fixed target}: to deal with non-stationarity, use fixed target networks $u^-, w^-$
+	\item Critic estimates value of current policy by DQN
+	$$J(w) = \left(r+\gamma Q_{w^-}(s',\pi_{u^-}(s'))-Q_w(s,a)\right)^2$$
+	Actor updates policy in direction that improves Q
+	$$\frac{\partial J(u)}{\partial u}=\frac{\partial Q_w(s,a)}{\partial a}\frac{\partial a}{\partial u}$$
+	Meaning: critic provides loss function for actor
+\end{list}
 \end{document}
