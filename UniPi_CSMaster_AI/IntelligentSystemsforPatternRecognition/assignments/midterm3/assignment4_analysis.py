@@ -64,7 +64,7 @@ def generate(decoder, prime_str='A', predict_len=100, temperature=0.8, proper_en
 
 #custom_sentence = "Make America Great Again"
 custom_sentence = "People keep telling me orange but I still prefer pink."
-temperature = 0.25
+temperature = 0.8
 
 all_characters = string.printable
 csv.field_size_limit(sys.maxsize)
