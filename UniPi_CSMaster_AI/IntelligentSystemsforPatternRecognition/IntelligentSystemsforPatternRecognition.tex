@@ -523,7 +523,7 @@ Determining causal relationships between variables entails deciding on arc prese
 		\item Node-wise testing: tests are performed on a single edge at the time, exhausting independence checks on all conditioning variables (TPDA algorithm)
 		\item The nodes entering $Z$ are chosen in the neighborhood of $X_i,X_j$
 	\end{list}
-	\item \textbf{Hybrid}\\
+roach	\item \textbf{Hybrid}\\
 	Model selection of constrained structures. Multi-stage algorithm combining previous approaches: independence tests to find a good sub-optimal skeleton as starting point, then search and score refining the skeleton.\\
 	Max-Min Hill Climbing (MMHC) model: optimized constraint-based approach to reconstruct the skeleton, using the candidate parents in the skeleton to run a search and score approach.
 \end{list}
@@ -2998,4 +2998,130 @@ Two networks:
 	\includegraphics[scale=0.5]{189.png}
 \end{center}
 Reducing search breadth using MCTS %TODO
+\section{Deep Graph Networks}
+Why graphs? Context is fundamental for the correct interpretation of information.
+\paragraph{Graph Structured Data}
+\begin{center}
+	\includegraphics[scale=0.5]{191.png}
+\end{center}
+Each node $u$ has a vectorial node label $x_u$, the edge $e_{vu}$ means that they have some sort of relationship, possibly with a label $l_{vu}$
+\paragraph{Deep Learning with Graphs} Hierarchical representation learning allows to efficiently diffuse information through the graph structure. Meaning we may gather more information the "higher level" we look: a single node in the graph yield less information than that node plus its neighbors.\\\textbf{Node representation depends on its context} (shorter first, longer later).
+\paragraph{Predictive Tasks} Many different tasks: node classification, regression\ldots
+\begin{center}
+	\includegraphics[scale=0.5]{192.png}
+\end{center}
+The level of the task is %TODO
+\paragraph{Trasductive Tasks} Given a vectorial and/or structured input $x$, learn to generate a trasductive prediction $y\sim P(y\:|\:x)$ (\textbf{conditional generation})
+\begin{center}
+	\includegraphics[scale=0.5]{193.png}
+\end{center}
+\paragraph{Contractive Approach} Extend the RNN approach to cyclic graphs. Handle loops through fixed points. Impose dynamic weight contraints to yield a contractive state mapping.\\
+A contractive encoding is a dynamical system with a ... behavior %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{194.png}
+\end{center}
+\paragraph{Contextual Approach} A feedforward approach to process grphs. Handle loops through layering. Uses context from frozen earlier layers compute the state on the node at current layer, layerwise training (cascade correlation) %TODO image
+\paragraph{Deep Graph Networks}
+\begin{center}
+	\includegraphics[scale=0.5]{195.png}
+\end{center}
+Encode vertexes and the graph itself into a vector space by means of an adaptive (learnable) mapping. Use the learned encodings to solve predictive and explorative tasks.
+\subsection{CNNs for Graphs}
+\paragraph{Spatial Domain} What is the equivalent of sliding a kernel to aggregate local spatial information? Is centering the convolution on a node and having the surrounding weights placed on the surrounding nodes. But in an image the pixel are always the same amount and ordered, in graphs this is not the case.
+\paragraph{Spectral Domain} $$\mathbb{F}(f*g) = \mathbb{F}(f)\times
+ \mathbb{F}(g)$$
+Exploit the convolution theorem and Fourier analysis to perform convolution in the spectral domain. The eigenvectors of the Laplacian matrix of the graph can be used as basis.
+\subparagraph{Spectral Scenario} Single weighted undirected graph: $w_{ij}>0$ weight of the $i,j$ edge.\\
+Functions $f_i$ attaching values (i.e. labels/signals $x_i$ to nodes $i$ %TODO
+\subparagraph{Spectral Graph Convolution in 1 Slide} Given a graph $G$, the eigendecomposition of its Laplacian provides an orthonormal basis $U$ which allow to compute the graph convolution of its node signals $f$ with a filter 
+$$(f*_G g) = \mathbb{F}^{-1}(\mathbb{F}(f)\mathbb{F}(g)) = UW(\lambda)U^Tf$$
+The final $f$ multiplication brings back to the spatial domain. Our parameters are localized in the Fourier domain, where we project the eigenvectors. So the parameters are specific to a graph: the same set of parameters will not work with two different graphs.
+\paragraph{Graph View on Image Convolutions} Visual convolutions are %TODO
+\paragraph{Node Neighborhoods} Example of 4-neighborhood
+\begin{center}
+	\includegraphics[scale=0.5]{196.png}
+\end{center}
+The filter is centered on the yellow node, and already the question of what's surrounding is questionable. We cannot assume an ordering so we \textbf{create} one.
+%skip the rest
+
+\subsection{Contractive Graph Processing}
+\paragraph{Graph Embedding by Learning-Free Neurons} Each vertex in an input graph is encoded by the hidden layer.
+\begin{center}
+	\includegraphics[scale=0.5]{197.png}
+\end{center}
+$$h(v) = \tanh\left(V x(v)+\sum_{v'\in N(v)} Wh(v')\right)$$ %TODO labels
+To compute $v$ I need $v_1$, but also viceversa. So we encode alternating between the too, iterating until $h(v)$ keeps changing. It converges.\\
+This can be realized with a reservoir in $W$. $W_0$ trained in closed-form (e.g.: pseudo-inversion, ridge regression).
+\subsection{Contextual Graph Processing}
+\paragraph{Neighborhood Aggregation and Layering}
+\begin{center}
+	\includegraphics[scale=0.5]{198.png}
+\end{center}
+At layer $l=0$ we embed $v$ into $h(v)$ with a simple MLP and place it on the original $v$.
+The green box is a MLP:
+\begin{center}
+	\includegraphics[scale=0.5]{199.png}
+\end{center}
+Need to be smart about the unfolding, the number of neighbors: need to be robust in changes in number of neighbors. Idea: \textbf{weight sharing}, single input shared many times. %TODO
+$$h_v^l = \sigma(W_l\text{Agg}(\{h_i^{l-1}\:|\:i\in N(v)\}), \hat{W}_l h_v^{l-1})$$
+\paragraph{Graph Convolutional Layer} %TODO
+$$h_v^{l+1} = \phi $$
+Variants: edge-aware convolutions, attention over neighbors, Laplacian-normalized\ldots
+\paragraph{Graph Isomorphism Network} A.k.a.: sum is better.\\
+A study of GNN expressivity w. r. t. WL tests of graph isomorphism. Choice of aggregation functions influences what structures can be recognized. Propose a simple agregation and concatenation model.\\
+Basically, the NN4G approach
+$$h_v^{(k)} = \text{MLP}^{(k)}\left((1+\epsilon^{(k)})\cdot h_v^{(k+1)} + \sum_{u\in N(v)}\right)$$ %TODO
+$$h_G$$ %TODO
+\paragraph{Graph Attention}
+\begin{center}
+	\includegraphics[scale=0.5]{200.png}
+\end{center}
+Learning to weight contribution of other nodes when aggregating to form the node ambeddings
+$$\overleftarrow{h}_i' = \sigma\left(\sum_{j\in N_i} \alpha_{ij}W\overleftarrow{h}_{ij}\right)$$
+\paragraph{Using Node Embedding} Usual aggregate all node embeddings %TODO
+\paragraph{Training the Embedding} Backpropagate the error through the MLPs %TODO
+\begin{center}
+	\includegraphics[scale=0.5]{201.png}
+\end{center}
+After 3-4 layers typically the embeddings of the nodes don't change.
+\subsection{Unsupervised Structure Embeddings}
+\paragraph{Generative Learning for Graphs} General, efficient and scalable architecture. Handle arbitrary structure (directed, undirected or mixed), labelled edges and nodes. Learn in both supervised and unsupervised way.
+\begin{center}
+	\includegraphics[scale=0.5]{202.png}
+\end{center}
+Expectation-Maximization for unsupervised, or use the graph representation for supervised.
+\paragraph{CGMM} Contextual Graph Markov Model
+\begin{center}
+	\includegraphics[scale=0.5]{203.png}
+\end{center}
+\paragraph{Incremental Construction} %TODO images
+\begin{enumerate}
+	\item Map the graph to the model (base case)
+	\item Perform inference and freeze states (Viterbi to figure out most probable hidden state)\\
+	New labels!
+	\item Add a new layer and use frozen states as observed variables in the graphical model
+	\item Go back to 2.204
+\end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.5]{204.png}
+\end{center}
+\paragraph{CGMM Layer Training} A maximum likelihood approach to learning.
+%TODO formula
+Trained by Expectation-Maximization
+
+\paragraph{CGMM} More layers bring more accuracy, because no longer backpropagation end-to-end but each layer is trained independently. Depth matters more than width.
+%TODO graph image
+\paragraph{Interpreting CGMM} Thanks to the probabilistic approach
+\paragraph{•} \begin{center}
+	\includegraphics[scale=0.5]{205.png}
+\end{center}
+\paragraph{ICGMM} Finer grained control on hidden space.
+\subsection{Advanced Topics}
+\paragraph{Pooling} Standard aggregation operates of predefined node subsets. Ignore community/hierarchical structure in the graph.\\
+Need graph coarsening (pooling) operators: differentiable, graph theoretical, graph signature.\\
+Or layer whose job is to cluster results of previous layer.
+\paragraph{Graph Theoretical Approaches} 
+\paragraph{Graph Variational Autoencoders} Basically VAE that generate adjacency matrices. %TODO
+\paragraph{Language-Based Graph Generation} Reducing it to sequence-to-sequence transduction.
+\paragraph{Explaining Deep Graph Networks} Identify relevant substructures and features for the prediction, or explain prediction locally with counterfactuals.
 \end{document}
