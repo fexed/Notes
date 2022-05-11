@@ -1167,17 +1167,30 @@ int main(int argc, char* argv[]) {
 }
 \end{lstlisting}
 \pagebreak
-\paragraph{}
+\paragraph{Kernels} Even with annotated code, where we don't have to write all the surrounding logic regarding the parallel computations, you have to be aware that you're executing a kernel which is a for loop of independent iterations.\\
+Given some C code, which we want to turn into a kernel, it's relatively easy to turn into an AST (Abstract Syntax Tree). The we can take the list of variables and see those that are read before being written, those are plausibly the parameters we're getting from somewhere else, and those that are written and then never read anymore, which plausibly are the outputs to be reflected on the main memory.\\
+You need a lot of code to \textbf{specify everything}. In particular three kinds of commands that you need to take into account:
 \begin{list}{}{}
-	\item Figure out config
-	\item Define kernel: in OCL compile a string, in CUDA special keywords
-	\item Direct command Kireagh queue: copy out, copy in, kernel exec
+	\item Figure out the configuration of the board
+	\item Define kernel
+	\begin{list}{}{}
+		\item OCL: compile a string, e.g. a file read from somewhere and with a specific command produce a kernel from the string that is directed to the GPU
+		\item CUDA: special keywords that gets the code from the CUDA compiler, which is a wrapper on top of the C++ compiler
+	\end{list}
+	\item Direct command queue: copy out, copy in, kernel exec
 \end{list}
 OpenCL is both for CPU and GPU, so figuring out the config means how many cores on CPU too. On CPU, can do conditionals and divergent code in general, things you can't do on GPU.\\
 OpenCL can be used for FPGAs too.
 \subsection{FPGAs}
-Devices with components that can be programmed to act as other components simply configuring them at the beginning, somehow. Basically: logical gates, small registers, small ALUs\ldots and a FPGA is an array where the single cell can act as if it were: a small (5-7bit input and 1bit output) boolean network, a 1 bit register or as router redirecting to a neighbor cell.
-%TODO columns
+Devices with components that can be programmed to act as other components simply configuring them at the beginning, somehow. Basically: logical gates, small registers, small ALUs\ldots\\
+A FPGA is an array where the single cell can act as if it were:
+\begin{list}{}{}
+	\item a small (5-7bit input and 1bit output) boolean network: made with a kind of EPROM which uses the input bits as an address and stores a single bit output
+	\item a 1 bit register
+	\item a router redirecting to a neighbor cell
+\end{list}
+The columns can host some RAM blocks, 1KB memory for intermediate values, or DSP blocks, basically multiplying addresses (multiply two inputs, adds the result with a register, stores the result of the addition in that register while propagating it too).\\
+These are organized in columns so that there are columns composed solely of cells interleaved with RAM/DSP columns: a cells column may implement a certain function that stores the result in a RAM column, that may be routed in a way to do come floating point operations in a DSP column\ldots
 \subparagraph{RTL} Register Transfer Level code used to program FPGA:
 \begin{list}{}{}
 	\item VHDL
@@ -1190,6 +1203,21 @@ module Name (input [N-1:0]x, input [N-1:0]y, output [N:0]z);
 end module;
 \end{lstlisting}
 \end{list}
-FPGAs are very good at executing pipelined code. 
-\paragraph{HLS} High Level Synthesis tools.
+FPGAs are very good at executing pipelined code, with better performance than CPUs. For example $$\forall\:i\:\:a_i = b_i + c_i$$
+a FPGA may operate with a memory interface able to load $a_i$ and $b_i$ into registers, then an adder which outputs to another register that delivers to a memory interface outputting $c_i$ in the memory. It costs a clock cycle per register level: first level of two registers, then adder and register and a final level with the memory interface which outputs $c_i$. Hence it costs 3 clock cycles.\\
+On a CPU this would've took 2 loads, the add and the final store: 4 operations each of the fetch-decode-execute pipeline.\\\\
+Also, this structure (which is a RAM column for the origin of $a_i,b_i$, a cells column for the memory interface, a DSP column for the add, another cells column for the memory interface and a final RAM column for the output $c_i$) can be easily replicated in multiple copies obtaining an hardware parallel computation of something already much faster than an original CPU code.
+\begin{center}
+	\includegraphics[scale=0.5]{25.png}
+\end{center}
+To achieve this you need a complex workflow which can go multiple ways. The classical is:
+\begin{list}{}{}
+	\item Write some RTL code
+	\item Run the compiler, which solves many problems. In particular, FPGAs are graphs and a task is mapping between tasks which is NP-hard and may take hours to complete
+	\item You get a bit stream file that we send to the FPGA (in configuration mode): is basically the entire configuration of the chip, and takes $\mu$seconds.
+\end{list}
+This is simplified, usually the RTL code is firstly run into simulators to check everything from performance to results.
+\paragraph{Xilinx} Assumes a kernel code written in C with no pointers, no recursion\ldots and other limitations, filled with pragmas with calls to a library of components (e.g. communication channels to interconnect different kernels to a buffer in hardware). With HLS (High Level Synthesis) tools, the "compiler", you get the bit stream.\\
+To operate the bitstream it's a different story. You have .ocl code where normally you have the \texttt{createProgram} with the GPU specified, that outputs a kernel that you can submit for execution in a queue, instead of the GPU you specify the bitstream obtained.\\
+Then, you can run on the FPGA or simulate it on CPU/GPU.
 \end{document}
