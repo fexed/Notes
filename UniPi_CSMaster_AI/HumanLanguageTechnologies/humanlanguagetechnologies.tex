@@ -2405,36 +2405,91 @@ Human-level response generation ability.\\
 \begin{center}
 	\includegraphics[scale=0.5]{121.png}
 \end{center}
-\paragraph{Neural Models for Dialogue Response Generation} %TODO
-\paragraph{Seq2Seq} Can be used, even before transformers and attention were invented.
+\paragraph{Neural Models for Dialogue Response Generation} Like other translation tasks, dialogue response generation can be done with encoder-decoders.
+\paragraph{Seq2Seq} Used even before transformers and attention were invented.
 \begin{center}
 	\includegraphics[scale=0.5]{122.png}
 \end{center}
 \subsection{Retrieval-Based}
 Most system today rely on retrieval
-\paragraph{Templates} Many requests can be answered with templates. Select the most relevant response from a collection of templates, determine the slots required to fill it and instantiate the template with those values. Slots filler %TODO
-\paragraph{Retrieval-Based Chat} Basic idea: given an utterance, find the most similar in the database and return it. Similarity based on exact word match %TODO
+\paragraph{Templates} Many requests can be answered with templates. Select the most relevant response from a collection of templates, determine the slots required to fill it and instantiate the template with those values. Slots filler can be extracted from user utterance or retrieved with a query.
+\paragraph{Retrieval-Based Chat} Basic idea: given an utterance, find the most similar in the database and return it.
+\begin{center}
+	\includegraphics[scale=0.5]{133.png}
+\end{center}
+\textbf{Similarity} based on \textbf{exact word match plus extracted features} regarding discourse.
 \paragraph{Neural Response Retrieval} Idea: use neural models to soften the connection between input and output and do more flexible matching.
+\begin{center}
+	\includegraphics[scale=0.33]{134.png}
+\end{center}
 \subsection{Challenges}
 Four main challenges: incorporating context, coherence, diversity, personality.
-\paragraph{Incorporating Context} To produce sensible response systems may need to incorporate both linguistic and physical context. In long dialogues people keep track of what has been said and what information has been exchanged..
-\paragraph{Coherence} Considering only a single previous utterance will lead to local coherence but global incoherence: need to consider more context. Contrast to MT, where context sometimes is helpful and sometimes isn't.\\\\
-A simple solution is to \textbf{concatenate utterances}.\\
-Or a hierarchical encoder-decoder model, also have utterance-level RNN track overall dialogue state: 2RNN for words, RNN for utterance, no attention.
-\paragraph{Diversity} For translation, there is lexical variation but content remains.\\\\
-Discourse-level Variable Autoencoder\\\\ %TODO
-Diversity promoting objective to mitigate %TODO
+\paragraph{Incorporating Context} To produce sensible response systems may need to \textbf{incorporate both linguistic and physical context}. In long dialogues, people keep track of what has been said and what information has been exchanged. Some experiments try to embed a conversation into vectors.
+\paragraph{Coherence} Considering only a single previous utterance will lead to local coherence but global incoherence: \textbf{need to consider more context}. Contrast to MT, where context sometimes is helpful and sometimes isn't.\\
+A simple solution is to \textbf{concatenate utterances}: some works consider one additional previous context utterance concatenated together, while other works just concatenate together all previous utterances and hope for the best.\\
+Or a \textbf{hierarchical encoder-decoder model}: also have utterance-level RNN track overall dialogue state (2RNN for words, RNN for utterance, no attention).
+\begin{center}
+	\includegraphics[scale=0.5]{135.png}
+\end{center}
+\paragraph{Diversity} For translation, there is lexical variation but content remains. We want to avoid providing always the same answer with the same words. We desire more varied responses.
+\begin{center}
+	\includegraphics[scale=0.5]{136.png}
+\end{center}
+\textbf{Discourse-level Variable Autoencoder}: encode \textbf{entire previous dialog context} as latent variable in VAE, also meta information such as dialog acts.
+\begin{center}
+	\includegraphics[scale=0.5]{137.png}
+\end{center}
+\textbf{Diversity Promoting Objective}: to mitigate the dull response system ("\textit{I don't know}"), a diversity-promoting objective function has been proposed:
+\begin{list}{}{}
+	\item Use \textbf{MMI} (\textbf{Maximum Mutual Information}) rather than cross-entropy, as a loss function
+	\item Penalize high-likelihood responses (anti-LM objective)
+\end{list}
 Basic idea: we want responses that are likely given the context, unlikely otherwise. Method: subtract weighted unconditioned log probability from conditioned probability.
-\paragraph{Personality} If we train on all of our data, our agent will be a mish-mash of personalities. We would like our agents to be consistent.\\\\
-\textbf{Personality infused dialogue} can address this. Train a generation system with controllable "knobs" based on personality traits, e.g. extraversion. Non-neural\\\\ %TODO
-Another idea is \textbf{speaker embeddings}, that may learn general facts associated with the specific speaker.
-\subsection{Google DialogFlow} DialogFlow is %TODO
-\section{•}
+\paragraph{Personality} If we train on all of our data, our agent will be a mish-mash of personalities. We would like our agents to be consistent.\\
+\textbf{Personality infused dialogue} can address this. Train a generation system with controllable "knobs" based on personality traits, e.g. extraversion. Non-neural approach, but well done and perhaps applicable.\\
+Another idea is \textbf{speaker embeddings}, that may learn general facts associated with the specific speaker, e.g.: to the question "\textit{Where do you live?}" it might reply with different answers depending on the speaker embedding.
+
+\subsection{Google DialogFlow} DialogFlow is a natural language understanding platform for designing conversational user interfaces. It generates automatically annotated templates from examples of training phrases that contain parts that can be matched to an existing entity type.
+\begin{center}
+	\includegraphics[scale=0.5]{138.png}
+\end{center}
+Some key concepts:
+\begin{list}{}{}
+	\item \textbf{Agent}: handles conversations with end-users, they can request your Action by typing or speaking to the Assistant
+	\item \textbf{Intent}: an underlying goal or task the user wants to do, e.g. ordering coffee. Each agent may have many intents, and when a user says something, DialogFlow matches the user expression to the best intent
+	\item \textbf{Entity}: each intent parameter has a type, called the entity type, which dictates exactly how data from an end-user expression is extracted
+	\item \textbf{Flows}: are used to define the topics in a conversation and the associated conversational paths
+	\item \textbf{Page}: a conversation can be described and visualized as a state machine, where the states of a session are represented by pages
+	\item \textbf{Fulfillment}: service, app, feed, conversation or other logic that handles an intent and carries out the corresponding Action
+	\item \textbf{Webhook}: services that host the business logic
+	\item \textbf{Handler}: used to control the conversation by creating responses for end-users and/or by transitioning the current page
+\end{list}
+\pagebreak
+\paragraph{Flow} A basic flow is the following
+\begin{center}
+	\includegraphics[scale=0.5]{139.png}
+\end{center}
+\paragraph{Intent} A basic intent contains the following
+\begin{list}{}{}
+	\item \textbf{Training phrases}: example phrases for what the user might say.\\
+	When an user expression resembles one of these phrases, DialogFlow matches the intent.
+	\item \textbf{Actions}: you can define an action for each intent.\\
+	When an intent is matched, DialogGlow provides the action to your system, and you can use the action to trigger certain actions defined in your system.
+	\item \textbf{Parameters}: when an intent is matched at runtime, DialogFlow provides the extracted values from the end-user expression as parameters, which are structured data.
+	\item \textbf{Follow-Up Intents} to automatically set contexts for pairs of intents.\\
+	A follow-up intent is a child of its associated parent intent.
+\end{list}
+When a fulfillment for an intent is enabled, DialogFlow responds to that intent by calling a service that you define.
+\section{Trends and Future of NLP}
 \paragraph{Applications}
 \begin{center}
-	\includegraphics[scale=0.5]{132.png}
+	\includegraphics[scale=0.75]{132.png}
 \end{center}
-\paragraph{Attention Mechanism} Applied to NMY, effective in aspect based sentiment/topic classification and other tasks.
+\pagebreak
+\paragraph{Attention Mechanism} Applied to NMT, effective in aspect based sentiment/topic classification and other tasks.
+\begin{center}
+	\includegraphics[scale=0.5]{140.png}
+\end{center}
 \paragraph{Story of recent years in Deep Learning NLP} General representation learning recipe:
 \begin{list}{}{}
 	\item Convert your data into sequence of integers
@@ -2453,7 +2508,11 @@ We discussed prompting:
 \end{list}
 We discussed model reuse: fine tuning, zero/few-shot learning and prompt tuning.
 \paragraph{Large Language Models and GPT-3} 175B parameters: 96 layers, 96 heads and 128 dimension heads. Same architecture as GPT-2 with the exception of locally banded sparse attention patterns, trained on 500B tokens from Wikipedia. Better than other models at language modeling and related tasks such as story completion.\\
-Possesses flexible "in-context" learning: GPT-3 demonstrates some level of fast adaption\\ %TODO
+Possesses flexible "in-context" learning: GPT-3 demonstrates some level of fast adaption to completely new tasks, happening via "in-context" learning.
+\begin{center}
+	\includegraphics[scale=0.5]{141.png}\\
+	The LM training (outer loop) is learning how to learn from the context (inner loop)
+\end{center}
 GPT-3 is only available via an inference API. Many interesting applications that demonstrate its flexible few-shot learning abilities, e.g.: natural language to Bash, databases in natural language, blending concepts\ldots\\
 It has some limitations: seems to do poorly on more structured problems that involve decomposing into atomic/primitive skills (RTE, arithmetic, word problems, analogy making\ldots), doesn't seem to exhibit human-like generalization (systematicity).
 \subsection{Compositional Representations and Systematic Generalization}
@@ -2468,24 +2527,57 @@ Compositionaliyy of representations is a helpful prior that could lead to system
 \end{list}
 \paragraph{Tree Reconstruction Error} (TRE): Compositionality of representations is about how well the representation approximates an explicitly homomorphic function in a learnt representation space.
 %skip
-\subsection{Assessing} %TODO
-\paragraph{Neural Network Effectiveness} %TODO image
-\paragraph{Understanding Models by Breaking Them} Are our models robust to innocuous changes in their input? By robust, in this case we mean their outputs don't change.
-\paragraph{Remark}
+\subsection{Assessing Deep Learning for NLP}
+\paragraph{Neural Network Effectiveness} It's wild that any of our model work at all. Their behavior is an emergent property of data and our design decisions. Accuracy on a held out test set is not sufficient to fully characterize them.
+\paragraph{Understanding Models by Breaking Them} Are our models robust to innocuous changes in their input? By robust, in this case we mean their outputs don't change. For example, if a QA model behaves well but changes answer when presented with a new, irrelevant sentence, the correct interpretation is that the model is not really working. This applies to other changes like contractions (e.g. "what's" instead of "what has") and the like.
+\paragraph{Remarks}
 \begin{list}{}{}
-	\item Neural Models are complex, fascinating objects that we don't currently understand, but we're making strides to understand them better
-	\item A wide variety of analysis methods have been developed %TODO
+	\item Neural Models are complex, fascinating objects that \textbf{we don't currently understand}, but we're making strides to understand them better
+	\item A wide variety of analysis methods have been developed for:
+	\begin{list}{}{}
+		\item understanding a model's behavior on specific phenomena
+		\item understanding what a model learns about a topic or task
+		\item understanding what seemingly innocuous input changes make a model fail
+		\item many other things, more every day
+	\end{list}
 \end{list}
 \subsection{Inferring From Memory}
-\paragraph{Current State} Transformer models have become quite popular and used everywhere. Neural methods are leading to a renaissance\ldots %TODO
+\paragraph{Current State} Transformer models have become quite popular and used everywhere. Neural methods are leading to a renaissance for all language generation tasks (i.e.: MT, dialogue, QA, summarizations\ldots)\\
+Real scientific question of whether we need explicit, localist language and knowledge representations and inferential mechanisms.
 \paragraph{Memory and Inference} Still have very primitive methods for building and accessing memories or knowledge. Current models have almost nothing for developing and executing goals and plans. Difficult to collect and count.
 \paragraph{Inter-Sentence} We still have inadequate abilities for understanding and using inter-sentential relationships. We still cant', at a large scale, do elaborations from a situation using commons sense knowledge but also having bias.
-\paragraph{Limits of Single Task Learning} Most models today are single task. Great performance improvements, %TODO
-\paragraph{Multiple Tasks} How to express different task in the same framework it's still very hard.
-\paragraph{Deep Linguistic Analysis} %TODO
-%TODO
-\paragraph{Back-Translation} Have two machine translation models going in opposite directions. No longer circular, models never see "bad translations" but only bad inputs.
-\subsection{Huge Models} %TODO
+\paragraph{Limits of Single Task Learning} Most models today are single task. Great performance improvements, but: projects starts from random, single unsupervised task can't fix it\ldots we will never get to a truly general NLP model this way.
+\paragraph{Multiple Tasks} How to express different task in the same framework it's still very hard. The obstacle is \textbf{joint many-task learning}, which is hard:
+\begin{list}{}{}
+	\item Usually restricted to lower layers
+	\item Usually helps only if tasks are related
+	\item Often hurts performance if tasks are not related
+	\item We lose powerful accuracy improvement techniques such as task-specific architecture and hyperparameter tuning
+\end{list}
+\paragraph{Deep Sequence Models} RNNs are shown to be effective for a variety of language processing tasks. Somewhat surprisingly, these seemingly purely sequential models are very capable at modeling syntactic phenomena, and using them result in very strong dependency parsers for a variety of languages. Empirical evidence for their capabilities of learning the subject-verb agreement, relation in naturally occurring text, from relatively indirect supervision.
+\paragraph{The 3 Equivalent NLP-Complete Super Tasks} Language modeling, question answering and dialogue systems.
+\subparagraph{QA Completeness} Every task may be recast as a QA task.\\
+An obstacle: necessary inputs to QA. We need to \textbf{be able to understand text, images and databases} to really answer all kinds of questions.
+\subparagraph{Seq2SQL}
+\begin{center}
+	\includegraphics[scale=0.5]{142.png}
+\end{center}
+Another obstacle: architecture engineering. We don't yet know the right model architecture for comprehensive QA and joint multitask learning. Architecture search was an active area of research, but usually applied to simpler/known tasks\ldots
+\begin{center}
+	\includegraphics[scale=0.5]{143.png}
+\end{center}
+Also, difficult to obtain significant benefits from tree structure models: non GPU friendly, high sensitivity to parse errors.\\
+Convolutional Reasoning without trees.
+\paragraph{Machine Translation} The problem with pre-training is that there's no interaction between the two languages during it.\\
+\textbf{Self-Training}: label unlabeled data to get noisy training examples. Might be circular.
+\begin{center}
+	\includegraphics[scale=0.5]{144.png}
+\end{center}
+\textbf{Back-Translation}: have two machine translation models going in opposite directions. No longer circular, models never see "bad translations" but only bad inputs.
+\begin{center}
+	\includegraphics[scale=0.5]{145.png}
+\end{center}
+\subsection{Huge Models} For several tasks, performance seems to increase with $\log($model size$)$.
 \paragraph{GPT-2 Reactions} Pro-Release \begin{list}{}{}
 	\item This model isn't much different from existing work
 	\item Not long until these models are easy to train
@@ -2495,7 +2587,9 @@ Compositionaliyy of representations is a helpful prior that could lead to system
 	\item Reproducibility is crucial for science
 \end{list}
 Against-Release \begin{list}{}{}
-	\item Danger of fake news %TODO
+	\item Danger of fake reviews, news comments\ldots, but already done by companies and governments
+	\item Precedent: "even if this model isn't dangerous, later ones might be"
+	\item Smaller model still being released
 \end{list}
 Who should make these decisions? NLP experts, computer security experts, technology and society experts, ethics experts\ldots?\\
 Need for more interdisciplinary science. Many other examples of NLP with big social ramifications, especially with regards to biases/fairness.
@@ -2534,4 +2628,5 @@ Systems 1 and 2 may explain the current dichotomy in approaches to AI:
 \end{list}
 An important goal of AI research would be to overcome this dichotomy.
 %TODO prospect theory
+
 \end{document}
