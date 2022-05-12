@@ -57,7 +57,9 @@
 \renewcommand*\contentsname{Index}
 
 \maketitle
+\begin{multicols}{2}
 \tableofcontents
+\end{multicols}
 \pagebreak
 \section{Introduction}
 Prof.s: Davide Bacciu and Antonio Carta
@@ -2775,14 +2777,15 @@ Q-values are differentiable with respect to $a$: deterministic policy gradients 
 \end{list}
 \subsection{Model-Based Reinforcement Learning}
 Up to now: learn value function and policy directly from experience, model-free RL.\\
-In this section:\begin{list}{}{}
-	\item \textbf{learn model} directly from experience
-	\item use \textbf{planning to construct a value function} or \textbf{policy}
-	\item model-based RL
+In this section: model-based reinforcement learning\begin{list}{}{}
+	\item \textbf{Learn the model} directly from experience
+	\item Use \textbf{planning to construct a value function} or \textbf{policy}
 \end{list}
 Integrate learning and planning (= solving an MDP) into a single architecture.
-\paragraph{Model-free} no model, learn value function and/or policy from experience
-\paragraph{Model-based} learn %TODO
+\begin{list}{}{}
+	\item Model-free: no model, \textbf{learn} value function and/or policy from experience
+	\item Model-based: learn a model from experience, \textbf{plan} a value function and/or policy from model
+\end{list}
 \paragraph{Advantages}\begin{list}{}{}
 	\item Can efficiently learn model by supervised learning methods
 	\item Can reason about model uncertainty
@@ -2799,17 +2802,27 @@ $$S_{t+1} = P_\eta(S_{t+1}\:|\:S_t,A_t)$$
 $$R_{t+1} = R_\eta(R_{t+1}\:|\:S_t,A_t)$$
 Typically assume conditional independence between state transitions and rewards
 $$P(S_{t+1},R_{t+1}\:|\:S_t,A_t) = P(S_{t+1}\:|\:S_t,A_t)\cdot P(R_{t+1}\:|\:S_t,A_t)$$
-\paragraph{Model Learning} Estimate model $M_\eta$ from experience $\{S_1,A_1,R_2,\ldots,S_T\}$. Supervised training task %TODO
+\paragraph{Model Learning} Estimate model $M_\eta$ from experience $\{S_1,A_1,R_2,\ldots,S_T\}$. Supervised learning task 
+$$S_1;A_1\rightarrow R_2;S_2$$
+$$S_2;A_2\rightarrow R_3;S_3$$
+$$\vdots$$
+$$S_{T-1};A_{T-1}\rightarrow R_T;S_T$$
+\begin{list}{}{}
+	\item Learning $s,a\rightarrow r$ is a \textbf{regression problem}
+	\item Learning $s,a\rightarrow s'$ is a \textbf{density estimation problem}
+\end{list}
+Pick an adequate loss function, e.g. MSE, KL divergence\ldots\\
+Find parameters $\eta$ that minimize the empirical loss.
 \subparagraph{Model Learning with Table Lookup} Model is an explicit MDP $(\hat{P},\hat{R})$\\
-Count visits $N(s,a)$ to each state-action pair
+Count visits $N(s,a)$ to each state-action pair, with indicator variable $=1\Leftrightarrow S_t=s, A_t=a, S_{t+1}=s'$
 $$\hat{P}_{ss'}^a=\frac{1}{N(s,a)}\sum_{t=1}^T\mathbf{1}(S_t,A_t,S_{t+1};s,a,s')$$
-With indicator variable $=1\Leftrightarrow S_t=s, A_t=a, S_{t+1}=s'$
 $$\hat{R}_s^a=\frac{1}{N(s,a)}\sum_{t=1}^T\mathbf{1}(S_t,A_t;s,a)R_t$$
 Alternatively:
 \begin{list}{}{}
 	\item At each time step $t$ record experience tuple $(S_t,A_t,R_{t+1},S_{t+1})$
 	\item To sample the model randomly pick tuple matching $(s,a,\:,\:)$
 \end{list}
+\pagebreak
 \subparagraph{Example} 
 \begin{multicols}{2}
 Two states, A, B, no discounting, 8 episodes of experience:
@@ -2831,11 +2844,13 @@ We've constructed a table lookup from experience
 \end{multicols}
 \paragraph{Planning with a Model} Given a model $M_\eta = (P_\eta, R_\eta)$ to plan we solve the MDP $(S,A,P_\eta,R_\eta)$ using your favorite planning algorithm: value iteration, policy iteration, tree search\ldots
 \paragraph{Sample-Based Planning} Simple but powerful approach to planning: use the model only to generate samples.\\
-Sample experience from model %TODO
-$$S_{t+1}$$
-$$R_{t+1}$$
-Apply model-free RL to sample, e.g.: MC control, sarsa %TODO
-\subparagraph{Example} \begin{multicols}{3}
+Sample experience from model
+$$S_{t+1} \sim P_\eta(S_{t+1}\:|\:S_t,A_t)$$
+$$R_{t+1} = R_\eta(R_{t+1}\:|\:S_t,A_t)$$
+Apply model-free RL to sample, e.g.: MC control, sarsa, Q-learning\ldots\\
+Sample-based planning methods are often more efficient.
+\subparagraph{Example} Construct a table-lookup from real experience, then apply model-free reinforcement learning to sampled experience.
+\begin{multicols}{3}
 Real Experience
 \begin{enumerate}
 	\item A, 0, B, 0
@@ -2862,39 +2877,42 @@ Sampled Experience
 	\item A, 0, B, 1
 	\item B, 1
 	\item B, 0
-\end{enumerate} %TODO
+\end{enumerate}
 \end{multicols}
-\paragraph{Planning with an Inaccurate Model} Given an imperfect model $(P_\eta, R_\eta)\neq (P,R)$, the performance of model-based RL is limited to optimal policy for approximate MDP $(S,A,P_\eta,R_\eta)$, i.e.: model-based RL is only as good as the estimated model.\\
-When the model is inaccurate, planning process will compute a suboptimal policy:
+\paragraph{Planning with an Inaccurate Model} Given an imperfect model $(P_\eta, R_\eta)\neq (P,R)$, the performance of model-based RL is limited to optimal policy for approximate MDP $(S,A,P_\eta,R_\eta)$, i.e.: \textbf{model-based RL is only as good as the estimated model}.\\
+When the model is inaccurate, the planning process will compute a suboptimal policy:
 \begin{list}{}{}
-	\item Solution 1: when model is wrong, use model-free RL
-	\item Solution 2: reason explicitly about model uncertainty
+	\item Solution 1, when model is wrong, use model-free RL
+	\item Solution 2, reason explicitly about model uncertainty
 \end{list}
+\pagebreak
+\subsubsection{Integrated Architecture}
 \paragraph{Real and Simulated Experience} Consider two sources of experience:
 \begin{list}{}{}
 	\item Real Experience: sampled from environment (true MDP)
 	$$S'\sim P_{ss'}^a$$
 	$$R = R_s^a$$
 	\item Simulated Experience: sampled from model (approximate MDP)
-	$$S'\sim$$ %TODO
-	$$R = $$
+	$$S'\sim P_\eta(S'\:|\:S,A)$$
+	$$R = R_\eta(R\:|\:S,A)$$
 \end{list}
-\paragraph{Integrating Learning and Planning} %TODO
-Dyna architecture
+\paragraph{Integrating Learning and Planning} In model-free RL we don't have the model, and we learn a value function and/or policy from \textbf{real} experience.\\
+In model-based RL, with sample-based planning, we learn a model from real experience and we plan value function and/or policy from \textbf{simulated} experience.\\
+\textbf{Dyna} architecture:
 \begin{list}{}{}
-	\item Learn a model from experience
-	\item Learn and plan value function and/or policy from real and simulated experience
+	\item Learn a model from real experience
+	\item Learn and plan value function and/or policy from both real and simulated experience
 \end{list}
 \begin{center}
-	\includegraphics[scale=0.5]{185.png}
+	\includegraphics[scale=0.5]{185.png}\\
+A loop on real world experience, and an internal loop on few (20-30) example of virtual experience.
 \end{center}
-A for loop on real world experience, and an internal for loop on few 20-30 example of virtual experience.
-\paragraph{Forward Search}
+\subsubsection{Learning with Simulation}
+\paragraph{Forward Search} No need to solve the whole MDP, just sub-MDP starting from now.
 \begin{center}
 	\includegraphics[scale=0.5]{186.png}
 \end{center}
-No need to solve the whole MDP, just sub-MDP starting from now.\\
-Forward search algorithms select the best action by lookahead. They build a search tree with the current state $s_t$ at the root, using a model of the MDP to look ahead.
+Forward search algorithms select the best action by lookahead: they build a search tree with the current state $s_t$ at the root, using a model of the MDP to look ahead.
 \paragraph{Simulation-Based Search} Forward search paradigm using sample-based planning.\\
 Simulate episodes of experience \textbf{from now} with the model 
 $$\{s_t^k,A_t^k,R_{t+1}^k;\ldots,S_T^k\}\sim M_v$$
@@ -2910,7 +2928,8 @@ Apply model-free RL to simulated episodes, e.g. Monte-Carlo:
 	\item Select current (real) action with maximum value
 	$$a_t=\arg\max_{a\in A} Q(s_t,a)$$
 \end{list}
-\paragraph{MCTS} Monte-Carlo Tree Search.\\
+\paragraph{MCTS} Monte-Carlo Tree Search.
+\subparagraph{MCTS: Evaluate}
 Given a model $M_v$
 \begin{list}{}{}
 	\item Simulate $K$ episodes from current state $s_t$ using current simulation policy $\pi$, just act in simulation without exploring
@@ -2921,13 +2940,13 @@ Given a model $M_v$
 \end{list}
 After search is finished, select current (real) action with maximum value in search tree
 $$a_t=\arg\max_{a\in A} Q(s_t,a)$$
-\subparagraph{Simulate} In MCTS the simulation policy $\pi$ improves.\\
+\subparagraph{MCTS: Simulate} In MCTS the simulation policy $\pi$ improves.\\
 Each simulation consists of two phases (in-tree, out-of-tree):
 \begin{list}{}{}
 	\item Tree policy, improves: pick actions to maximize $Q(S,A)$\\
-	Used whenever it can be applied, so when I'm \textit{in} an already explored \textit{tree}, before the frontier.
+	Used whenever it can be applied, so when I'm in an already explored tree, before the frontier (in-tree)
 	\item Default policy, fixed: pick actions randomly.\\
-	Used after the frontier.
+	Used after the frontier (out-of-tree)
 \end{list}
 Repeat, for each simulation:
 \begin{list}{}{}
@@ -2936,15 +2955,33 @@ Repeat, for each simulation:
 \end{list}
 Monte-Carlo control applied to simulated experience.\\
 Converges to the optimal search tree $Q(S,A)\rightarrow q_*(S,A)$
-\paragraph{MC vs TD Search} For model-free reinforcement learning, bootstrapping is helpful %TODO
-also for model-based
-\paragraph{Temporal-Difference Search} Simulation-based, using TD instead of MC (bootstrapping).\\
-MCTS applies MC control to sub-MDP from now $\leftrightarrow$ TD search applies SARSA to sub-MDP from now.
+\subparagraph{Advantages of MCTS}
+\begin{list}{}{}
+	\item Highly selective best-first search
+	\item Evaluates states dynamically
+	\item Uses sampling to break the curse of dimensionality
+	\item Works for black-box models (only requires samples)
+	\item Computationally efficient
+\end{list}
+\paragraph{MC vs TD Search} For model-free reinforcement learning, bootstrapping is helpful:
+\begin{list}{}{}
+	\item TD learning reduces variance but increases bias
+	\item TD learning is usually more efficient than MC
+	\item TD($\lambda$) can be much more efficient than MC
+\end{list}
+For simulation-based search, bootstrapping is also helpful:
+\begin{list}{}{}
+	\item TD search reduces variance but increases bias
+	\item TD search is usually more efficient than MC search
+	\item TD($\lambda$) search can be much more efficient than MC search
+\end{list}
+\paragraph{Temporal-Difference Search} Simulation-based, using TD instead of MC (bootstrapping): MCTS applies MC control to sub-MDP from, while TD search applies SARSA to sub-MDP from now.
 \begin{list}{}{}
 	\item Simulates episodes from the current (real) state $s_t$
 	\item Estimate action-value function $Q(s,a)$
-	\item %TODO
-	\item Select actions based on action-values %TODO
+	\item For each step of simulation, update action-values by SARSA
+	$$\Delta Q(S,A)=\alpha(R+\gamma Q(S',A') - Q(S,A))$$
+	\item Select actions based on action-values $Q(s,a)$ (i.e. $\epsilon$-greedy)
 	\item May also use function approximation for $Q$
 \end{list}
 \subsection{Three Types of Reinforcement Learning} \begin{multicols}{3}
@@ -2965,7 +3002,10 @@ MCTS applies MC control to sub-MDP from now $\leftrightarrow$ TD search applies 
 \paragraph{Go} Ancient board game, 2500 years old, considered the hardest classic board game and a grand challenge for AI. Traditional game-tree search has long failed Go.\\
 Rules are simple:
 \begin{list}{}{}
-	\item %TODO
+	\item Played on 19$\times$19, but also 13$\times$13 or 9$\times$9 boards
+	\item Black and white place alternately
+	\item Surrounded stones are captured and removed
+	\item The player with more territory wins
 \end{list}
 \subparagraph{Position Evaluation} How good is position $s$? Reward function, undiscounted:
 \begin{list}{}{}
@@ -2984,12 +3024,15 @@ $$v_*(s) = \max_{\pi_B}\min_{\pi_W} v_\pi(s)$$
 \end{center}
 \paragraph{Alpha-Go} Combines what we've seen so far: value function learning, policy gradient and MCTS. It has a CNN used to extract a meaningful state representation.
 Two networks:
-\begin{list}{}{} %TODO images
-	\item \textbf{Value Network}: is the player going to win with the current board?
-	\item \textbf{Policy Network}: how much preference for a specific move in the current board?
+\begin{list}{}{}
+	\item \textbf{Value Network} $V(s)$: is the player going to win with the current board?
+	\item \textbf{Policy Network} $P(a\:|\:s)$: how much preference for a specific move in the current board?
 \end{list}
+\begin{center}
+	\includegraphics[scale=0.33]{207.png}
+\end{center}
 \paragraph{Supervised-Reinforcement Learning Pipeline}
-\subparagraph{Offline Phase} Fit the network supervisedly to the games played by experts
+\subparagraph{Offline Phase} Fit the network supervisely to the games played by experts
 \begin{center}
 	\includegraphics[scale=0.5]{188.png}
 \end{center}
@@ -2997,7 +3040,11 @@ Two networks:
 \begin{center}
 	\includegraphics[scale=0.5]{189.png}
 \end{center}
-Reducing search breadth using MCTS %TODO
+Reducing search breadth using MCTS: bias MCTS towards most promising branches by policy network
+\begin{center}
+	\includegraphics[scale=0.5]{208.png}
+\end{center}
+\pagebreak
 \section{Deep Graph Networks}
 Why graphs? Context is fundamental for the correct interpretation of information.
 \paragraph{Graph Structured Data}
