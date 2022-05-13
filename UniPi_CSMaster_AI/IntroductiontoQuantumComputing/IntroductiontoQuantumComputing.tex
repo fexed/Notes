@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
+\usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
@@ -62,7 +63,7 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-Prof.: Anna Bernasconi, Gianna del Corso
+Prof.: Anna Bernasconi, Gianna del Corso, Roberto Bruni
 \paragraph{What is Quantum Computing?} Quantum computing concerns the \textbf{relationship between physics and computer science}. Physical phenomenon apply to information and computation: a \textbf{computational process is seen as a physical process}, performed on a machine whose operation obey certain physical laws.\\
 The classical theory of computation is based on the Universal Turing Machine, a mathematical abstraction and \textbf{not a physical device}, that works according to a set of rules and principles enunciated in 1936 and elaborated in the 1940s.
 \subparagraph{Church-Turing Thesis} \textit{Every function which would naturally be regarded as computable can be computed by the Universal Turing Machine}.\\
@@ -2080,10 +2081,10 @@ $\overline{q}$ denotes a quantum register, a finite sequence of \textbf{distinct
 	Yes/true is 1 and no/false is 0
 \end{list}
 Note: for any state $\ket{\psi}$ we can find a unitary transformation $U$ such that with \texttt{q:=$\ket{0}$;q:=U[q]} we get \texttt{q=$\ket{\psi}$}, so being able to initialize exclusively to $\ket{0}$ is not a limitation.\\
-Also note $M = \{M_m\} = \{M_{m_1},\ldots,M_{m_n}\}$ is a family of measurements.
+Also note that $M = \{M_m\} = \{M_{m_1},\ldots,M_{m_n}\}$ is a family of measurements.
 \paragraph{Difference with the classical case for conditionals} The state of the program is changed after performing the measure.\\
-"\textbf{Quantum data, classical flow}", referring to conditional and loops: in order to make a decision we must make a measure.
-\paragraph{•} \texttt{qvar : S $\rightarrow$ P(qVar)} variables appearing in a statement. For example:
+"\textbf{Quantum data, classical flow}", referring to conditional and loops: in order to make a decision we must make a measure.\\
+\texttt{qvar} : S $\rightarrow \mathbb{P}$(qVar) variables appearing in a statement. For example:
 \begin{list}{}{}
 	\item qvar(skip) = emptyset
 	\item qvar(q:=|0>) = \{q\}
@@ -2095,34 +2096,35 @@ Also note $M = \{M_m\} = \{M_{m_1},\ldots,M_{m_n}\}$ is a family of measurements
 Given a statement \texttt{S}, $H_{all}$ can be understood as $H_{qvar(\texttt{S})}$
 \paragraph{Quantum Configuration} $\langle \texttt{S},\rho\rangle$ where
 \begin{list}{}{}
-	\item \texttt{S} is a quantum statement or, taking into account the termination of the computation, the special statement for the empty program ($\epsilon$)\\
+	\item \texttt{S} is a \textbf{quantum statement} or, taking into account the termination of the computation, the special statement for the empty program ($\epsilon$)\\
 	$\langle \texttt{S},\rho\rangle$ = nothing to be done, terminated in state $\rho$
-	\item $\rho\in D(H_{all})$ is a partial density operators denoting the global state of quantum variables.\\
-	$tr(\rho)=1\Rightarrow$ density operator, $tr(\rho)\leq 1\Rightarrow$ partial density operator.\\
+	\item $\rho\in D(H_{all})$ is a \textbf{partial density operator} denoting the global state of quantum variables.\\
+	$tr(\rho)=1\Rightarrow$ density operator, $tr(\rho)\leq 1\Rightarrow$ partial density operator (with $tr(\mathbf{A}) = \sum_i a_{ii}$).\\
 	$D(H)$ is the sate of all partial density operators of Hilbert space $H$
 \end{list}
 \paragraph{Small Step Semantics} Transition system $\langle \texttt{S}, \rho\rangle\rightarrow\langle\texttt{S}',\rho'\rangle$\\
 Transition between configurations to be read as "after executing one step of \texttt{S} in $\rho$, we reach the state $\rho'$ where $\texttt{S}'$ is yet to be executed. If $\texttt{S}'=\epsilon$, then the program terminates in state $\rho'$.
 \subparagraph{Inference Rules} Induction on the structure of the statements.
-$$\frac{\hbox{premises}}{\hbox{conclusion}}$$
+$$\frac{\text{premises}}{\text{conclusion}}$$
 To be read as "if the premises hold, then the conclusion is true".\\
 Some \textbf{axioms}, rules without premises:
 \begin{list}{}{}
-	\item[(\texttt{SK})] $\frac{\hbox{}}{\langle\texttt{skip},\rho\rangle\rightarrow\langle\epsilon,\rho\rangle}$
-	\item[(\texttt{IN})] $\frac{\hbox{}}{\langle\texttt{q:=}\ket{0},\rho\rangle\rightarrow\langle\epsilon,\rho_0^q\rangle}$ with $rho_0^q = \ket{0}_q\bra{0}\rho\ket{0}_q\bra{0} + \ket{0}_q\bra{1}\rho\ket{1}_q\bra{0}$ (transform all zero of $q$ into zero and all ones of $q$ into ones) %TODO format
-	\item[(\texttt{UT})] $\frac{}{\langle \overline{q}\texttt{:=U[}\overline{q}\texttt{]},\rho\rangle\rightarrow\langle\epsilon U\rho U^*\rangle}$
-	\item[(\texttt{SC}] $\frac{\langle \texttt{S1},\rho\rangle\rightarrow\langle \texttt{S1}',\rho'\rangle}{\langle\texttt{S1;S2},\rho\rangle\rightarrow\langle\texttt{S1}'\texttt{;S2},\rho'\rangle}$\\
-	Special case for $\texttt{S1}' = \epsilon$ %TODO
-	\item[(\texttt{IF})]
-	\item[(\texttt{LO})]
-	\item[(\texttt{LI})]
-	\item[(\texttt{IF$'$})]
+	\item[(\texttt{SK})] $\frac{\displaystyle\text{}}{\displaystyle\langle\texttt{skip},\rho\rangle\rightarrow\langle\epsilon,\rho\rangle}$
+	\item[(\texttt{IN})] $\frac{\displaystyle\text{}}{\displaystyle\langle\texttt{q:=}\ket{0},\rho\rangle\rightarrow\langle\epsilon,\rho_0^q\rangle}$ with $\rho_0^q = \ket{0}_q\bra{0}\rho\ket{0}_q\bra{0} + \ket{0}_q\bra{1}\rho\ket{1}_q\bra{0}$\\Transforms all zero of $q$ into zero and all ones of $q$ into ones
+	\item[(\texttt{UT})] $\frac{\displaystyle}{\displaystyle\langle \overline{q}\texttt{:=U[}\overline{q}\texttt{]},\rho\rangle\rightarrow\langle\epsilon U\rho U^*\rangle}$
+	\item[(\texttt{SC})] $\frac{\displaystyle\langle \texttt{S1},\rho\rangle\rightarrow\langle \texttt{S1}',\rho'\rangle}{\displaystyle\langle\texttt{S1;S2},\rho\rangle\rightarrow\langle\texttt{S1}'\texttt{;S2},\rho'\rangle}$\\
+	Special case for $\texttt{S1}' = \epsilon$: $\frac{\displaystyle\langle \texttt{S2},\rho\rangle\rightarrow\langle \texttt{S2}',\rho'\rangle}{\displaystyle\langle\epsilon\texttt{;S2},\rho\rangle\rightarrow\langle\texttt{S2}',\rho'\rangle}$
+	\item[(\texttt{IF})] $\frac{\displaystyle(\rho_m\neq0)}{\displaystyle\langle\texttt{if }(\underset{m}{\square}M[\overline{q}]=m\rightarrow S_m)\texttt{ fi}, \rho\rangle\rightarrow\langle S_m,M_m\rho M_m^*\rangle}$ with $\rho_m = tr(M_m\rho M_m^*)$
+	\item[(\texttt{LO})] $\frac{\displaystyle(\rho_0\neq 0)}{\displaystyle\langle\texttt{while }M[\overline{q}]=1\texttt{ do }S\texttt{ od},\rho\rangle\rightarrow\langle\epsilon,M_0\rho M_0^*\rangle}$ with $\rho_0 = tr(M_0\rho M_0^*)$
+	\item[(\texttt{LI})] $\frac{\displaystyle(\rho_1\neq 0)}{\displaystyle\langle\texttt{while }M[\overline{q}]=1\texttt{ do }S\texttt{ od},\rho\rangle\rightarrow\langle S;\texttt{while }M[\overline{q}]=1\texttt{ do }S\texttt{ od},M_1\rho M_1^*\rangle}$ with $\rho_1 = tr(M_1\rho M_1^*)$
+	\item[(\texttt{IF$'$})] 
+	$\frac{\displaystyle\rho_m=\frac{M_m\rho M_m^*}{\rho_m}}{\displaystyle\langle\texttt{if }(\underset{m}{\square}M[\overline{q}]=m\rightarrow S_m)\texttt{ fi}, \rho\rangle\rightarrow^{\rho_m}\langle S_m,\rho_m\rangle}$ probabilistic version of (\texttt{IF})
 \end{list}
 Non-deterministic rotation system.
-\paragraph{Denotational Semantics} Assign the transformation function from input to output for every statement. We exploit %TODO
-We look at all the possible executions %TODO
-We write $$\langle S,\rho\rangle\rightarrow^n\langle S', \rho'\rangle \Leftrightarrow \langle S,\rho\rangle\rightarrow \langle S_1,\rho_1\rangle\rightarrow\ldots\rightarrow\langle S_{n-1},\rho_{n-q}\rangle\rightarrow\langle S',\rho'\rangle$$
-$$\langle S,\rho\rangle\rightarrow^*\langle S',\rho'\rangle\Leftrightarrow\exists\:n\in\mathbb{N}\langle S,\rho\rangle\rightarrow^n\langle S',\rho'\rangle$$
+\paragraph{Denotational Semantics} Assign the transformation function from input to output for every statement. We exploit\ldots\\ %TODO
+We look at all the possible executions\ldots\\ %TODO
+We write $$\langle S,\rho\rangle\rightarrow^n\langle S', \rho'\rangle \Leftrightarrow \langle S,\rho\rangle\underset{n\text{ steps}}{\underbrace{\rightarrow \langle S_1,\rho_1\rangle\rightarrow\ldots\rightarrow\langle S_{n-1},\rho_{n-q}\rangle\rightarrow}}\langle S',\rho'\rangle$$
+$$\langle S,\rho\rangle\rightarrow^*\langle S',\rho'\rangle\Leftrightarrow\exists\:n\in\mathbb{N}\:\:\langle S,\rho\rangle\rightarrow^n\langle S',\rho'\rangle$$
 $[S] : D(H_{all})\rightarrow D(H_{all})$ defined by the following
 $$[S]\rho =\sum\{\rho'\:|\:\langle S,\rho\rangle\rightarrow^*\langle\epsilon,\rho'\rangle\}$$
 Important to account for all paths. \textbf{Lemma}: it's a linear function. Proof by structural induction, all the transformations applied at each steps are linear.
@@ -2132,7 +2134,6 @@ So it's equal to stopping now or appling to the resulting state.
 Intuitively, $tr([S]\rho)$ is the probability of termination from $\rho$, meaning that the probability of divergence is\\$tr(\rho)-tr([S]\rho)$.
 \paragraph{Hoare Triples in Classical Programming Recap} $$\{P\}S\{Q\}$$
 For any input that satisfies the predicate $P$, the execution of $S$ will produce an output that satisfies $Q$
-\pagebreak
 \paragraph{Quantum Predicate} In classical logic, a predicate expresses some properties of individuals or systems. In the quantum world, a quantum predicate must be something that we can physically observe.\\
 In general, we take an Hermitian operator $M$ in its Hilbert space $H$ and we know that $$M\ket{\phi}=\lambda\ket{\psi}$$ with $\lambda\in\mathbb{R}$ eigenvalues and $\psi$ eigenvector. The eigenspace is
 $$X_\lambda=\{\ket{\psi}\in H\:|\:M\ket{\phi} = \lambda\ket{\psi}\}$$ and $\lambda$ can be understood as the truth value of the propositions in $X_\lambda$. We can restrict the eigenspace in the range $[0,1]$ by requiring $0\leq \lambda\leq 1$
@@ -2149,23 +2150,22 @@ $wp(\epsilon)(N)$ is the weakest precondition of $N$ with respect to the transfo
 \end{list}
 \paragraph{Correctness}
 \begin{list}{}{}
-	\item \textbf{Total Correctness} $vDash_{tot}\{P\}S\{Q\}\equiv\{P\}[S]\{Q\}$ if $\forall\:\rho\in D(H_{all}) tr(P\rho)\leq tr(Q[S]\rho)$ 
-	\item \textbf{Partial} $vDash_{par}\{P\}S\{Q\}$ if $tr(P\rho)\leq tr(Q[S]\rho)+(\underset{\hbox{divergence probability}}{tr(\rho)-tr([S]\rho)})$ accounts for divergence\\
+	\item \textbf{Total Correctness} $$\forall\:\rho\in D(H_{all}) tr(P\rho)\leq tr(Q[S]\rho)\Rightarrow\:\vDash_{tot}\{P\}S\{Q\}\left(\equiv\{P\}[S]\{Q\}\right)$$
+	\item \textbf{Partial} $$tr(P\rho)\leq tr(Q[S]\rho)+(\underset{\text{divergence probability}}{tr(\rho)-tr([S]\rho)})\Rightarrow\:\vDash_{par}\{P\}S\{Q\}$$ Accounts for divergence.\\
 	Intuitively, if input $\rho$ satisfies the precondition $P$ then either $S$ terminates on $\rho$ and $[S]\rho$ satisfies $Q$ or $S$ diverges on $\rho$
 \end{list}
-These relations are also linear: for both total or partial, $vDash\{P_i\}S\{Q_i\}$ for $i=1,2$ then $\{\lambda_1P_1+\lambda_2P_2\}S\{\lambda_1Q_1+\lambda_2Q_2\}$ for any $\lambda_1,\lambda_2$ %TODO
-\paragraph{Proof System for Partial Correctness} There are a set of rules to derive partial correctness (for total too but it's far more complicated). Allows to derive all and only %TODO
+These relations are also linear: for both total or partial, if $$\vDash\{P_i\}S\{Q_i\}$$ for $i=1,2$ then $$\vDash\{\lambda_1P_1+\lambda_2P_2\}S\{\lambda_1Q_1+\lambda_2Q_2\}$$ for any $\lambda_1,\lambda_2$ such that $\lambda_1+\lambda_2=2$
+\paragraph{Proof System for Partial Correctness} There are a set of rules to derive partial correctness (it exists for total too but it's far more complicated).
 \begin{list}{}{}
-	\item[(Ax-SK)]
-	\item[(Ax-UT)]
-	\item[(R-SC)]
-	\item[(R-IF)]
-	\item[(R-LP)]
-	\item[(R-OP)]
+	\item[(Ax-SK)] $\frac{\displaystyle}{\displaystyle \{P\}\texttt{skip}\{P\}}$
+	\item[(Ax-UT)] $\frac{\displaystyle }{\displaystyle \{U^*PU\}q\texttt{ := }U[\overline{q}]\{P\}}$
+	\item[(R-SC)] $\frac{\displaystyle \{P\}S_1\{Q\}\:\:\{Q\}S_2\{R\}}{\displaystyle \{P\}S_1\texttt{;}S_2\{R\}}$
+	\item[(R-IF)] $\frac{\displaystyle\forall\:m\:\: \{P_m\}S_m\{Q\}}{\displaystyle \{\sum_mM_m^*PM_m\}\texttt{if }(\underset{m}{\square}M[\overline{q}]=m\rightarrow S_m)\texttt{ fi}\{Q\}}$
+	\item[(R-LP)] $\frac{\displaystyle \{Q\}S\{M_0^*PM_0+M_1^*QM_1\}}{\displaystyle \{M_0^*PM_0+M_1^*QM_1\}\texttt{while }M[\overline{q}]=1\texttt{ do }S\texttt{ od}\{P\}}$
+	\item[(R-OP)] $\frac{\displaystyle P\sqsubseteq P'\:\:\{P'\}S\{Q'\}\:\:Q'\sqsubseteq Q}{\displaystyle \{P\}S\{Q\}}$
 \end{list}
-\pagebreak
-\paragraph{Exam} Exam is a informal discussion on the topics of the course, plus a "big question": a subject prepared and presented with a small report (circa 5 pages) in English, no slides but a oral presentation. The report may be theoretical or an implementation. Not strict to the exams schedule.\\
+\paragraph{Exam} The exam is a informal discussion on the topics of the course, plus a "big question": a subject prepared and presented with a small report (circa 5 pages) in English, no slides but a oral presentation. The report may be theoretical or an implementation. Not strict to the exams schedule.\\
 The graduation thesis may be done including this presentation.\\
 If more students select the same subject, they may study it together but they have to make two separate reports.\\
-A initial list of subjects is on the moodle (propose via mail and discuss with the teachers).
+A initial list of subjects is on the moodle (propose via mail and discuss with the professors).
 \end{document}  
