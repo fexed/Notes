@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
 \usepackage{multicol}
+\usepackage{amsmath}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -41,7 +42,7 @@
 \renewcommand{\headrulewidth}{0pt}
 \fancyhead{}
 \fancyfoot[L]{Telegram: \texttt{@fexed}}
-\fancyfoot[R]{Github: \texttt{fexed}}2
+\fancyfoot[R]{Github: \texttt{fexed}}
 \begin{document}
 \title{Machine Learning}
 \author{Federico Matteoni}
@@ -129,7 +130,7 @@ Generalization is the crucial point of ML. Performance in ML is the generalizati
 \end{list}
 We search for $h\in H\:|\: \min R$, but we only have the finite data set $TR = (x_p, d_p)$ with $p = 1\ldots l$. Looking for $h$ means minimizing the empirical risk (the training error $E$), finding the best values for the model free parameters $$R_{emp} = \frac{1}{l}\sum_{p=1}^l (d_p - h(x_p))^2$$
 The inductive principle is the \textbf{ERM}, Empirical Risk Minimization: can we use $R_{emp}$ to approximate $R$?
-\subsubsection{Vapnik-Chervoneniks dim and SLT} Given the VC dimension (simply VC), a measure of complexity of $H$ and by that we mean its flexibility to fit data.\\
+\subsubsection{Vapnik-Chervonenkis dim and SLT} Given the VC dimension (simply VC), a measure of complexity of $H$ and by that we mean its flexibility to fit data.\\
 The VC-bound states the following: it holds with probability $\frac{1}{\delta}$ that $$R \leq R_{emp} + \epsilon\left(\frac{1}{l}, \textsl{VC},\frac{1}{\delta}\right)$$
 \begin{list}{}{}
 	\item $\epsilon$ is a function called VC-confidence, that grows with VC and decreases with higher $l$ and $\delta$
@@ -245,6 +246,7 @@ $$w_{new} = w + \eta\cdot\Delta w$$
 We improve by learning on previous errors.\\\\
 Gradient descent is a simple and effective local search approach to a LMS solution. It allows to search through an infinite hypothesis space, can be easily applied for continuous $H$ and differentiable losses and isn't only for linear models (also neural networks and deep learning models).\\
 Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ldots)
+\pagebreak
 \begin{list}{}{}
 	\item \textbf{Language bias}: $H$ is a set of linear functions.
 	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
@@ -266,7 +268,7 @@ Which $\phi$? Towards the dictionary approaches. Pro: can model more complicated
 	\item \textbf{Eager}: analyze data and construct an explicit hypothesis
 	\item \textbf{Lazy}: store training data and wait test data point, then construct an ad hoc hypothesis.
 \end{list}
-\paragraph{k-NN}
+\paragraph{K-NN}
 The algorithm is simple: store the training data and given and input $x$ find the $k$ nearest training examples $x_i$, then output the mean label.
 \subparagraph{Voronoi Diagram} Each cell consists of points closer to $x$ than any other patterns. The segments are all points in plan equidistant to two patterns. It is implicitly used by K-NN.
 \subparagraph{K-NN vs linear} Two extremes of the ML panorama:
@@ -297,6 +299,7 @@ It provides a good approximation if we can find a significant set of data close 
 	If the target depends only on a few features in $x$, we could retrieve a similar pattern with the similarity dominated by the large number of irrelevant features. This grows with dimensionality. We may weight features according to the relevance, or adopt feature selection approaches (eliminating some variables)
 \end{list}
 % ML-21-NN-part1-v.0.1.pdf
+\pagebreak
 \section{Neural Networks} Models used to:
 \begin{list}{}{}
 	\item Study and model biological systems and learning processes (biological realism is essential)
@@ -389,7 +392,7 @@ Apparently similar but:
 For the derivatives, a step function has no derivative, which is exactly why it isn't used. The sigmoids have\\$\frac{df_\sigma(x)}{dx} = f_\sigma(x) (1-f_\sigma(x))$ and $\frac{df_{tanh}(x)}{dx} = 1 - f_{tanh}(x)^2$ for $\alpha = 1$.\\
 The sigmoid logistic function has the property of being a smoothed \textit{differentiable} threshold function. Hence, we can derive a Least (Mean) Square algorithm, by computing the gradient of the mean square loss function as for the linear units (also for a classifier).\\
 From $\sigma(x) = x^Tw$ to $\sigma(x) = f_\sigma(x^Tw)$ where $f_\sigma$ is a logistic function. Find $w$ that minimizes the residual sum of squares $$E(w) = \sum_p (d_p - \sigma(x_p))^2 = \sum_p (d_p - f_\sigma(x_p^Tw))^2$$
-$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\hbox{net}(x_p))\hbox{ for 1 unit and patterns }p = 1\ldots l$$
+$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\hbox{net}(x_p))\text{ for 1 unit and patterns }p = 1\ldots l$$
 \paragraph{Gradient descent algorithm} 
 The same as for linear units using the new delta rule $w_{new} = w + \eta\cdot\delta_p\cdot x_p$ where $\delta_p = (d_p - f_\sigma(net(x_p)))f'_\sigma(net(x_p)) = (d_p-out(x_p))f'_\sigma$
 \paragraph{Neural Network} In an MLP architecture: units connected by weighted links, organized in layers:
@@ -524,7 +527,7 @@ Too few units $\Rightarrow$ underfitting, viceversa too many units $\Rightarrow$
 		After training, the weights of the new unit are frozen and the remaining weights are restrained. If the obtained network N1 cannot solve the problem, new hidden units are progressively added, which are connected with all the inputs and previously installed units. The process continues until the residual errors of the output layer satisfy a specified stopping criteria.\\
 		This method dynamically builds up a neural network and terminates once a sufficient amount of hidden units has been found to solve the given problem. Specifically, it works by interleaving the minimization of the total error function (LMS) by simple backpropagation training of the output layer and the maximization of the (non-normalized) correlation (the covariance) of the new inserted hidden (candidate) units with the residual error. With $E_{p,k} = (o_{p,k} - d_{p,k})$ residual error, with $o_{p,k}$ output, $p$ pattern and $k$ output unit
 		$$S = \sum_k\:\vline\sum_p(o_p - mean_p(o_{p,k}))(E_{p,k} - mean_p(E_{p,k}))\vline$$
-		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\hbox{with }h\hbox{ candidate index}$$
+		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\text{with }h\hbox{ candidate index}$$
 		\begin{center}
 			\includegraphics[scale=0.5]{9.png}
 		\end{center}
@@ -578,14 +581,14 @@ The cost can be high (cartesian product between sets of values per each hyperpar
 \begin{center}
 	\includegraphics[scale=0.5]{3.png}
 \end{center}
-The issue is to find $K$ and that this method can be very computationally expensive but it can be combined with validation set,  double-$K$-fold cross-validation\ldots
+The issue is to find $K$ and that this method can be very computationally expensive but it can be combined with validation set,  double-K-Fold cross-validation\ldots
 \paragraph{Double cross-validation} After dividing the data set into $K$ mutually exclusive subsets $D_1,\ldots, D_k$, for each $D_i$: do another \textbf{internal} cross-validation using the other $K-1$ subsets.
 \begin{center}
 	\includegraphics[scale=0.7]{13.png}
 \end{center}
 It doesn't provide a model but an estimation of the risk, because can provide a different model per external step cycle.
-\paragraph{Example with $K$-fold CV} Split data in TR and TS.\\
-For the \textbf{model selection}, use $K$-fold cross-validation over TR, obtaining new TR and VL in each fold, to find the best hyperparameters of the model.\\
+\paragraph{Example with K-Fold CV} Split data in TR and TS.\\
+For the \textbf{model selection}, use K-Fold cross-validation over TR, obtaining new TR and VL in each fold, to find the best hyperparameters of the model.\\
 \textbf{Train} the final model on the whole, original, TR.\\
 Perform the \textbf{model assessment} by evaluating it on the external TS.\\\\
 There are more combination and more ways of doing this.
@@ -593,7 +596,7 @@ There are more combination and more ways of doing this.
 \subparagraph{Lucky/unlucky sampling} Can we avoid to be sensible to the particular partitioning of the examples?
 \begin{list}{}{}
 	\item \textbf{Stratification}: the process of grouping examples into relatively homogeneous subgroups. For example, partitioning in a way that every class (in a classification task) is represented in approximately the same proportions as in the full data set.\\
-	\item  \textbf{Repeated} hold-out or $K$-fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
+	\item  \textbf{Repeated} hold-out or K-Fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
 \end{list}
 \subparagraph{Very few data} In this case it's difficult to say if the sampling is representative or not. We can use stratification.\\
 To avoid (or to be considered during evaluation): missing classes or features in training data, special classes, known outliers that can affect the results\ldots\\
@@ -614,7 +617,7 @@ In the case of binary classification, there are $2^n$ possible \textbf{dichotomi
 	\includegraphics[scale=0.5]{14.png}
 \end{center}
 \columnbreak
-3 points in $R^2$, $H$ as a set of lines: $h(x) = \hbox{sign}(wx + w_0)$ with $x\in R^2$\\
+3 points in $R^2$, $H$ as a set of lines: $h(x) = \text{sign}(wx + w_0)$ with $x\in R^2$\\
 A dichotomy is a particular labeling in $\{-1,+1\}$ of the points. This specific dichotomy can be represented in $H$: there exist a line that correctly separate the points (in pic)
 \end{multicols}
 \paragraph{VC-Dimension} \textbf{Definition}: the VC dimension of a class of functions $H$ is the maximum cardinality of a set (configuration) of points in $X$ that can be shattered by $H$.\\
@@ -625,13 +628,13 @@ $VC(H)\geq 3$ shown before, note that not all the possible configurations of $3$
 	\includegraphics[scale=0.5]{15.png}
 \end{center}
 VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, $K$-NN has infinite VC-dim.
-\paragraph{Analytical Bound} With $N$ number of data $$R[h]\leq R_{emp}[h] + \epsilon\left(\hbox{VC-dim}, N, \delta\right)$$
+\paragraph{Analytical Bound} With $N$ number of data $$R[h]\leq R_{emp}[h] + \epsilon\left(\text{VC-dim}, N, \delta\right)$$
 with:
 \begin{list}{}{}
-	\item \textbf{Guaranteeded risk} $R_{emp}[h] + \epsilon\left(\hbox{VC-dim}, N, \delta\right)$
-	\item \textbf{VC Confidence} $\epsilon\left(\hbox{VC-dim}, N, \delta\right)$
+	\item \textbf{Guaranteeded risk} $R_{emp}[h] + \epsilon\left(\text{VC-dim}, N, \delta\right)$
+	\item \textbf{VC Confidence} $\epsilon\left(\text{VC-dim}, N, \delta\right)$
 \end{list}
-For example, for 0/1 loss $$\epsilon\left(\hbox{VC-dim}, N, \delta\right) = \sqrt{\frac{VC\left(\ln\frac{2N}{\hbox{VC-dim}}\right) - \ln\frac{\delta}{4}}{N}}$$ with probability at least $1-\delta$ for every VC-dim$< N$\\\\
+For example, for 0/1 loss $$\epsilon\left(\text{VC-dim}, N, \delta\right) = \sqrt{\frac{VC\left(\ln\frac{2N}{\text{VC-dim}}\right) - \ln\frac{\delta}{4}}{N}}$$ with probability at least $1-\delta$ for every VC-dim$< N$\\\\
 There are different bound formulations for different classes of functions, of tasks\ldots\\
 This gives us a way to estimate the error on future data based only on the training error and the VC-dim of $H$. The resulting bounds are the worst case scenario, because the hold for all but $1-\delta$ of the possible approximation function/training sets.
 \paragraph{Remarks} For many reasonable hypothesis classes (ex: linear approximators), the VC-dim is linear in the number of free parameters of the hypothesis. This shows that to learn "well" we need a number of examples that is linear in the VC-dim.
@@ -666,14 +669,14 @@ Example of linearly and non linearly separable problems:
 	\includegraphics[scale=0.5]{17.png}
 \end{center}
 \paragraph{Separating hyperplane} Given the training set $T = \{(x_i, d_i)\}_{i=1}^N$ we want to find an hyperplane of equation $w^Tx + b = 0$ to separate the examples and get $w^Tx_i + b \geq 0$ for $d_i = +1$ and $w^Tx_i + b < 0$ for $d_i = -1$\\
-$g(x) = w^Tx + b$ is the discriminant function and $h(x) = \hbox{sign}(g(x))$ is the hypothesis.\\
+$g(x) = w^Tx + b$ is the discriminant function and $h(x) = \text{sign}(g(x))$ is the hypothesis.\\
 An example of separation margin:
 \begin{center}
 	\includegraphics[scale=0.5]{18.png}
 \end{center}
 In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $w_O^Tx + b_O = 0$ with $_O$ meaning "optimal".\\
 We will find that $p = \frac{2}{||w||}$, so maximize $p\Leftrightarrow$ minimize $||w||$.
-\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\hbox{ if }d_i = +1$$ $$w^Tx_i + b < 1\hbox{ if }d_i = -1$$ which its compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
+\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\text{ if }d_i = +1$$ $$w^Tx_i + b < 1\text{ if }d_i = -1$$ which its compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
 A \textbf{support vector} $x^{(s)}$ satisfies the previous equation exactly $$d^{(s)}(w^Tx^{(s)}+b) = 1$$ so the \textbf{support vectors are the closest data points to the hyperplane} and "lay on the margin".
 \begin{center}
 	\includegraphics[scale=0.5]{19.png}
@@ -684,8 +687,8 @@ A \textbf{support vector} $x^{(s)}$ satisfies the previous equation exactly $$d^
 \end{center}
 $$x=x_p+r\frac{w_O}{||w_O||}$$
 $$g(x) = g\left(x_p + r\frac{w_O}{||w_O||}\right) ) w_O^Tx_o + b_O + w_O^Tr\frac{w_O}{||w_O||} = g(x_p) + rw_O^T\frac{w_O}{||w_O||} = r\frac{||w_O||^2}{||w_O||} = r||w_O||$$
-$$\hbox{thus }r=\frac{g(x)}{||w_O||}$$
-\paragraph{Computing the margin} Consider the distance between the hyperplane and a positive support vector $x^{(s)}$, for example $$r\hbox{ for }x^{(s)} = \frac{g(x^{(s)})}{||w_O||} = \frac{1}{||w_O||} = \frac{p}{2}$$
+$$\text{thus }r=\frac{g(x)}{||w_O||}$$
+\paragraph{Computing the margin} Consider the distance between the hyperplane and a positive support vector $x^{(s)}$, for example $$r\text{ for }x^{(s)} = \frac{g(x^{(s)})}{||w_O||} = \frac{1}{||w_O||} = \frac{p}{2}$$
 $$\Rightarrow p = \frac{2}{||w_O||}$$
 So the optimum hyperplane maximizes $p\Leftrightarrow$ minimizes $||w||$
 \paragraph{Quadratic Optimization Problem} The formal derivation of the SVM solution requires techniques in the constrained optimization framework, and we assume that quadratic programming is solved elsewhere.\\
@@ -715,8 +718,8 @@ So given the input pattern $x$:
 	\item Classify $x$ as the sign of $g(x)$
 \end{list}
 Note that it's not necessary to compute $w_O$, also the sum can be restricted to the number of support vector $N_s$
-\subparagraph{How does this improve the generalization?} Minimizing the norm of $w$ is equivalent to minimizing the VC-dim and thus to minimizing the VC confidence $\epsilon$ in $$R[h] \leq R_{emp}[h] + \epsilon(\hbox{VC-dim}, N, \delta)$$
-\subparagraph{Theorem (Vapnik)} Let $D$ be the diameter of the smallest ball around the data points $x_1,\ldots,x_N$. For the class of separating hyperplanes described by the equation $w^Tx+b = 0$, the upper bound to the VC-dim is $$\hbox{VC-dim} \leq min(\lceil\frac{D^2}{p^2}\rceil, m_O) + 1$$
+\subparagraph{How does this improve the generalization?} Minimizing the norm of $w$ is equivalent to minimizing the VC-dim and thus to minimizing the VC confidence $\epsilon$ in $$R[h] \leq R_{emp}[h] + \epsilon(\text{VC-dim}, N, \delta)$$
+\subparagraph{Theorem (Vapnik)} Let $D$ be the diameter of the smallest ball around the data points $x_1,\ldots,x_N$. For the class of separating hyperplanes described by the equation $w^Tx+b = 0$, the upper bound to the VC-dim is $$\text{VC-dim} \leq min(\lceil\frac{D^2}{p^2}\rceil, m_O) + 1$$
 \paragraph{An elegant approach} For linearly separable data there are many solutions. Vapnik proposed an "optimal separating hyperplane" maximizing the margin providing:
 \begin{list}{}{}
 	\item An unique solution with zero errors for the binary classifier
@@ -786,8 +789,8 @@ At \textbf{test phase} we have the Lagrangian multipliers and the kernel matrix.
 A regression problem requires to find $f$ such that $d=f(x)+v$ with a training set $T=\{(x_i,d_i)\}_{i=1}^N$ and with $v$ statistically independent from $x$\\
 We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(x)\}_{j=0}^{m_1}$ so $y=h(x) = w^T\phi(x)$ where $w = (w_0 = b, w_1,\ldots,w_{m_1})^T$ and $\phi(x) = (\phi(x)_0 = 1, \phi(x)_1,\ldots, \phi(x)_{m_1})^T$
 \paragraph{$\epsilon$-insensitive loss function} $L_\epsilon(d,y) = \left\{\begin{array}{l l}
-|d - y| - \epsilon & \hbox{if }|d-y|\geq\epsilon\\
-0 & \hbox{otherwhise}
+|d - y| - \epsilon & \text{if }|d-y|\geq\epsilon\\
+0 & \text{otherwhise}
 \end{array} \right.$
 \begin{center}
 	\includegraphics[scale=0.5]{22.png}
@@ -864,9 +867,9 @@ Given a new data point $x$, what is the expected prediction error? Assume that t
 \subsection{Bias-Variance Decomposition}
 $$E_P[(y - h(x))^2] = E_P[h(x)^2 - 2yh(x) + y^2] = E_P[h(x)^2] + E_P[y^2] - 2E_P[y]E_P[h(x)]$$
 Let $\overline{h}(x) = E_P[h(x)]$ denote the \textbf{mean prediction} of the hypothesis at $x$ when $h$ is trained with data drawn from $P$. By doing some calculations, we obtain $\begin{array}{r c l l}
-E_P[(y-h(x))^2] & = & E_P[(h(x) - E_P[h(x)])^2] + & \hbox{variance}\\
- & & (E_P[h(x)] - f(x))^2 + & \hbox{bias}^2 \\
- & & E_P[(y - f(x))^2] & \hbox{noise}^2
+E_P[(y-h(x))^2] & = & E_P[(h(x) - E_P[h(x)])^2] + & \text{variance}\\
+ & & (E_P[h(x)] - f(x))^2 + & \text{bias}^2 \\
+ & & E_P[(y - f(x))^2] & \text{noise}^2
 \end{array}$\\
 So expected error is Variance + Bias$^2$ + Noise$^2$\begin{list}{}{}
 	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(x)$, with $h(x)$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
@@ -1066,8 +1069,8 @@ Some approaches include the \textbf{gradient clipping}: if $||g||> v$ then $g = 
 Most of the heuristics try to deal with the problem of vanishing gradient that hampers the training in early deep neural network in the low layers. Traditional activation functions, such as the hyperbolic tangent, have gradients in the range of $(-1,1)$ and the backpropagation computes gradients by the chain rule repeated through the layers. This has the effect of multiplying $n$ of these small numbers to compute gradients of the "front" layers (closer to the inputs), in a $n$-layer network: the gradient decreases exponentially with $n$, with the result of a very slow training in the front layers. Same with big weights (exploding gradients), but less frequent.\\
 To deal with this, many approaches: Rprop, short-cut connections, randomized neural networks\ldots let's see the new ones.
 \subparagraph{ReLU} \textbf{Rectified Linear Unit}: $f(x) = \max(0,x) = \left\{\begin{array}{l l}
-0&\hbox{if }x< 0\\
-x&\hbox{if }x\geq 0\\
+0&\text{if }x< 0\\
+x&\text{if }x\geq 0\\
 \end{array}\right.$
 \begin{list}{}{}
 	\item \textbf{Sparse activation}: in a randomly initialized network, only about 50\% of hidden units are activated (non-zero output)
@@ -1080,12 +1083,12 @@ Used in deep learning since 2009 due to the simplified and better gradient propa
 Beyond ReLU there are:
 \begin{list}{}{}
 	\item ELU (Exponential Linear Unit), $f(\alpha,x)=\left\{\begin{array}{l l}
-	\alpha(e^x - 1)&\hbox{if }x \leq 0\\
-	x&\hbox{if} x > 0
+	\alpha(e^x - 1)&\text{if }x \leq 0\\
+	x&\text{if} x > 0
 	\end{array}\right.$
 	\item Leaky ReLU $f(x) = \left\{\begin{array}{l l}
-	0.01x&\hbox{if }x < 0\\
-	x&\hbox{if }x \geq 0 
+	0.01x&\text{if }x < 0\\
+	x&\text{if }x \geq 0 
 	\end{array}\right.$
 \end{list}
 \paragraph{Batch Normalization} Method that normalizes each batch by calculating each individual batch statistic such as mean and variance for each layer (\textbf{reparametrization}): normalize each matrix (databatch $\times$ activation of units) with mean and variance, by shifting values to zero-mean and unit variance, and include it in backpropagation.\\
@@ -1168,8 +1171,8 @@ I.e. a set of vector quantizers $x\rightarrow c(x) = w_{i^*(x)}$, from continous
 We evaluate the squared error distortion $d(x_i,c(x_i)) = ||x_i-c(x_i)||^2$
 \subparagraph{Loss function} The average value over the distribution of inputs is the average distortion/reconstruction/quantization error: our loss function. $$E = \int f(d(x,w_{i^*(x)}))\cdot p(x)\:dx= \int||x-w_{i^*(x)}||^2\cdot p(x)\:dx$$
 Discrete version: $$E = \sum_i^l\sum_j^K||x_i-w_j||^2\delta_{winner}(i,j)$$ with $\delta_{winner}(i,j)$ the characteristic function of the receptive field of $w_j = \left\{\begin{array}{l l}
-1&\hbox{if }j\hbox{ is the winner for }x_i\\
-0&\hbox{otherwise}
+1&\text{if }j\text{ is the winner for }x_i\\
+0&\text{otherwise}
 \end{array}\right.$ and $p(x)$ the probability distribution of $x$.\\
 Minimizing $E$ is the vector quantization: minimize $E$ through an optimal choice of $w$, the set of reference vectors $w$ that minimizes $E$ is the solution of the vector quantization problem.\\
 Note that the integrand of $E$ is not continuously differentiable: $w_{i^*(x)}$ have discrete changes, but derivatives can be computed locally by fixing $x$ in a Voronoi cell.
@@ -1183,7 +1186,7 @@ with $\eta$ being the learning rate. The basic algorithm is:
 	\item If a convergence criterion is not met, go to step 2. Examples of stopping criteria are: no or minimal reassignment of patterns to new cluster centers, or a minimal decrease in squared error.
 \end{enumerate}
 Given the cluster centers $w_1,\ldots,w_k$ of dimension $n$ same as $x$, for each $x$ the winner is the nearest prototype $i^*(x) = arg\:min_i||x-w_i||^2$, so now $x$ belong to the cluster $i^*$.\\
-For each cluster $i$ the new centroid is $w_i=\frac{1}{|\hbox{cluster}_i|}\sum_{j\:|\:x_j\in\hbox{cluster}_j}x_j$\\\\
+For each cluster $i$ the new centroid is $w_i=\frac{1}{|\text{cluster}_i|}\sum_{j\:|\:x_j\in\text{cluster}_j}x_j$\\\\
 This is the simplest and most common algorithm employing a squared error criterion, it's easy to implement and efficient in general.\\
 The number $K$ of clusters to find must be provided and local minima of $E$ makes the method dependent on the initialization. Also it works well only with hyperspherical and compact clusters, and has no visualization properties (doesn't allow to project in a lower dimension space).
 \paragraph{Softmax} To avoid confinement to local minima, a common approach is to introduce softmax adaptation rule: not only the winning reference is modified, but the adaption of $x$ affects all cluster centers depending on their proximity to $x$, typically with a step size that decreases with the distance $d(x,w_i)$. An instance of this strategy in neural networks is the Kohonen self-organizing maps, where the proximity among reference vectors is defined on a ordered map.
@@ -1365,7 +1368,7 @@ Over time the state information increases:
 We can use RNNs to implement a bottom-up encoding of input trees, extending states for children of vertexes of the tree: \textbf{universal approximation} over the tree domain/DPAG
 \begin{center}
 	$$\left\{\begin{array}{l}
-x(v)=\tau(x(\hbox{ch}[v]),l(v))\\
+x(v)=\tau(x(\text{ch}[v]),l(v))\\
 y(v)=g(x(v),l(v))
 \end{array}\right.$$
 	\includegraphics[scale=0.7]{42.png}
