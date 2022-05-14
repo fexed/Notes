@@ -855,7 +855,10 @@ Alice and Bob initially share a pair of qubits in the entangled Bell state $$|\b
 One qubit is in Alice's possession, the other is in Bob's possession.\\
 How are the Bell states formed?
 \begin{center}
-	\includegraphics[scale=0.5]{15.png}
+	\begin{quantikz}
+		\lstick{$\ket{x}$} & \gate{H} & \ctrl{1} & \qw\\
+		\lstick{$\ket{y}$} & \qw & \targ & \qw & \qw
+	\end{quantikz}
 \end{center}
 $$|00\rangle \rightarrow H\otimes I\rightarrow \frac{\ket{0}+\ket{1}}{\sqrt{2}}\ket{0}\rightarrow\hbox{CNOT}\rightarrow\frac{|00\rangle+|11\rangle}{\sqrt{2}} = |\beta_{00}\rangle$$
 $$|01\rangle \rightarrow H\otimes I\rightarrow \frac{\ket{0}+\ket{1}}{\sqrt{2}}\ket{1}\rightarrow\hbox{CNOT}\rightarrow\frac{|01\rangle+|10\rangle}{\sqrt{2}} = |\beta_{01}\rangle$$
@@ -870,7 +873,10 @@ Alternatively, some third party may prepare the entangled state ahead of time an
 If they are careful not to let the qubits interact with the environment or other quantum systems, Alice and Bob's joint state will remain entangled.\\
 Note that $|\beta_{00}\rangle$ is a fixed state, there is no need for Alice to have sent any qubit to Bob to prepare this state.
 \begin{center}
-	\includegraphics[scale=0.5]{16.png}
+	\begin{quantikz}
+		\lstick{$\ket{0}$} & \gate{H} & \ctrl{1}\slice{Prepare and share\\a Bell state $\ket{\beta_{00}}$} & \qw & \gate{X^b} & \gate{Z^a}\slice{Alice encodes\\the bits $a,b$} & \ctrl{1} & \gate{H} & \meter{}\slice{Bob decodes\\the bits $a,b$} & \qw \\
+		\lstick{$\ket{0}$} & \qw & \targ & \qw & \qw & \qw & \qw & \targ & \qw & \qw & \meter{} & \qw
+	\end{quantikz}
 \end{center}
 \paragraph{Procedure}
 \begin{center}
@@ -878,9 +884,9 @@ Note that $|\beta_{00}\rangle$ is a fixed state, there is no need for Alice to h
 \textbf{To send}&\makecell{\textbf{Alice applies to her}\\\textbf{qubit the gate}}&\textbf{Resulting state}\\
 \hline
 00&$I$& $|\beta_{00}\rangle \mapsto |\beta_{00}\rangle$ \\
-01&$X$& $|\beta_{00}\rangle \mapsto \frac{|10\rangle+|01\rangle}{\sqrt{2}} = |\beta_{01}\rangle$\\
-10&$Z$& $|\beta_{00}\rangle \mapsto  \frac{|00\rangle-|11\rangle}{\sqrt{2}} = |\beta_{10}\rangle$\\
-11&$ZX$& \makecell{$|\beta_{00}\rangle \mapsto_{X\otimes I}\frac{|10\rangle+|01\rangle}{\sqrt{2}}\mapsto_{Z\otimes I}\frac{-|10\rangle+|01\rangle}{\sqrt{2}}=|\beta_{11}\rangle$}
+01&$X$& $|\beta_{00}\rangle \mapsto \frac{\displaystyle|10\rangle+|01\rangle}{\displaystyle\sqrt{2}} = |\beta_{01}\rangle$\\
+10&$Z$& $|\beta_{00}\rangle \mapsto  \frac{\displaystyle|00\rangle-|11\rangle}{\displaystyle\sqrt{2}} = |\beta_{10}\rangle$\\
+11&$ZX$& \makecell{$|\beta_{00}\rangle \underset{X\otimes I}{\mapsto}\frac{\displaystyle|10\rangle+|01\rangle}{\displaystyle\sqrt{2}}\underset{Z\otimes I}{\mapsto}\frac{\displaystyle-|10\rangle+|01\rangle}{\displaystyle\sqrt{2}}=|\beta_{11}\rangle$}
 \end{tabular}
 \end{center}
 The resulting state is one of the four Bell states, which form an orthonormal basis and can be distinguished by an appropriate quantum measurement. So after applying the appropriate gate, Alice sends her qubit to Bob. Bob is in possession of one of the four Bell states, depending on the classical bits that Alice wished to send him, so he performs a measurement in the Bell basis and determines which bit string Alice sent.\\
@@ -906,10 +912,16 @@ Alice has $\ket{\psi} = \alpha\ket{0}+\beta\ket{1}$ and would like to send the q
 	\item Alice could tell Bob the amplitude $\alpha$ and $\beta$ for the quantum state $\ket{\psi}$. To do this, she doesn't need to send a quantum state, but she can simply send the complex numbers $\alpha$ and $\beta$ as ordinary classical information e.g. over the internet. Bob could then re-create the state in his lab.\\
 	But \textbf{in general Alice doesn't know the identity of her quantum state}.
 \end{list}
-\textbf{Quantum teleportation works even when the identity of a the state isn't known to Alice or Bob}.
+\textbf{Quantum teleportation works even when the identity of a the state isn't known to Alice or Bob}.\\
 The teleportation instead works like this. The circuit is:
 \begin{center}
-	\includegraphics[scale=0.5]{17.png}
+	\begin{quantikz}
+		\lstick[wires=2]{Alice's qubits} &\lstick{$\ket{\psi}$} & \qw & \qw & \qw & \ctrl{1} & \gate{H}\slice{Step 2} & \qw & \meter{$z$}\slice{Step 3}&\cw & \cwbend{4}\\
+		&&&& \qw & \targ & \qw & \qw & \qw & \meter{$x$} & \cwbend{3} & \\
+		\lstick{$\ket{0}$} & \gate{H} & \ctrl{1}\slice{Step 1} & \qw \vqw{-1}&&&&&&&&\\
+		\lstick{$\ket{0}$} & \qw & \targ & \qw & \qw \vqw{1}&&&&&&&\\
+		&&&\lstick{Bob's qubit$\:\:$} & \qw & \qw & \qw & \qw & \qw & \gate{X^z} & \gate{Z^z}\slice{Step 4} & \qw & \rstick{$\ket{\psi}$}
+	\end{quantikz}
 \end{center}
 Alice has two qubits, Bob just one.
 \begin{list}{}{}
