@@ -8,6 +8,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{textcomp}
+\usepackage{cancel}
 \graphicspath{ {./img/} }
 \usepackage{listings}
 \usepackage{makecell}
@@ -133,12 +134,12 @@ Generalization is the crucial point of ML. Performance in ML is the generalizati
 	\item \textbf{Overfitting}: a learner overfits data if it outputs an hypothesis $h\in H$ having true/generalization error (risk) $R$ and empirical (training) error $E$, but there's another $h'\in H$ with $E' > E$ and $R' < R$, which means that $h'$ is the better one despite having a worse fitting on training data
 \end{list}
 \subsection{Statistical Learning Theory} Under what mathematical conditions is a model able to generalize? We want to investigate the generalization capability of a model, measured as a risk or test error, the role of the model complexity and the role of the number of data.\\
-\textbf{Formal Setting}: approximate a function $f(x)$, with $d$ target ($d = f(x) +$ noise), minimizing the \textbf{risk function} $$R = \int L(d, h(x))\:dP(x,d)$$ which is the \textbf{true error over all the data}, given:
+\textbf{Formal Setting}: approximate a function $f(\mathbf{x})$, with $d$ target ($d = f(\mathbf{x}) +$ noise), minimizing the \textbf{risk function} $$R = \int L(d, h(\mathbf{x}))\:dP(\mathbf{x},d)$$ which is the \textbf{true error over all the data}, given:
 \begin{list}{}{}
-	\item a value $d$ from the teacher and the probability distribution $P(x,d)$
-	\item a loss function $L(h(x),d) = (d - h(x))^2$
+	\item a value $d$ from the teacher and the probability distribution $P(\mathbf{x},d)$
+	\item a loss function $L(h(\mathbf{x}),d) = (d - h(\mathbf{x}))^2$
 \end{list}
-We search for $h\in H\:|\: \min R$, but we only have the finite data set $TR = (x_p, d_p)$ with $p = 1\ldots l$. Looking for $h$ means minimizing the empirical risk (the training error $E$), finding the best values for the model free parameters $$R_{emp} = \frac{1}{l}\sum_{p=1}^l (d_p - h(x_p))^2$$
+We search for $h\in H\:|\: \min R$, but we only have the finite data set $TR = (\mathbf{x}_p, d_p)$ with $p = 1\ldots l$. Looking for $h$ means minimizing the empirical risk (the training error $E$), finding the best values for the model free parameters $$R_{emp} = \frac{1}{l}\sum_{p=1}^l (d_p - h(\mathbf{x}_p))^2$$
 The inductive principle is the \textbf{ERM}, Empirical Risk Minimization: can we use $R_{emp}$ to approximate $R$?
 \subsubsection{Vapnik-Chervonenkis dim and SLT} Given the VC dimension (simply VC), a measure of complexity of $H$ and by that we mean its flexibility to fit data.\\
 The VC-bound states the following: it holds with probability $\frac{1}{\delta}$ that $$R \leq R_{emp} + \epsilon\left(\frac{1}{l}, \textsl{VC},\frac{1}{\delta}\right)$$
@@ -157,7 +158,7 @@ Intuitively:
 \subsubsection{Structural risk minimization} Minimize the bound! There are different bounds formulations according to different classes of $f$, of tasks\ldots\\
 In other words, we can make a good approximation of $f$ from examples, provided that we have a good number of data and the complexity of the model is suitable for the task.
 \subsubsection{Complexity control} The Statistical Learning Theory allows for a formal framing of the problem of generalization and overfitting, providing an analytic upper bound to the risk $R$ for the prediction over all the data, regardless of the type of learning algorithm or the details of the model. So \textbf{the machine learning has good theoretical foundations}, the learning risk can be analytically limited and only a few concepts are fundamental. This leads to new models (such as the Support Vector Machine) and other methods that directly consider the control of the complexity in the construction of the model.
-\paragraph{Validation} Central role for the applications and the project. Two aims:
+\subsection{Validation} Central role for the applications and the project. Two aims:
 \begin{list}{}{}
 	\item \textbf{Model Selection}: estimating the performance (\textbf{generalization error}) of different models in order to choose the best one. This includes searching for the best hyperparameters of the model.\\
 	It returns a \textbf{model}.
@@ -180,6 +181,7 @@ In an ideal world, we'd have a large training set, a large validation set for mo
 	\end{center}
 	\end{multicols}
 \end{list}
+\pagebreak
 \paragraph{Confusion Matrix} \begin{center}
 	\begin{tabular}{|c|c|c|}
 		\hline
@@ -199,6 +201,21 @@ In an ideal world, we'd have a large training set, a large validation set for mo
 \begin{center}
 	\includegraphics[scale=0.5]{50.png}
 \end{center}
+\subsection{Design Cycle}
+\begin{center}
+	\includegraphics[scale=0.5]{52.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Data Collection}: adequately large and representative set of examples for training and testing the system
+	\item \textbf{Data Representation}: domain dependent, exploits prior knowledge of the application expert. It includes: feature selection, outliers detection, other preprocessing like variable scaling, missing data handling\ldots
+	\item \textbf{Model Choice}: statement of the problem, hypothesis formulation (must know the limits of applicability of your model) and complexity control.
+	\item \textbf{Bulding of the Model}: core of Machine Learning, through the learning algorithm and using the training data
+	\item \textbf{Evaluation}: performance is predictive accuracy
+\end{list}
+\pagebreak
+\subsection{Misinterpretations} For every statistical models, including Data Mining applications, causality if often assumed and a set of data representative of the phenomena is needed, so its no suitable for unrelated variables and for random phenomena like lotteries. Using uninformative input variables leads to poor modeling and poor learning results.\\
+But causality cannot be inferred from data analysis alone, maybe there's statistical dependencies for reasons outside the data.\\
+More specifically, in Machine Learning powerful model lead to higher risk, even for garbage data. Not well validated results can bring to a possibly misleading predicted outcome and interpretation.
 \section{Linear Models} Mainstay of statistics.
 \subsection{Univariate Linear Regression} Simple linear regression: we start with 1 input variable $x$ and 1 output variable $y$. We assume a model $h_w(x)$ expressed as $out = w_1x + w_0$ where $w$ are real-valued coefficients or \textbf{free parameters}, also called \textbf{weights}.\\
 Given that the $w$s are continuously valued, we have an infinite hypothesis space but a nice solution from classical math. We can learn with this basic tool and, although simple, it includes many relevant concepts of modern Machine Learning and many methods in the field are based on this.
@@ -207,56 +224,71 @@ So given a set of $l$ training examples $(x_p, y_p)$ with $p = 1,\ldots,l$, we h
 $$Loss(h_w) = E(w) = \sum_{p=1}^l (y_p - h_w(x_p))^2 = \sum_{p=1}^l (y_p - (w_1x_p + w_0))^2$$
 To have the mean, divide by $l$. How to solve? Local minimum as stationary point, so the gradient $\frac{\partial E(w)}{\partial w_i} = 0$ with $i = 1,\ldots,$ dim\_input $+1 = 1,\ldots, n+1$. For the simple linear regression (2 free parameters):
 $$\frac{\partial E(w)}{\partial w_0} = 0\:\:\:\:\frac{\partial E(w)}{\partial w_1} = 0$$
+$$\frac{\partial E(w)}{\partial w_i} = \frac{\partial(\:\overset{\text{delta}}{\overbrace{y-h_w(x)}}\:)^2}{\partial w_i} = 2(y-h_w(x))\frac{\partial(y-h_w(x))}{\partial w_i}=2(u-h_w(x))\frac{\partial (y-(w_1x+w_0))}{\partial w_i}$$
 $$\frac{\partial E(w)}{\partial w_0} = -2(y - h_w(x))\:\:\:\:\frac{\partial E(w)}{\partial w_1} = -2(y - h_w(x))\cdot x$$
+\paragraph{Notation} Assuming column vector for $\mathbf{x}$ and $\mathbf{w}$, in bold or without an index like $_i$.\\
+$l$ is the number of data, $n$ is the dimension of input vector and $y_p,d_y$ or $t_p$ are targets with $p=1,\ldots,l$.
+$$\mathbf{w}^T\mathbf{x} + w_0 = w_0 + w_1x_1+\ldots + w_nx_n = w_0 + \sum_{i=1}^n w_ix_i$$
+$$w^Tx + w_0 = w_0 + w_1x_1+\ldots + w_nx_n = w_0 + \sum_{i=1}^n w_ix_i$$
+$w_0$ is the threshold, bias, offset\ldots often we include $x_0=1$ as constant so that we can simply write $$\mathbf{w}^T\mathbf{x} = \mathbf{x}^T\mathbf{w}$$
+$$w^Tx=x^Tw$$
+$$h(\mathbf{x}_p)=\mathbf{x}_p^T\mathbf{w}=\sum_{i=0}^nx_{pi}w_i$$
 \subsection{Classification} The same models used for regression can be used for classification: \textbf{categorical targets} $y$ or $d$, for example 0/1, -1/+1\ldots\\
-We use an hyperplane ($wx$) assuming negative or positive values. We exploit such models to decide if a point $x$ belongs to the positive or the negative zone of the hyperplane to classify it. So we want to learn $w$ such that we get a good classification accuracy. The decision boundary is $x^Tw = w^Tx = w_0 + w_1x_1 + w_2x_2 = 0$ and we can introduce a threshold function which can be written in many ways: \begin{list}{}{}
-	\item $h(x) = \left\{\begin{array}{c l}
-	1 & \hbox{if }wx + w_0 \geq 0\\
-	0 & \hbox{else}
+We use an hyperplane ($\mathbf{wx}$) assuming negative or positive values. We exploit such models to decide if a point $\mathbf{x}$ belongs to the positive or the negative zone of the hyperplane to classify it. So we want to learn $\mathbf{w}$ such that we get a good classification accuracy. The decision boundary is $\mathbf{x}^T\mathbf{w} = \mathbf{w}^T\mathbf{x} = w_0 + w_1x_1 + w_2x_2 = 0$ and we can introduce a threshold function which can be written in many ways: \begin{list}{}{}
+	\item $h(\mathbf{x}) = \left\{\begin{array}{c l}
+	1 & \text{if }\mathbf{wx} + w_0 \geq 0\\
+	0 & \text{else}
 \end{array}	 \right.$
-	\item $h(x) = \hbox{sign}(wx + w_0)$
+	\item $h(\mathbf{x}) = \text{sign}(\mathbf{wx} + w_0) = \text{sign}\left(\sum_{i=0}^n x_{pi}w_i\right)$
 	\item \ldots
 \end{list}
-$w_0$ is called \textbf{threshold} or \textbf{bias}. $h(x) = w^Tx + w_0 \geq 0 \Leftrightarrow w^Tx \geq -w_0$
+$w_0$ is called \textbf{threshold} or \textbf{bias}. $h(\mathbf{x}) = \mathbf{w}^T\mathbf{x} + w_0 \geq 0 \Leftrightarrow \mathbf{w}^T\mathbf{x} \geq -w_0$
 \subsection{Learning Algorithms} Introducing 2 learning algorithms, both based on LSM and used for the linear model on regression and classification tasks. We start redefining the learning problem and the loss for them (in the case of $l$ data and multidimensional inputs).\\\\
-\textbf{Learning problem for classification tasks}: given a set of $l$ training examples $(x_p, y_p)$ and a loss function $L$, with $y_p \in \{0,1\}$ or $y_p \in \{-1, +1\}$, find the weight vector $w$ that minimizes expected loss on the training data $$R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(x_p), y_p)$$
+\textbf{Learning problem for classification tasks}: given a set of $l$ training examples $(\mathbf{x}_p, y_p)$ and a loss function $L$, with $y_p \in \{0,1\}$ or $y_p \in \{-1, +1\}$, find the weight vector $\mathbf{w}$ that minimizes expected loss on the training data $$R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(\mathbf{x}_p), y_p)$$
 The expected loss can be approximated by a smooth function. We can make the optimization problem easier by replacing the original objective function $L$ (0/1 loss) with a smooth, differentiable function: for example, the MSE loss (mean squared error).
 \begin{center}
 	\includegraphics[scale=0.75]{4.png}
 \end{center}
-No classification error minimizing either 0/1 loss or MSE loss. Given $l$ training examples $(x_p, y_p)$, find $w$ that minimizes the residual sum of squares $$E(w)= \sum_{p=1}^l (y_p - x_p^T w)^2 = ||y - Xw||^2$$
-We can't use $h(x)$ in $E(w)$, as for regression, because $h(x) = \hbox{sign}(w^T x)$ is non-differentiable. Also, this is a quadratic function so the minimum always exists (but may not be unique). $X$ is a $l\times n$ matrix with a row for each $x_p$.
-\paragraph{Direct Approach with a normal equation} Differentiating $E(w)$ with respect to $w$ to get the \textbf{normal equation} $$(X^T X)w = X^T y$$
-In the derivation we also find that $$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (x_p)_j \cdot (y_p - x_p^T w)$$
-If $X^T X$ is not singular, then the unique solution is given by $$w = (X^T X)^{-1}X^T y = X^+ y$$ with $X^+$ being the Moor-Penrose pseudoinverse. Else the solutions are infinite, so we can choose the \textbf{min norm}$(w)$ solution.\\
-The \textbf{Singular Value Decomposition} can be used for computing the pseudoinverse of a matrix ($X^+$). With\\ $X = U\Sigma V^T \Rightarrow X^+ = V\Sigma^+ U^T$ replacing every non-zero entry by its reciprocal. We can apply SVD directly to compute $w = X^+ y$, obtaining the minimal norm (on $w$) solution of least squares problem.
-$$\frac{\partial E(w)}{\partial w_j} = \frac{\partial \sum_{p=1}^l (y_p - x_p^T w)^2}{\partial w_j} = \ldots = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$$
-\subsection{Gradient Descent} The derivation suggests an approach based on an iterative algorithm based on $$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$$ The \textbf{gradient} is the \textbf{ascent direction}. We can move toward the minimum with a gradient descent $\Delta w = -$ gradient of $E(w)$. \textbf{Local search}: we begin with a initial weight vector and modify it iteratively to minimize the error function. The gradient vector is
-$$\Delta w = -\frac{\partial E(w)}{\partial w} = \left[\begin{array}{c}
--\frac{\partial E(w)}{\partial w_1}\\\vdots\\-\frac{\partial E(w)}{\partial w_n}
+No classification error minimizing either 0/1 loss or MSE loss. Given $l$ training examples $(\mathbf{x}_p, y_p)$, find $\mathbf{w}$ that minimizes the residual sum of squares $$E(\mathbf{w})= \sum_{p=1}^l (y_p - \mathbf{x}_p^T \mathbf{w})^2 = ||\mathbf{y} - \mathbf{Xw}||^2$$
+We can't use $h(\mathbf{x})$ in $E(\mathbf{w})$, as for regression, because $h(\mathbf{x}) = \text{sign}(\mathbf{w}^T \mathbf{x})$ is non-differentiable. Also, this is a quadratic function so the minimum always exists (but may not be unique). $\mathbf{X}$ is a $l\times n$ matrix with a row for each $\mathbf{x}_p$.
+\paragraph{Direct Approach with a normal equation} Differentiating $E(\mathbf{w})$ with respect to $\mathbf{w}$ to get the \textbf{normal equation} $$(\mathbf{X}^T \mathbf{X})\mathbf{w} = \mathbf{X}^T \mathbf{y}$$
+In the derivation we also find that $$\frac{\partial E(\mathbf{w})}{\partial w_j} = -2 \sum_{p=1}^l (\mathbf{x}_p)_j \cdot (y_p - \mathbf{x}_p^T \mathbf{w})$$
+If $\mathbf{X}^T \mathbf{X}$ is not singular, then the unique solution is given by $$\mathbf{w} = (\mathbf{X}^T \mathbf{X})^{-1}\mathbf{X}^T \mathbf{y} = \mathbf{X}^+ \mathbf{y}$$ with $\mathbf{X}^+$ being the Moore-Penrose pseudoinverse. Else the solutions are infinite, so we can choose the $\min \text{norm}(\mathbf{w})$ solution.\\
+The \textbf{Singular Value Decomposition} can be used for computing the pseudoinverse of a matrix ($\mathbf{X}^+$). With $$\mathbf{X} = \mathbf{U}\mathbf{\Sigma} \mathbf{V}^T \Rightarrow \mathbf{X}^+ = \mathbf{V}\mathbf{\Sigma}^+ \mathbf{U}^T$$ obtained by replacing every non-zero entry by its reciprocal.\\
+We can apply SVD directly to compute $\mathbf{w} = \mathbf{X}^+ \mathbf{y}$, obtaining the minimal norm (on $\mathbf{w}$) solution of least squares problem.
+$$\frac{\partial E(\mathbf{w})}{\partial w_j} = \frac{\partial \sum_{p=1}^l (y_p - \mathbf{x}_p^T \mathbf{w})^2}{\partial w_j} =$$
+$$=\sum_{p=1}^l 2(y_p-\mathbf{x}_p^T\mathbf{w})\frac{\partial(y_p-\mathbf{x}_p^T\mathbf{w})}{\partial w_j} = \sum_{p=1}^l 2(y_p-\mathbf{x}_p^T\mathbf{w})\underset{\text{Only the component }j\text{ is not }0}{\left(0-\cancel{\frac{\partial\mathbf{x}_{p1}w_1}{\partial w_j}}-\cancel{\frac{\partial\mathbf{x}_{p2}w_2}{\partial w_j}}-\ldots-\frac{\partial\mathbf{x}_{pj}w_j}{\partial w_j}-\ldots-\cancel{\frac{\partial\mathbf{x}_{pn}w_n}{\partial w_j}}\right)}=$$
+$$= \sum_{p=1}^l 2(y_p-\mathbf{x}_p^T\mathbf{w})\left(-\frac{\partial \mathbf{x}_{pj}w_j}{\partial w_j}\right)= -2 \sum_{p=1}^l (\mathbf{y}_p - \mathbf{x}_p^T \mathbf{w})(\mathbf{x}_p)_j$$
+By imposing this $=0$ we can easily obtain the normal equation, first by sums then in matrix notations, obtaining the gradiend $E$. Another form, used in neural networks:
+$$\frac{\partial E(\mathbf{w})}{\partial w_j}=-\sum_{p=1}^l 2 \underset{\delta_p}{\underbrace{(y_p-\mathbf{x}_p^T\mathbf{w})}} x_{pj} = -2\sum_{p=1}^l\delta_px_{pj}$$
+\subsection{Gradient Descent} The derivation suggests an approach based on an iterative algorithm based on $$\frac{\partial E(\mathbf{w})}{\partial w_j} = -2 \sum_{p=1}^l (y_p - \mathbf{x}_p^T \mathbf{w})x_{pj}$$ The \textbf{gradient} is the \textbf{ascent direction}. We can move toward the minimum with a gradient descent $\Delta \mathbf{w} = -$ gradient of $E(\mathbf{w})$. \textbf{Local search}: we begin with a initial weight vector and modify it iteratively to minimize the error function. The gradient vector is
+$$\Delta \mathbf{w} = -\frac{\partial E(\mathbf{w})}{\partial \mathbf{w}} = \left[\begin{array}{c}
+-\frac{\displaystyle\partial E(\mathbf{w})}{\displaystyle\partial w_1}\\\vdots\\-\frac{\displaystyle\partial E(\mathbf{w})}{\displaystyle\partial w_n}
 \end{array}\right] = \left[\begin{array}{c}
 \Delta w_1\\\vdots\\\Delta w_n
 \end{array} \right]$$
-Allowing us to work in a multi dimensional space without the need to visualize it. Hence, the iterative approach will move using a learning rule based on a "delta" of $w$ proportional to the opposite of the local gradient. The movements will be made according to $$w_{new} = w + \eta\cdot\Delta w$$
+Allowing us to work in a multi dimensional space without the need to visualize it. Hence, the iterative approach will move using a learning rule based on a "delta" of $w$ proportional to the opposite of the local gradient. The movements will be made according to $$\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$$
 The simple algorithm is as follows:
 \begin{enumerate}
-	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
-	\item Compute $\Delta w = -$ gradient of $E(w) = -\frac{\partial E(w)}{\partial w}$ (or for each $w_i$)
-	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)\\
+	\item Start with weight vector $\mathbf{w}_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta \mathbf{w} = -$ gradient of $E(\mathbf{w}) = -\frac{\partial E(\mathbf{w})}{\partial \mathbf{w}}$ (or for each $w_i$)
+	\item Compute $\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$ (or for each $w_i$)\\
 	$\eta$ is the step size or \textbf{learning rate}
-	\item Repeat from $2$ until convergence or $E(w)$ sufficiently small
+	\item Repeat from $2$ until convergence or $E(\mathbf{w})$ sufficiently small
 \end{enumerate}
 \subsubsection{Batch version} The gradient is the sum over all the $l$ patterns. Provides a more precise evaluation of the gradient over $l$ data. We upgrade the weight after the sum
-$$\frac{\partial E(w)}{\partial w_j} = -2 \sum_{p=1}^l (y_p - x_p^T w)(x_p)_j$$
+$$\frac{\partial E(\mathbf{w})}{\partial w_j} = -2 \sum_{p=1}^l (y_p - \mathbf{x}_p^T \mathbf{w})x_{pj}$$
 \subsubsection{Online/Stochastic version} We upgrade the weights with the error that is computed for each pattern. Hence, the second pattern output is based on weights already updated from the first and so on. In makes progress with each example it sees. Can be faster, but needs smaller $\eta$
-$$\frac{\partial E_p(w)}{\partial w_j} = -2(y_p - x_p^T w)(x_p)_j = -\Delta_p w_j$$
+$$\frac{\partial E_p(\mathbf{w})}{\partial w_j} = -2(y_p - \mathbf{x}_p^T \mathbf{w})x_{pj} = -\Delta_p w_j$$
 \subsubsection{Gradient Descent as error correction delta rule} The error correction rule, also called Widrow-Hoff or delta rule, changes $w_j$ proportionally to the error (target $y$ $-$ output)
-$$\Delta w_j = 2 \sum_{p=1}^l (x_p)_j (y_p - x_p^T w)$$
-$$w_{new} = w + \eta\cdot\Delta w$$
-We improve by learning on previous errors.\\\\
+$$\Delta w_j = 2 \sum_{p=1}^l x_{pj} (y_p - \mathbf{x}_p^T \mathbf{w})$$
+$$\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$$
+We improve by learning on previous errors.
+%TODO from here knn-0.1.pdf p.51
+\subsection{Extending the linear model}
+\paragraph{Inductive Bias}
 Gradient descent is a simple and effective local search approach to a LMS solution. It allows to search through an infinite hypothesis space, can be easily applied for continuous $H$ and differentiable losses and isn't only for linear models (also neural networks and deep learning models).\\
 Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ldots)
-\pagebreak
 \begin{list}{}{}
 	\item \textbf{Language bias}: $H$ is a set of linear functions.
 	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
@@ -264,7 +296,7 @@ Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ld
 Shows that even for a simple model there are many possibilities. We still need a principled approach.
 \subparagraph{Limitations} In geometry, two set of points are linearly separable in an $n$-dimensional space if they can be separated by a $(n-1)$-dimensional hyper-plane. In 2 dimensions, if they can be separated by a line, in 3 dimensions, by a plane\ldots\\
 The linear decision boundary can provide exact solutions only for linearly separable sets of points.
-\subsection{Extending the linear model} We can use transformed inputs, such as $x, x^2, x^3\ldots$ with a non-linear relationship between inputs and output, maintaining the learning machinery used so far. $$h_w(x) = w_0 + w_1 x + w_2 x^2 + \ldots + w_M x^M = \sum_{j=0}^M w_j x^j$$ \textbf{Linear basis expansion} (LBE) $$h_w(x) = \sum_{k=0}^K w_k\phi_k(x)$$ Augments the input vector with additional variables which are transformations of $x$ according to a function $\phi_k : R^n \rightarrow R$, so number of parameters $K > n$: linear in the parameters, so we can use the same learning algorithms as before.\\
+\paragraph{Extending} We can use transformed inputs, such as $x, x^2, x^3\ldots$ with a non-linear relationship between inputs and output, maintaining the learning machinery used so far. $$h_w(x) = w_0 + w_1 x + w_2 x^2 + \ldots + w_M x^M = \sum_{j=0}^M w_j x^j$$ \textbf{Linear basis expansion} (LBE) $$h_w(x) = \sum_{k=0}^K w_k\phi_k(x)$$ Augments the input vector with additional variables which are transformations of $x$ according to a function $\phi_k : R^n \rightarrow R$, so number of parameters $K > n$: linear in the parameters, so we can use the same learning algorithms as before.\\
 Which $\phi$? Towards the dictionary approaches. Pro: can model more complicated relationships than linear, so it's more expressive. Cons: with large basis of functions, we easily risk overfitting, hence we require controlling the complexity (as in flexibility of the model to fit the data). How to do that? Many approaches:
 \begin{list}{}{}
 	\item \textbf{Ridge Regression} (or \textbf{Tikhonov Regularization}): smoothed model.\\
@@ -330,7 +362,7 @@ For us, these are called \textbf{Artificial Neural Networks} (ANN): a flexible m
 Three types of activation functions:
 \begin{list}{}{}
 	\item \textbf{Linear}, or identity: $f(x) = x$
-	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = \hbox{sign}(x)$
+	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = \text{sign}(x)$
 	\item \textbf{Logistic}: $f(x) = \frac{1}{1 + e^{-\alpha x}}$
 \end{list}
 \subsubsection{Perceptron} A neuron that uses a threshold as activation function. Can be composed and connected to build a network: \textbf{MLP}, Multi Layer Perceptron 
@@ -366,7 +398,7 @@ For the $q$-th error, $2w(q-1)x_{iq} < 0$, so $|w(q)|^2 \leq |w(q-1)|^2 + |x_{iq
 So we have an upper bound $q\beta$ and a lower bound $\frac{(q\alpha)^2}{|w^*|^2}$, so $$q\beta\geq |w(q)|^2\geq \frac{(q\alpha)^2}{|w^*|^2}$$ $$q\beta\geq q^2\alpha'$$ $$\beta\geq q\alpha'$$ $$q \leq \frac{\beta}{\alpha'}$$
 \pagebreak
 \paragraph{Differences}
-	$$w_{new} = w + \eta(d-\hbox{out})x$$
+	$$w_{new} = w + \eta(d-\text{out})x$$
 Apparently similar but:
 \begin{multicols}{2}
 	\begin{list}{}{\textbf{LMS algorithm}}
@@ -392,7 +424,7 @@ Apparently similar but:
 \paragraph{Activation functions}
 \begin{list}{}{}
 	\item \textbf{Linear}, or identity: $f(x) = x$
-	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = \hbox{sign}(x)$
+	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = \text{sign}(x)$
 	\item \textbf{Logistic}: $f(x) = \frac{1}{1 + e^{-\alpha x}}$\\
 	This is a non-linear squashing function like the sigmoidal logistic function: it assumes a continuous range of values in the bounded interval $[0,1]$. It has the property of being a smoothed differentiable threshold function, with $\alpha$ being the slope parameter of the sigmoid function.
 	\item \textbf{Radial basis}: $f(x) = e^{-\alpha x^2}$
@@ -402,7 +434,7 @@ Apparently similar but:
 For the derivatives, a step function has no derivative, which is exactly why it isn't used. The sigmoids have\\$\frac{df_\sigma(x)}{dx} = f_\sigma(x) (1-f_\sigma(x))$ and $\frac{df_{tanh}(x)}{dx} = 1 - f_{tanh}(x)^2$ for $\alpha = 1$.\\
 The sigmoid logistic function has the property of being a smoothed \textit{differentiable} threshold function. Hence, we can derive a Least (Mean) Square algorithm, by computing the gradient of the mean square loss function as for the linear units (also for a classifier).\\
 From $\sigma(x) = x^Tw$ to $\sigma(x) = f_\sigma(x^Tw)$ where $f_\sigma$ is a logistic function. Find $w$ that minimizes the residual sum of squares $$E(w) = \sum_p (d_p - \sigma(x_p))^2 = \sum_p (d_p - f_\sigma(x_p^Tw))^2$$
-$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\hbox{net}(x_p))\text{ for 1 unit and patterns }p = 1\ldots l$$
+$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\text{net}(x_p))\text{ for 1 unit and patterns }p = 1\ldots l$$
 \paragraph{Gradient descent algorithm} 
 The same as for linear units using the new delta rule $w_{new} = w + \eta\cdot\delta_p\cdot x_p$ where $\delta_p = (d_p - f_\sigma(net(x_p)))f'_\sigma(net(x_p)) = (d_p-out(x_p))f'_\sigma$
 \paragraph{Neural Network} In an MLP architecture: units connected by weighted links, organized in layers:
@@ -537,7 +569,7 @@ Too few units $\Rightarrow$ underfitting, viceversa too many units $\Rightarrow$
 		After training, the weights of the new unit are frozen and the remaining weights are restrained. If the obtained network N1 cannot solve the problem, new hidden units are progressively added, which are connected with all the inputs and previously installed units. The process continues until the residual errors of the output layer satisfy a specified stopping criteria.\\
 		This method dynamically builds up a neural network and terminates once a sufficient amount of hidden units has been found to solve the given problem. Specifically, it works by interleaving the minimization of the total error function (LMS) by simple backpropagation training of the output layer and the maximization of the (non-normalized) correlation (the covariance) of the new inserted hidden (candidate) units with the residual error. With $E_{p,k} = (o_{p,k} - d_{p,k})$ residual error, with $o_{p,k}$ output, $p$ pattern and $k$ output unit
 		$$S = \sum_k\:\vline\sum_p(o_p - mean_p(o_{p,k}))(E_{p,k} - mean_p(E_{p,k}))\vline$$
-		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\text{with }h\hbox{ candidate index}$$
+		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\text{with }h\text{ candidate index}$$
 		\begin{center}
 			\includegraphics[scale=0.5]{9.png}
 		\end{center}
