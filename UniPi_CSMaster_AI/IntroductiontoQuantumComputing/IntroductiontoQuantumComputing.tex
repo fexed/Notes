@@ -714,8 +714,8 @@ The probability of getting result $m$ on the state $\ket{\psi}$ is $$p(m) = \lan
 Given that outcome $m$ occurred, the state of the quantum system immediately after is $$\frac{P_m\ket{\psi}}{\sqrt{p(m)}}$$
 The operators $P_m$ satisfy the completeness relation.
 $$\sum_m P_m^+P_m = \sum_m P_m = I$$
-\paragraph{Measurements in the Standard Basis} A measurement in the $\ket{0}, \ket{1}$ basis corresponds to perform a projective measurement with projectors $$P_0 = \ket{0}\langle 0| = \left(\begin{array}{c}1//0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}1&0\\0&0\end{array}\right)$$
-$$P_1 = \ket{1}\langle 1| = \left(\begin{array}{c}1//0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}0&0\\0&1\end{array}\right)$$
+\paragraph{Measurements in the Standard Basis} A measurement in the $\ket{0}, \ket{1}$ basis corresponds to perform a projective measurement with projectors $$P_0 = \ket{0}\langle 0| = \left(\begin{array}{c}1\\0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}1&0\\0&0\end{array}\right)$$
+$$P_1 = \ket{1}\langle 1| = \left(\begin{array}{c}1\\0\end{array}\right) (1\:\:0) = \left(\begin{array}{c c}0&0\\0&1\end{array}\right)$$
 Can be seen as projective measurement with respect to Hermitian matrix $Z$
 $$Z = \ket{0}\langle 0| - \ket{1}\langle 1| = \left(\begin{array}{c c}
 1&0\\0&-1
@@ -949,14 +949,35 @@ We want to compute functions $$f:\{0,1\}^n\rightarrow\{0,1\}$$ We need to have a
 To translate a gate into a reversible version we use Toffoli gates, which are reversible versions of the AND. Toffoli gates are C-CNOT. With $C= 0$ is AND, with $C=1$ is a NAND.\\
 Toffoli gate and the quantum implementation:
 \begin{center}
-	\includegraphics[scale=0.5]{19.png}
+	\begin{quantikz}
+	\qw & \ctrl{1} & \qw & \\
+	\qw & \ctrl{1} & \qw & \\
+	\qw &\targ &\qw& \qw & 
+	\end{quantikz}
+	=
+	\begin{quantikz}
+	\qw & \qw      & \qw      & \qw        & \ctrl{2}  & \qw      & \qw &  \qw & \ctrl{2} & \qw & \ctrl{1} & \gate{T} & \ctrl{1} & \qw\\
+	\qw & \qw      & \ctrl{1} & \qw        & \qw       & \qw      & \ctrl{1}  & \qw & \qw & \gate{T} & \targ&\qw & \gate{T^T} & \targ&\qw & \qw\\
+	\qw & \gate{H} & \targ&\qw& \gate{T^T} & \targ&\qw & \gate{T} & \targ&\qw  & \gate{T^T} & \targ&\qw & \gate{T} & \gate{H} & \qw & \qw & \qw
+	\end{quantikz}
 \end{center}
+$$T=\left[\begin{array}{c c}
+1&0\\
+0&e^{\frac{i\pi}{4}}
+\end{array}\right]$$
 Any classical computation can be implemented by a quantum circuit of Toffoli gates.
 \paragraph{Quantum Parallelism} An oracle computing a function is a black-box that computes said function. Quantum if used with quantum bits.\\
 $U_f$ is implemented, due to reversibility, with input $\ket{x}$ of size $n$ and another qubit $|y\rangle$ used to store the result. The output is $\ket{x}$ and $|y\otimes f(x)\rangle$. It's reversible
 $$|x,y\rangle\mapsto_{U_f} |x,y\otimes f(x)\rangle \mapsto_{U_f} |x, (y\otimes f(x))\otimes f(x) \rangle = |x,y\rangle$$
-In general $\ket{x}$ is of size $n$, meaning $f:\{0,1\}^n\rightarrow\{0,1\}$. To prepare the $\ket{x}$ (data register) in a superposition we apply the Hadamard gate, and we can generalize this procedure on an arbitrary number of qubits:\begin{center}
-	\includegraphics[scale=0.5]{20.png}
+In general $\ket{x}$ is of size $n$, meaning $f:\{0,1\}^n\rightarrow\{0,1\}$. To prepare the $\ket{x}$ (data register) in a superposition we apply the Hadamard gate, and we can generalize this procedure on an arbitrary number of qubits:
+Toffoli gate and the quantum implementation:
+\begin{center}
+	\begin{quantikz}
+		\lstick[wires=3]{$n$\\qubits} & \rstick{$\ket{0}$} &&& \gate{H} & \gate[wires=4]{U_f} &\qw\\
+		&\rstick{\vdots} &&&&&\qw\\
+		&\rstick{$\ket{0}$} &&& \gate{H} &&\qw\\
+		&\rstick{$\ket{0}$} &&& \qw && \qw
+	\end{quantikz}
 \end{center}
 So we:\begin{list}{}{}
 	\item Prepare the $n+1$ qubit state $\ket{x}^{\otimes n}|y\rangle$
