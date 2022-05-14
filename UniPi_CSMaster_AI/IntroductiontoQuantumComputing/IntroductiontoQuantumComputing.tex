@@ -920,7 +920,7 @@ The teleportation instead works like this. The circuit is:
 		&&&& \qw & \targ & \qw & \qw & \qw & \meter{$x$} & \cwbend{3} & \\
 		\lstick{$\ket{0}$} & \gate{H} & \ctrl{1}\slice{Step 1} & \qw \vqw{-1}&&&&&&&&\\
 		\lstick{$\ket{0}$} & \qw & \targ & \qw & \qw \vqw{1}&&&&&&&\\
-		&&&\lstick{Bob's qubit$\:\:$} & \qw & \qw & \qw & \qw & \qw & \gate{X^z} & \gate{Z^z}\slice{Step 4} & \qw & \rstick{$\ket{\psi}$}
+		&&&\lstick{Bob's qubit$\:\:$} & \qw & \qw & \qw & \qw & \qw & \gate{X^x} & \gate{Z^z}\slice{Step 4} & \qw & \rstick{$\ket{\psi}$}
 	\end{quantikz}
 \end{center}
 Alice has two qubits, Bob just one.
@@ -989,7 +989,13 @@ Quantum parallelism enables all possible values of $f$ to be evaluated simultane
 To exploit quantum parallelism, we need the ability to extract information about more than one value of $f(x)$ from $\sum_x |x,f(x)\rangle$
 \subsection{Deutsch's Algorithm}
 \begin{center}
-	\includegraphics[scale=0.5]{22.png}
+	\begin{quantikz}
+	\rstick{$\ket{0}$} &&& \gate{H}\slice{$\ket{\psi_1}$} & \gate[wires=2][2cm]{U_f}
+\gateinput{$x$}
+\gateoutput{$x$}\slice{$\ket{\psi_2}$} & \gate{H}\slice{$\ket{\psi_3}$}& \meter{}&\cw & \rstick{$f(0)\otimes f(1)$}\\
+	\rstick{$\ket{1}$} &&& \gate{H} & \gateinput{$y$}
+\gateoutput{$y\oplus f(x)$} &\qw & \qw & \qw
+	\end{quantikz}
 \end{center}
 $$f(0)\otimes f(1)=\left\{\begin{array}{c l}
 0 & f\hbox{ is constant}\\
@@ -1025,7 +1031,13 @@ As input we have a black box for computing an unknown function $f:\{0,1\}^n\righ
 The problem is to determine whether $f$ is constant or balanced.\\\\
 Classical (exact) solution, in the best case we query twice getting two different answers, then $f$ is balanced for sure. The worst case is $2^{n-1}$ queries with the same result, so $2^{n-1}+1$ queries: if the last value is different then is balanced, otherwise is constant. So classically we need an exponential number of queries. With quantum circuits we do just one query.
 \begin{center}
-	\includegraphics[scale=0.5]{23.png}
+	\begin{quantikz}
+	\lstick{$\ket{0}$} & \qw\slice{$\ket{\psi_0}$}&\qw &[2mm] \gate{H^{\otimes n}}\qwbundle{n} & \qw\slice{$\ket{\psi_1}$} & \gate[wires=2][2cm]{U_f}
+\gateinput{$x$}
+\gateoutput{$x$}\slice{$\ket{\psi_2}$} & [2mm] \gate{H^{\otimes n}}& \qw\qwbundle{n} & \qw\slice{$\ket{\psi_3}$} & \meter{} & \qw \\
+\lstick{$\ket{1}$} & \qw & \qw & \qw & \qw & \gateinput{$y$}
+\gateoutput{$y\oplus f(x)$} & \qw & \qw & \qw & \qw & \qw
+	\end{quantikz}
 \end{center}
 Very similar, just with a $n$ qubits on state $\ket{0}$ in the query register and 1 qubit in state $\ket{1}$ in the answer register.
 $$|\psi_0\rangle = |0\ldots 0\rangle\ket{1} = \ket{0}^{\otimes n}\ket{1}$$
@@ -1054,6 +1066,7 @@ If $f$ is balanced, positive and negative contributes cancel each other and the 
 \paragraph{Probability Error} $$2\left(\frac{1}{2}\right)^k = \frac{1}{2^{k-1}}$$
 \paragraph{Simon's Algorithm} $$f:\{0,1\}^n\rightarrow\{0,1\}^n$$
 Is $f$ one-to-one (bijection) or two-to-one function?
+\pagebreak
 \subsection{Quantum Fourier Transform}
 Building block for many important algorithms: QPE, QAA, Shor's, QS\ldots
 \paragraph{Discrete Fourier Transform} DFT, essentially multiplying a unitary matrix by a vector. With Fast Fourier Transform we do it in $O(N\log N)$ with $N = 2^n$.\\
