@@ -384,7 +384,7 @@ It provides a good approximation if we can find a significant set of data close 
 	If the target depends only on a few features in $x$, we could retrieve a similar pattern with the similarity dominated by the large number of irrelevant features. This grows with dimensionality. We may weight features according to the relevance, or adopt feature selection approaches (eliminating some variables)
 \end{list}
 \pagebreak
-% ML-21-NN-part1-v.0.1.pdf from here
+% ML-21-NN-part1-v.0.1.pdf
 \section{Neural Networks} Models used to:
 \begin{list}{}{}
 	\item Study and model biological systems and learning processes (biological realism is essential)
@@ -398,10 +398,11 @@ For us, these are called \textbf{Artificial Neural Networks} (ANN): a flexible m
 	\item Can handle continuous and discrete data for both regression and classification tasks
 	\item It's a \textbf{paradigm}: it encompasses a wide set of models
 \end{list}
-\subsection{Artificial Neuron} Input from external source or other units, with weights $w$ as free parameters: can be modified by the learning process. The unit $i$ computes $f(\sum_j w_{ij}x_j)$ with $w_{ij}$ the weight from input $j$ to unit $i$. $f$ is called \textbf{activation function}: linear, threshold or logistic (sigmoid). The weighted sum $\sum_j w_{ij}x_j$ is called net input to unit $i$, or $net_i$.
+\subsection{Artificial Neuron} Input from external source or other units, with weights $\mathbf{w}$ as free parameters: can be modified by the learning process. The unit $i$ computes $f(\sum_j w_{ij}x_j)$ with $w_{ij}$ the weight from input $j$ to unit $i$. $f$ is called \textbf{activation function}: linear, threshold or logistic (sigmoid). The weighted sum $\sum_j w_{ij}x_j$ is called net input to unit $i$, or $net_i$.
 \begin{center}
 	\includegraphics[scale=0.75]{6.png}
 \end{center}
+A neuron can either be firing (1) or not firing (0). All connections are equivalent and characterized by a real number (their strength $\mathbf{w}_{ij}$), which is positive of excitatory connections and negative for inibitory connections. A neuron $i$ becomes active when the sum of those connections $w_{ij}$ coming from neurons $j$ plus a bias is larger than zero.\\
 Three types of activation functions:
 \begin{list}{}{}
 	\item \textbf{Linear}, or identity: $f(x) = x$
@@ -411,53 +412,67 @@ Three types of activation functions:
 \subsubsection{Perceptron} A neuron that uses a threshold as activation function. Can be composed and connected to build a network: \textbf{MLP}, Multi Layer Perceptron 
 \subparagraph{Xor} $x_1 \oplus x_2 = x_1\cdot \overline{x_2} + \overline{x_1}\cdot x_2$. Let $h_1 = x_1\cdot x_2, h_2 x_1 + x_2$ then $x_1 \oplus x_2 = \overline{h_1} \cdot h_2$ with $\wedge = \cdot$ and $\vee = +$.\\
 So two layers are sufficient, but single layer cannot model all functions due to limits of single perceptron and the linear separable problems.
-\paragraph{Learning for one unit model} \begin{enumerate}
+\paragraph{Hidden Representation} Developing high level hidden features is a key factor in NN. The representation in the hidden layer makes the task easier for the output layer. Such composition of sub/intermediate operations to perform a complex task can be extended through many layers of abstraction, and in NNs such \textbf{internal representation} (intermediate features) \textbf{can be learned}.
+\paragraph{Learning for one unit model} \begin{list}{}{}
 	\item \textbf{Adaline}, adaptive linear neuron: LMS direct solution and gradient descent solution
-	\item \textbf{Perceptron}, non linear: only classificiation\\
-	Minimize number of misclassified patterns, find $w\:|\:sign(w^Tx) = d$. Online algorithm, a step can be made for each input pattern.
+	\item \textbf{Perceptron}, non linear: only classification.\\
+	Minimize number of misclassified patterns, find $\mathbf{w}\:|\:sign(\mathbf{w}^T\mathbf{x}) = d$. Online algorithm, a step can be made for each input pattern.
 	\begin{enumerate}
 		\item Initialize weights
 		\item Pick learning rate $\eta$ (between 0 and 1)
-		\item Until stopping condition (es weights don't change)\\
-		For each training pattern $(x, d)$ compute output activation $out = sign(w^T x)$.\\
-		If $out = d$ don't change weights, if $out \neq d$ update weights $w_{new} = w + \eta\cdot d\cdot x$ adding $+\eta x$ if $wx\leq 0$ and $d = +1$ or $-\eta x$ if $wx > 0$ and $d = -1$.\\Different form $w_{new} = w + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot x$
+		\item Until stopping condition (e.g.: weights don't change):
+		\begin{list}{}{}
+			\item For each training pattern $(\mathbf{x}, d)$ compute output activation $out = sign(\mathbf{w}^T \mathbf{x})$.\\
+		If $out = d$ then don't change weights\\
+		If $out \neq d$ update weights $\mathbf{w}_{new} = \mathbf{w} + \eta\cdot d\cdot \mathbf{x}$ adding $+\eta \mathbf{x}$ if $\mathbf{wx}\leq 0$ and $d = +1$ or $-\eta \mathbf{x}$ if $\mathbf{wx} > 0$ and $d = -1$.\\Different form: $\mathbf{w}_{new} = \mathbf{w} + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot \mathbf{x}$
+		\end{list}
 	\end{enumerate}
-	\textbf{Delta Rule}: the form $w_{new} = w + \eta\cdot d\cdot x$ is the \textbf{Hebbian learning} form, while the form $w_{new} = w + \frac{1}{2}\cdot\eta\cdot (d-out)\cdot x$ is the \textbf{error correction learning} form. It's a recall from LMS: a error correction/delta/Widrow-Hoff/Adaline/LMS rule that changes the $w$ proportionally to the error (target $d -$ output).\\
+	The first is called \textbf{Hebbian learning} form $$\mathbf{w}_{new} = \mathbf{w} + \eta d \mathbf{x}$$ while the second is the \textbf{error correction learning} form $$\mathbf{w}_{new} = \mathbf{w} + \frac{1}{2}\eta (d-out) \mathbf{x}$$
+	It's a recall from LMS: a error correction/delta/Widrow-Hoff/Adaline/LMS rule that changes the $\mathbf{w}$ proportionally to the error (target $d -$ output).\\
 	In terms of neurons, the adjustment made to a synaptic weight is proportional to the product of error signal and the input signal that excite the synapse. Easy to compute when errors signal $\delta$ is directly measurable (meaning that we know the desired response for each unit).
-\end{enumerate}
+\end{list}
 \paragraph{Perceptron Convergence theorem} A perceptron can represent linear decision boundaries, so it can solve linearly separable problems. Also, it can always learn the solution with the perceptron learning algorithm.\\
 The \textbf{perceptron convergence theorem} is a milestone: a biologically inspired model with well-defined and proved computational capabilities and proved by a theorem. It states that \textbf{the perceptron is guarateed to converge} (classifying correctly all the input patterns) \textbf{in a finite number of steps if the problem is linearly separable}. This independently of the starting point, although the final solution is not unique and it depends on the starting point.
-\subparagraph{Preliminaries} We focus on positive patterns, assuming $(x_i, d_i)\in$ TR set with $d_i = +1$ or $-1$. We also omit $^T$ for the dot product $w^T x$ (sometimes).\\
-Linearly separable $\Rightarrow\exists\: w^*$ solution $|\:d_i(w^* x_i)\geq \alpha = \min_i d_i(w^*x_i) > 0$, hence $w^*(d_ix_i)\geq \alpha$.\\
-With $x_i' = (d_ix_i)$ then $w^*$ solution $\Leftrightarrow w^*$ solution of $(x_i', +1)$\\
-This because $w^*$ solves $\Rightarrow d_i(w^*x_i) \geq \alpha \Rightarrow (w^*d_ix_i)\geq\alpha\Rightarrow (w^*x_i')\geq\alpha \Rightarrow w^*$ solution of $(x_i', +1)$.\\
-And if $w^*$ is a solution of $(x_i', +1)\Rightarrow(w^*d_ix_i)\geq \alpha\Rightarrow d_i(w^*x_i)\geq \alpha\Rightarrow w^*$ solves for $x_i$\\\\
-Also assuming $w(0) = 0$ (at step $0$), $\eta = 1$ and $\beta = \max_i |x_i|^2$ where $|\:|$ is the euclidean norm.\\
-After $q$ errors (all false negatives), $w(q) = \sum_{j=1}^q x_{ij}$ with $_{ij}$ denoting the patterns belonging to the subset of misclassified patterns.
-\subparagraph{Proof} The basic idea is that we can find lower and upper bound to $|w|$ as a function of $q^2$ steps (lower bound) and $q$ steps (upper bound) $\Rightarrow$ we can find the number of steps $q\:|$ the algorithm converges.\\
-Lower bound on $|w(q)|$ is $w^* w(q) = w^*\sum_{j=1}^q x_{ij}\geq q\alpha$ recalling that $\alpha=\min_i\:(w^*x_i)$. With Cauchy-Schwartz we know that $(wv)^2 \leq |w|^2|v|^2$ where $|w|^2 = ||w||_2 ^2$.\\
-$|w^*|^2|w(q)|^2 \geq (w^*w(q))^2 \geq (q\alpha)^2 \Rightarrow |w(q)|^2 \geq \frac{(q\alpha)^2}{|w^*|^2}$. Also $|w(q)|^2 = |w(q-1)+ x_{iq}|^2 = |w(q-1)|^2 + 2w(q-1)x_{iq} + |x_{iq}|^2$ because $|a + b|^2 = |a|^2 + 2ab + |b|^2$\\
-For the $q$-th error, $2w(q-1)x_{iq} < 0$, so $|w(q)|^2 \leq |w(q-1)|^2 + |x_{iq}|^2$ and by iteration $w(0) = 0$ we have $|w(q)|^2 \leq \sum_{j=1}^q |x_{ij}|^2 \leq q\beta$ with $\beta = \max_i |x_i|^2$.\\\\
-So we have an upper bound $q\beta$ and a lower bound $\frac{(q\alpha)^2}{|w^*|^2}$, so $$q\beta\geq |w(q)|^2\geq \frac{(q\alpha)^2}{|w^*|^2}$$ $$q\beta\geq q^2\alpha'$$ $$\beta\geq q\alpha'$$ $$q \leq \frac{\beta}{\alpha'}$$
-\pagebreak
+\subparagraph{Preliminaries} We sometimes omit $^T$ for the dot product $\mathbf{w}^T \mathbf{x}$
+\begin{list}{}{}
+	\item We focus on positive patterns, assuming $(\mathbf{x}_i, d_i)\in$ TR set with $d_i = +1$ or $-1$
+	\item Linearly separable $\Rightarrow\exists\: \mathbf{w}^*$ solution $|\:d_i(\mathbf{w}^* x_i)\geq \alpha = \min_i d_i(\mathbf{w}^*\mathbf{x}_i) > 0$, hence $\mathbf{w}^*(d_i\mathbf{x}_i)\geq \alpha$
+	\item $\mathbf{x}_i' = (d_i\mathbf{x}_i)$ then $\mathbf{w}^*$ solution $\Leftrightarrow \mathbf{w}^*$ solution of $(\mathbf{x}_i', +1)$\\
+	This because:
+	\begin{list}{}{}
+		\item If $\mathbf{w}^*$ solves $\Rightarrow d_i(\mathbf{w}^*\mathbf{x}_i) \geq \alpha \Rightarrow (\mathbf{w}^*d_i\mathbf{x}_i)\geq\alpha\Rightarrow (\mathbf{w}^*\mathbf{x}_i')\geq\alpha \Rightarrow \mathbf{w}^*$ solution of $(\mathbf{x}_i', +1)$
+		\item If $\mathbf{w}^*$ is a solution of $(\mathbf{x}_i', +1)\Rightarrow(\mathbf{w}^*d_i\mathbf{x}_i)\geq \alpha\Rightarrow d_i(\mathbf{w}^*\mathbf{x}_i)\geq \alpha\Rightarrow \mathbf{w}^*$ solves for $\mathbf{x}_i$
+	\end{list}
+	\item Also assuming $\mathbf{w}(0) = 0$ (at step $0$), $\eta = 1$ and $\beta = \max_i |x_i|^2$ where $|\:|$ is the euclidean norm
+	\item After $q$ errors (all false negatives), $$\mathbf{w}(q) = \sum_{j=1}^q \mathbf{x}_{i_j}$$ with $_{i_j}$ denoting the patterns belonging to the subset of misclassified patterns and $\mathbf{w}(j) = \mathbf{w}(j-1)  + \mathbf{x}_{i_j}$
+	\item Rule: $\mathbf{w}_{new} = \mathbf{w}+\eta d\mathbf{x}$ with $d=+1$ because all positive patterns
+\end{list}
+\subparagraph{Proof} The basic idea is that we can find lower and upper bound to $|\mathbf{w}|$ as a function of $q^2$ steps (lower bound) and $q$ steps (upper bound) $\Rightarrow$ we can find the number of steps $q\:|$ the algorithm converges.\\\\
+Lower bound on $|\mathbf{w}(q)|$ is $$\mathbf{w}^* \mathbf{w}(q) = \mathbf{w}^*\sum_{j=1}^q \mathbf{x}_{ij}\geq q\alpha$$ recalling that $\alpha=\min_i\:(\mathbf{w}^*\mathbf{x}_i)$.\\
+With Cauchy-Schwartz we know that $(\mathbf{wv})^2 \leq |\mathbf{w}|^2|\mathbf{v}|^2$ where $|\mathbf{w}|^2 = ||\mathbf{w}||_2 ^2$
+$$|\mathbf{w}^*|^2|\mathbf{w}(q)|^2 \geq (\mathbf{w}^*\mathbf{w}(q))^2 \geq (q\alpha)^2 \Rightarrow |\mathbf{w}(q)|^2 \geq \frac{(q\alpha)^2}{|\mathbf{w}^*|^2}$$
+Also, because $|\mathbf{a} + \mathbf{b}|^2 = |\mathbf{a}|^2 + 2\mathbf{ab} + |\mathbf{b}|^2$
+$$|\mathbf{w}(q)|^2 = |\mathbf{w}(q-1)+ \mathbf{x}_{i_q}|^2 = |\mathbf{w}(q-1)|^2 + 2\mathbf{w}(q-1)\mathbf{x}_{i_q} + |\mathbf{x}_{i_q}|^2$$
+For the $q$-th error, $2\mathbf{w}(q-1)\mathbf{x}_{i_q} < 0$, so $$|\mathbf{w}(q)|^2 \leq |\mathbf{w}(q-1)|^2 + |\mathbf{x}_{i_q}|^2$$ and by iteration, given $\mathbf{w}(0) = 0$, we have $$|\mathbf{w}(q)|^2 \leq \sum_{j=1}^q |\mathbf{x}_{i_j}|^2 \leq q\beta$$ with $\beta = \max_i |\mathbf{x}_i|^2$
+So we have an upper bound $q\beta$ and a lower bound $\frac{(q\alpha)^2}{|\mathbf{w}^*|^2}$, so $$\underset{\text{Upper bound}}{q\beta}\geq |\mathbf{w}(q)|^2\geq \underset{\text{Lower bound}}{\frac{(q\alpha)^2}{|\mathbf{w}^*|^2}}$$ $$q\beta\geq q^2\alpha'$$ $$\beta\geq q\alpha'$$ $$q \leq \frac{\beta}{\alpha'} = \frac{\max_i |\mathbf{x}_i|^2}{\min_i\:(\mathbf{w}^*\mathbf{x}_i)}$$
 \paragraph{Differences}
-	$$w_{new} = w + \eta(d-\text{out})x$$
+	$$\mathbf{w}_{new} = \mathbf{w} + \eta(d-\text{out})\mathbf{x}$$
 Apparently similar but:
 \begin{multicols}{2}
 	\begin{list}{}{\textbf{LMS algorithm}}
 		\item LSM rule derived without threshold activation functions
-		\item Hence for training $\delta = d - w^Tx$
-		\item Can still be used for classification using\\$h(x) = sign(w^T x)$, LTU
-		\item Minimizes $E(w)$ with out = $w^Tx$
+		\item Hence for training $\delta = d - \mathbf{w}^T\mathbf{x}$
+		\item Can still be used for classification using\\$h(\mathbf{x}) = \text{sign}(\mathbf{w}^T \mathbf{x})$, LTU
+		\item Minimizes $E(\mathbf{w})$ ($\text{out} = \mathbf{w}^T\mathbf{x}$)
 		\item Asymptotic convergence also for not linear separable problems
 		\item Not always zero classification errors
 		\item Can be extended to network of units (NN) using the gradient based approach
 	\end{list}
 	\begin{list}{}{\textbf{Perceptron learning algorithm}}
-		\item Perceptron uses out $= sign(w^Tx)$
-		\item versus $\delta = d - sign(w^Tx)$
+		\item Perceptron uses out $= \text{sign}(\mathbf{w}^T\mathbf{x})$
+		\item versus $\delta = d - \text{sign}(\mathbf{w}^T\mathbf{x})$
 		\item
-		\item Minimizes misclassifications (out = $sign(w^Tx)$)
+		\item Minimizes misclassifications ($\text{out} = \text{sign}(\mathbf{w}^T\mathbf{x})$)
 		\item Always converges in a finite number of steps for a linear separable problem to a perfect classifier\\
 		Else it doesn't converge
 		\item 
@@ -468,25 +483,31 @@ Apparently similar but:
 \begin{list}{}{}
 	\item \textbf{Linear}, or identity: $f(x) = x$
 	\item \textbf{Threshold}, for the \textbf{perceptrons}: $f(x) = \text{sign}(x)$
-	\item \textbf{Logistic}: $f(x) = \frac{1}{1 + e^{-\alpha x}}$\\
+	\item \textbf{Logistic}: $f(x) = \frac{1}{\displaystyle 1 + e^{-\alpha x}}$\\
 	This is a non-linear squashing function like the sigmoidal logistic function: it assumes a continuous range of values in the bounded interval $[0,1]$. It has the property of being a smoothed differentiable threshold function, with $\alpha$ being the slope parameter of the sigmoid function.
+	\item Tanh-like, piecewise linear approximation for efficient computation
+	\item \textbf{ReLU}, rectifier $f(x)=\max(0, x)$
+	\item Softplus, smooth approximation of the ReLU $f(x)=\ln(1+e^x)$
 	\item \textbf{Radial basis}: $f(x) = e^{-\alpha x^2}$
 	\item \textbf{Softmax}
 	\item \textbf{Stochastic neurons}, where the output is +1 with probability $P(net)$ or -1 with $1-P(net) \Rightarrow$ Boltzmann machines and other models rooted in statistical mechanics.
 \end{list}
-For the derivatives, a step function has no derivative, which is exactly why it isn't used. The sigmoids have\\$\frac{df_\sigma(x)}{dx} = f_\sigma(x) (1-f_\sigma(x))$ and $\frac{df_{tanh}(x)}{dx} = 1 - f_{tanh}(x)^2$ for $\alpha = 1$.\\
+For the derivatives, a step function has no derivative, which is exactly why it isn't used. The sigmoids have ($\alpha = 1$): for the asymmetric case $$\frac{df_\sigma(x)}{dx} = f_\sigma(x) (1-f_\sigma(x))$$ and for the symmetric case $$\frac{df_{tanh}(x)}{dx} = 1 - f_{tanh}(x)^2$$ 
 The sigmoid logistic function has the property of being a smoothed \textit{differentiable} threshold function. Hence, we can derive a Least (Mean) Square algorithm, by computing the gradient of the mean square loss function as for the linear units (also for a classifier).\\
-From $\sigma(x) = x^Tw$ to $\sigma(x) = f_\sigma(x^Tw)$ where $f_\sigma$ is a logistic function. Find $w$ that minimizes the residual sum of squares $$E(w) = \sum_p (d_p - \sigma(x_p))^2 = \sum_p (d_p - f_\sigma(x_p^Tw))^2$$
-$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l (x_p)_j (d_p - f_\sigma(x_p^Tw))f'_\sigma(x_p^Tw) =$$ $$= -2\sum_p^l(x_p)_j\delta_pf'_\sigma(\text{net}(x_p))\text{ for 1 unit and patterns }p = 1\ldots l$$
-\paragraph{Gradient descent algorithm} 
-The same as for linear units using the new delta rule $w_{new} = w + \eta\cdot\delta_p\cdot x_p$ where $\delta_p = (d_p - f_\sigma(net(x_p)))f'_\sigma(net(x_p)) = (d_p-out(x_p))f'_\sigma$
+From $\text{out}(\mathbf{x}) = \mathbf{x}^T\mathbf{w}$ to $$\text{out}(\mathbf{x}) = f_\sigma(\mathbf{x}^T\mathbf{w})$$ where $f_\sigma$ is a logistic function. Find $\mathbf{w}$ that minimizes the residual sum of squares $$E(\mathbf{w}) = \sum_p (d_p - \text{out}(\mathbf{x}_p))^2 = \sum_p (d_p - f_\sigma(\mathbf{x}_p^T\mathbf{w}))^2$$
+$$\frac{\partial E(w)}{\partial w_j} = -2\sum_p^l x_{pj} (d_p - f_\sigma(\mathbf{x}_p^T\mathbf{w}))f'_\sigma(\mathbf{x}_p^T\mathbf{w}) =$$ $$= -2\sum_p^lx_{pj}\underset{\text{new }\delta_p}{\underbrace{\delta_pf'_\sigma(\text{net}(\mathbf{x}_p))}}$$
+This for 1 unit and patterns $p = 1\ldots l$.\\
+The same as for linear unit using the new delta rule
+$$\mathbf{w}_{new}=\mathbf{w}+\eta\delta_p\mathbf{x}_p$$
+$$\delta_p = (d_p - f_\sigma(\text{net}(\mathbf{x}_p)))f'_\sigma(\text{net}(\mathbf{x}_p)) = (d_p-\text{net}(\mathbf{x}_p))f'_\sigma$$
+Again an error correction rule.
 \paragraph{Neural Network} In an MLP architecture: units connected by weighted links, organized in layers:
 \begin{list}{}{}
-	\item input layer, source of the input $x$. Copies the source external input patterns $x$, without computing $net$ and $f$.
+	\item input layer, source of the input $\mathbf{x}$. Copies the source external input patterns $\mathbf{x}$, without computing $\text{net}$ and $f$.
 	\item hidden layer, projects onto another hidden or an output layer, computing.
 \end{list}
 Can be viewed as network of units or a flexible function:
-$$h(x) = f_k\left(\sum_j w_{kj}f_j\left(\sum_i w_{ji}x_i\right)\right)$$
+$$h(\mathbf{x}) = f_k\left(\sum_j w_{kj}f_j\left(\sum_i w_{ji}x_i\right)\right)$$
 As for notation, given
 \begin{center}
 	\includegraphics[scale=0.6]{7.png}
@@ -495,19 +516,33 @@ We have that the index $t$ denotes a generic unit, can be either $k$ or $j$. $u$
 $x$ is a generic input from an external source (input vector) or from other units according to the position of the unit in the network. If we load the pattern $x$ in the input layer, we can use the notation with $o$ for both the inputs and the hidden units outputs. Hence, inside the network, the input to each unit $t$ from any source $u$ (through the connection $w_{tu}$) is typically denoted as $o_u$.
 \subparagraph{Architectures}
 \begin{list}{}{}
-	\item \textbf{Feedforward NN} Standard architecture of the NNs. Direction: input $\longrightarrow$ output\\
+	\item \textbf{Feedforward NN} Standard architecture of the NNs. Direction: input $\longrightarrow$ output
 	\item \textbf{Recurrent NN} adds feedback loops connections to the network topology. These self-loop connections provide the network with dynamical properties, leaving a "memory" of the past computations inside the model. This allows us to extend the representation capability of the model to the processing of sequences and structured data.
 \end{list}
-\subparagraph{Flexibility} The hypothesis space is a \textbf{continuous space} of all the functions that can be represented by assigning the weight values of the given architecture. Depending on the class of values produced by the output units (discrete or continuous), the model can deal, respectively, with classification tasks (sigmoidal output $f$) or regression tasks (linear output $f$). Also multi-class and multi-regression, with multiple output units.
+\subparagraph{Flexibility} The hypothesis space is a \textbf{continuous space} of all the functions that can be represented by assigning the weight values of the given architecture. Depending on the class of values produced by the output units (discrete or continuous), the model can deal, respectively, with classification tasks (sigmoidal output $f$) or regression tasks (linear output $f$). Also multi-class and multi-regression, with multiple output units.\\
+A NN can be seen either as:
+\begin{list}{}{}
+	\item A \textbf{function}, \textbf{non-linear in the parameters} $\mathbf{w}$ $$h(\mathbf{x}) = f_k\left(\sum_j w_{kj}\:\underset{\text{Unit}}{\underbrace{f_j\left(\sum_i w_{ji}x_i\right)}}\right)$$
+	with each $f_j\left(\sum_i w_{ji}x_i\right)$ computed by an independent processing element (unit)
+	\item A \textbf{dictionary approach}, as an adaptive basis function approach. $$\phi_j(\mathbf{x},\mathbf{w})=f_j\left(\sum_i w_{ji}x_i\right)$$
+	The basis function themselves are adapted to the data, by fitting $\mathbf{w}$ in the $\phi$s.\\
+	$h(\mathbf{x})$ as non-linear function of weighted sums of non-linearly transformed linear models. Each basis function (hidden unit) computes new nonlinear derived features, adaptively by learning from training data: the parameters $\mathbf{w}$ of the basis function are learned.
+\end{list}
+The representational capacity of the model is related to the hidden layer, and it's essential that the hidden units are non-linear in order to transform the input pattern into the internal representation of the network.
 \subparagraph{Universal approximation} The flexibility is theoretically grounded (Cybenko 1989, Hornik et al. 1993\ldots). In short, a single hidden-layer network with logistic activation functions can approximate (arbitrary well) every continuous function, provided enough units in the hidden layer.\\
 A MLP network can approximate (arbitrarily well) every input-output mapping, provided enough units in the hidden layers.\\\\
-Existence theorem: given $\epsilon$, $\exists\:h(x)\:|\:|f(x) - h(x)|< \epsilon\:\:\forall\:x$ in the hypercube.\\\\
-With this fundamental result (MLP can represent \textit{any} function), two issues arise: how to learn by neural network and how to decide its architecture.\\
-The \textbf{expressive power} of a NN is strongly influenced by the number of units and their configuration (architecture). The number of units can be related to the discussion of the VC-dim, specifically: the network capabilities are influenced by the number of parameters $w^*$, which is proportional to the number of units. Further studies also report the dependencies on their value sizes.\\\\
-Es: weights = 0 $\Rightarrow$ minimal VC-dim, small weights $\Rightarrow$ linear part of the activation function,\\high values weights $\Rightarrow$ more complex model.\\
+\textbf{Existence theorem}: given $\epsilon$, $\exists\:h(\mathbf{x})\:|\:|f(\mathbf{x}) - h(\mathbf{x})|< \epsilon\:\:\forall\:\mathbf{x}$ in the hypercube.\\\\
+With this fundamental result (MLP can represent \textit{any} function), two issues arise: how to learn by neural network and how to decide its architecture.
+\subparagraph{Expressive Power}
+The \textbf{expressive power} of a NN is strongly influenced by the number of units and their configuration (architecture). The number of units can be related to the discussion of the VC-dim, specifically: the network capabilities are influenced by the number of parameters $\mathbf{w}^*$, which is proportional to the number of units. Further studies also report the dependencies on their value sizes. E.g.:
+\begin{list}{}{}
+	\item weights = 0 $\Rightarrow$ minimal VC-dim
+	\item small valued weights $\Rightarrow$ linear part of the activation function
+	\item high valued weights $\Rightarrow$ more complex model
+\end{list}
 The universal approximation theorem is a fundamental contribution, showing that one hidden layer is sufficient in general, but it doesn't assure that a "small number" of units would do the work. For many function families it's possible to find boundaries on that number, but also cases for which a single hidden layer network would require an exponential number of units (in $n$ input dimension).\\
 More layers can help, but is it possible to efficiently train deep networks?
-\subparagraph{Learning Algorithm} The learning algorithm adapts the weights $w$ of the model in order to obtain the best approximation of the target function. Often built in terms of minimization of error/loss function on the training set. Same kind of problem as any other model: given a set of $l$ training examples $(x_p, d_p)$ and a loss measure $L$ (example: the MSE $L(h(x_p), d_p) = (d_p - h_w(x_p))^2$), find the weight vector $w$ that minimizes the expected error on the training data $$E(w) = R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(x_p), d_p)$$
+\subparagraph{Learning Algorithm} The learning algorithm adapts the weights $\mathbf{w}$ of the model in order to obtain the best approximation of the target function. Often built in terms of minimization of error/loss function on the training set. Same kind of problem as any other model: given a set of $l$ training examples $(\mathbf{x}_p, d_p)$ and a loss measure $L$ (example: the MSE $L(h(\mathbf{x}_p), d_p) = (d_p - h_\mathbf{w}(\mathbf{x}_p))^2$), find the weight vector $\mathbf{w}$ that minimizes the expected error on the training data $$E(\mathbf{w}) = R_{emp} = \frac{1}{l}\sum_{p=1}^l L(h(\mathbf{x}_p), d_p)$$
 \begin{list}{}{}
 	\item \textbf{Credit assignment problem}: which credit to the hidden units? Not easy when the error signal is not directly measurable: we don't know the error (delta) or the desired response for the hidden units, which is useful for changing their weights. Supposed too difficult, but the backpropagation algorithm brought a renaissance of the NN field
 	\item \textbf{Loading problem}, NP-complete: given a network and a set of examples, is there a set of weights so that the network will be consistent with the examples?
@@ -517,8 +552,9 @@ In practice, networks can be trained in a reasonable amount of time, although op
 	\item Credit assignment problem: how to change the hidden layer weights?
 	\item Gradient descent approach can be extended to MLP (provided that loss and activations are differentiable functions, to find the delta for every unit in the network)
 \end{list}
-\subsection{Backpropagation algorithm} We need a differentiable loss, differentiable activation functions and a network to follow the information flow.\\
-Find $w$ by computing the gradient of the error function $$E(w) = R_{emp} = \frac{1}{l}\sum_{p=1}^l (h(x_p) - d_p)^2$$
+\pagebreak
+\subsection{Backpropagation Algorithm} We need a differentiable loss, differentiable activation functions and a network to follow the information flow.\\
+Find $\mathbf{w}$ by computing the gradient of the error function $$E(\mathbf{w}) = R_{emp} = \frac{1}{l}\sum_{p=1}^l (h(\mathbf{x}_p) - d_p)^2$$
 It has nice properties: easy because of the \textbf{compositional} form of the model, and keeps track only of the quantities local of each unit (local variables), so the \textbf{modularity} of the units is preserved.
 \begin{lstlisting}[style=myPython]
 def backprop():
@@ -531,67 +567,96 @@ def backprop():
 		# Compute out and e_tot
 	end
 \end{lstlisting}
-\subparagraph{Step (1)} $$\Delta w = - \frac{\partial E_{tot}}{\partial w} = - \sum_p \frac{\partial E_p}{\partial w} = -\sum_p \Delta_p w$$
-\paragraph{Issues in training neural networks} Heuristic guidelines in setting the backward propagation (backprop) algorithm. Generally, the models are over-parametrized, the optimization problem is not convex and is potentially unstable. We will discuss few of the issues. A good interpretation is to see backprop as a path trough the loss/weight space. The path depends on: data, neural network, starting point (initial weight values), rate of convergence, final point (stopping rule). This defines a control for the search over the hypothesis space. The basic algorithm, once again, is:
+\subparagraph{Step (1)} $$\Delta \mathbf{w} = - \frac{\partial E_{tot}}{\partial \mathbf{w}} = - \sum_p \frac{\partial E_p}{\partial \mathbf{w}} \overset{\text{def}}{=} -\sum_p \Delta_p \mathbf{w}$$
+$p$ represents the $p$th pattern to be fed as input to the neural network.\\
+For $w_{tu}$ (generic unit $t$, pattern $p$ and input $u$ to $t$), we have:
+$$\Delta_p w_{tu} = -\frac{\partial E_p}{\partial w_{tu}} = -\frac{\partial E_p}{\partial\text{net}_t}\cdot\frac{\partial\text{net}_t}{\partial w_{tu}} = \delta_t \cdot \text{o}_u$$
+Since 
+$$\left\{\begin{array}{l}
+\text{net}_t = \sum_{j'}w_{tj'}\text{o}_{j'}\\
+\text{o}_t = f_t(\text{net}_t)
+\end{array}\right.\Rightarrow \frac{\partial\text{net}_t}{\partial w_{tu}} = \frac{\partial \sum_{j'}w_{tj'}\text{o}_{j'}}{\partial w_{tu}} = \text{o}_u$$
+because all 0 except $j'=u$.\\
+Expanding $\delta_t$ (of unit $t$):
+$$\delta_t=-\frac{\partial E_p}{\partial\text{net}_t}=-\frac{\partial E_p}{\partial\text{o}_t}\cdot\frac{\partial\text{o}_t}{\partial\text{net}_t} \overset{\text{o}_t=f_t(\text{net}_t)}{=}-\frac{\partial E_p}{\partial\text{o}_t}\cdot f_t'(\text{net}_t)$$
+Now recall that $$E_p=\frac{1}{2}\sum_{k=1}^K(d_k-\text{o}_k)^2$$
+Distinguishing two cases depending on $\text{o}_t$ being an output unit $k$ or an hidden unit $j$
+\begin{list}{}{}
+	\item \textbf{Output unit}, $t=k$
+	$$-\frac{\partial E_p}{\partial \text{o}_k}=-\frac{\partial \frac{1}{2}\sum_{r=1}^K(d_r-\text{o}_r)^2}{\partial\text{o}_k} = (d_k-\text{o}_k)$$ $$\Rightarrow\delta_k = -\frac{\partial E_p}{\partial\text{net}_k}=(d_k-\text{o}_k)\cdot f_k'(\text{net}_k)$$
+	\item \textbf{Hidden unit}, $t=j$
+	$$-\frac{\partial E_p}{\partial\text{o}_j} = \sum_{k=1}^K -\frac{\partial E_p}{\partial\text{net}_k}\cdot\frac{\partial\text{net}_k}{\partial\text{o}_j}=\sum_{k=1}^K\delta_k\cdot w_{kj}$$
+	This because $\frac{\partial\text{net}_k}{\partial\text{o}_j} = \frac{\partial\sum_s w_{ks}\text{o}_s}{\partial\text{o}_j}$
+	$$\Rightarrow\delta_j = \left(\sum_{k=1}^K\delta_k\cdot w_{kj}\right)\cdot f_j'(\text{net}_j)$$
+	This expresses the variation of $E_p$ considering all the output units $\text{o}_k$. Each $\text{o}_k$ and $\text{net}_k$ depends on $\text{o}_j$, hence we introduce a sum over $k$.\\
+	This step can be obtained directly, but in this form is more instructive because it shows the propagation over the provided network.
+\end{list}
+\paragraph{Issues in training neural networks} Generally, the models are over-parametrized, the optimization problem is not convex and is potentially unstable. We will discuss few of the issues. A good interpretation is to see backpropagation as a path trough the loss/weight space. The path depends on: data, neural network, starting point (initial weight values), rate of convergence, final point (stopping rule). This defines a control for the search over the hypothesis space. The basic algorithm, once again, is:
 \begin{enumerate}
-	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
-	\item Compute $\Delta w = -$ gradient of $E(w) = -\frac{\partial E(w)}{\partial w}$ (or for each $w_i$)
-	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)\\
+	\item Start with weight vector $\mathbf{w}_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta \mathbf{w} = -$ gradient of $E(\mathbf{w}) = -\frac{\partial E(\mathbf{w})}{\partial \mathbf{w}}$ (or for each $w_i$)
+	\item Compute $\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$ (or for each $w_i$)\\
 	$\eta$ is the step size or \textbf{learning rate}
-	\item Repeat from $2$ until convergence or $E(w)$ sufficiently small
+	\item Repeat from $2$ until convergence or $E(\mathbf{w})$ sufficiently small
 \end{enumerate}
-But now the $\Delta w =-\frac{\partial E(w)}{w}$ were obtained through backprop derivation/algorithm for any weight in the network. At step 2, to compute the error, we first apply inputs to the network computing an output (\textbf{forward phase}), then we retro-propagate the deltas for the gradient (\textbf{backward phase}). So how to choose the $w_{initial}, \eta$ and the convergence?
-\subparagraph{Starting values} In the basic algorithm, $w_{initial}$. The weights are initialized with random values close to zero. To be avoided: all zero, high values or all equal (symmetry), because this hampers the training. For standardized data, values $\in [-0.7, +0.7]$. There are other heuristics: $range \cdot \frac{2}{fanin}$ with $fanin$ being the number of inputs to a hidden unit, or orthogonal matrices\ldots
-\subparagraph{Multiple minima} The loss is not convex, has local minima. This affects the results, which depends on the starting weight values, hence: try a number of random starting configurations (5-10 or more \textbf{training runs} or \textbf{trials}). Useful taking the mean results (mean of errors) and looking at the variance to evaluate the model and then, if only one response is needed: we can choose the solution giving the lowest (penalized) validation error or we can take advantage of different end points and outputting a mean of the outputs (\textbf{committee approach}).\\
+But now the $\Delta \mathbf{w} =-\frac{\partial E(\mathbf{w})}{\mathbf{w}}$ were obtained through backpropagation derivation/algorithm for any weight in the network. At step 2, to compute the error, we first apply inputs to the network computing an output (\textbf{forward phase}), then we retro-propagate the deltas for the gradient (\textbf{backward phase}). So how to choose the $\mathbf{w}_{initial}, \eta$ and the convergence conditions?
+\subparagraph{Starting values} In the basic algorithm, $\mathbf{w}_{initial}$. The weights are initialized with random values close to zero. To be avoided: all zeros, high values or all equal (symmetry), because this hampers the training. For standardized data, values $\in [-0.7, +0.7]$. There are other heuristics: $\text{range} \cdot \frac{2}{fanin}$ with $fanin$ being the number of inputs to a hidden unit, or orthogonal matrices\ldots
+\subparagraph{Multiple Minima} The loss is not convex, has many local minima. This affects the results, which depends on the starting weight values, hence: try a number of random starting configurations (5-10 or more \textbf{training runs} or \textbf{trials}). Useful taking the mean results (mean of errors) and looking at the variance to evaluate the model and then, if only one response is needed: we can choose the solution giving the lowest (penalized) validation error or we can take advantage of different end points and outputting a mean of the outputs (\textbf{committee approach}).\\
 A "good" local minima is often sufficient: in ML we don't need the global or local minimum on $R_{emp}$, as we are searching the minimum of $R$ (which we can't compute). Often we stop early, in a point of non-zero gradient so being neither a local nor a global minima for the training error. The neural network builds a variable sized hypothesis space, so VC-dim increases during training and the training error decreases toward zero (or global minimum) while the neural network becomes too complex. We \textbf{stop before this condition of overtraining}, avoiding overfitting.
-\subparagraph{Online/batch} Batch version: sum all the gradients of each pattern over an epoch and then update the weights ($\Delta w$ after each epoch of $l$ patterns). Online/stochastic: upgrade $w$ for each pattern $p$, making progress with each example it sees. Faster but need smaller $\eta$.\begin{multicols}{2}
+\subparagraph{Online/Batch} 
+\begin{list}{}{}
+	\item Batch version: sum all the gradients of each pattern over an epoch and then update the weights ($\Delta w$ after each epoch of $l$ patterns)\\
+	Usually more accurate estimation of target
+	\item Online/stochastic: upgrade $w$ for each pattern $p$, making progress with each example it sees. Faster but need smaller $\eta$.
+\end{list}
+\begin{multicols}{2}
 \paragraph{Batch}
 \begin{enumerate}
-	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
-	\item Compute $\Delta w = -$ gradient of $E(w)$ on the entire training set (\textbf{epoch})
-	\item Compute $w_{new} = w + \eta\cdot\Delta w$ (or for each $w_i$)
+	\item Start with weight vector $\mathbf{w}_{initial}$ and fix $0 < \eta < 1$
+	\item Compute $\Delta \mathbf{w} = -$ gradient of $E(\mathbf{w})$ on the entire training set (\textbf{epoch})
+	\item Compute $\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$ (or for each $w_i$)
 	\item Repeat from $2$ until convergence
 \end{enumerate}
 More accurate estimation of gradient
 \columnbreak
 \paragraph{Online}
 \begin{enumerate}
-	\item Start with weight vector $w_{initial}$ and fix $0 < \eta < 1$
+	\item Start with weight vector $\mathbf{w}_{initial}$ and fix $0 < \eta < 1$
 	\item For each pattern $p$\begin{enumerate}
-		\item Compute $\Delta_p w = -$ gradient of $E(w)$
-		\item Compute $w_{new} = w + \eta\cdot\Delta_p w$
+		\item Compute $\Delta_p \mathbf{w} = -$ gradient of $E(\mathbf{w})$
+		\item Compute $\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta_p \mathbf{w}$\\
 	$\eta$ is the step size or \textbf{learning rate}
 	\end{enumerate}
 	\item Repeat from $2$ until convergence
 \end{enumerate}
 Since the gradient of a single data point can be considered a noisy approximation to the overall gradient, this is also called \textbf{stochastic gradient descent}.
 \end{multicols}
-Many variations exists, for example stochastic gradient descent with minibatches.
+Many variations exists, for example stochastic gradient descent with minibatches (gradient computed with $mb$ patterns before updating the weights).
 \subparagraph{Learning rate} With batch training we have more accurate estimation of gradient, so higher $\eta$. With online we have faster but potentially unstable training, hence lower $\eta$. So high vs low $\eta \Leftarrow$ fast but unstable vs slow but stable. Typically $\eta \in [0.01, 0.5]$.\\
 The learning curve, plotting the errors during training, allows to check the behavior in the early phases of the model design. Of course the absolute value depends also on model capability and other hyperparameters, but $\eta$ plays a big role in the curve quality. It's useful to have the mean of the gradients over the epoch: uniform approach (Least \textbf{Mean} Square). Some improvements: momentum (Nesterov), variable and adaptive learning rates, varying depending on the layers (in deep networks)\ldots\\
-With \textbf{momentum} it becomes $\Delta w_{new} = -\eta\frac{\partial E(w)}{w} \underline{+ \alpha\Delta w_{old}}$, saving $\Delta w_{new}$ in $\Delta w_{old}$ for the next step. Becomes faster in plateaus but damps in oscillations (inertia effect, allows higher $\eta$)\\
-Can be used in online by considering the previous example, $\Delta w_{p-1}$ as $\Delta w_{old}$.\\
-It smooths the gradient over different examples. A variant is to evaluate the gradient after the momentum is applied (so using $\overline{w} = w + \alpha\Delta w_{old}$), improves the rate of convergence for the batch mode (not online!).\\
-The variable learning rate starts high and decays linearly for each step until iteration $\tau$, using $\alpha = \frac{s}{\tau}$ with $s$ current step so that $\eta_s = (1-\alpha)\eta_0 + \alpha\eta_\tau$, then stops and uses a fixed small $\eta_\tau$. Set up as $\eta_\tau = 1\%$ of $\eta_0$ and $\tau$ as few hundred steps. $\eta_0$ same no instability/no stuck trade off.\\
+With \textbf{momentum} it becomes $$\Delta w_{new} = -\eta\frac{\partial E(\mathbf{w})}{\mathbf{w}} \underline{+ \alpha\Delta \mathbf{w}_{old}}$$, saving $\Delta \mathbf{w}_{new}$ in $\Delta \mathbf{w}_{old}$ for the next step. Becomes faster in plateaus but damps in oscillations (inertia effect, allows higher $\eta$)\\
+Can be used in online by considering the previous example, $\Delta \mathbf{w}_{p-1}$ as $\Delta \mathbf{w}_{old}$.\\
+It smooths the gradient over different examples. A variant is to evaluate the gradient after the momentum is applied (so using $\overline{\mathbf{w}} = \mathbf{w} + \alpha\Delta \mathbf{w}_{old}$), improves the rate of convergence for the batch mode (not online!).\\\\
+The \textbf{variable learning rate} starts high and decays linearly for each step until iteration $\tau$, using $\alpha = \frac{s}{\tau}$ with $s$ current step so that $\eta_s = (1-\alpha)\eta_0 + \alpha\eta_\tau$, then stops and uses a fixed small $\eta_\tau$. Set up as $\eta_\tau = 1\%$ of $\eta_0$ and $\tau$ as few hundred steps. $\eta_0$ same no instability/no stuck trade off.\\
 With adaptive learning rate, it's automatically adapted during training possibly avoiding/reducing the fine tuning phase via hyperparameters selection.
 % ML-21-NN-part2-v0.12.pdf p.42
 \subparagraph{Stopping criteria} When to stop training? Basic: error. The best metric if we know the tolerance of data. Other: max tolerance instead of mean, number of misclassified, no more relevant weight changes or no more significant error decreasing.\\
 In any case stop after too many epochs, but avoid stopping at an arbitrary fixed number of epochs, and not necessarily stop with very low training error.\\
 Control of complexity is the main aim to achieve best generalization capability.
-\subparagraph{Overfitting and regularization} Typically, stopping at the global minimum of $R_{emp}(w)$ is likely to be an overfitting solution. The control of complexity is our main aim to achieve the best generalization capability. For instance, we need to add some \textbf{regularization}: can be achieved directly (\textbf{penalty term}) or indirectly (\textbf{early stopping}). Model selection with cross validation on empirical data to find the trade-off.\\
+\subparagraph{Overfitting and regularization} Typically, stopping at the global minimum of $R_{emp}(\mathbf{w})$ is likely to be an overfitting solution. The control of complexity is our main aim to achieve the best generalization capability. For instance, we need to add some \textbf{regularization}: can be achieved directly (\textbf{penalty term}) or indirectly (\textbf{early stopping}). Model selection with cross validation on empirical data to find the trade-off.\\
 In neural networks, we start learning with small random weights (breaking the symmetry!). As optimization proceeds, hidden units tend to saturate, increasing the effective number of free parameters (hence increasing the VC-dim). As we discussed, this is a variable-sized hypothesis space (changes during training).
 \begin{center}
 	\includegraphics[scale=0.5]{8.png}
 \end{center}
 How to act on the overtraining?
-\begin{enumerate}
-	\item Early stopping: using a validation set to determine when to stop (vague indication: when the validation error increases, so use more than one epoch before estimating (\textbf{patience}))\\
+\begin{list}{}{}
+	\item \textbf{Early stopping}: using a validation set to determine when to stop (vague indication: when the validation error increases, so use more than one epoch before estimating (\textbf{patience}))\\
 	Since the effective number of parameters grows during the training, halting the process effectively limits the complexity.
-	\item Regularization on the loss: we can optimize the loss considering the weights values.\\
-	Related to Tikhonov, so well principled approach: add a penalty term to the error function: $Loss(w) = \sum_p (d_p - f(x_p))^2 \underline{+\lambda||w||^2}$ with $||w||^2 = \sum_i w_i^2$\\
-	The effect is a weight decay, basically $w_{new} = w + \eta\cdot\Delta w - 2\lambda w$.\\
+	\item \textbf{Regularization} on the loss: we can optimize the loss considering the weights values.\\
+	Related to Tikhonov, so well principled approach: add a penalty term to the error function: $$\text{Loss}(\mathbf{w}) = \sum_p (d_p - f(\mathbf{x}_p))^2 \underline{+\lambda||\mathbf{w}||^2}$$ with $||\mathbf{w}||^2 = \sum_i w_i^2$\\
+	The effect is a weight decay, basically $$\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w} - 2\lambda \mathbf{w}$$
 	$\lambda$ is the \textbf{regularization parameter}, generally very low (0.01) and selected in the model selection phase. Applied on the linear model it's the ridge regression.\\
-	More sophisticated penalty terms have been developed (ex: weight elimination, Haykin).
+	More sophisticated penalty terms have been developed (e.g.: weight elimination with Haykin).
 	Misunderstandings:
 	\begin{list}{}{}
 		\item Regularization is not a technique to control the stability of the training convergence but controls the \textbf{complexity of the model}, measured by VC-dim and related to the number of weights and values of the weights in the neural networks
@@ -601,8 +666,9 @@ How to act on the overtraining?
 	Typically the bias ($w_0$) is omitted because its inclusion causes the results to be not independent from target shift/scaling. May be included with its own regularization coefficient.\\
 	Typically it's applied in the batch version. So for online/mini batch we need to take into account possible effects over many steps, so it's better to use $\lambda\cdot\frac{mb}{l}$ with $l$ being the number of total patterns.\\
 	Other techniques: \textbf{dropout}.
-	\item Pruning methods
-\end{enumerate}
+	\item \textbf{Pruning methods}
+\end{list}
+%TODO from here ML-21-NN-part2-v0.12.pdf p.59
 \subparagraph{Number of units} This is related to the control of complexity but also to the input dimension and the size of the TR set. In general, this is a model selection issue. The number of units, along with the regularization parameters, can be selected with the model selection phase (cross-validation).\\
 Too few units $\Rightarrow$ underfitting, viceversa too many units $\Rightarrow$ overfitting. The number can be high with proper regularization.
 \begin{list}{}{}
