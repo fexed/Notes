@@ -3,6 +3,7 @@
 \usepackage[italian]{babel}
 \usepackage{multicol}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage[bookmarks]{hyperref}
 \usepackage[a4paper, total={18cm, 25cm}]{geometry}
 \usepackage{graphicx}
@@ -284,36 +285,76 @@ $$\frac{\partial E_p(\mathbf{w})}{\partial w_j} = -2(y_p - \mathbf{x}_p^T \mathb
 $$\Delta w_j = 2 \sum_{p=1}^l x_{pj} (y_p - \mathbf{x}_p^T \mathbf{w})$$
 $$\mathbf{w}_{new} = \mathbf{w} + \eta\cdot\Delta \mathbf{w}$$
 We improve by learning on previous errors.
-%TODO from here knn-0.1.pdf p.51
 \subsection{Extending the linear model}
 \paragraph{Inductive Bias}
 Gradient descent is a simple and effective local search approach to a LMS solution. It allows to search through an infinite hypothesis space, can be easily applied for continuous $H$ and differentiable losses and isn't only for linear models (also neural networks and deep learning models).\\
 Many possible improvements (Newton, quasi-Newton methods, conjugate gradients\ldots)
 \begin{list}{}{}
 	\item \textbf{Language bias}: $H$ is a set of linear functions.
-	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal. For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
+	\item \textbf{Search Bias}: ordered search guided by the least squares minimization goal.\\
+	For instance, we could prefer a different method to obtain a restriction on the values of parameters, achieving a different solution with other properties.
 \end{list}
 Shows that even for a simple model there are many possibilities. We still need a principled approach.
 \subparagraph{Limitations} In geometry, two set of points are linearly separable in an $n$-dimensional space if they can be separated by a $(n-1)$-dimensional hyper-plane. In 2 dimensions, if they can be separated by a line, in 3 dimensions, by a plane\ldots\\
 The linear decision boundary can provide exact solutions only for linearly separable sets of points.
-\paragraph{Extending} We can use transformed inputs, such as $x, x^2, x^3\ldots$ with a non-linear relationship between inputs and output, maintaining the learning machinery used so far. $$h_w(x) = w_0 + w_1 x + w_2 x^2 + \ldots + w_M x^M = \sum_{j=0}^M w_j x^j$$ \textbf{Linear basis expansion} (LBE) $$h_w(x) = \sum_{k=0}^K w_k\phi_k(x)$$ Augments the input vector with additional variables which are transformations of $x$ according to a function $\phi_k : R^n \rightarrow R$, so number of parameters $K > n$: linear in the parameters, so we can use the same learning algorithms as before.\\
-Which $\phi$? Towards the dictionary approaches. Pro: can model more complicated relationships than linear, so it's more expressive. Cons: with large basis of functions, we easily risk overfitting, hence we require controlling the complexity (as in flexibility of the model to fit the data). How to do that? Many approaches:
-\begin{list}{}{}
-	\item \textbf{Ridge Regression} (or \textbf{Tikhonov Regularization}): smoothed model.\\
+\paragraph{Extending} Note that linear refers to the way in which $\mathbf{w}$, the regression coefficient, occur in the regression equation. So we can use transformed inputs, such as $x, x^2, x^3\ldots$ with a \textbf{non-linear relationship between inputs and output}, maintaining the learning machinery used so far. $$h_\mathbf{w}(\mathbf{x}) = w_0 + w_1 x + w_2 x^2 + \ldots + w_M x^M = \sum_{j=0}^M w_j x^j$$
+\paragraph{Linear Basis Expansion} (LBE) $$h_\mathbf{w}(\mathbf{x}) = \sum_{k=0}^K w_k\phi_k(\mathbf{x})$$
+$$\phi_k : \mathbb{R}^n \rightarrow \mathbb{R}$$
+Augments the input vector with additional variables which are transformations of $\mathbf{x}$ according to a function $\phi_k : \mathbb{R}^n \rightarrow \mathbb{R}$, so number of parameters $K > n$: linear in the parameters, so we can use the same learning algorithms as before.
+\begin{list}{}{Examples are:}
+	\item Polynomial representation of $\mathbf{x}$: $\phi(\mathbf{x}) = x_j^2, \phi(\mathbf{x} = x_jx_i,\ldots$
+	\item Non-linear transformation of single inputs: $\phi(\mathbf{x})=\log(x_j), \phi(\mathbf{x})=\sqrt{x_j},\ldots$
+	\item Non-linear transformation of multiple inputs: $\phi(\mathbf{x})=\|\mathbf{x}\|,\ldots$
+	\item Splines,\ldots
+\end{list}
+Which $\phi$? Towards the \textbf{dictionary approaches}. Pro: can model more complicated relationships than linear, so it's more expressive. Cons: with large basis of functions, we easily risk overfitting, hence we require \textbf{controlling the complexity} (as in flexibility of the model to fit the data). How to do that? Many approaches\ldots
+\subparagraph{Ridge Regression} (or \textbf{Tikhonov Regularization}): smoothed model, a \textbf{coefficient shrinkage} approach to model complexity control.\\
 	Add constraints to the sum of value of $|w_j|$, penalizing models with high values of $|w|$ (so favoring sparse models, using less terms due to weights $w_j = 0$ or close)
-	$$Loss(w) = \sum_{p=1}^l (y_p - x_p^T w)^2 + \lambda||w||^2$$ with $\lambda$ being the regularization hyper-parameter. It implements the control of the model complexity, leading to a model with less VC-dim with a trade-off controlled through a single parameter, $\lambda$.\\
-	This uses $||\:||_2$
+	$$Loss(\mathbf{w}) = \sum_{p=1}^l (y_p - \mathbf{x}_p^T \mathbf{w})^2 + \lambda||\mathbf{w}||^2$$ with $\lambda$ being the \textbf{regularization hyper-parameter}. It implements the control of the model complexity, leading to a model with less VC-dim with a trade-off controlled through a single parameter, $\lambda$.
+\begin{list}{}{}
+	\item Thikonov uses $||\:||_2$
 	\item Lasso uses $||\:||_1$
 	\item Elastic nets uses both $||\:||_1$ and $||\:||_2$
 \end{list}
+Solving Tikhonov Regularization:
+\begin{list}{}{}
+	\item Direct approach
+	$$\mathbf{w} = \underset{\text{Always invertible}}{\underbrace{(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})^{-1}}}\mathbf{X}^T\mathbf{y}$$
+	\item Gradient approach
+	$$\mathbf{w}_{new} = \mathbf{w}+\eta\cdot\Delta\mathbf{w} - 2\lambda\mathbf{w}$$
+	\textbf{Weight decay} technique, basically adds $2\lambda\mathbf{w}$ to the gradient: with 0 gradient, it decreases the value of each $w_j$ with a fraction of the old $w_j$
+\end{list}
+The penalty term penalizes high values of the weights and tends to drive all them to smaller values, with some to zero. It implements a control of the model complexity, leading to a model with less, or proper, VC-dim with a \textbf{trade-off obtained with just one parameter} that you can control: $\lambda$.
 \paragraph{Learning Timing} \begin{list}{}{}
 	\item \textbf{Eager}: analyze data and construct an explicit hypothesis
 	\item \textbf{Lazy}: store training data and wait test data point, then construct an ad hoc hypothesis.
 \end{list}
-\paragraph{K-NN}
-The algorithm is simple: store the training data and given and input $x$ find the $k$ nearest training examples $x_i$, then output the mean label.
+\pagebreak
+\subsection{K-NN}
+The algorithm is simple: store the training data $\langle\mathbf{x}_p, y_p\rangle$ and given an input $\mathbf{x}$ find the $k$ nearest training examples $\mathbf{x}_i$, then output the mean label.
+$$\text{avg}_k(\mathbf{x})=\frac{1}{k}\sum_{\mathbf{x}_i\in N_k(\mathbf{x})}y_i$$
+$N_k(\mathbf{x})$ is a neighborhood of $\mathbf{x}$ that contains exactly $k$ neighbors, closest according to $d$. Thus the classification rule is the majority voting among the members of $N_k(\mathbf{x})$
+$$h(\mathbf{x})=\left\{\begin{array}{c l}
+1&\text{if }\text{avg}_k(\mathbf{x})>0.5\\
+0&\text{else}
+\end{array}\right.$$
+For the regression tasks we use directly the $\text{avg}$: mean over the $k$ nearest neighbors ($k$-NN)
+\paragraph{Nearest} For example: Euclidean distance
+$$d(\mathbf{x},\mathbf{x}_p)=\sqrt{\sum_{t=1}^n(x_t-x_{pt})^2}=\|\mathbf{x}-\mathbf{x}_p\|$$
 \subparagraph{Voronoi Diagram} Each cell consists of points closer to $x$ than any other patterns. The segments are all points in plan equidistant to two patterns. It is implicitly used by K-NN.
-\subparagraph{K-NN vs linear} Two extremes of the ML panorama:
+\paragraph{Multiclass} Return the most common class among its $k$ nearest neighbors: we count the classes in the neighbor (with $\mathbf{1}_{v,y_i}$) taking the most frequent (with$\arg\max_v$)
+$$h(\mathbf{x})=\arg\max_v\sum_{\mathbf{x}_i\in N_k(\mathbf{x})}\mathbf{1}_{v,y_i}$$
+$$\mathbf{1}_{v, y_i}=\left\{\begin{array}{c l}
+1&\text{if }v = y_i\\
+0&\text{else}
+\end{array}\right.$$
+\subparagraph{Weighted Distance} It can be useful to weight the contributions of the neighbors, so that the nearer neighbors contribute more to the average than the more distant ones.
+$$h(\mathbf{x})=\arg\max_v\sum_{\mathbf{x}_i\in N_k(\mathbf{x})}\mathbf{1}_{v,y_i}\cdot\frac{1}{d(\mathbf{x},\mathbf{x}_i)^2}$$
+$$\mathbf{1}_{v, y_i}=\left\{\begin{array}{c l}
+1&\text{if }v = y_i\\
+0&\text{else}
+\end{array}\right.$$
+\paragraph{K-NN vs linear} Two extremes of the ML panorama:
 \begin{center}
 	\begin{tabular}{l | l}
 		\textbf{Linear} & \textbf{K-NN}\\
@@ -323,12 +364,14 @@ The algorithm is simple: store the training data and given and input $x$ find th
 		Parametric & Instance-Based
 	\end{tabular}
 \end{center}
-\subparagraph{Bayes Error Rate} If we know the density $P(x,y)$, we classify the most probable class, using the conditional distribution as: output the class $v\:|\:$ is $\max P(v\:|\:x)$.\\
-The error rate of this classifier (called the Bayes classifier) is called the Bayes error rate: the minimum achievable error rate given the distribution of the data. K-NN directly approximates this solution (majority vote in a nearest neighborhood) except that conditional probability is relaxed to conditional probability withing a neighbordhood and probabilities are estimated by training sample proportions
+K-NN represents an extreme. There's no global hypothesis for all the instances, so no model to fit: we need to memorize all the input examples. Local estimations (by locally constant functions) versus the linear global approximation/estimation of the target function over the instance space.\\
+It's a lazy, memory-based, instance-based, distance-based method.
+\subparagraph{Bayes Error Rate} If we know the density $P(x,y)$, we classify the most probable class, using the conditional distribution as: output the class $v\:|\:$ is $\max P(v\:|\:x)$, the \textbf{Bayes Classifier}.\\
+The error rate of this classifier is called the \textbf{Bayes error rate}: the \textbf{minimum achievable error rate given the distribution of the data}. K-NN directly approximates this solution (majority vote in a nearest neighborhood) except that conditional probability is relaxed to conditional probability withing a neighborhood and probabilities are estimated by training sample proportions
 \subparagraph{Inductive bias of K-NN} The assumed distance tells us which are the most similar examples. The classification is assumed similar to the classification of the neighbors according to the assumed metric.
-\subparagraph{Limitations} The computational cost is deferred to the prediction phase: makes the local approximation to the target function for each new example to be predicted.\\
-Moreover, high retrieval cost: computationally intensive, in time, for each new input because computes the distance from the test sample to all stored vectors, so high cost in space too (all training data).\\
-It provides a good approximation if we can find a significant set of data close to any $x$. Can fail when we have a lot of input variables (high $n$, high dimensionality) due to the curse of dimensionality:
+\subparagraph{Limitations} The \textbf{computational cost is deferred to the prediction phase}: makes the local approximation to the target function for each new example to be predicted.\\
+\textbf{High retrieval cost}: computationally intensive, in time, for each new input because computes the distance from the test sample to all stored vectors, so high cost in space too (all training data).\\
+It provides a good approximation if we can find a significant set of data close to any $x$. \textbf{Can fail when we have a lot of input variables} (high $n$, high dimensionality) due to the curse of dimensionality:
 \begin{list}{}{}
 	\item \textbf{Hard to find nearby points} in high dimensions\\
 	K-NN can fail in high dimensions because it becomes difficult to gather $K$ observation close to a target point $x_q$: near neighborhoods tend to be spatially large and estimates are no longer local
@@ -336,12 +379,12 @@ It provides a good approximation if we can find a significant set of data close 
 		\includegraphics[scale=0.75]{5.png}
 	\end{center}
 	\item \textbf{Low sampling density} for high-dim data\\
-	Sampling density is proportional to $l^{\frac{l}{d}}$ with $l$ data and $d$ data dim. If 100 points are needed to estimate a function in $R$ (1 dim), then $100^{10}$ are needed in $R^{10}$
+	Sampling density is proportional to $l^{\frac{1}{d}}$ with $l$ data and $d$ data dim. If 100 points are needed to estimate a function in $\mathbb{R}$ (1 dim), then $100^{10}$ are needed in $\mathbb{R}^{10}$
 	\item Irrelevant features: the \textbf{curse of noisy}\\
 	If the target depends only on a few features in $x$, we could retrieve a similar pattern with the similarity dominated by the large number of irrelevant features. This grows with dimensionality. We may weight features according to the relevance, or adopt feature selection approaches (eliminating some variables)
 \end{list}
-% ML-21-NN-part1-v.0.1.pdf
 \pagebreak
+% ML-21-NN-part1-v.0.1.pdf from here
 \section{Neural Networks} Models used to:
 \begin{list}{}{}
 	\item Study and model biological systems and learning processes (biological realism is essential)
@@ -659,7 +702,7 @@ In the case of binary classification, there are $2^n$ possible \textbf{dichotomi
 	\includegraphics[scale=0.5]{14.png}
 \end{center}
 \columnbreak
-3 points in $R^2$, $H$ as a set of lines: $h(x) = \text{sign}(wx + w_0)$ with $x\in R^2$\\
+3 points in $R^2$, $H$ as a set of lines: $h(x) = \text{sign}(wx + w_0)$ with $x\in \mathbb{R}^2$\\
 A dichotomy is a particular labeling in $\{-1,+1\}$ of the points. This specific dichotomy can be represented in $H$: there exist a line that correctly separate the points (in pic)
 \end{multicols}
 \paragraph{VC-Dimension} \textbf{Definition}: the VC dimension of a class of functions $H$ is the maximum cardinality of a set (configuration) of points in $X$ that can be shattered by $H$.\\
@@ -803,7 +846,7 @@ Evaluating $\phi(x)$ could be intractable, but with certain conditions we don't 
 \subparagraph{Properties} With $k_1,k_2$ kernels over $R^{m_0}\rightarrow R^{m_0}$, the following are also kernel functions:
 \begin{list}{}{}
 	\item $k_1(x,y)+k_2(x,y)$
-	\item $\alpha k_1(x,y)$ with $\alpha\in R^+$
+	\item $\alpha k_1(x,y)$ with $\alpha\in \mathbb{R}^+$
 	\item $k_1(x,y)\cdot k_2(x,y)$
 \end{list}
 \paragraph{Wrapping up}
@@ -1198,7 +1241,7 @@ Of course smaller models, with smaller numbers of adaptive units (basis function
 \end{center}
 \subparagraph{Similarity Measures} The metric is very important, the assumed distance tells us which are the similar examples (\textbf{pattern proximity}), and the clustering algorithm decide the grouping using that metric.\\
 Many possible metric, Euclidean metrics are popular but it's just a choice.
-\paragraph{Vector Quantization} Vector quantization techniques encode a data manifold, e.g. a submanifold $V\subseteq R^n$, using only a finite set $w=(w_1,\ldots,w_k)$ of \textbf{reference/codebook vectors} $w_i\in R^n$ with $i=1,\ldots,k$\\
+\paragraph{Vector Quantization} Vector quantization techniques encode a data manifold, e.g. a submanifold $V\subseteq \mathbb{R}^n$, using only a finite set $w=(w_1,\ldots,w_k)$ of \textbf{reference/codebook vectors} $w_i\in \mathbb{R}^n$ with $i=1,\ldots,k$\\
 A data vector $x\in V$ is described by the best matching or "winning" reference vector $w_{i^*(x)}$ of $w$ for which the \textbf{distortion error} $d(x, w_{i^*(x)})$ is minimal.\\
 This procedure divides the manifold $V$ into a number of subregions $$V_i=\{x\in V\:|\:||x-w_i||\leq ||x-w_j||\forall\:j\}$$ called \textbf{Voronoi Polyhedra}, out of which each data vector $x$ is described by the corresponding reference vector $w_{i^*(x)}$
 \begin{center}
