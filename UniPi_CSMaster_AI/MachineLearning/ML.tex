@@ -668,34 +668,35 @@ How to act on the overtraining?
 	Other techniques: \textbf{dropout}.
 	\item \textbf{Pruning methods}
 \end{list}
-%TODO from here ML-21-NN-part2-v0.12.pdf p.59
-\subparagraph{Number of units} This is related to the control of complexity but also to the input dimension and the size of the TR set. In general, this is a model selection issue. The number of units, along with the regularization parameters, can be selected with the model selection phase (cross-validation).\\
+\subparagraph{Number of units} This is related to the control of complexity but also to the input dimension and the size of the TR set. In general, this is a \textbf{model selection issue}. The number of units, along with the regularization parameters, can be selected with the model selection phase on the VL set (cross-validation).\\
 Too few units $\Rightarrow$ underfitting, viceversa too many units $\Rightarrow$ overfitting. The number can be high with proper regularization.
 \begin{list}{}{}
 	\item \textbf{Constructive approaches}: the learning algorithm decides the number of hidden units, starting with small networks and adding new units.\\
-	Incremental approach: algorithms that build a network starting with a minimal configuration and add new units and connections during training. Examples: Tower, Tiling Upstart for classification and Cascade Correlation for both regression and classification.\begin{list}{}{}
+	\textbf{Incremental approach}: algorithms that build a network starting with a minimal configuration and add new units and connections during training. Examples: Tower, Tiling Upstart for classification and Cascade Correlation for both regression and classification.
+	\begin{list}{}{}
 		\item The \textbf{Cascade Correlation} algorithm starts with N0, a network without hidden units, which is trained and evaluated. If N0 cannot solve the problem, go to N1: a hidden unit is added such that the correlation between the output of the unit and the residual error of N0 is maximized (by training its weights).\\
 		After training, the weights of the new unit are frozen and the remaining weights are restrained. If the obtained network N1 cannot solve the problem, new hidden units are progressively added, which are connected with all the inputs and previously installed units. The process continues until the residual errors of the output layer satisfy a specified stopping criteria.\\
 		This method dynamically builds up a neural network and terminates once a sufficient amount of hidden units has been found to solve the given problem. Specifically, it works by interleaving the minimization of the total error function (LMS) by simple backpropagation training of the output layer and the maximization of the (non-normalized) correlation (the covariance) of the new inserted hidden (candidate) units with the residual error. With $E_{p,k} = (o_{p,k} - d_{p,k})$ residual error, with $o_{p,k}$ output, $p$ pattern and $k$ output unit
-		$$S = \sum_k\:\vline\sum_p(o_p - mean_p(o_{p,k}))(E_{p,k} - mean_p(E_{p,k}))\vline$$
-		$$\frac{\partial S}{\partial w_j} = \sum_k sign(S_k)\sum_p(E_{p,k} - mean_p(E_{p,k}))f'(net_{p,h})I_{p,j}\:\:\text{with }h\text{ candidate index}$$
+		$$S = \sum_k|\sum_p(o_p - \text{mean}_p(o_{pk}))(E_{pk} - \text{mean}_p(E_{pk}))|$$
+		$$\frac{\partial S}{\partial w_j} = \sum_k \text{sign}(S_k)\sum_p(E_{pk} - \text{mean}_p(E_{pk}))f'(\text{net}_{p,h})I_{p,j}\:\:\text{with }h\text{ candidate index}$$
 		\begin{center}
 			\includegraphics[scale=0.5]{9.png}
 		\end{center}
 		The role of hidden units is to reduce the residual output error (solves a specific sub-problem and becomes a permanent "feature detector").\\
-		Typically, since the maximization of the correlation is obtained using a gradient descent technique on a surface with several maxima, a pool of hidden units is trained and the best one selected to avoid local maxima. It's also greedy: easy to converge may also find a minimal number of units but may lead to overfitting.
+		Typically, since the maximization of the correlation is obtained using a gradient descent technique on a surface with several maxima, a pool of hidden units is trained and the best one selected to avoid local maxima. It's also greedy: easy to converge and may also find a minimal number of units but may lead to overfitting.
 \end{list}
 	\item \textbf{Pruning methods}: start with a large network and progressively delete weights or units.
 \end{list}
 \subparagraph{Input scaling and output representation} Preprocessing can have large effects: normalization (via standardization and rescaling), categorical inputs, handling missing data\ldots\\
 For the output, one or more linear units for regression. For classification, one unit (binary classification) or one of $k$ (multioutput):
 \begin{list}{}{}
-	\item sigmoid (choose the threshold to assign to class)
-	\item rejection zone
-	\item one-of-$k$ encoding (winner class chosen by taking the highest value among the outputs)
-	\item Often symmetric logistic (tanh) learn faster
+	\item Sigmoid (choose the threshold to assign to class)
+	\item Rejection zone
+	\item One-of-$k$ encoding (winner class chosen by taking the highest value among the outputs)
+	\item Often symmetric logistic ($\tanh$) learn faster
 	\item Softmax for 0/1 targets, sum to 1 can be interpreted as probability of belonging to class $i$ among $k$ classes.
 \end{list}
+\pagebreak
 \section{Model Selection and Model Assessment}
 \subsection{Bias-Variance} A bias-variance decomposition provides an useful framework to understand the validation issue, showing how difficult is the estimation of a model's performance, again showing the need of a trade-off between fitting capabilities (\textbf{bias}) and model flexibility (\textbf{variance}).
 \begin{center}
@@ -746,7 +747,7 @@ There are more combination and more ways of doing this.
 \paragraph{Particular cases} 
 \subparagraph{Lucky/unlucky sampling} Can we avoid to be sensible to the particular partitioning of the examples?
 \begin{list}{}{}
-	\item \textbf{Stratification}: the process of grouping examples into relatively homogeneous subgroups. For example, partitioning in a way that every class (in a classification task) is represented in approximately the same proportions as in the full data set.\\
+	\item \textbf{Stratification}: the process of grouping examples into relatively homogeneous subgroups. For example, partitioning in a way that every class (in a classification task) is represented in approximately the same proportions as in the full data set.
 	\item  \textbf{Repeated} hold-out or K-Fold CV: repeating the splitting with different random sampling, average the results to yield an overall estimation.
 \end{list}
 \subparagraph{Very few data} In this case it's difficult to say if the sampling is representative or not. We can use stratification.\\
@@ -756,7 +757,7 @@ Also the blind test set can be misleading if: is from a different distribution, 
 Also selecting the number of epochs by model selection it's not the best practice: better than a fixed number, but still not accurate.
 \subparagraph{Early Stopping} Should be part of the model selection as well. Tricky: uses part of the data just to decide when to stop, also complex with cross-validation.\\
 How to select the best model with early stopping for the final retraining (example: different stop points for each validation set in a cross-validation)? You could take the average number of epochs, but varying the data for retraining after model selection could lead to a different (better) stop point. So it's better to consider the average of the TR error at the best point and use it to gain the same level of fitting on the retraining. Else you need a VL every time you train.
-\subparagraph{Random initialization} Different $w_{initial} \Rightarrow$ different models: how to chose one for the final model? You can compute the mean and variance of error/accuracy across the different trials, so that a random case would be in this range.
+\subparagraph{Random initialization} Different $\mathbf{w}_{initial} \Rightarrow$ different models: how to chose one for the final model? You can compute the mean and variance of error/accuracy across the different trials, so that a random case would be in this range.
 \section{Statistical Learning Theory}
 \subsection{VC-dim} The VC-dim is used to provide the analytical bound we need to evaluate $H$. It's a measure of complexity (that is to say, capacity/expressive power/flexibility) of a class of hypothesis.\\
 The bound is expressed not in terms of $|H|$ but in terms of distinct instances that can be completely discriminated using $H$. Intuitively (for classification): how much can $H$ discriminate points? The maximum number of points that can be correctly classified/learned without error for all the possible labelings.
@@ -778,18 +779,19 @@ $VC(H)\geq 3$ shown before, note that not all the possible configurations of $3$
 \begin{center}
 	\includegraphics[scale=0.5]{15.png}
 \end{center}
-VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, $K$-NN has infinite VC-dim.
+VC-dim is related to the number of parameters, but it's not the same thing: we may add redundant free parameters, for example, and there exists models with one parameter and infinite VC-dim. For example, K-NN has infinite VC-dim.
 \paragraph{Analytical Bound} With $N$ number of data $$R[h]\leq R_{emp}[h] + \epsilon\left(\text{VC-dim}, N, \delta\right)$$
 with:
 \begin{list}{}{}
 	\item \textbf{Guaranteeded risk} $R_{emp}[h] + \epsilon\left(\text{VC-dim}, N, \delta\right)$
 	\item \textbf{VC Confidence} $\epsilon\left(\text{VC-dim}, N, \delta\right)$
 \end{list}
-For example, for 0/1 loss $$\epsilon\left(\text{VC-dim}, N, \delta\right) = \sqrt{\frac{VC\left(\ln\frac{2N}{\text{VC-dim}}\right) - \ln\frac{\delta}{4}}{N}}$$ with probability at least $1-\delta$ for every VC-dim$< N$\\\\
+For example, for 0/1 loss $$\epsilon\left(\text{VC-dim}, N, \delta\right) = \sqrt{\frac{VC\left(\ln\frac{\displaystyle 2N}{\displaystyle \text{VC-dim}}+1\right) - \ln\frac{\displaystyle \delta}{\displaystyle 4}}{N}}$$ with probability at least $1-\delta$ for every VC-dim$< N$\\\\
 There are different bound formulations for different classes of functions, of tasks\ldots\\
 This gives us a way to estimate the error on future data based only on the training error and the VC-dim of $H$. The resulting bounds are the worst case scenario, because the hold for all but $1-\delta$ of the possible approximation function/training sets.
 \paragraph{Remarks} For many reasonable hypothesis classes (ex: linear approximators), the VC-dim is linear in the number of free parameters of the hypothesis. This shows that to learn "well" we need a number of examples that is linear in the VC-dim.
-\subsection{Structural Risk Minimization} SRM uses VC-dim as a controlling parameter for minimizing the generalization bound on $R$. Assuming finite VC-dim, we can define a nested structure of models-hypothesis spaces according to the VC-dim in the following way:\begin{list}{}{}
+\subsection{Structural Risk Minimization} SRM uses VC-dim as a controlling parameter for minimizing the generalization bound on $R$. Assuming finite VC-dim, we can define a nested structure of models-hypothesis spaces according to the VC-dim in the following way:
+\begin{list}{}{}
 	\item $H_1\subseteq H_2\subseteq \ldots\subseteq H_n$
 	\item $VC(H_1)\leq VC(H_2)\leq \ldots\leq VC(H_n)$
 \end{list}
@@ -797,7 +799,7 @@ Some examples:
 \begin{list}{}{}
 	\item Neural Networks with increasing number of hidden units, but also the number of epochs
 	\item Polynomial of increasing degree
-	\item Increasing values for $c$, in $||w||<c$ for regularization
+	\item Increasing values for $c$, in $\|\mathbf{w}\|<c$ for regularization
 	\item Increasing number of nodes in a decision tree
 \end{list}
 \paragraph{Model selection} Growing VC-dim: empirical (training) error decreasing, VC confidence increasing.\\
@@ -819,82 +821,89 @@ Example of linearly and non linearly separable problems:
 \begin{center}
 	\includegraphics[scale=0.5]{17.png}
 \end{center}
-\paragraph{Separating hyperplane} Given the training set $T = \{(x_i, d_i)\}_{i=1}^N$ we want to find an hyperplane of equation $w^Tx + b = 0$ to separate the examples and get $w^Tx_i + b \geq 0$ for $d_i = +1$ and $w^Tx_i + b < 0$ for $d_i = -1$\\
-$g(x) = w^Tx + b$ is the discriminant function and $h(x) = \text{sign}(g(x))$ is the hypothesis.\\
+\paragraph{Separating hyperplane} Given the training set $T = \{(\mathbf{x}_i, d_i)\}_{i=1}^N$ we want to find an hyperplane of equation $\mathbf{w}^T\mathbf{x} + b = 0$ to separate the examples and get
+$$\begin{array}{r l}
+\mathbf{w}^T\mathbf{x}_i + b \geq 0 & \text{for }d_i=+1\\
+\mathbf{w}^T\mathbf{x}_i + b < 0 & \text{for }d_i=-1
+\end{array}$$
+The discriminant function is 
+$$g(\mathbf{x}) = \mathbf{w}^T\mathbf{x} + b$$
+The hypothesis is 
+$$h(\mathbf{x}) = \text{sign}(g(\mathbf{x}))$$
 An example of separation margin:
 \begin{center}
-	\includegraphics[scale=0.5]{18.png}
+	\includegraphics[scale=0.33]{18.png}
 \end{center}
-In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $w_O^Tx + b_O = 0$ with $_O$ meaning "optimal".\\
-We will find that $p = \frac{2}{||w||}$, so maximize $p\Leftrightarrow$ minimize $||w||$.
-\paragraph{Support Vector} We can rescale $w$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(x_i)| = |w^Tx_i + b| = 1$, so we can write $$w^Tx_i + b \geq 1\text{ if }d_i = +1$$ $$w^Tx_i + b < 1\text{ if }d_i = -1$$ which its compact form is $$d_i(w^Tx_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
-A \textbf{support vector} $x^{(s)}$ satisfies the previous equation exactly $$d^{(s)}(w^Tx^{(s)}+b) = 1$$ so the \textbf{support vectors are the closest data points to the hyperplane} and "lay on the margin".
+In this case the hyperplane has equal distance to both the closest negative and positive examples. The separation margin ($p$) is evaluated as the double of the distance between the linear hyperplane and the closest data point (a "safe zone"). Not all hyperplanes solving the task are equal: the margin changes, bigger or smaller. The \textbf{optimal hyperplane is the hyperplane which maximizes $p$} $$\mathbf{w}_O^T\mathbf{x} + b_O = 0$$ with $_O$ meaning "optimal". We will find that $$p = \frac{2}{\|\mathbf{w}\|}$$ so \textbf{maximize $p\Leftrightarrow$ minimize $\|\mathbf{w}\|$}.
+\paragraph{Support Vector} We can rescale $\mathbf{w}$ and $b$ so that the closest points to the separating hyperplane statisfy $|g(\mathbf{x}_i)| = |\mathbf{w}^T\mathbf{x}_i + b| = 1$, so we can write $$\mathbf{w}^T\mathbf{x}_i + b \geq 1\text{ if }d_i = +1$$ $$\mathbf{w}^T\mathbf{x}_i + b < 1\text{ if }d_i = -1$$ which its compact form is $$d_i(\mathbf{w}^T\mathbf{x}_i + b) \geq 1\:\:\forall\:i=1,\ldots,N$$
+A \textbf{support vector} $\mathbf{x}^{(s)}$ satisfies the previous equation exactly $$d^{(s)}(\mathbf{w}^T\mathbf{x}^{(s)}+b) = 1$$ so the \textbf{support vectors are the closest data points to the hyperplane} and "\textit{lay on the margin}".
 \begin{center}
 	\includegraphics[scale=0.5]{19.png}
 \end{center}
-\paragraph{Computing the distance} With the discriminant function $g(x) = w^Tx + b$, recalling that $w_O$ is a vector orthogonal to the hyperplane. Let's denote with $r$ the distance between $x$ and the optimal hyperplane.
+\paragraph{Computing the distance} With the discriminant function $g(\mathbf{x}) = \mathbf{w}^T\mathbf{x} + b$, recalling that $\mathbf{w}_O$ is a vector orthogonal to the hyperplane. Let's denote with $r$ the distance between $\mathbf{x}$ and the optimal hyperplane.
 \begin{center}
 	\includegraphics[scale=0.5]{20.png}
 \end{center}
-$$x=x_p+r\frac{w_O}{||w_O||}$$
-$$g(x) = g\left(x_p + r\frac{w_O}{||w_O||}\right) ) w_O^Tx_o + b_O + w_O^Tr\frac{w_O}{||w_O||} = g(x_p) + rw_O^T\frac{w_O}{||w_O||} = r\frac{||w_O||^2}{||w_O||} = r||w_O||$$
-$$\text{thus }r=\frac{g(x)}{||w_O||}$$
-\paragraph{Computing the margin} Consider the distance between the hyperplane and a positive support vector $x^{(s)}$, for example $$r\text{ for }x^{(s)} = \frac{g(x^{(s)})}{||w_O||} = \frac{1}{||w_O||} = \frac{p}{2}$$
-$$\Rightarrow p = \frac{2}{||w_O||}$$
-So the optimum hyperplane maximizes $p\Leftrightarrow$ minimizes $||w||$
+$$\mathbf{x}=\mathbf{x}_p+r\frac{\mathbf{w}_O}{\|\mathbf{w}_O\|}$$
+$$g(\mathbf{x}) = g\left(\mathbf{x}_p + r\frac{\mathbf{w}_O}{\|\mathbf{w}_O\|}\right) = \mathbf{w}_O^T\mathbf{x}_p + b_O + \mathbf{w}_O^Tr\frac{\mathbf{w}_O}{\|\mathbf{w}_O\|} = g(\mathbf{x}_p) + r\mathbf{w}_O^T\frac{\mathbf{w}_O}{\|\mathbf{w}_O\|} = r\frac{\|\mathbf{w}_O\|^2}{\|\mathbf{w}_O\|} = r\|\mathbf{w}_O\|$$
+$$r=\frac{g(\mathbf{x})}{\|\mathbf{w}_O\|}$$
+\paragraph{Computing the margin} Consider the distance between the hyperplane and a positive support vector $\mathbf{x}^{(s)}$, for example $$r\text{ for }x^{(s)} = \frac{g(\mathbf{x}^{(s)})}{\|\mathbf{w}_O\|} = \frac{1}{\|\mathbf{w}_O\|} = \frac{p}{2}$$
+$$\Rightarrow p = \frac{2}{\|\mathbf{w}_O\|}$$
+So the optimum hyperplane maximizes $p\Leftrightarrow$ minimizes $\|w\|$
 \paragraph{Quadratic Optimization Problem} The formal derivation of the SVM solution requires techniques in the constrained optimization framework, and we assume that quadratic programming is solved elsewhere.\\
 For the hard margin SVM, the quadratic optimization problem asks to find the optimum values of $w$ and $b$ in order to maximize the margin.
-\subparagraph{Primal Form} Given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $w$ and $b$ which minimizes $$\psi(w) = \frac{1}{2}w^Tw$$ satisfying the constraints $$d_i(w^Tx_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$
-The objective function $\psi(w)$ is quadratic and convex in $w$, while the constraints are linear in $w$: solving this problem scales (the computational cost) with the size of the input space $m$.\\
-The Lagrangian multipliers method is used: constructing the Lagrangian function corresponding to the quadratic optimization problem $$J(w, b,\alpha) = \frac{1}{2} w^Tw - \sum_{i=1}^N\alpha_i\left(d_i\left(w^Tx_i+b\right)-1\right)$$ with $\alpha_i \geq 0$ the $N$ Lagrangian multipliers. Each term in the sum correspond to a constraint in the primal problem. $J$ must be minimized with respect to $w$ and $b$, and maximized with respect to $\alpha$, and the solution correspond to a saddle point in $J$.\\\\
-We will find $$w_O = \sum_{i=1}^N \alpha_{O,i}d_ix_i$$ thus the optimal hyperplane is expressed as $$w^T_Ox+b_O = 0 \Leftrightarrow \sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx + b_O = 0$$
+\subparagraph{Primal Form} Given the training examples $T = \{(\mathbf{x}_i, d_i)\}_{i=1}^N$, find the optimum values of $\mathbf{w}$ and $b$ which minimizes $$\Psi(\mathbf{w}) = \frac{1}{2}\mathbf{w}^T\mathbf{w}$$ satisfying the constraints $$d_i(\mathbf{w}^T\mathbf{x}_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$
+The objective function $\Psi(\mathbf{w})$ is quadratic and convex in $\mathbf{w}$, while the constraints are linear in $\mathbf{w}$: solving this problem scales (the computational cost) with the size of the input space $m$.\\\\
+The \textbf{Lagrangian multipliers} method is used: constructing the Lagrangian function corresponding to the quadratic optimization problem $$J(\mathbf{w}, b,\alpha) = \frac{1}{2} \mathbf{w}^T\mathbf{w} - \sum_{i=1}^N\alpha_i\left(d_i\left(\mathbf{w}^T\mathbf{x}_i+b\right)-1\right)$$ with $\alpha_i \geq 0$ the $N$ Lagrangian multipliers. Each term in the sum correspond to a constraint in the primal problem. $J$ must be minimized with respect to $\mathbf{w}$ and $b$, and maximized with respect to $\alpha$, and the solution correspond to a saddle point in $J$.\\\\
+We will find $$\mathbf{w}_O = \sum_{i=1}^N \alpha_{O,i}d_i\mathbf{x}_i$$ thus the optimal hyperplane is expressed as $$\mathbf{w}^T_O\mathbf{x}+b_O = 0 \Leftrightarrow \sum_{i=1}^N\alpha_{Oi}d_i\mathbf{x}_i^T\mathbf{x} + b_O = 0$$
 The optimal conditions will be:
 \begin{list}{}{}
-	\item Minimize $J$ with respect to $w \Rightarrow\frac{\partial J}{\partial w} = 0 \Rightarrow w = \sum_{i=1}^N \alpha_id_ix_i$
+	\item Minimize $J$ with respect to $\mathbf{w} \Rightarrow\frac{\partial J}{\partial \mathbf{w}} = 0 \Rightarrow \mathbf{w} = \sum_{i=1}^N \alpha_id_i\mathbf{x}_i$
 	\item Minimize $J$ with respect to $b \Rightarrow\frac{\partial J}{\partial b} = 0 \Rightarrow w = \sum_{i=1}^N \alpha_id_i$
 \end{list}
 And we may substitute these in $J$ to study the dual form.
-\subparagraph{Kuhn-Tucker Conditions} From the KT conditions follows that $$\alpha_i(d_i(w^Tx_i + b) - 1) = 0\:\:\:\:\forall\:i=1,\ldots, N$$ in the saddle point of $J$:
+\subparagraph{Kuhn-Tucker Conditions} From the KT conditions follows that $$\alpha_i(d_i(\mathbf{w}^T\mathbf{x}_i + b) - 1) = 0\:\:\:\:\forall\:i=1,\ldots, N$$ in the saddle point of $J$:
 \begin{list}{}{}
-	\item $\alpha_i > 0 \Rightarrow d_i(w^Tx_i+b) = 1$ and $x_i$ is a support vector
-	\item $x_i$ isn't a support vector $\Rightarrow \alpha_i = 0$
+	\item $\alpha_i > 0 \Rightarrow d_i(\mathbf{w}^T\mathbf{x}_i+b) = 1\wedge\mathbf{x}_i$ is a support vector
+	\item $\mathbf{x}_i$ isn't a support vector $\Rightarrow \alpha_i = 0$
 \end{list}
-Hence we can restrict the computation to $N_s$ so $w_O=\sum_{i=1}^{N_s} \alpha_{O,i}d_ix_i$: \textbf{the hyperplane depends solely on the support vectors}!\\\\
-To obtain the Lagrangian multipliers $\{a_i\}_{i=1}^N$ we must solve the dual form: given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $\{a_i\}_{i=1}^N$ that maximizes $$Q(\alpha) = \sum_{i=1}^N \alpha_i - \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jd_id_jx_i^Tx_j$$ satisfying the constraints $$\alpha_i\geq 0\:\:\:\forall\:i=1,\ldots,N$$ $$\sum_{i=1}^N\alpha_id_i = 0$$
-Then we compute $w_O = \sum_{i=1}^N\alpha_{O,i}d_ix_i$ and $b_O = 1-w_O^Tx^{(s)}$ corresponding to a positive support vector $x^{(s)}$, so $$b_O = = 1-\sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx^{(s)}$$
-So we don't need to explicitly compute $w_O$, but we only need the Lagrangian multipliers $\alpha_i$ (by solving the dual problem), then we compute the optimal bias $b_O$. The decision surface is given by $$w_O^Tx + b_O = 0 \Leftrightarrow\sum_{i=1}^N\alpha_{O,i}d_i x_i^Tx + b_O = 0$$
-So given the input pattern $x$:
+Hence we can restrict the computation to $N_s$ so $\mathbf{w}_O=\sum_{i=1}^{N_s} \alpha_{O,i}d_i\mathbf{x}_i$: \textbf{the hyperplane depends solely on the support vectors}!\\\\
+To obtain the Lagrangian multipliers $\{a_i\}_{i=1}^N$ we must solve the problem in the dual form: given the training examples $T = \{(\mathbf{x}_i, d_i)\}_{i=1}^N$, find the optimum values of $\{a_i\}_{i=1}^N$ that maximizes $$Q(\alpha) = \sum_{i=1}^N \alpha_i - \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jd_id_j\mathbf{x}_i^T\mathbf{x}_j$$ satisfying the constraints $$\alpha_i\geq 0\:\:\:\forall\:i=1,\ldots,N$$ $$\sum_{i=1}^N\alpha_id_i = 0$$
+Then we compute $$\mathbf{w}_O = \sum_{i=1}^N\alpha_{Oi}d_i\mathbf{x}_i$$ and $b_O = 1-\mathbf{w}_O^T\mathbf{x}^{(s)}$ corresponding to a positive support vector $\mathbf{x}^{(s)}$, so $$b_O = 1-\sum_{i=1}^N\alpha_{O,i}d_i\mathbf{x}_i^T\mathbf{x}^{(s)}$$
+So we don't need to explicitly compute $\mathbf{w}_O$, but we only need the Lagrangian multipliers $\alpha_i$ (by solving the dual problem), then we compute the optimal bias $b_O$. The decision surface is given by $$\mathbf{w}_O^T\mathbf{x} + b_O = 0 \Leftrightarrow\sum_{i=1}^N\alpha_{O,i}d_i \mathbf{x}_i^T\mathbf{x} + b_O = 0$$
+So given the input pattern $\mathbf{x}$:
 \begin{list}{}{}
-	\item Compute $g(x) = \sum_{i=1}^N \alpha_{O,i}d_ix_i^Tx + b_O$
-	\item Classify $x$ as the sign of $g(x)$
+	\item Compute $g(\mathbf{x}) = \sum_{i=1}^N \alpha_{O,i}d_i\mathbf{x}_i^T\mathbf{x} + b_O$
+	\item Classify $\mathbf{x}$ as the $\text{sign}(g(\mathbf{x}))$
 \end{list}
-Note that it's not necessary to compute $w_O$, also the sum can be restricted to the number of support vector $N_s$
-\subparagraph{How does this improve the generalization?} Minimizing the norm of $w$ is equivalent to minimizing the VC-dim and thus to minimizing the VC confidence $\epsilon$ in $$R[h] \leq R_{emp}[h] + \epsilon(\text{VC-dim}, N, \delta)$$
-\subparagraph{Theorem (Vapnik)} Let $D$ be the diameter of the smallest ball around the data points $x_1,\ldots,x_N$. For the class of separating hyperplanes described by the equation $w^Tx+b = 0$, the upper bound to the VC-dim is $$\text{VC-dim} \leq min(\lceil\frac{D^2}{p^2}\rceil, m_O) + 1$$
+Note how it's not necessary to compute $\text{w}_O$, also the sum can be restricted to the number of support vector $N_s$
+\subparagraph{How does this improve the generalization?} Minimizing the norm of $\text{w}$ is equivalent to minimizing the VC-dim and thus to minimizing the VC confidence $\epsilon$ in $$R[h] \leq R_{emp}[h] + \epsilon(\text{VC-dim}, N, \delta)$$
+\subparagraph{Theorem (Vapnik)} Let $D$ be the diameter of the smallest ball around the data points $\mathbf{x}_1,\ldots,\mathbf{x}_N$. For the class of separating hyperplanes described by the equation $\mathbf{w}^T\mathbf{x}+b = 0$, the upper bound to the VC-dim is $$\text{VC-dim} \leq \min\left(\left\lceil\frac{D^2}{p^2}\right\rceil, m_O\right) + 1$$
 \paragraph{An elegant approach} For linearly separable data there are many solutions. Vapnik proposed an "optimal separating hyperplane" maximizing the margin providing:
 \begin{list}{}{}
 	\item An unique solution with zero errors for the binary classifier
 	\item An automatized approach to SRM that minimizes VC confidence (by maximizing the margin) as part of the training process, without hyper parameters in the linear separable case.
 	\item The use of a solver in the class of constrained quadratic programming (instead of gradient descent) with a dual form (showing support vectors and dot product among the patterns)
-	\item A solution focused on "selected" training data (support vectors)
+	\item A solution focused on "selected" training data (support vectors), hoping that those points are not the noisier ones.
 \end{list}
-For noisy or not linearly separable data, you can have a soft margin (support vector still on the border, but some data may fall closer to the hyperplane: at least one point violate $d_i(w^Tx_i+b)\geq 1$)
-\paragraph{Soft margin SVM} We introduce $\xi_i\geq 0\:\:\:\forall\:i=1,\ldots, N$ called \textbf{slack variables}: $d_i(w^Tx_i+b)\geq 1-\xi_i$, so a support vector satisfies that exactly $d_i(w^Tx_i+b)\geq 1-\xi_i$
+For noisy or not linearly separable data, you can have a \textbf{soft margin} (support vector still on the border, but some data may fall closer to the hyperplane: at least one point violate $d_i(\mathbf{w}^T\mathbf{x}_i+b)\geq 1$)
+\paragraph{Soft margin SVM} We introduce $\xi_i\geq 0\:\:\:\forall\:i=1,\ldots, N$ called \textbf{slack variables} $$d_i(\mathbf{w}^T\mathbf{x}_i+b)\geq 1-\xi_i$$ So a support vector $\text{x}^{(s)}$ satisfies that exactly $$d^{(s)}(\mathbf{w}^T\mathbf{x}^{(s)}+b)= 1-\xi^{(s)}$$
 \begin{center}
 	\includegraphics[scale=0.5]{21.png}
 \end{center}
-Note that Vapnik does not hold anymore. The primal problems becomes: given the training examples $T = \{(x_i, d_i)\}_{i=1}^N$, find the optimum values of $w$ and $b$ which minimizes $$\psi(w, \xi) = \frac{1}{2}w^Tw + C\sum_{i=1}^N\xi_i$$ satisfying the constraints $$d_i(w^Tx_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$ $$\xi_i\geq 0\:\:\:\forall\:i=1,	\ldots, N$$
+Note that Vapnik does not hold anymore. The primal problems becomes: given the training examples $T = \{(\mathbf{x}_i, d_i)\}_{i=1}^N$, find the optimum values of $\mathbf{w}$ and $b$ which minimizes $$\Psi(\mathbf{w}, \xi) = \frac{1}{2}\mathbf{w}^T\mathbf{w} + C\sum_{i=1}^N\xi_i$$ satisfying the constraints $$d_i(\mathbf{w}^T\mathbf{x}_i+b)\geq 1\:\:\:\forall\:i=1,\ldots,N$$ $$\xi_i\geq 0\:\:\:\forall\:i=1,	\ldots, N$$
 We introduced $C$ as a regularization hyperparameter, losing the fully automated SRM. Low $C$ means many TR errors allowed (possible underfitting), while high $C$ means less or no TR errors allowed (smaller margin, possible overfitting)
 \subparagraph{Kuhn-Tucker Conditions} The KT conditions are now defined as
 \begin{list}{}{}
-	\item $\forall\:i=1,\ldots,N\:\:\:\alpha_i(d_i(w^Tx_i + b)+\xi_i - 1) = 0$
+	\item $\forall\:i=1,\ldots,N\:\:\:\alpha_i(d_i(\mathbf{w}^T\mathbf{x}_i + b)+\xi_i - 1) = 0$
 	\item $\forall\:i=1,\ldots,N\:\:\:\mu_i\xi_i=0$ with $\mu_i$ Lagrangian multipliers introduced to enforce the non negativity of the slack variables.
 \end{list}
 We have $0<\alpha_i<C\Rightarrow\xi_i = 0$ on the margin and $\alpha_i=C\Rightarrow\xi_i > 0$ inside the margin.
-\subparagraph{Solving the problem} We solve the dual problem to compute the $\{\alpha_i\}_{i=1}^N$, then we find $w_O$ and $b_O$ from $\{\alpha_{O,i}\}_{i=1}^N$ with $w_O = \sum_{i=1}^N\alpha_{O,i}d_ix_i$\\
-Then, for a pattern $j$ such that $0<\alpha_j<C$, we have $$b_O = d_j-\sum_{i=1}^N\alpha_{O,i}d_ix_i^Tx_j$$
-or an average of all the solutions for numerical stability. The non-zero Lagrangian multipliers correspond the the support vectors. We use it as before: $g(x) = \sum_{i=1}^N \alpha_{O,i}d_ix_iTx + b_O$ and $h(x) = sign(g(x))$
-\subsection{High-Dimensional feature spaces} We can use:
+\subparagraph{Solving the problem} We solve the dual problem to compute the $\{\alpha_i\}_{i=1}^N$, then we find $\mathbf{w}_O$ and $b_O$ from $\{\alpha_{O,i}\}_{i=1}^N$ with $$\mathbf{w}_O = \sum_{i=1}^N\alpha_{Oi}d_i\mathbf{x}_i$$
+Then, for a pattern $j$ such that $0<\alpha_j<C$, we have $$b_O = d_j-\sum_{i=1}^N\alpha_{O,i}d_i\mathbf{x}_i^T\mathbf{x}_j$$
+Or an average of all the solutions for numerical stability. The non-zero Lagrangian multipliers correspond the the support vectors. We use it as before: $$g(\mathbf{x}) = \sum_{i=1}^N \alpha_{O,i}d_i\mathbf{x}_iT\mathbf{x} + b_O$$ $$h(\mathbf{x}) = \text{sign}(g(\mathbf{x}))$$
+\subsection{High-Dimensional feature spaces}
+The idea is to map the data points to a high-dimensional feature space where they can possible be linearly separable. We can use:
 \begin{list}{}{}
 	\item Non-linear mapping of input patterns to a high-dimensional feature space\\
 	\textbf{Cover's Theorem}: the patterns are linearly separable with high probability in the feature space under such conditions.
@@ -902,68 +911,73 @@ or an average of all the solutions for numerical stability. The non-zero Lagrang
 \end{list}
 However we know that using high dimensional feature spaces (large basis function expansion) can be computationally unfeasible and can lead to overfitting.\\
 We will propose the kernel approach to implicitly manage the feature space while regularizing.
-\paragraph{Kernel} Non linear function mapping $$\phi:R^{m_0}\rightarrow R^{m_1}$$ $$x\mapsto \phi(x)$$
-The problem is formulated as before, but the training set is now $\{(\phi(x_i), d_i)\}_{i=1}^N$ and the hyper plane is now $w^T\phi(x) + b = 0$\\
-The weight vector is a linear combination of the feature vectors
-$$w=\sum_{i=1}^N\alpha_id_i\phi(x_i)$$ so the hyperplane equation is $$\sum_{i=1}^N\alpha_id_i\phi(x_i)^T\phi(x) = 0$$
-Evaluating $\phi(x)$ could be intractable, but with certain conditions we don't need to evaluate it directly. We do not even need to know the feature space itself! This is possible using a function to compute directly the dot products in the feature spaces $k:R^{m_0}\times R^{m_0}\rightarrow R$, with $k$ called inner product kernel function: $k(x_i, x) = \phi(x_i)^T\phi(x)$, and it's symmetric meaning $k(x_i, x) = k(x, x_i)$\\
-\subparagraph{Kernel Matrix} We can arrange the dot products in the feature space between the images of the input training patterns in a $N\times N$ matrix called kernel matrix $K = \{k(x_i, x_j)\}_{i,j=1}^N$, symmetrical.
+\paragraph{Kernel} Non linear function mapping $$\Phi:\mathbb{R}^{m_0}\rightarrow \mathbb{R}^{m_1}$$ $$\mathbf{x}\mapsto \Phi(\mathbf{x})$$
+The problem is formulated as before, but the training set is now $\{(\Phi(\mathbf{x}_i), d_i)\}_{i=1}^N$ and the hyper plane is now $$\mathbf{w}^T\Phi(\mathbf{x}) + b = 0$$
+The weight vector incorporates the bias ($w_0=b$ and $\Phi_0(\mathbf{x})=1$) and is a linear combination of the feature vectors
+$$\mathbf{w}=\sum_{i=1}^N\alpha_id_i\Phi(\mathbf{x}_i)$$ so the hyperplane equation is $$\sum_{i=1}^N\alpha_id_i\Phi(\mathbf{x}_i)^T\Phi(\mathbf{x}) = 0$$
+Evaluating $\Phi(\mathbf{x})$ could be intractable, but with certain conditions we don't need to evaluate it directly. We do not even need to know the feature space itself! This is possible using a function to compute directly the dot products in the feature spaces: $k$, called \textbf{inner product kernel function} $$k:\mathbb{R}^{m_0}\times \mathbb{R}^{m_0}\rightarrow \mathbb{R}$$ $$k(\mathbf{x}_i, \mathbf{x}) = \Phi(\mathbf{x}_i)^T\Phi(\mathbf{x})$$ And it's symmetric $$k(\mathbf{x}_i, \mathbf{x}) = k(\mathbf{x}, \mathbf{x}_i)$$
+This kernel function provides us with a powerful abstraction tool. The dot product $\Phi(\mathbf{x}_i)^T\Phi(\mathbf{x})$ is evaluated without considering the feature mapping and the feature space itself, but it's evaluated in terms of the input patterns.
+\subparagraph{Kernel Matrix} We can arrange the dot products in the feature space between the images of the input training patterns in a $N\times N$ matrix called kernel matrix $K = \{k(\mathbf{x}_i, \mathbf{x}_j)\}_{i,j=1}^N$, symmetrical.
 \subparagraph{Mercer's Theorem} This property holds only for kernels with positive semi-definite kernel matrices. It's related to having non-negative eigenvalues in the kernel matrix.
-\subparagraph{Properties} With $k_1,k_2$ kernels over $R^{m_0}\rightarrow R^{m_0}$, the following are also kernel functions:
+\subparagraph{Properties} With $k_1,k_2$ kernels over $\mathbb{R}^{m_0}\times \mathbb{R}^{m_0}$, the following are also kernel functions:
 \begin{list}{}{}
-	\item $k_1(x,y)+k_2(x,y)$
-	\item $\alpha k_1(x,y)$ with $\alpha\in \mathbb{R}^+$
-	\item $k_1(x,y)\cdot k_2(x,y)$
+	\item $k_1(\mathbf{x},\mathbf{y})+k_2(\mathbf{x},\mathbf{y})$
+	\item $\alpha k_1(\mathbf{x},\mathbf{y})$ with $\alpha\in \mathbb{R}^+$
+	\item $k_1(\mathbf{x},\mathbf{y})\cdot k_2(\mathbf{x},\mathbf{y})$
 \end{list}
 \paragraph{Wrapping up}
 \begin{list}{}{}
-	\item The training set is $T = \{(x_i,d_i)\}_{i=1}^N$
+	\item The training set is $T = \{(\mathbf{x}_i,d_i)\}_{i=1}^N$
 	\item We can choose the trade-off parameter $C$ and the kernel function $k$
 	\item We find $\{\alpha_i\}_{i=1}^N$ by solving the optimization problem via quadratic programming algorithms\\
-	Remember that the solution is spars, as every $\alpha_i$ corresponding to non-support vector is $0$
+	Remember that the solution is sparse, as every $\alpha_i$ corresponding to non-support vector is $0$
 	\item The bias $b_O$ is computed knowing the Lagrangian multipliers and the kernel matrix
-	\item Given an input pattern $x$ we compute $w^T\phi(x) = \sum_{i=1}^N\alpha_id_ik(x,x_i)$\\
-	Fundamental: we don't need to compute $w$
-	\item $x$ is classified as $sign(g(x)) = sign\left(\sum_{i=1}^N\alpha_id_ik(x,x_i)\right)$ with $g(x)$ called discriminant function
+	\item Given an input pattern $\mathbf{x}$ we compute $\mathbf{w}^T\Phi(\mathbf{x}) = \sum_{i=1}^N\alpha_id_ik(\mathbf{x},\mathbf{x}_i)$\\
+	Important: we don't need to compute $\mathbf{w}$
+	\item $\mathbf{x}$ is classified as $\text{sign}(g(\mathbf{x})) = \text{sign}\left(\sum_{i=1}^N\alpha_id_ik(\mathbf{x},\mathbf{x}_i)\right)$ with $g(\mathbf{x})$ called discriminant function
 \end{list}
-At \textbf{test phase} we have the Lagrangian multipliers and the kernel matrix. To classify an unseen input pattern $x$, we compute $\sum_{i=1}^N\alpha_id_ik(x,x_i)$ and classify $x$ and the sign of that computation, so $h(x) = sign\left(\sum_{i=1}^N\alpha_id_ik(x,x_i)\right)$
+At \textbf{test phase} we have the Lagrangian multipliers and the kernel matrix. To classify an unseen input pattern $\mathbf{x}$, we compute $\sum_{i=1}^N\alpha_id_ik(\mathbf{x},\mathbf{x}_i)$ and classify $\mathbf{x}$ as the sign of that computation, so $h(\mathbf{x}) = \text{sign}\left(\sum_{i=1}^N\alpha_id_ik(\mathbf{x},\mathbf{x}_i)\right)$\\
+Note that we memorize $\mathbf{x}_i$ for the test phase.D
 \paragraph{Examples of kernels}
 \begin{list}{}{}
-	\item \textbf{Polynomial Learning Machine} $k(x,x_i) = (x^Tx_i + 1)^p$ with $p$ user-specified parameter
-	\item \textbf{Radial Basis Function} or \textbf{Gaussian Kernel} $k(x,x_i) = e^{-\frac{1}{2\sigma^2}||x-x_i||^2}$ with $\sigma^2$ user-specified parameter.\\
+	\item \textbf{Polynomial Learning Machine} $k(\mathbf{x},\mathbf{x}_i) = (\mathbf{x}^T\mathbf{x}_i + 1)^p$ with $p$ user-specified parameter
+	\item \textbf{Radial Basis Function} or \textbf{Gaussian Kernel} $k(\mathbf{x},\mathbf{x}_i) = e^{-\frac{1}{2\sigma^2}\|\mathbf{x}-\mathbf{x}_i\|^2}$ with $\sigma^2$ user-specified parameter.\\
 	Narrow peaked kernels with small $\sigma$, imply that the reply for $x_i$ is only $d_i$\\
 	Feature space with an infinite number of dimensions
-	\item \textbf{Two-layer perceptron} $k(x,x_i) = tanh(\beta_0x^Tx_i + \beta_1)$ where $\beta_0 > 0$ and $\beta_1 < 0$ are user-specified parameters\\
+	\item \textbf{Two-layer perceptron} $k(\mathbf{x},\mathbf{x}_i) = tanh(\beta_0\mathbf{x}^T\mathbf{x}_i + \beta_1)$ where $\beta_0 > 0$ and $\beta_1 < 0$ are user-specified parameters\\
 	Here the Mercer's Theorem holds only for some choices of $\beta_0,\beta_1$
 \end{list}
-\subsection{SVM for non-linear regression}
-A regression problem requires to find $f$ such that $d=f(x)+v$ with a training set $T=\{(x_i,d_i)\}_{i=1}^N$ and with $v$ statistically independent from $x$\\
-We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(x)\}_{j=0}^{m_1}$ so $y=h(x) = w^T\phi(x)$ where $w = (w_0 = b, w_1,\ldots,w_{m_1})^T$ and $\phi(x) = (\phi(x)_0 = 1, \phi(x)_1,\ldots, \phi(x)_{m_1})^T$
-\paragraph{$\epsilon$-insensitive loss function} $L_\epsilon(d,y) = \left\{\begin{array}{l l}
+\subsection{SVM for Non-Linear Regression}
+A regression problem requires to find $f$ such that $d=f(\mathbf{x})+v$ with a training set $T=\{(\mathbf{x}_i,d_i)\}_{i=1}^N$ and with the noisy term $v$ statistically independent from $\mathbf{x}$.\\
+We estimate $d$ using a linear expansion of non-linear functions $\{\phi_j(\mathbf{x})\}_{j=0}^{m_1}$ so $y=h(\mathbf{x}) = \mathbf{w}^T\phi(\mathbf{x})$ where $\mathbf{w} = (w_0 = b, w_1,\ldots,w_{m_1})^T$ and $\phi(\mathbf{x}) = (\phi(\mathbf{x})_0 = 1, \phi(\mathbf{x})_1,\ldots, \phi(\mathbf{x})_{m_1})^T$
+\paragraph{$\epsilon$-insensitive loss function} $$L_\epsilon(d,y) = \left\{\begin{array}{l l}
 |d - y| - \epsilon & \text{if }|d-y|\geq\epsilon\\
 0 & \text{otherwhise}
-\end{array} \right.$
+\end{array} \right.$$
 \begin{center}
 	\includegraphics[scale=0.5]{22.png}
 \end{center}
-\paragraph{Optimization problem} Introducing the non-negative slack variables $\xi_i'$ and $\xi_i\forall\:i=1,\ldots,N$ $$-\xi_i'-\epsilon \leq d_i-w^T\phi(x_i)\leq \epsilon + \xi_i$$
+\paragraph{Optimization problem} Introducing the non-negative slack variables $\xi_i'$ and $\xi_i$ $\forall\:i=1,\ldots,N$ $$-\xi_i'-\epsilon \leq d_i-\mathbf{w}^T\phi(\mathbf{x}_i)\leq \epsilon + \xi_i$$
 leading to the following constraints, all $\forall\:i=1,\ldots,N$
 \begin{list}{}{}
-	\item $d_i - w^T\phi(x_i)\leq \epsilon + \xi_i$
-	\item $w^T\phi(x_i)-d_i\leq \epsilon + \xi_i'$
+	\item $d_i - \mathbf{w}^T\phi(\mathbf{x}_i)\leq \epsilon + \xi_i$
+	\item $\mathbf{w}^T\phi(\mathbf{x}_i)-d_i\leq \epsilon + \xi_i'$
 	\item $\xi_i\geq 0$
 	\item $\xi_i'\geq 0$
 \end{list}
-The primal problem then is: given the training set $\{(x_i, d_i)\}_{i=1}^N$ find the optimal values of $w$ such that the following objective function is minimized $$\psi(w,\xi,\xi') = \frac{1}{2}w^Tw + C\sum_{i=1}^N\left(\xi_i+\xi_i'\right)$$ under the constraints, all $\forall\:i=1,\ldots,N$
+\begin{center}
+	\includegraphics[scale=0.5]{53.png}
+\end{center}
+The primal problem then is: given the training set $\{(\mathbf{x}_i, d_i)\}_{i=1}^N$ find the optimal values of $\mathbf{w}$ such that the following objective function is minimized $$\psi(\mathbf{w},\xi,\xi') = \frac{1}{2}\mathbf{w}^T\mathbf{w} + C\sum_{i=1}^N\left(\xi_i+\xi_i'\right)$$ under the constraints, all $\forall\:i=1,\ldots,N$
 \begin{list}{}{}
-	\item $d_i - w^T\phi(x_i)\leq \epsilon + \xi_i$
-	\item $w^T\phi(x_i)-d_i\leq \epsilon + \xi_i'$
+	\item $d_i - \mathbf{w}^T\phi(\mathbf{x}_i)\leq \epsilon + \xi_i$
+	\item $\mathbf{w}^T\phi(\mathbf{x}_i)-d_i\leq \epsilon + \xi_i'$
 	\item $\xi_i\geq 0$
 	\item $\xi_i'\geq 0$
 \end{list}
-The dual problem yields the optimal $\{\alpha_i\}_{i=1}^N$ and $\{\alpha_i'\}_{i=1}^N$. With those, we can compute the optimal $w$ $$w=\sum_{i=1}^N(\alpha_i - \alpha_i')\phi(x_i) = \sum_{i=1}^N\gamma_i\phi(x_i)$$
-with $\gamma_i = \alpha_i - \alpha_i'$: in this case support vectors correspond to non-zero values of $\gamma_i$\\
-The estimate is defined as $h(x) = y = w^T\phi(x)$, and using the linear expansion for $w$ we get $$h(x) = \sum_{i=1}^N\gamma_i\phi(x_i)^T\phi(x) = \sum_{i=1}^N\gamma_i k(x_i, x)$$
+The dual problem yields the optimal $\{\alpha_i\}_{i=1}^N$ and $\{\alpha_i'\}_{i=1}^N$. With those, we can compute the optimal $\mathbf{w}$ $$\mathbf{w}=\sum_{i=1}^N\underset{\gamma_i}{\underbrace{(\alpha_i - \alpha_i')}}\phi(\mathbf{x}_i) = \sum_{i=1}^N\gamma_i\phi(\mathbf{x}_i)$$
+In this case support vectors correspond to non-zero values of $\gamma_i$\\
+The estimate is defined as $h(\mathbf{x}) = y = \mathbf{w}^T\phi(\mathbf{x})$, and using the linear expansion for $w$ we get $$h(\mathbf{x}) = \sum_{i=1}^N\gamma_i\phi(\mathbf{x}_i)^T\phi(\mathbf{x}) = \sum_{i=1}^N\gamma_i k(\mathbf{x}_i, \mathbf{x})$$
 \paragraph{Wrapping up}
 \begin{list}{}{}
 	\item \textbf{Important}: select values for the user-specified parameters $C$ and $\epsilon$
@@ -971,9 +985,9 @@ The estimate is defined as $h(x) = y = w^T\phi(x)$, and using the linear expansi
 	\item Compute the kernel matrix $K$
 	\item Solve the dual form and get the optimal values of the Lagrangian multipliers ($\{\gamma_i\}_{i=1}^N$)
 	\item Compute the optimal value for the bias ($b$)
-	\item Obtain the estimate function as a linear combination of dot products in a feature space we can ignore ($h(x) = \sum_{i=1}^N \gamma_ik(x_i, x)$)
+	\item Obtain the estimate function as a linear combination of dot products in a feature space we can ignore ($h(\mathbf{x}) = \sum_{i=1}^N \gamma_ik(\mathbf{x}_i, \mathbf{x})$)
 \end{list}
-The test: given an input pattern $x$, we estimate the value of the unknown function $f$ in that point using the estimate computed before $$h(x) = \sum_{i=1}^N\gamma_i k(x_i,x)$$
+At test phase: given an input pattern $x$, we estimate the value of the unknown function $f$ in that point using the estimate computed before $$h(\mathbf{x}) = \sum_{i=1}^N\gamma_i k(\mathbf{x}_i,\mathbf{x})$$
 \paragraph{Summary of the main characteristics}
 \subparagraph{Pros}
 \begin{list}{}{}
@@ -1001,49 +1015,52 @@ The kernel trick introduces the kernel methods, also without SVM. \textbf{Kernel
 	\includegraphics[scale=0.75]{23.png}
 \end{center}
 An SVM is largely characterized by the kernel: the best choice of kernel for a given problem is still a research issue.
-\section{Bias-Variance} A training set is only one possible realizations from the universe of the data: different TR sets can provide different estimate. The expected error (on various TR) at a point $x$ is decomposed as:
+\section{Bias-Variance} A training set is only one possible realization from the universe of the data: different TR sets can provide different estimates. The expected error (on various TR) at a point $\mathbf{x}$ is decomposed as:
 \begin{list}{}{}
-	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(x)$ (averaged on data)
+	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(\mathbf{x})$ (averaged on data)
 	\item \textbf{Variance}: quantifies the variability of the response of the model $h$ for different realizations of the TR data
-	\item \textbf{Noise}: error in the label
+	\item \textbf{Noise}: error in the labels
 \end{list}
-Let's assume the regression scenario with target $y$ and L2 squared error loss. Suppose we have examples $(x,y)$ where the true function is $y = f(x) + \epsilon$ with $\epsilon$ being Gaussian noise with 0 mean and $\sigma$ standard deviation. In linear regression, given a set of examples $(x_i,y_i)$ with $i = 1,\ldots,l$, we fit a linear hypothesis $h(x) = wx + w_0$ to minimize sum of the squared error over the training data $\sum_{i=1}^l (y_i - h(x_i))^2$\\
-Because of the hypothesis class that we chose for some function $f$ (linear hypothesis), we have a \textbf{systematic prediction error}. Depending on the dataset that we have, the parameters $w$ that we find will be different.\\\\
-Given a new data point $x$, what is the expected prediction error? Assume that the data points are drawn independently and identically distributed from a unique underlying probability distribution $P$. The goal is to compute, for an arbitrary new point $x$, $E_P[(y - h(x))^2]$ noting that there's a different $h$ and $y$ for each different "extracted" training set. $y$ is the value for $x$ that could be present in a data set, and the expectation is over \textbf{all training sets} that are drawn according to $P$. We will decompose this expectation into three components: bias, variance and noise.
+Let's assume the regression scenario with target $y$ and L2 squared error loss. Suppose we have examples $(\mathbf{x},y)$ where the true function is $y = f(\mathbf{x}) + \epsilon$ with $\epsilon$ being Gaussian noise with 0 mean and $\sigma$ standard deviation.\\
+In linear regression, given a set of examples $(\mathbf{x}_i,y_i)$ with $i = 1,\ldots,l$, we fit a linear hypothesis $h(\mathbf{x}) = \mathbf{wx} + w_0$ to minimize sum of the squared error over the training data $\sum_{i=1}^l (y_i - h(\mathbf{x}_i))^2$\\
+Because of the hypothesis class that we chose for some function $f$ (linear hypothesis), we have a \textbf{systematic prediction error}. Depending on the dataset that we have, the parameters $\mathbf{w}$ that we find will be different.\\\\
+Given a new data point $\mathbf{x}$, what is the expected prediction error? Assume that the data points are drawn independently and identically distributed (i.i.d.) from a unique underlying probability distribution $P$. The goal is to compute, for an arbitrary new point $\mathbf{x}$, $E_P[(y - h(\mathbf{x}))^2]$ noting that there's a different $h$ and $y$ for each different "extracted" training set. $y$ is the value for $\mathbf{x}$ that could be present in a data set, and the expectation is over \textbf{all training sets} that are drawn according to $P$. We will decompose this expectation into three components: bias, variance and noise.
 \subparagraph{Recall of statistics} With $Z$ random variable of possible values $z_i$ with $i=1,\ldots,l$ and probability distribution $P(Z)$
 \begin{list}{}{}
 	\item \textbf{Expected value} or \textbf{mean} of $Z$ is $$\overline{Z} = E_P[Z] = \sum_{i=1}^l z_i\cdot P(z_i)$$ with the sum replaced by an integral and the distribution by a density function if $Z$ is continuous.
 	\item \textbf{Variance} of $Z$ is $$Var[Z] = E[(Z - E[Z])^2] = E[Z^2] - E[Z]^2$$ with $$E[Z^2] = E[Z]^2 + Var(Z)$$
 \end{list}
 \subsection{Bias-Variance Decomposition}
-$$E_P[(y - h(x))^2] = E_P[h(x)^2 - 2yh(x) + y^2] = E_P[h(x)^2] + E_P[y^2] - 2E_P[y]E_P[h(x)]$$
-Let $\overline{h}(x) = E_P[h(x)]$ denote the \textbf{mean prediction} of the hypothesis at $x$ when $h$ is trained with data drawn from $P$. By doing some calculations, we obtain $\begin{array}{r c l l}
-E_P[(y-h(x))^2] & = & E_P[(h(x) - E_P[h(x)])^2] + & \text{variance}\\
- & & (E_P[h(x)] - f(x))^2 + & \text{bias}^2 \\
- & & E_P[(y - f(x))^2] & \text{noise}^2
-\end{array}$\\
+$$E_P[(y - h(\mathbf{x}))^2] = E_P[h(\mathbf{x})^2 - 2yh(\mathbf{x}) + y^2] = E_P[h(\mathbf{x})^2] + E_P[y^2] - 2E_P[y]E_P[h(\mathbf{x})]$$
+Let $\overline{h}(\mathbf{x}) = E_P[h(\mathbf{x})]$ denote the \textbf{mean prediction} of the hypothesis at $\mathbf{x}$ when $h$ is trained with data drawn from $P$. By doing some calculations, we obtain $$\begin{array}{r c l l}
+E_P[(y-h(\mathbf{x}))^2] & = & E_P[(h(\mathbf{x}) - E_P[h(\mathbf{x})])^2] & \text{variance}\\
+ & & + (E_P[h(\mathbf{x})] - f(\mathbf{x}))^2 & \text{bias}^2 \\
+ & & + E_P[(y - f(\mathbf{x}))^2] & \text{noise}^2
+\end{array}$$
 So expected error is Variance + Bias$^2$ + Noise$^2$\begin{list}{}{}
-	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(x)$, with $h(x)$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
-	\item \textbf{Variance}: quantifies the variability of the response of model $h$ for different realizations of the training data.\\Due to too high flexibility
-	\item \textbf{Noise}: event the optimal solution can be wrong.\\E.g. if for a give n$x$ there are more than one possible $d$.\\
+	\item \textbf{Bias}: quantifies the discrepancy between true function and $h(\mathbf{x})$, with $h(\mathbf{x})$ averaged over different TR data (\textbf{systematic error})\\E.g. due to too small $H$, too rigid model.
+	\item \textbf{Variance}: quantifies the variability of the response of model $h$ for different realizations of the training data.\\Due to too high flexibility.
+	\item \textbf{Noise}: event the optimal solution can be wrong.\\E.g. if for a given $\mathbf{x}$ there are more than one possible $d$.\\
 	It's irreducible, doesn't depend on the model.
 \end{list}
 \begin{center}
 	\includegraphics[scale=0.5]{24.png}
 \end{center}
+
 \section{Ensemble Learning}
 \begin{center}
 	\includegraphics[scale=0.5]{25.png}
 \end{center}
 Take advantage of multiple models. In regression: simple average committee, mean square error of a committee\ldots In classification, take a vote over many classifier.
-\subsection{Bagging} \paragraph{Bootstrap Aggregating} Combine many classifiers. Train $n$ classifiers on different subsets of TR and differentiate each training using bootstrap (resampling with replacement). Thing to bias-variance: high variance model can perform well on average. In other therms: the average of $h$ reduce the variance. In regression use the mean, in classification use the vote of the $n$ classifiers.
-\subsection{Boosting} If the models have the same errors we have no advantage on esembling.\\
+\subsection{Bagging} \paragraph{Bootstrap Aggregating} Combine many classifiers. Train $n$ classifiers on different subsets of TR and differentiate each training using bootstrap (resampling with replacement). Think to bias-variance: high variance model can perform well on average. In other therms: the average of $h$ reduce the variance. In regression use the mean, in classification use the vote of the $n$ classifiers.
+\subsection{Boosting} If the models have the same errors we have no advantage on ensembling.\\
 Differentiate each training concentrating on errors (more weight to difficult instances, e.g. more likely to be included in the TR of the next classifier, for example: train the 1st classifier, then train the 2nd with more weight on the instances misclassified before\ldots\\
 Combine the results by output weights (weighted vote for classifiers, with more weight to low error classifiers).\\
 If not stopped, boosting will learn to classify correctly all instances from TR, providing an incremental approach to construct complex models. Can suffer from noisy data (which are weighted more)
 \subsection{Feature Selection} Find a selection of features that are more informative for the problem at hands. Benefits for: dimensionality reduction and filtering of irrelevant information and noise, interpretability\ldots\\
 Computationally hard (many possible subsets of features, retraining\ldots) typically an heuristic search of the best subset by greedy or other optimization techniques.
 \section{Applications} A huge number of successful applications in all the fields of ML.
+%TODO ML-21-NN-part3-CNN-v0.1.pdf from here
 \subsection{Character recognition (classification)}
 \paragraph{First approaches} Standard NN with 256 inputs (16$\times$16 pixels): misclassification rate of 5/20\% (mostly due to lack of invariance as rotations ecc.)
 \paragraph{Basic idea} Exploiting the architecture design to include pior information into NN:
@@ -1216,7 +1233,7 @@ If we share that neuron, we share the concept of redness.
 	\item If the weights are small, the gradient shrinks exponentially (\textbf{vanishing gradient})
 	\item If the weights are big, the gradient grows exponentially (\textbf{exploding gradient})
 \end{list}
-Some approaches include the \textbf{gradient clipping}: if $||g||> v$ then $g = \frac{vg}{||g||}$ with $g$ being the gradient and $v$ the norm threshold, as to move in the gradient direction but bounding the weight update.\\
+Some approaches include the \textbf{gradient clipping}: if $\|g\|> v$ then $g = \frac{vg}{\|g\|}$ with $g$ being the gradient and $v$ the norm threshold, as to move in the gradient direction but bounding the weight update.\\
 Most of the heuristics try to deal with the problem of vanishing gradient that hampers the training in early deep neural network in the low layers. Traditional activation functions, such as the hyperbolic tangent, have gradients in the range of $(-1,1)$ and the backpropagation computes gradients by the chain rule repeated through the layers. This has the effect of multiplying $n$ of these small numbers to compute gradients of the "front" layers (closer to the inputs), in a $n$-layer network: the gradient decreases exponentially with $n$, with the result of a very slow training in the front layers. Same with big weights (exploding gradients), but less frequent.\\
 To deal with this, many approaches: Rprop, short-cut connections, randomized neural networks\ldots let's see the new ones.
 \subparagraph{ReLU} \textbf{Rectified Linear Unit}: $f(x) = \max(0,x) = \left\{\begin{array}{l l}
@@ -1309,7 +1326,7 @@ Of course smaller models, with smaller numbers of adaptive units (basis function
 Many possible metric, Euclidean metrics are popular but it's just a choice.
 \paragraph{Vector Quantization} Vector quantization techniques encode a data manifold, e.g. a submanifold $V\subseteq \mathbb{R}^n$, using only a finite set $w=(w_1,\ldots,w_k)$ of \textbf{reference/codebook vectors} $w_i\in \mathbb{R}^n$ with $i=1,\ldots,k$\\
 A data vector $x\in V$ is described by the best matching or "winning" reference vector $w_{i^*(x)}$ of $w$ for which the \textbf{distortion error} $d(x, w_{i^*(x)})$ is minimal.\\
-This procedure divides the manifold $V$ into a number of subregions $$V_i=\{x\in V\:|\:||x-w_i||\leq ||x-w_j||\forall\:j\}$$ called \textbf{Voronoi Polyhedra}, out of which each data vector $x$ is described by the corresponding reference vector $w_{i^*(x)}$
+This procedure divides the manifold $V$ into a number of subregions $$V_i=\{x\in V\:|\:\|x-w_i\|\leq \|x-w_j\|\forall\:j\}$$ called \textbf{Voronoi Polyhedra}, out of which each data vector $x$ is described by the corresponding reference vector $w_{i^*(x)}$
 \begin{center}
 	\includegraphics[scale=0.5]{32.png}
 \end{center}
@@ -1319,9 +1336,9 @@ For us, the problem is to find centers that minimizes the loss $E$ given the dat
 Clustering has a more general objective of finding interesting/useful groupings of data. Interesting is often implicitly defined via the computational procedure by itself and not necessarily measured by the minimum quantization error. However, vector quantization provides an usefult framework and its algorithms can be used for clustering. We're going to use this perspective.
 \subparagraph{Goal} Optimal partitioning of unknown distribution in $x$-space into clusters approximated by a cluster center or \textbf{prototype}.\\
 I.e. a set of vector quantizers $x\rightarrow c(x) = w_{i^*(x)}$, from continous space to discrete space.\\
-We evaluate the squared error distortion $d(x_i,c(x_i)) = ||x_i-c(x_i)||^2$
-\subparagraph{Loss function} The average value over the distribution of inputs is the average distortion/reconstruction/quantization error: our loss function. $$E = \int f(d(x,w_{i^*(x)}))\cdot p(x)\:dx= \int||x-w_{i^*(x)}||^2\cdot p(x)\:dx$$
-Discrete version: $$E = \sum_i^l\sum_j^K||x_i-w_j||^2\delta_{winner}(i,j)$$ with $\delta_{winner}(i,j)$ the characteristic function of the receptive field of $w_j = \left\{\begin{array}{l l}
+We evaluate the squared error distortion $d(x_i,c(x_i)) = \|x_i-c(x_i)\|^2$
+\subparagraph{Loss function} The average value over the distribution of inputs is the average distortion/reconstruction/quantization error: our loss function. $$E = \int f(d(x,w_{i^*(x)}))\cdot p(x)\:dx= \int\|x-w_{i^*(x)}\|^2\cdot p(x)\:dx$$
+Discrete version: $$E = \sum_i^l\sum_j^K\|x_i-w_j\|^2\delta_{winner}(i,j)$$ with $\delta_{winner}(i,j)$ the characteristic function of the receptive field of $w_j = \left\{\begin{array}{l l}
 1&\text{if }j\text{ is the winner for }x_i\\
 0&\text{otherwise}
 \end{array}\right.$ and $p(x)$ the probability distribution of $x$.\\
@@ -1336,7 +1353,7 @@ with $\eta$ being the learning rate. The basic algorithm is:
 	\item Recompute the cluster centers (geometric centroids, i.e. means) using the current cluster membership.
 	\item If a convergence criterion is not met, go to step 2. Examples of stopping criteria are: no or minimal reassignment of patterns to new cluster centers, or a minimal decrease in squared error.
 \end{enumerate}
-Given the cluster centers $w_1,\ldots,w_k$ of dimension $n$ same as $x$, for each $x$ the winner is the nearest prototype $i^*(x) = arg\:min_i||x-w_i||^2$, so now $x$ belong to the cluster $i^*$.\\
+Given the cluster centers $w_1,\ldots,w_k$ of dimension $n$ same as $x$, for each $x$ the winner is the nearest prototype $i^*(x) = arg\:min_i\|x-w_i\|^2$, so now $x$ belong to the cluster $i^*$.\\
 For each cluster $i$ the new centroid is $w_i=\frac{1}{|\text{cluster}_i|}\sum_{j\:|\:x_j\in\text{cluster}_j}x_j$\\\\
 This is the simplest and most common algorithm employing a squared error criterion, it's easy to implement and efficient in general.\\
 The number $K$ of clusters to find must be provided and local minima of $E$ makes the method dependent on the initialization. Also it works well only with hyperspherical and compact clusters, and has no visualization properties (doesn't allow to project in a lower dimension space).
@@ -1355,10 +1372,10 @@ Competitions among neurons for an input data, where the winner is allowed to lea
 	\item The map is randomly initialized (weights)
 	\item A sample input $x$ is drawn
 	\item \textbf{Competitive Stage}: the winner is the unit (with $w$) most similar to $x$\\
-The current input vector $x$ is compared with all the unit weights using an euclidean distance criteria. The standard SOM adopts a "winner takes all" strategy, with the winner being $i^*(x) = arg\:min_i||x-w_i||$ where $i$ is an index on the map (e.g. coordinate in 2D)
+The current input vector $x$ is compared with all the unit weights using an euclidean distance criteria. The standard SOM adopts a "winner takes all" strategy, with the winner being $i^*(x) = arg\:min_i\|x-w_i\|$ where $i$ is an index on the map (e.g. coordinate in 2D)
 	\item \textbf{Cooperative Stage}: upgrade the weights of the units that have topological relationships with the winner unit (\textbf{softmax})\\
 	The weight of the winning unit and the weight of the units in its neighborhood are moved closer to the input vector (Hebbian learning)\\
-	At iteration $t$ $$w_i(t+1) = w_i(t) +\eta(t)h_{i,i^*(x)}(t)(x - w_i(t))$$ where $h(t)$ is the neighborhood function i.e. $h_{i,j}(t)$ is a function that decreases monotonically for increasing $||i-j||$ $$h_{i,i^*}(t)=\exp\left(-\frac{||r_i - r_{i^*}||^2}{2\sigma^2_{nh}(t)}\right)$$
+	At iteration $t$ $$w_i(t+1) = w_i(t) +\eta(t)h_{i,i^*(x)}(t)(x - w_i(t))$$ where $h(t)$ is the neighborhood function i.e. $h_{i,j}(t)$ is a function that decreases monotonically for increasing $\|i-j\|$ $$h_{i,i^*}(t)=\exp\left(-\frac{\|r_i - r_{i^*}\|^2}{2\sigma^2_{nh}(t)}\right)$$
 	The neighborhood radius $\sigma$ and the learning rate are decreased as function of iteration $t$: wide at the beginning and then width and height slowly decreases during learning.
 	\item Continues until convergence, when there are no changes
 \end{enumerate}
