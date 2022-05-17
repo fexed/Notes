@@ -1079,7 +1079,6 @@ Once in the attraction basin, we can restrict it by evaluating $f$ in two points
 \end{center}
 How to choose the part so that the algorithm go as fast as possible? Each iteration dumps the left or the right part, don't know which $\Rightarrow$ should be equal $\Rightarrow$ select $r \in (\frac{1}{2}, 1), x'_- = x'_- + (1 - r)D, x'_+ = x_- + rD$\\
 Faster if $r$ larger $\Rightarrow$ $r = \frac{D}{2} + \epsilon = x'_\pm = x_- + \frac{D}{2} \pm \epsilon$ but next iteration will have two entirely different $x'_-, x'_+$ to evaluate $f$ on.
-%TODO first-steps.pdf p.39
 \paragraph{Optimally choosing the iterates} A generally powerful concept is to optimize the worst-case behavior $\Rightarrow$ shrink the intervals as quickly as possible.\\
 Each iteration dumps either $[x_-, x_-']$ or $[x_+', x_+]$, we don't know which so they should be of equal size $\Rightarrow$ select $r\in (\frac{1}{2},1)$ so that $x_-' = x_- + (1-r)D$ and $x_+' = x_- + rD$\\
 $r$ larger $\Rightarrow$ faster convergence, so $r = \frac{D}{2} + \epsilon \Leftrightarrow x_\pm' = x_- + \frac{D}{2}\pm\epsilon$ but next iteration will have two entirely different $x_-', x_+'$ to evaluate $f$ on.\\
@@ -1106,16 +1105,16 @@ procedure x = GRS(f, xl, xr, delta)
 \end{lstlisting}
 After $k$ iterations, $x_+^k - x_-^k = Dr^k$ stops when $Dr^k \leq \delta$, so when $k = 2\log\frac{D}{\delta}$: exponentially faster, can work with small $\delta$.\\
 Asymptotically optimal if no other information is available. $\delta \neq \epsilon$ but $f$ L-c $\Rightarrow A(x^k) \leq \epsilon$ when $k = 2\log\frac{LD}{\epsilon}$\\
-First example of linear convergence $A(x^k) \leq Sr^k \leq \epsilon$ with $r < 1$, as fast as a negative exponential $\Rightarrow k \geq \frac{\log\frac{S}{\epsilon}}{\log\frac{1}{r}}$\\\\
-$O(\log(\frac{1}{\epsilon}))$ good, but the constant $\rightarrow\infty$ as $r\rightarrow 1$
+First example of linear convergence $A(x^k) \leq Sr^k \leq \epsilon$ with $r < 1$, as fast as a negative exponential $\Rightarrow k \geq \frac{\displaystyle \log\frac{S}{\epsilon}}{\displaystyle \log\frac{1}{r}}$\\\\
+$O(\log(\frac{1}{\epsilon}))$ is good, but the constant $\rightarrow\infty$ as $r\rightarrow 1$
 \paragraph{To make it go faster, give it more information} Two points are needed to see in which direction $f$ is decreasing. If we could see this directly we could make it with one point, faster. Look at the linear function that best locally approximates $f$, trusty old first derivative $f'(x)$: slope of the tangent line to the graph of $f$ in $x$\\
-First order model of $f$ at $x$: $$L_x(y)=f'(x)(y-x) + f(x)$$ $L_x(y) \simeq f(y)\:\:\:\:\forall\:y\in[x-\epsilon, x+\epsilon]$ for some small $\epsilon > 0$.\\
+First order model of $f$ at $x$: $$L_x(y)=f'(x)(y-x) + f(x)$$ $L_x(y) \simeq f(y)$ $\forall\:y\in[x-\epsilon, x+\epsilon]$ for some small $\epsilon > 0$.\\
 $x_*$ local minimum $\Rightarrow f'(x_*) = 0 \Leftrightarrow$ root of $f' \Leftrightarrow$ stationary point. If $f'(x) < 0$ or $f'(x) > 0$, then $x$ is clearly not a local minimum. Hence, $f'(x) = 0$ for the all local minima (hence in the global minimum as well) but this is true for the local maxima (hence global maximum as well), as well in the plateau and saddle points. To tell them apart, look at the second derivative $f''$.
 \begin{center}
 	\includegraphics[scale=0.5]{1.png}
 \end{center}
-In simple cases we get the answer by a closed formula. In $f = bx + c$ linear, if $b > 0$ then the minimum is $x_-$ and maximum is $x_+$, viceversa if $b < 0$. For $f = ax^2 + bx + c$, quadratic, then if $a > 0$ the minimum is min$\{ x_+, \max\{x_*, x_-\}\}$ and the maximum is argmax$\{f(x_-), f(x_+)\}$, and viceversa if $a < 0$.\\
-Only polynomial whose root have a closed formula (degree 3 and some degree 4), with basically no hope for most trascendental, trigonometric and mixed equations. We need an algorithm for solving non-linear equations.
+In simple cases we get the answer by a closed formula. In $f = bx + c$ linear, if $b > 0$ then the minimum is $x_-$ and maximum is $x_+$, viceversa if $b < 0$. For $f = ax^2 + bx + c$, quadratic, then if $a > 0$ the minimum is $\min\{ x_+, \max\{x_*, x_-\}\}$ and the maximum is $\arg\max\{f(x_-), f(x_+)\}$, and viceversa if $a < 0$.\\
+Only polynomial whose roots have a closed formula (degree 3 and some degree 4), with basically no hope for most trascendental, trigonometric and mixed equations. We need an algorithm for solving non-linear equations.
 \paragraph{Dichotomic Search} $f'$ continuous and the intermediate value theorem gives that $$f'(x_-) < 0 \wedge f'(x_+) > 0 \Rightarrow \exists\:x\in[x_-, x_+]\:|\: f'(x) = 0$$
 Theorems breed algorithms $\rightarrow$ \textbf{Dichotomic Search}.
 \begin{lstlisting}[style=myPython]
@@ -1131,7 +1130,7 @@ procedure x = DS(f, xl, xr, eps)
 \end{lstlisting}
 With \texttt{df} meaning $f'$\\
 For \texttt{in\_middle\_of(xl, xr)} the obvious choice is \texttt{return (xl + xr)/2;}. We have linear convergence with $\gamma = 0.5 < 0.618 \Rightarrow k = 1.45\log(\frac{LD}{\epsilon}) < 2 \log(\frac{LD}{\epsilon})$\\
-The condition $f'(x_-) < -\epsilon, f'(x_+) > \epsilon$ is important. What if is not satisfied? Obvious solution, moving the interval more and more to the right until the derivative is possible. %TODO
+The condition $f'(x_-) < -\epsilon, f'(x_+) > \epsilon$ is important. What if is not satisfied? Obvious solution, moving the interval more and more to the right until the derivative is possible.\\
 The same in reverse of $x_-$ with $\Delta x = -1$. This works in practice for all "reasonable" functions. Works if $f$ coercive ($\lim_{|x| \to \infty} f(x) = \infty$)\\
 \begin{list}{}{}
 	\item $f' \in \mathbb{C}^0 \Leftrightarrow f \in \mathbb{C}^1 \Leftrightarrow$ continuously differentiable $\Rightarrow f\in \mathbb{C}^0$
@@ -1143,7 +1142,6 @@ $f\in \mathbb{C}^1$ on $X$ finite $\Rightarrow f$ globally L-c on $X$\\
 Best possible case is $f\in \mathbb{C}^2$ on finite $X\Rightarrow$ both $f$ and $f'$ globally L-c on $X$
 \paragraph{Fastest local optimization} Interpolation, for improving the dichotomic search. Choosing $x$ "right in the middle" is the dumbest possible approach, because we know a lot about $f$: $f(x_-), f(x_+), f'(x_-), f'(x_+)\ldots$. So let's use that, by constructing a model of $f$ based on known information. Much better choosing $x$ close to $x_*$.\\
 But remember that \textbf{the model is an estimate}, so never completely trust the model, but regularize, stabilize\ldots in this case, the minimum guaranteed decrease is with $\sigma < 0.5$, and the worst case is linear convergence with $r = 1 - \sigma$, but hopefully is much faster than that when the model is "right".
-\pagebreak
 \subsection{Measuring algorithms speed} Given the sequences \begin{list}{}{}
 	\item $\{x_i\}$
 	\item $\{d_i = |x_i - x_*|\}$
@@ -1160,11 +1158,11 @@ $$\lim_{i\to\infty} \left(\frac{f_{i+1} - f_*}{f_i - f_*}\right)^p = \lim_{i\to\
 			\item $\frac{1}{i^2} \Rightarrow k \in O(\frac{1}{\sqrt{\epsilon}})$ (a bit better)
 			\item $\frac{1}{\sqrt{i}} \Rightarrow k \in O(\frac{1}{\epsilon^2})$ (horrible)
 		\end{list}
-		\item $r < 1\Rightarrow$ linear, $r_i \rightarrow i \in O(\log(\frac{1}{\epsilon})$, good unless $r = 1$
+		\item $r < 1\Rightarrow$ linear, $r_i \rightarrow i \in O(\log(\frac{1}{\epsilon}))$, good unless $r = 1$
 	\end{list}
 	\item[$p \in (1,2)$] $p = 1, r = 0\Rightarrow$ superlinear
 	\item[$p = 2$] $r > 0\Rightarrow$ quadratic, best we can reasonably hope for\\
-	$\frac{1}{2^{2^i}} \Rightarrow i \in O(\log(\log(\frac{1}{\epsilon})))$, which is basically $O(1)$: the number of correct digits double at each iteration
+	$\frac{1}{2^{2^i}} \Rightarrow i \in O(\log(\log(\frac{1}{\epsilon})))$, which is basically $O(1)$: the number of correct digits doubles at each iteration
 \end{list}
 \paragraph{Improving dichotomic search} Quadratic interpolation has superlinear convergence if started "close enough".\\
 $f\in \mathbb{C}^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$ with $p = \frac{1 + \sqrt{5}}{2}$ exponent of superlinear convergence.\\$x_0$ is the starting point of the algorithm.\\\\
@@ -1179,7 +1177,7 @@ With \texttt{df} meaning $f'$ and \texttt{ddf} meaning $f''$.\\
 Alternatively construct a second order model $$Q_i(x) = Q_{x^i}(x) = f(x^i) + f'(x^i)(x - x^i) + f''(x^i)\frac{(x - x^i)^2}{2}$$ and then minimize it.\\\\
 Numerically delicate: what if $f''(x) \simeq 0$? Converges (at all) only if started close enough to $x_*$.\\
 If we get within a short enough distance $\delta$, then it will converges extremely fast with $p = 2$. Mathematically, $f\in \mathbb{C}^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0\Rightarrow \exists\:\delta>0\:|\:x_0\in[x_*-\delta, x_*+\delta]\Rightarrow \{x_i\} \rightarrow x_*$ with $p = 2$.
-\pagebreak
+
 \subsection{Global optimization} Unless strong assumptions are made, we can't say much about global optimization.\\
 The obvious one would be unimodal, but not easy to verify/construct. Workable alternative: $f$ convex ($\Rightarrow$ unimodal).
 \paragraph{Convexity} Convex means that $f'$ monotone non decreasing and $f'' \geq 0$. But convexity $\not\Rightarrow C^1$. Some functions are convex and a few operators preserve convexity. Many models are purposely constructed convex $\Rightarrow$  \textbf{Spatial Branch-and-Bound approach}: sift through all $X = [x_-, x_+]$ using clever guide, convex lower approximation \underline{$f$} of nonconvex $f$ on $X$.
@@ -1189,6 +1187,7 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 "Easily" find local $\equiv$ global minimum $\tilde{x}$ giving \underline{$f$}$(\tilde{x}) \leq f_* \leq f(\tilde{x})$. If the gap $f(\tilde{x}) - \underline{f}(\tilde{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\tilde{x}) \geq$ best $f$-value so far, then that partition is killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
+%TODO from here 2-unconstrained%20optimality.pdf
 \section{Unconstrained optimization}
 From now on we'll use $f:R^n\rightarrow R$, i.e. $f(x_1,x_2,\ldots,x_n) = f(x)$ with $x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in \mathbb{R}^n$. Note that $R^n = R\times R \times\ldots\times R$, which is \textbf{exponentially larger} than $R$.\\
 $I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal).\\\\
