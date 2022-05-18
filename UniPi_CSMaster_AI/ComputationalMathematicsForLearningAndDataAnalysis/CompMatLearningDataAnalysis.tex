@@ -1187,11 +1187,11 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 "Easily" find local $\equiv$ global minimum $\tilde{x}$ giving \underline{$f$}$(\tilde{x}) \leq f_* \leq f(\tilde{x})$. If the gap $f(\tilde{x}) - \underline{f}(\tilde{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\tilde{x}) \geq$ best $f$-value so far, then that partition is killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
-%TODO from here 2-unconstrained%20optimality.pdf
 \section{Unconstrained optimization}
-From now on we'll use $f:R^n\rightarrow R$, i.e. $f(x_1,x_2,\ldots,x_n) = f(x)$ with $x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in \mathbb{R}^n$. Note that $R^n = R\times R \times\ldots\times R$, which is \textbf{exponentially larger} than $R$.\\
-$I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal).\\\\
-We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega((\frac{LD}{\epsilon})^n)$. \textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O((\frac{LD}{\epsilon})^n)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
+From now on we'll use $$f:\mathbb{R}^n\rightarrow \mathbb{R}$$ $$f(x_1,x_2,\ldots,x_n) = f(x)$$ $$x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in \mathbb{R}^n$$
+Note that $\mathbb{R}^n = \mathbb{R}\times \mathbb{R} \times\ldots\times \mathbb{R}$, which is \textbf{exponentially larger} than $\mathbb{R}$.\\
+$I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal). A lot more space to look at, meaning much more difficult task.\\\\
+We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega\left(\left(\frac{LD}{\epsilon}\right)^n\right)$.\\\textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O\left(\left(\frac{LD}{\epsilon}\right)^n\right)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
 \subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\equiv$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
 \paragraph{Notation}\begin{list}{}{}
 	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
@@ -1199,16 +1199,16 @@ We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega((\fr
 	\item \textbf{Distance} $d(x,y) = \|x-y\| = \sqrt{(x_1-y_1)^2+\ldots+(x_n-y_n)^2}$
 	\item \textbf{Ball} with center $r\in \mathbb{R}^n$ and radius $r > 0$ is $B(x,r) = \{y\in \mathbb{R}^n\:|\:\|y-x\|\leq r\}$
 \end{list}
-Usually $f:D\rightarrow R$ with $D = dom(f)$ domain of $f$ which may not be all $R^n$, but usually ok to ignore $dom(f)$ and assume $f(x)=\infty$ for $x\not\in D$
+Usually $f:D\rightarrow \mathbb{R}$ with $D = dom(f)$ domain of $f$ which may not be all $\mathbb{R}^n$, but usually ok to ignore $dom(f)$ and assume $f(x)=\infty$ for $x\not\in D$
 \begin{list}{}{}
-	\item \textbf{Graph} of $f$ lives in $R^{n+1}$: $gr(f) = \{(f(x),x)\:|\:x\in \mathbb{R}^n\}$
-	\item \textbf{Epigraph} of $f$ lives in $R^{n+1}$: $epi(f)=\{(v,x) \in \mathbb{R}^{n+1}\:|\:v\geq f(x)\}$
+	\item \textbf{Graph} of $f$ lives in $\mathbb{R}^{n+1}$: $gr(f) = \{(f(x),x)\:|\:x\in \mathbb{R}^n\}$
+	\item \textbf{Epigraph} of $f$ lives in $\mathbb{R}^{n+1}$: $epi(f)=\{(v,x) \in \mathbb{R}^{n+1}\:|\:v\geq f(x)\}$
 	\item \textbf{Level set} at value $v$: $L(f,v)=\{x\in \mathbb{R}^n\:|\:f(x)=v\}$
 	\item \textbf{Sublevel set} at value $v$: $S(f,v)=\{x\in \mathbb{R}^n\:|\:f(x)\leq v\}$
 \end{list}
 We have that $x_* \in S(f,v)\:\:\:\forall\:v\geq f_*$ and $S(f,v) = \emptyset\:\:\:\forall\:v<f_*$
 
-\paragraph{Tomography} $f:R^n \rightarrow R$ with $x\in \mathbb{R}^n$ origin and $d\in \mathbb{R}^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): R \rightarrow R$ \textbf{tomography} of $f$ from $x$ along $d$.\\
+\paragraph{Tomography} $f:\mathbb{R}^n \rightarrow \mathbb{R}$ with $x\in \mathbb{R}^n$ origin and $d\in \mathbb{R}^n$ direction. You can define $\phi_{x,d}(\alpha) = f(x + \alpha d): \mathbb{R} \rightarrow \mathbb{R}$ \textbf{tomography} of $f$ from $x$ along $d$.\\
 $\phi_{x,d}$ can always be pictured, but there are infinitely many of them: which $x,d$?\begin{list}{}{}
 	\item $\|d\|$ only changes the scale: $\phi_{x,\beta d}(\alpha) = \phi_{x,d}(\beta \alpha)$ so often convenient to use normalised direction ($\|d\| = 1$)
 	\item Simplest case: restriction along $i$-th coordinate\\
@@ -1216,16 +1216,16 @@ $\phi_{x,d}$ can always be pictured, but there are infinitely many of them: whic
 	\item When $x,d$ clear from context, then $\phi(\alpha)$
 \end{list}
 \paragraph{Simple Functions} \begin{list}{}{}
-	\item \textbf{Linear} $f(x) = \langle b,x\rangle + c, b \in \mathbb{R}^n, c\in \mathbb{R}$\\
-	Tomography $f(x) = \langle b,x\rangle, x = 0, \|d\|=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha\|b\|cos(\theta)$\\
+	\item \textbf{Linear} $b \in \mathbb{R}^n, c\in \mathbb{R}$ $$f(x) = \langle b,x\rangle + c$$
+	Tomography $f(x) = \langle b,x\rangle, x = 0, \|d\|=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha\|b\|\cos(\theta)$\\
 	Plotting this gives a line, increasing because "$b$ same direction as $d$", more collinear $\Rightarrow$ steeper. Collinear means steepest line, less collinear means less steap. 90° angle means a flat line. Decreasing if opposite directions.\\
-	min $f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
+	$\min f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
 	\item \textbf{Quadratic} with fixed $Q\in \mathbb{R}^{n\times n}, q\in \mathbb{R}^n$ we have $f(x) = \frac{1}{2}x^TQx + qx$. If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
 	Tomography $\phi(\alpha) = f(\alpha d) = \alpha^2(d^TQd)\Rightarrow$ sign and steepness depend on $d^TQd$, so we need to know about signs of $d^TQd$. Steeper when $d$ along one axe, least steep when $d$ along the other axe and intermediate steepness when "in between". Again, steeper along the opposite of one axe and least steep along the opposite of the other axe.\\
 	With $q\neq 0$ but $Q$ nonsingular then $\lambda_i\neq 0\:\:\:\forall\:i$, then $f(x)=\frac{1}{2}(x-x_*)^TQ(x-x_*) [+c]$ for $x_* = -Q^{-1}q$ and $x_* \neq 0$ center of the level sets (which shapes are determined by the eigenvalues).\\
 	$y = x - x_*, f_*(y) = y^TQy [+c]$
 \end{list}
-\paragraph{Directional/partial derivatives} The directional derivative of $f:R^n\rightarrow R$ at $x\in \mathbb{R}^n$ along the direction $d\in \mathbb{R}^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
+\paragraph{Directional/partial derivatives} The directional derivative of $f:\mathbb{R}^n\rightarrow \mathbb{R}$ at $x\in \mathbb{R}^n$ along the direction $d\in \mathbb{R}^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
 How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial d}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in \mathbb{R}^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
 The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f(x) = \left[\begin{array}{c}
 \frac{\partial f}{\partial x_1}(x)\\
@@ -1239,8 +1239,8 @@ $\psi$ is equivalent to the first order model of $f$ at $x$, the error of this e
 	\item $\Rightarrow \frac{\partial f}{\partial x_i}(x)$ exists for every $i$ (but $\Leftrightarrow$ not true)
 	\item $\Rightarrow$ first order model of $f$ at $x$ is $L_x(y) = \nabla f(x)(y-x)$
 \end{list}
-$f$ differentiable $\Rightarrow$ all relevant objects in $R^{n+1}$ and $R^n$ are smooth. If $f$ is non differentiable $\Rightarrow$ kinks appear and things break,
-\paragraph{Jacobian} Given a vector-valued function $f:R^n\rightarrow R^m$, $f(x) = [f_1(x), f_2(x),\ldots,f_m(x)]$, the partial derivatives are the same with extra index $$\frac{\partial f_j}{\partial x_i}(x) = \lim_{t\rightarrow 0}\frac{f_j(x_1,\ldots,x_{i-1},x_i+t,x_{i+1},\ldots,x_n) - f_j(x)}{t}$$
+$f$ differentiable $\Rightarrow$ all relevant objects in $\mathbb{R}^{n+1}$ and $\mathbb{R}^n$ are smooth. If $f$ is non differentiable $\Rightarrow$ kinks appear and things break,
+\paragraph{Jacobian} Given a vector-valued function $f:\mathbb{R}^n\rightarrow \mathbb{R}^m$, $f(x) = [f_1(x), f_2(x),\ldots,f_m(x)]$, the partial derivatives are the same with extra index $$\frac{\partial f_j}{\partial x_i}(x) = \lim_{t\rightarrow 0}\frac{f_j(x_1,\ldots,x_{i-1},x_i+t,x_{i+1},\ldots,x_n) - f_j(x)}{t}$$
 The \textbf{Jacobian} is the matrix of all $mn$ partial derivatives
 $$Jf(X) = \left[ \begin{array}{c c c}
 \frac{\partial f_1}{\partial x_1}(x) & \ldots & \frac{\partial f_1}{\partial x_n}(x)\\
@@ -1250,8 +1250,8 @@ $$Jf(X) = \left[ \begin{array}{c c c}
 \nabla f_1(x)^T\\\vdots\\\nabla f_m(x)^T
 \end{array}\right]$$
 A $m\times n$ matrix with gradients as rows.
-\paragraph{Hessian} The $\frac{\partial f}{\partial x_i}:R^n\rightarrow R$ have partial derivatives themselves. \textbf{Second order partial derivative}, just do it twice $$\frac{\partial^2 f}{\partial x_i \partial x_j}$$ $$\frac{\partial^2 f}{\partial x_i \partial x_i}=\frac{\partial^2 f}{\partial x_i^2}$$
-So $\nabla f(x) : R^n \rightarrow R^n$ have a Jacobian and it's called \textbf{Hessian} of $f$ at $x$
+\paragraph{Hessian} The $\frac{\partial f}{\partial x_i}:\mathbb{R}^n\rightarrow \mathbb{R}$ have partial derivatives themselves. \textbf{Second order partial derivative}, just do it twice $$\frac{\partial^2 f}{\partial x_i \partial x_j}$$ $$\frac{\partial^2 f}{\partial x_i \partial x_i}=\frac{\partial^2 f}{\partial x_i^2}$$
+So $\nabla f(x) : \mathbb{R}^n \rightarrow \mathbb{R}^n$ have a Jacobian and it's called \textbf{Hessian} of $f$ at $x$
 $$\nabla^2 f(x) = J\nabla f(x) = \left[ \begin{array}{c c c c}
 \frac{\partial^2 f}{\partial x_1^2}(x) & \frac{\partial^2 f}{\partial x_2\partial x_1} & \ldots & \frac{\partial^2 f}{\partial x_n\partial x_1}(x)\\
 \vdots&\ddots&\ddots&\vdots\\
@@ -1267,10 +1267,22 @@ $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
 \end{list}
 With $f\in \mathbb{C}^2$ we have $\nabla^2 f(x)$ continuous everywhere, so symmetric everywhere. $C^2$ is the best class for optimization.
 \subsection{Optimality conditions}
-$f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \equiv$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I wold know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$\\
-$\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$, otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$.\\
-Another condition necessary and almost sufficient: $f\in \mathbb{C}^2$.
+$f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \equiv$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I would know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
+$$\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$$otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$. Requires the second-order Taylor's theorem
+$$f(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2 f(x)(y-x) + R(y-x)$$
+Another condition necessary and almost sufficient: $f\in C^2$, $\nabla f(x) = 0$ and $\nabla^2f(x)\succ 0\Rightarrow x$ local minimum. Avoids the bad case $d^T\nabla^2f(x)d=0$ meaning zero curvature direction.
+\subsection{Convex functions}
+$f$ convex $\Leftrightarrow \forall\:x,y\in\mathbb{R}^n\:\alpha\in [0,1]$
+$$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+(1-\alpha)y)$$
+$f$ concave $\Leftrightarrow -f$ convex.\\
+$f\in C^1$ convex $\Leftrightarrow\nabla f$ monotone $\Leftrightarrow L_x(y) = f(x)+\langle\nabla f(x), y-x\rangle\leq f(y)$
+\begin{list}{}{}
+	\item $f\in C^1$ convex: $\nabla f(x) = 0\Leftrightarrow x$ global minimum
+	\item $f\in C^2$: $f$ convex $\Leftrightarrow\forall\:x\in\mathbb{R}^n \nabla^2 f(x)\succeq 0$
+	\item $f\in C^2$ with $\nabla^2 f\succ 0$ absolutely the \textbf{best case} for optimization
+\end{list}
 %end 2-uncostrained optimality.pdf
+%TODO from here
 \subsection{Gradient Methods}
 \paragraph{Multivariate optimization algorithms} These are iterative procedures: start from an initial guess $x_0$ and compute some process $x_i \longrightarrow x_{i+1}$ to get a \textbf{sequence} $\{x_i\}$ that \textbf{should go towards an optimal solution}. $\{x_i\}\rightarrow x_*$ is one option, the best one, but not the only possibility.\\
 At least $\{f_i = f(x_i)\} \rightarrow f_*$: \textbf{minimizing sequence}, and clearly $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}$ minimizing sequence, but $\not\Leftarrow$\\
@@ -1280,7 +1292,7 @@ Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 	\item \textbf{Trust region}: first choose $\alpha_i\in \mathbb{R}$ (\textbf{trust radius}), then $d_i$
 \end{list}
 The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
-\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in arg\min\{L_i(x) : x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $R^n$\\
+\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in arg\min\{L_i(x) : x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $\mathbb{R}^n$\\
 It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = arg\min\{\lim_{t\to 0} \frac{f(x+td)}{t}\} = -\nabla f(x_i) =$ steepest descent direction.\\
 $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
 \paragraph{Step selection} The issue is to find the Goldilocks Step $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
