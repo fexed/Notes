@@ -1059,10 +1059,10 @@ and on computers $x\in \mathbb{R}$ is actually $x\in \mathbb{Q}$ with up to 16 d
 	\item \textbf{Absolute gap} $$\left\{a_i = A(x_i) = f(x_i) - f_*\right\}$$ So $A(x) = f(x) - f_*$ ($\geq 0$)
 	\item \textbf{Relative gap} $$\left\{r_i = R(x_i) = \frac{f(x_i) - f_*}{|f_*|} = \frac{A(x_i)}{|f_*|}\right\}$$ So $R(x) = \frac{\displaystyle f(x) - f_*}{\displaystyle |f_*|} = \frac{\displaystyle A(x)}{\displaystyle |f_*|}$ ($\geq 0$)
 \end{list}
-The relative gap is useful because $\forall\:\alpha>0$ we have that $(P)\equiv (P_\alpha) = \min\{\alpha f(x)\:|\:x\in X\}$, and for the same $x_*$ we have $v(P_\alpha) = \alpha v(P) \Rightarrow$ same $R(x)$, different $A(x)$\\
+The relative gap is useful because $\forall\:\alpha>0$ we have that $(P)\Leftrightarrow (P_\alpha) = \min\{\alpha f(x)\:|\:x\in X\}$, and for the same $x_*$ we have $v(P_\alpha) = \alpha v(P) \Rightarrow$ same $R(x)$, different $A(x)$\\
 But in general computing the absolute/relative gap is hard because we don't know $f_*$, which is what we want to estimate. So it's hard to estimate how good a solution is. Could argue that this is the "issue" in optimization: compute an estimate of $f_*$.
 \paragraph{Optimization is really hard} Impossible, even, because isolated minima can be anywhere, and restricting to $x\in X=[x_-, x_+]$ with $-\infty<x_-<x_+<+\infty$ doesn't help: still uncountable many points to try. Also $f$ can have isolated downward spike anywhere. Even on $X = [x_-, x_+]$ the spikes can be arbitrarily narrow.
-\paragraph{Optimization at least possible} We can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$, meaning with a fixed finite diameter. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\equiv$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\forall x,y\in X\:\:\:|f(x) - f(y)| \leq L|x - y|$$
+\paragraph{Optimization at least possible} We can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$, meaning with a fixed finite diameter. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\Leftrightarrow$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\forall x,y\in X\:\:\:|f(x) - f(y)| \leq L|x - y|$$
 $f$ L-c $\Rightarrow$ doesn't "jump" and one $\epsilon$-optimum can be found with $O(\frac{LD}{\epsilon})$ evaluations by uniformly sampling $X$ with step $\frac{2\epsilon}{L}$. There's a bad news: no algorithm can work in less that $\Omega(\frac{LD}{\epsilon})$, but it's the worst case of $f$ (constant with one spike).\\
 The number of steps is inversely proportional to accuracy: just not doable for small $\epsilon$. Dramatically worse with $X\subset R^n$.\\
 Also generally $L$ is unknown and not easy to estimate, but algorithms actually require/use it.
@@ -1184,7 +1184,7 @@ The obvious one would be unimodal, but not easy to verify/construct. Workable al
 \begin{center}
 	\includegraphics[scale=0.5]{2.png}
 \end{center}
-"Easily" find local $\equiv$ global minimum $\tilde{x}$ giving \underline{$f$}$(\tilde{x}) \leq f_* \leq f(\tilde{x})$. If the gap $f(\tilde{x}) - \underline{f}(\tilde{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\tilde{x}) \geq$ best $f$-value so far, then that partition is killed.\\
+"Easily" find local $\Leftrightarrow$ global minimum $\tilde{x}$ giving \underline{$f$}$(\tilde{x}) \leq f_* \leq f(\tilde{x})$. If the gap $f(\tilde{x}) - \underline{f}(\tilde{x})$ is too large, we partition $X$ and iterate. If on some partition $\underline{f}(\tilde{x}) \geq$ best $f$-value so far, then that partition is killed.\\
 In the worst case, exponential complexity because you keep dicing and slicing $X$. But it is exponential in practice too. It depends on how much non-convex $f$ is and how good of a lower approximation $\underline{f}$ is. A cleverer approach is carefully choosing the non-convexities.
 %end 1-first steps.pdf
 \section{Unconstrained optimization}
@@ -1192,7 +1192,7 @@ From now on we'll use $$f:\mathbb{R}^n\rightarrow \mathbb{R}$$ $$f(x_1,x_2,\ldot
 Note that $\mathbb{R}^n = \mathbb{R}\times \mathbb{R} \times\ldots\times \mathbb{R}$, which is \textbf{exponentially larger} than $\mathbb{R}$.\\
 $I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal). A lot more space to look at, meaning much more difficult task.\\\\
 We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega\left(\left(\frac{LD}{\epsilon}\right)^n\right)$.\\\textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O\left(\left(\frac{LD}{\epsilon}\right)^n\right)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
-\subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\equiv$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
+\subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\Leftrightarrow$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
 \paragraph{Notation}\begin{list}{}{}
 	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
 	\item \textbf{Norm} $\|x\| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
@@ -1267,7 +1267,7 @@ $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
 \end{list}
 With $f\in C^2$ we have $\nabla^2 f(x)$ continuous everywhere, so symmetric everywhere. $C^2$ is the best class for optimization.
 \subsection{Optimality conditions}
-$f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \equiv$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I would know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
+$f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \Leftrightarrow$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I would know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
 $$\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$$otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$. Requires the second-order Taylor's theorem
 $$f(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2 f(x)(y-x) + R(y-x)$$
 Another condition necessary and almost sufficient: $f\in C^2$, $\nabla f(x) = 0$ and $\nabla^2f(x)\succ 0\Rightarrow x$ local minimum. Avoids the bad case $d^T\nabla^2f(x)d=0$ meaning zero curvature direction.
@@ -1287,11 +1287,11 @@ $f\in C^1$ convex $\Leftrightarrow\nabla f$ monotone $\Leftrightarrow L_x(y) = f
 At least $\{f_i = f(x_i)\} \rightarrow f_*$: \textbf{minimizing sequence}, and clearly $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}$ minimizing sequence, but $\not\Leftarrow$\\
 Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 \begin{list}{}{}
-	\item \textbf{Line search}: first choose $d_i\in \mathbb{R}^n$ (\textbf{direction}), then choose $\alpha_i\in \mathbb{R}$ (\textbf{step size} $\equiv$ learning rate in ML)
+	\item \textbf{Line search}: first choose $d_i\in \mathbb{R}^n$ (\textbf{direction}), then choose $\alpha_i\in \mathbb{R}$ (\textbf{step size} $\Leftrightarrow$ learning rate in ML)
 	\item \textbf{Trust region}: first choose $\alpha_i\in \mathbb{R}$ (\textbf{trust radius}), then $d_i\in \mathbb{R}^n$
 \end{list}
 The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
-\paragraph{First order model $\equiv$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in \arg\min\{L_i(x)\:|\:x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $\mathbb{R}^n$\\
+\paragraph{First order model $\Leftrightarrow$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in \arg\min\{L_i(x)\:|\:x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $\mathbb{R}^n$\\
 It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = \arg\min\left\{\lim_{t\to 0} \frac{f(x+td)}{t}\right\} = -\nabla f(x_i) =$ steepest descent direction.\\
 $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
 \paragraph{Step selection} The issue is to find the \textbf{Goldilocks Step} $\alpha_i$ efficiently (a few function evaluations). Two extreme strategies:
@@ -1355,7 +1355,7 @@ The result can be extended to inexact LS with $r\simeq 1-\frac{\lambda_n}{\lambd
 With $\alpha_i = \tilde{\alpha}$ for each $i$ it's much simpler but also rigid. Easier to avoid Charybdis: $\sum_{i=1}^\infty \alpha_i = \infty$\\
 Yet $d_i = -\nabla f(x_i) \Rightarrow$ one wants $\{\|d_i\|\}\rightarrow 0$, so care is still required. We also have that $\alpha_i\rightarrow 0$ surely avoid Scylla, but it's not possible here.\\
 The fundamental trick is $d_i = -\nabla f(x_i) \Rightarrow \|x_{i+1} - x_i\|$ automatically changes along iterations even if $\alpha_i$ is fixed.\\
-$d_i = \frac{-\nabla f(x_i)}{\|\nabla f(x_i)\|} \equiv \|d_i\| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
+$d_i = \frac{-\nabla f(x_i)}{\|\nabla f(x_i)\|} \Leftrightarrow \|d_i\| = 1$ would necessarily require $\alpha_i \rightarrow 0$, yet $f$ varies very rapidly so only very short $\alpha_i$ are possible. It's crucial to bound how rapidly $f$ changes.
 \paragraph{L-smoothness} $$f \text{ L-smooth }\Rightarrow \phi(\alpha) \leq \phi(0) + \|\nabla f(x)\|^2\left(\frac{L\alpha^2}{2-\alpha}\right)$$
 Powerful general idea: find $\alpha$ giving the best worst-case improvement, meaning $v(\alpha) = \frac{L\alpha^2}{2-\alpha}, \alpha_* = \frac{1}{L}$ (constant!), $v(\alpha_*) = -\frac{1}{2L}$ hence $$f(x_{i+1}) - f(x_i) \leq -\frac{\|\nabla f(x_i)\|^2}{2L}$$ Can't do better if you trust the quadratic bound (which you should not).\\
 The error decreases sublinearly: a term is subtracted to $a_i$ rather than multiplied $$a_{i+1} = f(x_{i+1}) - f_* \leq a_i - \frac{\|\nabla f(x_i)\|^2}{2L}$$
@@ -1365,9 +1365,9 @@ However we used $Q$ nonsingular $\Leftrightarrow \lambda_n > 0$, which does make
 $f$ convex means that $\forall\:x,y\in \mathbb{R}^n$ we have $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\geq f(x) + \langle \nabla f(x), y-x\rangle$$
 \textbf{Strictly} convex means $$\alpha f(x) + (1-\alpha)f(y)\underset{\uparrow}{>} f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\underset{\uparrow}{>} f(x) + \langle \nabla f(x), y-x\rangle$$
 $$\Leftrightarrow\nabla^2f(x)\succeq 0$$
-Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n\|x\|_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\equiv \lambda_n$-convex.\\
+Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n\|x\|_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\Leftrightarrow \lambda_n$-convex.\\
 $f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $f(x)-\frac{\tau}{2}\|x\|_2^2$ is convex $\Leftrightarrow$ $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
-$f \in C^2,$ $L$-smooth and $\tau$-convex $\equiv \tau I \preceq \nabla^2 f\preceq LI \equiv \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
+$f \in C^2,$ $L$-smooth and $\tau$-convex $\Leftrightarrow \tau I \preceq \nabla^2 f\preceq LI \Leftrightarrow \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
 \paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{\|\nabla f(x_i)\|^2}{2\tau} \Rightarrow \|\nabla f(x_i)\|^2\geq 2\tau(f(x_i)-f(x_*))$$
 "If $a_i = f(x_i) - f_*$ is large then the gradient must also be large."\\
 $L$-smooth $\Rightarrow a_{i+1}\leq a_i - \frac{\|\nabla f(x_i)\|^2}{2L} \Rightarrow a_{i+1}\leq a_i(1-\frac{\tau}{L})$\\
@@ -1427,7 +1427,7 @@ The crucial convergence arguments are:
 So that there's a significant decrease at each step unless $\|\nabla f(x_i)\|\rightarrow 0$.\\
 There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -\|\nabla f(x_i)\|^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
 In $\mathbb{R}^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
-\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $$\frac{\partial f(x_i)}{\partial d_i} < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$$ Meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
+\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $$\frac{\partial f(x_i)}{\partial d_i} < 0 \Leftrightarrow \langle d_i,\nabla f(x_i)\rangle < 0 \Leftrightarrow \cos(\theta_i) > 0$$ Meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
 \textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty$ $$(A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$$
 A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{\|\nabla f(x_i)\|\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
 Very many $d_i$, but which is better than $-\nabla f$? Need to look farther than the first order model.
@@ -1515,7 +1515,7 @@ This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficie
 \end{list}
 \paragraph{Conjugate gradient method for quadratic functions} Gradient method + exact LS $\Rightarrow \langle \nabla f(x_{i+1}, d_i\rangle = 0$ resulting in $d_{i+1} \perp d_i$. Property is lost at $i+2$: $x_{i+2}$ is not the minimum over all the small subspace of $d_i$, it zig-zags.\\
 Would be nice if $x_{i+1}$ minimum on the subspace of $\{d_1,\ldots,d_i\}$, getting larger with every iteration.\\
-Possible with quadratic $f\equiv$ linear systems, with two conditions:
+Possible with quadratic $f\Leftrightarrow$ linear systems, with two conditions:
 \begin{list}{}{}
 	\item All directions are $Q$-conjugate: $d_i^TQd_j=0\:\:\:\:\forall\:i,j$
 	\item The optimal step is always taken along each $d_i$
@@ -1651,18 +1651,18 @@ A closed formula: $\gamma_i\in$ $\arg\min\{\|\gamma g_i+(1-\gamma)d_{i-1}\|^2\:|
 In practice is slowish, superlinear in a doubly-logarithmic chart after a long flat leg. Subgradients are faster but flatline at $\epsilon\simeq 1$e$-4$, smoothed does at $\epsilon\simeq 1$e$-6$.
 \subsubsection{Bundle Methods}
 \paragraph{Basic Idea} Cutting-plane model. Being $f$ convex, the first-order information that we have is globally valid: I can collect it along the way and use it all.\\
-$\{x_i\}\rightarrow$ bundle $$B=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\} = \{(x_i, f_i, g_i)\}$$
-The \textbf{cutting-plane model} $f_B$ of $f$ is $$f_B(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ A $(1+\epsilon)$-order model.
-$$x_{B,*}\in \arg\min\{f_B(x)\}$$ $$f_B(x_{B,*})\leq f_*$$ Use $x_{B,*}$ as the next iterate a-la Newton.\\
-$f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small" $$\min\{f_B(x)\}=\min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$$
-\paragraph{Cutting Plane Algorithm} $\min\{f_B(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
-$f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B= B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
-The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#B\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
+$\{x_i\}\rightarrow$ bundle $$\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\} = \{(x_i, f_i, g_i)\}$$
+The \textbf{cutting-plane model} $f_\mathscr{B}$ of $f$ is $$f_\mathscr{B}(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in \mathscr{B}\}\leq f(x)\:\:\forall x$$ A $(1+\epsilon)$-order model.
+$$x_{\mathscr{B},*}\in \arg\min\{f_\mathscr{B}(x)\}$$ $$f_\mathscr{B}(x_{\mathscr{B},*})\leq f_*$$ Use $x_{\mathscr{B},*}$ as the next iterate a-la Newton.\\
+$f_\mathscr{B}\not\in C^1$ but computing $x_{\mathscr{B},*}$ is a linear program $\Rightarrow$ easy if $\# \mathscr{B}$ "small" $$\min\{f_\mathscr{B}(x)\}=\min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in \mathscr{B}\}$$
+\paragraph{Cutting Plane Algorithm} $\min\{f_\mathscr{B}(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
+$f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $\mathscr{B}= \mathscr{B}\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_\mathscr{B}$ becomes a better model.\\
+The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#\mathscr{B}\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
 So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\epsilon}\right)^{\frac{n}{2}}\right)$
-\subparagraph{Why} $x_{B,*}$ \textbf{may be infinitely far} from $x_*$, the \textbf{iterates have no local property} ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail).\\
-It's unavoidable: linear functions have no curvature, and we need many linear functions to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
-\subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_B$ is a good model of $f$).\\
-Stabilized master problem $$\min\left\{f_B(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\right\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+\subparagraph{Why} $x_{\mathscr{B},*}$ \textbf{may be infinitely far} from $x_*$, the \textbf{iterates have no local property} ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail).\\
+It's unavoidable: linear functions have no curvature, and we need many linear functions to make a quadratic one. Pruning $\mathscr{B}$ is possible but not easy, and no a priori bound on $\# \mathscr{B}$.
+\subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_\mathscr{B}$ is a good model of $f$).\\
+Stabilized master problem $$\min\left\{f_\mathscr{B}(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\right\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
 \section{Constrained Optimality and Duality}
 \paragraph{Constrained Optimization} Back to the full $$(P)\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset R^n$\begin{list}{}{}
 	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
@@ -1673,8 +1673,8 @@ Constraints can be hidden in the objective $\chi_X : \mathbb{R}^n\rightarrow \ov
 0&\text{if }x\in X\\
 \infty&\text{if }x\not\in X
 \end{array}\right.$$ Convex if $X$ is, but extended-valued.
-$$(P)\equiv \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\text{(essential objective)}$$ But very bad idea, $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
-$$(P)\equiv\min\{v\:|\:v\geq f(x), x\in X\}$$
+$$(P)\Leftrightarrow \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\text{(essential objective)}$$ But very bad idea, $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
+$$(P)\Leftrightarrow\min\{v\:|\:v\geq f(x), x\in X\}$$
 \paragraph{(Local) minima vs. optima} Note that $X=\emptyset\Rightarrow v(P) = +\infty$, so solving $(P)$ includes constructively proving $X=\emptyset$. Almost never happens in ML, so we will forget about this but the issue exists. The model is our choice, we choose it simple/nice/nonempty if we can.\\
 Global optimum obviously hard, hence $x_*$ local optimum solves $$\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$$ for some $\epsilon>0$.\\
 Important concept: $x$ in the interior of $X\Leftrightarrow\exists\:B(x,\epsilon)\subseteq X$ (for $\epsilon>0$), so $x_*$ in the interior of $X\Rightarrow$ local minimum/optimum so $\nabla f(x_*)=0$.\\
@@ -1703,15 +1703,15 @@ Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest conv
 	\item $F_X(x)$ is the \textbf{set of feasible directions of $X$ at $x$}
 	\item $X$ convex and $d\in F_X(x)\Rightarrow x+\epsilon d\in X\:\:\forall
 	\epsilon\in [0,\tilde{\epsilon}]$ ($F_X$ cone)
-	\item $X$ convex and $d$ feasible at $x \Rightarrow d\in T_X(x)$ with $z_i = x + dt_i \equiv F_X(x)\subseteq T_X(x)$\\
+	\item $X$ convex and $d$ feasible at $x \Rightarrow d\in T_X(x)$ with $z_i = x + dt_i \Leftrightarrow F_X(x)\subseteq T_X(x)$\\
 	In fact they are almost the same, except from the borders
 	\item $f,X$ convex, $x_*$ global optimum $\Leftrightarrow\langle\nabla f(x_*),d\rangle \geq 0\:\:\forall\:d\in F_X(x_*)$
 	\item $f,X$ convex, (TCC) at $x_*\Rightarrow x_*$ global optimum
 	\item $x_*$ global optimum $\Rightarrow x_*$ local optimum $\Rightarrow$ (TCC)
 \end{list}
 (TCC) sufficient in the convex case, but is always necessary. Not always sufficient because it holds in saddle point of $\partial X$, for example, despite not being a minimum.\\
-$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in \mathbb{R}^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\equiv\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in \mathbb{R}^n\equiv \nabla f(x) = 0$\\
-In fact, $f,X$ convex $\Rightarrow$ (TCC) $\equiv \not\exists$ feasible descent direction: every direction is feasible, hence only descent matters. So "$x$ satifies (TCC)" is a direct constrained generalization of "$x$ stationary point".\\
+$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in \mathbb{R}^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\Leftrightarrow\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in \mathbb{R}^n\Leftrightarrow \nabla f(x) = 0$\\
+In fact, $f,X$ convex $\Rightarrow$ (TCC) $\Leftrightarrow \not\exists$ feasible descent direction: every direction is feasible, hence only descent matters. So "$x$ satifies (TCC)" is a direct constrained generalization of "$x$ stationary point".\\
 Necessary, \textbf{not sufficient} but the only one you can reasonably check. But how to compute this in practice? How to prove something doesn't exists? How to characterize $T_X$ depends on how you characterize $X$.
 \subsubsection{Algebraic Version}
 \paragraph{Describing a Set via Functions} The most used way to describe a set is via some functions.\\
@@ -1734,7 +1734,7 @@ with $I$ set of inequality constraints and $J$ set of equality constraints. Ofte
 \textbf{There are many different ways to express the same $X$}. Often, choosing the right formulation is crucial for being able to solve a problem. We will not see this, but a few trivial observation are useful:
 \begin{list}{}{}
 	\item Could always assume $|J|=0$, no equality constraints: $h_j(x) = 0\Leftrightarrow h_j(x)\leq 0, -h_j(x)\leq 0$\\
-	One equality constraints $\equiv$ two "opposite" inequality constraints
+	One equality constraints $\Leftrightarrow$ two "opposite" inequality constraints
 	\item Could always assume $|I|=1$, one single inequality constraint\\
 	$G(x)\leq 0\Leftrightarrow \max\{g_i(x)\:|\:i\in I\} = g(x)\leq 0$
 \end{list}
@@ -1751,8 +1751,8 @@ So, \textbf{to have a convex $X$ all equality constraints must be linear}.
 $x\in X \Leftrightarrow x\in \partial X$ plus "$\partial X$ looks the same everywhere".\\
 $S(f,\cdot)$ and $X=\{x\in \mathbb{R}^n\:|\:Ax=b\}$: optimum touches the inner level set.\\
 $F_X(x) = \{d\in \mathbb{R}^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$\\
-(TCC) $\equiv \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$\\
-$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\equiv\nabla f(x)\in $ range$(A)\equiv\exists\:\mu\in \mathbb{R}^m\:|\:\nabla f(x) = \mu A$\\
+(TCC) $\Leftrightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$\\
+$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\Leftrightarrow\nabla f(x)\in $ range$(A)\Leftrightarrow\exists\:\mu\in \mathbb{R}^m\:|\:\nabla f(x) = \mu A$\\
 Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in \mathbb{R}^m\:|\:\mu A = \nabla f(x)$\\
 $f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
 \paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
@@ -1773,12 +1773,12 @@ $x_*$ optimum $\Rightarrow \langle\nabla f(x_*),d\rangle\geq 0\:\:\forall\:d\:|\
 	\item $\langle\nabla g_i(x_*),d\rangle\leq 0\:\:i\in A(x)$
 	\item $\langle\nabla h_j(x_*),d\rangle = 0\:\:j\in J$
 \end{list}
-$\equiv\lambda\in \mathbb{R}_+^{|A(x)|}$ and $\mu \in \mathbb{R}^{|J|}\:|\:\nabla f(x_*) + \sum_{i\in A(x)}\lambda_i\nabla g_i(x_*) + \sum_{j\in J} \mu_j\nabla h_j(x_*)=0$\\
+$\Leftrightarrow\lambda\in \mathbb{R}_+^{|A(x)|}$ and $\mu \in \mathbb{R}^{|J|}\:|\:\nabla f(x_*) + \sum_{i\in A(x)}\lambda_i\nabla g_i(x_*) + \sum_{j\in J} \mu_j\nabla h_j(x_*)=0$\\
 So a constructive way to prove the conditions is to find $\lambda$ and $\mu$.
 \paragraph{KKT Conditions} $\exists\:\lambda\in \mathbb{R}_+^{|I|}$ and $\mu\in \mathbb{R}^{|J|}\:|$\begin{list}{}{}
 	\item[(KKT-F)] $g_i(x)\leq 0\:\:i\in I$, $h_j(x) = 0\:\:j\in J$
 	\item[(KKT-G)] $\nabla f(x) + \sum_{i\in I}\lambda_i\nabla g_i(x) + \sum_{j\in J}\mu_h\nabla h_j(x) = 0$
-	\item[(KKT-CS)] $\sum_{i\in I}\lambda_i(-g_i(x)) = 0$ \textbf{complementary slackness} $\equiv \lambda_ig_i(x) = 0\:\:\forall\:i\in I$
+	\item[(KKT-CS)] $\sum_{i\in I}\lambda_i(-g_i(x)) = 0$ \textbf{complementary slackness} $\Leftrightarrow \lambda_ig_i(x) = 0\:\:\forall\:i\in I$
 \end{list}
 \paragraph{KKT Theorem} $T_X(x)=D_X(x)\wedge x$ local optimum $\Rightarrow$ (KKT)\\
 For $(P)$ convex, (KKT) $\Rightarrow x$ global optimum: (KKT) $\Rightarrow \langle \nabla f(x), d\rangle \geq 0\:\:\forall\:d\in D_X(x)$ and $D_X(x)\supseteq T_X(x)\supseteq F_X(x) \Rightarrow\langle \nabla f(x), d\rangle \geq 0\:\:\forall\:d\in F_X(x)\Rightarrow x$ global optimum.
@@ -1814,14 +1814,13 @@ Under further conditions, solving $(D)$ actually solves $(P)$
 	 $\psi(\mu)=\min_{x\in \mathbb{R}^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
 	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in \mathbb{R}^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
 \end{list}
-%TODO from here
-\subsection{Constrained Optimization Algorithms} Algorithms for $(P)\:\:\:\min\{f(x)\:|\:G(x)\leq 0, H(x) = 0\}$\\
-Usually ok to ignore $H(\:)$, just $G(x)\leq 0$ (implementation details). Only linear inequalities $Ax\leq b$, because of their convenience: always convex, satisfy (Linl), numerically stable, cheap to compute\ldots\\
-Important notation: \textbf{sub-system} (a relaxation) $A\in \mathbb{R}^{m\times n}, b\in \mathbb{R}^m, B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes $\equiv$ constraints $\Rightarrow$ sub-matrix/vector/system $A_B=[A_i]_{i\in B}$/$b_B=[b_i]_{i\in B}$/$A_Bx \leq b_B$\\
-\textbf{Polyhedral cone} $F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}(x)} d\leq 0\}$ with $\mathscr{A}(x)$ being the 
-\textbf{active constraints} at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$
+\subsection{Constrained Optimization Algorithms} Algorithms for $$(P)\:\:\min\{f(x)\:|\:G(x)\leq 0, H(x) = 0\}$$
+Usually it's ok to ignore $H(\:)$, just $G(x)\leq 0$ (implementation details). Only linear inequalities $Ax\leq b$, because of their convenience: always convex, satisfy (Linl), numerically stable, cheap to compute\ldots\\
+Important notation of \textbf{sub-system} (a relaxation): given $A\in \mathbb{R}^{m\times n}, b\in \mathbb{R}^m$ we define $B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes (constraints) $\Rightarrow$ sub-matrix/vector/system $$A_B=[A_i]_{i\in B}$$ $$b_B=[b_i]_{i\in B}$$ $$A_Bx \leq b_B$$
+\textbf{Polyhedral cone} $$F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}(x)} d\leq 0\}$$ with $\mathscr{A}(x)$ being the 
+\textbf{active constraints} at $x\in X$: $$\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$$
 \subsubsection{Quadratic Problem with Linear Equality Constraints}
-\paragraph{Equality-Constrained QP} $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax=b\}$ with $A\in \mathbb{R}^{m\times n}$, rank$(A)=m<n \equiv$ rows of $A$ are linearly independent. Usually $(P)$ convex $\equiv Q\succeq 0$ (otherwise $v(P)=-\infty$ likely).\\
+\paragraph{Equality-Constrained QP} $$(P)\:\:\min\left\{\frac{1}{2}x^TQx+qx\:|\:Ax=b\right\}$$ with $A\in \mathbb{R}^{m\times n}$, $\text{rank}(A)=m<n \Leftrightarrow$ rows of $A$ are linearly independent. Usually $(P)$ convex $\Leftrightarrow Q\succeq 0$ (otherwise $v(P)=-\infty$ likely).\\
 For a minimum/saddle point, just solve the $KKT$ system (normal equations)
 $$\begin{array}{c}
 (a)\\(b)
@@ -1843,39 +1842,45 @@ or try to exploit the large scale structure (saddle-point system).
 	\includegraphics[scale=0.75]{10.png}
 \end{center}
 Can compute feasible initial $x$ autonomously.\\
-\textbf{Always exploit all the structure of your problem}: quadratic program with \textbf{box constraints}\\$(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:\underline{x}\leq x\leq \tilde{x}\}$\\
-Active constraint $\equiv$ inactive variable, $B\subseteq N=\{1,2,\ldots,n\}, B = (L,U)$ with $L\cap U=\emptyset, L\cup U \subset N, F = N\setminus (L\cup U)\Rightarrow A_Bx=b_B \equiv x = [x_L, x_F, x_U]=[\underline{x}_L, x_F, \tilde{x}_U]$ so only $x_F$ "free". $\underline{x} = 0 (x\leftarrow x+\underline{x})\Rightarrow x=[0, x_F, \tilde{x}_U]$\\
-$(P)$ can become $(P)\:\:\:\min\{\frac{1}{2}x_F^TQ_{FF}x_F+(q_F+\tilde{x}_U^TQ_{UF})x_F\}$ \textbf{unconstrained} and in a (possibly much) smaller space. Initial feasible $x$ straightforward.
+\textbf{Always exploit all the structure of your problem}: quadratic program with \textbf{box constraints} $$(P)\:\:\min\left\{\frac{1}{2}x^TQx+qx\:|\:\underline{x}\leq x\leq \overline{x}\right\}$$
+Active constraint $\Leftrightarrow$ inactive variable: $B\subseteq \mathbb{N}=\{1,2,\ldots,n\}$ \\$B = (L,U)$ with
+\begin{list}{}{}
+	\item $L\cap U=\emptyset$
+	\item $L\cup U \subset \mathbb{N}$
+	\item $F = N\setminus (L\cup U)$
+\end{list}
+$\Rightarrow A_Bx=b_B \Leftrightarrow x = [x_L, x_F, x_U]=[\underline{x}_L, x_F, \tilde{x}_U]$ So only $x_F$ "free".\\
+$\underline{x} = 0 (x\leftarrow x+\underline{x})\Rightarrow x=[0, x_F, \tilde{x}_U]$\\
+$(P)$ can become $$(P)\:\:\min\left\{\frac{1}{2}x_F^TQ_{FF}x_F+(q_F+\overline{x}_U^TQ_{UF})x_F\right\}$$ \textbf{unconstrained} and in a (possibly much) smaller space. Initial feasible $x$ straightforward.
 \subparagraph{In practice} If (Linl)-type not satisfied, $B$ needs to be more carefully managed to handle possible degenerate steps $(\tilde{\alpha}=0)$. For instance, only one constraint at a time is added to $B$, not very efficient in practice and different nontrivial rules are used.\\
 Exploit information from previous iteration to speed up KKT system solution: update factorizations, use $x$ to warm-start iterative approaches\ldots many different variants.\\
 No more exact solution but hopefully fast iterative approaches, e.g. (quasi-)Newton on the reduced problem.\\
 Which $\epsilon$? How many iterations? How about one of the gradient methods?
-\subsubsection{Projected Gradient Method} Nonlinear problem with linear constraints $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b\}$, feasible $x$: if $-\nabla f(x)\in F_X(x)$ trivial, just LS/FS along $d=-\nabla f(x)$. In general, find $d\in F_X(x)$ "closer" to $-\nabla f(x)$ then FS/LS along $d$.\\
-Projection of $d\in \mathbb{R}^n$ on $S\subset R^n$: $p_S(d)=\min\{\|d-x\|\:|\:x\in S\}$ so $$p_{F_X(x)}(-\nabla f(x))=\min\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\}$$
-a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\equiv x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
-$p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.\\\\
-Box constraints $\underline{x}\leq x\leq \tilde{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \tilde{x}_i] \Rightarrow$\\$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i), F_{[\underline{x},\tilde{x}]}(x) = \left\{\begin{array}{l}
-R_+\text{ if }x=\underline{x}\\
-R_-\text{ if }x=\tilde{x}\\
-R\text{ otherwise}\\
-\end{array} \right.$\\
-$g(d) = \|d-v\|^2$ decomposable: $g(d)=\sum_{i=1}^n [g_i(d_i)=(d_i-v_i)^2]$\\
+\subsubsection{Projected Gradient Method} Nonlinear problem with linear constraints $(P)\:\:\min\{f(x)\:|\:Ax\leq b\}$, feasible $x$: if $-\nabla f(x)\in F_X(x)$ trivial, just LS/FS along $d=-\nabla f(x)$. In general, find $d\in F_X(x)$ "closer" to $-\nabla f(x)$ then FS/LS along $d$.\\
+Projection of $d\in \mathbb{R}^n$ on $S\subset R^n$: $$p_S(d)=\min\left\{\|d-x\|\:|\:x\in S\right\}$$ $$p_{F_X(x)}(-\nabla f(x))=\min\left\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\right\}$$
+a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\Leftrightarrow x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
+$p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.
+\paragraph{Special Forms of Constraints} Always exploit all the structure of your problem: box constraints $\underline{x}\leq x\leq \tilde{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \tilde{x}_i] \Rightarrow$ $$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i)$$ $$F_{[\underline{x},\tilde{x}]}(x) = \left\{\begin{array}{cl}
+\mathbb{R}_+&\text{ if }x=\underline{x}\\
+\mathbb{R}_-&\text{ if }x=\overline{x}\\
+\mathbb{R}&\text{ otherwise}\\
+\end{array} \right.$$
+$g(d) = \|d-v\|^2$ decomposable: $$g(d)=\sum_{i=1}^n [g_i(d_i)=(d_i-v_i)^2]$$
 $p_X(x)$ separable $\Rightarrow n$ independent problems, much easier and parallelizable.
 \begin{center}
 	\includegraphics[scale=0.75]{11.png}
 \end{center}
 Other cases where projection is easy: simplex constraints $\sum_{i=1}^n x_i = 1, x_i\geq 0$ for $i=1,\ldots,n$.
-\paragraph{Goldstein's Version} What if projection is easy on the whole $X$, not only $F_X(x)$? Goldstein's projected gradient method: move first, project second: $y_i \leftarrow x_i - \alpha_i\nabla f(x_i);\:\:\:x_{i+1}\leftarrow p_X(y_i);$\\
+\paragraph{Goldstein's Version} What if projection is easy on the whole $X$, not only $F_X(x)$? Goldstein's projected gradient method: move first, project second $$y_i = x_i - \alpha_i\nabla f(x_i)$$ $$x_{i+1}= p_X(y_i)$$
 Not a descent method, more like a heavy ball, and only converges with appropriate stepsize, typical $\alpha=\frac{1}{L}$. Convergence result similar to unconstrained gradient (for good and bad): $O\left(\left(\frac{L}{\tau}\right)\log\left(\frac{1}{\epsilon}\right)\right)$ for $f$ $\tau$-convex, $O\left(\frac{LD}{\epsilon}\right)$ otherwise.
 \paragraph{Rosen's Version} General $Ax\leq b$: $p_{F_X(x)}$ can be too costly.\\
-Make it easier by projecting on $\partial F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}}d=0\}$: quadratic program with easy objective and equality constraints, so very easy. In fact, $\tilde{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula\begin{list}{}{}
-	\item $\mu=-[\tilde{A}\,\tilde{A}^T]^{-1}\tilde{A}\nabla f(x)$
-	\item $d = (I-\tilde{A}^T[\tilde{A}\,\tilde{A}^T]^{-1}\tilde{A})(-\nabla f(x))$
+Make it easier by projecting on $$\partial F_X(x)=\{d\in \mathbb{R}^n\:|\:A_{\mathscr{A}}d=0\}$$ Quadratic program with easy objective and equality constraints, so very easy. In fact, $\overline{A}=A_{\mathscr{A}(x)}$ full row rank $\Rightarrow$ closed formula
+$$\mu=-[\overline{A}\,\overline{A}^T]^{-1}\overline{A}\nabla f(x)$$
+$$d = (I-\overline{A}^T[\overline{A}\,\overline{A}^T]^{-1}\overline{A})(-\nabla f(x))$$
 	\begin{list}{}{}
 		\item $d = 0$ may happen: good if $\mu \geq 0$, un-good otherwise
-		\item $d = 0$ surely happens if $\tilde{A}\in A^{n\times n}$ ($x$ a vertex, $\mathscr{A}(x)$ a base)
+		\item $d = 0$ surely happens if $\overline{A}\in A^{n\times n}$ ($x$ a vertex, $\mathscr{A}(x)$ a base)
 	\end{list}
-\end{list}
 $A_{\mathscr{A}(x)}$ not full rank in general: must work with $A_B$ full rank with $B\subset \mathscr{A}(x) \Rightarrow$ rather more complicated logic.\\
 $f$ linear plus streamlining $\longrightarrow$ primal simplex method.\\
 Can be extended to $G(x)\leq 0$ nonlinear. When $B$ optimal face, then unconstrained steepest descent $\Rightarrow$ convergence results analogous with twists.
@@ -1883,27 +1888,28 @@ Can be extended to $G(x)\leq 0$ nonlinear. When $B$ optimal face, then unconstra
 	\includegraphics[scale=0.75]{12.png}
 \end{center}
 $\alpha_i = \max\{\alpha\:|\:A_i(x+\alpha d)\leq b_i\}$ if is $< \infty$. The pesky part is the handling of linear independence. Maximal $B$ easy to get via a greedy algorithm.
+\pagebreak
 \subsubsection{Frank-Wolfe Method}
-Nonlinear problem with linear constraints $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b\}$\\
-Minimizing $\| x-v\|$ over $Ax\leq b$ may be too costly, but minimizing a linear function may be possible (special structure, e.g. network constraints). Solve nonlinear $(P)$ by solving a sequence of $LP$s (master problem)
+Nonlinear problem with linear constraints $$(P)\:\:\min\{f(x)\:|\:Ax\leq b\}$$
+Minimizing $\|x-v\|$ over $Ax\leq b$ may be too costly, but minimizing a linear function may be possible (special structure, e.g. network constraints). Solve nonlinear $(P)$ by solving a sequence of $LP$s (master problem)
 \begin{center}
 	\includegraphics[scale=0.75]{13.png}
 \end{center}
 \begin{list}{}{}
-	\item $\langle \nabla f(x),d\rangle<0 \equiv d$ a descent direction
+	\item $\langle \nabla f(x),d\rangle<0 \Leftrightarrow d$ a descent direction
 	\item $\langle \nabla f(x),d\rangle = 0 \Rightarrow x$ local optimum
 \end{list}
-$f$ convex $\Rightarrow v = f(x) + \langle \nabla f(x),d\rangle\leq v(P) \Rightarrow f(x) - v(P)\leq f(X) - v =$ readily available estimate of gap $\Rightarrow \langle \nabla f(x),d\rangle = 0 \Rightarrow x$ global optimum.
+$f$ convex $\Rightarrow$ $$v = f(x) + \langle \nabla f(x),d\rangle\leq v(P)$$ $\Rightarrow f(x) - v(P)\leq f(X) - v =$ readily available estimate of gap $\Rightarrow \langle \nabla f(x),d\rangle = 0 \Rightarrow x$ global optimum.
 \paragraph{Stabilising the Frank-Wolfe Method} Initial $x$ not really needed: one LP, e.g. $\langle 0,y\rangle$ objective, to find it if any.\\
 Convergence easy enough, similar to run-of-the-mill descent algorithm.\\
 One LP per iteration is costly, exploit structure to make it efficient.\\
 Convergence rather slow: trusting $L_x(\:)$ very far from $x$ where $\nabla f$ is computed.\\
-Solution seen already: stabilize the master problem, but separable penalty $\gamma\|y-x\|_2$ in the objective. \textbf{Trust region stabilization}: constraint $\|y-x\|_\infty \leq \tau\equiv$ box constraints $x_i-\tau\leq y_i\leq x_i+\tau$, almost never make an LP harder.\\
+Solution seen already: stabilize the master problem, but separable penalty $\gamma\|y-x\|_2$ in the objective. \textbf{Trust region stabilization}: constraint $\|y-x\|_\infty \leq \tau\Leftrightarrow$ box constraints $x_i-\tau\leq y_i\leq x_i+\tau$, almost never make an LP harder.\\
 Have to manage $\tau$ somehow (e.g. fixed) but often worth it. Other ways to improve convergence speed, e.g. away step and/or use FW to identify optimal active set, then exploit it.
 \paragraph{Constrained Cutting Plane (Bundle)} Stabilised Frank-Wolfe. What if $f\not\in C^1$? Cannot use $g\in\partial f(x)$, bad first order information. $f$ convex $\Rightarrow$ first-order information not so bad, globally valid.\\
 What if I collect it along the way and use it all?
 \begin{list}{}{}
-	\item $\{x_i\}\rightarrow$ \textbf{bundle} $\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
+	\item $\{x_i\}\rightarrow$ \textbf{bundle} $\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\} = \{(x_i, f_i, g_i)\}$
 	\item \textbf{Cutting-plane model} $f_\mathscr{B}(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in \mathscr{B}\}$, a $(1+\epsilon)$-order model.
 \end{list}
 $\tilde{x}\leftarrow \arg\min\{f_\mathscr{B}(x)\:|\:Ax\leq b\}$ \textbf{constrained cutting-plane algorithm}, completely equivalent to the unconstrained version, even better if $Ax\leq b$ is compact.\\
@@ -1913,23 +1919,21 @@ More difficult to exploit the structure, but not impossible.
 Can approximate $\nabla^2 f(x)$ with quasi-Newton formula. Fast convergence if done properly.\\
 Solve a constrained quadratic program at each iteration, possibly with quadratic constraints.
 \subsubsection{Dual Methods}
-Quadratic program with linear constraints $(P)\:\:\:\min\{\frac{1}{2}x^TQx+qx\:|\:Ax\leq b\}$\\
-So far, kept $Ax\leq b$ and gotten $\lambda \geq 0$ in the end. We can do the reverse (dual approach): \begin{list}{}{}
-	\item $\forall$ fixed $\lambda\geq 0$, $\psi(\lambda)=\min\{\frac{1}{2}x^TQx + qx + \lambda(b-Ax)\}\leq v(P)$
-\end{list}
-$Q\succ 0\Rightarrow$ optimal solution $x(\lambda)=Q^{-1}(\lambda A-q)$\\
+Quadratic program with linear constraints $$(P)\:\:\min\left\{\frac{1}{2}x^TQx+qx\:|\:Ax\leq b\right\}$$
+So far, kept $Ax\leq b$ and gotten $\lambda \geq 0$ in the end. We can do the reverse (dual approach):
+$$\forall\text{ fixed }\lambda\geq 0\:\:\:\psi(\lambda)=\min\left\{\frac{1}{2}x^TQx + qx + \lambda(b-Ax)\right\}\leq v(P)$$
+$Q\succ 0\Rightarrow$ optimal solution $$x(\lambda)=Q^{-1}(\lambda A-q)$$
 $\psi$ concave, $\psi\in C^1$, $\nabla\psi(\lambda)=b-Ax(\lambda)$\\
 \textbf{Lagrangian dual}: $(D)\:\:\:\max\{\psi(\lambda)\:|\:\lambda\geq 0\}$
 \begin{list}{}{}
-	\item $(D)\equiv (P)$: $v(D) = v(P)$ and $\{x(\lambda_i)\}\rightarrow x_*$ as $\{\lambda_i\}\rightarrow \lambda_*$
+	\item $(D)\Leftrightarrow (P)$: $v(D) = v(P)$ and $\{x(\lambda_i)\}\rightarrow x_*$ as $\{\lambda_i\}\rightarrow \lambda_*$
 \end{list}
 \paragraph{Dual Method} Solve $(D)$ by any method for $C^1$, but $\psi\not\in C^2$ in general. $(D)$ is constrained but the constraints are very easy (projection is trivial).\\
 Feasible primal solution $x_*$ only asymptotically, but valid lower bound $v_i = \psi(\lambda_i)$ on $v(P)$ at every iteration.\\
 If $X$ is "simple", then \textbf{Langragian heuristic} $X_i = p_X(x(\lambda_i))\Rightarrow$ valid upper bound $f_i = f(x_i)$ on $v(P)$ at every iteration $\Rightarrow f(x_i)-v(P)\leq f_i - v_i$ = readily available estimate of gap.\\
 Can behave very differently from primal methods ($\frac{L}{\tau}$ much less of an issue). Also $Q$ singular $\Rightarrow \psi(\lambda)=-\infty$ happens $\Rightarrow$ nasty constraints in $(D)$. Extends to $f(x)$ strictly convex (must solve general nonlinear problem). $f(x)$ not convex is a serious issue, $\psi$ has to be computed exactly.
-\subparagraph{Decomposition} Partial Lagrangian relaxation $(P)\:\:\:\min\{f(x)\:|\:Ax\leq b, Ex\leq d\}$\begin{list}{}{}
-	\item $(R_\lambda)\:\:\:\psi(\lambda)=\min_x\{f(x)+\lambda(b-Ax)\:|\:Ex\leq d\}$ by keeping the "easy" constraints $Ex\leq d$ and relaxing complicating constraints $Ax\leq b$
-\end{list}
+\subparagraph{Decomposition} Partial Lagrangian relaxation $$(P)\:\:\min\{f(x)\:|\:Ax\leq b, Ex\leq d\}$$
+$$(R_\lambda)\:\:\:\psi(\lambda)=\min_x\{f(x)+\lambda(b-Ax)\:|\:Ex\leq d\}$$ by keeping the "easy" constraints $Ex\leq d$ and relaxing complicating constraints $Ax\leq b$
 $(R_\lambda)$ is constrained but can exploit structure (and $\psi(\lambda)=-\infty$ less likely). The typical structure: $Ax\leq b$ linking constraints + $f$ separable
 \begin{center}
 	\includegraphics[scale=0.6]{14.png}\\
@@ -1940,6 +1944,7 @@ Algorithms can exploit (parallelize).
 Pro of dual method: $(D)$ is almost unconstrained (would be with $Ax = b$). The cons of dual methods are that $\psi\not\in C^2$, and even $\not\in C^1$ if $f$ isn't strictly convex, also $x(\lambda)$ is never feasible until the very end (unless Langragian heuristic).\\
 We would like: unconstrained, $\in C^2$ and $x$ feasible. The first and last are obviously solved with $f + \chi_X$, but $\chi_X\not\in C^1$: we need something like $\chi_X$ but $\in C^2$. Can get $C^2$ if you accept to solve almost $(P)$ but not quite.
 \paragraph{Barrier Function and Central Path} $\gamma > 0$ parameter, $(P_\gamma)\:\:\:\min\{f_\gamma(x) = f(x) - \gamma\sum_{i=1}^m \log(b_i-A_i x)\}$ \textbf{logarithmic barrier} $f_\gamma$ strictly convex (if $f$ convex), $\in C^2$ (if $f\in C^2$)
+\pagebreak
 \begin{multicols}{2}
 \begin{center}
 	\includegraphics[scale=0.6]{15.png}
@@ -1972,7 +1977,7 @@ One is solving the dual at the same time as the primal $(D)\:\:\:\max\{-\lambda 
 	\item With (KKT-CS-$\mu$) $\lambda_i s_i = \gamma$ for $i=1,\ldots,m \Rightarrow \sum_{i=1}^m\lambda_i s_i = \gamma m = (\frac{1}{2}x^TQx + qx)-(-\lambda b - \frac{1}{2}x^TQx)$
 \end{list}
 And using $\Lambda, S$ diagonal matrices with $\lambda_i, s_i$ on the diagonal, we get (KKT-CS-$\mu$) $\Lambda Su = \gamma u$ for $i=1,\ldots,m$\\\\
-$x\rightarrow x + \Delta x, s\rightarrow s + \Delta s, \lambda \rightarrow \lambda + \Delta\lambda$ (current iterate plus displacement, so we get $(\Lambda + \Delta\Lambda)(S+\Delta S)u = (S\Delta\Lambda + \Lambda\Delta S + \Lambda S + \Delta\Lambda\Delta S)u = \gamma u$ so (KKT-CS-$\mu$) only nonlinear (bilinear) term $\Rightarrow$ linearize $\equiv$ Newton's method $\equiv$ just ignore it!
+$x\rightarrow x + \Delta x, s\rightarrow s + \Delta s, \lambda \rightarrow \lambda + \Delta\lambda$ (current iterate plus displacement, so we get $(\Lambda + \Delta\Lambda)(S+\Delta S)u = (S\Delta\Lambda + \Lambda\Delta S + \Lambda S + \Delta\Lambda\Delta S)u = \gamma u$ so (KKT-CS-$\mu$) only nonlinear (bilinear) term $\Rightarrow$ linearize $\Leftrightarrow$ Newton's method $\Leftrightarrow$ just ignore it!
 $$\left[\begin{array}{c c c}
 Q&A^T&0\\
 A&0&I\\
