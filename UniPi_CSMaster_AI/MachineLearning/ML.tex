@@ -1510,13 +1510,13 @@ In the following we use this notation for graphs:
 \end{list}
 \paragraph{Graph Representations} There has been no systematic way to extract features or metrics relation between examples for structured domains. \textbf{Feature based} representations are incomplete (or strongly task-dependent), while \textbf{adjacent/incident matrix} representations or any other fixed-size representation have other issues (over-dimensionality, alignment among different graphs, topological orders which makes generalization difficult).\\
 The ability to treat the proper inherent nature of the input data is the key feature for a successful application of the machine learning methodologies.\\
-The goal is to \textbf{learn} a mapping between a structured information domain (SD) and a discrete/continuous space (\textbf{transduction} $T$): given a set of examples (graph, target), we can learn a \textbf{hypotheses mapping} $T$(graph). So instead of moving data to models (e.g. graphs into vectors, trees into sequences\ldots with alignment problems, loss of information, etc.) we \textbf{mode models to data}.
+The goal is to \textbf{learn} a mapping between a structured information domain (SD) and a discrete/continuous space (\textbf{transduction} $T$): given a set of examples (graph, target), we can learn a \textbf{hypothesis mapping} $T$(graph). So instead of moving data to models (e.g. graphs into vectors, trees into sequences\ldots with alignment problems, loss of information, etc.) we \textbf{move models to data}.
 \paragraph{Classes}
 \begin{center}
 	\includegraphics[scale=0.5]{40.png}
 \end{center}\begin{list}{}{}
 	\item \textbf{K-ary tree}: root and bounded out-degree ($k$) for each node (the number of children)
-	\item \textbf{DPAG}: laveled direct positional acyclic graphs with supersource, bounded in-degree and out-degree ($k$)
+	\item \textbf{DPAG}: labeled direct positional acyclic graphs with supersource, bounded in-degree and out-degree ($k$)
 \end{list}
 \paragraph{Overview of SD learning}
 \begin{center}
@@ -1531,18 +1531,17 @@ The goal is to \textbf{learn} a mapping between a structured information domain 
 \end{tabular}
 \end{center}
 \paragraph{Transductions}
-From an input graph $g$, $T_{enc}$ produces $x(g)$ (possible internal representation/encoding) and with that produces the outpu $y(g)$ which type depends on the kind of transduction: a general transduction can be either
+From an input graph $\mathbf{g}$, $T_{enc}$ produces $\mathbf{x}(\mathbf{g})$ (possible internal representation/encoding) and with that produces the outpu $\mathbf{y}(\mathbf{g})$ which type depends on the kind of transduction: a general transduction can be either
 \begin{list}{}{}
-	\item \textbf{Structure-to-Structure}, input and output $y(g)$ isomorphic
+	\item \textbf{Structure-to-Structure}, input and output are isomorphic
 	\item \textbf{Structure-to-Scalar}, regression/classification
-	\item Or in general can also be \textbf{non-isomorphic}
+	\item Or in general, it can also be \textbf{non-isomorphic}
 \end{list}
-%TODO ML-21-SDL-intro-v0.1.pdf from here
 \subsection{Recurrent/Recursive Approaches for Trees}
-\paragraph{RRNs} A state-transitions system with free parameters. Given $x(0) = 0$, the internal state is $\left\{\begin{array}{l}
-x(t)=\tau(x(t-1),l(t))\\
-y(t)=g(x(t),l(t))
-\end{array}\right.$ and the states summarize the past information, with $\tau$ being the state transition function realized by a neural network with weights and sigmoidal functions.\\
+\paragraph{RRNs} A state-transitions system with free parameters. Given $\mathbf{x}(0) = 0$, the internal state is $\left\{\begin{array}{l}
+\mathbf{x}(t)=\tau(\mathbf{x}(t-1),\mathbf{l}(t))\\
+\mathbf{y}(t)=g(\mathbf{x}(t),\mathbf{l}(t))
+\end{array}\right.$ and the \textbf{states summarize the past information}, with $\tau$ being the \textbf{state transition function} realized by a neural network with weights and sigmoidal functions.\\
 Over time the state information increases:
 \begin{center}
 	\includegraphics[scale=0.75]{41.png}
@@ -1550,11 +1549,17 @@ Over time the state information increases:
 We can use RNNs to implement a bottom-up encoding of input trees, extending states for children of vertexes of the tree: \textbf{universal approximation} over the tree domain/DPAG
 \begin{center}
 	$$\left\{\begin{array}{l}
-x(v)=\tau(x(\text{ch}[v]),l(v))\\
-y(v)=g(x(v),l(v))
+\mathbf{x}(v)=\tau(\mathbf{x}(\text{children}(v)),\mathbf{l}(v))\\
+\mathbf{y}(v)=g(\mathbf{x}(v),\mathbf{l}(v))
 \end{array}\right.$$
 	\includegraphics[scale=0.7]{42.png}
 \end{center}
+\paragraph{Unfolding network}
+\begin{center}
+	\includegraphics[scale=0.5]{55.png}
+\end{center}
+Unfolding (encoding) through different structures. The same process applied to all the nodes of a tree and for all the trees in the dataset.
+\pagebreak
 \paragraph{Encoding network} 
 \begin{center}
 	\includegraphics[scale=0.5]{43.png}
@@ -1563,7 +1568,7 @@ y(v)=g(x(v),l(v))
 \paragraph{Useful concepts} Recurrent neural networks transductions admit a recursive state representation with the following properties:
 \begin{list}{}{}
 	\item \textbf{Causality}: the transduction computed in correspondence of a vertex $v$ depends only on $v$ and its descendants
-	\item \textbf{Stationarity}: the transduction computed in correspondence of a vertex $v$ is independent from the node node.\\
+	\item \textbf{Stationarity}: the transduction computed in correspondence of a vertex $v$ is independent from the node.\\
 	$\tau$ is the same for every $v$, regardless of the dimension of sequences/structures (useful to process data of variable length with a fixed size model)
 	\item \textbf{Adaptivity}: the transduction is learned from observed data
 \end{list}
@@ -1586,9 +1591,9 @@ $\rightarrow$ \textbf{Deep TreeESN}: hierarchical abstraction both trough the in
 \begin{center}
 	\includegraphics[scale=0.5]{45.png}
 \end{center}
-Improve efficiency (giving the same number of units) and improves results.
-\paragraph{HTMM} For example, \textbf{Bottom-up Hidden Tree Markov models} extend HMM to trees exploiting the recursive approach. It's a generative process from the leaves to the root.\\
-Uses the Markov assumption $Q$ch$_1(u),\ldots,Q$ch$_k(u)\Rightarrow Q_u$ and a children-to-parent hidden state transition\\$P(Q_u\:|\:Q$ch$_1(u),\ldots,Q$ch$_k(u))$
+Improve efficiency (given the same number of units) and improves results.
+\paragraph{HTMM} For example, \textbf{Bottom-up Hidden Tree Markov models} extend HMM to trees exploiting the recursive approach. It's a generative process from the leafs to the root.\\
+Uses the Markov assumption $$Q\text{children}_1(u),\ldots,Q\text{children}_k(u)\Rightarrow Q_u$$ and a children-to-parent hidden state transition$$P(Q_u\:|\:Q\text{children}_1(u),\ldots,Q\text{children}_k(u))$$
 \begin{center}
 	\includegraphics[scale=0.5]{46.png}
 \end{center}
@@ -1603,15 +1608,19 @@ Iteratively compared via bottom-up encoding process.
 \end{list}
 Toward partial relaxation (or \textbf{extension}) of the causality assumption.
 \paragraph{Towards Context} Kind of data domain, \textbf{contextual processing} (does the model process vertexes considering the context over the graph?), \textbf{efficiency} (often graph processing induce high complexity), \textbf{adaptivity} (including generalization performance).\\
-Contextual processing can be referred to computations that yields for each vertex a response that depends on the whole information represented in the structured data, according to its topology. Causality introduces an issue: how to deal with cycles and causality? Two main approaches:\begin{list}{}{}
+Contextual processing can be referred to computations that yields for each vertex a response that depends on the whole information represented in the structured data, according to its topology. Causality introduces an issue: how to deal with cycles and causality? Two main approaches:
+\begin{list}{}{}
 	\item \textbf{RNN}: explicitly treat the cycles constraining state dynamics to be contractive.\begin{list}{}{}
-		\item \textbf{GraphESN/GNN}, cycles are allowed in state computation, the state is computed iterating the state transition function until convergence. Stability of the recursive encoding process is guaranteed by resorting to contractive state dynamics (banach theorem for fixed point).\\
-		In GNN imposing constraints in the loss function (alternating learning and convergence), while in GraphESN the condition is inherited by contractivity of the reservoir dynamics (very efficient).
+		\item \textbf{GraphESN/GNN}, cycles are allowed in state computation, the state is computed iterating the state transition function until convergence. Stability of the recursive encoding process is guaranteed by resorting to \textbf{contractive state dynamics} (Banach theorem for fixed point):
+		\begin{list}{}{}
+			\item In GNN by imposing constraints in the loss function (alternating learning and convergence)
+			\item In GraphESN the condition is inherited by contractivity of the reservoir dynamics (very efficient)
+		\end{list}
 		\item \textbf{FDGNN} deep embedding: exploit embedding from the previous layer to develop a higher order embedding\begin{center}
 			\includegraphics[scale=0.5]{47.png}
 		\end{center}
 	\end{list}
-	\item \textbf{Layering}: contextual non-recursive approach. Basic idea (aka deep learning for graphs): the mutual dependencies are managed (architecturally) through different layers. Instead of iterating at the same layer, each vertex can take the context of the other vertexes computed in the previous layers, accessing progressively to the entire graph/network, and each vertex take information from all the others including mutual influences.\begin{list}{}{}
+	\item \textbf{Layering}: contextual non-recursive approach. Basic idea (aka deep learning for graphs): the \textbf{mutual dependencies are managed} (architecturally) \textbf{through different layers}. Instead of iterating at the same layer, each vertex can take the context of the other vertexes computed in the previous layers, accessing progressively to the entire graph/network, and each vertex take information from all the others including mutual influences.\begin{list}{}{}
 		\item \textbf{NN4G}: pioneer approach following the RNN/CRCC line (completely relaxing the recursive causality assumption). It visits the nodes of the input graphs through units with weight sharing (stationarity), i.e. we apply the same model to each node and for each node we compose the context through layers.\\
 		Composition through layers. The context window is incrementally extended when the number of hidden units is decreased.
 		\begin{center}
