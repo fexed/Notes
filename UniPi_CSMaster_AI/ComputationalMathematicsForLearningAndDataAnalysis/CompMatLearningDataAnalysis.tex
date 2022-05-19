@@ -887,7 +887,7 @@ What if I need the \textbf{smallest} eigenvalues of $A$? A trick: if $A=V\Lambda
 & &\lambda_m^{-1}
 \end{array}\right]V^{-1}$ with $\lambda_m^{-1}$ the largest. So we can compute $\mu=$\texttt{eigs}$(B,n)$ with $B=A^{-1}$ and take $\lambda_i = \frac{1}{\mu_i}$ for $i=1,\ldots,n$. $B$ is dense and expensive to compute, but in Arnoldi it's enough to have a "black-box" function that computes $Bv=A^{-1}v$ given $v$.\\
 Computing $w=A^{-1}v \Leftrightarrow$ solving the linear system $Aw=v$. So one can precompute, once, a sparse factorization $A=PLU$ and then pass to \texttt{eigs}() the callback/black-box/oracle function $w = (U-(L-(P^Tb)))$\\
-Recall that one can also "target" eigenvalues closest to a given $\alpha\in \mathbb{C}$ by applying Arnoldi to $(A-\alpha I)^{-1}$ with eigenvalues $\mu_i = (\lambda_i-\alpha)^{-1}$ for $i=1,\ldots,m$\\\\
+Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ by applying Arnoldi to $(A-\alpha I)^{-1}$ with eigenvalues $\mu_i = (\lambda_i-\alpha)^{-1}$ for $i=1,\ldots,m$\\\\
 If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MINRES.
 \subsection{Conjugate Gradient}
@@ -1133,13 +1133,13 @@ For \texttt{in\_middle\_of(xl, xr)} the obvious choice is \texttt{return (xl + x
 The condition $f'(x_-) < -\epsilon, f'(x_+) > \epsilon$ is important. What if is not satisfied? Obvious solution, moving the interval more and more to the right until the derivative is possible.\\
 The same in reverse of $x_-$ with $\Delta x = -1$. This works in practice for all "reasonable" functions. Works if $f$ coercive ($\lim_{|x| \to \infty} f(x) = \infty$)\\
 \begin{list}{}{}
-	\item $f' \in \mathbb{C}^0 \Leftrightarrow f \in \mathbb{C}^1 \Leftrightarrow$ continuously differentiable $\Rightarrow f\in \mathbb{C}^0$
-	\item $f'' \in \mathbb{C}^0 \Leftrightarrow f\in \mathbb{C}^2 \Leftrightarrow f' \in \mathbb{C}^1 \Rightarrow f' \in \mathbb{C}^0 \Rightarrow f \in \mathbb{C}^1 \Rightarrow f \in \mathbb{C}^0$
-	\item $f \in \mathbb{C}^1$ globally L-c on $X \Rightarrow |f'(x)| \leq L \forall\: x \in X$
+	\item $f' \in C^0 \Leftrightarrow f \in C^1 \Leftrightarrow$ continuously differentiable $\Rightarrow f\in C^0$
+	\item $f'' \in C^0 \Leftrightarrow f\in C^2 \Leftrightarrow f' \in C^1 \Rightarrow f' \in C^0 \Rightarrow f \in C^1 \Rightarrow f \in C^0$
+	\item $f \in C^1$ globally L-c on $X \Rightarrow |f'(x)| \leq L \forall\: x \in X$
 \end{list}
-\paragraph{Extreme value theorem} $f \in \mathbb{C}^0$ on $X = [x_-, x_+]$ finite $\Rightarrow$ max$\{f(x)\:|\: x\in X\} < \infty$, min$\{f(x)\:|\: x\in X\} > -\infty$\\\\
-$f\in \mathbb{C}^1$ on $X$ finite $\Rightarrow f$ globally L-c on $X$\\
-Best possible case is $f\in \mathbb{C}^2$ on finite $X\Rightarrow$ both $f$ and $f'$ globally L-c on $X$
+\paragraph{Extreme value theorem} $f \in C^0$ on $X = [x_-, x_+]$ finite $\Rightarrow$ max$\{f(x)\:|\: x\in X\} < \infty$, min$\{f(x)\:|\: x\in X\} > -\infty$\\\\
+$f\in C^1$ on $X$ finite $\Rightarrow f$ globally L-c on $X$\\
+Best possible case is $f\in C^2$ on finite $X\Rightarrow$ both $f$ and $f'$ globally L-c on $X$
 \paragraph{Fastest local optimization} Interpolation, for improving the dichotomic search. Choosing $x$ "right in the middle" is the dumbest possible approach, because we know a lot about $f$: $f(x_-), f(x_+), f'(x_-), f'(x_+)\ldots$. So let's use that, by constructing a model of $f$ based on known information. Much better choosing $x$ close to $x_*$.\\
 But remember that \textbf{the model is an estimate}, so never completely trust the model, but regularize, stabilize\ldots in this case, the minimum guaranteed decrease is with $\sigma < 0.5$, and the worst case is linear convergence with $r = 1 - \sigma$, but hopefully is much faster than that when the model is "right".
 \subsection{Measuring algorithms speed} Given the sequences \begin{list}{}{}
@@ -1165,7 +1165,7 @@ $$\lim_{i\to\infty} \left(\frac{f_{i+1} - f_*}{f_i - f_*}\right)^p = \lim_{i\to\
 	$\frac{1}{2^{2^i}} \Rightarrow i \in O(\log(\log(\frac{1}{\epsilon})))$, which is basically $O(1)$: the number of correct digits doubles at each iteration
 \end{list}
 \paragraph{Improving dichotomic search} Quadratic interpolation has superlinear convergence if started "close enough".\\
-$f\in \mathbb{C}^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$ with $p = \frac{1 + \sqrt{5}}{2}$ exponent of superlinear convergence.\\$x_0$ is the starting point of the algorithm.\\\\
+$f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$ with $p = \frac{1 + \sqrt{5}}{2}$ exponent of superlinear convergence.\\$x_0$ is the starting point of the algorithm.\\\\
 Four conditions $\Rightarrow$ can fit a cubic polynomial and use its minima. Theoretically pays: quadratic convergence ($p = 2$) and seems to work well in practice.
 \paragraph{Newton's method} More derivatives, so same information with less points. First order model of $f'$ at $x_i$ $$L_i'(x) = L_{x_i}'(x) = f'(x_i) + f''(x_i)(x-x_i)\simeq f'(x)$$ and solve $L'_i(x) = 0 \simeq f'(x) = 0 \Rightarrow x = x_i-\frac{f'(x_i)}{f''(x_i)}$
 \begin{lstlisting}[style=myPython]
@@ -1176,7 +1176,7 @@ procedure x = NM(f, x, eps)
 With \texttt{df} meaning $f'$ and \texttt{ddf} meaning $f''$.\\
 Alternatively construct a second order model $$Q_i(x) = Q_{x^i}(x) = f(x^i) + f'(x^i)(x - x^i) + f''(x^i)\frac{(x - x^i)^2}{2}$$ and then minimize it.\\\\
 Numerically delicate: what if $f''(x) \simeq 0$? Converges (at all) only if started close enough to $x_*$.\\
-If we get within a short enough distance $\delta$, then it will converges extremely fast with $p = 2$. Mathematically, $f\in \mathbb{C}^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0\Rightarrow \exists\:\delta>0\:|\:x_0\in[x_*-\delta, x_*+\delta]\Rightarrow \{x_i\} \rightarrow x_*$ with $p = 2$.
+If we get within a short enough distance $\delta$, then it will converges extremely fast with $p = 2$. Mathematically, $f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0\Rightarrow \exists\:\delta>0\:|\:x_0\in[x_*-\delta, x_*+\delta]\Rightarrow \{x_i\} \rightarrow x_*$ with $p = 2$.
 
 \subsection{Global optimization} Unless strong assumptions are made, we can't say much about global optimization.\\
 The obvious one would be unimodal, but not easy to verify/construct. Workable alternative: $f$ convex ($\Rightarrow$ unimodal).
@@ -1265,7 +1265,7 @@ $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
 	\item $\Rightarrow \frac{\partial^2 f}{\partial x_j\partial x_i}(y) = \frac{\partial^2 f}{\partial x_i\partial x_j}(y) \Leftrightarrow \nabla^2 f$ symmetric
 	\item $\Rightarrow$ all eigenvalues of $\nabla^2 f(x)$ are real
 \end{list}
-With $f\in \mathbb{C}^2$ we have $\nabla^2 f(x)$ continuous everywhere, so symmetric everywhere. $C^2$ is the best class for optimization.
+With $f\in C^2$ we have $\nabla^2 f(x)$ continuous everywhere, so symmetric everywhere. $C^2$ is the best class for optimization.
 \subsection{Optimality conditions}
 $f$ differentiable at $x$ and $x$ local minimum $\Rightarrow \nabla f(x) = 0 \equiv$ stationary point ($\not\Leftarrow$): to tell them apart we need to look at the curvature of $f$. If $f$ quadratic I would know, looking at the eigenvalues of $Q = \nabla^2 f(x)$, so we could approximate $f$ with a quadratic function: the second order model $$Q_x(y) = L_x(y) + \frac{1}{2}(y-x)^T\nabla^2f(x)(y-x)$$
 $$\nabla Q_x(x) = \nabla L_x(x) = \nabla f(x) \Rightarrow \nabla Q_x(x) = 0$$otherwise not minimum. Meaning that in a local minimum there cannot be directions of negative curvature, $\nabla^2 f(x) \geq 0 \Leftrightarrow x$ (global) minimum of $Q_x$. Requires the second-order Taylor's theorem
@@ -1417,7 +1417,6 @@ We need conditions on $f$ to get it:
 \end{list}
 Might be rather slow, need something better.
 %end 3-unconstrained optimization I.pdf
-%TODO from here
 \subsection{More-Than-Gradient Methods}
 \paragraph{General descent methods} So far, the crucial assumption was $d_i = -\nabla f(x_i)$\\
 The crucial convergence arguments are:
@@ -1425,36 +1424,56 @@ The crucial convergence arguments are:
 	\item $\phi_i'(0) = -\|\nabla f(x_i)\|^2$, or "far from $x_*$ the derivative is very negative"
 	\item "You can get a non-vanishing fraction of the descent promised by $\phi_i'(0)$", the "exact" LS or Armijo or FS + $L$-smooth $\Rightarrow \alpha_i$ doesn't not go to 0 too fast.
 \end{list}
-so that there's a significant decrease at each step unless $\|\nabla f(x_i)\|\rightarrow 0$.\\
+So that there's a significant decrease at each step unless $\|\nabla f(x_i)\|\rightarrow 0$.\\
 There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -\|\nabla f(x_i)\|^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
-In $R^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
-\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $\frac{\partial f}{\partial d_i}(x_i) < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$ meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
-\textbf{Zoutendijk's Theorem}: $f\in \mathbb{C}^1 L$-smooth, $f_*>-\infty, (A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$\\
+In $\mathbb{R}^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
+\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $$\frac{\partial f(x_i)}{\partial d_i} < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$$ Meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
+\textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty$ $$(A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$$
 A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{\|\nabla f(x_i)\|\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
 Very many $d_i$, but which is better than $-\nabla f$? Need to look farther than the first order model.
-\paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)\Rightarrow$ Newton's direction $d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$ (just $R^n$ version). No problem with the step, we use $\alpha_i = 1$.\\
-The \textbf{Newton's Method} is $x_{i+1} = x_i + d_i$, a step of $\alpha_i = 1$ along $d_i$.\\
+\paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)$\\$\Rightarrow$ \textbf{Newton's direction} $d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$ (just $\mathbb{R}^n$ version). No problem with the step, we use $\alpha_i = 1$.\\
+The \textbf{Newton's Method} is $x_{i+1} = x_i + d_i$ (step of $\alpha_i = 1$ along $d_i$)\\
 It's not globally convergent, needs to be globalised. Easy as $\nabla^2 f(x_i) \succ 0 \Rightarrow [\nabla^2 f(x_i)]^{-1} \succ 0 \Rightarrow d_i$ is of descent.
 $$\langle \nabla f(x_i), d_i\rangle = -\nabla f(x_i)^T[\nabla^2f(x_i)]^{-1}\nabla f(x_i) < 0$$
 but it's not enough, we need it "negative enough".
-\paragraph{Globalised Netwtod} Simply add AWLS/BLS with $\alpha_0 = 1$. The convergence requires $f\in \mathbb{C}^2, L$-smooth and $\tau$-convex
+\paragraph{Globalized Newton} Simply add AWLS/BLS with $\alpha_0 = 1$. The convergence requires $f\in C^2, L$-smooth and $\tau$-convex
 \subparagraph{Theorem 1} $\cos(\theta_i)$ bounded away from $0 \Rightarrow$ global convergence.\\
 Meaning $\cos(\theta_i)\geq \tilde{\theta} > 0$
-\subparagraph{Theorem 2} $f\in \mathbb{C}^3, \nabla f(x_*) = 0, \nabla^2 f(x_*)\succ 0\Rightarrow\exists B(x_*, r)\:|\:x_0\in B\Rightarrow$ "pure" Newton sequence with $\alpha_i = 1$ that $\{x_i\}\rightarrow x_*$ quadratically.
-\subparagraph{Theorem 3} If $\{x_i\}\rightarrow x_* \exists\:h\:|\:\alpha_i = 1$ satisfies $(A)$ for all $i\geq h$\\
+\subparagraph{Theorem 2} $f\in C^3, \nabla f(x_*) = 0, \nabla^2 f(x_*)\succ 0\Rightarrow\exists B(x_*, r)\:|\:x_0\in B\Rightarrow$ "pure" Newton sequence with $\alpha_i = 1$ that $\{x_i\}\rightarrow x_*$ quadratically.
+\subparagraph{Theorem 3} If $\{x_i\}\rightarrow x_*$ then $\exists\:h\:|\:\alpha_i = 1$ satisfies $(A)$ for all $i\geq h$\\
 Requires $m_1\leq \frac{1}{2}$, because $m_1>\frac{1}{2}$ cuts away the minimum when $f$ quadratic.\\\\
 \textbf{Global phase} ($\alpha_i$ varies) $+$ \textbf{pure Newton's phase} (ends in $O(1)\simeq 6$ iterations in practice)\\
-If $\nabla^2 f M$-smooth then global phase also $O(1)$: $O\left(\frac{M^2L^2(f(x_0)-f_*)}{\tau^5}\right)$\\
-An interpretation is Newton = Gradient in a twisted space. $Q$ is positive semidefinite ($\succeq 0$), so $Q= RR\Leftrightarrow R = Q^{\frac{1}{2}}$: it exists and it's symmetric $Q=H\Lambda H^T\Rightarrow R = H\sqrt{\Lambda}H^T$\\
-$f(x) = \frac{1}{2}x^TQx + qx, d = -x-Q^{-1}q \Rightarrow \nabla f(x+d)=0$ Netwon ends in one iteration. $y = Rx \Leftrightarrow x = R^{-1}y, h(y) = f(R^{-1}y) = \frac{1}{2}y^TIy + qR^{-1}y$ (in $y$-space, $\nabla^2 f(x_i)$ looks like $I\Rightarrow$ gradient is fast)\\
-$g = -\nabla h(y) = -y-R^{-1}q \Rightarrow \nabla h(y+g) = 0$
-\subparagraph{Nonconvex case} The Newton's method is a space dilation: a linear map making $\nabla^2 f$ "simple", but it's not necessarily $\nabla^2f(x_i)^{-1}$ especially when $\not\succeq 0$
+If $\nabla^2 f M$-smooth then global phase also $O(1)$: $O\left(\displaystyle \frac{M^2L^2(f(x_0)-f_*)}{\displaystyle \tau^5}\right)$\\\\
+An interpretation is Newton = Gradient in a twisted space.\\
+$Q$ is positive semidefinite ($\succeq 0$), so $Q= RR\Leftrightarrow R = Q^{\frac{1}{2}}$: it exists and it's symmetric $Q=H\Lambda H^T\Rightarrow R = H\sqrt{\Lambda}H^T$
+$$f(x) = \frac{1}{2}x^TQx + qx$$ $$d = -x-Q^{-1}q$$ $$\Rightarrow \nabla f(x+d)=0$$ Meaning that \textbf{Newton ends in one iteration} $$y = Rx \Leftrightarrow x = R^{-1}y$$ $$h(y) = f(R^{-1}y) = \frac{1}{2}y^TIy + qR^{-1}y$$ In $y$-space, $\nabla^2 f(x_i)$ looks like $I\Rightarrow$ gradient is fast $$g = -\nabla h(y) = -y-R^{-1}q$$ $$\Rightarrow \nabla h(y+g) = 0$$
+Translate $g$ from $y$-space to $x$-space
+$$R^{-1}g=R^{-1}(-y-R^{-1}q) = -x-Q^{-1}q = d$$
+$y = Rx$ is not the only choice, $y\simeq Rx$ (very $\simeq$) also works.
+\subparagraph{Nonconvex case} The Newton's method is a space dilation: a linear map making $\nabla^2 f$ "simple", but not necessarily $\nabla^2f(x_i)^{-1}$ especially when $\not\succeq 0$
 $$d_i=-H_{i}\nabla f(x_i),\tau I\preceq H_i\preceq LI, (A)\cap (W)\Rightarrow\text{Global convergence}$$
-Any $\epsilon_i > -\lambda_n$ works (but numerical issues). Also algorithmic issues: $\lambda_n(\nabla^2 f(x_i)+\epsilon I)$ is very small, so the axes are very elongated and $x_{i+1}$ far from $x_i$ (not good for a local model)\\
-Simple form $\epsilon = max\{0,\delta - \lambda_n\}$ for appropriately chosen $\delta$. This solves $min\{\|H-\nabla^2 f(x_i)\|_2\:|\:H\succeq \delta I\}$, works for other norms too.\\
+Any $\epsilon_i > -\lambda_n$ works (but numerical issues). Also algorithmic issues: $\lambda_n(\nabla^2 f(x_i)+\epsilon I)$ is very small, so the axes of $S(Q_{x_i},\:)$ are very elongated and $x_{i+1}$ far from $x_i$ (not good for a local model)\\
+Simple form $$\epsilon = \max\{0,\delta - \lambda_n\}$$ for appropriately chosen small $\delta$. This solves $$\min\{\|H-\nabla^2 f(x_i)\|_2\:|\:H\succeq \delta I\}$$ Works for other norms too.\\
 In every case, $\{x_i\}\rightarrow x_*$ with $\nabla^2 f(x_*)\succeq \delta I\Rightarrow \epsilon_i = 0 \Leftrightarrow H_i = \nabla^2 f(x_i)$ eventually (quadratic convergence in the tail)
+\paragraph{Trust Region} $\nabla^2f(x_i)\not\succ 0\Rightarrow\exists$ negative curvature direction along which $f$ decreases: exactly what we want when minimizing $f$.\\
+$Q_{x_i}(y)$ has no minimum on $\mathbb{R}^n$, but it does on a compact set: $\mathbb{R}^n \supset T^i$ (compact) \textbf{trust region} around $x_i$ "where $Q_{x_i}$ can be trusted". A \textbf{constrained problem}
+$$x_{i+1}\in\arg\min\{Q_{x_i}(y)\:|\:y\in T^i\}$$
+Even worse, it's NP-hard for simple $T$ like $B_1(x_i,r)$ or $B_\infty(x_i,r)$ but not for $B_2(x_i,r)$. Which $r$?\\
+Can use $H_i\simeq \nabla^2f(x_i)$, not necessarily $\succ 0$.\\\\
+$x_{i+1}$ optimal means $$x_{i+1} = x_i+d_i\wedge\exists\:\lambda_i\geq 0\:|\:\underset{\text{Linear}}{\underbrace{[H_i+\lambda_i]d_i=-\nabla f(x_i)}} \wedge \underset{\text{Semidefinite}}{\underbrace{H_i+\lambda_i I\succeq 0}} \wedge \underset{\text{Nonlinear}}{\underbrace{\lambda_i(r-\|d_i\|)=0}}$$
+\begin{list}{}{}
+	\item $\lambda > 0\Rightarrow$ like in line search with $\epsilon_i=\lambda$ (but here $\lambda$ is unknown)
+	\item $\|d_i\|<r\Rightarrow\lambda_i=0\Rightarrow$ normal Newton step ($T$ has no effect)
+	\item $\{x_i\}\rightarrow x_*\Rightarrow\{\|d_i\|\}\rightarrow 0\Rightarrow$ eventually $\lambda_i=0\Rightarrow$ quadratic convergence in the tail
+\end{list}
+Plenty of smart ways to find $\lambda$, $x_{i+1}$ or approximate them. Typically some eigenvalue/eigenvectors computations, $O(n^3)$ again.
+\begin{list}{}{}
+	\item LS: first $d_i$ then $\alpha_i$
+	\item TR: first $r\simeq \alpha_i$ then $d_i$
+\end{list}
+Ultimately similar and in both cases properly choosing $H_i\simeq \nabla^2f(x_i)$ to reduce the cost is crucial.
 \paragraph{Quasi-Newton} The space of $H_i$ that gives fast convergence is big. Superlinear convergence if $H_i$ looks like $\nabla^2 f(x_i)$ along $d$.\\
-General derivation of Quasi-Newton methods $m_i(x) = \nabla f(x_i)(x-x_i)+\frac{1}{2}(x-x_i)^TH_i(x-x_i), x_{i+1} = x_i+\alpha_id_i$\\
+General derivation of Quasi-Newton methods $$m_i(x) = \nabla f(x_i)(x-x_i)+\frac{1}{2}(x-x_i)^TH_i(x-x_i), x_{i+1} = x_i+\alpha_id_i$$
 Having computed $x_{i+1}$ and $\nabla f(x_{i+1})$, new model
 $$m_{i+1}(x) = \nabla f(x_{i+1})(x-x_{i+1})+\frac{1}{2}(x-x_{i+1})^TH_{i+1}(x-x_{i+1})$$\\
 We would like $H_{i+1}$ to have the following properties:
@@ -1466,11 +1485,17 @@ We would like $H_{i+1}$ to have the following properties:
 \end{list}
 Depending on the choices at iteration $i$, it may not be possible to achieve both the first and second properties.\\
 \textbf{Notation} $s_i = x_{i+1}- x_i = \alpha_id_i$, $y_i = \nabla f(x_{i+1}) -\nabla f(x_i)$\\
-Secant equation $(S)\:\:\:\:H_{i+1}s_i = y_i$\\
-$(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$ and the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
+Secant equation 
+\begin{list}{}{}
+	\item[$(S)$] $H_{i+1}s_i = y_i$
+\end{list}
+$(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$, the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
 So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
-Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$. Assuming an AWLS, $(C)$ can always be satisfied.
-\paragraph{DFP} With the three properties we have $H_{i+1} = \arg\min\{\|H-H_i\|\:|\:(S), H\succeq 0\}$\\
+Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$.
+$$\phi'(\alpha_i)=\langle\nabla f(x_{i+1},d_i\rangle\geq m_3\phi'(0)=m_3\langle\nabla f(x_i), d_i\rangle\Rightarrow$$
+$$\Rightarrow \langle\nabla f(x_{i+1})-\nabla f(x_i),d_i\rangle\geq (m_3-1)\phi'(0)> 0$$
+Assuming an AWLS, $(C)$ can always be satisfied.
+\paragraph{DFP} With the three properties we have $$H_{i+1} = \arg\min\{\|H-H_i\|\:|\:(S), H\succeq 0\}$$
 Needs appropriate $\|\:\:\|$: \textbf{Davidon-Fletcher-Powell formula}
 \begin{list}{}{}
 	\item[$(DFP)$] $H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$
@@ -1478,55 +1503,62 @@ Needs appropriate $\|\:\:\|$: \textbf{Davidon-Fletcher-Powell formula}
 So $H_{i+1}$ is a rank-two correction of $H_i$, $O(n^2)$ to produce $H_{i+1}$ from $H_i$\\
 Actually need $B_{i+1} = H_{i+1}^{-1}$: \textbf{Sherman-Morrison-Woodbury formula}
 \begin{list}{}{}
-	\item[$(SMW)$] $[A+ab^T]^{-1} = \frac{A^{-1} - A^{-1}ab^TA^{-1}}{1-b^TA^{-1}a}$
-	\item[$\Rightarrow (DFP)^{-1}$] $B_{i+1} = \frac{B_i + \rho_is_is_i^T - B_iy_iy_i^TB_i}{y_i^TB_iy_i}$
+	\item[$(SMW)$] $[A+ab^T]^{-1} = \frac{\displaystyle A^{-1} - A^{-1}ab^TA^{-1}}{\displaystyle 1-b^TA^{-1}a}$
+	\item[$\Rightarrow (DFP)^{-1}$] $B_{i+1} = \frac{\displaystyle B_i + \rho_is_is_i^T - B_iy_iy_i^TB_i}{\displaystyle y_i^TB_iy_i}$
 \end{list}
 $O(n^2)$ per iteration, just matrix-vector products and no inverses.\\
 This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficient but can do better.
 \paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = \arg\min\{\|B-B_i\|\:|\:(S),B\succeq 0\}$\\
 \textbf{Broyden-Felcther-Goldfarb-Shanno formulae} still $O(n^2)$\begin{list}{}{}
-	\item[$(BFGS)$] $H_{i+1} = \frac{H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{s_i^TH_is_i}$
-	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T = B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
+	\item[$(BFGS)$] $H_{i+1} = \frac{\displaystyle H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{\displaystyle s_i^TH_is_i}$
+	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T=$\\$= B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
 \end{list}
-\paragraph{Conjugate gradient method for quadratic functions} Gradient method + exact LS $\Rightarrow \langle \nabla f(x_{i+1}, d_i\rangle = 0\equiv d_{i+1}$ perpendicular to $d_i$. Property: $x_{i+1}$ minimum over all the small subspace of $d_i$. This is lost at $i+2$: zig-zags.\\
+\paragraph{Conjugate gradient method for quadratic functions} Gradient method + exact LS $\Rightarrow \langle \nabla f(x_{i+1}, d_i\rangle = 0$ resulting in $d_{i+1} \perp d_i$. Property is lost at $i+2$: $x_{i+2}$ is not the minimum over all the small subspace of $d_i$, it zig-zags.\\
 Would be nice if $x_{i+1}$ minimum on the subspace of $\{d_1,\ldots,d_i\}$, getting larger with every iteration.\\
 Possible with quadratic $f\equiv$ linear systems, with two conditions:
 \begin{list}{}{}
-	\item all directions are $Q$-conjugate: $d_i^TQd_j=0\:\:\:\:\forall\:i,j$
-	\item the optimal step is always taken along each $d_i$
+	\item All directions are $Q$-conjugate: $d_i^TQd_j=0\:\:\:\:\forall\:i,j$
+	\item The optimal step is always taken along each $d_i$
 \end{list}
 Can't use $d_i = -\nabla f(x_i)$, have to deflect $-\nabla f(x_i)$ using $d_{i-1}$: $d_0 = 0$ and $d_i = -\nabla f(x_i) + \beta_id_{i-1}$\\
-The crucial, but only, decision is $\beta_i$: \textbf{Fletcher-Reeves} (closed) \textbf{formula}:
+The crucial, but only, decision is $\beta_i$: \textbf{Fletcher-Reeves} (closed) \textbf{formula}
 \begin{list}{}{}
-	\item $\beta_i = \frac{\nabla f(x_i)^T Qd_{i-1}}{d_{i-1}^TQd_{i-1}} = \frac{\|\nabla f(x_i)\|^2}{\|\nabla f(x_{i-1})\|^2}$
+	\item $\beta_i = \frac{\displaystyle \nabla f(x_i)^T Qd_{i-1}}{\displaystyle d_{i-1}^TQd_{i-1}} = \frac{\displaystyle \|\nabla f(x_i)\|^2}{\displaystyle \|\nabla f(x_{i-1})\|^2}$
 \end{list}
-$f$ quadratic + exact LS $\Rightarrow$ quadratic conjugate gradient (CG): $\nabla f(x) = 0 \equiv Qx = -q$ in at most $n$ iterations. If properly preconditioned $<< n$ iterations.\\
+$f$ quadratic + exact LS $\Rightarrow$ quadratic conjugate gradient (CG): $\nabla f(x) = 0 \Leftrightarrow Qx = -q$ in at most $n$ iterations. If properly preconditioned $<< n$ iterations.\\
 Also many $\beta$ formulae, all equivalent for quadratic $f$ but not so here.\\
 LS only exact with quadratic $f$, otherwise AWLS.
 \subparagraph{Convergence and efficiency} Depends on $\beta$-formula. F-R requires $m_1<m_2<\frac{1}{2}$ for $(A)\cap(W')$ to work.\\
-$(A)\cap(W')\not\Rightarrow d_i$ of P-R is of descent, unless $\beta_{PR,i} = max\{\beta_i, 0\}$\\
+$(A)\cap(W')\not\Rightarrow d_i$ of P-R is of descent, unless $\beta_{PR,i} = \max\{\beta_i, 0\}$\\
 Restart: from time to time take plain $-\nabla f$. It's a good idea especially for F-R: one bad step leads to many bad steps, restarting cures this. Typically restart after $n$ steps.\\
-$n$ CG steps $\simeq 1$ Newton steps, in $n$ steps CG exactly solves a quadratic function. Powerful approach, not easy to manage.
-\paragraph{Deflected Gradients method} CG's idea: use previous direction while computing the current one. Simple form: $x_{i+1} = x_i - \alpha_i\nabla f(x_i) + \beta_i(x_i-x_{i-1})$ with $\beta_i$ called \textbf{momentum}, $x_i$ \textbf{heavy} and $\nabla f(x_i)$ the \textbf{force} steering the trajectory.\\
+$n$ CG steps $\simeq 1$ Newton step, in $n$ steps CG exactly solves a quadratic function.
+$$\|x_{i+n}-x_*\|\leq r\|x_i-x_*\|^2$$
+Makes sense: "close to $f_*$ we have $f\simeq Q_{x_*}$" and "in $n$ steps the CG exactly solves a quadratic functions".\\
+Powerful approach, not easy to manage.
+\paragraph{Deflected Gradients methods} 
+\subparagraph{Heavy Ball Gradient} CG's idea: use previous direction while computing the current one. Simple form: $$x_{i+1} = x_i - \alpha_i\nabla f(x_i) + \beta_i(x_i-x_{i-1})$$ with $\beta_i$ called \textbf{momentum}, $x_i$ \textbf{heavy} and $\nabla f(x_i)$ the \textbf{force} steering the trajectory.\\
 \textbf{Not a descent algorithm}, may zig-zags: specific analysis. For $L$-smooth and $\tau$-convex, better linear convergence
-$$\|x_{i+1} - x_*\|\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\right]\|x_i-x_*\|\:\:\:\:(\sqrt{L}<<L)$$
-Gridsearch required to find $\alpha_i$ and $\beta_i$ in practice. For non-convex $f$, converges if $\beta\in[0,1), \alpha\in(0,2\frac{1-\beta}{L})$\\
-$\nabla f$ computed after momentum but before descent: not at all a gradient-like method, almost entirely different.\\
+$$\|x_{i+1} - x_*\|\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\right]\|x_i-x_*\|$$ $$(\sqrt{L}<<L)$$
+Gridsearch required to find $\alpha_i$ and $\beta_i$ in practice. For non-convex $f$, converges if $\beta\in[0,1), \alpha\in(0,2\frac{1-\beta}{L})$
+\subparagraph{Accelerated Gradient} Similar to Heavy Ball, with $\nabla f$ computed after momentum but before descent: not at all a gradient-like method, almost entirely different.\\
 It's \textbf{optimal} $O(\frac{LD^2}{\sqrt{\epsilon}}$ for $L$-smooth not $\tau$-convex.
-%TODO poormans' directions, heavy ball gradient and accelerated gradient
 \subsection{Less-Than-Gradient Methods}
-\paragraph{Stochastic Gradient} The motivation comes from the incremental a.k.a. stochastic gradient in ML.\\
-We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in \mathbb{R}^h\}_{i\in I}$ inputs and $y=\{y_i\in \mathbb{R}^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):R^h\rightarrow R^k$ parametric on $w\in \mathbb{R}^n$ with $l:R^k\times R^k \rightarrow R$ \textbf{loss function} (could be $l_i$), fitting $$\min\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in \mathbb{R}^n\}$$
-$\nabla f(w) = \sum_{i\in I}\nabla f_i(w)$ with $m >> n$ we have a sum of a very large number of terms.\\
-A trivial case: $\pi(x;w) = \langle x,w\rangle$, $l=\frac{d^2}{2}\equiv$ linear least squares.$$f_i(w) = \frac{(y_i-\langle X_i, w\rangle)^2}{2}\:\:\:\:\:\:\:\:\nabla f_i(w) = -X_i(y_i - \langle X_i, w\rangle)$$
-Each $\nabla f_i$ is cheap, but computing the full $\nabla f$ is already costly.\\
-\textbf{Intuition}: $X_i$ are independent and identically distributed $\Rightarrow\nabla f_i$ are i.i.d. too $\Rightarrow$ "many of them will cancel out" so a \textbf{small sample} is enough to compute a close $\simeq$ to the "true" $\nabla f$: $K\subseteq I$ "small", so $\nabla f_K(w) = \sum_{i\in K}\nabla f_i(w) =$ incremental gradient. Cheaper but $-\nabla f_K$ is not a descent direction, a different analysis is needed.\\\\
-How to choose $K$? What is the better $|K|$? Apparently, no better way than \textbf{random}: \textbf{stochastic gradient}. With $K = I$ we have a "batch" and with $K\subset I \Leftrightarrow |K| < m$ a "mini-batch". An extreme version, on-line: observations used one-by-one and discarded (no memory).
-\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$\min\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in \mathbb{R}^n\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{\|w\|_2^2}{2}\in \mathbb{C}^1$ with $\nabla\Omega(w) = w$.\\
-The regularization simplifies the model and reduces the number of parameters (feature selection).
+\paragraph{Stochastic Gradient} The motivation comes from the incremental aka stochastic gradient in ML.\\
+We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in \mathbb{R}^h\}_{i\in I}$ inputs and $y=\{y_i\in \mathbb{R}^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):\mathbb{R}^h\rightarrow \mathbb{R}^k$ parametric on $w\in \mathbb{R}^n$ with $l:\mathbb{R}^k\times \mathbb{R}^k \rightarrow \mathbb{R}$ \textbf{loss function} (could be $l_i$), fitting $$\min\left\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in \mathbb{R}^n\right\}$$
+$$\nabla f(w) = \sum_{i\in I}\nabla f_i(w)$$
+With $m >> n$ we have a sum of a very large number of terms.\\
+A trivial case: $\pi(x;w) = \langle x,w\rangle$, $l=\frac{d^2}{2}$ (linear least squares)
+$$f_i(w) = \frac{(y_i-\langle X_i, w\rangle)^2}{2}$$ $$\nabla f_i(w) = -X_i(y_i - \langle X_i, w\rangle)$$
+Each $\nabla f_i$ is cheap, but computing the full $\nabla f$ is already costly due to $m$ being large.\\
+\textbf{Intuition}: $X_i$ are independent and identically distributed $\Rightarrow\nabla f_i$ are i.i.d. too $\Rightarrow$ "many of them will cancel out" so a \textbf{small sample} is enough to compute a close $\simeq$ to the "true" $\nabla f$: $K\subseteq I$ "small", so $\nabla f_K(w) = \sum_{i\in K}\nabla f_i(w) =$ \textbf{incremental gradient}. Cheaper but $-\nabla f_K$ is not a descent direction, a different analysis is needed.\\\\
+How to choose $K$? What is the better $|K|$? No better way than \textbf{random}: \textbf{stochastic gradient}. With $K = I$ we have a "batch" and with $K\subset I \Leftrightarrow |K| < m$ a "mini-batch". An extreme version, on-line: observations used one-by-one and discarded (no memory).
+\paragraph{Nondifferentiable functions} We would add a regularizer $\Omega(w)$ so that it becomes $$\min\left\{\sum_{i\in I} l(y_i, \pi(X_i;w)+\mu\Omega(w)\:|\:w\in \mathbb{R}^n\right\}$$ with $\mu$ hyperparameter. For example, a simple ridge regularization $\Omega(w) = \frac{\displaystyle \|w\|_2^2}{\displaystyle 2}\in C^1$ with $\nabla\Omega(w) = w$.\\
+The regularization simplifies the model and reduces the number of parameters (feature selection).\\\\
+A sought after regularization is $\Omega = \|\:\|_0\not\in C^0$ and a workable alternative is $\Omega = \|\:\|_1$ (Lasso), the best convex approximation of $\|\:\|_0$.
+\pagebreak
 \paragraph{Smooth methods fail on nonsmooth functions} With a nonsmooth function, many directions point outside, not giving a descent direction. But if $f$ is convex, it can be exploited.
 \subsubsection{Convex Nondifferentiable Functions}
-\paragraph{Subgradients and subdifferentials} $s$ \textbf{subgradient} of $f$ at $x$: $f(y)\geq f(x) + s(y-x)$, $\forall\:y\in \mathbb{R}^n$\\
+\paragraph{Subgradients and subdifferentials} $s$ \textbf{subgradient} of $f$ at $x$ $$\forall\:y\in \mathbb{R}^n\:\:f(y)\geq f(x) + s(y-x)$$ 
 By changing $s$ we have \textbf{too much information} of the first-order. So $s$ it's a \textbf{direction}.
 \begin{center}
 	\includegraphics[scale=0.5]{7.png}
@@ -1535,73 +1567,69 @@ For $x$ on the border of dom$(f)$, $\|s\|\rightarrow\infty$, while for $s=0\Righ
 \textbf{Subdifferential} is a set $\partial f(x) =\{s\in \mathbb{R}^n\:|\:s$ is a subgradient at $x\}$
 \begin{list}{}{}
 	\item $\partial f(x) = \{\nabla f(x)\}\Leftrightarrow f$ differentiable at $x$
-	\item $\frac{\partial f}{\partial d}(x) \leq \langle s,d\rangle\:\:\forall s \in \partial f(x)\Rightarrow d$ is a descent direction $\Leftrightarrow \langle s,d\rangle < 0\:\: \forall s\in\partial f(x)$
+	\item $\forall s \in \partial f(x)\:\:\frac{\partial f}{\partial d}(x) \leq \langle s,d\rangle\Rightarrow d$ is a descent direction $\Leftrightarrow \forall s\in\partial f(x)\:\: \langle s,d\rangle < 0$
 	\item $s_* = -\arg\min\{\|s\|\:|\:s\in\partial f(x)\}$ \textbf{steepest descent direction}
 	\item $x$ \textbf{global minimum} $\Leftrightarrow 0\in \partial f(x)$
 \end{list}
-\paragraph{Subgradients in $R^n$} If $\partial f(X) = \{g=\nabla f(x)\}$, $g\perp (f,f(x))$ i.e. $-g$ points towards $x_*$, then we can take $d\:|\:\langle g,d\rangle < 0$ (descent direction). But if $f$ is nondifferentiable in $x$, there are many different $g$ and all of them are $\perp S(f,f(x))$ ($x$ = kink point), but \textbf{not all of them are descent directions}.\\
+\paragraph{Subgradients in $\mathbb{R}^n$} If $\partial f(X) = \{g=\nabla f(x)\}$, $g\perp S(f,f(x))$ i.e. $-g$ points towards $x_*$, then we can take $d\:|\:\langle g,d\rangle < 0$ (descent direction). But if $f$ is nondifferentiable in $x$, there are many different $g$ and all of them are $\perp S(f,f(x))$ ($x$ = kink point), but \textbf{not all of them are descent directions}.\\
 However, any (-)subgradient points towards $x_*$:
 $$f(x_*)\geq f(x)+\langle g,x_*-x\rangle\Rightarrow \langle g,x_*-x\rangle\leq f(x_*)-f(x)\leq 0$$
 Enough for gradient-type approaches.
 \paragraph{Convex nondifferentiable optimization is hard} Nondifferentiable optimization is \textbf{orders of magnitude slower}
 \begin{center}
 	\begin{tabular}{c | c | c | c}
-	$f\in \mathbb{C}^1$&$\tau$-convex&$L$-smooth&$O\left(\log\left(\frac{1}{\epsilon}\right)\right)$\\
+	$f\in C^1$&$\tau$-convex&$L$-smooth&$O\left(\log\left(\frac{1}{\epsilon}\right)\right)$\\
 	\hline
-	$f\not\in \mathbb{C}^1$&$\tau$-convex&$L$-Lipschitz&$\Omega\left(\frac{L^2}{\epsilon}\right)$\\
+	$f\not\in C^1$&$\tau$-convex&$L$-Lipschitz&$\Omega\left(\frac{L^2}{\epsilon}\right)$\\
 	\hline
-	$f\in \mathbb{C}^1$&convex&$L$-smooth&$O\left(\log\left(\frac{1}{\sqrt{\epsilon}}\right)\right)$\\
+	$f\in C^1$&convex&$L$-smooth&$O\left(\log\left(\frac{1}{\sqrt{\epsilon}}\right)\right)$\\
 	\hline
-	$f\not\in \mathbb{C}^1$&convex&$L$-Lipschitz&$\Omega\left(\frac{L}{\epsilon^2}\right)$
+	$f\not\in C^1$&convex&$L$-Lipschitz&$\Omega\left(\frac{L}{\epsilon^2}\right)$
 	\end{tabular}
 \end{center}
-Furthemore, "fixed-step" cannot work for $f\not\in \mathbb{C}^1$
+Furthemore, "fixed-step" cannot work for $f\not\in C^1$
 \begin{list}{}{}
 	\item $f(x) = L|x|,$ $x_0 =-\frac{\alpha L}{2}$
 	\item $g_1 = -L,$ $x_1 = x_0 - \alpha g_1 = \frac{\alpha L}{2}$
 	\item $g_2 = L,$ $x_2 = x_1 - \alpha g_2 = -\frac{\alpha L}{2} = x_0$
 	\item $g_3 = -L\ldots$
 \end{list}
-For $f\in \mathbb{C}^1$ \textbf{the gradient is unique}, $d=-\nabla f(x)$:
+$$f_{\text{best}} - f_* = \frac{L^2\alpha}{2}$$
+$O(L)$ for $\alpha=\frac{1}{L}$ and the algorithm cycles forever.
+\pagebreak
+
+For $f\in C^1$ \textbf{the gradient is unique}, $d=-\nabla f(x)$:
 \begin{list}{}{}
 	\item $f(x+\alpha d) < f(x)\:\:\forall\alpha > 0$ small enough
-	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Leftrightarrow f(x)$ "close" to $f_*\equiv \|d\|\leq \epsilon$ is an effective stopping criterion
+	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Leftrightarrow f(x)$ "close" to $f_*\Leftrightarrow \|d\|\leq \epsilon$ is an effective stopping criterion
 	\item Can use fixed step since $\|x_{i+1}-x_i\|\rightarrow 0$ automatically: $\|d_i\|\rightarrow 0$ even if $\alpha_i \geq \tilde{\alpha} > 0$
 \end{list}
-For $f\not\in \mathbb{C}^1$, there can be \textbf{many different subgradients} $d = -[g\in\partial f(x)]$, and for any one of them (can't choose):
+For $f\not\in C^1$, there can be \textbf{many different subgradients} $d = -[g\in\partial f(x)]$, and for any one of them (can't choose):
 \begin{list}{}{}
 	\item $f(x+\alpha d)$ may be $\geq f(x)\:\:\forall\alpha$
-	\item $\|d\|$ is a two-sided proxy of $A(x)$: $\|d\|$ "small" $\Rightarrow f(x)$ "close" to $f_*$, but $f(x)$ "close" $\not\Rightarrow \|d\|$ "small"! So $\|d\|\leq \epsilon$ is an ineffective stopping criterion (almost never happens)
+	\item $\|d\|$ is a \textbf{one}-sided proxy of $A(x)$: $\|d\|$ "small" $\Rightarrow f(x)$ "close" to $f_*$, but $f(x)$ "close" $\not\Rightarrow \|d\|$ "small"! So $\|d\|\leq \epsilon$ is an ineffective stopping criterion (almost never happens)
 	\item Can't use fixed step since $\|d\|$ can be big even if $x = x_*$: to ensure $\|x_{i+1}-x_i\|\rightarrow 0$ one has to force $\alpha_i\rightarrow 0$ (but not too fast).
 \end{list}
 \subsubsection{Subgradient methods}
 \paragraph{Fundamental relationship} Any (-)subgradient "points towards $x_*$", so an \textbf{appropriate step} along $-g$ brings closer to $x_*$, meaning that $x_{i+1} = x_i - \alpha_ig_i$ \textbf{makes sense with the right $\alpha_i$}.\\
 A fundamental relationship: $$\|x_{i+1}-x_*\|^2 = \|x_i - \alpha_ig_i - x_*\|^2 =$$
-$$\begin{array}{c}
-= \|x_i-x_*\|^2+2\alpha_i\langle g_i, x_*-x_i\rangle + \alpha_i^2\|g_i\|^2 \leq \|x_i - x_*\|^2\\\:
-\end{array}
-\begin{array}{c}
-+\\\:
-\end{array}
-\begin{array}{c}
-2\alpha_i(f_*-f(x_i))\\<0
-\end{array}\begin{array}{c}
-+\\\:
-\end{array}\begin{array}{c}
-\alpha_i^2\|g_i\|^2\\>0
-\end{array}$$
-As $\alpha \rightarrow 0$ (short step), the $2\alpha_i(f_*-f(x_i))$ term dominates $\Rightarrow x_{i+1}$ closer to $x_*$ than $x_i$.\\
+$$\|x_i-x_*\|^2+2\alpha_i\langle g_i, x_*-x_i\rangle + \alpha_i^2\|g_i\|^2 \leq \|x_i - x_*\|^2 + \overset{\text{(a)}}{\underset{<0}{\underbrace{2\alpha_i(f_*-f(x_i))}}} + \underset{>0}{\underbrace{\alpha_i^2\|g_i\|^2}} $$
+As $\alpha \rightarrow 0$ (short step), the (a) term dominates $\Rightarrow x_{i+1}$ closer to $x_*$ than $x_i$.\\
 \textbf{Short but not too short}: \textbf{Diminishing-Square Summable} stepsize (\textbf{DSS}) $$\sum_{i=1}^\infty\alpha_i = \infty\wedge\sum_{i=1}^\infty\alpha_i^2<\infty$$
 So $\alpha_i\rightarrow 0$ but not fast enough that the series converges ($\alpha_i = \frac{1}{i}$).\\
-DSS just works: $\lim_{i\to\infty} inf\{f_h\:|\:h\geq i\} = f_*$\\
+DSS just works $$\lim_{i\to\infty} \inf\{f_h\:|\:h\geq i\} = f_*$$
 Incredibly robust result: $\alpha_i$ chosen a priori, $f(x_i)$ not even used (only $g_i$), but \textbf{convergence is very slow}.\\
-If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $\min\{a\alpha_i^2+2b\alpha_i\}\equiv \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{\|g_i\|^2} \geq 0$.\\
+If we knew $f_*$, we could estimate $\alpha_i$, let's assume we do: $$\min\{a\alpha_i^2+2b\alpha_i\}\Leftrightarrow \alpha_i = -\frac{b}{a} = \frac{f(x_i)-f_*}{\|g_i\|^2} \geq 0$$
 \textbf{Polyak stepsize} (\textbf{PSS}): $$\alpha_i = \beta_i\frac{f(x_i)-f_*}{\|g_i\|^2}$$ With $\beta_i = 1$ we have a "optimal step", but works $\forall\:\beta_i\in(0,2)$ since this $\Rightarrow \|x_{i+1}-x_*\|^2 < \|x_i-x_*\|^2\Rightarrow \{x_i\}\rightarrow x_*$\\
 In pratice is vastly better, but as far as it can go (not much): $\min\{f(x_h)\:|\:g\leq i\}-f_*\leq L\frac{\|x_1-x_*\|}{\sqrt{i}}\Rightarrow O\left(\frac{1}{\epsilon^2}\right)$\\
 From $\epsilon=1$e$-3$ to $\epsilon=1$e$-4$ we get 100x the iterations. The good news is that PSS would be optimal if we knew $f_*$, which we don't $\rightarrow$ \textbf{target level stepsize} (vanishing), "\textit{if you don't know it estimate it, but be ready to revise your estimate}".\\
 Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With a "good improvement", $f_{ref}$ gets smaller and also does the target level. If there are too many steps without improvement, $\delta$ gets smaller so the target level increases.\\
-\textbf{Too many parameters} $\rho\in(0,1),\beta\in(0,2),\delta_0>0,R>0$. $\{f_{rec,i}\}\rightarrow f_*$ but there's no reasonable stopping criterion, just "stop after a while". So slow convergence.
-\paragraph{Deflected Subgradient} Better model, better direction. There's no second-order information but deflection is possible $$d_i = \gamma_ig_i+(1-\gamma_i)d_{i-1},\:x_{i+1}=x_i-\alpha_id_i$$ "Conjugate subgradient". To have theoretical convergence, there are some rules:
+\textbf{Too many parameters}: $\rho\in(0,1),\beta\in(0,2),\delta_0>0,R>0$\\
+$\{f_{rec,i}\}\rightarrow f_*$ but there's no reasonable stopping criterion, just "stop after a while". So slow convergence.
+\paragraph{Deflected Subgradient} Better model, better direction. There's no second-order information but deflection is possible $$d_i = \gamma_ig_i+(1-\gamma_i)d_{i-1}$$ $$\:x_{i+1}=x_i-\alpha_id_i\simeq \text{"Conjugate Subgradient"}$$
+\pagebreak
+
+To have theoretical convergence, there are some rules:
 \begin{multicols}{2}
 \begin{center}
 	\includegraphics[scale=0.66]{8.png}
@@ -1609,7 +1637,7 @@ Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With
 \columnbreak
 \begin{list}{}{}
 	\item \textbf{Stepsize-restricted}, deflection-first\\
-	$$\alpha_i = \beta_i\frac{f(x_i)-f_*}{\|d_i\|^2}\text{ and }\beta_i\leq\gamma_i$$
+	$$\alpha_i = \beta_i\frac{f(x_i)-f_*}{\|d_i\|^2}\wedge\beta_i\leq\gamma_i$$
 	"As deflection increases, stepsize has to decrease".
 	\item \textbf{Deflection-restricted}, stepsize-first\\
 	$$\frac{\alpha_{i-1}\|d_{i-1}\|^2}{(f(x_i)-f_*)+\alpha_{i-1}\|d_{i-1}\|^2}\leq \gamma_i$$
@@ -1617,44 +1645,44 @@ Reference value $f_{ref} -$ threshold $\delta =$ target level $\simeq f_*$. With
 \end{list}
 \end{multicols}
 In both cases, target level to replace $f_*$.\\
-A closed formula, $\gamma_i\in$ $\arg\min\{\|\gamma g_i+(1-\gamma)d_{i-1}\|^2\:|\:\gamma\in[0,1]\}$
-\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\tilde{z}$ optimal for $x\Rightarrow A\tilde{z}\in\partial f(x)\Rightarrow f\not\in \mathbb{C}^1$ (there can be many different $\tilde{z}$).\\
-\textbf{Smoothed} $f_\mu(x)=\max\{x^TAz-\mu\frac{\|z\|^2}{2}\:|\:z\in Z\}\in \mathbb{C}^1$ hopefully easy.\\
+A closed formula: $\gamma_i\in$ $\arg\min\{\|\gamma g_i+(1-\gamma)d_{i-1}\|^2\:|\:\gamma\in[0,1]\}$
+\subsubsection{Smoothed Gradient Methods} The speed is a property of the space, so let's change the space. Requires $f(x) = \max\{x^TAz\:|\:z\in Z\}$ convex and assumed to be easy to compute. $\tilde{z}$ optimal for $x\Rightarrow A\tilde{z}\in\partial f(x)\Rightarrow f\not\in C^1$ (there can be many different $\tilde{z}$).\\
+\textbf{Smoothed} $$f_\mu(x)=\max\left\{x^TAz-\mu\frac{\|z\|^2}{2}\:|\:z\in Z\right\}\in C^1$$ Hopefully easy. Choose small $\mu=O(\epsilon)$, with fast minimization of $f_\mu$ gives only $O(\frac{1}{\epsilon})$.\\
 In practice is slowish, superlinear in a doubly-logarithmic chart after a long flat leg. Subgradients are faster but flatline at $\epsilon\simeq 1$e$-4$, smoothed does at $\epsilon\simeq 1$e$-6$.
 \subsubsection{Bundle Methods}
 \paragraph{Basic Idea} Cutting-plane model. Being $f$ convex, the first-order information that we have is globally valid: I can collect it along the way and use it all.\\
-$\{x_i\}\rightarrow$ bundle $B=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
-The \textbf{cutting-plane model} $f_B$ if $f$ is $$f_B(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ a $(1+\epsilon)$-order model.\\
-$x_{B,*}\in \arg\min\{f_B(x)\}$, $f_B(x_{B,*})\leq f_*$: use $x_{B,*}$ as the next iterate a-la Newton.\\
-$f_B\not\in \mathbb{C}^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small": $\min\{f_B(x)\}=\min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$
+$\{x_i\}\rightarrow$ bundle $$B=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\} = \{(x_i, f_i, g_i)\}$$
+The \textbf{cutting-plane model} $f_B$ of $f$ is $$f_B(x) = \max\{f_i+\langle g_i, x-x_i\rangle\:|\:(x_i, f_i, g_i)\in B\}\leq f(x)\:\:\forall x$$ A $(1+\epsilon)$-order model.
+$$x_{B,*}\in \arg\min\{f_B(x)\}$$ $$f_B(x_{B,*})\leq f_*$$ Use $x_{B,*}$ as the next iterate a-la Newton.\\
+$f_B\not\in C^1$ but computing $x_{B,*}$ is a linear program $\Rightarrow$ easy if $\# B$ "small" $$\min\{f_B(x)\}=\min\{v\:|\:v\geq f_i+\langle g_i, x-x_i\rangle\:\:(x_i, f_i, g_i)\in B\}$$
 \paragraph{Cutting Plane Algorithm} $\min\{f_B(x)\}$ is the master problem, and $(x_*, v_*)$ the optimal solutions $\rightarrow$ new $(x_*, f(x_*), g_*\in\partial f(x_*))$\\
-$f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B\leftarrow B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
+$f(x_*)\leq v_*\Rightarrow x_*$ optimal, otherwise $B= B\:\cup\:(x_*, f(x_*), g_*)\Rightarrow f_B$ becomes a better model.\\
 The min in the master problem focuses $\{x_*\}$ in the right place, with a practical stopping criterion (unlike any subgradient-style algorithm). But $\#B\rightarrow\infty\Rightarrow$ the cost per iteration of the master problem $\rightarrow\infty$.\\
 So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\epsilon}\right)^{\frac{n}{2}}\right)$
-\subparagraph{Why} $x_{B,*}$ may be infinitely far from $x_*$, the iterates have no local property ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail.\\
-It's unavoidable: linear functions have no curvature, and we need many of them to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
-\subparagraph{Stabilizing} $\tilde{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\tilde{x} f_B$ is a good model of $f$).\\
-Stabilized master problem $$\min\{f_B(x)+\mu\frac{\|x-\tilde{x}\|^2}{2}\}$$ Keeps $\{x_*\}$ "close" to $\tilde{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
+\subparagraph{Why} $x_{B,*}$ \textbf{may be infinitely far} from $x_*$, the \textbf{iterates have no local property} ($\|x_{i+1}-x_i\|$ can be very large and doesn't go smoothly to $0$, no fast convergence in the tail).\\
+It's unavoidable: linear functions have no curvature, and we need many linear functions to make a quadratic one. Pruning $B$ is possible but not easy, and no a priori bound on $\# B$.
+\subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_B$ is a good model of $f$).\\
+Stabilized master problem $$\min\left\{f_B(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\right\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
 \section{Constrained Optimality and Duality}
-\paragraph{Constrained Optimization} Back to the full $(P) f_* = \min\{f(x)\:|\:x\in X\}$ with $x\subset R^n$\begin{list}{}{}
+\paragraph{Constrained Optimization} Back to the full $$(P)\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset R^n$\begin{list}{}{}
 	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
 	\item $x\in X$ feasible solution, $x\not\in X$ unfeasible solution
 	\item $x_*\in X\:|\:f(x_*)\leq f(x)\:\:\forall\:x\in X$ optimal solution $\Leftrightarrow$ global optimum
 \end{list}
-Constraints can be hidden in the objective $\chi_X : R^n\rightarrow \tilde{R}$ \textbf{indicator function of $X$} with $\chi_X(x)=\left\{\begin{array}{l l}
+Constraints can be hidden in the objective $\chi_X : \mathbb{R}^n\rightarrow \overline{\mathbb{R}}$ \textbf{indicator function of $X$} with $$\chi_X(x)=\left\{\begin{array}{l l}
 0&\text{if }x\in X\\
 \infty&\text{if }x\not\in X
-\end{array}\right.$ which is convex if $X$ is, but extended-valued.
-$$\Longrightarrow (P)\equiv \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\text{(essential objective)}$$ But very bad idea, $\chi_X\not\in \mathbb{C}^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
+\end{array}\right.$$ Convex if $X$ is, but extended-valued.
+$$(P)\equiv \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\text{(essential objective)}$$ But very bad idea, $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
 $$(P)\equiv\min\{v\:|\:v\geq f(x), x\in X\}$$
 \paragraph{(Local) minima vs. optima} Note that $X=\emptyset\Rightarrow v(P) = +\infty$, so solving $(P)$ includes constructively proving $X=\emptyset$. Almost never happens in ML, so we will forget about this but the issue exists. The model is our choice, we choose it simple/nice/nonempty if we can.\\
-Global optimum obviously hard, hence $x_*$ local optimum solves $\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$ for some $\epsilon>0$.\\
+Global optimum obviously hard, hence $x_*$ local optimum solves $$\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$$ for some $\epsilon>0$.\\
 Important concept: $x$ in the interior of $X\Leftrightarrow\exists\:B(x,\epsilon)\subseteq X$ (for $\epsilon>0$), so $x_*$ in the interior of $X\Rightarrow$ local minimum/optimum so $\nabla f(x_*)=0$.\\
 Constrained (local) optimality conditions $\neq\nabla f(x)=0$, only if $x$ not in the interior $\Leftrightarrow x\in \partial X$, the boundary of $X$.
 \subsection{First-Order Optimality Conditions}
 \subsubsection{Geometric Version}
 \paragraph{The Tangent Cone} Crucial Object $T_X(x) =$ tangent cone of $X$ at $x$
-$$\{d\in \mathbb{R}^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\}$$
+$$T_X(x) = \left\{d\in \mathbb{R}^n\:|\:\exists\{z_i\in X\}\rightarrow x\wedge \{t_i\geq 0\}\rightarrow 0, d=\lim_{i\to\infty}\frac{z_i-x}{t_i}\right\}$$
 Tangent Cone Condition (TCC): $\langle\nabla f(x),d\rangle \geq 0\:\:\forall d\in T_X(x)$\\Zooming into $x$, $X$ looks like a cone, so we build the cone $T_X(x)$ with $x$ as the vertex.
 \begin{center}
 	\includegraphics[scale=0.75]{9.png}
@@ -1663,11 +1691,11 @@ Note that TCC $\not\Rightarrow$ local optimum, even less global optimum, \textbf
 Turns out that $X$ convex $\Rightarrow$ this.
 \paragraph{Convex Sets} $x,y\in \mathbb{R}^n,\{z=\alpha x+(1-\alpha)y\:|\:\alpha\in[0,1]\} = \text{conv}(x,y) =$ segment joining $x$ and $y$
 \begin{list}{}{}
-	\item $C\subset R^n$ \textbf{convex}: $\forall\:x,y\in \mathbb{C}\:\:\text{conv}(x,y)\subseteq C$
-	\item $C\subset R^n$ \textbf{nonconvex}: $\exists\:x,y\in \mathbb{C}\:|\:\text{conv}(x,y)\not\subseteq C$
+	\item $C\subset \mathbb{R}^n$ \textbf{convex}: $\forall\:x,y\in C\:\:\text{conv}(x,y)\subseteq C$
+	\item $C\subset \mathbb{R}^n$ \textbf{nonconvex}: $\exists\:x,y\in C\:|\:\text{conv}(x,y)\not\subseteq C$
 \end{list}
 Being convex is rare: nonconnected $\Rightarrow$ nonconvex. Every nonconvex set can be "completed" to a convex set (\textbf{convex hull}):
-$$\text{conv}(S) = \bigcup\{\text{conv}(x,y)\:|\:x,y\in S\} = \bigcap\{C\:|\:C\text{is convex }\wedge C\supseteq S\}$$
+$$\text{conv}(S) = \bigcup\{\text{conv}(x,y)\:|\:x,y\in S\} = \bigcap\{C\:|\:C\text{ is convex}\wedge C\supseteq S\}$$
 Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest convex set containing $S$".\begin{list}{}{}
 	\item $C$ convex $\Leftrightarrow C = \text{conv}(C)$: a convex set is equal to its convex hull
 	\item $f$ convex $\Leftrightarrow epi(f)$ convex $\Rightarrow S(f,v)$ convex $\forall v$ ($\not\Leftarrow$)
@@ -1711,7 +1739,7 @@ with $I$ set of inequality constraints and $J$ set of equality constraints. Ofte
 	$G(x)\leq 0\Leftrightarrow \max\{g_i(x)\:|\:i\in I\} = g(x)\leq 0$
 \end{list}
 This can be useful to simplify the notation, but almost never useful for implementation: \textbf{exploit the structure of $X$ and of the constraints when is there}.\\
-Also, reformulations can be bad: $\max\{g_1,g_2\}\not\in \mathbb{C}^1$ even if both $g_1\in \mathbb{C}^1$ and $g_2\in \mathbb{C}^1$.
+Also, reformulations can be bad: $\max\{g_1,g_2\}\not\in C^1$ even if both $g_1\in C^1$ and $g_2\in C^1$.
 \paragraph{Convex Sets out of Convex Functions} How can I be sure of the convexity of $X$?\\
 Sublevel sets of convex functions are convex $\Rightarrow g_i(x)\leq 0$ with $g_i$ convex "good"\begin{list}{}{}
 	\item $g_i(x) \geq 0$ not convex if $g_i$ is, and typically is badly not convex (reverse convex)
@@ -1730,7 +1758,7 @@ $f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
 \paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
 $x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
 Active constraints at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
-\textbf{First-order feasible direction cone} at $x\in X$: $D_X(x) = \{d\in \mathbb{R}^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=\{d\in \mathbb{R}^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$
+\textbf{First-order feasible direction cone} at $x\in X$: $$D_X(x) = \{d\in \mathbb{R}^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=$$ $$=\{d\in \mathbb{R}^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$$
 \paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in \mathbb{R}^n\:|\:Ad\leq 0\}$ for some $A\in \mathbb{R}^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
 Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
 \textbf{Farkas' Lemma}: $\forall\:c\in \mathbb{R}^n$:
@@ -1739,7 +1767,7 @@ Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
 	\item or $\exists\:d\:|\:Ad\leq 0\wedge\langle c,d\rangle > 0$
 \end{list}
 One and only one is true.\\
-$\langle c,d\rangle \leq 0\:\:\forall\:d\in \mathbb{C}, c\in \mathbb{C}^*$ actually a $\neq$ definition: polar cone $C^\circ=\{c\in \mathbb{R}^n\:|\:\langle c,d\rangle\leq 0\:\:\forall\:d\in \mathbb{C}\}=C^*$ so Farkas' lemma says that $\forall\:c\in \mathbb{R}^n$ either $c\in \mathbb{C}^*$ or $c\not\in \mathbb{C}^*$\\\\
+$\langle c,d\rangle \leq 0\:\:\forall\:d\in C, c\in C^*$ actually a $\neq$ definition: polar cone $C^\circ=\{c\in \mathbb{R}^n\:|\:\langle c,d\rangle\leq 0\:\:\forall\:d\in C\}=C^*$ so Farkas' lemma says that $\forall\:c\in \mathbb{R}^n$ either $c\in C^*$ or $c\not\in C^*$\\\\
 $x_*$ optimum $\Rightarrow \langle\nabla f(x_*),d\rangle\geq 0\:\:\forall\:d\:|\:$
 \begin{list}{}{}
 	\item $\langle\nabla g_i(x_*),d\rangle\leq 0\:\:i\in A(x)$
@@ -1757,7 +1785,9 @@ For $(P)$ convex, (KKT) $\Rightarrow x$ global optimum: (KKT) $\Rightarrow \lang
 \subsection{Second-Order Optimization}
 If $(P)$ is not convex then (KKT) is not sufficient, need to use second order but clearly not just "$\nabla^2 f(x_*)\succeq 0$". Fundamental concept: \textbf{Lagrangian function} $$L(x;\lambda, \mu)=f(x) + \sum_{i\in I} \lambda_ig_i(x) + \sum_{j\in J}\mu_jh_j(x)$$ with $x$ variables and $\lambda,\mu$ parameters. Fundamental observation $(x,\lambda,\mu)$ satisfies (KKT-G) $\Leftrightarrow \nabla L(x;\lambda,\mu) = 0$ (gradient on $x$ alone) $\Rightarrow x$ stationary point of $L(\cdot;\lambda,\mu)$. When a stationary point is also a minimum?
 \paragraph{Lagrangian Relaxation} Lagrangian function is objective and constraints together. (KKT-G) $\Leftrightarrow x$ stationary point of $L()$ for the right $\lambda\geq 0$ and $\mu$. Assume we know them, can we find $x$?\\
-Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in \mathbb{R}^n\}$$\\
+Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in \mathbb{R}^n\}$$
+\pagebreak
+
 The relaxation is another optimization problem carefully constructed in order to provide a lower bound on $v(P)$ for $(P)\:\:\min\{f(x)\:|\:x\in X\}$\\
 $(\underline{P})\:\:\min\{\underline{f}(x)\:|\:x\in \underline{X}\}$ relaxation of $(P) \Rightarrow v(\underline{P})\leq v(P)$ if $\underline{X}\supseteq X$ and $\underline{f}(x)\leq f(x)\:\:\forall\:x\in X$\\
 $(R_{\lambda,\mu})$ is a relaxation of $(P)\:\:\forall\:\lambda\geq 0$ and $\mu\Rightarrow$ weak duality $\forall\:\:x\in X$, $\psi(\lambda,\mu)\leq v(P)\leq f(x)$\\
@@ -1765,9 +1795,9 @@ But how to choose $\lambda\geq 0$ and $\mu$? The dual function $\psi$ is \begin{
 	\item Often easy to compute
 	\item Concave, but note that $\psi(\lambda,\mu)=-\infty$ might happen
 	\item $\tilde{x}$ optimal in ($R_{\lambda,\mu}$) $\Rightarrow [G(\tilde{x}), H(\tilde{x})]\in \partial\psi(\lambda,\mu)$
-	\item $\psi\not\in \mathbb{C}^1$ even if $f,g_i,h_j$ are, but $\tilde{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\tilde{x}), H(\tilde{x})]$
+	\item $\psi\not\in C^1$ even if $f,g_i,h_j$ are, but $\tilde{x}$ unique optimal solution to ($R_{\lambda,\mu}$) $\Rightarrow \psi$ differentiable in $(\lambda, \mu)$, $\nabla \psi(\lambda, \mu)= [G(\tilde{x}), H(\tilde{x})]$
 \end{list}
-The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in \mathbb{R}_+^{|I|},\mu\in \mathbb{R}^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
+The first three properties makes $\psi$ easy to maximize, so a Langragian dual of $(P)$ $$(D)\:\:\max\{\psi(\lambda,\mu)\:|\:\lambda\in \mathbb{R}_+^{|I|},\mu\in \mathbb{R}^{|J|}\}$$ But it needs to be solved to global optimality and not necessarily convex, but if you can do that everything works even on $(P)$ nonconvex.\\
 When is $v(D) = v(P)$ (strong duality)?  \textbf{Convexity} $\Rightarrow$ \textbf{Strong Duality}, so not always but yes if $(P)$ convex, meaning that $x_*$ optimum, $T_X(x_*)=D_X(x_*)\Rightarrow v(D) = v(P)$\\
 Under further conditions, solving $(D)$ actually solves $(P)$
 \paragraph{Specialized Lagrangians} Lagrangian dual is powerful but cumbersome: $\min$/$\max$, simplifies to have "just max".\begin{list}{}{}
@@ -1784,6 +1814,7 @@ Under further conditions, solving $(D)$ actually solves $(P)$
 	 $\psi(\mu)=\min_{x\in \mathbb{R}^n} L(x;\mu)$ hence $\nabla L(x)=x+\mu A = 0 \Leftrightarrow x = - \mu A\Rightarrow \psi(\mu)=-\frac{1}{2}\mu^T(AA^T)\mu - \mu b$\\
 	 $(D)\:\:\max\{-\frac{1}{2}\mu^T(AA^T)\mu-\mu b\:|\:\mu \in \mathbb{R}^m\}$ (an unconstrained quadratic program). It's strictly convex and strong duality almost always holds with $(D)\:\:\max\{\lambda b-\frac{1}{2}v^TQ^{-1}v\:|\:\lambda A-v=q, \lambda\geq 0\}$
 \end{list}
+%TODO from here
 \subsection{Constrained Optimization Algorithms} Algorithms for $(P)\:\:\:\min\{f(x)\:|\:G(x)\leq 0, H(x) = 0\}$\\
 Usually ok to ignore $H(\:)$, just $G(x)\leq 0$ (implementation details). Only linear inequalities $Ax\leq b$, because of their convenience: always convex, satisfy (Linl), numerically stable, cheap to compute\ldots\\
 Important notation: \textbf{sub-system} (a relaxation) $A\in \mathbb{R}^{m\times n}, b\in \mathbb{R}^m, B\subseteq\{1,2,\ldots,m\}$ subset of row's indexes $\equiv$ constraints $\Rightarrow$ sub-matrix/vector/system $A_B=[A_i]_{i\in B}$/$b_B=[b_i]_{i\in B}$/$A_Bx \leq b_B$\\
@@ -1869,7 +1900,7 @@ One LP per iteration is costly, exploit structure to make it efficient.\\
 Convergence rather slow: trusting $L_x(\:)$ very far from $x$ where $\nabla f$ is computed.\\
 Solution seen already: stabilize the master problem, but separable penalty $\gamma\|y-x\|_2$ in the objective. \textbf{Trust region stabilization}: constraint $\|y-x\|_\infty \leq \tau\equiv$ box constraints $x_i-\tau\leq y_i\leq x_i+\tau$, almost never make an LP harder.\\
 Have to manage $\tau$ somehow (e.g. fixed) but often worth it. Other ways to improve convergence speed, e.g. away step and/or use FW to identify optimal active set, then exploit it.
-\paragraph{Constrained Cutting Plane (Bundle)} Stabilised Frank-Wolfe. What if $f\not\in \mathbb{C}^1$? Cannot use $g\in\partial f(x)$, bad first order information. $f$ convex $\Rightarrow$ first-order information not so bad, globally valid.\\
+\paragraph{Constrained Cutting Plane (Bundle)} Stabilised Frank-Wolfe. What if $f\not\in C^1$? Cannot use $g\in\partial f(x)$, bad first order information. $f$ convex $\Rightarrow$ first-order information not so bad, globally valid.\\
 What if I collect it along the way and use it all?
 \begin{list}{}{}
 	\item $\{x_i\}\rightarrow$ \textbf{bundle} $\mathscr{B}=\{(x_i, f_i = f(x_i), g_i\in\partial f(x_i))\}$
@@ -1887,12 +1918,12 @@ So far, kept $Ax\leq b$ and gotten $\lambda \geq 0$ in the end. We can do the re
 	\item $\forall$ fixed $\lambda\geq 0$, $\psi(\lambda)=\min\{\frac{1}{2}x^TQx + qx + \lambda(b-Ax)\}\leq v(P)$
 \end{list}
 $Q\succ 0\Rightarrow$ optimal solution $x(\lambda)=Q^{-1}(\lambda A-q)$\\
-$\psi$ concave, $\psi\in \mathbb{C}^1$, $\nabla\psi(\lambda)=b-Ax(\lambda)$\\
+$\psi$ concave, $\psi\in C^1$, $\nabla\psi(\lambda)=b-Ax(\lambda)$\\
 \textbf{Lagrangian dual}: $(D)\:\:\:\max\{\psi(\lambda)\:|\:\lambda\geq 0\}$
 \begin{list}{}{}
 	\item $(D)\equiv (P)$: $v(D) = v(P)$ and $\{x(\lambda_i)\}\rightarrow x_*$ as $\{\lambda_i\}\rightarrow \lambda_*$
 \end{list}
-\paragraph{Dual Method} Solve $(D)$ by any method for $C^1$, but $\psi\not\in \mathbb{C}^2$ in general. $(D)$ is constrained but the constraints are very easy (projection is trivial).\\
+\paragraph{Dual Method} Solve $(D)$ by any method for $C^1$, but $\psi\not\in C^2$ in general. $(D)$ is constrained but the constraints are very easy (projection is trivial).\\
 Feasible primal solution $x_*$ only asymptotically, but valid lower bound $v_i = \psi(\lambda_i)$ on $v(P)$ at every iteration.\\
 If $X$ is "simple", then \textbf{Langragian heuristic} $X_i = p_X(x(\lambda_i))\Rightarrow$ valid upper bound $f_i = f(x_i)$ on $v(P)$ at every iteration $\Rightarrow f(x_i)-v(P)\leq f_i - v_i$ = readily available estimate of gap.\\
 Can behave very differently from primal methods ($\frac{L}{\tau}$ much less of an issue). Also $Q$ singular $\Rightarrow \psi(\lambda)=-\infty$ happens $\Rightarrow$ nasty constraints in $(D)$. Extends to $f(x)$ strictly convex (must solve general nonlinear problem). $f(x)$ not convex is a serious issue, $\psi$ has to be computed exactly.
@@ -1906,9 +1937,9 @@ $(R_\lambda)$ is constrained but can exploit structure (and $\psi(\lambda)=-\inf
 \end{center}
 Algorithms can exploit (parallelize).
 \subsubsection{Barrier Methods}
-Pro of dual method: $(D)$ is almost unconstrained (would be with $Ax = b$). The cons of dual methods are that $\psi\not\in \mathbb{C}^2$, and even $\not\in \mathbb{C}^1$ if $f$ isn't strictly convex, also $x(\lambda)$ is never feasible until the very end (unless Langragian heuristic).\\
-We would like: unconstrained, $\in \mathbb{C}^2$ and $x$ feasible. The first and last are obviously solved with $f + \chi_X$, but $\chi_X\not\in \mathbb{C}^1$: we need something like $\chi_X$ but $\in \mathbb{C}^2$. Can get $C^2$ if you accept to solve almost $(P)$ but not quite.
-\paragraph{Barrier Function and Central Path} $\gamma > 0$ parameter, $(P_\gamma)\:\:\:\min\{f_\gamma(x) = f(x) - \gamma\sum_{i=1}^m \log(b_i-A_i x)\}$ \textbf{logarithmic barrier} $f_\gamma$ strictly convex (if $f$ convex), $\in \mathbb{C}^2$ (if $f\in \mathbb{C}^2$)
+Pro of dual method: $(D)$ is almost unconstrained (would be with $Ax = b$). The cons of dual methods are that $\psi\not\in C^2$, and even $\not\in C^1$ if $f$ isn't strictly convex, also $x(\lambda)$ is never feasible until the very end (unless Langragian heuristic).\\
+We would like: unconstrained, $\in C^2$ and $x$ feasible. The first and last are obviously solved with $f + \chi_X$, but $\chi_X\not\in C^1$: we need something like $\chi_X$ but $\in C^2$. Can get $C^2$ if you accept to solve almost $(P)$ but not quite.
+\paragraph{Barrier Function and Central Path} $\gamma > 0$ parameter, $(P_\gamma)\:\:\:\min\{f_\gamma(x) = f(x) - \gamma\sum_{i=1}^m \log(b_i-A_i x)\}$ \textbf{logarithmic barrier} $f_\gamma$ strictly convex (if $f$ convex), $\in C^2$ (if $f\in C^2$)
 \begin{multicols}{2}
 \begin{center}
 	\includegraphics[scale=0.6]{15.png}
