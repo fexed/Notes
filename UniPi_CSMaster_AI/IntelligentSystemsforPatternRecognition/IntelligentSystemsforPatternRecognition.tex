@@ -374,12 +374,42 @@ Different classes of graphs:
 \paragraph{Generate new knowledge} Complex data can be generated if the model is powerful enough to capture its distribution.
 \subsection{Probability Refresher}
 \texttt{todo}
-\subsubsection{Inference} Bayesian: consider all hypothesis weighted by their probabilities
-$$P(X\:|\:d)=\sum_i P(X\:|\:h_i)P(h_i\:|\:d)$$
-MAP (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
-$$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H} P(d\:|\:h)P(h)$$
-ML assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(d\:|\:h)$$
+\subsubsection{Inference and Learning in Probabilistic Models}
+\paragraph{Inference} How can one determine the distribution of the values of one/several random variables given the observed values of others?
+$$P(\text{graduate}\:|\:\text{exam}_1,\ldots,\text{exam}_n)$$
+From a \textbf{machine learning point of view}: given a set of observations $\mathbf{d}$ and a set of hypothesis $\{h_i\}_i^K=1$, how can I use them to predict the distribution of a random variable $X$?
+\paragraph{Learning} Learning is a \textbf{very specific inference problem}: given a set of observations $\mathbf{d}$ and a probabilistic model of a given structure, how do I find the parameters $\theta$ of its distribution? Amounts to determining the best hypothesis $h_\theta$ regulated by a set of parameters $\theta$.
+\paragraph{Three Approaches}
+\begin{list}{}{}
+	\item \textbf{MAP} (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
+$$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H}\underbrace{ P(d\:|\:h)P(h)}$$
+There are two distributions multiplied together, so they need to be coherent.
+	\item \textbf{ML} assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(\mathbf{d}\:|\:h)$$
 Any probability can be obtained from the Joint Probability Distribution $P(X_1,\ldots,X_n)$ by marginalization but at an exponential cost (e.g. $2^{n-1}$ for a marginal distribution from binary RV)
+	\item \textbf{Bayesian}: consider all hypothesis weighted by their probabilities
+$$P(X\:|\:\mathbf{d})=\sum_i P(X\:|\:h_i)P(h_i\:|\:\mathbf{d})$$
+Optimal but poses computational and analytical tractability issues
+$$P(X\:|\:\mathbf{d}) = \int_H P(X\:|\:h)P(h\:|\:\mathbf{d})\:dh$$
+	ML and MAP are point estimates of the Bayesian, since they infer based only on one most likely hypothesis. MAP and Bayesian predictions become closer as more data gets available.\\
+	MAP is a regularization of the ML estimation.
+\end{list}
+\paragraph{Regularization} $P(h)$ introduces \textbf{preference across hypothesis}, penalizes complexity: complex hypothesis have lower prior probability, and hypothesis prior embodies trade-off between complexity and degree of fit.
+The MAP hypothesis $h_{MAP}$ can be rearranged in a minimization problem with $\log_2$ (so to count the number of bits).
+$$\max_h P(\mathbf{d}\:|\:h)P(h)\Leftrightarrow\min_h\underbrace{-\overset{\text{Bits needed for the data}}{\overbrace{\log_2(P(\mathbf{d}\:|\:h))}}-\overset{\text{Model complexity}}{\overbrace{\log_2P(h)}}}$$
+The highlighted part is the number of bits needed to represent the date with the number of bits needed to represent the hypothesis. By optimizing only based on $\log_2(P(\underline{d}\:|\:h))$ we choose the hypothesis $h$ that best fits the data, potentially leading to overfitting. With the other term, $\log_2P(h)$ we penalize big models.
+\paragraph{Maximum-Likelihood Learning} Find the model $\theta$ that is most likely to have \textbf{generated} the data $\underline{d}$ from a family of parameterized distributions $P(x\:|\:\theta)$
+$$\theta_{ML} = \arg\max_{\theta\in \Theta} P(\mathbf{d}\:|\:\theta)$$
+Optimization problem that considers the likelihood function $L(\theta\:|\:x)=P(x\:|\:\theta)$
+as a function of $\theta$, which can be solved with $$\frac{\partial L(\theta\:|\:x)}{\partial\theta}=0$$
+The \textbf{learning assumes that all random variables $X$ are visible}, as in Naive Bayes.\\
+If the probabilistic model contains both observed random variables $\mathbf{X}$ (i.e. training data) and unobserved (hidden/latent) variables $\mathbf{Z}$ (e.g. data clusters), the ML learning can still be used to estimate model parameters:
+\begin{list}{}{}
+	\item Expectation-Maximization algorithm optimizes the complete likelihood
+	$$L_c(\theta\:|\:\mathbf{X},\mathbf{Z})=P(\mathbf{X},\mathbf{Z}\:|\:\theta) = P(\mathbf{Z}\:|\:\mathbf{X},\theta)P(\mathbf{X}\:|\:\theta)$$
+	\item A 2-step iterative process
+	$$\theta^{(k+1)} = \arg\max_\theta\sum_{\mathbf{z}}P(\mathbf{Z}=\mathbf{z}\:|\:\mathbf{X},\theta^{(k)})\log(L_c(\theta\:|\:\mathbf{X},\mathbf{Z}=\mathbf{z})$$
+\end{list}
+%TODO from here ISPR_5_introBayes.pdf p.26
 \subsection{Graphical Models}
 Compact graphical representation for exponentially large joint distributions: simplifies marginalization and inference algorithms, allowing to \textbf{incorporate prior knowledge} concerning causal relationships and associations between random variables.\begin{list}{}{}
 	\item Directed graphical models (Bayesian Networks)
