@@ -787,7 +787,7 @@ Recursive model highlights analogy with RNNs.
 DBNs are graphical models whose structure changes to represent evolution across time and/or between different samples.
 \subsection{Markov Random Fields}
 MFRs are undirected graphs $G = (V, E)$. Nodes $v\in V$ are random variables $X_v$, edges $e\in E$ are bi-directional dependencies between variables.
-\paragraph{Likelihood Factorization} Define X = $X_1,\ldots, X_N$ as the random variables associated to the $N$ nodes in the undirected graph $G$
+\paragraph{Likelihood Factorization} Define $X = X_1,\ldots, X_N$ as the random variables associated to the $N$ nodes in the undirected graph $G$
 $$P(\text{X}) = \frac{1}{Z}\prod_C \psi_C(X_C)$$\\
 $X_C$ are the random variables associated to the maximal clique $C$, $\psi_C(X_C)$ is the \textbf{potential function} for clique $C$\\
 With $Z$ normalization term used to transform to probability, from a \textbf{partition function}:
@@ -801,33 +801,44 @@ In general we will assume to work with Markov Random Fields where the partition 
 	\item $\theta_{Ck}\in\mathbb{R}$ are parameters
 \end{list}
 Undirected graphical models do not express the factorization of potentials into feature functions, you cannot express $f$ graphically $\Rightarrow$ \textbf{factor graphs}.
-\pagebreak
 \paragraph{Factor Graphs} Random Variables are still circular nodes, factors $f_{Ck}$ are denoted with square nodes and edges connect a factor to the random variable.
 \begin{center}
 	\includegraphics[scale=0.5]{34.png}
 \end{center}
-\paragraph{Sum-Product Inference} A powerful class of exact inference algorithms. Use factor graph representation to provide a unique algorithm for directed/undirected models. So factor graph are a "unifying language" to represent both models, directed and undirected.\\
-Inference is \textbf{feasible for chain and tree structures}. We restructure the graph to obtain a tree-like structure to perform message passing (junction tree algorithm) and then approximated inference (variational, sampling).\\
+$$\psi(X_1,X_2,X_3) = f(X_1,X_2,X_3)$$
+$$\psi(X_1,X_2,X_3) = f_a(X_1,X_2,X_3)f_b(X_2,X_3)$$
+\paragraph{Sum-Product Inference} A powerful class of \textbf{exact inference algorithms}. Use factor graph representation to provide a unique algorithm for directed/undirected models. So \textbf{factor graph are a "unifying language" to represent both models, directed and undirected}.\\
+Inference is \textbf{feasible for chain and tree structures}. We restructure the graph to obtain a tree-like structure to perform message passing (\textbf{junction tree algorithm}) and then do approximated inference (variational, sampling).\\
 Even better: we constrain the MRF to obtain tractable classes of undirected models.
-\subparagraph{Restricting to Conditional Probabilities} In ML a part of the random variables can be assumed to be always observable (input data).\begin{list}{}{}
+\paragraph{Restricting to Conditional Probabilities} In Maximum Likelihood (ML) a part of the random variables can be assumed to be always observable (input data).\begin{list}{}{}
 	\item $X_k$ are observable inputs in the factor $k$
-	\item $Y_k$ are hidden random variables
+	\item $Y_k$ are hidden or partially observable random variables
 	\item $f_k(X_k, Y_k)$ is the factor feature function
 \end{list}
 Instead of $P_\theta(x,y)$ we compute $P_\theta(y\:|\:x)\cdot P_\theta(x)$. Under this assumptio we can directly model the conditional distribution $$P(Y\:|\:X) = \frac{1}{Z(X)}\prod_k \exp\left(\theta_kf_k(X_k,Y_k)\right)$$
-We note that $Z$ depends on $X$
+With the partition function $Z$ now being dependent on $X$, not a general partition function over all the possible values of $X$ but ensures a sum-to-one constraint over a specific $X$
 $$Z(X) = \sum_y\prod_k\exp\left(\theta_kf_k(X_k,Y_k = y)\right)$$
 \subparagraph{Conditional Random Field} CRF are constrained MRF models representing input-conditional distributions.
 \begin{center}
 	\includegraphics[scale=0.5]{35.png}
 \end{center}
-\paragraph{Feature Functions} Represent coupling or constraints between random variables, and are often very simple such as linear functions.
+$$P(Y\:|\:X,\theta) = \frac{1}{Z(X)}\exp\left(\theta_1f_1(X_i, Y_i) + \theta_2f_2(Y_i,Y_j) + \theta_3f_3(X_j, Y_j)+\ldots\right)$$
+\paragraph{Feature Functions} Represent coupling or constraints between random variables, and are often very simple such as linear functions. Examples:
+\begin{list}{}{}
+	\item Make noisy binary pixel $X_i$ and its clean version $Y_i$ have the same sign: $f_i(X_i,Y_i)=X_iY_i$
+	\item Constrain nearby interpretations to be similar: $F_{ij}(Y_i, Y_j) = Y_i^TY_j$
+\end{list}
+
 \paragraph{Discriminative Learning in Graphical Models} $X$ is always observable input while $Y$ \textbf{can} be unobserved.\\
-Let's consider a single $Y$ and multiple $X$s. We can observe the $Y_n$ corresponding to $X_n$ for some $n$, and we can use this information to fit $\theta$ in $P(Y\:|\:X,\theta)$
-\paragraph{CRF for Sequences} Undirected and dicriminative equivalent of an HMM.\begin{center}
+Let's consider a single $Y$ and multiple $X$s. Assuming we can observe the $Y_n$ corresponding to $X_n$ for some $n$, we can use this information to fit $\theta$ in $P(Y\:|\:X,\theta)$
+\paragraph{CRF for Sequences} Undirected and discriminative equivalent of an HMM.\begin{center}
 	\includegraphics[scale=0.5]{36.png}
 \end{center}
-Meaning that $f_t(Y_{t-1}, Y_t)$ and it looks like $P(S_t\:|\:S_{t-1})$ of the HMM. $f_e(X_t, Y_t)$ looks like the emission $P(X_t\:|\:S_t)$, but \textbf{I can place as many feature functions $f_t$ I want between the same variables} while I can't place more transition probabilities. The other difference is the main essences.
+\begin{list}{}{}
+	\item $f_t(Y_{t-1}, Y_t)$ looks like the transition probability $P(S_t\:|\:S_{t-1})$
+	\item $f_e(X_t, Y_t)$ looks like the emission $P(X_t\:|\:S_t)$
+\end{list}
+But \textbf{I can place as many feature functions $f_t$ I want between the same variables} while I can't place more transition probabilities in the HMM. The other difference is the main essences.
 \paragraph{Generalization of HMM} CRF are much more powerful\begin{center}
 	\includegraphics[scale=0.4]{37.png}
 \end{center}
@@ -840,10 +851,10 @@ We can also model explicitly input influence on transition.
 \end{center}
 The general Linear Conditional Random Fields likelihood is
 $$P(Y\:|\:X,\Theta)=\frac{1}{Z(X)}\prod_t\exp\left(\Theta_kf_k(Y_t,Y_{t-1},X_t)\right)$$
-Uses indicator variables in $f_k$ definition to include or disregard the influence of specific random variables: e.g. $I_{Y_t=i}, I_{X_t=o}$
-\paragraph{Posterior Inference in LCRF} Is there an equivalent of the smoothing problem? Yes: $P(Y_t, Y_{t-1}\:|\:X)$
-Solved by exact forward backward inference. Sum-product message passing (alpha-beta recursion) on the LCRF factor graph.
-$$P(Y_t,Y_{t-1}\:|\:X)\simeq\alpha_{t-1}(Y_{t-1})\psi_t(Y_t,Y_{t-1},X_t)\beta_t(Y_t)$$
+Uses indicator variables in $f_k$ definition to include or disregard the influence of specific random variables: e.g. $\mathbf{1}_{Y_t=i}, \mathbf{1}_{X_t=o}$
+\paragraph{Posterior Inference in LCRF} The equivalent of the smoothing problem is $P(Y_t, Y_{t-1}\:|\:X)$\\
+Solved by exact forward-backward inference. Sum-product message passing (alpha-beta recursion) on the LCRF factor graph.
+$$P(Y_t,Y_{t-1}\:|\:X)\simeq\underset{\text{Forward message}}{\underbrace{\alpha_{t-1}(Y_{t-1})}}\underset{\text{Clique weighting}}{\underbrace{\psi_t(Y_t,Y_{t-1},X_t)}}\underset{\text{Backward message}}{\underbrace{\beta_t(Y_t)}}$$
 \begin{list}{}{}
 	\item \textbf{Clique weighting} $\psi_t(Y_t,Y_{t-1},X_t)=\exp(\Theta_cf_c(X_t,Y_t)+\Theta_tf_t(Y_{t-1},Y_t))$
 	\item \textbf{Forward message} $\alpha_t(i) = \sum_j\psi_t(i,j,X_t)\alpha_{t-1}(j)$
@@ -851,60 +862,82 @@ $$P(Y_t,Y_{t-1}\:|\:X)\simeq\alpha_{t-1}(Y_{t-1})\psi_t(Y_t,Y_{t-1},X_t)\beta_t(
 \end{list}
 Also Viterbi can be used, because we can do Max-Product. The expensive part is the computation of the exponential summation in $Z(X)$. The forward-backward algorithm computes it efficiently as normalization term of $P(Y_t,Y_{t-1}\:|\:X)$. More articulated posteriors interact with $Z(X)$, which is a summation over everything that's not observable, difficult when there's a lot of unobservable variables. Exact inference in CRF other than chain-like is likely to be computationally impractical. We need to approximate: Markov Chain Monte Carlo (sample $y$ rather than estimate $P(y)$) or Variational Belief Propagation (reduce to message passing on trees).
 \paragraph{Training LCRF}Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^n\log P(y^n\:|\:x^n,\Theta)$$
-We can substitute the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$
-$$L(\Theta)=\sum_n\sum_t\sum_k \Theta_kf_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_n\log Z(X^n)\left(-\sum_k\frac{\Theta_k^2}{2\sigma^2}\right)$$
+We can substitute the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$\\
+getting $\log \frac{1}{Z(X)}\exp(\sum \Theta_k f_k) = \log \exp(\sum \Theta_k f_k)-\log Z(X)$
+$$L(\Theta)=\sum_n\sum_t\sum_k \Theta_kf_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_n\log Z(X^n)\underset{\text{Regularization term}}{\underbrace{-\sum_k\frac{\Theta_k^2}{2\sigma^2}}}$$
 With the last being a regularization term based on $\|\Theta\|^2$.\\
-To get proper marginalization $Z(X^n) = \sum_{y_t,y_{t-1}}\sum_t \exp(\sum_k\Theta_k f_k(y_t,y_{t-1},x^n_t))$\\
+To get proper marginalization $$Z(X^n) = \sum_{y_t,y_{t-1}}\sum_t \exp(\sum_k\Theta_k f_k(y_t,y_{t-1},x^n_t))$$
+$$\frac{\partial\log(Z(X))}{\partial \theta_k} = \frac{1}{Z(X)}\cdot\frac{\partial Z(X)}{\partial \theta_k} = \frac{1}{Z(X)}\cdot\sum_{y_t,y_{t-1}}\sum_t\exp\left(\sum_k\theta_k f_k\right)f_k$$
+Which looks like
+$$P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp\left(\sum_k\theta_kf_k\right)$$
+So we have $P(Y\:|\:X) = \frac{1}{Z(X)}\exp\left(\sum_k\theta_k f_k\right)f_k$\\
 With $\frac{\partial L(\Theta)}{\partial \Theta_k}$ we can maximize it because typically $L(\Theta)$ cannot be maximized in closed form.
-$$\frac{\partial L(\Theta)}{\partial \Theta_k} = \sum_{n,k}f_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_{n,t}\sum_{y,y'}f_k(y,y',X_t^n)P(y,y'\:|\:X^n)-\frac{\Theta_k}{\sigma^2}$$ 
-We have sum of expectations: the first term is $E[f_k]$ when $Y$ is not random, with samples drawn from a finite dataset (\textbf{empirical distribution}), and the right term is $E[f_k]$ using the posterior so the expectation of the feature function under the \textbf{model distribution}. $$\frac{\partial L(\Theta)}{\partial \Theta_k} = E[f_k(y,y',x^n_t)] - E_{P(Y\:|\:X,\Theta)}[f_k(y,y',x_t^n)]$$
-We need to match those two expectations, meaning that when the gradient is zero these are equal.\\
+$$\frac{\partial L(\Theta)}{\partial \Theta_k} = \underset{E_{y,y'\sim\text{ dataset}}[f_k(y,y',X_t^n)]}{\underbrace{\sum_{n,k}f_k(Y_t^n,Y_{t-1}^n,X_t^n)}}-\underset{E_{P(Y\:|\:X,\theta)}[f_k(y,y',X_t^n)]}{\underbrace{\sum_{n,t}\sum_{y,y'}f_k(y,y',X_t^n)P(y,y'\:|\:X^n_t)}}-\frac{\Theta_k}{\sigma^2}$$ 
+We have sum of expectations: the first term is $E[f_k]$ when $Y$ is not random, with samples drawn from a finite dataset (\textbf{empirical distribution}), and the right term is $E[f_k]$ using the posterior so the expectation of the feature function under the \textbf{model distribution}. $$\frac{\partial L(\Theta)}{\partial \Theta_k} = E_{y,y'\sim\text{ dataset}}[f_k(y,y',x^n_t)] - E_{P(Y\:|\:X,\Theta)}[f_k(y,y',x_t^n)]$$
+We need to match those two expectations, meaning that when the gradient is zero these are equal. So \textbf{Maximum Likelihood learning makes sure that the model expectation matches the empirical expectation}: it's a general property of exponential models.\\
 There's a regularization term $\sum_k\frac{\Theta_k^2}{2\sigma^2}$ on $\|\Theta\|^2$, a posteriori regularization on the gaussian $P(\Theta)$ with $\mu=0$ mean and $\sigma^2I$ variance.\\
 In practice, then, $\Theta$ can be learn with stochastic gradient descent or variants.
+$$\theta^m = \theta^{m-1} - v_m\nabla L_n(\theta^{m-1})$$
+$$\nabla L_{nk}(\theta) = \sum_t f_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_t\sum_{y,y'}f_k(y,y',X_t^n)P(y,y'\:|\:X^n)-\frac{\theta_k}{N\sigma^2}$$
+(remembering to divide the regularization by the number of terms $N$), with$P(y,y'\:|\:X^n)$ estimated by sum-product inference.
 \paragraph{Applications} Linear CRF have various applications: POS-tagging, semantic role identification, bioinformatics. Feature functions have the form $f_k(X_k,Y_k)=I_{y_k=\hat{y}_k}q(X_c)$, with $f_k$ non-zero only for a specific output configuration $\hat{y}_k$, and then depending only on $X_k$ (the features not shared by the classes). $q(X_c)$ is the observation functions: word begins with capital, ends with -ing\ldots\\
 In computer vision they can be used to define bi-dimensioal lattice on images, bg/fg segmentation and to impost constraints.
 
 \subsection{Bayesian Learning and Variational Inference}
 Introducing basic concepts of variational learning useful for both generative models and deep learning.
+\begin{list}{}{}
+	\item \textbf{Bayesian Latent Variable} models: class of generative models for which variational or approximated methods are needed
+	\item \textbf{Latent Dirichlet Allocation}: possibly the simplest Bayesian latent variable model, with many applications in unsupervised text analytics, machine vision,\ldots
+\end{list}
 \paragraph{Latent Variables} Unobserved random variables that define a hidden generative process of observed data. They explain complex relation between many observable variables. An example: hidden states in HMM/CRF.\\
-Latent variables likelihood $$P(x) = \int_z \prod_{i=1}^N P(x_i\:|\:z)P(z)dz$$ with a graph like $Z \longrightarrow X$ so of nodes $\{Z,X\}$ and a directed arc $(Z,X)$.
-\paragraph{Latent Spaces} Spaces where high-dimensional data can be represented. Each of the $M$ samples is made of $N$ features represented with $k<<N$ dimensions.
+Latent variables likelihood $$P(x) = \int_\mathbf{z} \prod_{i=1}^N P(x_i\:|\:z)P(\mathbf{z})\:d\mathbf{z}$$ with a graph like $Z \longrightarrow X$ so of nodes $\{Z,X\}$ and a directed arc $(Z,X)$.
+\paragraph{Latent Spaces} Spaces where high-dimensional data can be represented. Each of the $M$ samples is made of $N$ features represented internally with $k<<N$ dimensions.
 \begin{center}
 	\includegraphics[scale=0.5]{39.png}
 \end{center}
 The assumption is that latent variables conditional and marginal distribution are more tractable than the joint distribution $P(X)$.
-\paragraph{Tractability} Hidden variables can make intractable the posteriors. We need stuff that simplify those posteriors: Bayesian learning introduces priors which introduce integrals in the posteriors computation which are not always analytically or computationally tractable.
-\subsubsection{Kullback-Leiber Divergence}
-An information thoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = \langle\log q(z)\rangle_q - \langle\log p(z\:|\:x)\rangle_q$$
+\paragraph{Tractability} Introducing hidden variables can make the posteriors intractable. We need stuff that simplify those posteriors: Bayesian learning introduces priors which introduce integrals in the posteriors computation which are not always analytically or computationally tractable.
+\subsubsection{Kullback-Leibler Divergence}
+An information theoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = E_q[\log q(z)] - E_q[\log p(z\:|\:x)]$$
 Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
-	\item if $q$ and $p$ high, then good
-	\item if $q$ is high and $p$ is low, the it's unhappy
+	\item if $q$ and $p$ high, then good (close to $0$)
+	\item if $q$ is high and $p$ is low, then it's unhappy (large divergence)
 	\item if $q$ is low we don't care (due to the expectation)
 \end{list}
 The expectation $E_q$ means taking all possible assignments $z$ weighted according to the probability $q(z)$.
 \paragraph{Jensen Inequality} Property of linear operators on convex/concave functions $$\lambda f(x) + (1-\lambda)f(x)\geq f(\lambda x + (1-\lambda)x)$$
+Which generalizes to
+$$\frac{\sum_ia_if(x_i)}{\sum_ia_i}\geq f\left(\frac{\sum_ia_ix_i}{\sum_ia_i}\right)$$
 The curve is longer than the line connecting the two points. With concave we have $\leq$. Applied to probability $$f(E[X])\geq E[f(X)]$$
 $$\log(E[X])\geq E[\log(X)]$$
 The log-likelihood for a model with a single hidden variable $Z$ and parameters $\theta$ with a single sample assumed for simplicity is the following
 $$\log P(x\:|\:\Theta) = \log\int_zP(x,z\:|\:\Theta)dz = \log\int_z\frac{Q(z\:|\:\phi)}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)dz$$
-$Q$ is a distribution, used over $z$ with parameters $\phi$ and $Q(z\:|\:\phi)\neq 0$. That is the definition of expectation, we have $\int_zQ(z\:|\:\phi)\cdot \frac{1}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)$ which is $\sum_z q\cdot g(z)$. Using Jensen we have $$\log P(x\:|\:\Theta)= \log E_Q\left[\frac{P(x,z)}{Q(z)}\right] \geq E_Q\left[\log \frac{P(x,z)}{Q(z)}\right]= E_Q[\log P(x,z)] - E_Q[\log Q(z)] = L(x,\Theta,\phi)$$
-So we are lower bounding $\log P(x\:|\:\Theta)$ with the expected joint distribution minus the entropy. So we have a lower bound on something I want to maximize, so we can maximize the lower bound. Maximizing this term entails that we're supported by the data (using the expectation of joint distribution $E_Q[\log P(x,z)]$).\\
+$Q$ is a distribution, used over $z$ with parameters $\phi$ and $Q(z\:|\:\phi)\neq 0$. That is the definition of expectation, we have $\int_zQ(z\:|\:\phi)\cdot \frac{1}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)$ which is $\sum_z q\cdot g(z)$. Using Jensen we have $$\log P(x\:|\:\Theta)= \log E_Q\left[\frac{P(x,z)}{Q(z)}\right] \geq E_Q\left[\log \frac{P(x,z)}{Q(z)}\right]= \underset{\text{Expectation of joint distribution}}{\underbrace{E_Q[\log P(x,z)]}} - \underset{\text{Entropy}}{\underbrace{E_Q[\log Q(z)]}} = L(x,\Theta,\phi)$$
+So we are lower bounding $\log P(x\:|\:\Theta)$ with the expected joint distribution minus the entropy. So we have a lower bound on something I want to maximize: we can maximize the lower bound. Maximizing this term entails that we're supported by the data (using the expectation of joint distribution $E_Q[\log P(x,z)]$).\\
 How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) = ?$ We introduce $Q(z)$ by marginalization $$\int_z Q(z)\log P(x) - \int_z Q(z)\log\frac{P(x,z)}{Q(z)} = \int_z Q(z)\log\frac{P(x)Q(z)}{P(x,z)}=E_Q\left[\log \frac{Q(z)}{P(z\:|\:x)}\right] = KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right)$$
 Because $\frac{P(x)}{P(x,z)} = \frac{1}{P(z\:|\:x)}$. So it's an optimization problem of finding $\Theta$ and $\phi$ that maximize $L(x,\Theta,\phi)$ reduced to a minimization problem with KL.\\
 We can assume the existence of a probability $Q(z\:|\:\phi)$ which allows to bound the likelihood $P(x\:|\:\Theta)$ from below using $L(x,\Theta,\phi)$.\\
-$L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$ choosing $Q(z\:|\:\phi)=P(z\:|\:x,\Theta)$. So the problem now becomes maximizing ELBO $$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$.\\
+$L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$ choosing $Q(z\:|\:\phi)=P(z\:|\:x,\Theta)$. So the problem now becomes maximizing ELBO. Maximum Likelihood learning with hidden variables can be approached by maximization of the ELBO $$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$.
 If $P(z\:|\:x,\Theta)$ is tractable then we use it s $Q(z\:|\:\phi)$ (optimal ELBO). Otherwise we choose $Q(z\:|\:\phi)$ as a tractable family of distributions: find $\phi$ that minimize $KL(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta))$ or find $\phi$ that maximize $L(\:,\phi)$.
 \paragraph{Example} Bag of Words representations are classical examples of multinomial data. A BOW dataset $X$ is the $N\times M$ document matrix, with $N$ number of vocabulary items $w_j$ and $M$ is the number of documents $d_i$ and $x_{ij} = n(w_j,d_i)$ the number of occurrences of $w_j$ in $d_i$.\\
 Often $M$ is very very large ($\simeq 30$k elements). So we want a smaller representation. Mixture of topics: a topic identifies a pattern in the co-occurrence of multinomial items $w_j$ within the documents. Mixture, so we associate an interpretation (topic) to each item in a document, whose interpretation is then a mixture of the items' topics. We use Latent Variables.
 \paragraph{Latent Dirichlet Allocation} LDA models a document as a mixture of topics $z$. We assign one topic $z$ to each item $w$ with probability $P(w\:|\:z,\beta)$ and pick a topic for the whole document with probability $P(z\:|\:\Theta)$
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item $P(w\:|\:z,\beta)$ \textbf{multinomial} item-topic distribution
+	\item $P(z\:|\:\theta)$ \textbf{multinomial} topic distribution with document-specific parameter $\theta$
+	\item $P(\theta\:|\:\alpha)$ \textbf{Dirichlet} distribution with hyperparameter $\alpha$\\
+	It's a distribution for vectors that sums to 1 (\textbf{simplex}): the elements of a multinomial are vector that sums to 1.
+\end{list}
 \begin{center}
-	\includegraphics[scale=0.5]{40.png}
+	\includegraphics[scale=0.45]{40.png}
 \end{center}
+\end{multicols}
 Each document has its personal topic proportion $\Theta$ sampled from a distribution. $\Theta$ defines a multinomial distribution, but it is a random variable as well. $\alpha$ is the prior.
 \paragraph{Dirichlet distribution} Conjugate prior to multinomial distribution.\\
 If the likelihood is multinomial with a Dirichlet prior, then posterior is Dirichlet.
 $$P(\Theta\:|\:\alpha) = \frac{\Gamma(\sum_{k=1}^K \alpha_k)}{\prod_{k=1}^K\Gamma(\alpha_k)}\prod_{k=1}^K\Theta_k^{\alpha_k-1}$$
-$\Gamma$ is the generalization of the factorial. With a big $\alpha$ we make the topics almost equiprobable, while with lower $\alpha$ we get substatially different proportions (less and less topics active). So big $\alpha$ means that every document can express each topic, while low $\alpha$ is almost deterministic. Usually, $\alpha = 1$ or similar but smaller.\\\\
+$\Gamma$ is the generalization of the factorial, $\alpha_k$ is the Dirichlet parameter and is a prior count of the $k$the topic which controls the mean shape and sparsity of multinomial parameters $\theta$. With a big $\alpha$ we make the topics almost equiprobable, while with lower $\alpha$ we get substatially different proportions (less and less topics active). So big $\alpha$ means that every document can express each topic, while low $\alpha$ is almost deterministic. Usually, $\alpha = 1$ or similar but smaller.\\\\
 LDA finds a set of $K$ projection functions on the $K$-dimensional topic simplex.\begin{center}
 	\includegraphics[scale=0.5]{41.png}
 \end{center}
@@ -916,18 +949,21 @@ It's a completed likelihood with the conditional independence assumption.
 \subparagraph{Learning} Marginal distribution of a document $d =$ w
 $$P(\text{w}\:|\:\alpha,\beta) = \int \sum_z P(\Theta,z,w\:|\:\alpha,\beta)d\Theta=\int P(\Theta\:|\:\alpha)\prod_{j=1}^N\sum_{z_j=1}^kP(z_j\:|\:\Theta)P(w_j\:|\:z_j,\beta)d\Theta$$
 given w$_1$,\ldots,w$_M$ find $\alpha,\beta$ that maximize.\\
-Key problem is inferring latent variables posterior:
+Key problem is inferring latent variables posterior, because optimal ELBO is achieved when $Q(z)$ is equal to the latent variable posterior:
 $$P(\Theta, \text{z}\:|\:\text{w},\alpha,\beta) = \frac{P(\Theta, \text{z}, \text{w}\:|\:\alpha,\beta)}{P(\text{w}\:|\:\alpha,\beta)}$$
 but the denominator is intractable because of couplings between $\beta$ and $\Theta$ under exponenziation in the summation over topics. So we don't use the posterior, we pick a function $Q$ that helps in solving the problem (variational inference).
 \paragraph{Variational Inference} We write $Q(z\:|\:\phi)$ function that is sufficiently similar to the posterior but tractable. It should be such that $\beta$ and $\Theta$ are no longer coupled, fitting $\phi$ so that is close to the posterior according to KL.\\
 Fast convergence but it's an approximation.\\
-The key idea is to assume that $Q(z\:|\:\phi)$ is tractable: \textbf{mean-field assumption}.
+The key idea is to assume that $Q(z\:|\:\phi)$ is factorizable (\textbf{tractable}): \textbf{mean-field assumption}.
 $$Q(z\:|\:\phi) = Q(z_1,\ldots,z_K\:|\:\phi)=\prod_{k=1}^K Q(z_k\:|\:\phi_k)$$
 Can be generalized by factorizing on groups of latent variables. Does not contain the true posterior because hidden variables are dependent.\\
-We optimize ELNO using $Q(z\:|\:\phi)$ using the factorized distribution. Simple \textbf{coordinate ascent inference}: iteratively optimize each variational distribution holding the others fixed, so when learning we use the model on the right, breakdown of the independence.\begin{center}
-	\includegraphics[scale=0.5]{42.png}\\
-	\includegraphics[scale=0.5]{43.png}
+We optimize ELBO using $Q(z\:|\:\phi)$ factorized distribution. Simple \textbf{coordinate ascent inference}: iteratively optimize each variational distribution holding the others fixed, so when learning we use the model on the right, breakdown of the independence.
+\begin{center}
+	\includegraphics[scale=0.5]{42.png}
 \end{center}
+Given $\Phi=\{\gamma,\phi,\lambda\}$ as \textbf{variational approximation parameters}.
+$$Q(\theta,z,\beta\:|\:\Phi) = Q(\theta\:|\:\gamma)\prod_{n=1}^NQ(z_n\:|\:\phi_n)\prod_{k=1}^KQ(\beta_k\:|\:\lambda_k)$$
+Then we have the model parameters $\Psi=\alpha,\beta$ of sample distribution $P(\theta,z,w\:|\:\alpha,\beta)=P(\theta,z,w\:|\:\Psi)$
 \paragraph{Variational Expectation-Maximization} Find the $\Phi, \Psi$ that maximize the ELBO
 $$L(w,\Phi,\Psi) = E_Q[\log P(\Theta,z,w\:|\:\Psi)] - E_Q[\log Q(\Theta,z,\Psi\:|\:\Phi)]$$
 by alternate maximization:
@@ -1047,6 +1083,7 @@ To be avoided when:
 	\item Dealing with raw, noisy, low-level data
 \end{list}
 Variational inference and sampling are efficient ways to learn approximations to intractable distribution. Neural networks can be used as variational functions or to implement sampling processes.
+%TODO from here ISPR_10_sampling.pdf
 \section{Sampling Methods} 
 \paragraph{Probability Recap}
 \paragraph{Sampling} Drawing a set of realisations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
