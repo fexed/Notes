@@ -341,14 +341,14 @@ Many different options for the mother wavelet $\Psi(\:)$
 \end{center}
 Scaling and dilation is akin to a sort of frequency: high scale mean stretched wavelet with slowly changing coarse feature and low frequency, while low scale compressed wavelet with rapidly changing details and high frequency.
 \paragraph{DWT} Discrete Wavelet Transform: uses a finite set of scales and shifts rather than "any possible value" as in the continuous wavelet transform.
-%TODO lecture 5 from here
+
 \section{Generative and Graphical Models}
-Generative referring to the probability we learn: if we know the distribution probability of data we can generate new data.\\
+Generative referring to the probability that we learn: if we know the distribution probability of data we can generate new data.\\
 Graphical referring to graphical formalisms that describe in a syntetic way the structures we'll see.
 \paragraph{Generative Learning} ML models that represent knowledge inferred from data under the form of probabilities:
 \begin{list}{}{}
-	\item Probabilities can be sample: new data can be generated
-	\item Supervised, unsupervised, weakly supervised tasks
+	\item Probabilities can be sampled: new data can be generated
+	\item Supervised, unsupervised, weakly supervised learning tasks
 	\item More easily incorporate prior knowledge on data and tasks
 	\item Interpretable knowledge (how data is generated)
 \end{list}
@@ -357,9 +357,12 @@ The majority of modern tasks comprises large number of variables\begin{list}{}{}
 	\item Exponential size of the parameter space
 	\item Computationally impractical to train and predict
 \end{list}
-\paragraph{Representation} Graphical models are a compact way to represent exponentially large probability distributions. Encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
-\paragraph{Inference} How to query (predict with) a graphical model? Probability of unknown $X$ given observations $d$, $P(X\:|\:d)$, the \textbf{most likely hypothesis} (parameters) $X$.
-\paragraph{Learning} Find the right model parameters.
+\paragraph{The Graphical Models Framework}
+\begin{list}{}{}
+	\item \textbf{Representation} Graphical models are a compact way to represent exponentially large probability distributions. Encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
+	\item \textbf{Inference} How to query (predict with) a graphical model? Probability of unknown $X$ given observations $\mathbf{d}$, $P(X\:|\:\mathbf{d})$, the \textbf{most likely hypothesis} (parameters) $X$.
+	\item \textbf{Learning} Find the right model parameters.
+\end{list}
 \paragraph{Representation} A graph whose nodes are random variables and edges represent probabilistic relationships between the variables.\\
 Different classes of graphs:
 \begin{list}{}{}
@@ -419,7 +422,8 @@ Compact graphical representation for exponentially large joint distributions: si
 \begin{multicols}{2}
 Directed Acyclic Graphs (DAG) $G = (V,E)$\begin{list}{}{}
 	\item Nodes $v\in V$ represent random variables\\
-	Shaded $\Rightarrow$ observed, empty (like $Y_3$) $\Rightarrow$ unobserved
+	Shaded $\Rightarrow$ observed\\
+	Empty $\Rightarrow$ unobserved (e.g. $Y_3$)
 	\item Edges $e\in E$ describe the conditional independence relationships
 \end{list}
 \columnbreak
@@ -435,38 +439,61 @@ $$P(Y_1,\ldots,Y_N,C) = P(C)\prod_{i=1}^N P(Y_i\:|\:C)$$
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
 \paragraph{Full-Plate Notation}
-Boxes denote replication for a number of times (denoted by the letter in the corner). Shaded nodes are observed variables, empty nodes are unobserved latent variables.\\
-Black dots (optional) identify model parameters.
+\begin{multicols}{2}
+\begin{list}{}{}
+	\item Boxes denote replication for a number of times (denoted by the letter in the corner)
+	\item Shaded nodes are observed variables
+	\item Empty nodes are unobserved latent variables.
+	\item Black dots (optional) identify model parameters.
+	\begin{list}{}{}
+		\item $\pi$: multinomial prior distribution
+		\item $\mu$, $\sigma$: mean and std. dev. of the Gaussian $C$
+	\end{list}
+\end{list}
+\columnbreak
 \begin{center}
-	\includegraphics[scale=0.5]{17.png}
+	\includegraphics[scale=0.6]{17.png}
 \end{center}
+\end{multicols}
 \subsubsection{Markov Random Fields}
 \begin{center}
 	\includegraphics[scale=0.5]{18.png}
 \end{center}
 Undirected graph $G = (V,E)$ (a.k.a. Markov Networks). Also with shaded/empty nodes to denote observed/unobserved variables.\\
+Nodes $v\in V$ represent random variables $X_v$ (shaded meaning unobserved and empty meaning unobserved).\\
 Edges $e\in E$ represent bidirectional dependencies between variables (constraints).\\
 Often arranged in a structure that is coherent with the data/constraint we want to model.\\
 Often used in image processing to impose spatial constraints (e.g. smoothness)
 \subsection{Conditional Independence and Causality}
 Can we reason on the structure of the graph to infer direct/indirect relationships between random variables?
-\paragraph{Local Markov Property} Each node (random variable) is conditionally independent of all its non-descendants given a joint state of its parents. $$Y_v\perp Y_{V\setminus \text{Children(v)}}\text{ given }Y_{\text{Parent}(v)}\:\:\forall\:v\in V$$
+\paragraph{Local Markov Property} Each node (random variable) is conditionally independent of all its non-descendants given a joint state of its parents. $$\forall\:v\in V\:\:Y_v\perp Y_{V\setminus \text{Children(v)}}\:|\:Y_{\text{Parent}(v)}$$
+To be read as "$Y_v$ is independent from all the RVs in $Y$ that are not children of $v$ given the parents of $v$".\\
 There are substructures in the Bayesian networks with which we can build everything.
 \paragraph{Markov Blanket} A Markov blanket $Mb(A)$ of a node $A$ is the minimal set of vertices that isolates/shields the node from the rest of the Bayesian network. If I know the variables in $Mb(A)$ then I know everything I need to know about $A$\begin{center}
-	\includegraphics[scale=0.5]{19.png}
+	\includegraphics[scale=0.33]{19.png}
 \end{center}
 Taking only the parents it's not sufficient, we need also the children and the co-parents (nodes that are parents of one of my children). So it contains parents, children and children's parents.
 $$P(A\:|\:Mb(A), Z) = P(A\:|\:Mb(A))\:\:\forall\:Z\not\in Mb(A)$$
-\paragraph{Joint Probability Factorization} An application of the chain rule and local Markov property.\begin{enumerate}
+\paragraph{Joint Probability Factorization}
+\begin{multicols}{2}
+An application of the chain rule and local Markov property.\begin{enumerate}
 	\item Pick a topological ordering of the nodes
 	\item Apply chain rule following the order
+	\item Use the conditional independence assumptions
 \end{enumerate}
+\columnbreak
+\begin{center}
+	\includegraphics[scale=0.5]{209.png}
+\end{center}
+\end{multicols}
+$$P(PA,S,H,T,C) = P(PA)\cdot P(S\:|\:PA)\cdot P(H\:|\:S,PA)\cdot P(T\:|\:H,S,PA)\cdot P(C\:|\:T,H,S,PA)=$$
+$$=P(PA)\cdot P(S)\cdot P(H\:|\:S,PA)\cdot P(T\:|\:H)\cdot P(C\:|\:H)$$
 \paragraph{Sampling of a Bayesian Network} A BN describes a generative process for observations.
 \begin{enumerate}
 	\item Pick a topological ordering of the nodes
 	\item Generate data by sampling from the local condition probabilities following this order
 \end{enumerate}
-Generate $i$th sample for each variable, example $s_i\simeq P(S)$, $h_i\simeq P(H\:|\:S=s_i)$
+Generate $i$th sample for each variable, example $s_i\sim P(S)$, $pa_i\sim P(PA)$, $h_i\sim P(H\:|\:S=s_i, PA = pa_i)$
 \subsection{Fundamental Bayesian Network Structures}
 Three fundamental substructures that determine the conditional independence relationships in a Bayesian network.
 \paragraph{Tail to Tail} Common cause \begin{center}
@@ -511,21 +538,24 @@ What if we want to model symmetric dependencies: bidirectional effects, spatial 
 What is the undirected equivalent of $d$-separation in directed models? It's based on node separation: the two nodes in the middle separate the two lateral parts.\\
 Node subsets $A,B\subset V$ are conditionally independent given $C\subset V\setminus \{A,B\}$ if all paths between nodes in $A$ and $B$ pass through at least one of the nodes in $C$.\\
 The Markov Blanket of a node includes all and only its neighbors.
-\paragraph{Joint Probability Factorization} What is the undirected equivalent? We seek a product of functions defined over a set of nodes associated with some local properties of the graph. Markov blanket tells that nodes that are not neighbors are conditionally independent given the remainder of the nodes.$$P(X_v,X_i\:|\:X_{V\setminus\{v,i\}}) = P(X_v\:|\:X_{V\setminus\{v,i\}})P(X_i\:|\:X_{V\setminus\{v,i\}})$$
+\paragraph{Joint Probability Factorization} What is the undirected equivalent? We seek a product of functions defined over a set of nodes associated with some local properties of the graph. Markov blanket tells that nodes that are not neighbors are conditionally independent given the rest of the nodes.$$P(X_v,X_i\:|\:X_{V\setminus\{v,i\}}) = P(X_v\:|\:X_{V\setminus\{v,i\}})P(X_i\:|\:X_{V\setminus\{v,i\}})$$
 Factorization should be chosen in a way that nodes $X_v$ and $X_i$ are not in the same factor: we use a well-known graph structure that includes only nodes that are pairwise connected.
 \subparagraph{Clique} Subset of nodes $C$ in graph $G$ such that $G$ contains an edge between all pair of nodes in $C$. It's maximal if you cannot add more nodes.
+\begin{center}
+	\includegraphics[scale=0.5]{210.png}
+\end{center}
 \subparagraph{Maximal Clique Factorization} Define $X = X_1,\ldots,X_n$ as the random variables associated to the $N$ nodes of the undirected graph $G$ $$P(X)=\frac{1}{Z}\prod_C \psi(X_C)$$
 $X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the \textbf{potential function} over the maximal clique $C$ and $Z$ is the partition function ensuring normalization.
 $$Z = \sum_X\prod_C\psi(X_C)$$
 The partition function $Z$ is the computational bottleneck of undirected modes: $O(K^N)$ for $N$ discrete random variables with $K$ distinct values.
-\paragraph{Potential Functions} Potential functions $\psi(X_C)$ are not probabilities, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=\left\{ \begin{array}{l l}
+\paragraph{Potential Functions} \textbf{Potential functions} $\psi(X_C)$ \textbf{are not probabilities}, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=\left\{ \begin{array}{l l}
 1&\text{if }X_1 = X_2\\
 4&\text{if }X_2 = 2X_1\\
 0&\text{otherwise}
 \end{array}\right.$: you can hand-engineer feature functions.\\
 If we restrict to strictly positive potential functions, the Hammersley-Clifford theorem provides guarantees on the distribution that can be repreesented by the clique factorization.
 \paragraph{Boltzmann Distribution} A convenient and widely used strictly positive representation of the potential function is $$\psi(X_C)=e^{-E(X_C)}$$
-where $E(X_C)$ is called \textbf{energy function}.
+where $E(X_C)=-\frac{X_C}{kT}$ is called \textbf{energy function}.
 \subsubsection{From Directed to Undirected}
 Straightforward when is linear.\\Requires some work with v-structures, e.g. \textbf{moralization} (a.k.a. marrying of the parents).\begin{center}
 	\includegraphics[scale=0.5]{25.png}
@@ -549,7 +579,7 @@ Determining causal relationships between variables entails deciding on arc prese
 	\end{list}
 	Two approaches:\begin{list}{}{}
 		\item Information theoretic: based on data likelihood plus some model-complexity penalization terms
-		\item Bayesian: score the structures using a graph posterior (likelihood plus proper prior choice
+		\item Bayesian: score the structures using a graph posterior (likelihood plus proper prior choice)
 	\end{list}
 	\textbf{Search strategy}:\begin{list}{}{}
 		\item Finding maximal scoring structures is NP complete
@@ -561,24 +591,28 @@ Determining causal relationships between variables entails deciding on arc prese
 		\item Search in the space of node ordering
 	\end{list}
 	\item \textbf{Constraint Based}\\
-	Tests of conditional independence $I(X_i,X_j\:|\:Z)$, constraining the network. Based on measures of association between two variables $X_i$ and $X_j$ given their neighbor nodes $Z$.\\
+	Tests of conditional independence $I(X_i,X_j\:|\:Z)$, constraining the network. Based on measures of association between two variables $X_i$ and $X_j$ given their neighbor nodes $Z$ and using deterministic rules based on local Markovian dependencies to determine edge orientation (DAG).\\
 	\textbf{Testing strategy}:\begin{list}{}{}
 		\item Choice of the testing order is fundamental in avoiding a super-exponential complexity.
-		\item Level-wise testing: tests $I(X_i,X_j\:|\:Z)$ are performed in order of increasing size of the conditioning set $Z$ starting from $Z = \emptyset$ (PC algorithm)
-		\item Node-wise testing: tests are performed on a single edge at the time, exhausting independence checks on all conditioning variables (TPDA algorithm)
+		\item \textbf{Level-wise testing}: tests $I(X_i,X_j\:|\:Z)$ are performed in order of increasing size of the conditioning set $Z$ starting from $Z = \emptyset$ (PC algorithm)
+		\item \textbf{Node-wise testing}: tests are performed on a single edge at the time, exhausting independence checks on all conditioning variables (TPDA algorithm)
 		\item The nodes entering $Z$ are chosen in the neighborhood of $X_i,X_j$
 	\end{list}
-roach	\item \textbf{Hybrid}\\
-	Model selection of constrained structures. Multi-stage algorithm combining previous approaches: independence tests to find a good sub-optimal skeleton as starting point, then search and score refining the skeleton.\\
+	\item \textbf{Hybrid}\\
+	Model selection of constrained structures. Multi-stage algorithms combining previous approaches: independence tests to find a good sub-optimal skeleton as starting point, then search and score refining the skeleton.\\
 	Max-Min Hill Climbing (MMHC) model: optimized constraint-based approach to reconstruct the skeleton, using the candidate parents in the skeleton to run a search and score approach.
 \end{list}
+\paragraph{PC Algorithm}
+\begin{center}
+	\includegraphics[scale=0.5]{211.png}
+\end{center}
 \subsection{Hidden Markov Models}
 \paragraph{Sequence}A sequence $y$ is a collection of observations $y_t$ where $t$ represent the position of the element according to a complete order (e.g. time)
 $$y_1\rightarrow \ldots\rightarrow y_{t-1}\rightarrow y_t\rightarrow\ldots\rightarrow y_T$$
 $$P(y_t\:|\:y_{t-1})$$
 Also head-to-tail: observation at time $t$ is independent from $t=1,\ldots,t-1$: \textbf{first-order Markov assumption}.\\
 Reference population is a set of independent and identically distributed sequences $y^1, \ldots, y^N$\\
-Difference sequences generally have different lengths $T^1,\ldots,T^N$
+Difference sequences $y^1, \ldots, y^N$ generally have different lengths $T^1,\ldots,T^N$
 \paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on the $t-1$ previous nodes.\\
 We have X = $x-1,\ldots,x_T$ that can be represented as 
 $$x_1\rightarrow \ldots\rightarrow x_{t-1}\rightarrow x_t\rightarrow\ldots\rightarrow x_T$$
@@ -620,20 +654,19 @@ Indicates that the hidden state $S_t$ at time $t$ is dependent on context inform
 	\item the previous timestep $s^{-1}$, first-order
 	\item the previous two timesteps $s^{-1},s^{-2}$, second-order
 \end{list}
-and so on.
+and so on. Applying the recursive model to a sequence (\textbf{unfolding}) generates the corresponding \textbf{directed graphical model}.
 \paragraph{HMMs as Automata} Can also be generalized to transducers.
 \begin{center}
 	\includegraphics[scale=0.5]{29.png}
 \end{center}
-\pagebreak
 \subsection{Notable Inference Problems}
 \paragraph{Smoothing} Given a model $\Theta$ and an observed sequence $y$, determine the distribution of the hidden state at time $t$: $P(S_t\:|\:Y=y,\Theta)$\\
 Forward Backward algorithm.
 \paragraph{Learning} Given a dataset of $N$ sequences $D=\{y^1,\ldots,y^N\}$ and the number of hidden states $C$, find the parameters $\pi,A,B$ that maximize the probability model $\Theta = \{\pi,A,B\}$ having generated the sequences in $D$
 \paragraph{Optimal State Assigment} Given a model $\Theta$ and an observed sequence $y$, find an optimal state assignment $s = s_1^*,\ldots,s_T^*$ for the hidden Markov chain.\\
 Viterbi algorithm.
-\subsubsection{Forward-Backward Algorithm} \textbf{Smoothing}: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$).\\
-I know $\Theta$, the model (its parameters). So I know $P(S_1) = \pi, P(S_t\:|\:S_{t-1} = A$ and $P(y_t\:|\:S_t) = B$: I need to express the quantity I want in terms of $\Theta=\{\pi,A,B\}$.\\
+\subsubsection{Forward-Backward Algorithm} \textbf{Smoothing}: how do we determine $P(S_t = i\:|\:\hat{y})$? We will compute $P(S_t=i, \hat{y})$, it's proportional (just divide by $P(\hat{y})$). It's possible to directly estimate $P(S_t = i\:|\:\hat{y})$ (\textbf{smoothed posterior}), but it's more involved.\\
+I know $\Theta$, the model (its parameters). So I know $P(S_1) = \pi, P(S_t\:|\:S_{t-1}) = A$ and $P(y_t\:|\:S_t) = B$: I need to express the quantity I want in terms of $\Theta=\{\pi,A,B\}$.\\
 $\hat{y}$ are all the observations for each timestep $\Rightarrow P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T)$
 $$\begin{array}{ccccccccccccc}
 S_1&\rightarrow&\ldots&\rightarrow&S_{t-1}&\rightarrow&S_t&\rightarrow&S_{t+1}&\rightarrow&\ldots&\rightarrow&S_T\\
@@ -642,23 +675,23 @@ y_1&\rightarrow&\ldots&\rightarrow&y_{t-1}&\rightarrow&y_t&\rightarrow&y_{t+1}&\
 \end{array}$$
 We are at time $t$, so everything after that is the future ($y_{t+1:T}$), and everything up to $t$ included is the past ($y_{1:t}$).
 $$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) P(S_t=i,y_{1:t})$$
-If I observe $S_t$ we block the path $y_{1:t}$, so $P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) = P(y_{t+1:T}\:|\:S_t=i)$
-$$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = P(y_{t+1:T}\:|\:S_t=i) P(S_t=i,y_{1:t})$$
+If I observe $S_t$ we block all the paths from the past $y_{1:t}$ to the future $y_{t+1:T}$, so $P(y_{t+1:T}\:|\:S_t=i, y_{1:t}) = P(y_{t+1:T}\:|\:S_t=i)$
+$$P(S_t=i,y_1,\ldots,y_{t-1},y_t,y_{t+1},\ldots,y_T) = \underset{\beta_t(i)}{\underbrace{P(y_{t+1:T}\:|\:S_t=i)}} \underset{\alpha_t(i)}{\underbrace{P(S_t=i,y_{1:t})}}$$
 I can derive two "messages"
 \begin{list}{}{}
-	\item Past message $\alpha_t(i) = P(S_t=i,y_{1:t})$ (\textbf{forward recursion})
-	\item Future message $\beta_t(i) = P(y_{t+1:T}\:|\:S_t=i)$ (\textbf{backward recursion})
+	\item Past message $\alpha_t(i) = P(S_t=i,y_{1:t})$: \textbf{forward recursion} with $\alpha_1(i)=b_i(y_1)\pi_i$
+	\item Future message $\beta_t(i) = P(y_{t+1:T}\:|\:S_t=i)$: \textbf{backward recursion} with $\beta_T(i) = 1$ for every $i$
 \end{list}
 $$P(S_t,y_{1:t}) = \sum_{j=1}^c P(S_t, S_{t-1}=j,y_{1:t}) = \sum_{j=1}^c P(y_t\:|\:S_t, S_{t-1} = j, y_{1:t-1})P(S_t,S_{t-1},y_{1:t-1})$$
-But we can get rid of $S_{t-1}=j$ and $y_{1:t-1}$ leaving us with $P(y_t\:|\:S_t)$ which is just the emission.\\
-The second factor can be rewrited as $P(S_t\:|\:S_{t-1}=j,y_{1:t-1}) P (S_{t-1}=j\:|\:y_{1:t-1})$ and observing $S_{t-1}$ allows us to get rid of $y_{1:t-1}$, giving us the transition distribution $P(S_t\:|\:S_{t-1}=j)$ and $\alpha_{t-1}(j)$
+But because we observe $S_t$ we can get rid of $S_{t-1}=j$ and $y_{1:t-1}$ leaving us with $P(y_t\:|\:S_t)$ which is just the emission.\\
+The second factor can be rewritten as $P(S_t\:|\:S_{t-1}=j,y_{1:t-1}) \underset{\alpha_{t-1}(j)}{\underbrace{P (S_{t-1}=j, y_{1:t-1})}}$ and observing $S_{t-1}$ allows us to get rid of $y_{1:t-1}$, giving us the transition distribution $P(S_t\:|\:S_{t-1}=j)$ and $\alpha_{t-1}(j)$
 $$\alpha_t(i) = P(S_t=i,y_{1:t}) = \sum_{j=1}^c P(y_t\:|\:S_t=i) P(S_t=i\:|\:S_{t-1}=j)\alpha_{t-1}(j)$$
 $$\alpha_1(j) = P(y_1\:|\:S_1=j)P(S_1=j)$$
 This just by reasoning with conditional independence.\\
-Same thing can be done for $$P(y_{t+1:T}\:|\:S_{t} = i) = \sum_j P(y_{t+1:T},S_{t+1}=j\:|\:S_t=i) = \sum_j P(y_{t+2:T}\:|\:S_t, S_{t+1},y_{t+1})P(S_{t+1},y_{t+1}\:|\:S_t=i)$$
+Same thing can be done for backward recursion introducing $S_{t+1}$ by marginalization $$\beta_t(i) = P(y_{t+1:T}\:|\:S_{t} = i) = \sum_j P(y_{t+1:T},S_{t+1}=j\:|\:S_t=i) = \sum_j P(y_{t+2:T}\:|\:S_t, S_{t+1},y_{t+1})P(S_{t+1},y_{t+1}\:|\:S_t=i)$$
 Same as before, I can exclude $S_t, y_{t+1}$ because we observe $S_{t+1}$ so that factor is $\beta_{t+1}(j)$.\\
 The second factor is rewritten as $P(S_{t+1}\:|\:S_t,y_{t+1})P(y_{t+1}\:|\:S_{t+1})$ which is the transition distribution (we can exclude $y_{t+1}$) times the emission distribution.
-$$\beta_t(i) = \sum_j P(y_{t+1}\:|\:S_{t+1} = j)P(S_{t+1}=j\:|\:S_t=i)\beta_{t+1}(j)$$ %TODO check
+$$\beta_t(i) = \sum_j P(y_{t+1}\:|\:S_{t+1} = j)P(S_{t+1}=j\:|\:S_t=i)\beta_{t+1}(j)$$
 $$\beta_T = 1$$
 \paragraph{Sum-Product Message Passing} The Forward-Backward algorithm is an example of a sum-product message passing algorithm.\\
 A forward recursion computing a generic message $\mu_\alpha$, backward recursion computing a generic message $\mu_\beta$\\
@@ -671,7 +704,7 @@ Maximizing the joint likelihood of the sequences given the parameters considerin
 Expectation-Maximization of the \textbf{complete likelihood} $L_c(\Theta)$, optimizing a slightly different problem obtaining a not-reducing similar result. It's completed with indicator variables $z_{ti}^n=\left\{\begin{array}{c l}
 1&\text{if }n\text{th chain is in state }i\text{ at time }t\\
 0&\text{otherwise}
-\end{array}\right.$ about the assignments $S_i^n$
+\end{array}\right.$ about the assignments $S_i^n$ (meaning $z_{ti}^n = 1\Leftrightarrow S_t = i$)
 \paragraph{Expectation-Maximization} Gives the red line: touching in the estimating point and not greater in the other points.
 \begin{center}
 	\includegraphics[scale=0.5]{30.png}
@@ -679,23 +712,33 @@ Expectation-Maximization of the \textbf{complete likelihood} $L_c(\Theta)$, opti
 It's a matter of picking the right $Q(\Theta\:|\:\Theta^k)$\\
 Introduce indicator variables in $L(\Theta)$ together with model parameters $\Theta = (\pi,A,B)$
 $$L_C(\Theta)=\log P(X,Z\:|\:\Theta) = $$
-$$ = \log\prod_{n=1}^N\left(\prod_{i=1}^C \left(P(S_1=1)P(Y_1^n\:|\:S_1=i) \right)^{z_{1i}^n} \prod_{t=2}^{T_n}\prod_{i,j=1}^C P(S_t=i\:|\:S_{t-1}=j)^{z_{ti}^nz_{(t-1)j}^n} P(Y_t^n\:|\:S_t=i)^{a_{ti}^n} \right) =$$
-$$ = \sum_{n=1}^N\left( \sum_{i=1}^C z_{1i}^n\log\pi_i+\sum_{t=2}^{T_n}\sum_{i,j=1}^C z_{ti}^nz_{(t-1)j}\log A_{ij} + \sum_{t=1}^{T_n}\sum_{i=1}^C z_{ti}^n\log b_i(y_t^n) \right)$$
+$$ = \log\underset{\text{Sequences}}{\underbrace{\prod_{n=1}^N}}\left(\underset{=P(S_1=i^*)P(Y_1^n\:|\:S_1=i^*)}{\underbrace{\overset{\text{All }C\text{ terms are 1 except for the single }z_{1i^*}^n=1}{\overbrace{\underset{\text{Assignments}}{\underbrace{\prod_{i=1}^C}} \left(\underset{\text{Prior}}{\underbrace{P(S_1=i)}}\underset{\text{Emission}}{\underbrace{P(Y_1^n\:|\:S_1=i)}} \right)^{z_{1i}^n}}}}} \overset{\text{Survives only the term where }S_t=i\text{ and }S_{t-1}=j}{\overbrace{\prod_{t=2}^{T_n}\prod_{i,j=1}^C P(S_t=i\:|\:S_{t-1}=j)^{z_{ti}^nz_{(t-1)j}^n} P(Y_t^n\:|\:S_t=i)^{a_{ti}^n}}} \right) =$$
+$$ = \sum_{n=1}^N\left( \overset{\text{Depends only on the prior }\pi_i}{\overbrace{\sum_{i=1}^C z_{1i}^n\log\pi_i}}+\overset{\text{Depends only on the transition }A_{ij}}{\overbrace{\sum_{t=2}^{T_n}\sum_{i,j=1}^C z_{ti}^nz_{(t-1)j}\log A_{ij}}} + \overset{\text{Depends only on the emission }b_i(y_t^n)}{\overbrace{\sum_{t=1}^{T_n}\sum_{i=1}^C z_{ti}^n\log b_i(y_t^n)}} \right)$$
 We built it assuming to know $z$, but we don't know it. The \textit{expectation} part is in this: we don't know $z_{ti}^n$, but you can optimize the function in expectation $E[L_C(\Theta)]$
 \pagebreak
 \paragraph{Expectation-Maximization Algorithm} It's a 2-step iterative algorithm for the maximization of complete likelihood $L_C(\Theta)$ with respect to the model parameters $\Theta$\begin{list}{}{}
-	\item \textbf{E-step}: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:\Theta)]$$
-	So compute the expectation of the complete log likelihood with respect to indicator variables $z_{ti}^n$ assuming estimated parameters $\Theta^t = (\pi^t, A^t, B^t)$ fixed at time $t$.\\
-	Expectation with respect to a discrete random variable is $$E_z[Z] = \sum_z z\cdot P(Z=z)$$
+	\item \textbf{E-step}: given the current estimate of the model parameters $\Theta^t$, compute $$Q^{t+1}(\Theta\:|\:\Theta^t) = E_{Z\:|\:X,\Theta^t}[\log P(X,Z\:|\:\Theta)] = E_{Z\:|\:X,\Theta^t}[L_C(\Theta)]$$
+	The important part is understanding what happens in the expectation, where we pass the formula stated in the previous page through the expectation operator. Compute the expectation of the complete log likelihood with respect to indicator variables $z_{ti}^n$ assuming estimated parameters $\Theta^t = (\pi^t, A^t, B^t)$ fixed at time $t$.\\
+	Expectation with respect to a discrete random variable is the following, and our $Z$ is an indicator variable, so it has two values. $$E_Z[Z] = \sum_z z\cdot P(Z=z) \underset{z=0,1}{=} 0\cdot P(Z=0)+1\cdot P(Z=1)= P(Z=1)$$
+	We compute it on visible data, so $E_Z[Z] = P(Z\:|\:X)$\\
 	To compute the conditional expectation $Q^{t+1}(\Theta\:|\:\Theta^t)$ for the complete HMM log likelihood we need to estimate $$E_{Z\:|\:Y,\Theta^k}[z_{ti}] = P(S_t=i\:|\:y)$$
 	$$E_{Z\:|\:Y,\Theta^k}[z_{ti}z_{(t-1)j}] = P(S_t = i, S_{t-1}=j\:|\:y)$$
-	
-	And we know how to compute the posteriors thanks to the forward-backward algorithm:
+	And we know how to compute the posteriors, now that we've fixed the parameters, thanks to the forward-backward algorithm:
 	$$y_t(i) = P(S_t = i\:|\:Y) = \frac{\alpha_t(i)\beta_t(i)}{\sum_{j=1}^C\alpha_t(j)\beta_t(j)}$$
 	$$y_{t,t-1}(i,j) = P(S_t = i, S_{t-1} = j\:|\:Y) = \frac{\alpha_{t-1}(j)A_{ij}b_i(y_t)\beta_t(i)}{\sum_{m,l=1}^C \alpha_{t-1}(m)A_{lm}b_j(y_t)\beta_t(l)}$$
+	We work by decomposition for independence of the joint distributions.\\
+	Applying the expectation to $L_C(\Theta)$, and being it a linear operator, we apply the expectation to each sum. For example (omitting $n$):
+	$$\underset{\text{Independent from }Z\text{ so it's a constant}}{E_{Z\:|\:Y,\Theta}[z_{1i}\underbrace{\log\pi_i}]} = \log\pi_i\cdot E_{Z\:|\:Y,\Theta}[z_{1i}] = \log\pi_i\cdot \underset{\text{Posterior}}{\underbrace{P(S_1=i\:|\:y)}}$$
+	And that's how we use the posteriors we need.
+	$$E[L_C(\Theta)] = \sum_n\left(\sum_iP(S_1=i\:|\:y)\log(\pi_i) + \sum_{t=2}^T\sum_{i,j} P(S_t=i,S_{t-1}=j\:|\:y)\log(A_{ij}) + \sum_{t=1}^T\sum_i P(S_t=i\:|\:y)\log(b_i(y_t))\right)$$
+	Which is an expected complete log-likelihood ready to be maximized in the M-step.
 	\item \textbf{M-step}: find the new estimate of the model parameters $$\Theta^{t+1} = \arg\max_\Theta Q^{t+1}(\Theta\:|\:\Theta^t)$$
-	Optimization problem, using the posteriors computed at the E-step. As usual with $$\frac{\partial Q^{t+1}(\Theta\:|\:\Theta^t)}{\partial\Theta}$$
-	where $\Theta = (\pi, A, B)$ are now variables. The parameters can be distributions, so we need to preserve sum-to-one constraints (Lagrange Multipliers).\\
+	Optimization problem, using the posteriors computed at the E-step. As usual with $$\frac{\partial Q^{t+1}(\Theta\:|\:\Theta^t)}{\partial\Theta}=\frac{\partial E[L_C]}{\partial\Theta}$$
+	where $\Theta = (\pi, A, B)$ are now variables, so getting three derivatives:
+			$$\frac{\partial E[L_C]}{\partial\pi_i}\:\:\frac{\partial E[L_C]}{\partial A_{ij}}\:\:\frac{\partial E[L_C]}{\partial b_i}$$
+		Each just focusing on its term of the summation, e.g.:
+			$$\frac{\partial E[L_C]}{\partial \pi_k}=\underset{\text{Survives only the }i=k\text{ element}}{\underbrace{\frac{\partial \sum_n\sum_iP(S_1=i\:|\:y)\log(\pi_i)}{\partial \pi_k}}} = \sum_nP(S_1=k\:|\:y)\cdot\underset{\text{Derivative of }\log\pi_k}{\underbrace{ \frac{1}{\pi_k}}}$$
+	The parameters can be distributions, so we need to preserve sum-to-one constraints (Lagrange Multipliers).\\
 	State distributions are
 	$$A_{ij}=\frac{\sum_{n=1}^N\sum_{t=2}^{T^n} \gamma_{t,t-1}^n(i,j)}{\sum_{n=1}^N\sum_{t=2}^{T^n}\gamma_{t-1}^n(j)}$$
 	$$\pi_i=\frac{\sum_{n=1}^N\gamma_1^n(i)}{N}$$
@@ -711,18 +754,16 @@ With appropriate Lagrange multiplier is multinomial.
 Can be done identifying the single hidden states $s_t$ that maximize the posterior $$s_t^*=\arg\max_{i=1,\ldots,C}P(S_t=i\:|\:Y)$$ 
 or find the most likely \textbf{joint hidden state assignment} 
 $$\text{s}^* = \arg\max_s P(Y,S = \text{s})$$
-\paragraph{Viterbi Algorithm} Efficient dynamic programming algorithm based on a backward-forward recursion, example of max-product message passing algorithm. When exchanging, instead of $\sum$ we maximize the $\prod$.
-%TODO check all
+\subsubsection{Viterbi Algorithm} Efficient dynamic programming algorithm based on a backward-forward recursion, example of max-product message passing algorithm. When exchanging, instead of $\sum$ we maximize the $\prod$.
 $$\max_{\hat{s} = s_1,\ldots,s_T} P(\hat{y},\hat{s}) = \max_{\hat{s}}\prod_{t=1}^T P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})$$
 because is emission and prior as always. Let's focus on a simplified problem: first try to find the state that maximize $s_T$. Let's focus on $T$
 $$\max_{s_T}\prod_{t=1}^T P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})=$$
 we can exclude a lot
-$$=\prod_{t=1}^{T-1} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\cdot\max_{s_T}P(y_T\:|\:s_T)P(s_T\:|\:s_{T-1})$$
-which is a unique term, let's call $\epsilon(s_{T-1}) = \max_{s_T}P(y_T\:|\:s_T)P(s_T\:|\:s_{T-1})$, and $s_{T-1}$ has $c$ possible values, the number of hidden states.\\
-So $\epsilon(s_{T-1})$ it's a vector of $c$ positions, and in position $j$ we have $\epsilon(s_{T-1} = j)$
-$$\prod_t^{T-1} P(y_t\:|\:s_t)PSs_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
+$$=\prod_{t=1}^{T-1} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\cdot\underset{\epsilon(s_{T-1})}{\underbrace{\max_{s_T}P(y_T\:|\:s_T)P(s_T\:|\:s_{T-1})}}$$
+$\epsilon(s_{T-1})$ is a unique term, and $s_{T-1}$ has $c$ possible values, the number of hidden states, so: $\epsilon(s_{T-1})$ it's a vector of $c$ positions, and in position $j$ we have $\epsilon(s_{T-1} = j)$
+$$\prod_t^{T-1} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
 Let's try solving 
-$$\max_{s_{T-1}} \prod_t^{T-1} P(y_t\:|\:s_t)PSs_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
+$$\max_{s_{T-1}} \prod_t^{T-1} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\epsilon(s_{T-1})$$
 we would do the same procedure. So we can iteratively start from the last item and use the information iteratively to compute the previous one.\\
 In general we compute $$\epsilon(s_{t-1}) = \max_{s_t} P(y_t\:|\:s_t)P(s_t\:|\:s_{t-1})\epsilon(s_t)$$
 So $s_t$ is received by $s_{t-1}$ to compute the new $\epsilon(s_{t-1})$ which is in turn passed to $s_{t-2}$ and so on, ending at the root. In practice we never choose the state, only computing the maximum. At the root, I have no predecessor states and can solve the maximization problem
