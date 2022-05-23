@@ -1291,13 +1291,21 @@ Training by variants of the standard backpropagation that account for the fact t
 	\includegraphics[scale=0.5]{62.png}
 \end{center}
 The gradient $\Delta w_i$ is obtained by summing the contributions from all the connections sharing that weight.\\
-We can write convolution as dense multiplication with shared weights.
+We can write convolution as dense multiplication with shared weights.\\\\
+Backpropagating gradients from convolutional layer $N$ to layer $N-1$ is not as simple as transposing the weight matrix: need \textbf{deconvolution with zero paddign}.
 \end{multicols}
 \paragraph{Deconvolution}
 \begin{center}
 	\includegraphics[scale=0.5]{63.png}
 \end{center}
-We can obtain the transposed convolution using the same logic of the forward convolution. If you had no padding in the forward convolution you need to use much padding when doing the transposed convolution.
+We can obtain the transposed convolution using the same logic of the forward convolution.
+\begin{list}{}{}
+	\item If you had no padding in the forward convolution you need to use much padding when doing the transposed convolution.
+	\item If you had striding, you need to fill in the convolution map with zeroes to obtain a correctly sized deconvolution
+	\begin{center}
+		\includegraphics[scale=0.5]{213.png}
+	\end{center}
+\end{list}
 \paragraph{ReLU} ReLU helps counteract gradient vanish: sigmoid first derivative vanishes as we increase or decrease $z$, ReLU first derivative is 1 when unit is active and 0 otherwise. ReLU second derivative is 0 (no second order effects).\\
 Easy to compute and favors sparsity.
 \paragraph{VGGNet} Standardized convolutional layer:
@@ -1313,17 +1321,21 @@ Not very good because very limited, need to push for diversity.
 \end{center}
 But many parameters: number of channels times number of convolutional layers times the dimensions. If not careful the application of this module explodes the number of parameters.\\
 Kernels of different size to capture details at varied scale, aggregated before sending to next layer.\\
-1$\times$1 convolutions are helpful.\begin{center}
+1$\times$1 convolutions are helpful too: by placing 1$\times$1 convolutions before larger kernels in the Inception module, the number of input channels is reduced saving computations and parameters.\begin{center}
 	\includegraphics[scale=0.5]{65.png}
 \end{center}
 Only 5M parameters, followed by v2, v3 and v4 which added more filter factorization and introduced heavy use of Batch normalization.
 \paragraph{Batch Normalization} Very deep neural networks are subject to internal covariate shift. Distribution of inputs to a layer $N$ may vary (shift) with different minibatches due to adjustments at layer $N-1$. Layer $N$ can get confused by this, so (simplifying) we normalize for mean and variance in each minibatch.
+$$\mu_b=\frac{1}{N_b}\sum_{i=1}^{N_b}x_i$$
+$$\sigma_b^w=\frac{1}{N_b} \sum_{i=1}^{N_b}(x_i-\mu_b)^2$$
+$$\hat{x}_i = \frac{x_i-\mu_b}{\sqrt{\sigma^2_b+\epsilon}}$$
+\paragraph{ResNet Trick} A ultra-deep network, with 152 layers. Begun working in 2015 thanks to a trick: the input to the block $X$ bypasses the convolution and is combined with its residual $f(X)$. When backpropagating, the gradient flows in full through these bypass connections.
 \paragraph{Deconvolution Network} Attach a DeConvNet to a target layer, pluggin an input and forward porpagation activations until layers, then backpropagate on the DeConvNet and see what parts of the reconstructed image are affected.
 \begin{center}
 	\includegraphics[scale=0.5]{68.png}
 \end{center}
 \paragraph{Occlusions} Measure what happens to feature maps and object classification if we occlude part of the image. Slide a grey mask across the image and project back the response of the best filters using deconvolution.\begin{center}
-	\includegraphics[scale=0.5]{83.png}
+	\includegraphics[scale=0.33]{83.png}
 \end{center}
 \paragraph{Dense CNN}
 \begin{center}
@@ -1333,16 +1345,23 @@ Gradient flows well in bypass connections, and each layer in the dense blocks ha
 \paragraph{Causal Convolutions} Basically meaning asymmetrical, to prevent a convolution to see into the future.\begin{center}
 	\includegraphics[scale=0.5]{70.png}
 \end{center}
-Problem is the context size glows slow with depth. So Dilated Convokutions
+Problem is the context size glows slow with depth. So \textbf{Dilated Convolutions}
+$$(I*K)(i,j)=\sum_m\sum_nI(i-lm,i-ln)K(m,n)$$
 \begin{center}
 	\includegraphics[scale=0.5]{71.png}
 \end{center}
-Basically convoluting every now and then. Similar to striding but size is preserved.\\\\
+Basically convoluting every now and then. Similar to striding but size is preserved.
 \paragraph{Fully Convolutional Networks} Due to not maintaining the original dimension we cannot perform semantic segmentation, so we need \textbf{Fully Convolutional Networks}
 \begin{center}
 	\includegraphics[scale=0.5]{72.png}
 \end{center}
-\paragraph{Deconvolutional Architecture} Basically you decompress the segmentation.
+\begin{list}{}{}
+	\item A convolutional part to extract interesting features at various scales
+	\item Fuse information from feature maps of different scales
+	\item Learn an upsampling function of the fused map to generate the semantic segmentation map
+\end{list}
+\pagebreak
+\paragraph{Deconvolutional Architecture} Basically you decompress the segmentation. The max pooling indexes are transferred to the decoder to improve the segmentation resolution.
 \begin{center}
 	\includegraphics[scale=0.5]{73.png}
 \end{center}
@@ -1351,21 +1370,25 @@ With Dilated Convolution out of the temporal domain we can perform semantic segm
 	\includegraphics[scale=0.5]{74.png}
 \end{center}
 \section{Autoencoders} The first and the latest deep learning model.
-\paragraph{Basic Autoencoder} Train a model to reconstruct the input, passing through some form of \textbf{information bottleneck}.\begin{center}
+\paragraph{Basic Autoencoder} Train a model to reconstruct the input, passing through some form of \textbf{information bottleneck} ($K<<D$).\begin{center}
 	\includegraphics[scale=0.5]{75.png}
 \end{center}
 $h$ is known as \textbf{latent space projection}, like with probabilistic models.\\
-The architecture is composed of the encoder $f$ ($x\rightarrow h$), and the decoder $g$ ($h\rightarrow\tilde{x}$). In principle $K << D$, the bottleneck. Or you can penalize the model by making $h$ sparsely active.
-\paragraph{Neural Autoencoders} Generally we want to train nonlinear AEs with possibly $K > D$ that do not learn trivial identity. Regularized AE:
-\subparagraph{Sparse Autoencoder} Add a term to the cost function to penalize $h$ (want the number of active units to be small)
+The architecture is composed of the encoder $f$ ($x\rightarrow h$), and the decoder $g$ ($h\rightarrow\tilde{x}$). In principle $K << D$, the bottleneck. Or you can penalize the model by making $h$ sparsely active.\\
+Trained by loss minimization
+$$L(x,\tilde{x})=L(x,g(f(x))$$
+\paragraph{Neural Autoencoders} Generally we want to train nonlinear AEs, 
+with possibly $K > D$, that do not learn trivial identity. Regularized AE:
+\begin{list}{}{}
+	\item \textbf{Sparse Autoencoder} Add a term to the cost function to penalize $h$ (we want the number of active units to be small)
 $$J_{SAE}(\Theta) = \sum_{x\in S} (L(x, \tilde{x}) + \lambda\Omega(h))$$
 Typically norm 1
 $$\Omega(h) = \Omega(f(x)) = \sum_j|h_j(x)|$$
-Probabilistic interpretation: training with regularization is MAP inference
+Probabilistic interpretation: training with regularization is MAP (Maximum-a-Posteriori) inference
 $$\max\log P(h,x)=\max(\log P(x\:|\:h)+\log P(h))$$
 MAP is formed by the likelihood plus the prior $P(h)$
 $$P(h)=\frac{\lambda}{2}\exp\left(-\frac{\lambda}{2}|h|_1\right) \Leftrightarrow \log P(h) = \lambda|h|_1 = \Omega(h)$$
-\subparagraph{Denoising Autoencoders} Train the AE to minimize the function $$L(x,g(f(\hat{x})))$$
+	\item \textbf{Denoising Autoencoders} Train the AE to minimize the function $$L(x,g(f(\hat{x})))$$
 where $\hat{x}$ is a version of the original input corrupted by some noise process $C(\hat{x}\:|\:x)$, so the usual $\hat{x} = x + \epsilon$ with $\epsilon$ from a gaussian of mean $0$ and variance $1$.\\
 Key intuition: learned representations should be robust to partial destruction of the input.\\
 Probabilistic interpretation:\begin{center}
@@ -1380,10 +1403,12 @@ $$C(\hat{x}\:|\:x) = N(\hat{x}\:|\:x,\sigma^2)$$
 $$g(h)-x\propto\frac{\partial\log p(x)}{\partial x}$$
 Remembering that $h$ is the encoding $h(x)$ depending on $x$. So basically compares the reconstruction with the original data.\\
 \textbf{The Manifold Assumption}: assume data lies on a lower dimensional non-linear manifold since variables in data are typically dependent. Regularized AR can afford to represent only variations that are needed to reconstruct training examples. AR mapping is sensitive only to changes in manifold direction.
-\subparagraph{Contractive Autoencoder} Penalize encoding function for input sensitivity.
+	\item \textbf{Contractive Autoencoder} Penalize encoding function for input sensitivity.
 $$J_{CAE}(\Theta)=\sum_{x\in S} (L(x,\tilde{x}) + \lambda\Omega(h))$$
-$$\Omega(h) = \Omega(f(x)) = \|\frac{\partial f(x)}{\partial x}\|^2_F$$
+$$\Omega(h) = \Omega(f(x)) = \left\|\frac{\partial f(x)}{\partial x}\right\|^2_F$$
 You can as well penalize on higher order derivatives.
+\end{list}
+
 \subsection{Basic Autoencoders}
 \begin{center}
 	\includegraphics[scale=0.5]{79.png}
@@ -1397,15 +1422,15 @@ You can as well penalize on higher order derivatives.
 \begin{center}
 	\includegraphics[scale=0.5]{80.png}
 \end{center}
-Train $h_1$ without $\tilde{x}$ getting all the encoding vectors. Then train a new layer $h_2$ recostructing $h_1$ in output ad so on, obtaining the desired structure.\\
+Train $h_1$ in reconstructing $\tilde{x}$ getting all the encoding vectors. Then train a new layer $h_2$ with $h_1$ in input and reconstructing $h_1$ in output ad so on, obtaining the desired structure.\\
 At the end, fine tune the whole autoencoder to optimize input reconstruction. You can use backpropagation, but it remains a supervised task.\\
 If we rearrange the graph we obtain a stack of restricted Boltzmann machine:\begin{center}
 	\includegraphics[scale=0.5]{81.png}
-\end{center}
-This is called a \textbf{Deep Belief Network}: a stack of pairwise Restricted Boltzmann Machines.\begin{center}
 	\includegraphics[scale=0.5]{82.png}
 \end{center}
-A DBM it's \textbf{not recurrent}, is a deep autoencoder but not a deep RBM.\\
+This is called a \textbf{Deep Belief Network}: a stack of pairwise Restricted Boltzmann Machines. A DBM it's \textbf{not recurrent}, is a deep autoencoder but not a deep RBM.\\
+\pagebreak
+
 Training of a Deep Boltzmann Machine requires attention because of the recurrent interactions from higher layers to the bottom.
 $$P(h_j^1\:|\:x,h^2)=\sigma\left(\sum_jW_{ij}x_i+\sum_m W^2_{jm}h_m^2\right)$$
 $$P(x_i\:|\:h^1)=\sigma\left(\sum_jW_{ij}^1h_j^1\right)$$
@@ -1413,6 +1438,8 @@ To train this, first pretrain the first layers, meaning fitting this model:
 $$P(x\:|\:\Theta) =\sum_{h^1}P(h^1\:|\:W^1)P(x\:|\:h^1,W^1)$$
 Then pretrain the second layer changes $h^1$ prior by
 $$P(h^1\:|\:W^2) = \sum_{h^2}P(h^1,h^2\:|\:W^2)$$
+Putting $P(x\:|\:\Theta)$ and $P(h^1\:|\:W^2)$ together we need to average between the two:
+$$P(h^1\:|\:W^1) = \sum_x P(h^2,x\:|\:W^1)$$
 A trick, averaging the two models of $h^1$ can be approximated by taking half contribution from $W^1$ and half from $W^2$. Using full both would double count $x$ contributions as $h^2$ depends on $x$.
 \paragraph{Discriminative Fine Tuning}
 The pretrained DBM matrices can be used to initialize a deep autoencoder. Add input from $h^2$ to the first hidden layer, add output layer and fine tune the RBM matrices by backpropagation.\begin{center}
@@ -1431,7 +1458,6 @@ Sequences are variable sized data describing sequentially dependent information.
 	Depends on architecture, initialization and learning algorithm.
 	\item \textbf{Computational Efficiency}: the network should be efficient.
 \end{list}
-\pagebreak
 \paragraph{Supervised Recurrent Tasks}
 \begin{multicols}{2}
 \begin{list}{}{}
@@ -1453,6 +1479,7 @@ Sequences are variable sized data describing sequentially dependent information.
 	\end{center}
 \end{list}
 \end{multicols}
+\pagebreak
 \paragraph{Vanilla RNN} Also called Simple or Elman.
 \begin{center}
 	\includegraphics[scale=0.5]{90.png}
@@ -1473,19 +1500,20 @@ there is little residual information of the input inside of the memory.
 	\item (Rarely) Explode $\Rightarrow$ instability and oscillations
 \end{list}
 Weights are shared between timesteps.
+\pagebreak
 \paragraph{Backward Propagation}
 \begin{center}
 	\includegraphics[scale=0.5]{156.png}
 \end{center}
 The gradient is
-$$\frac{\partial L_t}{\partial W} = \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\underbrace{\frac{\partial h_t}{\partial h_k}}_{\frac{\partial h_t}{\partial h_{t-1}}\cdot\frac{h_{t-1}}{\partial h_{t-2}}\cdot\ldots\cdot\frac{\partial h_{k+1}}{\partial h_k}}\cdot\frac{\partial h_k}{\partial W}$$
+$$\frac{\partial L_t}{\partial W} = \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\underset{{\frac{\partial h_t}{\partial h_{t-1}}\cdot\frac{h_{t-1}}{\partial h_{t-2}}\cdot\ldots\cdot\frac{\partial h_{k+1}}{\partial h_k}}}{\underbrace{\frac{\partial h_t}{\partial h_k}}}\cdot\frac{\partial h_k}{\partial W}$$
 Inside $\frac{\partial h_t}{\partial h_k}$ we have the chain rule
 $$\frac{\partial L_t}{\partial W} =  \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right)\cdot\frac{\partial h_k}{\partial W}$$
-So the gradient is a recursive product of hidden activation gradients (Jacobian). We want to bound the update to compensate for the vanishing/exploding gradients. We have $$h_l = \tanh(W_{hl}h_{l-1}+W_{in}x_l)$$, so $$\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$$ where the activation Jacobian is $$D_{l+1} = diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
+So the gradient is a recursive product of hidden activation gradients (Jacobian). We want to bound the update to compensate for the vanishing/exploding gradients. We have $$h_l = \tanh(W_{hl}h_{l-1}+W_{in}x_l)$$ $$\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$$ where the activation Jacobian is $$D_{l+1} = diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
 meaning a diagonal matrix with $\tanh^{-1}(\partial_i^t)$ on the diagonal.
 $$\frac{\partial L_t}{\partial h_k} = \frac{\partial L_t}{\partial h_t}\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right) = \frac{\partial L_t}{\partial h_t}\prod_{l=k}^{t-1}D_{l+1}W_{hl}^T $$
 We're interested in the magnitude 
-$$\|\frac{\partial L_t}{\partial h_k}\| = \|\frac{\partial L_t}{\partial h_t}\|\prod_{l=k}^{t-1}\sigma(D_{l+1})\sigma(W_{hl}^T)$$
+$$\left\|\frac{\partial L_t}{\partial h_k}\right\| = \left\|\frac{\partial L_t}{\partial h_t}\prod_{l=k}^{t-1}D_{l+1}W_{hl}^T\right\|\leq \left\|\frac{\partial L_t}{\partial h_t}\right\|\prod_{l=k}^{t-1}\|D_{l+1}W_{hl}^T\|= \left\|\frac{\partial L_t}{\partial h_t}\right\|\prod_{l=k}^{t-1}\sigma(D_{l+1})\sigma(W_{hl}^T)$$
 We bound the spectral radius $\sigma$. Can shrink to zero or increase exponentially:\begin{list}{}{}
 	\item $\sigma < 1 \Rightarrow$ \textbf{vanishing}
 	\item $\sigma > 1 \Rightarrow$ \textbf{exploding}
@@ -1494,13 +1522,23 @@ We bound the spectral radius $\sigma$. Can shrink to zero or increase exponentia
 With $g=\frac{\partial L_t}{\partial W}$ our gradient and $\Theta_0$ our max value for the gradient
 $$\|g\|>\Theta_0\Rightarrow g=\frac{\Theta_0}{\|g\|}g$$
 Rescaling doesn't work for gradient vanish as total gradient is a sum of time dependent gradients (preserving relative contribution from each time makes it exponentially decay).
-\subparagraph{Constant Error Propagation} Solution seem to be having the Jacobian with spectral radius $\sigma = 1$.
-\subparagraph{Activation functions} The popular choices (sigmoids, tanhs) are always contractive ($\sigma < 1$). Alternatives: modReLU (ReLU generalized to the $C$ domain) or identity.
+\subparagraph{Constant Error Propagation} Solution seem to be having the Jacobian with spectral radius $\sigma = 1$.\\
+Change the activation function and constrain the recurrent weight matrix
+$$\frac{\partial h_{l+1}}{\partial h_l}=D_{l+1}W_h^T$$
+\subparagraph{Activation functions} The popular choices (sigmoids, tanhs) are always contractive ($\sigma < 1$). Alternatives: modReLU (ReLU generalized to the $\mathbb{C}$ domain) or identity.
+\begin{list}{}{}
+	\item $\tanh$: $h_{l+1}=\tanh(W_h^Th_l+Wx_{l+1})$ and $\frac{\displaystyle \partial h_{l+1}}{\displaystyle \partial h_l} = D_{l+1}W_h^T$
+	\item Linear: $h_{l+1}=W_h^Th_l+Wx_{l+1}$ and $\frac{\displaystyle \partial h_{l+1}}{\displaystyle \partial h_l} = IW_h^T = W_h^T$
+\end{list}
 \subparagraph{Recurrent Weights} Possible to achieve $\sigma = 1$
 \begin{list}{}{}
 	\item Orthogonal matrices $W^TW = 1$
 	\item Unitary matrices $W^H W = 1$
 \end{list}
+Orthogonal matrix plus linear activation:
+$$h_{l+1}= W_h^Th_l+Wx_{l+1}$$
+$$\frac{\partial h_{l+1}}{\partial h_l} = W_h^T$$
+$$\left\|\frac{\partial h_{l+1}}{\partial h_l}\right\|=\left\|IW_h^T\right\|=1$$
 \paragraph{Gating Units} Mixture of experts, origin of gating.
 \begin{center}
 	\includegraphics[scale=0.5]{93.png}
@@ -1516,8 +1554,10 @@ CEC plus forget gate
 \begin{list}{}{}
 	\item CEC
 	\item Forget gate to "soft reset" units
-	$$f_t = \sigma(W_{fh}h_{t-1} + W_{fx}x_t + b_f)$$
-	$$h_t = f_t\cdot h_{t-1} + \hat{c}(x_t)$$
+	\begin{list}{}{}
+		\item $f_t = \sigma(W_{fh}h_{t-1} + W_{fx}x_t + b_f)$
+		\item $h_t = f_t\odot h_{t-1} + \hat{c}(x_t)$
+	\end{list}
 	\item Adaptively forgets the past
 	\item Avoid saturation
 	\item No guarantees about constant propagation.
@@ -1573,7 +1613,7 @@ All current LSTM implementation use full BPTT training, typically with Adam or R
 \textbf{Reset} and \textbf{update} gates are coupled, act as input and forget gates 
 $$z_t =\sigma(W_{zh}h_{t-1} + W_{zin}x_t + b_z)$$
 $$r_t =\sigma(W_{rh}h_{t-1} + W_{rin}x_t + b_r)$$
-\textbf{Reset} acts directly on output state (no internal state and no output gate. $\odot$ is the element-wise multiplication.
+\textbf{Reset} acts directly on output state (no internal state and no output gate). $\odot$ is the element-wise multiplication.
 $$h_t = (1 - z_t)\odot h_{t-1} + z_t\odot h_t$$
 $$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
 \subsection{Applications}
@@ -1591,22 +1631,31 @@ $$h_t = \tanh(W_{hh}(r_t\odot h_{t-1}) W_{hin}x_t + b_h)$$
 \end{center}
 No only for sequential/structured data: can also used to generate image of digits by learning to sequentially add color to a canvas.
 \subsection{Advanced Topics} 
-\paragraph{Language Modeling - Dynamic Evaluation} Language modeling is an unsupervised task, you can train the model at test time. UIseful when you have domain shifts inside a large document.
+\paragraph{Language Modeling - Dynamic Evaluation} Language modeling is an unsupervised task, you can train the model at test time. Useful when you have domain shifts inside a large document.
 \begin{center}
 	\includegraphics[scale=0.5]{105.png}
 \end{center}
 Meaning the backward pass and gradient descent update during test time, this because it's unsupervised.
-\paragraph{Compression and Online Adaptation} Take a large document and a randomly initialized RNN.\\
-Compression: train and compress the file with arithmetic encoding.\\
-Decompression: train the same random net and use the compressed file for lossless decompression.
+\paragraph{Compression and Online Adaptation} Take a large document and a randomly initialized RNN.
+\begin{list}{}{}
+	\item \textbf{Compression}: train and compress the file with arithmetic encoding.
+	\item \textbf{Decompression}: train the same random net and use the compressed file for lossless decompression.
+\end{list}
 \subsubsection{Seq2Seq Models}
 \begin{center}
 	\includegraphics[scale=0.5]{106.png}
 \end{center}
-Gated RNN are excellent to handle size/topology varying data in input, but how can we handle size/topology varying outputs? \textbf{Sequence-to-sequence models}.\\
-Structured data is compound information: efficient processing needs the ability to focus on certain parts of such information. \textbf{Attention mechanism}.
+Some problems we're going to tackle:
+\begin{list}{}{}
+	\item Gated RNN are excellent to handle size/topology varying data in input, but how can we handle size/topology varying outputs?\\
+	\textbf{Sequence-to-sequence models}
+	\item Structured data is compound information: efficient processing needs the ability to focus on certain parts of such information.\\
+	\textbf{Attention mechanism}
+	\item GRNN have trouble dealing with very long-range dependencies.\\
+	We can introduce multiscale representation explicitly in the architecture: introduce \textbf{external memory} components.
+\end{list}
 \paragraph{Sequence Transduction} Input/output both sequences, maybe with different lengths. Example: machine translation. How to model the context?\\
-We could take a single recurrent model, process the entire input sequence to encode it (and ignoring the outputs in this phase) and then process the output sequence (usually without knowing in advance how long it will be, and giving dummy inputs):
+We could take a single recurrent model, process the entire input sequence to encode it (and ignoring the outputs in this phase) and then process the output sequence (usually without knowing in advance how long it will be, and giving dummy inputs). It's an approach based on the encoder-decoder scheme.
 \begin{center}
 	\includegraphics[scale=0.5]{107.png}
 \end{center}
@@ -1614,15 +1663,15 @@ This idea doesn't really work well, because of forgetting. We need two separated
 \begin{list}{}{}
 	\item \textbf{Encoder} which builds a $c$, originally $c=h_n$
 	\begin{center}
-		\includegraphics[scale=0.5]{108.png}
+		\includegraphics[scale=0.45]{108.png}
 	\end{center}
 	\item \textbf{Decoder}, LSTM/GRU layer of $K$ cells seeded by the context vector $c$
 	\begin{center}
-		\includegraphics[scale=0.5]{109.png}
+		\includegraphics[scale=0.45]{109.png}
 	\end{center}
 	If we share the parameters between encoder and decoder, we can take $s_1 = c$ (or at least assume that $c$ and $s_1$ have compatible sizes)
 	\begin{center}
-		\includegraphics[scale=0.5]{110.png}
+		\includegraphics[scale=0.45]{110.png}
 	\end{center}
 	$$s_i = f(c, s_{i-1}, y_{i-1})$$
 \end{list}
@@ -1635,7 +1684,8 @@ Encoder-decoder can share parameters, but it's uncommon
 $$E_{en} = D^{-1}_{en}$$
 But can be useful especially on lower resources.\\
 Encoder-decoder can be trained end-to-end but also independently.
-\paragraph{Attention} We would like to have alignment in the hidden states.\\Encoder-decoder scheme assumes the hidden activation fo the last input element summarizes sufficient information to the output: it's a bias toward the recent past, and it doesn't work well. Other parts of the input might be very informative for the task, possibly \textbf{elements appearing very far from sequence end}.
+\subsubsection{Attention}
+We would like to have alignment in the hidden states.\\Encoder-decoder scheme assumes the hidden activation for the last input element summarizes sufficient information to the output: it's a bias toward the recent past, and it doesn't work well. Other parts of the input might be very informative for the task, possibly \textbf{elements appearing very far from sequence end}.
 \begin{center}
 	\includegraphics[scale=0.5]{112.png}\\
 	\includegraphics[scale=0.33]{113.png}
@@ -1662,6 +1712,7 @@ An advanced example: Google Neural Machine Translation (GNMT)
 \begin{center}
 	\includegraphics[scale=0.5]{115.png}
 \end{center}
+\pagebreak
 \paragraph{Generalized Relevance} This component determines how much each $h$ is correlated/associated with current context $s$:
 \begin{center}
 	\includegraphics[scale=0.5]{116.png}
@@ -1688,8 +1739,9 @@ $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1,\ldots,\text{head}_h)W^O
 $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
 Is self-attention a good mechanism to model temporal dependencies? What happens if I randomly shuffle some tokens? The result is going to be shuffled. We have a key for each timestep, but there's nothing that keeps track of time. So attention is order-independent, but we need temporal information.\\
 So we sum word embed plus position embed.
-\subsection{Skipping State Updates}
-This mitigates vanishing gradients, because it reduces the distance between dependencies.
+\subsubsection{Hierarchical and Multiscale RNNs}
+\paragraph{RNN and Memory} Gated RNN claim to solve the problem of learning long-range dependencies. In practice, it is still difficult to learn on longer range. Architectures are still trying to optimize dynamic memory usage.
+\paragraph{Skipping State Updates} This mitigates vanishing gradients, because it reduces the distance between dependencies.
 \begin{center}
 	\includegraphics[scale=0.5]{120.png}
 \end{center}
@@ -1700,7 +1752,7 @@ Vanishing gradients depend on the depth of the network.
 \end{center}
 Recurrent are on the opposite side of the spectrum respect to self-attention.
 \paragraph{Hierarchical RNNs} Different approach: adds skip connections to the model (\textbf{static skip}) or learns when to skip updates (\textbf{adaptive skips}). Can skip units, block of units or entire layers.
-\subparagraph{Zoneout Regularization} At each timestep, force some units to keep the same value by random sampling. Hard gate, avoiding the update improves the gradient propagation.
+\paragraph{Zoneout Regularization} At each timestep, force some units to keep the same value by random sampling. Hard gate, avoiding the update improves the gradient propagation.
 $$T = d_t\odot \tilde{T}+(1-d_t)\odot 1$$
 For comparison, the dropout is given by the formula
 $$T = d_t\odot\tilde{T}+(1-d_t)\odot 0$$
@@ -1710,22 +1762,33 @@ which zeroes the value of some units.
 	\includegraphics[scale=0.5]{122.png}\\
 	\includegraphics[scale=0.5]{123.png}
 \end{center}
-RNN update $$ $$
-Block structure $$ $$
-Conditional update $$ $$
+RNN update
+$$y_H^{(t)} = f_H(W_hy^{(t-1)}+W_Ix^{(t)})$$
+$$y_O^{(t)} = f_O(W_Oy_H^{(t)})$$
+Block structure $$W_H=\left(\begin{array}{c}
+W_{H_1}\\\vdots\\W_{H_g}
+\end{array}\right)\:\:\:\:W_I = \left(\begin{array}{c}
+W_{I_1}\\\vdots\\W_{I_g}
+\end{array}\right)$$
+Conditional update $$W_{H_i}=\left\{\begin{array}{c l}
+W_{H_i}&\text{if }t\text{ mod }T_i = 0\\
+0&\text{else}
+\end{array}\right.$$
 Example of sequence generation:
 \begin{center}
-	\includegraphics[scale=0.5]{124.png}
+	\includegraphics[scale=0.65]{124.png}
 \end{center}
+\pagebreak
 \paragraph{Skip RNN}
 \begin{center}
 	\includegraphics[scale=0.5]{125.png}
 \end{center}
 $u_t$ is the binary state update gate, that determine if RNN state is going to be updated or copied (skip). Replacing gated update by copying increases the network memory (LSTM has an exponential fading effect due to the multiplicative gate).
-\subsection{Hierarchical Networks}
+\paragraph{Hierarchical Sequential Structure}
 Many sequences have latent hierarchical structures that we want to model explicitly. E.g.: Wikipedia represented as a sequence of characters. The hierarchy would be characters, words, sentences, paragraphs, documents.
 \paragraph{Explicit Boundaries} If explicit boundaries are available, we can have different layers for each level of abstraction. Combining representations from the lower layer to obtain representation for the higher layer. The problem is that typically there are no explicit boundaries available.
-\paragraph{Operations}\begin{list}{}{}
+\paragraph{Hierarchical Multiscale RNN} (HM-RNN)\\
+\textbf{Operations}\begin{list}{}{}
 	\item \textbf{Update}: state update (LSTM cells) according to boundary detector
 	\item \textbf{Copy}: copies cell and hidden states from previous timestep to the current
 	\item \textbf{Flush}: sends summary to next layer and re-initialize the current layer's state
@@ -1742,6 +1805,7 @@ Many sequences have latent hierarchical structures that we want to model explici
 	\item Skip-RNN: adaptive gates learns to skip entire update, save computation
 	\item HM-RNN: each layer models more abstract features by learning the boundaries, adaptive
 \end{list}
+\pagebreak
 \section{Reservoir Computing}
 It's an extremely efficient way of designing and training RNNs.
 \begin{multicols}{2}
@@ -1809,7 +1873,7 @@ Now $\rho(W_{hh}) = \rho_{desired}$: the \textbf{spectral radius is a key hyperp
 \end{list}
 To solve, typically the training is performed offline in closed form.
 \section{Neural Reasoning}
-Not using classical algorithms because we may not have a proper input but only sensor information (e.g. robot navigation). The model need to learn to encode the structure from the raw data and then solve the problem. Another example is question answering, where we need to memorize facts, the question and the answer: a bit too much for the dynamical RNN memories, so we need an external memory.
+Not using classical algorithms because we may not have a proper input but only sensor information (e.g. robot navigation). The model needs to learn how to encode the structure from the raw data and then solve the problem. Another example is question answering, where we need to memorize facts, the question and the answer: a bit too much for the dynamical RNN memories, so we need an external memory.
 \paragraph{Memory Networks General Idea} \begin{center}
 	\includegraphics[scale=0.5]{127.png}
 \end{center}
@@ -1821,7 +1885,6 @@ The memory module typically is a matrix of $N$ slots, sometimes with fixed size 
 	\item \textbf{Output Feature Map} $O$: reads the relevant memory slots
 	\item \textbf{Response} $R$: returns the prediction given the retrieved memories
 \end{list}
-\pagebreak
 \paragraph{End-to-End Memory Networks}
 \begin{center}
 	\includegraphics[scale=0.75]{128.png}
