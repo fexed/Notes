@@ -975,14 +975,17 @@ by alternate maximization:
 Unlike EM, variational EM has no guarantee to reach a local maximizer of $L$.
 \subsection{Boltzmann Machines}
 Examples of Markov Random Fields:
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item Visible random variables $v\in\{0,1\}$
 	\item Latent random variables $h\in\{0,1\}$
 	\item $s = [vh]$ (concatenation)
 \end{list}
+\columnbreak
 \begin{center}
 	\includegraphics[scale=0.5]{46.png}
 \end{center}
+\end{multicols}
 Linear energy function $$E(s) = -\frac{1}{2}\sum_{ij}M_{ij}s_is_j - \sum_jb_js_j = -\frac{1}{2}s^TMs - b^Ts$$
 with symmetric and no self-recurrent connectivity. Model parameters $\Theta = \{M, b\}$ encode the interactions between the variables (observable and not).\\
 \textbf{Boltzmann machines are a type of Recurrent Neural Networks}. They can be interpreted as stochastic neural network: the state of a unit at a given timestep is sampled from a given probability distribution and the network learns a probability distribution $P(V)$ from the training patterns. The network includes both visible $v$ and hidden $h$ units, and the activity is a sample from posterior probability given the inputs (visible data).
@@ -990,16 +993,18 @@ with symmetric and no self-recurrent connectivity. Model parameters $\Theta = \{
 1&\text{with probability }p_j^{(t)}\\
 0&\text{with probability }1-p_j^{(t)}
 \end{array}\right.$$
-The key is in the definition of the spiking probability (local potential $x_j$ $$p_j^{(t)} \simeq \sigma(x_j^{(t)})$$
+The key is in the definition of the spiking probability (needs to be a function of \textbf{local potential} $x_j$) $$p_j^{(t)} \simeq \sigma(x_j^{(t)})$$
 The Boltzmann machine has $N$ neurons with binary activations $s_j$, a weight matrix $M = [M_{ij}]_{i,j} \in \{1,\ldots,N\}$ and a bias vector $b = [b_j]_j\in\{1,\ldots,N\}$\\
 Local neuron potential $x_j$ is the usual $$x_j^{(t+1)} = \sum_{i=1}^N M_{ij}s_j^{(t)} +b_j$$
-This assuming full connectivity with weight $0$ if you want to ignore a neuron in the potential. A chosen neurpon fire with spiking probability which is a sigmoid $$p_j^{(t+1)} = P(s_j^{(t+1)} = 1\:|\:s^{(t)}) = \sigma(x_j^{(t+1)}) = \frac{1}{1+e^{-x_j^{(t+1)}}}$$
-Clearly has Markovian dynamics, $P(s^{t+1}\:|\:s^t)$\\\\
+This assuming full connectivity with weight $0$ if you want to ignore a neuron in the potential. A chosen neuron fire with spiking probability which is a sigmoid $$p_j^{(t+1)} = P\left(s_j^{(t+1)} = 1\:|\:s^{(t)}\right) = \sigma\left(x_j^{(t+1)}\right) = \frac{1}{1+e^{-x_j^{(t+1)}}}$$
+Clearly has Markovian dynamics, $P(s^{(t+1)}\:|\:s^{(t)})$\\\\
 How does the model state (activation of all neurons) evolve in time?
-\paragraph{Parallel Dynamics} Assuming we can compute each activation in parallel every $\Delta t$, updating each random variable in parallel. $$P(s^{t+1}\:|\:s^t) = \prod_{j=1}^N P(s_j^{t+1}\:|\:s^t) = T(s_j^{t+1}\:|\:s^t)$$
+\paragraph{Parallel Dynamics} Assuming we can compute each activation in parallel every $\Delta t$, updating each random variable in parallel. $$P\left(s^{(t+1)}\:|\:s^{(t)}\right) = \prod_{j=1}^N P\left(s_j^{(t+1)}\:|\:s^{(t)}\right) = T\left(s_j^{(t+1)}\:|\:s^{(t)}\right)$$
 Yielding a Markov process for state update
-$$P(s^{t+1} = s') = \sum_s T(s'\:|\:s)P(s^t = s)$$
-\paragraph{Glauber Dynamics} One neuron at random is chosen for update at each step. No fixed-point guarantees for $s$, but it has a stationary distribution for the network at equilibrium state when its connectivity is symmetric.
+$$P\left(s^{(t+1)} = s'\right) = \sum_s T\left(s'\:|\:s\right)P\left(s^{(t)} = s\right)$$
+\paragraph{Glauber Dynamics} One neuron at random is chosen for update at each step. No fixed-point guarantees for $s$, but it has a stationary distribution for the network at equilibrium state when its connectivity is symmetric.\\
+Given $F_j$ as a state flip operator for the $j$the random variable $s^{(t+1)}=F_js^{(t)}$
+$$T(s^{(t+1)}\:|\:s^{(t)}) = \frac{1}{N}P(s_j^{(t+1)}\:|\:s^{(t)})$$
 \subparagraph{Boltzmann-Gibbs Distribution} Undirected connectivity enforces detailed balance condition $$P(s)T(s'\:|\:s) = P(s')T(s\:|\:s')$$
 Ensures reversible transitions guaranteeing existence of equilibrium distribution (Boltzmann-Gibbs) $$P_\infty(s) = \frac{e^{-E(s)}}{Z}$$
 where $E(s)$ is the energy function and $Z = \sum_se^{-E(s)}$ is the partition function.
@@ -1009,10 +1014,10 @@ Couple of simplifications:
 	\item bias $b$ is just another row in the weight matrix $M$
 	\item consider only visible random variables, meaning $s = v$
 \end{list}
-We use probabilistic learning techniques to fit the parameters, i.e. maximizing the log-likelihood $$L(M)=\frac{1}{L}\sum_{l=1}^L \log P(v_l\:|\:M)$$
-given the $P$ visible training patterns $v_l$, the set of all the visible units (so it's a joint distribution $v_{l1},\ldots,v_{ln}$. We need a way to write the likelihood $P(v_l\:|\:M)$, and we can use the Boltzmann-Gibbs. So we can optimize it solving a maximum likelihood problem.
+We use probabilistic learning techniques to fit the parameters, i.e. maximizing the log-likelihood (note that $\langle x\rangle = E[x]$) $$L(M)=\frac{1}{L}\sum_{l=1}^L \log P(v_l\:|\:M)$$
+given the $P$ visible training patterns $v_l$, the set of all the visible units (so it's a joint distribution $v_{l1},\ldots,v_{ln}$). We need a way to write the likelihood $P(v_l\:|\:M)$, and we can use the Boltzmann-Gibbs. So we can optimize it solving a maximum likelihood problem.
 $$\log P(v_l\:|\:M) = \log \frac{e^{-E(v)}}{Z} = -E(v) - \log Z$$
-$$\frac{\partial L}{\partial M_{ij}} \Rightarrow \frac{\partial (-E(v) - \log Z)}{\partial M_{ij}}\Leftrightarrow$$
+$$\frac{\partial L}{\partial M_{ij}} = \frac{\partial (-E(v) - \log Z)}{\partial M_{ij}}\Leftrightarrow$$
 Given that $E(v) = -\frac{1}{2}v^TM^Tv = -\sum_{ij} M_{ij} v_1v_j$ we get that every $M_{ij}$ will be constant except for the $M_{ij}$ we are differentiating leaving with $v_iv_j$. As for $\log Z$, differentiating the potential function leaves us with $\sum_v P(v\:|\:M)v_iv_j$ from $\partial\log\partial\exp\cdot\partial E$
 $$\Leftrightarrow v_iv_j - \sum_v P(v\:|\:M)v_iv_j = 0$$
 The second term is $\sum_v P(v\:|\:M)v_iv_j = E_{v_iv_j\in P(v\:|\:M)}[v_iv_j] = \langle v_iv_j\rangle_M$ the expectation of the coactivation of two units $v_i,v_j$ when the values of those two units are taken from $P(v\:|\:M)$ the distribution learned by the model $M$.\\
@@ -1021,9 +1026,9 @@ $$v_i^lv_j^l - \langle v_iv_j\rangle_M$$
 not introducing $l$ in the second term because it's marginalized, all the possible values in all possible configurations, it's an expectation and the data is already included in the formulation.\\
 So $\forall\:v^l\in L$ $$\frac{\partial L}{\partial M_{ij}} = \frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l)-\langle v_iv_j\rangle_M=$$
 We have the clamped expectation under the empirical distribution $\frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l) = E_{v_i^lv_j^l\in L}[v_i^lv_j^l] = \langle v_iv_j\rangle_c$
-$$=\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = \Delta M_{ij}$$
+$$=\underset{\text{Wake}}{\underbrace{\langle v_iv_j\rangle_c}} - \underset{\text{Dream}}{\underbrace{\langle v_iv_j\rangle_M}} = \Delta M_{ij}$$
 So we're focusing on the neurons $i, j$ and the link between them $M_{ij}$, and we increase the connection when both are 1 so when $\langle v_iv_j\rangle_c$ is larger, so Hebbian learning. The second term $\langle v_iv_j\rangle_M$, if they are in disagreement then they are flipped then it's zero, if instead they are coactive (both on or off) then it's close to $-1$. It's anti-Hebbian, has the purpose of nearing the expectation of the model towards the reality.\\
-When $\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = 0-1$, we get that the model thinks that they are correlated while the are different, so the model stop believing that they are correlated.\\\\
+When $\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = 0-1$, we get that the model thinks that they are correlated while they are different in reality, so the model stop believing that they are correlated.\\\\
 With hidden variables doesn't change much. We have $s=[hv]$
 The wake hebbian term $\sum_h s_is_jP(h\:|\:v)$ and the dream anti-hebbian term $\sum_ss_is_jP(s)$
 $$\frac{\partial P(v\:|\:M)}{\partial M_{ij}} = \sum_h s_is_jP(h\:|\:v) - \sum_ss_is_jP(s) = \langle s_is_j\rangle_c - \langle s_is_j\rangle_M = \Delta M_{ij}$$
@@ -1036,33 +1041,37 @@ This becomes tractable because we can compute the activation of each hidden in p
 Hidden units are conditionally independent given visible units and viceverse
 $$P(h_j\:|\:v)=\sigma\left(\sum_i M_{ij}v_i+c_j\right)$$
 $$P(c_i\:|\:v)=\sigma\left(\sum_j M_{ij}h_j+b_i\right)$$
-Training is again based on the likelihood maximization $$\frac{\partial L}{\partial M_{ij}} =\langle v_ih_j\rangle_c -\langle v_jh_j\rangle = \Delta M_{ij}$$
+Training is again based on the likelihood maximization $$\frac{\partial L}{\partial M_{ij}} = \underset{\text{Data}}{\underbrace{\langle v_ih_j\rangle_c}} - \underset{\text{Model}}{\underbrace{\langle v_ih_j\rangle}} = \Delta M_{ij}$$
 Again, we have data $-$ model which are both expectations that need to be estimated. The first has the sum on just $h$, the second is a full summation over both $v$ and $h$.\\
-With a Gibbs sampling approach, for the wake/data term\begin{list}{}{}
-	\item clamp data on $v$
-	\item sample $v_i,h_j$ for all pairs of connected units
-	\item Repeat for all elements of dataset
+With a Gibbs sampling approach:
+\begin{multicols}{2}
+For the wake/data term\begin{list}{}{}
+	\item Clamp data on $v$
+	\item Sample $v_ih_j$ for all pairs of connected units
+	\item Repeat for all elements of the dataset as to stay as near as possible to the empirical data
 \end{list}
-as to stay as much as possible to the empirical data, and for the model/dream term\begin{list}{}{}
-	\item 
+\columnbreak
+
+For the dream/model term\begin{list}{}{}
+	\item Don't clamp units
+	\item Let network reach equilibrium
+	\item Sample $v_ih_j$ for all pairs of connected units
+	\item Repeat many times to get a good estimate
 \end{list}
-computing a correlation between ideally $v^\infty,h^\infty$, but of course can't wait until the infinity sample and we cut at some sample $k$ so $v^k,h^k$.
+\end{multicols}
+Computing a correlation between ideally $v^\infty,h^\infty$, but of course can't wait until the infinity sample and we cut at some sample $k$ so $v^k,h^k$.
 \begin{center}
 	\includegraphics[scale=0.5]{48.png}
 \end{center}
 We start with a training vector on the visible units, alternating between updating all the hidden units in parallel and updating all the visibile units in parallel
-$$\frac{\partial L}{\partial M_{ij}} = \langle v_ih_i\rangle_0 - \langle v_jh_j\rangle_\infty = \text{data} - \text{model}$$
+$$\frac{\partial L}{\partial M_{ij}} = \underset{\text{data}}{\underbrace{\langle v_ih_i\rangle_0}} - \underset{\text{model}}{\underbrace{\langle v_jh_j\rangle_\infty}}$$
 \paragraph{Contrastive-Divergence Learning} Because Gibbs sampling converges really slowly: clamp a training vector $v^l$ on visible units. CD-1.
 \begin{center}
 	\includegraphics[scale=0.5]{49.png}
 \end{center}
 Clamping a training vector $v^l$ on visible units, update all hidden units in parallel, update all the visible units in parallel to get a \textbf{reconstruction} and update the hidden units again.
-$$\begin{array}{c c c}
-\langle v_ih_j\rangle_0&-&\langle v_ih_j\rangle_1\\
-\text{data}& &\text{reconstruction}
-\end{array}$$
+$$\underset{\text{data}}{\underbrace{\langle v_ih_j\rangle_0}}-\underset{\text{reconstruction}}{\underbrace{\langle v_ih_j\rangle_1}}$$
 Learns a very crude approximation of the gradient of log-likelihood, not even following it closely. Why use it? Because in practice it works well.
-
 \subsection{Wrap Up}
 We've seen three families of models\begin{list}{}{}
 	\item \textbf{Bayesian Networks}: unsupervised data understanding, interpretability but weak on supervised performance. Directed.
@@ -1083,11 +1092,9 @@ To be avoided when:
 	\item Dealing with raw, noisy, low-level data
 \end{list}
 Variational inference and sampling are efficient ways to learn approximations to intractable distribution. Neural networks can be used as variational functions or to implement sampling processes.
-%TODO from here ISPR_10_sampling.pdf
 \section{Sampling Methods} 
-\paragraph{Probability Recap}
-\paragraph{Sampling} Drawing a set of realisations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
-If we have a sampling set we can use it to approximate $p(x)$ $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = i]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
+\paragraph{Sampling} Drawing a set of realizations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
+If we have a sampling set we can use it to approximate $p(x)$ using the \textbf{empirical distribution} $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = i]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
 We can also approximate the expectation of a function $f$ $$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l)$$
 We need sampling when $p(x)$ is intractable. For example, in Bayesian models the parameters are random variables but the posteriors are often intractable so we can use sampling to obtain the model parameters.
 \paragraph{Sampling Procedure as Distributions} A sampler $S$ is a procedure that generates a sample set $X$ from a generic distribution $p(x)$. Since $X$ contains realizations of random variables, also $X$ has a probability distribution. We denote with $\hat{p}_S(X)$ the probability to obtain the sample set $X$ from the sampler $S$.\\
@@ -1109,9 +1116,14 @@ This is true provided that $\hat{p}(x_l) = p(x_l)$\\
 A sampler with this property is called \textbf{valid} because it draws samples from the desired distribution.\\\\
 The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$. Let $$\Delta\hat{f}_X = \hat{f}_X - E_{\hat{p}(X)}[\hat{f}_X]$$ then the variance of $\hat{f}(X)$ is given by $$E_{\hat{p}_X}[(\Delta\hat{f}_X)^2]$$
 we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average, i.e. to $E_{p(X)}[f(X)]$.\\\\
-So if the sampler has same marginals and draws sample independently we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\text{Var}_{p(x)}[f(x)]$$
+So if the sampler has same marginals $(\hat{p}(x_l)=p(x_l))$ and draws sample independently $(\hat{p}(x_l,x_{l'}) = \hat{p}(x_l)\hat{p}(x_{l'}))$ we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\text{Var}_{p(x)}[f(x)]$$
 The variance reduces linearly with respect to the number of samples provided that $\text{Var}_{p(x)}[f(x)]$ is finite.\\\\
-We've shown that we need sampling to approximate expectations and to do inference in Bayesian models. Propertis of the sampling procedure depends on $\hat{p}(X)$: valid sampler and low approximation variance.
+We've shown that we need sampling to approximate expectations and to do inference in Bayesian models. Properties of the sampling procedure depends on $\hat{p}(X)$:
+\begin{list}{}{}
+	\item \textbf{Valid Sampler}: $\hat{p}(x_l) = p(x_l)$
+	\item \textbf{Low Approximation Variance}: $\hat{p}(x_l,x_{l'}) = \hat{p}(x_l)\hat{p}(x_{l'})$
+\end{list}
+\pagebreak
 \subsection{Univariate Sampling}
 Easy: random number generator $R$ which produces a value uniformly at random in $[0,1]$ and $p(x)$. We use $p(x)$ to divide $[0,1]$ in bins and sample accordingly.
 \subsection{Multivariate Sampling}
@@ -1129,7 +1141,7 @@ Using the chain rule we can rewrite the joint distribution as a chain of conditi
 	\item $\hat{s}_n \simeq p(s_n\:|\:\hat{s}_1,\ldots,\hat{s}_{n-1})$
 \end{list}
 Each is univariate, so easy, but unfortunately computing the distribution $p(s_i\:|\:s_{j<i})$ often requires summation over an exponential number of states.\\
-This approach is called \textbf{Ancestral Sampling}. There are cases where it cannot be used.
+This approach is called \textbf{Ancestral Sampling}, and it's a valid sampler since each sample $x_l$ is drawn from $p(x)$. It also has low variance since the samples are independent. There are cases where it cannot be used.
 \subparagraph{Example} We can apply directly if a distribution $p(s_1,\ldots,s_n)$ is already presented as a belief network:
 \begin{center}
 	\includegraphics[scale=0.5]{67.png}
@@ -1146,31 +1158,44 @@ $$\{s_1,s_2,s_4\}\prec\{s_3\}\prec\{s_6\}\prec\{s_5\}$$\begin{list}{}{}
 We obtain a single sample $x^l = \hat{s}_1,\hat{s}_2,\hat{s}_3,\hat{s}_4,\hat{s}_5,\hat{s}_6$.\\\\
 Suppose a subset $s_\epsilon$ of variables that are visible, with $s=s_\epsilon\cup s_{\setminus\epsilon}$ we want to sample from $$P(s_{\setminus\epsilon}\:|\:s_\epsilon) = \frac{p(s_{\setminus\epsilon}, s_\epsilon)}{p(s_\epsilon)}$$
 Can we still use Ancestral Sampling?\begin{list}{}{}
-	\item Clamping variables changes the structure of the bayesian network, and computing the new structure is as complex as running exact inference.
-	\item We could run AS on the original structure and discarding any samples which do not match the evidence.
+	\item Clamping variables changes the structure of the Bayesian network, and computing the new structure is as complex as running exact inference.
+	\item We could run AS on the original structure and discarding any samples which do not match the evidence, but we could discard a lot of samples.
 \end{list}
-Sampling under evidence is very important, in probabilistic models the inference is based on the posterior which is exactly that. So we need an efficient method of sampling under evidence.
+Sampling under evidence is very important, in probabilistic models the inference is based on the posterior which is exactly that. With set $h$ of hidden variables and set $v$ of visible variables:
+$$P(h\:|\:v)=\frac{P(h,v)}{P(v)}$$
+So we need an efficient method of sampling under evidence.
 \paragraph{Gibbs Sampling Procedure}
 The idea is to start from a sample $x^1=\{s_1^1,\ldots,s_n^1\}$ and \textbf{update only one variable at a time}. Dealing with evidence is easy, we just do not select the visible variables.\\
 During the $(l+1)$th iteration:
 \begin{list}{}{}
 	\item Select a variable $s_j$
-	\item we sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\text{Parents}(s_j))\prod_{k\in\text{Children}(s_j)} P(s_k\:|\:\text{Parents}(s_k)) $$
+	\item Sample the new value according to $$s_j^{l+1}\simeq p(s_j\:|\:s_{\setminus j}) = \frac{1}{Z}p(s_j\:|\:\text{Parents}(s_j))\prod_{k\in\text{Children}(s_j)} P(s_k\:|\:\text{Parents}(s_k)) $$
 \end{list}
 Which depends only on the Markov blanket of $s_j$ and $s_{\setminus j}$ is clamped to$ \{s_1^l,\ldots,s_{j-1}^l,s_{j+1}^l,\ldots,s_n^l\}$
 \begin{center}
 	\includegraphics[scale=0.5]{45.png}
 \end{center}
+Convergence criteria based on $P(z,w,\theta,\beta,\alpha)$: the procedure terminates when the joint-likelihood stops increasing.
 \subparagraph{$\hat{p}(X)$ of Gibbs sampling} Considering a set of variables $X=\{x^1,\ldots,x^L\}$ obtained with a Gibbs sampler: each sample $x^{l+1}$ is obtained from the previous sample $x^l$. We can define a probability $q(x^{l+1}\:|\:x^l)$, the probability to obtain $x^{l+1}$ given $x^l$:
 $$q(x^{l+1}\:|\:x^l) = \sum_{j=1}^NP(\text{Variable }j\text{ is selected})P(\text{New value }s_j^l\text{ given }x^l)$$
 With $P(\text{New value }s_j^l\text{ given }x^l)$ from equation 4 and $P(\text{Variable }j\text{ is selected})$ up to you.\\
 With this we can compute $\hat{p}(X)$ $$\hat{p}(X)=\prod_{l=1}^L q(x^{l+1}\:|\:x^l)$$
+We are not sampling from $p(x)$, i.e. $\hat{p}(x)\neq p(x)$, so Gibbs is a non-valid sampling procedure but it its when $L\rightarrow\infty$. Also, the samples are highly dependent, so it has high variance.
 \paragraph{Markov Chain Monte Carlo Sampling Framework} Gibbs sampling is a specialization of the Markov Chain Monte Carlo sampling framework. The idea is to build a Markov Chain whose stationary distribution is $p(x)$.\\
 Let $q(x^{l+1}\:|\:x^l)$ be the Markov Chain state-transition distribution, if the Markov Chain is\begin{list}{}{}
 	\item \textbf{Irreducible}, meaning it's possible to reach any state from anywhere
 	\item \textbf{Aperiodic}, meaning at each time-step we can be anywhere
 \end{list}
 then it has a unique stationary distribution. So we define $q(x^{l+1}\:|\:x^l)$ such that the Markov Chain converges to $p(x)$.
+\paragraph{Procedures} Many sampling procedure in the MCMC framework, defining different state-transition distributions $q(\:)$. Each of them has different characteristics:
+\begin{list}{}{}
+	\item Gibbs Sampling: $q(\:)$ relies on marginals $p(s_j\:|\:s_{\setminus j})$
+	\item Metropolis-Hastings Sampling: based on a proposal distribution $\hat{q}(x_{l+1}\:|\:x_l)$ where the choice of $\hat{q}(\:)$ is crucial
+	\item Particle Filtering: used in recursive models
+	\item Hybrid Monte Carlo
+	\item Swendson-Wang
+	\item \ldots
+\end{list}
 \section{Convolutional Neural Networks}
 \paragraph{Deep Learning} Effectively is learning the representation of data.
 \paragraph{CNNs} The principle is complex neurons that take the outputs of simple neurons and assemble it into more complex structures.
@@ -1188,15 +1213,13 @@ For images:
 \end{center}
 \end{multicols}
 
-\paragraph{Dense Vector Multiplication} E.g. take the 32x32 image and reshape into a vector of 3072. Input-sized weight vector for each hidden neuron $W$ of e.g. 100 neurons: 100$\times$3072 weights, a huge amount of parameters. That's why we want convolutional filters.
+\paragraph{Dense Vector Multiplication} E.g. take the 32x32 image and reshape into a vector of 3072 elements. Input-sized weight vector for each hidden neuron $W$ of e.g. 100 neurons: 100$\times$3072 weights, a huge amount of parameters. That's why we want convolutional filters.
 \begin{center}
 	\includegraphics[scale=0.5]{51.png}
 \end{center}
 A set of weights that are applied to a 5$\times$5 region of the image. It's a \textbf{kernel} that outputs into the \textbf{feature map}. No longer a 1:1 correspondence between a pixel and a parameter.
 \begin{center}
-	\includegraphics[scale=0.5]{52.png}
-\end{center}
-\begin{center}
+	\includegraphics[scale=0.5]{52.png}\\
 	\includegraphics[scale=0.5]{53.png}
 \end{center}
 With a number of slices equal to the number of image channels. Basically a filter per channel color, but they are convolved together still giving a $28\times28$ feature map even with 3 color channels for example. The \textbf{convolution map stays bidimensional}.
@@ -1222,13 +1245,21 @@ $$W' = \frac{W-K}{S} + 1$$
 \paragraph{Convolutional Architecture}
 \begin{center}
 	\includegraphics[scale=0.5]{55.png}
+	\includegraphics[scale=0.5]{212.png}
 \end{center}
 Usually use a certain number of convolutional layers ending in a small final image feeded into some fully connected layers.
+\pagebreak
 \paragraph{Filter Banks}
 \begin{center}
 	\includegraphics[scale=0.5]{56.png}
 \end{center}
-The number of parameters in this model is $K\times K\times D_I\times D_K$ because pooling is non parametric and feature maps have no parameters, so the parameters are just in the filters.
+The number of parameters in this model is $K\times K\times D_I\times D_K$ because pooling is often non parametric and feature maps have no parameters, so the parameters are just in the filters.
+\paragraph{Note on Convolution} We know that discrete convolution between an image $I$ and a filter/kernel $K$ is
+$$(I*K)(i,j) = \sum_m\sum_nI(i-m,j-n)K(m,n)$$
+and it's commutative.\\
+In practice, implementations of convolution in deep learning libraries don't flip the kernel
+$$(I*K)(i,j) = \sum_m\sum_nI(i+m,j+n)K(m,n)$$
+Which is \textbf{cross-correlation} and its not commutative.
 \paragraph{CNNs as Sparse Neural Networks}
 Let's use a 1D input sequence to ease graphics.
 \begin{center}
@@ -1240,6 +1271,7 @@ $s_i$ is a convolutional neuron with a kernel size $3\times1$
 \begin{center}
 	\includegraphics[scale=0.5]{58.png}
 \end{center}
+\pagebreak
 \subparagraph{Pooling} Just another neuron.
 \begin{center}
 	\includegraphics[scale=0.5]{59.png}
