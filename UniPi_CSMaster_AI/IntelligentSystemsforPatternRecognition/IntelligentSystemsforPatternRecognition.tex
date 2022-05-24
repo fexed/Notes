@@ -1880,10 +1880,10 @@ Not using classical algorithms because we may not have a proper input but only s
 The memory module typically is a matrix of $N$ slots, sometimes with fixed size other times with dynamic memory. The neural network reads/writes from/to the memory module. Where to read and write can be done with attention.
 \subsection{Memory Network}
 \paragraph{Components}\begin{list}{}{}
-	\item \textbf{Input Feature Map} $I$: encodes the input in a feature vector
-	\item \textbf{Generalization} $G$: decide what input (or function of it) to write to memory
-	\item \textbf{Output Feature Map} $O$: reads the relevant memory slots
-	\item \textbf{Response} $R$: returns the prediction given the retrieved memories
+	\item \textbf{Input Feature Map}: encodes the input in a feature vector
+	\item \textbf{Generalization}: decide what input (or function of it) to write to memory
+	\item \textbf{Output Feature Map}: reads the relevant memory slots
+	\item \textbf{Response}: returns the prediction given the retrieved memories
 \end{list}
 \paragraph{End-to-End Memory Networks}
 \begin{center}
@@ -1942,10 +1942,9 @@ Write operation is actually performed by composing adding and erasing operations
 Not yet of practical use, not straightforward to train.\\
 Has advantages over GRNN when it comes to learn to program.
 \section{Unsupervised Learning}
-\paragraph{The Problem} Characterize the data: data distribution and variances. Connects to autoencoders and manifold learning.\begin{center}
+\paragraph{The Problem} Characterize the data (data distribution and variances) to allow the understanding of data, the generation of new observations and ultimately \textbf{reasoning}. Connects to autoencoders and manifold learning.\begin{center}
 	\includegraphics[scale=0.5]{138.png}
 \end{center}
-This to allow: understanding of data, generating new observation\ldots and ultimately reasoning.\\\\
 Another reason is that \textbf{labeled data is costly and difficult to obtain}. A sustainable future for deep learning: learning the latent structure of data, discover important features, learn task independent representations and introduce (if any) supervision only on few examples.
 \paragraph{Why Generative?} Focusing too much on discrimination rather than on characterizing data can cause issues, e.g.: reduced interpretability, adversarial examples.\\
 Generative model try to characterize data distribution. \begin{list}{}{}
@@ -1958,9 +1957,9 @@ Generative model try to characterize data distribution. \begin{list}{}{}
 \end{center}
 Two approaches:
 \begin{list}{}{}
-	\item Explicit (learn a model density $P_\theta(x)$), which can be visible (work only< on visible data, tractable densities, sampling RNNs) and latent (assume there's something else, intractable densities).\\
+	\item \textbf{Explicit} (learn a model density $P_\theta(x)$), which can be \textbf{visible} (work only on visible data, tractable densities, sampling RNNs) and \textbf{latent} (assume there's something else, intractable densities).\\
 	Latent can also be variational (Variational Autoencoders) and stochastic (Boltzmann Machines).
-	\item Implicit (learn a process that samples data from $P_\theta(x)\simeq P(x)$). Can be divided into direct models (generative adversarial networks) and stochastic models (generative stochastic networks)
+	\item \textbf{Implicit} (learn a process that samples data from $P_\theta(x)\simeq P(x)$). Can be divided into \textbf{direct models} (generative adversarial networks) and \textbf{stochastic models} (generative stochastic networks)
 \end{list}
 \paragraph{Learning With Fully Visible Information} If all information is fully visible, the joint distribution can be computed from the chain rule factorization (Bayesian Networks).
 $$P(x)=\prod_i^NP(x_i\:|\:x_1,\ldots,x_{i-1})$$
@@ -1969,7 +1968,7 @@ We can use RNNs: use their ability to handle previous data. Scan the image accor
 With only visible information we try to learn the $\theta$ parametrized model distribution
 $$P_\theta(x)=\prod_i^NP_\theta(x_i\:|\:x_1,\ldots,x_{i-1})$$
 Then we introduce a latent process regulated by unobservable variables $z$
-$$P_\theta(x)=\int P_\theta(x\:|\:z)P_\theta(z)\:\:dz$$
+$$P_\theta(x)=\int \underbrace{P_\theta(x\:|\:z)} P_\theta(z)\:\:dz$$
 But $P_\theta(x\:|\:z)$ it's typically intractable.
 \paragraph{NN With Latent Variables?} An Autoencoder.
 \begin{center}
@@ -1982,13 +1981,13 @@ We introduced a probabilistic twist on AE
 There's sampling on $z$, so I can't backpropagate from $\tilde{x}$.\\
 We need a \textbf{deeper probabilistic push}: as an additional push in the probabilistic interpretation, we assume to be able to generate the reconstruction from a sampled latent representation.\\
 Transform $z\mapsto\tilde{x}$ with $P(x\:|\:z)$ transformed into something simpler: a stochastic part and a deterministic part. The stochastic part must be as simple as possible, and the deterministic part as powerful as possible. For example, a probability distribution from which we can sample is not multivariate nor discrete, is a Gaussian, so the stochastic part is a Gaussian. Sample $z$ from the Gaussian, into the powerful deterministic part and transform to represent some other distribution.\\
-So we sample latent variables $z$ from the true prior $P(z)$ and sample from the true conditional $P(\tilde{x}\:|\:z)$\\
-Of course we can't access the true distribution, we approximate them with a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$. At training time sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
+So we sample latent variables $z$ from the true prior $P(z)$ and sample from the true conditional $P(\tilde{x}\:|\:z)$.\\\\
+Of course we can't access the true distribution, so we approximate. We sample $z$ from a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$ (neural network) representing $P(\tilde{x}\:|\:z)$ through a NN $g$. At training time sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
 $$z\simeq N(\mu(x),\sigma(x))$$
-But it's not so easy, we would like to train maximizing something non differentiable ($P(x_i\:|\:z)P(z)$)
-$$L(D)=\prod_{i=1}^NP(x_i)=\prod_{i=1}^N\int P(x_i\:|\:z)P(z)\:\:dz$$
-$P(x_i)$ is intractable so we lower bound it with variational approximation.\\
-The non-differentiable part we handle with reparametrization.
+But it's not so easy, we would like to train maximizing something non differentiable
+$$L(D)=\prod_{i=1}^N\underset{\text{Intractable}}{\underbrace{P(x_i)}}=\prod_{i=1}^N\int \underset{\text{Non differentiable}}{\underbrace{P(x_i\:|\:z)P(z)}}\:dz$$
+$P(x_i)$ is intractable so we lower bound it with \textbf{variational approximation}.\\
+The non-differentiable part we handle with \textbf{reparametrization}.
 \subparagraph{Reparametrization} \begin{center}
 	\includegraphics[scale=0.5]{142.png}
 \end{center}
@@ -2001,31 +2000,35 @@ $\mu$ and $\sigma$ are generated with an encoder.
 \paragraph{Variational Approximation} ELBO (Evidence Lower Bound)
 $$\log P(x\:|\:\theta)\geq E_Q[\log P(x,z)] - E_Q[\log Q(z)] = L(x,\theta,\phi)$$
 The $Q$ function is anything that can approximate the distribution with its own parameters. Maximizing the ELBO allows approximating from below the intractable log-likelihood $\log P(x)$
-$$ L(x,\theta,\phi) = E_Q[\log P(x\:|\:z)] + E_Q[\log P(z)] - E_Q[\log Q(z)]$$
+$$ L(x,\theta,\phi) = E_Q[\log P(x\:|\:z)] + \underset{KL(Q(z|\phi)\|P(z))}{\underbrace{E_Q[\log P(z)] - E_Q[\log Q(z)]}}$$
 $E_Q[\log P(z)] - E_Q[\log Q(z)] = KL(Q(z|\phi)\|P(z))$ is the KL, and $P(x\:|\:z)$ is the decoder estimate of the conditional (made possible through reparametrization). $P(z)$ is a probability from which is simple to sample form. $Q(z)$ has parameters, any function that can be matched against the distribution, so the $Q$ can be played by a neural network (the encoder). This KL will enforce $Q$ to behave like the prior.
 \subsection{Variational Autoencoder}\begin{center}
-	\includegraphics[scale=0.6]{144.png}
+	\includegraphics[scale=0.55]{144.png}
 \end{center}
 \paragraph{Training} Performed by backpropagation on $\theta,\phi$ to optimize the ELBO
-$$L(x,\theta,\phi) = E_Q[\log P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)] - KL(Q(z|x,\phi)\|P(z|\theta))$$
-To make it an appropriate loss function, the first term ($E_Q$) is the reconstruction and the second term is a regularization ($KL$). The $Q$ function is a Gaussian, $P(z|\theta)$ is also a Gaussian, so $KL$ is between two Gaussians and can be computed in closed form.
+$$L(x,\theta,\phi) = \underset{\text{Reconstruction}}{\underbrace{E_Q[\log P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]}} - \underset{\text{Regularization}}{\underbrace{KL(Q(z|x,\phi)\|P(z|\theta))}}$$
+The $Q$ function is a Gaussian, $P(z|\theta)$ is also a Gaussian, so $KL$ is between two Gaussians and can be computed in closed form.\\
+We train the encoder to behave like a Gaussian prior, with zero-mean and unit-variance.
 \paragraph{VAE Final Loss} In principle we would like to optimize the following loss by SGD
 $$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
 Which with reparametrization becomes
 $$E_{X\sim D}[E_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
 No expectation is w.r.t. distributions that depend on model parameters: we can move gradients into them.
 \subparagraph{Information Theoretic Interpretation}
-$\log P(x|z)$ tells the number of bits required to reconstruct $x$ from $z$ under the ideal encoding (i.e. $Q(z|x)$ is generally suboptimal).\\
-The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. Meaning that $Q(z|x,\phi)$ is the number of bits required to convert an uninformative sample from $P(z)$ into a sample from $Q(z|x)$.\\
-The information gain is the amount of extra information we get about $X$ when $z$ comes from $Q(z|x)$ instead of from $P(z)$.
+$$E_{X\sim D}[E_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{\log P(x|z)}}]-KL(\underset{\text{Bits for convertion}}{\underbrace{Q(z|x,\phi)}}\|P(z))$$
+\begin{list}{}{}
+	\item $\log P(x|z)$ tells the number of bits required to reconstruct $x$ from $z$ under the ideal encoding (i.e. $Q(z|x)$ is generally suboptimal)
+	\item The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. Meaning that $Q(z|x,\phi)$ is the number of bits required to convert an uninformative sample from $P(z)$ into a sample from $Q(z|x)$
+	\item The information gain is the amount of extra information we get about $X$ when $z$ comes from $Q(z|x)$ instead of from $P(z)$
+\end{list}
 \paragraph{Testing} Aka sampling the VAE. At test time detach the decoder, sample a random encoding and generate the sample as the corresponding reconstruction.
 \paragraph{VAE vs Denoising/Contractive AE}
 \begin{center}
 	\includegraphics[scale=0.5]{145.png}
 \end{center}
+\pagebreak
 \paragraph{Conditional Generation (CVAE)} Learn conditional distributions\begin{center}
-	\includegraphics[scale=0.5]{146.png}\\
-	\includegraphics[scale=0.5]{147.png}
+	\includegraphics[scale=0.5]{146.png}
 \end{center}
 Learns the conditional distribution $P(x\:|\:y)$.\\
 This is the simplest possible form of CVAE.
@@ -2033,18 +2036,21 @@ This is the simplest possible form of CVAE.
 \paragraph{Distribution Learning vs Learning to Sample} Variational AEs  learn to approximate an intractable distribution
 $$P_\theta(x) = \int P_\theta(x\:|\:z)P_\theta(z)\:\:dz$$
 then sample it to generate the output. What if we learn to generate samples rather than learning the distribution? Generative Adversarial Networks (GAN), game theoretic approach.
-\paragraph{The GAN Catch} We need to learn to sample from a complex, high-dimensional training distribution: no straightforward way to do this. The catch: sample from a simple distribution (random noise, Gaussian) and train a differentiable distribution (Neural Network) to transform random noise to the training distribution.\\\\
-Again a two step architecture.
+\paragraph{The GAN Catch} We need to learn to sample from a complex, high-dimensional training distribution: no straightforward way to do this. The catch: sample from a simple distribution (random noise, Gaussian) and train a differentiable distribution (Neural Network) to transform random noise to the training distribution.
 \begin{center}
 	\includegraphics[scale=0.5]{148.png}
 \end{center}
-$$C = \min_{\theta_G}\max_{\theta_D}\left(E_x[\log D_{\theta_D}(x)]-E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))\right)$$
-With $D$ being the output of the discriminator, and $G$ the output of the GAN. So the term $D_{\theta_D}(x)$ is the discriminator output for real data $x$ and the term $D_{\theta_D}(G_{\theta_G}(z))$ is the discriminator output for fake data $G(z)$.\\
+$$C = \min_{\theta_G}\max_{\theta_D}\left(E_x[\log\underset{\text{Discriminator's output for real data }x}{\underbrace{ (D_{\theta_D}(x))}}]-E_z[\log\underset{\text{Discriminator's output for fake data }G(z)}{\underbrace{(1-D_{\theta_D}(G_{\theta_G}(z)))}}]\right)$$
+With $D$ being the output of the discriminator, and $G$ the output of the GAN. So:
+\begin{list}{}{}
+	\item Discriminator tries to maximize $C$ such that $D_{\theta_D}(x)\rightarrow 1$ and $D_{\theta_D}(G_{\theta_G}(z))\rightarrow 0$
+	\item Generator tries to minimize $C$ such that $D_{\theta_D}(G_{\theta_G}(z))\rightarrow 1$
+\end{list}
 An alternate optimization:\begin{enumerate}
 \item Discriminator gradient ascent 
-$$C_D = \max_{\theta_D}\left(E_x[\log D_{\theta_D}(x)]-E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))\right)$$
+$$C_D = \max_{\theta_D}\left(E_x[\log D_{\theta_D}(x)]-E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))]\right)$$
 \item Generator gradient descent
-$$C_G =  \min_{\theta_G}(E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))$$
+$$C_G =  \min_{\theta_G}(E_z[\log(1-D_{\theta_D}(G_{\theta_G}(z)))])$$
 \end{enumerate}
 The last doesn't really work well. The cost that the generator receives in response to generating $G(z)$ depends only on the discriminator response.
 \paragraph{Hard Two-Player Game} The optimal solution of a min-max problem is a saddle point. Little stability: initially lot of heuristic work, now converged to more principled solutions.
@@ -2075,7 +2081,7 @@ $$G:\{x,z\}\rightarrow y$$
 \end{center}
 The discriminator discriminates the $z$s from the encoder from the $z$ from the distribution.
 \paragraph{Training AAE} We replace the second term with an adversarial loss
-$$L(x) = E_Q[\log P(x\:|\:z)]-KL(Q(z\:|\:x)\|P(z))$$
+$$L(x) = E_Q[\log P(x\:|\:z)]-\underset{\text{Replaced}}{\underbrace{KL(Q(z\:|\:x)\|P(z))}}$$
 \begin{list}{}{}
 	\item \textbf{Reconstruction phase}: update encoder and decoder to minimize reconstruction error
 	\item \textbf{Regularization phase}: update discriminator to distinguish true prior samples from generated samples. Update generator to fool the discriminator.
@@ -2096,6 +2102,7 @@ Distribution of $y$ is made little distinguishable from a multinomial (induced f
 \end{center}
 \paragraph{Overview} Generative Adversarial Networks \textbf{learn to sample} rather than learning the distribution. They obtain state-of-the-art generated sample quality, but are unstable/difficult to train, cannot perform inference (no distribution learning) and need differentiable generator.\\
 Adversarial Autoencoders leverage adversarial penalties in place of KL regularization. useful to impose "complex" or empirical priors.
+\pagebreak
 \section{Continual Learning}
 Deep learning holds state-of-the-art performances in many tasks, mainly supervised training with \textbf{huge} and \textbf{fixed} datasets.\\
 \textbf{The Curse of Dimensionality} is a very important topic: there are $3.9\cdot10^{372282}$ possible $277\times277$ RGB images. That's huge and you cannot consider them all.\\
