@@ -2143,42 +2143,50 @@ But there are many others! Not only for data streams but also for sequences.
 	\item Replace examples randomly to maintain an approximate equal number of examples for experience
 \end{list}
 \section{Reinforcement Learning}
+\begin{center}
+	\includegraphics[scale=0.5]{214.png}
+\end{center}
 Reinforcement learning is characterized, with respect to other ML tasks, by:
 \begin{list}{}{}
-	\item no supervisor, only a \textit{reward} signal
-	\item delayed \textbf{asynchronous feedback}
-	\item time matters (sequential data, continual learning)
-	\item agent's actions affect the subsequent data it receives (inherently non-stationarity)
+	\item No supervisor, only a \textbf{reward} signal
+	\item Delayed \textbf{asynchronous feedback}
+	\item Time matters (\textbf{sequential data}, continual learning)
+	\item Agent's \textbf{actions affect the subsequent data} it receives (\textbf{inherently non-stationarity})
 \end{list}
 Reinforcement learning is used in:
 \begin{list}{}{}
-	\item learning to maneuver vehicles and control robots (walking, navigation, manipulation\ldots)
-	\item playing games
-	\item discovering new molecules
-	\item end-to-end learning with discrete structures
+	\item Learning to maneuver vehicles and control robots (walking, navigation, manipulation\ldots)
+	\item Playing games
+	\item Discovering new molecules
+	\item End-to-end learning with discrete structures
 \end{list}
 \subsection{Fundamentals}
-\paragraph{Rewards} A reward $R_t$ is a scalar feedback signal. It indicates how well an agent is doing at step $t$, and the agent's job is to maximize cumulative reward. Reinforcement learning is based on the \textbf{reward hypothesis}: all goals can be described by the maximization of expected cumulative reward.\\
-Most of the engineering work in reinforcement learning is about the realization of the reward function.
+\paragraph{Rewards} A reward $R_t$ is a \textbf{scalar feedback signal}. It indicates how well an agent is doing at step $t$, and the agent's job is to maximize cumulative reward. Reinforcement learning is based on the \textbf{reward hypothesis}: all goals can be described by the maximization of expected cumulative reward.\\
+Most of the engineering work in RL is about the realization of the reward function.
 \paragraph{Sequential Decision Making} Goal: select actions that maximize total future reward. Actions may have long-term consequences, and the reward may be delayed. It may be better to sacrifice immediate reward to gain more long-term reward.\\
 Examples:
 \begin{list}{}{}
-	\item financial investment, may take months to mature
-	\item refueling a helicopter, may prevent a crash in several hours
-	\item blocking opponent moves, might help winning chances many moves from now
+	\item Financial investment, may take months to mature
+	\item Refueling a helicopter, may prevent a crash in several hours
+	\item Blocking opponent moves, might help winning chances many moves from now
 \end{list}
+\begin{multicols}{2}
 \paragraph{Agent and Environment} At each step $t$ the agent:
 \begin{list}{}{}
-	\item executes action $A_t$
-	\item receives observation $O_t$
-	\item receives scalar reward $R_t$
+	\item Executes action $A_t$
+	\item Receives observation $O_t$
+	\item Receives scalar reward $R_t$
 \end{list}
 The environment:
 \begin{list}{}{}
-	\item receives action $A_t$
-	\item emits observation $O_{t+1}$
-	\item emits scalar reward $R_{t+1}$
+	\item Receives action $A_t$
+	\item Emits observation $O_{t+1}$
+	\item Emits scalar reward $R_{t+1}$
 \end{list}
+\begin{center}
+	\includegraphics[scale=0.45]{215.png}
+\end{center}
+\end{multicols}
 \paragraph{History and State} The \textbf{history} is the sequence of observations, actions and rewards
 $$H_t = O_1;R_1;A_1;\ldots;A_{t-1};O_t;R_t$$
 I.e. all the observable variables up to time $t$. What happens next depends on the history: the agent selects an action, the environment selects observations/rewards.\\
@@ -2187,7 +2195,7 @@ $$S_t = f(H_t)$$
 \paragraph{Environment State} The environment state $S_t^e$ is the environment $e$ private representation at time $t$. Whatever information the environment uses to generate the next observation/reward.\\
 The environment state is not usually visible to the agent (unobservable environment).\\
 Even if $S_t^e$ is visible, it may contain irrelevant information.
-\paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$: it's whatever information the agent uses to select its next action. Generally speaking is a function of history, $S_t^a = f(H_t)$, and its the information used by reinforcement learning algorithms.
+\paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$: it's whatever information the agent uses to select its next action. Generally speaking is a function of history, $S_t^a = f(H_t)$, and it's the information used by reinforcement learning algorithms.
 \paragraph{Information (Markov) State} An information state (Markov state) contains all useful information from the history. A state $S_t$ is Markov $\Leftrightarrow P(S_{t+1}\:|\:S_1,\ldots,S_t) = P(S_{t+1}\:|\:S_t)$.\\
 The future is independent of the past given the present (\textbf{d-separation}), meaning $H_{1:t}\rightarrow S_t \rightarrow GH_{t+1:\infty}$. The state is a \textbf{sufficient statistic for the future}. The environment state $S_t^e$ and the history $H_t$ are Markov.
 \paragraph{Observability}
@@ -2240,6 +2248,7 @@ Exploration finds more information about the environment, while exploitation exp
 \paragraph{Prediction vs Control} Prediction is evaluating the future, given a policy, while control is optimizing the future (finding the best policy).
 \paragraph{Overview} Reinforcement Learning is a general-purpose framework for decision making. It's for an agent with the capacity to act and observe. The state is the sufficient statistics to characterize the future, depends on the history of actions and observations (environment state vs agent state).\\
 Success is measured by a scalar reward signal: the goal is to select actions to maximize future reward (exploit) and in order to be effective we should not forget to explore.
+\subsection{Markov Decision Processes}
 \paragraph{MDP} Markov decision processes formally describe an environment for reinforcement learning: environment is \textbf{fully observable}, i.e. the current state completely characterizes the process. Almost all Reinforcement Learning problems can be formalized as MDPs, for example:
 \begin{list}{}{}
 	\item Partially observable problems can be converted into MDPs
@@ -2258,7 +2267,7 @@ $$G_t = R_{t+1} + \gamma R_{t+1}+\ldots = \sum_{k=0}^\infty \gamma^kR_{t+k+1}$$
 The values of receiving reward $R$ after $k+1$ time steps is $\gamma^k R$. $\gamma$ values immediate reward vs delayed reward:
 \begin{list}{}{}
 	\item $\gamma\simeq 0$ leads to "myopic" evaluation
-	\item $\gamma\simeq 1$ leads to "fat-sighted" evaluation
+	\item $\gamma\simeq 1$ leads to "far-sighted" evaluation
 \end{list}
 It's mathematically convenient to discount rewards as it avoids infinite returns in cyclic Markov processes. Uncertainty about the future may not be fully represented. Also it's application independent and it's still possible to use undiscounted Markov reward processes (i.e. $\gamma=1$) if all sequences terminate.\\
 An example: student Markov decision process
@@ -2291,7 +2300,7 @@ $$v_\pi(s) = E_\pi[R_{t+1} + \gamma v_\pi(S_{t+1})\:|\:S_t=s] = \sum_{a\in A }\p
 Similarly we can decompose the action-value function
 $$q_\pi(s,a) = E_\pi[R_{t+1}+\gamma q_\pi(S_{t+1}, A_{t+1})\:|\:S_t=s, A_t=a] = R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_\pi(s')$$
 One more step of nesting: the expected return of being in a state reachable from $s$ through action $a$ and then continue following the policy $\pi$
-$$v_\pi(s) = \sum_{a\in A} \pi(a\:|\:s) \left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v\pi(s')\right)$$
+$$v_\pi(s) = \sum_{a\in A} \pi(a\:|\:s) \left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v_\pi(s')\right)$$
 The expected return of any action $a'$ taken from states reachable from $s$ through action $a$ (and then following policy $\pi$)
 $$q_\pi(s,a) = R_s^a + \gamma\sum_{s'\in S}P_{ss'}^a \sum_{a'\in A}\pi(a'\:|\:s')q_\pi(s',a')$$
 Matrix form: linear system
@@ -2310,7 +2319,7 @@ The optimal value function determines the best possible performance in the MDP. 
 \end{center}
 \paragraph{Optimal Policy} Define a partial ordering over policies $$\pi\geq \pi'\text{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
 \subparagraph{Theorem} For any Markov Decision process\begin{list}{}{}
-	\item There exist an optimal policy $\pi_*$ that is better or equal than all the other: $\forall\pi\:\:\pi_*\geq \pi$
+	\item There exist an optimal policy $\pi_*$ that is better or equal than all the others: $\forall\pi\:\:\pi_*\geq \pi$
 	\item All optimal policies achieve the optimal value function: $v_{\pi_*}(s) = v_*(s)$
 	\item All optimal policies achieve the optimal action-value function: $q_{\pi_*}(s,a) = q_*(s,a)$
 \end{list}
@@ -2323,6 +2332,31 @@ There is always a deterministic optimal policy for any MDP. If we know $q_*(s,a)
 \subparagraph{Bellman Optimality Equations} Optimal value functions are recursively related Bellman-style
 $$v_*(s)= \max_{a\in A}q_*(s,a) = \max_{a\in A}R_s^a + \gamma\sum_{s'\in S}P_{ss'}^av_*(s')$$
 $$q_*(s,a)=R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_*(s') = R_s^a + \gamma\sum_{s'\in S}P_{ss'}^a\left(\max_{a'\in A}q_*(s',a')\right)$$
+Bellman Optimality Equations are non linear, no closed form solution in general but many iterative solution methods:
+\begin{list}{}{}
+	\item Value iteration
+	\item Policy iteration
+	\item Q-learning
+	\item SARSA
+\end{list}
+\subsubsection{MDP Extensions}
+\paragraph{Infinite MDPs} Countably infinite state and/or action spaces.\\
+Continuous state and/or action spaces: closed form for linear quadratic model (LQR).\\
+Continuout time: requires partial differential equations.
+\paragraph{POMDP} Partially Observable MDPs are MDPs with hidden states: a Hidden Markov Model with actions.\\
+A POMDP is a tuple $(S,A,O,P,R,Z,\gamma)$
+\begin{list}{}{}
+	\item $S$ is a finite set of states
+	\item $A$ is a finite set of actions $a$
+	\item $O$ is a finite set of observations
+	\item $P$ is a transition matrix such that $P_{ss'}^a=P(S_{t+1}=s'\:|\:S_t=s,A_t=a)$
+	\item $R$ is a reward function such that $R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$
+	\item $Z$ is an observation function
+	\item $\gamma\in[0,1]$ is a discount factor
+\end{list}
+\paragraph{Belief State} A history $H_t$ is a sequence of actions, observations and rewards $$H_t = A_0O_1R_1,\ldots,A_{t-1}O_tR_t$$
+A belief state $b(h)$ is a distribution over states conditioned on the history $h$
+$$b(h) = [P(S_t=s_1\:|\:H_t=h),\ldots,P(S_t=s_n\:|\:H_t=h)$$
 \subsection{Model-Based Planning}
 \paragraph{Dynamic Programming} Dynamic: problem with sequential or temporal component.\\
 Programming: optimizing a program, i.e. a policy.\\
@@ -2380,6 +2414,7 @@ Why update the policy every iteration? Stop after $k=1$, equivalent to value ite
 	\item Policy Evaluation: estimate $v_\pi$, \textbf{any} policy evaluation
 	\item Policy Improvement: generate $\pi' \geq \pi$, \textbf{any} policy improvement algorithm
 \end{list}
+\subsubsection{Value Iteration}
 \paragraph{Optimality Principle} Any optimal policy can be subdivided into two components:
 \begin{list}{}{}
 	\item An optimal first action $a^*$
@@ -2389,7 +2424,7 @@ Why update the policy every iteration? Stop after $k=1$, equivalent to value ite
 A policy $\pi(a\:|\:s)$ achieves the optimal value from state $s$ (i.e. $v_\pi(s) = v_*(s)$) $\Leftrightarrow$ for any state $s'$ reachable from $s$, $\pi$ achieves the optimal value from state $s'$, $v_\pi(s') = v_*(s')$
 \paragraph{Deterministic Value Iteration} If we know the solution to subproblems $v_*(s')$, then solution $v_*(s)$ can be found by one-step lookeahead
 $$v_*(s) = \max_{a\in A} R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_*(s')$$
-Value iteration applies these updates iteratively. Intuition: start with final rewards and work backwards (sill works with loopy, stochastic MDPs).
+Value iteration applies these updates iteratively. Intuition: start with final rewards and work backwards (still works with loopy, stochastic MDPs).
 \paragraph{Value Iteration} Problem: find optimal policy $\pi$\\
 Solution: iterative application of Bellman optimality backup
 $$v_1\rightarrow\ldots\rightarrow v_\pi$$
@@ -2427,7 +2462,7 @@ So far: solve a known MDP (states, transition, rewards, actions). In a model-fre
 	\item Model-Free Control: optimize the value function of an unknown MDP
 \end{list}
 \subsubsection{Monte-Carlo Reinforcement Learning}
-\paragraph{MC} MV methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of DMP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
+\paragraph{MC} MC methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of DMP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
 Uses the simplest idea: the value is the mean return across episodes.\\
 But can only apply Monte-Carlo to episodic MDPs, where \textbf{all episodes must terminate}.
 \subparagraph{MC Policy Evaluation} Goal: learn $v_\pi$ from episodes of experience under policy $\pi$
@@ -2452,13 +2487,14 @@ TD methods learn directly from episodes of experience. Model-free (no knowledge 
 	$$V(S_t) = V(S_t) +\alpha(G_t-V(S_t))$$
 	\item Simplest temporal-difference learning algorithm (TD(0))\\
 	Update value $V(S_t)$ toward estimated return $R_t + \gamma V(S_{t+1})$
-	$$V(S_t) = V(S_t) + \alpha(R_t+\gamma V(S_{t+1}) - V(S_t))$$
+	$$V(S_t) = V(S_t) + \alpha(\overset{\text{TD Error }\delta_t}{\overbrace{\underset{\text{TD Target}}{\underbrace{R_t+\gamma V(S_{t+1})}} - V(S_t)}})$$
 \end{list}
-$R_t+\gamma V(S_{t+1})$ is TD target and  $R_t+\gamma V(S_{t+1}) - V(S_t)$ is TD error $\delta_t$
+TD can \textbf{learn before knowing the final outcome}: it can learn online after every step, while MC must wait until the end of an episode before return is known.\\
+Also, TD can \textbf{lean without the final outcome}: it can learn from incomplete sequences and works in continuing (non-terminating) environments, while MC can only learn from complete sequences and only works for episodic (terminating) environments.
 \paragraph{Bias-Variance Tradeoff} Return $G_t = R_{t+1} + \gamma R_{t+2}+\ldots$ is a unbiased estimate of $v_\pi(S_t)$. (MC zero bias)\\
 True TD target $R_{t+1} + \gamma v_\pi(S_{t+1})$ is unbiased estimate of $v_\pi(S_t)$.\\
 TD target $R_{t+1} + \gamma V(S_{t+1})$ is a biased estimate of $v_\pi(S_t)$\\
-TD target is much lower variance than the return: return depends on many random actions-transition-rewards, TD target depends on one random action-transition-reward.
+TD target is much lower variance than the return: return depends on many random action-transition-rewards, TD target depends on one random action-transition-reward.
 \begin{list}{}{}
 	\item MC hash high variance, zero bias\\
 	Good convergence properties, even with function approximation. Not very sensitive to initial value and very simple to understand and use.
@@ -2470,6 +2506,7 @@ $$s_1^1,a_1^1r_2^1,\ldots,s_{T_1}^1$$
 $$\vdots$$
 $$s_1^K,a_1^Kr_2^K,\ldots,s_{T_1}^K$$
 E.g. repeatedly sample episode $k\in [1,K]$, apply MC or TD(0) to episode $k$.
+\pagebreak
 \subparagraph{Simple example} 
 \begin{multicols}{2}
 Two states, A, B, no discounting, 8 episodes of experience:
@@ -2490,29 +2527,33 @@ $V(A)=0$ on MC but $0.75=75\%$ on TD.
 	\includegraphics[scale=0.5]{174.png}
 \end{center}
 \end{multicols}
-\paragraph{Certainty Equivalence}
+\paragraph{Certainty Equivariance}
 \begin{list}{}{}
 	\item MC converges to solution with minimum mean-squared error, best fit to the observed returns
 	$$\sum_{k=1}^K\sum_{t=1}^{T_k}\left(G_t^k-V(s_t^k)\right)^2$$
 	\item TD(0) converges to solution of maximum likelihood Markov model, solution to the MDP $(S, A, P, R, \gamma)$ that best fits the data
-	$$\hat{P}_{ss'}^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} 1(s_t^k,a_t^k,s_{t+1}^k; s, a, s')$$
-	$$\hat{R}_s^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} 1(s_t^k,a_t^k;s,a)r_t^k$$
+	$$\hat{P}_{ss'}^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} \mathbf{1}(s_t^k,a_t^k,s_{t+1}^k; s, a, s')$$
+	$$\hat{R}_s^a = \frac{1}{N(s,a)}\sum_{k=1}^K\sum_{t=1}^{T_k} \mathbf{1}(s_t^k,a_t^k;s,a)r_t^k$$
 \end{list}
 TD exploits Markov property (usually more efficient in Markov environments), while MC doesn't (usually more effective in non-Markov environments).
 \subsubsection{Unifying and Generalizing}
 \paragraph{MC Update}
+$$V(S_t)=V(S_t)+\alpha(G_t-V(S_t))$$
 \begin{center}
 	\includegraphics[scale=0.5]{166.png}
 \end{center}
+\pagebreak
 \paragraph{Dynamic Programming}
+$$V(S_t) = E[R_{t+1}+\gamma V(S_{t+1})]$$
 \begin{center}
 	\includegraphics[scale=0.5]{167.png}
 \end{center}
 \paragraph{TD Update}
+$$V(S_t) = V(S_t) +\alpha(R_t+\gamma V(S_{t+1})-V(S_t))$$
 \begin{center}
 	\includegraphics[scale=0.5]{168.png}
 \end{center}
-Are there something in between MC and TD? Yes, TD(0) because looks just one step ahead.
+Is there something in between MC and TD? Yes, TD(0) because looks just one step ahead.
 \paragraph{$n$-step Prediction} TD looks and targets $n$ steps in the future
 \begin{center}
 	\includegraphics[scale=0.5]{169.png}
@@ -2531,7 +2572,7 @@ The TD($\lambda$) weight function is:
 \begin{center}
 	\includegraphics[scale=0.5]{170.png}
 \end{center}
-\paragraph{Eligibility Traces} Tradeoff between
+\paragraph{Eligibility Traces} It's a temporary record of the occurrence of an event, in our case the taking of an action. Trade-off between
 \begin{list}{}{}
 	\item Frequency heuristic
 	\item Recency heuristic
@@ -2540,12 +2581,19 @@ Eligibility trace combines both
 $$E_0(s) = 0$$
 $$E_t(s) = \lambda\gamma E_{t-1}(s) + 1(S_t;s)$$
 With fading memory of the past (frequency) and adds 1 whenever $S_t = s$ (recency)
-\paragraph{Backward View TD($\lambda$)} Keep an eligibility trace for every state $s$. Update value $V(s)$ for every state $s$, in proportion to TD-error $\delta_t$ and eligibility trace $E_t(s)$
+\paragraph{Backward View TD($\lambda$)} The forward view provides the theory, while the \textbf{backward view provides the mechanism}.\\
+Update online, every step, from incomplete sequences. Using eligibility traces for solving the credit assignment problem by trading between the frequency heuristic (assign credit to most frequent states) and recency heuristic (assign credit to most recent states).\\
+Keep an eligibility trace for every state $s$. Update value $V(s)$ for every state $s$, in proportion to the backpropagated TD-error $\delta_t$ and eligibility trace $E_t(s)$
 $$\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$$
 $$V(s) = V(s) + \alpha\delta_t E_t(s)$$
 \begin{center}
 	\includegraphics[scale=0.5]{171.png}
 \end{center}
+\paragraph{Model-Free RL: Control} Two types:
+\begin{list}{}{}
+	\item On-policy learning: "learn on the job", learn about policy $\pi$ from experience sampled from $\pi$
+	\item Off-policy learning: "look over someone's shoulder", learn about policy $\pi$ from experience sampled from $\mu$
+\end{list}
 \subsubsection{On-Policy Learning}
 \paragraph{Model-Free Policy Iteration Using Action-Value Function}
 \begin{list}{}{}
@@ -2581,19 +2629,27 @@ $$\pi(a\:|\:s)= \left\{\begin{array}{c l}
 \begin{center}
 	\includegraphics[scale=0.5]{173.png}
 \end{center}
+$$Q(S,A)=Q(S,A)+\alpha(R+\gamma Q(S',A')-Q(S,A))$$
 Expected SARSA
 $$q_*(s,a) = R_s^a+\gamma\sum_{a'\in A}\pi(a'\:|\:s')q_*(s',a')$$
 We sample also future action $A'\simeq \pi$ (instead of leveraging policy to compute expectation).
 \subsubsection{Off-Policy Learning} Evaluate target policy $\pi(a\:|\:s)$ to compute $v_\pi(s)$ or $q_\pi(s,a)$, while following behavior policy $\mu(a\:|\:s)$
 $$\{S_1,A_1,R_2\ldots,S_T\}\sim\mu$$
+Important for various reasons:
+\begin{list}{}{}
+	\item Learn from imitation (humans, other agents,\ldots)
+	\item Re-use experience generated from old policies $\pi_1,\ldots,\pi_{t-1}$
+	\item Learn about optimal policy while following \textbf{exploratory policy}
+	\item Learn about multiple policies while following one policy
+\end{list}
 \paragraph{Q-Learning} Off-policy learning of action-values $Q(s,a)$
 \begin{list}{}{}
 	\item Next action is chosen using behavior policy $A_{t+1}\sim \mu(\:\:|\:S_t)$
 	\item But we consider alternative successor action $A'\sim\pi(\:\:|\:S_t)$
 	\item And update $Q(S_t,A_t)$ toward value of alternative action
-	$$Q(S_t,A_t) = Q(S_t,A_t) + \alpha(R_{t+1} + \gamma Q(S_{t+1},A') - Q(S_t,A_t))$$
-	Note that $R_{t+1} + \gamma Q(S_{t+1},A')$ is TD learning
+	$$Q(S_t,A_t) = Q(S_t,A_t) + \alpha(\underset{\text{TD-Learning}}{\underbrace{R_{t+1} + \gamma Q(S_{t+1},A')}} - Q(S_t,A_t))$$
 \end{list}
+%TODO from-here
 \paragraph{Off-Policy Control by Q-Learning} Allow both behavior and target policies to improve. The target policy $\pi$ is greedy with respect to $Q(S_t,A_t)$
 $$\pi(S_{t+1})=\arg\max_{a'} Q(S_{t+1}, a')$$
 The behavior policy $mu$ is $\epsilon$-greedy with respect to $Q(s,a)$.\\
