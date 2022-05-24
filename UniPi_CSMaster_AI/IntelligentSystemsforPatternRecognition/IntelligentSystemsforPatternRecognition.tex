@@ -2649,7 +2649,6 @@ Important for various reasons:
 	\item And update $Q(S_t,A_t)$ toward value of alternative action
 	$$Q(S_t,A_t) = Q(S_t,A_t) + \alpha(\underset{\text{TD-Learning}}{\underbrace{R_{t+1} + \gamma Q(S_{t+1},A')}} - Q(S_t,A_t))$$
 \end{list}
-%TODO from-here
 \paragraph{Off-Policy Control by Q-Learning} Allow both behavior and target policies to improve. The target policy $\pi$ is greedy with respect to $Q(S_t,A_t)$
 $$\pi(S_{t+1})=\arg\max_{a'} Q(S_{t+1}, a')$$
 The behavior policy $mu$ is $\epsilon$-greedy with respect to $Q(s,a)$.\\
@@ -2671,12 +2670,12 @@ We would like to be able to use reinforcemente learning in problems with non-tri
 	\item Molecule search: $>10^{60}$ states
 \end{list}
 How to scale the policy evaluation, prediction and control models saw before?\\
-So fare $V(s)$ and $Q(s,a)$ are lookup tables, vectors/matrices: n entry for every state $s$ or state-action pair $s,a$. Large MDPs bring too many states and/or actions to store in memory. Too slow to learn the value of each state individually, generalization issues.\\
+So far $V(s)$ and $Q(s,a)$ are lookup tables, vectors/matrices: an entry for every state $s$ or state-action pair $s,a$. Large MDPs bring too many states and/or actions to store in memory. Too slow to learn the value of each state individually, generalization issues.\\
 The new approach is:
 \begin{list}{}{}
 	\item Estimate value function with function approximation 
 	$$\hat{v}(s;W)\simeq v_\pi(s)$$
-	$$\hat{(s,a;W)}\simeq q_\pi(s,a)$$
+	$$\hat{q}(s,a;W)\simeq q_\pi(s,a)$$
 	\item Generalize from seen states to unseen states
 	\item Update parameters $W$ using MC or TD learning
 \end{list}
@@ -2690,13 +2689,15 @@ Which function approximator in those boxes? Anything. Focus on linear models and
 \paragraph{Stochastic Gradient Descent} Goal: find parameter vector $W$ minimizing mean-squared error between approximate value $\hat{v}(s;W)$ and true value function $v_\pi(s)$
 $$J(W) = E_\pi[(v_\pi(S)-\hat{v}(S;W))^2]$$
 Gradient solution
-$$\Delta W= -\frac{1}{2}\alpha_{W}J(W) = \alpha E_\pi[v_\pi(S) - \hat{v}(S;W)]\Delta_W\hat{v}(S;W)$$
+$$\Delta W= -\frac{1}{2}\alpha\nabla_{W}J(W) = \alpha E_\pi[v_\pi(S) - \hat{v}(S;W)]\nabla_W\hat{v}(S;W)$$
 Stochastic approximation (\textbf{sampling}, single sample so no expectation)
-$$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W))\Delta_W\hat{v}(S;W)$$
+$$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W))\nabla_W\hat{v}(S;W)$$
 We need $\pi$, so to know how to model things. The \textbf{feature vector state} is represented by a feature vector
-$$c(S)=\left[\begin{array}{c}
+$$x(S)=\left[\begin{array}{c}
 x_1(S)\\\vdots\\x_n(S)
 \end{array}\right]$$
+\pagebreak
+
 For example:
 \begin{list}{}{}
 	\item Robot distance from landmarks
@@ -2711,23 +2712,23 @@ $$\nabla_W\hat{v}(S;W)=x(S)$$
 $$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W)x(S))$$
 \subparagraph{Lookup Table and Features} A special case of linear value approximation. Using table lookup features
 $$x(S)=\left[\begin{array}{c}
-1(S;s_1)\\\vdots\\1(S;s_n)
+\mathbf{1}(S;s_1)\\\vdots\\\mathbf{1}(S;s_n)
 \end{array}\right]$$
 Parameter vector $W$ values each state
 $$\hat{v}(S;W)=\left[\begin{array}{c}
-1(S;s_1)\\\vdots\\1(S;s_n)
+\mathbf{1}(S;s_1)\\\vdots\\\mathbf{1}(S;s_n)
 \end{array}\right]^T\left[\begin{array}{c}
 W_1\\\vdots\\W_n
 \end{array}\right]$$
-\subsubsection{Incremental Prediction}
+\paragraph{Incremental Prediction}
 So far we assumed access to true $v_\pi(s)$, but in RL there is no supervisor, only rewards. In practice we substitute a target for $v_\pi(S)$
 \begin{list}{}{}
 	\item MC: target is the return $G_t$
-	$$\Delta W=$$
+	$$\Delta W= \alpha(\underline{G_t} - \hat{v}(S_t;W))\nabla_W\hat{v}(S_t;W)$$
 	\item TD(0): target is the TD target $R_{t+1} + \gamma\hat{v}(S_{t+1};W)$
-	$$\Delta W=$$
+	$$\Delta W= \alpha(\underline{R_{t+1} + \gamma\hat{v}(S_{t+1};W)} - \hat{v}(S_t;W))\nabla_W\hat{v}(S_t;W)$$
 	\item TD($\lambda$): target is the $\lambda$-return $G_t^\lambda$
-	$$\Delta W=$$
+	$$\Delta W= \alpha(\underline{G_t^\lambda} - \hat{v}(S_t;W))\nabla_W\hat{v}(S_t;W)$$
 \end{list}
 \paragraph{Value Function Approximation with MC} Reinforcement learning with some supervised learning.\\
 Return $G_t$ is an unbiased, noisy sample of true value $v_\pi(S_t)$. Can therefore apply supervised learning to training samples
@@ -2748,7 +2749,7 @@ Forward in the theoretical way, but we don't have that information so we use the
 $$\delta_t = R_{t+1} + \gamma\hat{v}(S_{t+1};W)-\hat{v}(S_t;W)$$
 $$E_t=\lambda\gamma E_{t-1} + x(S_t)$$
 $$\Delta W = \alpha\delta_t E_t$$
-\subsubsection{Incremental Control}
+\paragraph{Incremental Control}
 We need to adapt
 \begin{list}{}{}
 	\item Policy evaluation: approximate policy evaluation, $\hat{q}(\:,\:;W)\simeq q_\pi(\:,\:)$\\
@@ -2874,6 +2875,7 @@ $$W = \left(\sum_{t=1}^T s(S_t,A_t)(x(S_t,A_t)-\gamma x(S_{t+1},\pi(S_{t+1})))^T
 \begin{center}
 	\includegraphics[scale=0.5]{181.png}
 \end{center}
+%TODO from here
 \subsection{Policy-Based Reinforcement Learning}
 Up until now:
 \begin{list}{}{}
