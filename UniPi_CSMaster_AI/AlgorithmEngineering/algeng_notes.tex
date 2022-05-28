@@ -13,6 +13,8 @@
 \usepackage{qtree}
 \usepackage{pgfplots}
 \usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{cancel}
 \usepgflibrary{shapes}
 \usepgfplotslibrary{fillbetween}
 \definecolor{backcolour}{RGB}{255,255,255}
@@ -78,99 +80,126 @@ We will count not all the steps but the I/O ops, with a \textbf{2-level memory m
 	\item \textbf{Spatial Locality}: access near items
 	\item \textbf{Temporal Locality}, or small working set: far apart items used often so we can exploit their presence in the cache
 \end{list}
-\paragraph{Poly vs Exp time complexity} Let's say we have three algorithms with $n$, $n^2$ and $2^n$ in time complexity respectively. Let's express the time complexity fixing $t$ time and counting how many items we can process in $t$ time. In the first case is linear, so $n = t$, the second is $n = \sqrt{t}$ and the third is $n = \log_2 t$. If we have a $k$ times faster machine, we can imagine that we are using the original machine for $k$ more times, or $k$ original machines in parallel. So in this case $n = kt, n = \sqrt{kt}$ and $n = \log_s kt$. The linear algorithm takes full advantage of the $k$ times faster machine, the second algorithm has a small advantage of a multiplication factor $\sqrt{k}$ and the last a negligible advantage of a sum factor of $\log_2 k$, which is basically none.
-\paragraph{Example} $A[1, n]$ integer array of which we want to compute the sum. The number of items, then, is $n$.\\
-First situation: first we load $B$ items and process them, then the next $B$ items and so on\ldots $\Rightarrow$ \# I/O = $n/B$, which we will see often and is called the \textbf{scan cost}, because we need to see each element, in batches of $B$ elements. So \textbf{$B$ is the size of the memory page}.\\
-But we can follow a different approach: we take the first item of each batch of $B$ elements, then the second items and so on, which will take $n$ steps, but this will be possibly slower because this method takes more I/Os ops, $n$ I/O ops. The larger the jumps the more I/O ops we do. The model doesn't distinguish between local and random I/Os.
-\paragraph{Binary Search} Array of $n$ elements. We pick the middle element, we go to left/right, middle element of the section and so on. The time complexity is $T(n) = O(\log_2 n)$, but we have a lot of I/Os and big jumps, so elements in different and far pages. We have $log_2 \frac{n}{B}$, because at a certain point the sub array where we search will be smaller than a page, so we have $\log_2 n$ steps $- \log_2 B$ the last steps inside the page, and for the properties of the logarithms we have $\log_2 \frac{n}{B}$. So the larger the page the smaller the number of I/Os. One consideration: $n$ is the number of items, $B$ is in kilobytes. So if we consider integers of 8 bytes, we have $\frac{B}{size}$ items, and with $B =$ 32 KB = $2^{15}$ KB we have circa 4000 items, or $2^{15}/2^3 = 2^{12}$.\\
-How can we improve the search? We can consider the $B^+$-trees. We split the array into the page size $B$ and the array is sorted in ascendant order. The splits are called leafs, and each leaf has a key (one of the elements). We have a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on.\\ %numero di elementi da rivedere
-Fetch a page, binary search and follow the pointer. Number of I/Os is $\log_B \frac{n}{B}$ and the number of steps is a binary search for every page, so $(\log_B \frac{n}{B})$ pages $\cdot \log_2 B$
+\paragraph{Poly vs Exp time complexity} Let's say we have three algorithms with $n$, $n^2$ and $2^n$ in time complexity respectively. Let's \textbf{express the time complexity fixing $t$ time and counting how many items we can process in $t$ time}.
+\begin{list}{}{}
+	\item A linear algorithm $O(n)\Rightarrow n = t$
+	\item A quadratic algorithm $O(n^2)\Rightarrow n = \sqrt{t}$
+	\item An exponential algorithm $O(2^n)\Rightarrow n = \log_2(t)$
+\end{list}
+\pagebreak
+With a $k$ times faster machine, we can imagine that we're using $k$ original machines in parallel. In this case:
+\begin{list}{}{}
+	\item With a linear algorithm on a $k$ times faster machine $\Rightarrow n = kt$\\
+	The \textbf{linear algorithm takes full advantage of the faster machine}
+	\item With a quadratic algorithm on a $k$ times faster machine $\Rightarrow n = \sqrt{kt}$\\
+	The \textbf{quadratic has a small advantage of a multiplicative factor} $\sqrt{k}$
+	\item With an exponential algorithm on a $k$ times faster machine $\Rightarrow n = \log_2(kt)$\\
+	The \textbf{exponential algorithm has a negligible advantage of a sum factor} $\log_2 k$, basically none
+\end{list}
+\paragraph{Example} We have an integer array $A[1, n]$, of which we want to compute the sum, so $n$ items.
+\begin{list}{}{}
+	\item First approach: load $B$ items and process them, then load the next $B$ items and process and so on\ldots\\
+	We do \#I/O = $\frac{\displaystyle n}{\displaystyle B}$: this is called the \textbf{scan cost}, we need to see each element in batches of $B$ elements, so $B$ is the \textbf{size of the memory page}.
+	\item We can follow a different approach: take the first item of each batch of $B$ elements, then the second items and so on\ldots\\
+	This will take $n$ steps, but it could be slower because we \textbf{do more I/O operations} (\#I/O = $n$).\\
+	\textbf{The larger the jumps the more I/O operations we do}, because this model doesn't distinguish between local and random I/Os.
+\end{list}
+\paragraph{Binary Search} We have an array of $n$ elements. We pick the middle element, we go to left or right based on the comparison result, take the middle element of the chosen section and so on\ldots\\
+The time complexity is $T(n) = O(\log_2 n)$, but \textbf{we have a lot of I/Os} and big jumps, meaning elements in different and far apart pages.\\
+At a certain point the sub array where we search will be smaller than a page, so we have $$\underset{\text{Steps}}{\underbrace{\log_2 n}} - \underset{\text{Last page}}{\underbrace{\log_2 B}} = \log_2 \frac{n}{B}$$
+This means that \textbf{the larger the page the smaller the number of I/Os}.
+\subparagraph{Small note} One consideration: $n$ is the number of items while $B$ is in kilobytes. If we consider integers of 8 bytes, we have $\frac{\displaystyle B}{\text{size}}$ items, and with $B = 32 \text{ KB} = 2^{15}\text{ KB}$ we have circa 4000 items, or $\frac{\displaystyle 2^{15}}{\displaystyle 2^3} = 2^{12}$.
+\paragraph{Improving Binary Search} We can consider the $B^+$-trees. We sort the array in ascendant order and split it into portions of the page size $B$. The splits are called leafs, and each leaf has a key (one of the elements). We build a page with each key and the next element is the pointer to its page. Above one level, a page with a key of the first key list and a pointer to the key list, a key of the second and so on\ldots\\
+We fetch a page, perform binary search and follow the pointer. \#I/Os $=\log_B \frac{n}{B}$ and the number of steps is a binary search for every page, so $$\underset{\text{Pages}}{\underbrace{\log_B \frac{n}{B}}} \cdot \underset{\text{BS in each page}}{\underbrace{\log_2 B}}$$
 \begin{center}
 	\includegraphics[scale=0.25]{2.png}
 \end{center}
-\paragraph{Analysis}
-$n = (1 + \epsilon)M$ with $\epsilon > 0$ data outside of the memory. So $M$ is totally full and $\epsilon M$ is stored in the unbound memory.\\
-The first point is we want to find $P($accessing the disk$)$, with a totally random algorithm, is $= \frac{\epsilon M}{n} = \frac{\epsilon\not M}{(1 + \epsilon)\not M} = P(\epsilon)$\\\\
-The second point is the average time of a step. $\sum_x P(X = x)\cdot x$ with $X$ the variable of which we compute the average with that formula. $X$ is time, in this case. The time is $1$ in case of computing, and varies in case of accessing the memory. So we have to multiply the cost of access times the probability (of computing, going internal, going to the disk). Internal memory access costs 1, while on disk is larger and we say that the cost is $c$. So the average, with let's say probability $a$ of memory access, $= (1 - a)\cdot 1 + a(P(\epsilon)\cdot c + (1 - P(\epsilon))\cdot 1)$ but $0 < a < 1$ and $1 - P(\epsilon)$ are very small, so we can rewrite as $= a\cdot P(\epsilon)\cdot c = a \cdot \frac{\epsilon}{1 + \epsilon} \cdot c + O(1)$. If $a = 0$ then no memory access so the cost is constant. The larger is $a$ the more memory accesses there are, the more that term is important, which is exactly what we want to capture. Usually, $a = 0.3 = 30\%$ and $c = 10^6$ the gap between accessing the disk and accessing the internal memory.\\
+\subparagraph{Analysis} Let's say that the elements are $n = (1 + \epsilon)M$ with $\epsilon > 0$ data outside of the memory: $M$ is totally full and $\epsilon M$ elements are stored in the unbound memory.\\
+Let's find the probability of accessing the disk. With a totally random algorithm, we have $$P(\text{Accessing the disk}) = P(\epsilon) = \frac{\epsilon M}{n} = \frac{\epsilon\cancel{M}}{(1 + \epsilon)\cancel{M}} = \frac{\epsilon}{1 + \epsilon}$$
+Let's compute the average time of a step. We can say the the time of a computing step is $1$, but time varies in case of memory access. We have three types of steps: computing step (costs $1$), internal memory access  (costs $1$ as well) step or disk access step (larger, let's say that it costs $c$). Let's suppose that the probability of accessing the memory is $a$, then the average of $X$ variable denoting time of a step is:
+$$E[X] = \sum_x P(X=x) = \underset{\text{Computing step}}{\underbrace{(1-a)\cdot 1}} + \underset{\text{Memory access step}}{\underbrace{a(\overset{\text{External memory}}{\overbrace{P(\epsilon)\cdot c}} + \overset{\text{Internal memory}}{\overbrace{(1-P(\epsilon))\cdot 1}})}}$$
+$0 < a < 1$ and $1 - P(\epsilon)$ are very small, so we can rewrite
+
+$$E[X] = \cancel{(1-a)} + a(P(\epsilon)c + \cancel{(1-P(\epsilon))}) = a\cdot P(\epsilon)\cdot c = a \cdot \frac{\epsilon}{1 + \epsilon} \cdot c + O(1)$$
+If $a = 0$ then there is no memory access so the cost is constant. The larger is $a$ the more memory accesses there are, the more that term is important, which is exactly what we want to capture. Usually, $a = 0.3 = 30\%$ and $c = 10^6$ the gap between accessing the disk and accessing the internal memory.\\
 So $\frac{\epsilon}{1 + \epsilon}\cdot 0.3 \cdot 10^6 = \frac{\epsilon}{1 + \epsilon} \cdot 300000$. If $P(\epsilon) = 0.001$ the avg time of a step is $0.001 \cdot 300000 = 300$, so the disk has a lot of impact even with only a thousandth of memory access being on disk: the avg cost is 300 and not 1.
 \section{Sorting}
-\paragraph{Permuting problem} Given an array $S[1, m]$ and a permutation $\pi$, the permutation problem asks to permute $S$ according to $\pi$, creating $[S[\pi[1]], S[\pi[2]],\ldots,S[\pi[m]]$. For example $S = [A, B, C, D], \pi = [3, 1, 2, 4]$ then $\pi$ tells that the $\pi[0] = 3$ item goes to the first position. So $S_\pi = [C, A, B, D]$
+\subsection{Permuting} Given an array $S[1, m]$ and a permutation $\pi$, the permutation problem asks to permute $S$ according to $\pi$, creating $[S[\pi[1]], S[\pi[2]],\ldots,S[\pi[m]]$. For example $S = [A, B, C, D], \pi = [3, 1, 2, 4]$ then $\pi$ tells that the $\pi[0] = 3$ item goes to the first position. So $S_\pi = [C, A, B, D]$
 \begin{lstlisting}[style=myPython]
 for i = 1 to n:
 	S1[i] = S[pi[i]]
 \end{lstlisting}
-Which costs $\Theta(n)$\\
-\begin{tabular}{c | c | c}
+Which costs $\Theta(n)$
+\begin{center}
+	\begin{tabular}{c | c | c}
  & PERM & SORT \\
 \hline
 RAM & $n$ & $n\log n$\\
 \hline
 2-level memory & min\{$n$, $C_{sort}$\} & $C_{sort}$
 \end{tabular}
-\pagebreak
-
+\end{center}
 Solving the permuting in a scan + sort kind of way, otherwise we have to do a disk access per value.\\
 \begin{list}{}{}
-	\item scan S : $\langle$S[i], i$\rangle$ which is $\langle$item, position$\rangle$\\
-	Which creates $\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
-	This costs $O(\frac{n}{B})$
-	\item scan $\pi$ : $\langle\pi$[i], i$\rangle$ which is $\langle$src, dst$\rangle$\\
-	Which creates $\langle$3, 1$\rangle$ $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$4, 4$\rangle$\\
-	This costs $O(\frac{n}{B})$
-	\item sort by first component of the sequence $\langle\pi$[i], i$\rangle$\\
-	Which creates $\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$3, 1$\rangle$ $\langle$4, 4$\rangle$\\
-	We take the item in source and move to destination
-	\item parallel scan
-	$\langle$A, 1$\rangle$ $\langle$B, 2$\rangle$ $\langle$C, 3$\rangle$ $\langle$D, 4$\rangle$\\
-	$\langle$1, 2$\rangle$ $\langle$2, 3$\rangle$ $\langle$3, 1$\rangle$ $\langle$4, 4$\rangle$\\
-	Which creates $\langle$A, 2$\rangle$ $\langle$B, 3$\rangle$ $\langle$C, 1$\rangle$ $\langle$D, 4$\rangle$\\
-	\item sort by second component\\
-	Which creates $\langle$C, 1$\rangle$ $\langle$A, 2$\rangle$ $\langle$B, 3$\rangle$ $\langle$D, 4$\rangle$\\
-	\item scan\\
-	Which creates [C, A, B, D]\\
-	This costs $O(\frac{n}{B})$
+	\item \textbf{Scan} S : $\langle\text{S}[i], i\rangle$ which is $\langle\text{item}, \text{position}\rangle \Rightarrow \langle\text{A}, 1\rangle, \langle\text{B}, 2\rangle, \langle\text{C}, 3\rangle, \langle\text{D}, 4\rangle$ (Costs $O(\frac{n}{B})$)
+	\item \textbf{Scan} $\pi$ : $\langle\pi[i], i\rangle$ which is $\langle\text{source}, \text{destination}\rangle \Rightarrow \langle3, 1\rangle,\langle1, 2\rangle,\langle2, 3\rangle,\langle4, 4\rangle$ (Costs $O(\frac{n}{B})$)
+	\item \textbf{Sort $\langle\pi[i], i\rangle$ by first component} $\Rightarrow \langle1, 2\rangle, \langle2, 3\rangle, \langle3, 1\rangle, \langle4, 4\rangle$ (Costs $O(C_{\text{sort}})$)
+	\item \textbf{Parallel scan} $\begin{array}{l}
+	\langle\text{A}, 1\rangle, \langle\text{B}, 2\rangle, \langle\text{C}, 3\rangle, \langle\text{D}, 4\rangle\\
+	\langle1, 2\rangle, \langle2, 3\rangle, \langle3, 1\rangle, \langle4, 4\rangle
+	\end{array}\Rightarrow \langle\text{A}, 2\rangle, \langle\text{B}, 3\rangle, \langle\text{C}, 1\rangle, \langle\text{D}, 4\rangle$ (Costs $O(\frac{n}{B})$)
+	\item \textbf{Sort by second component} $\Rightarrow\langle\text{C}, 1\rangle,\langle\text{A}, 2\rangle,\langle\text{B}, 3\rangle,\langle\text{D}, 4\rangle$ (Costs $O(C_{\text{sort}})$)
+	\item \textbf{Scan} $\Rightarrow$ [C, A, B, D] (Costs $O(\frac{n}{B})$)
 \end{list}
-The I/O cost is 4 scan + 2 sort $= O(\frac{n}{B}) + 2\cdot O(C_{sort})$ sorting cannot cost less than $\frac{n}{B}$ because we can't improve that, so $O(C_{sort})$\\\\
-So we have proposed upper-bounds, hence algorithms, for the sorting and the permuting problem. The permuting problem can be solved in $O(\frac{n}{B}) +$ sorting I/Os. Moving $n$ items takes $\Theta(n)$ I/Os.\\
-Sorting $n$ items in a two level memory of size $M$ for internal memory and $B$ for the disk page size, costs $O(\frac{n}{B} \cdot \log_{\frac{M}{B}} \frac{n}{M})$ with $L = \log_{\frac{M}{B}} \frac{n}{M}$, and often written as $\overline{O}(\frac{n}{B})$ with the overline or over tilde that means that is a scan.\\
+I/O cost $=$ 4 scan + 2 sort $= O(\frac{n}{B}) + O(C_{sort})$ sorting cannot cost less than $\frac{n}{B}$ so $O(C_{sort})$
+\pagebreak
+\paragraph{Bounds} So \textbf{we have proposed upper-bounds}, hence algorithms, \textbf{for the sorting and the permuting problem}. The permuting problem can be solved in $O(\frac{n}{B}) + O(C_{sort})$ I/Os, while moving $n$ items takes $\Theta(n)$ I/Os.\\
+Sorting $n$ items in a two level memory, with size $M$ for internal memory and $B$ for the disk page size, costs $O(\frac{n}{B} \cdot \log_{\frac{M}{B}} \frac{n}{M})$ with $L = \log_{\frac{M}{B}} \frac{n}{M}$ often written as $\overline{O}(\frac{n}{B})$ with the overline or over tilde that means that is a scan.\\
 $L$ consists of the base $\frac{M}{B}$ and the argument $\frac{n}{B}$ which means that with a larger memory I'd like it to be faster, with bigger $M$ the argument decreases and the base increases so the logarithm shrinks a lot. With a bigger $B$ page size, $\frac{n}{B}$ decreases but the base increases.\\
-$\frac{M}{B} =$ how many pages I can keep in the internal memory. Let's say $n = 2^{40}$, $M = 8$Gb $= 2^{33}$ and $B = 32$Kb $= 2^{15}$, then $$\log_{\frac{M}{B}} \frac{n}{M} = \frac{\log_2\frac{n}{M}}{\log_2 \frac{M}{B}} = \frac{\log_2 \frac{2^{40}}{2^{33}}}{\log_2 \frac{2^{33}}{2^{15}}} = \frac{\log_2 2^7}{\log_2 2^{18}} = \frac{7}{18} < 1$$
+$\frac{\displaystyle M}{\displaystyle B} =$ how many pages I can keep in the internal memory. Let's say $n = 2^{40}$, $M = 8 \text{Gb} = 2^{33}$ and $B = 32 \text{Kb} = 2^{15}$, then $$\log_{\frac{M}{B}} \frac{n}{M} = \frac{\log_2\frac{n}{M}}{\log_2 \frac{M}{B}} = \frac{\log_2 \frac{2^{40}}{2^{33}}}{\log_2 \frac{2^{33}}{2^{15}}} = \frac{\log_2 2^7}{\log_2 2^{18}} = \frac{7}{18} < 1$$
 Let's see when is sorting preferred to moving items or viceversa
 $$\frac{n}{B} \log_{\frac{M}{B}} \frac{n}{M} < n \Leftrightarrow \log_{\frac{M}{B}} \frac{n}{M} < B$$\\
 We have $B = 1$ in the RAM model, $B = 32$Kb in the 2-level model compared to $\log_{\frac{M}{B}}\frac{n}{M} = 2$ or $3$. In practical situations with disk, sorting is better than moving numbers. If $B = 1$, in the RAM model, $M = O(1)$, then sorting is worse than moving.
-\paragraph{Sorting} Let's consider binary merge sort, which in the worst case costs $O(n\cdot \log_2 n)$.
+\subsection{Sorting} Let's consider binary merge sort, which in the worst case costs $O(n\cdot \log_2 n)$.
 \begin{lstlisting}[style=myPython]
 def MergeSort(S, i, j):
-	if (i < j):  # sort if at least two items, otherwise already sorted
+	# sort if at least two items, otherwise already sorted
+	if (i < j):
 		m = (i+j)/2
 		MergeSort(S, i, m-1)  # split into two halves
 		MergeSort(S, m, j)
 		Merge(S, i, m, j)  # most of the cost is here
 \end{lstlisting}
-Let's evaluate the I/Os in the case that $n >> M$, meaning that the array can't be stored entirely in internal memory. Since it's based on the merge procedure, we can evaluate the cost of the merge and multiply by the number of levels. It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $\frac{l}{B}$ I/Os. So it takes $O(\frac{n}{B} \log_2 n)$ I/Os: we partition $n$ elements in $\log_2 n$ halves and merge each.\\
-Sorting consists of computing the sorted permutation and implementing the sorted permutation. So we can say that sorting $\geq$ permuting, is at least difficult as permuting.\\
-In the RAM model the $\geq$ is $>$, it's strict, because sorting is $n\cdot\log n$ and computing is the real issue, because implement is linear. In the 2-level memory model they are almost equivalent. This considering \textbf{atomic items}, integers o non-splittable strings.\\
-The mismatch is the base of the logarithm. The binary merge sort is $O(\frac{n}{B} \log_2 \frac{n}{M})$: partitioning the array in blocks of size $M$, the size of the memory, called runs. Can we generate runs longer than M in few I/Os? On average we will be able to create runs of size $2M$, which saves 1 full scan of data (which, for large data, is a lot of time saved).
-\paragraph{Snow plow algorithm} Sort item that you can, leave item that you cannot.\\
-S = 1, 7, 5, 3, 2, with M = 3 items. The memory is divided in two parts: a min heap, items that are still unsorted, and an unsorted part, the snow that we cannot clean. Start from the memory with everything unsorted: min heap empty and only unsorted items. We put $M$ unsorted items, so 1, 7, 5 in the unsorted part. We sort the unsorted items and move to the min heap, with the unsorted part left empty. We pick the minimum element and write it out of the memory. We have emptied a position, and we can fetch another item in the unsorted part, the 3. The new item is compared to the minimum. 3 is larger than the current minimum, so is written inside the min heap, which is now 3, 5, 7. We write again out the minimum, 3, and fetch another item. 2 is smaller than 3, so it goes in the unsorted part. At some point the min heap will be empty, the unsorted part will be full and we restart the phase. We pay 1 I/O as soon as we write out $B$ items.
+Let's evaluate the I/Os in the case that $n >> M$, meaning that \textbf{the array can't be stored entirely in internal memory}. Since it's \textbf{based on the merge procedure}, we can evaluate the cost of the merge and multiply by the number of levels.\\
+It loads a page every time it needs it and writes a pages every time it fills one. So if the two arrays to merge are long $l$, it makes $\frac{l}{B}$ I/Os. So it takes \#I/Os $=O(\frac{n}{B} \log_2 n)$: we partition $n$ elements in $\log_2 n$ halves and merge each.\\\\
+\textbf{Sorting} consists of \textbf{computing the sorted permutation} and \textbf{implementing the sorted permutation}. So we can say that sorting $\geq$ permuting, is at least difficult as permuting.\\
+In the RAM model the $\geq$ is $>$, it's strict, because sorting is $n\cdot\log n$ and computing the sorted permutation is the real bottleneck, because implementing it is linear. In the 2-level memory model they are almost equivalent. This considering \textbf{atomic items}, integers o non-splittable strings.\\
+\textbf{The mismatch is the base of the logarithm}. The binary merge sort is $O(\frac{n}{B} \log_2 \frac{n}{M})$: partitioning the array in blocks of size $M$, the size of the memory, called runs. Can we generate runs longer than M in few I/Os? On average we will be able to create runs of size $2M$, which saves 1 full scan of data (which, for large data, is a lot of time saved).
+\subsection{Snow Plow Algorithm} Sort the items that you can, leave item that you cannot.
+\paragraph{Example}
+$S = 1, 7, 5, 3, 2$, with $M = 3$ items.\\
+The \textbf{memory is divided in two parts}: a \textbf{min heap, items that are still unsorted}, and an \textbf{unsorted part, the "snow that we cannot clean"}.\\
+We start by \textbf{loading $M$ items}, which will \textbf{all go in the unsorted part}: 1, 7, 5. We \textbf{sort them}, moving each to the min heap with the unsorted part left empty. Then we \textbf{pick the minimum element and write it out} of the memory: we have emptied a position, and we can fetch another item: the 3. The new item is compared to the current minimum, the written-out element. 3 is larger than the current minimum, so is written inside the min heap, which is now 3, 5, 7. We write again out the minimum, 3, and fetch another item. 2 is smaller than 3, so it goes in the unsorted part. At some point the min heap will be empty, the unsorted part will be full and we restart the phase. We pay 1 I/O as soon as we write out $B$ items.
 \begin{center}
 	\includegraphics[scale=0.5]{1.png}
 \end{center}
 \begin{lstlisting}[style=myPython]
-U = unsorted array of M items
-H = min-heap over items of U
+U = unsorted array of M items  # load the first M items
+H = min-heap over items of U  # we sort them and put in the min heap
 U = {}
 while H != {}:
 	min = minimum from H
-	min -> output run
-	next = next item from input sequence
-	if next < min:
-		next -> U
+	min -> output run  # write out the minimum
+	next = next item from input sequence  # fetch another item
+	if next < min:  # if it's smaller
+		next -> U  # it goes in the unsorted part
 	else:
-		next -> H
+		next -> H  # otherwise it goes in the min heap
 \end{lstlisting}
-Let's prove that the runs are 2M on average. We start with $|U| = M$ and $|H| = 0$, with U unsorted part and H heap part. Continuing we read items, with $\tau = \#$ items read. The phase has processed $\tau + M$ items, $\tau$ read and $M$ already in memory. At the end of the phase, the min heap is empty $|H| = 0$ and $|U| = M$ and $\tau$ items are written out. So $\tau$ is the length of the run, we have to compute it, by making hypothesis about the distribution of the items, the probabilities of going to $U$ and $H$. $P($item read goes to $U) = \frac{1}{2}$, a totally random situation. By changing the probability we change "how much sorted" is the sequence. The more sorted is the sequence, the smaller the probability of going to $U$. avg$(|U|) = E[|U|] = \tau/2$ because we have $\tau$ items that go to $U$ with probability $\frac{1}{2}$.\\
-Given that $|U| = M$, then on average $E[|U|] = \frac{\tau}{2} = M$ so average $\tau = 2M$
+Let's \textbf{prove that the runs are 2M on average}.\\
+We start with $|U| = M$ and $|H| = 0$, with $U$ unsorted part and $H$ min heap part. As the algorithm goes on, we read some items: $\tau =$ \# items read. The phase has processed $\tau + M$ items: $\tau$ read items and $M$ that were already in memory.\\
+At the end of the phase, $|H| = 0$ and $|U| = M$ with $\tau$ items written out: $\tau$ is the \textbf{length of the run}, we have to compute it by making hypothesis about the distribution of the items, hence the probabilities of going to $U$ and $H$. Let's say that $P(\text{item read goes to }U) = \frac{1}{2}$, a totally random sequence (by changing the probability we change "how much sorted" is the sequence, and the more sorted is the sequence, the smaller the probability of going to $U$)\\
+$E[|U|] = \frac{\tau}{2}$ because we have $\tau$ items that go to $U$ with probability $\frac{1}{2}$. Given that $|U| = M$, then $$E[|U|] = \frac{\tau}{2} = M \Leftrightarrow \tau = 2M$$ so average $\tau = 2M$
 \paragraph{Exercise} $M = 2$ and $S = 1, 8, 3, 2, 5, 0, 4, 6$\ldots\\
 $\left[\begin{array}{l r}
 1,8&\\
@@ -214,43 +243,47 @@ $\left[\begin{array}{l r}
 \emptyset&\\
 &\not6
 \end{array}\right]\rightarrow$ third run is $0,4,6$
-\paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, for the merge we need $3B$ for reading the memory (one for the first run, one on the second run and one page for the output), so $3B << M$, a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if we immediately load all the pages, we do not have much advantage in doing so. So we would like to merge $k$ runs instead of two runs at a time. Since we want to fill the memory, we want $(k+1)B = M$: $k$ pages of size $B$ needed for $k$ runs plus $1$ output page of size $B$. So $k = \frac{M}{B} - 1$ which we can approximate with $k = \frac{M}{B}$ pages. Each run has $l$ elements, but for the merge we can load just $B$ elements per run: the runs are sorted, so every time we merge $B$ elements from a run we load another page from the same run (keeping track of which elements belongs to each run with a $\langle$elem, run$\rangle$ min heap). When we fill the output page (of size $B$) we write it out and empty the page. This generates $\frac{l}{B}$ I/Os per run during the merge procedure (and the merged run is long $k\cdot l$ elements).\\
-The array of size $n$ is divided into blocks of size $M$, which are sorted: this takes $\frac{M}{B}$ I/Os, for $\frac{n}{M}$ runs. So the total cost for creating runs is $O(\frac{n}{\not M} \cdot \frac{\not M}{B}) = O(\frac{n}{B})$. Then we merge $k$ runs at the time: the cost is linear for every run of size $l$, and we can produce $\frac{n}{l}$ runs, so a total cost of $\frac{\not l}{B}\cdot\frac{n}{\not l} = \frac{n}{B}$ I/Os. We merge, and the merge tree has $\frac{n}{M}$ leafs and every node has $k$ runs to merge from the lower level, making it $\log_k \frac{n}{M}$ levels high.\\
-The cost of merge sort is $O(\frac{n}{B} + \frac{n}{B}\cdot\log_k \frac{n}{M})$ which we have seen with $k = \frac{M}{B}$. It's the cost of creating the runs ($\frac{n}{B}$) plus the cost of merging (every merge is linear, total length divided by $B$, times the number of merge operations which is the levels of the tree)\\
-With improved $B$, $M$ by compression. So 3, 5, 10 is written as 3 (the first item) and storing the gaps (gap encoding) so 2, 5,\ldots with variable length encoders.\\\\
-Let's rewrite the bound
+\paragraph{Issues} Binary Mergesort doesn't always exploit all the memory. Because after creating the $M$-long first runs, for the merge we need $3B$ for reading the memory (one for the first run, one on the second run and one page for the output), and $3B << M$: a lot of unused memory. We could fetch 2 pages per run, but the second page can be used only after the first page, so no advantage in allocating all data. Since there's a sequence of processing, even if we immediately load all the pages, we do not have much advantage in doing so. So \textbf{we would like to merge $k$ runs instead of two runs at a time}.
+\pagebreak
+\paragraph{$k$-way Mergesort} Since we want to fill the memory, we want $(k+1)B = M$: $k$ pages of size $B$ needed for $k$ runs plus $1$ output page of size $B$. So $k = \frac{M}{B} - 1 \simeq \frac{M}{B}$ pages.\\
+Each run has $l$ elements, but for the merge we can load just $B$ elements per run: the runs are sorted, so every time we merge $B$ elements from a run we load another page from the same run (keeping track of which elements belongs to each run with a $\langle\text{elem}, \text{run}\rangle$ min heap). When we fill the output page (of size $B$) we write it out and empty the page. \textbf{This generates $\frac{l}{B}$ I/Os per run during the merge procedure} (and the merged run is long $k\cdot l$ elements).\\
+The array of size $n$ is divided into blocks of size $M$, which are sorted: this takes $\frac{M}{B}$ I/Os, for $\frac{n}{M}$ runs. So the \textbf{total cost for creating runs is $O(\frac{n}{\cancel{M}} \cdot \frac{\cancel{M}}{B}) = O(\frac{n}{B})$}.\\
+Then \textbf{we merge $k$ runs at the time}: the cost is linear for every run of size $l$, and we can produce $\frac{n}{l}$ runs, so a \textbf{total cost of $\frac{\cancel{\:l}}{B}\cdot\frac{n}{\cancel{l\:}} = \frac{n}{B}$ I/Os}.\\
+The merge tree has $\frac{n}{M}$ leafs and every node has $k$ runs to merge from the lower level, making it \textbf{$\log_k \frac{n}{M}$ levels high}.\\\
+The cost of merge sort is $$O\left(\underset{\text{Creating the runs}}{\underbrace{\frac{n}{B}}} + \underset{\text{Single merge}}{\underbrace{\frac{n}{B}}}\cdot\underset{\text{Total merges}}{\underbrace{\log_k \overset{\text{Leafs}}{\overbrace{\frac{n}{M}}}}}\right)$$ which we have seen with $k = \frac{M}{B}$.\\
+With improved $B$ and $M$ by compression. So 3, 5, 10 is written as 3 (the first item) and storing the gaps (gap encoding) so 2, 5,\ldots with variable length encoders.
+\paragraph{More disks} Let's rewrite the bound
 $$\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{M}$$
 We don't know how items are consumed on the disks, given $D$ disks. With $k = 2, D = 2$ we can take advantage of the parallelism on the first load. But once loaded in memory, we may consume the pages asymmetrically, so we may end up reading a lot from a disk and very few times from the other. Possibly, every page on the first disk is used before the second page on the second disk. So by adding more disks we take full advantage because they are the denominators. The known optimal bound is:
 $$\Theta\left(\frac{n}{BD}\cdot\log_{\frac{M}{B}}\frac{n}{BD}\right)$$
 For 1 disk is $O(\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{B})$\\
 For $D$ disks we can consider one big disk with $B' = D\cdot B$ page size, so the heads of the disks are fixed together and move together. We do not change the algorithm, so the complexity is simply $$O\left(\frac{n}{B'}\cdot\log_{\frac{M}{B'}}\frac{n}{B'}\right) = O\left(\frac{n}{DB}\cdot\log_{\frac{M}{DB}}\frac{n}{B'}\right)$$ With D in the base of the logarithm reducing it, making the value larger, but the impact is small and the simplicity of the management with this method makes it worth it. This is called \textbf{disk striping}.
-\paragraph{Binary Decision Trees} Every node $(a,b)$ generates a comparison, the left branch is followed if $a<b$ and the right if $a>b$: it represents an algorithm. The leafs are sorted permutations according to the path of comparisons, total number of leafs is $n!$. The question is how big should be the tree so that it's a sorting algorithm, so to reach a number of leafs that's at least $n!$, the number of possible permutations of $n$ elements? It grows by $2^t$ nodes for every level $t$, so $2^t > n!$ and we have the lower bound.\\
+\paragraph{Binary Decision Trees} Every node $(a,b)$ generates a comparison, the left branch is followed if $a<b$ and the right if $a>b$: it \textbf{represents an algorithm}. The \textbf{leafs are sorted permutations according to the path of comparisons}, total number of leafs is $n!$. The question is how big should be the tree so that it's a sorting algorithm, so to reach a number of leafs that's at least $n!$, the number of possible permutations of $n$ elements? It grows by $2^t$ nodes for every level $t$, so $2^t > n!$ and we have the lower bound.\\
 The left subtree, where the comparison is $a < b$, simply generates (by following a path) all the permutations in which $a$ comes before $b$, whatever number of elements are between them. The right path, vice versa, generates permutations where $b$ comes before $a$.
-\paragraph{Lower bounds} There are also lower bounds about permuting, an extra for the oral.\\
-Binary decision trees proved lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages. The main idea is that whenever I fetch a page I fetch $B$ items, not just two, so we can do many comparisons before loading another page. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
-The memory $M$ consists of several items, we bring the page of size $B$ in internal memory and we have $M-B$ other items in the memory. One I/O executes many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. How many comparisons? We can assume that the items in memory are sorted, so the item brought can go in 4 position (before the first, between the first two\ldots). In general, the $B$ items can enter the $M-B$ items in $n$ ways. The memory consists of $M$ cells, so $n = \left(\begin{array}{c}
+\subparagraph{Lower bounds} Binary decision trees provide a lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages.\\
+The main idea is that \textbf{whenever I fetch a page I fetch $B$ items}, not just two, so we can do many comparisons before loading another page. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
+The memory $M$ consists of several items. When we bring the page of size $B$ in internal memory, we already have $M-B$ other items in the memory. So with one I/O we can execute many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. We can assume that the items in memory are sorted, so the item brought can go in 4 position (before the first, between the first two\ldots).\\
+In general, the $B$ items can enter the $M-B$ items in $n$ ways. The memory consists of $M$ cells, so $n = \left(\begin{array}{c}
 M\\B
 \end{array}\right)\cdot B!$ with $B!$ because we have to account for the shuffling, but it needs to be counted only once when the items are first loaded. We have $\left(\begin{array}{c}
 M\\B
 \end{array}\right)$ because every item from $B$ can be inserted in one slot of $M$ possible slots, so $B$ slots out of $M$.\\
-So two situations \begin{enumerate}
-	\item A new read, a read of an input page for the first time\\
-	\# new reads = $\frac{n}{B}$
-	\item An old read, all other read-cases, $t - \frac{n}{B}$
+Making $t$ I/Os, each can be a new or an old read: either one of the $\frac{n}{B}$ pages for the first time or any other page (or one of those pages for the second/third/\ldots time). So two situations \begin{enumerate}
+	\item \textbf{A new read}, a read of an input page for the first time: \# new reads = $\frac{n}{B}$
+	\item \textbf{An old read}, all other read-cases: \# old reads = $t - \frac{n}{B}$
 \end{enumerate}
-$t$ I/Os, can be a new or an old read. Either one of the $\frac{n}{B}$ pages for the first time or any other page (or one of those pages for the second/third/\ldots time).\\
 Two kinds of nodes, one node refers to a new I/O the other to an old I/O.\\
 In a new I/O we have $\left(\begin{array}{c}
 M\\B
-\end{array}\right)\cdot B!$ options, we have to account for the shuffling, in the second case we have $\left(\begin{array}{c}
+\end{array}\right)\cdot B!$ options, accounting for the shuffling, in the second case we have $\left(\begin{array}{c}
 M\\B
 \end{array}\right)$ options.\\
-So in any path $\frac{n}{B}$ are new and $t - \frac{n}{B}$ are old. For this tree to be a sorting algorithm, the number of leafs must be $\geq n!$: how many levels (steps) are needed? Every node is no longer binary and can be one of two kinds. Still a decision tree. So in every step we have $\frac{n}{B}$ new I/Os and $t - \frac{n}{B}$ old I/Os.\\
-\# permutations that the algorithm can distinguish is $$= \left( \left(\begin{array}{c}
+In any path $\frac{n}{B}$ are new reads and $t - \frac{n}{B}$ are old. \textbf{For this tree to be a sorting algorithm, the number of leafs must be $\geq n!$}. Each node is no longer binary and can be one of two kinds: it's still a decision tree.\\
+The number of permutations that the algorithm can distinguish is $$\#\text{ permutations}= \underset{\text{New I/Os}}{\underbrace{\left( \left(\begin{array}{c}
 M\\B
-\end{array}\right)\cdot B!\right)^{\frac{n}{B}}\cdot \left(\begin{array}{c}
+\end{array}\right)\cdot B!\right)^{\frac{n}{B}}}}\cdot \underset{\text{Old I/Os}}{\underbrace{\left(\begin{array}{c}
 M\\B
-\end{array}\right)^{t - \frac{n}{B}} = \left(\begin{array}{c}
+\end{array}\right)^{t - \frac{n}{B}}}} = \left(\begin{array}{c}
 M\\B
 \end{array}\right)^{t}\cdot \left(B!\right)^{\frac{n}{B}} \geq n!$$
 To compute, consider that $\log\left(\begin{array}{c}
@@ -258,32 +291,49 @@ a\\b
 \end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multi way merge sort bound. $t = \Omega(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M})$
 \paragraph{Two sorting paradigms} The following:
 \begin{list}{}{}
-	\item merge-based paradigm: partition (computationally free, $O(1)$), recursion, recombination (merge, $O(\frac{n}{B})$)
-	\item distribution/partitioning-based paradigm: partition (costly part, $O(n)$), recursion, recombination ($\not\exists$)
+	\item \textbf{Merge-based} paradigm: partition (computationally free, $O(1)$), recursion, recombination (merge, $O(\frac{n}{B})$)
+	\item \textbf{Partitioning-based} paradigm: partition (costly part, $O(n)$), recursion, recombination ($\not\exists$)
 \end{list}
 How can we design a multi way quick sort? We can't take one pivot, because that'll be binary. We can take many pivot but we have to guarantee a good usage of internal memory, but more importantly we need that the partition have to balanced: with $k$ pivot I'd like that every partition has $\frac{n}{k}$ items. This requires a theorem.\\
 Let's refresh the quick sort. %TODO
-\paragraph{Time complexity of quick sort is $O(n\log n)$ on average} Let's prove it by introducing a random variable. $$X_{u,v} = \left\{\begin{array}{c l}
-1&\hbox{if }S[u]\hbox{ is compared to }S[v]\\0&\hbox{else}
+\paragraph{Time complexity of quick sort is $O(n\cdot\log n)$ on average} Let's prove it by introducing a random variable. $$X_{u,v} = \left\{\begin{array}{c l}
+1&\hbox{if }S[u]\hbox{ is compared to }S[v]\\0&\text{else}
 \end{array}\right.$$ and we want the average number of comparisons $$E\left[\sum_{u=1}^m\sum_{v>u}^m X_{u,v}\right] = \sum_{u=1}^m\sum_{v>u}^m E\left[X_{u,v}\right] = $$
-The average of an indicator value (which $X_{u,v}$ is) is the sum of all possible values times their probability $$= \sum_{u=1}^m\sum_{v>u}^m \left(1\cdot P(S[u]\hbox{ is compared to }S[v]) + 0\cdot P(S[u]\hbox{ is not compared to }S[v])\right) = $$
-$$=\sum_u \sum_v P(S[u]\hbox{ is compared to }S[v])$$
-Let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part and when one of the elements is a pivot. With just one pivot and two parts, then $S[u]$ is compared to $S[v]$ only when one of them is the pivot. So $P(S[u]\hbox{ is compared to}S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
+The average of an indicator value (which $X_{u,v}$ is) is the sum of all possible values times their probability $$= \sum_{u=1}^m\sum_{v>u}^m \left(1\cdot P(S[u]\text{ is compared to }S[v]) + 0\cdot P(S[u]\text{ is not compared to }S[v])\right) = $$
+$$=\sum_u \sum_v P(S[u]\text{ is compared to }S[v])$$
+Let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part and when one of the elements is a pivot. With just one pivot and two parts, then $S[u]$ is compared to $S[v]$ only when one of them is the pivot. So $P(S[u]\text{ is compared to}S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
 \begin{list}{}{}
 	\item Case $a$: the pivot is smaller or greater than both items, so both items go to the same partition: not significative because they can be compared in the next time 
 	\item Case $b$: the pivot is between the two items, so no comparison because they'll go to different partitions.
 	\item Case $c$: is that one of the two items is taken as pivot, so \textbf{there's the comparison}.
 \end{list}
-So the probability is the number of times that $c$ can happen (two items, so $2$) divided by the total number of events possible, $b + c$, which is any item choosen between the two elements included, so $S[v] - S[u] + 1$. So $P(S[u]\hbox{ is compared to }S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$) = \frac{2}{S[v] - S[u] + 1}$\\
+So the probability is the number of times that $c$ can happen (two items, so $2$) divided by the total number of events possible, $b + c$, which is any item choosen between the two elements included, so $S[v] - S[u] + 1$. So $$P(S[u]\text{ is compared to }S[v]) = P(S[u]\text{ or }S[v]\text{ pivot in a call involving both}) = \frac{2}{S[v] - S[u] + 1}$$
 So the formula becomes $$\sum_{u=1}^n \sum_{v>u}^n \frac{2}{S[v] - S[u] + 1} = 2\sum_{u=1}^n \sum_{k=2}^{n-S[u]+1} \frac{1}{k} \leq 2n\log n$$
-\paragraph{$k$th ranked item} In unsorted array $S$: is the item that, taken $S$, would go to the $k$th place if $S$ would be sorted. The obvious way of finding out would be to sort and pick the item in the position $k$, but you'd be paying $n\cdot\log n$. This problem can be solved in linear time $O(n)$ on average: same idea as quick sort with just one recursive call. Pick a random pivot and do a three-way partition: a partition of $n_<$ smaller elements than the pivot, a partition of $n_=$ elements of the same value as the pivot and a partition of $n_>$ larger elements than the pivot. Of course the left and right partition, of respectively smaller and bigger elements, are unsorted (the middle partition is of equal elements so is trivially sorted) but if the elements falls into the middle partition we can immediately know which elements it is. For example, $[3,2,0,\vline7,7,7,\vline10,8,9]$, if $k$ is 4 we can answer that, being that there are $3$ elements in the left partition, the 4th ranked element is a 7. Then if $k$ falls in the $=$ partition, I'm done. If it falls in one of the other two, I cannot know but we can already discard some items: if the pivot is in the $<$ part we recurse on that part (with rank $k$), otherwise if the pivot is on the $>$ part we recurse over there (in this case, dropping from $k$ the items that are smaller, so $k = k - n_= - n_<$). Only one recursive call.\\
-$T(n) = O(n) + [T(n_<)$ or $T(n_>)]$ choice of going to the left or to the right, probability. Let's analyze that probabilities. Supposing that $n_= = \frac{n}{3}$, a balanced partitioning, with the pivot falling among the $n_=$ items (the middle partition). So this is the good case: the pivot is between the position $\frac{n}{3}$ and $\frac{2}{3}n$, and happens with probability $\frac{1}{3}$. The bad case is when we can only drop the pivot, so we recurse on the remaining $n-1$ elements.\\
-In the good case $n_< \leq \frac{2}{3}n$ and $n_> \leq 	\frac{2}{3}n$. So $$T(n) = O(n) + (P(\hbox{good case})\cdot T() + P(\hbox{bad case})\cdot T()) \Leftrightarrow$$
+\paragraph{$k$th ranked item} In unsorted array $S$, \textbf{the $k$th ranked item is the item that would go to the $k$th place if $S$ would be sorted}.\\
+The obvious way: sort and pick the item in the position $k$, costing $n\cdot\log n$. This problem can be solved in $O(n)$ on average: same idea as quick sort with just one recursive call.\\
+Pick a random pivot and do a \textbf{three-way partition}:
+\begin{list}{}{}
+	\item Partition of $n_<$ smaller elements than the pivot (unsorted)
+	\item Partition of $n_=$ elements of the same value as the pivot (trivially sorted)
+	\item Partition of $n_>$ larger elements than the pivot (unsorted)
+\end{list}
+If the elements falls into the middle partition we can immediately know which elements it is.\\
+For example, $[3,2,0,\vline7,7,7,\vline10,8,9]$, if $k$ is 4 we can answer that, being that there are $3$ elements in the left partition, the 4th ranked element is a 7.\\
+\textbf{If $k$ falls in the $=$ partition, I'm done}. \textbf{If it falls in one of the other two}, I don't yet know but we \textbf{can already discard some items}:
+\begin{list}{}{}
+	\item If the pivot is in the $<$ part we recurse on that part, with rank unchanged $k$
+	\item If the pivot is on the $>$ part we recurse over there, in this case dropping from $k$ the items that are smaller: $k = k - (n_= + n_<)$
+\end{list}
+Only one recursive call.
+$$T(n) = O(n) + [T(n_<)\text{ or }T(n_>)]$$
+Depending on the choice of going to the left or to the right. Let's analyze that probabilities, supposing that $n_= = \frac{n}{3}$, a balanced partitioning, with the \textbf{pivot falling among the $n_=$ items} (the middle partition). This is the \textbf{good case}: the \textbf{pivot is between the position $\frac{1}{3}n$ and $\frac{2}{3}n$}, and happens with \textbf{probability $\frac{1}{3}$}. The \textbf{bad case is when we can only drop the pivot}, so we \textbf{recurse on the remaining $n-1$ elements}.\\
+In the good case $n_< \leq \frac{2}{3}n$ and $n_> \leq 	\frac{2}{3}n$. So $$T(n) = O(n) + (P(\text{good case})\cdot T() + P(\text{bad case})\cdot T()) \Leftrightarrow$$
 $$\Leftrightarrow T(n) = O(n) + \left(\frac{1}{3}\cdot T\left(\frac{2}{3}n\right) + \frac{2}{3}\cdot T(n - 1)\right) \Leftrightarrow$$
 $$\Leftrightarrow T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) + \frac{2}{3}\cdot T(n) \Leftrightarrow$$
 $$\Leftrightarrow \frac{1}{3}T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) \Leftrightarrow$$
 $$\Leftrightarrow T(n) \leq O(n) + T\left(\frac{2}{3}n\right)$$
 By applying the master theorem, we have that $T(n) = O(n)$.
+%TODO from here
 \paragraph{Dual Pivot} \textbf{3-Way Partitioning} made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (swaps impacts on memory and comparison on CPU), but the problem here is mispredictions on the CPU, modern CPU do look-ahead in the computing and, if it badly predicts the future comparisons, it has to break the stack and go back. So with fewer comparisons it's better, it reduces the mispredictions. 10\% circa speed-up factor.\\
 The pivots maintain an invariant: the first partition, until index $l-1$, are items smaller than the first pivot ($p$), then there's a partition of items $p\leq \ldots \leq q$ with $q$ being the second pivot and this partition starts at $l$ and ends at $k-1$. Then there's a partition of items that are still to be processed from index $k$ to $g$, and at the end a partition of elements $> q$.
 \begin{center}
@@ -371,12 +421,12 @@ n-j\\m-s-1
 \end{list}
 So the probability that $i_j$ is stored in $R$ is $\frac{m}{j}$: the probability is $\in [1,j]$ and $m$ are the values needed to pick it.\\
 $P(i_j\in R$ after $n$ steps$)$ must be $\frac{1}{n}$. Since when we discard an item it's discarded forever, in order for $i_j$ to be in $R$ at the $n$th step it had to be in the reservoir at the $n-1$th step. At the $n$th step, in order for $i_j$ to stay in $R$ either two cases need to happen: $i_n$ is not taken (therefore $R$ doesn't change) or $i_n$ is taken and goes in a position different from the one of $i_j$.\\
-$$P(i_j\in R\hbox{ after }n\hbox{ steps})= P(i_j\in R\hbox{ after }n-1\hbox{ steps})\cdot( P(i_n\hbox{ is not taken})+ P(i_n\hbox{ is taken})\cdot P(i_j\hbox{ is not kicked out}))=$$
+$$P(i_j\in R\text{ after }n\text{ steps})= P(i_j\in R\text{ after }n-1\text{ steps})\cdot( P(i_n\text{ is not taken})+ P(i_n\text{ is taken})\cdot P(i_j\text{ is not kicked out}))=$$
 \begin{list}{}{}
-	\item $P(i_j\in R\hbox{ after }n-1\hbox{ steps}) = \frac{m}{n-1}$
-	\item $P(i_n\hbox{ is not taken}) = 1-\frac{m}{n}$
-	\item $P(i_n\hbox{ is taken}) = \frac{m}{n}$
-	\item $P(i_j\hbox{ is not kicked out}) = \frac{m-1}{m}$ ($m$ positions for $i_n$ minus the one occupied by $i_j$)
+	\item $P(i_j\in R\text{ after }n-1\text{ steps}) = \frac{m}{n-1}$
+	\item $P(i_n\text{ is not taken}) = 1-\frac{m}{n}$
+	\item $P(i_n\text{ is taken}) = \frac{m}{n}$
+	\item $P(i_j\text{ is not kicked out}) = \frac{m-1}{m}$ ($m$ positions for $i_n$ minus the one occupied by $i_j$)
 \end{list}
 $$=\frac{m}{n-1} \left( \left( 1-\frac{m}{n}\right) + \frac{\not m}{n}\cdot\frac{m-1}{\not m}\right) = \frac{m}{n-1}\left(\frac{n - \not m}{n} + \frac{\not m - 1}{n}\right) =\frac{m}{\not n-\not 1}\cdot\frac{\not n - \not 1}{n}= \frac{m}{n}$$
 The base case is $n=m$, the starting point, and we have $P(i_n$ stored in $R) = \frac{m}{j} = \frac{m}{m} = 1$, guaranteed by the initialization.
@@ -483,7 +533,7 @@ In the right rotation, node $x$ goes up and node $y$ goes down. $\alpha$ was the
 \Tree [.$x$ [.\triangled{$\alpha$} ] [.$y$ [.\triangled{$\beta$} ] [.\triangled{$\gamma$} ] ] ]
 \end{center}
 We claim that this relocation still guarantees the balancing of the treap. We can pick a node $k$ inside $\beta$
-$$\hbox{key}(x) \leq \hbox{key}(k) \leq \hbox{key}(y)$$
+$$\text{key}(x) \leq \text{key}(k) \leq \text{key}(y)$$
 because it's in the right subtree of $x$ (therefore, larger key) but it's inside the left subtree of $y$ (therefore, smaller key). When we go to $\beta$ as left subtree of $y$ after the rotation, so $y$ inside the right subtree of $x$, we have that a node $k$ inside $\beta$ satisfies the same condition: it's still in the left subtree of $y$, therefore has smaller key, and still in the right subtree of $x$, therefore greater key. So the relocation preserves the conditions.\\
 It's constant time, $O(1)$, because we change a constant number of pointers.
 \paragraph{Search($k$)} It's just the search in the binary search tree. Based on the searched key, we go on the left if it's smaller and on the right if it's larger, so priority is not needed. Cost is $O(h)$ with $h$ being the height of the tree.
@@ -498,14 +548,14 @@ It's still a binary search tree but it's not an heap because the priority 6 does
 So it's a search plus rotation to reestablish the heap property. The rotation is constant, but in the worst case there are $h$ rotations. So the cost is again $O(h)$.
 \paragraph{Delete($k$)} The deletion is trivial when we delete leafs. But for example let's remove T: we can make it a leaf by setting the priority to $-\infty$. So deletion is just: search for $k$, set the priority to $-\infty$ and then apply rotations to reestablish the heap property, then delete. Again, $O(h)$.\\
 Of course in this particular case T has just one child, so we could remove it and link S as right subtree of M, but the procedure above handles every possible case.
-\paragraph{Merge$(T_1,T_2)$} $\forall\:x\in T_1$ and $\forall\:y\in T_2$ we have $\hbox{key}(x)<\hbox{key}(y)$.\\
+\paragraph{Merge$(T_1,T_2)$} $\forall\:x\in T_1$ and $\forall\:y\in T_2$ we have $\text{key}(x)<\text{key}(y)$.\\
 We create a root with a logical key between the maximum key of $T_1$ and the minimum key of $T_2$ and $-\infty$ as the priority. The problem is the priority: it's a binary search tree (both $T_i$ are, and the chosen key mantains that condition) but the $-\infty$ priority breaks the heap condition. But we know we can apply rotations to reestablish the condition: the root goes down until it reaches the leaf level, where it can be dropped. When this happens, the rest of the "stuff" will be a treap. So again it's $O(h)$: creating the node it's constant and the rotations are $O(h)$.\\
 The reverse operation is the split.
 \paragraph{Split($k, T$)} Splitting $T$ according to the key $k$ means creating a treap $T_{<k}$ with keys $< k$ and another treap $T_{>k}$ with keys $> k$. This assuming $k\not\in T$. The split is trivial when the key is the root, so I need to put myself in a situation where $k$ occupies the root. So we first insert $k,\infty$, so that it goes to the root. At insertion, $k,\infty$ will be a leaf, so we rotate to reestablish the heap priority, arriving in a situation where we have $k,\infty$ as root with a left and a right subtree. The left subtree will be $T_{<k}$ and the right subtree will be $T_{>k}$ so the we delete the root. This costs $O(h)$ for insertion, $O(h)$ for rotations and constant for deleting the root, overall $O(h)$.
 \paragraph{On average, a treap is balanced} By drawing the priorities at random, the average treap is balanced. $h$ height of the treap, it's $n$ if it's just a path or $\log n$ if it's balanced, but $h = O(\log n)$ on average. Let's prove it.\\
 Let's create an indicator variable $A_k^i = \left\{ \begin{array}{c l}
-1&\hbox{if }x_i\hbox{ is a proper ancestor of }x_k\\
-0&\hbox{otherwise}
+1&\text{if }x_i\text{ is a proper ancestor of }x_k\\
+0&\text{otherwise}
 \end{array}\right.$\\
 $depth(x_k) = \sum_{i=1}^k A_k^i$ which counts the proper ancestors of $x_k$. $E[depth(x_k)] = E[\sum_{i=1}^k A_k^i] = \sum_{i=1}^k E[A_k^i]$ and the expected value of a indicator variable is the probability of it being 1 so $= \sum_{i=1}^k P(A_k^i = 1)$ which is the probability of $x_i$ being on the path to $x_k$. We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted. So $\sum_{i=1}^k P(A_k^i = 1)$ we consider $x_i < x_k$ or vice versa, is totally symmetric. So $priority(x_i) > priority(x_k)$\\
 Theorem: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
@@ -597,7 +647,7 @@ $$|B_J| \leq \frac{b}{\min_{2,\ldots,n} x_i - x_{i-1}} \leq \frac{\max_{2,\ldots
 \paragraph{Entropy} Of a source, assuming an alphabet $\Sigma$ of symbols (characters, or digits in the case of integers), with a probability distribution $\{p_\sigma\}$ over $\Sigma$.\\
 The entropy of a source is $H = \sum_\sigma p_\sigma\cdot\log_2 \frac{1}{p_\sigma} = H_0$, sometimes specified as $H_0$ which means no context, every symbol is independent from the previous one.\\
 We know that $H_0 \geq 0$ and $\sum_\sigma p_\sigma = 1$ because is a probability distribution. In order for $H = 0 \Leftrightarrow$ either $p_\sigma = 0$ or $\log_2\frac{1}{p_\sigma} = 0 \Leftrightarrow p_\sigma = 0$ or $p_\sigma = 1$. Because the sum is 1, this means that if $\exists\:\sigma'\:|\:p_{\sigma'}=1 \Rightarrow \forall\:\sigma\neq\sigma'\:\:p_\sigma = 0$. So entropy is $0$ when one symbol has probability 1 and the other have probability $0$.\\
-An upper bound is $H \leq \log_2 |\Sigma|$. The formula of the entropy has its maximum value when all the $p_\sigma$ are equal, so $H \leq \log_2 |\Sigma| \Leftrightarrow p_\sigma = \frac{1}{|\Sigma|}$, a uniform probability: we would have $\sum_\sigma \frac{1}{|\Sigma|}\cdot\log_2|\Sigma| = |\Sigma|\cdot\left(\frac{1}{|\Sigma|}\cdot\log_2|\Sigma|\right) = \log_2|\Sigma|$. So we have found that $$\hbox{Highly skewed probability }0 \leq H \leq \log_2 |\Sigma|\hbox{ Uniform probability}$$
+An upper bound is $H \leq \log_2 |\Sigma|$. The formula of the entropy has its maximum value when all the $p_\sigma$ are equal, so $H \leq \log_2 |\Sigma| \Leftrightarrow p_\sigma = \frac{1}{|\Sigma|}$, a uniform probability: we would have $\sum_\sigma \frac{1}{|\Sigma|}\cdot\log_2|\Sigma| = |\Sigma|\cdot\left(\frac{1}{|\Sigma|}\cdot\log_2|\Sigma|\right) = \log_2|\Sigma|$. So we have found that $$\text{Highly skewed probability }0 \leq H \leq \log_2 |\Sigma|\text{ Uniform probability}$$
 We also have a \textbf{theorem}, of Shannon: any prefix-code for source $\Sigma$ takes an average number of bits $\geq H$ per symbol of $\Sigma$.\\
 Considering a random variable $X_\sigma$ that gets value $\log_2 \frac{1}{p_\sigma}$ with probability $p_\sigma$, $E[X] = \sum_\sigma p_\sigma\cdot\log_2\frac{1}{p_\sigma} = H$, so $\log_2 \frac{1}{p_\sigma}$ defines the information content of $\sigma$: the \textbf{entropy is the average information content of each symbol}.\\
 This also states that the optimal encoding for a symbol $\sigma$ is a codeword of length $\log_2\left(\frac{1}{p(\sigma)}\right)$
@@ -613,13 +663,13 @@ c\rightarrow 1
 \end{array}\right.$ and we receive $01$ we cannot unequivocably say if the codeword was produced by the sequence ac or by b. We want uniquely decodable codes.\\
 We will focus on variable-length prefix-free codes.\\\\
 Looking at $C$, can we optimize it? We could reduce c and assign it the codeword 11, but we cannot encode b with just 1  because we couldn't then get the prefix-free for c.\\
-We have a golden rule: more frequent symbols get shorter codewords. We want to relate the length of the codeword to the frequence of its symbol. The \textbf{average length of a code $C$} in bits is $E[C] = \sum_\sigma p_\sigma\cdot\hbox{length}(\hbox{codeword}(\sigma))$. In the example, with $p($a$) = \frac{1}{4}, p($b$) = \frac{1}{2}, p($c$) = \frac{1}{4}$, then $E[C] = p($a$)\cdot|cw($a$)| + p($b$)\cdot|cw($b$)| + p($c$)\cdot|cw($c$)| = \frac{1}{4}\cdot 2 + \frac{1}{2}\cdot 2 + \frac{1}{4}\cdot 3 = 2$ bits\\
+We have a golden rule: more frequent symbols get shorter codewords. We want to relate the length of the codeword to the frequence of its symbol. The \textbf{average length of a code $C$} in bits is $E[C] = \sum_\sigma p_\sigma\cdot\text{length}(\text{codeword}(\sigma))$. In the example, with $p($a$) = \frac{1}{4}, p($b$) = \frac{1}{2}, p($c$) = \frac{1}{4}$, then $E[C] = p($a$)\cdot|cw($a$)| + p($b$)\cdot|cw($b$)| + p($c$)\cdot|cw($c$)| = \frac{1}{4}\cdot 2 + \frac{1}{2}\cdot 2 + \frac{1}{4}\cdot 3 = 2$ bits\\
 Is the golden rule satisfied for the $C$ in the example? No because b is the most probable symbol but is not the shortest codeword. A better code for those probabilities would be $C' = \left[\begin{array}{l}
 a\rightarrow 00\\
 b\rightarrow 1\\
 c\rightarrow 01
 \end{array}\right.$, with b being the most probable symbol having the shortest length and a and c having same length, where we would get $E[C'] = \frac{1}{4}\cdot2 + \frac{1}{2}\cdot1 + \frac{1}{4}\cdot2 = 1.5$ bits which is better (and optimal, we will prove it).\\
-$\forall\:C$ prefix-free $E[C] \geq H$ (Shannon), so if we can make the length of the codeword of $\sigma$ exactly $\log_2 \frac{1}{p_\sigma}$ bits we have optimality. Formally, if $|\hbox{cw}(\sigma)| = \log_2\frac{1}{p_\sigma} \Rightarrow C$ is optimal. But $\log_2\frac{1}{p_\sigma}$ is a real number, which cannot be a length. For it to belong to $N$, we should have $p_\sigma = 2^{-x}$.
+$\forall\:C$ prefix-free $E[C] \geq H$ (Shannon), so if we can make the length of the codeword of $\sigma$ exactly $\log_2 \frac{1}{p_\sigma}$ bits we have optimality. Formally, if $|\text{cw}(\sigma)| = \log_2\frac{1}{p_\sigma} \Rightarrow C$ is optimal. But $\log_2\frac{1}{p_\sigma}$ is a real number, which cannot be a length. For it to belong to $N$, we should have $p_\sigma = 2^{-x}$.
 \subsection{Integer coding}
 $\Sigma = N$, we will consider sequences of integers $S = s_1s_2\ldots s_n$ with $s_i\in N$ and possibly repetitive (one or more of $s_i$ can repeat). Sometimes we have increasing sequences, such that $s_i < s_{i+1}$: if we have a sequence like this we can transform is into a sequence comprised of the first element and the next element encoded as the distance from the first, the third element encoded as the distance from the original second, and so on. So $S' = 1\:3\:5\:6\:9\ldots$ will be $S = 1\:2\:2\:1\:3\ldots$, these are called $d$-gaps, or gaps, and are used in place of the increasing sequences for the encoding. Of course we can revert $S$ to its original sequence $S'$ by making the prefix sum: a number is the sum of the previous numbers, so by summing the numbers from left to right.\\
 This increasing sequences occur in search engines (page ids), databases (keys), hash tables (positions of unempty slots)\ldots\\
@@ -634,11 +684,11 @@ Very efficient for small $x$, but with large $x$ it's inefficient. For which dis
 \paragraph{$\gamma$-code} Improvement over the unary code, still for $x > 0$.\\
 $\gamma(9) = \begin{array}{c c c}
 000 & 1001 & \\
-|\hbox{bin(9)}|-1\hbox{ zeros} & \hbox{bin(9)} &
+|\text{bin(9)}|-1\text{ zeros} & \text{bin(9)} &
 \end{array} = 0001001$ with bin$(x)$ being the binary representation of $x$.\\
-In general, $\gamma(x) = |\hbox{bin}(x)| - 1$ zeros followed by bin$(x)$.\\
+In general, $\gamma(x) = |\text{bin}(x)| - 1$ zeros followed by bin$(x)$.\\
 bin$(x)$ surely starts with $1$, so to decode you read the number of zeroes until you find the first $1$ and then you know how many bits to read after that $1$\\
-$$|\gamma(x)| = 2\hbox{bin}(x) - 1 = 2\left(\lfloor\log_2 x\rfloor + 1\right) - 1 = 2\lfloor\log_2 x\rfloor + 1\hbox{ bits}$$
+$$|\gamma(x)| = 2\text{bin}(x) - 1 = 2\left(\lfloor\log_2 x\rfloor + 1\right) - 1 = 2\lfloor\log_2 x\rfloor + 1\text{ bits}$$
 Ignoring the floor, in order to get the optimal distribution for the $\gamma$-code we need $$|\gamma(x)| = \log_2\frac{1}{p(x)} \Leftrightarrow 2\log_2 x + 1 = \log_2\frac{1}{p(x)} \Leftrightarrow \log_2 2x^2 = \log \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2x^2}$$
 Which is a distribution smoother than the one optimal for the Unary code.\\
 The sequence $0\underline{10}00\underline{111}\,\underline{1}0\underline{11}$ is decoded as $10\:111\:1\:11 = 2\:7\:1\:3$\\
@@ -648,9 +698,9 @@ Also for very large numbers we have lots of zeroes so a long decoding time.
 \paragraph{$\delta$-code} Again for $x>0$, $\delta(x) = \gamma(|$bin$(x)|)$ followed by bin$(x)$\\
 For example, $\delta(14) = \begin{array}{c c c}
 \gamma(4) & 1110 & \\
-\gamma(|\hbox{bin(14)}|) & \hbox{bin(14)} &
+\gamma(|\text{bin(14)}|) & \text{bin(14)} &
 \end{array} = 00\:100\:\:1110$\\
-$\delta$-code is advantageous with large numbers.$$|\delta(x)| = |\gamma(|\hbox{bin}(x)|)| + |\hbox{bin}(x)| = \left(2\log_2 |\hbox{bin}(x)| + 1\right) \left(\log_2 x + 1\right) = 2\log_2(\log_2 x + 1) + 1 + (\log_2 x + 1)=$$
+$\delta$-code is advantageous with large numbers.$$|\delta(x)| = |\gamma(|\text{bin}(x)|)| + |\text{bin}(x)| = \left(2\log_2 |\text{bin}(x)| + 1\right) \left(\log_2 x + 1\right) = 2\log_2(\log_2 x + 1) + 1 + (\log_2 x + 1)=$$
 $$= 2\log_2\log_2 x + \log_2 x + 2 \Rightarrow p(x) = \frac{1}{2x(\log_2 x)^2}$$
 
 \paragraph{Rice encoding} Depends on a parameter $k$, given $x \geq 0$ computes $q = \lfloor\frac{x}{2^k}\rfloor$ and $r = x - q2^k$ with $0\leq r \leq 2^k$. For example, given $x=13, k=2$, we have $q = 3, r = 1$.\\
@@ -874,8 +924,8 @@ y = & \:\:\:\:\:\alpha\:\:\:\:\: & b & \ldots\\
 \end{array}$$
 $x<y\Rightarrow a<b$, for example $x$ is "abaco" and $y$ is "abate": $\alpha =$ "aba", $a=$ c, $b=$ t.
 $$\begin{array}{r c c c}
-x = & \hbox{aba} & \hbox{c} & \hbox{o}\\
-y = & \hbox{aba} & \hbox{t} & \hbox{e}\\
+x = & \text{aba} & \text{c} & \text{o}\\
+y = & \text{aba} & \text{t} & \text{e}\\
 \end{array}$$
 In the first phases, we compare the right part of both strings and $x$ could end up before or after $y$, it's not important. At some point, it will compare $a,b$ and since $a< b$ we will have a situation where $x$ comes before $y$. Then we compare $\alpha$, but they are equal and thanks to the stable sort the relative order between $x$ and $y$ will not change (possibly changing distance, but they will not "invert" order). This applies to every pair of strings, so the final order of strings will be a sorted order.
 \subparagraph{More precise complexity} Let's assume binary strings, with $0,1$ digits and of $b$ length. We can apply the LSD radix sort to groups of $r$ bits each: $\frac{b}{r}$ groups. Each group of $r$ bits can be interpreted as a symbol, so $\sigma = 2^r$ maximum configurations of $r$ bits (from all zeroes to all ones)\\
@@ -1037,7 +1087,7 @@ With $n=8$ nodes. We could implement it with pointers, every node with a left an
 	\item \textbf{Serialization of the node labels} of the full binary tree\\
 	$B$ of 17 positions, I scan the tree and every time I find an original node I record 1 and every time I find a dummy node I record 0.
 	$$\begin{array}{r c c c c c c c c c c c c c c c c c}
-	\hbox{Positions}&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16&17\\
+	\text{Positions}&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16&17\\
 	B = &1&1&1&1&0&1&1&0&1&0&0&1&0&0&0&0&0
 	\end{array}$$
 	Compress and index $B$ using Rank/Select data structures, using a space of $|B|+o(|B|)$ for Rank$_1$ $+ o(|B|)$ for Select$_1$
@@ -1053,13 +1103,13 @@ Let's see how, in the original tree, \begin{list}{}{}
 \end{list}
 If we consider $x \rightarrow 2x+1$ it works on the circled nodes to the non-circled nodes (children of $1$ are $2$ and $3$, children of $3$ are $6$ and $7$\ldots). So the right child is $2x + 1$ and the left child is $2x$, both uncircled but I want the circled nodes so from each dummy node I have to find the corresponding original one or a "not existing in the original tree" value. If I take the number 9, for example, I can find it in $B$, which numerations corresponds to the dummy nodes. The corresponding original node is the Rank$_1$, if the value is $1$
 $$\begin{array}{r c c c c c c c c c c c c c c c c c}
-	\hbox{Positions}&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16&17\\
+	\text{Positions}&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16&17\\
 	B = &1&1&1&1&0&1&1&0&1&0&0&1&0&0&0&0&0\\
-	\hbox{Rank}_1&1&2&3&4& &5&6& & 7 & & & 8\\
+	\text{Rank}_1&1&2&3&4& &5&6& & 7 & & & 8\\
 	& & & & & & & & &\uparrow
 	\end{array}$$
 	So I just do Rank$_1(9)$. So the left child is Rank$_1(2x)$ if $B[2x]=1$ and the right child is Rank$_1(2x+1)$ if $B[2x+1]=1$.\\
-	The parent comes from inverting the child operations, and it's $\lfloor\frac{\hbox{Select}_1(x)}{2}\rfloor$. On the uncircled nodes, the parent is the half, but we are reasoning for uncircled values. So first we turn $x$ into an uncircled value, the opposite of before, then we divide by two and find the parent (circled). Of course not in the root, so $x\neq 1$\\
+	The parent comes from inverting the child operations, and it's $\lfloor\frac{\text{Select}_1(x)}{2}\rfloor$. On the uncircled nodes, the parent is the half, but we are reasoning for uncircled values. So first we turn $x$ into an uncircled value, the opposite of before, then we divide by two and find the parent (circled). Of course not in the root, so $x\neq 1$\\
 Let's see an algorithm that, given a path $\Pi$ and a tree described by its parameters "\ldots", answers if the requested path exists in the given tree starting from the root or not.
 \begin{lstlisting}[style=myPython]
 def match(path, ...):
@@ -1140,7 +1190,7 @@ So we have $L_H = L_{R_H} + P(x) + P(y) \leq L_{R_O} + P(x) + P(y)$ and for lemm
 \paragraph{Entropy} The entropy $H = \sum_\sigma P(\sigma)\cdot\log_2\frac{1}{P(\sigma)}$. In Huffman, $L_H = \sum_\sigma P(\sigma)\cdot l(c_\sigma)$.\\
 Very similar formulas, differing just by one factor: $\log_2\frac{1}{P(\sigma)}\in R$ and $l(c_\sigma)\in N$, so in general not equal.\\
 If the probabilities are diatic, in the form of $2^{-k}$, the two formulas could correspond, but it's not the general case, but surely we have that $$H\leq L_H < H + 1$$ So Huffman loses up to 1 bit per symbol: is this bad or good? This formula is per symbol, let's see it for the entire sequence (multiply by $n$)
-$$nH\leq \hbox{Huffman length} < nH + n$$ So we lose $n$ bits over the overall file. Good or bad depends on $nH$: if very small entropy, so $H$ close to zero meaning the text is highly repetitive, then $+n$ is very large, but if the text is not repetitive, then $n$ is possibly smaller than $nH$ and so it's ok. So the loss depends on the entropy. Arithmetic is able to drop that $+1$.\\
+$$nH\leq \text{Huffman length} < nH + n$$ So we lose $n$ bits over the overall file. Good or bad depends on $nH$: if very small entropy, so $H$ close to zero meaning the text is highly repetitive, then $+n$ is very large, but if the text is not repetitive, then $n$ is possibly smaller than $nH$ and so it's ok. So the loss depends on the entropy. Arithmetic is able to drop that $+1$.\\
 This comes from the \textbf{Shannon bound} ($H\leq L_C$) and it's for all prefix-free code $C$. The property of Huffman is the right part.
 
 \paragraph{Canonical Huffman} We want to create an Huffman code with some properties: more succint in space (not regarding the codewords, which are already optimal, but regarding what we are storing in the preamble) and with an increased speed in the compression.\\
@@ -1154,7 +1204,7 @@ The main idea is to turn the Huffman tree into an unbalanced tree with the deepe
 	For every level, keep a list of symbols per each level
 	\item Computing the new codewords.\\
 	It's sufficient to find the first codeword for each level, because all the codewords in that level are increasing\\
-	$l =$ max level, the first codeword of level max $fc[l_{max}] = 0$ and $l<l_{max}$ such that $fc([l])=\frac{fc[l+1]+\hbox{num}[l+1]}{2}$\\
+	$l =$ max level, the first codeword of level max $fc[l_{max}] = 0$ and $l<l_{max}$ such that $fc([l])=\frac{fc[l+1]+\text{num}[l+1]}{2}$\\
 	Mathematically, by summing the first plus the num array element, I'm going to the next available leaf not occupied by any symbol on that level, and dividing by two in binary is just making a shift so we're dropping the leaf and going up one level. So it's the first codeword of the level $+1$ plus the number of leafs divided by two to go to the parent.\\
 	With $fc$ and the length which is $l$, we represent the value on $l$ bits and get the codeword.
 \end{enumerate}
@@ -1165,11 +1215,11 @@ c & 3\\
 d & 2\\
 e & 2\\
 f & 2
-\end{array}$ $$\hbox{num= }\begin{array}{c| c c c c}
-\hbox{pos}&1&2&3&4\\
+\end{array}$ $$\text{num= }\begin{array}{c| c c c c}
+\text{pos}&1&2&3&4\\
 \hline
-\hbox{val}&0&3&1&2\\
-\end{array}\:\:\:\hbox{symb= }\begin{array}{c| l l l l}
+\text{val}&0&3&1&2\\
+\end{array}\:\:\:\text{symb= }\begin{array}{c| l l l l}
 &0&1&2&\ldots\\
 \hline
 1&\\
@@ -1180,7 +1230,7 @@ f & 2
 $$\begin{array}{r | c c c c}
 fc & 1 & 2 & 3 & 4\\
  & \frac{fc[2] + num[2]}{2} = \frac{1 + 3}{2} = 2 & \frac{fc[3] + num[3]}{2} = \frac{1 + 1}{2} = 1 & \frac{fc[4] + num[4]}{2} = \frac{0 + 2}{2} = 1 & 0\\
-\hbox{codeword} & \hbox{dummy value for the algorithm} & 01 & 001 & 0000
+\text{codeword} & \text{dummy value for the algorithm} & 01 & 001 & 0000
 \end{array}$$
 The first codeword at the deepest level is $0$, and the levels without codewords are still computed due to the functioning of the algorithm. The values are used as integers, so the $fc[1] = 2$ cannot be represented on $l=1$ bit, but it's not a problem because it's a dummy value and the fact that it's outside the tree is fundamental for the algorithm.
 \begin{center}
@@ -1241,7 +1291,7 @@ Arithmetic compression $< nH + 2$, with a theoretical constant $2$ in the case o
 \subparagraph{Theorem} $d< nH + 2$
 $$d = \lceil\log_2\frac{2}{s}\rceil = \lceil 1-\log_2 s\rceil < 2 - \log_2 s = 2-\log_2\prod_{i=1}^{|T|}p(T[i]) = 2 - \sum_{i=1}^{|T|} \log_2 p(T[i]) =$$
 In the previous example of $T = abac$ this would be $=2- [\log_2 p(a)+\log_2 p(b)+\log_2 p(a) + \log_2 p(c)] = 2 - [2\cdot\log_2 p(a) + 1\cdot\log_2 p(b) + 1\cdot \log_2 p(c)$ so the number of occurrences times the probability
-$$ = 2 - \sum_\sigma \hbox{occ}(\sigma)\cdot\log_2 p(\sigma) = 2 - n\cdot\sum_\sigma \frac{\hbox{occ}(\sigma)}{n}\cdot\log_2 p(\sigma) = $$
+$$ = 2 - \sum_\sigma \text{occ}(\sigma)\cdot\log_2 p(\sigma) = 2 - n\cdot\sum_\sigma \frac{\text{occ}(\sigma)}{n}\cdot\log_2 p(\sigma) = $$
 For sufficiently large texts, the number of occurrences occ($\sigma$) over $n$ converges to the frequency of $\sigma$ $f(\sigma)$, and in the semi-static model $p(\sigma)$ is $f(\sigma)$ 
 $$2 - n\sum_\sigma p(\sigma)\cdot\log_2 p(\sigma) = 2 + n\sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$$ and $H = \sum_\sigma p(\sigma)\log_2\frac{1}{p(\sigma)}$.\\\\
 Recently, ANS (Asymmetric Numeral Systems) was proposed as a variation of the Arithmetic Encoding we've seen and it's actually better than this bound.\\\\
@@ -1552,7 +1602,7 @@ This approach has a space complexity of the size of the table ($m$) plus the num
 \paragraph{Analysis} Up until now in our studies we've seen $h$ that were \textbf{simple uniform hashing}, meaning that\\$\forall\:k\:\:\:P(h(k) = i)=\frac{1}{m}$. This is means that every key is independent and is \textbf{computationally unfeasible}, although possible it takes too much space and time. Let's consider this kind of function.\\\\
 The insertion is $O(1)$ because we simply append in $T$.\\
 The Membership and Deletion both require a search, and the search costs the average overflow list length: a constant time to access the position required and a scan of the list in that position to search for the key.\\
-The average list length is $$E[\hbox{length of a list}]=\sum_{k'\in D\:k'\neq k} P(h(k')=h(k)) = \sum_{k'\in D\:k'\neq k} P(h(k')=i) = \sum_{k'\in D\:k'\neq k} \frac{1}{m} = \frac{n}{m} = \alpha$$
+The average list length is $$E[\text{length of a list}]=\sum_{k'\in D\:k'\neq k} P(h(k')=h(k)) = \sum_{k'\in D\:k'\neq k} P(h(k')=i) = \sum_{k'\in D\:k'\neq k} \frac{1}{m} = \frac{n}{m} = \alpha$$
 So the average time for a search is the loading factor $\alpha$. Typically we assume that the computation of $h(k)$ is $O(1)$ so the cost of both Membership and Deletion is $O(1+\alpha)$ to account for the computation.\\\\
 If the size of the table is chosen proportional to $n$ then $\alpha$ is constant. We have a problem: how much is $n$? It's certainly dynamic.
 \paragraph{Constant Time in Dynamic Context} Let's consider the evolution over time. At the beginning, $t=0$ we have $n_0$ keys and a table of size $m_0 = 2n_0$ so we allocate a table of twice the size, meaning $\alpha_0 = \frac{1}{2}$. Then we add and delete keys.\\
@@ -1585,7 +1635,7 @@ Does this class of functions exists? How practical is it?
 \subparagraph{Example of universal hashing} $h:U\rightarrow [0,m]$ with $u=|U|$. So a key $k$ consists of $\log_2 u$ bits.\\
 Let's divide the key $k$ into blocks of $\log_2 m$ bits: so blocks from $k_0$ to $k_{r-1}$ where $r=\frac{\log_2 u}{\log_2 m} =$ the number of blocks. So $\forall\:k_i\:\:0\leq k_1< m$\\
 Let's consider a parameter of $h$: $a$ of size $\log_2 u$ bits with $0 < a < u$ and the same partitioning (blocks of $\log_2 m$ bits giving $a_0,\ldots,a_{r-1}$). Note that $a$ is \textbf{picked at random}.\\
-We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\hbox{ mod }m$$ with $a\neq 0$ and $m$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
+We get $$h_a(k) = \sum_{i=0}^{r-1} a_i\cdot k_i\text{ mod }m$$ with $a\neq 0$ and $m$ prime number. So $h_a$ is a class of functions, $\# h_a = u-1$\\\\
 Let's prove that it's universal, so the property $(\# h_a\:|\:h_a(x)=h_a(y))\leq\frac{|H|}{m}$ for any given $x\neq y$. We have $x,y$ of $\log_2 u$ bits divided into blocks. Since $x\neq y$, at least one of the blocks is different. Let's assume $x_0\neq y_0$ for simplicity of notation. For any pair of blocks it's analogous.\begin{list}{}{}
 	\item $h_a(x) = \sum_{i=0}^{r-1} a_i\cdot x_i$ mod $m = \sum_{i=0}^{r-1}a_i\cdot y_i$ mod $m$
 \end{list}
@@ -1603,9 +1653,9 @@ Each $a$ is formed by $a_0,a_1,\ldots,a_{r-1}$. Each of the $a_1,a_2,\ldots,a_{r
 So we have a collision in $m^{r-1}-1$ ways, but is this number $\leq \frac{|H|}{m}$?
 $$m^{r-1}-1 = \frac{m^r}{m} -1 = \frac{2^{r\cdot\log_2 m}}{m} - 1 = \frac{2^{\log_2 u}}{m} - 1 = \frac{u}{m} - 1 = \frac{u-m}{m} \leq \frac{u-1}{m} = \frac{|H|}{m}$$
 Because $2^{\log_2 m} = m$ and $r$ blocks of size $\log_2 m$ is the total length $\log_2 u$
-\subparagraph{Another Example} $$h_a(x) = \left(\sum_{i=0}^{r-1}a_ix_i\hbox{ mod }p\right)\hbox{ mod } m$$
+\subparagraph{Another Example} $$h_a(x) = \left(\sum_{i=0}^{r-1}a_ix_i\text{ mod }p\right)\text{ mod } m$$
 With $p$ prime and $m < p$ any number.\\
-Assuming $|U| = 2^q$, $m = 2^l$, $a$ is odd, then the class of this function is $$H_{q,l} = \{h_a(x)\:|\:\left(a\cdot x\hbox { mod }2^q\right)\hbox{ div }2^{q-l}\}$$
+Assuming $|U| = 2^q$, $m = 2^l$, $a$ is odd, then the class of this function is $$H_{q,l} = \{h_a(x)\:|\:\left(a\cdot x\text { mod }2^q\right)\text{ div }2^{q-l}\}$$
 $a$ odd so that $a$ and $2^q$ are coprime. $x$ and $a$ are $\log_2 u$ bits, so $ax$ is $2\log_2 u$ bits. With mod we take the rest of the division, and the rest is the least significative $\log_2 u$ bits. With div $2^{q-l}$ we take the quotient, so we split the remaining $\log_2 u$ bits into two parts: the left $l$ bits and the right $q-l$ bits, and we take the left part of $l$ bits.\\
 This basically means taking $l$ bits in the middle of the multiplication $a\cdot x$.
 \subsection{$d$-Left Hashing}
@@ -1720,7 +1770,7 @@ The issue is that the more functions you have the more $1$ you set so the more p
 $P(B[i]=0$ after $n$ insertions$)$, so we have $rn$ bits set. For $i$ to be $0$, we need to have that each $h_j$ goes either to the left or to the right of $i$, in the other $m-1$ position, for each of the $n$ insertions. So $P(B[i]=0$ after $n$ insertions$) = \left(1-\frac{1}{m}\right)^{rn} = \left(\frac{m-1}{m}\right)^{rn}$.\\
 $\left(1-\frac{1}{m}\right)^{rn}\simeq e^{-\frac{rn}{m}}$\\
 So $P($a specific bit is $1) = 1-e^{-\frac{rn}{m}}$\\
-$P(k\not\in D$ but all $h_i(k)$ are set to $1) = \left(1-e^{-\frac{rn}{m}}\right)^r$. This is the main formula of bloom filters (and it's an approximation of the real formula, much more complex but asymptotically identical): $$P(\hbox{error})\simeq f(n,m,r) = \left(1-e^{-\frac{rn}{m}}\right)^r$$
+$P(k\not\in D$ but all $h_i(k)$ are set to $1) = \left(1-e^{-\frac{rn}{m}}\right)^r$. This is the main formula of bloom filters (and it's an approximation of the real formula, much more complex but asymptotically identical): $$P(\text{error})\simeq f(n,m,r) = \left(1-e^{-\frac{rn}{m}}\right)^r$$
 \begin{list}{}{}
 	\item $n$ is the number of keys, and is given
 	\item $m$ is the size of $B$
@@ -1732,7 +1782,7 @@ So the probability of error goes down exponentially with $m$, and if $\overline{
 The bloom filter takes $m=cn$ bits. According to the probability of error computed before, even if $c\simeq 30$ or $c\simeq 40$ we get a really low error with far fewer bits than the hashing with chaining.
 \subparagraph{Note} Fixed $m=30n$, for example, we get $r=30\ln 2$, so $30$ hash functions which are a lot. So may be better to fix $r$ to get more speed although not the minimum error.
 \paragraph{Spectral Bloom Filters} Array $C$ of $m$ counters. For insertion, of setting $C[h_i(k)] = 1$ we do $C[h_i(k)]$\texttt{++}. The deletion is analogous, $C[h_i(k)]$\texttt{--}.\\
-The search is $\min_i C[h_i(k)]$ with $1\leq i\leq r$: $\min$ because the counters are an overestimate of the number of occurrences of the key. $P($overestimating $k)=P(\min_i C[h_i(k)])>\#\hbox{occ}(k)$. Overestimate happens when we have conflicts with other keys, so it's analogous to the normal bloom filter, so it's just $P($error of the bloom filter$)$.\\
+The search is $\min_i C[h_i(k)]$ with $1\leq i\leq r$: $\min$ because the counters are an overestimate of the number of occurrences of the key. $P($overestimating $k)=P(\min_i C[h_i(k)])>\#\text{occ}(k)$. Overestimate happens when we have conflicts with other keys, so it's analogous to the normal bloom filter, so it's just $P($error of the bloom filter$)$.\\
 The size of a spectral bloom filter is $c\cdot n\cdot($counter size$)$
 \section{Prefix String Search}
 Given a dictionary of strings $D$ and want to preprocess it and build a data structure: \texttt{prefix\_search(P,D)} $\rightarrow$ return or count the strings in $D$ that are prefixed by $P$.
