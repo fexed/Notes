@@ -393,20 +393,23 @@ $$P(X<a+1)\leq P\left(X<\left(1-\frac{1}{3}\right)E[X]\right) \leq e^{-\frac{1}{
 Given that $(a+1)=12\ln k$ this becomes $$e^{-\frac{1}{12}(12\ln k)} = e^{-\ln k} = \frac{1}{k}$$ $$P(t_1\text{ contains }< a+1\text{ samples}) \leq \frac{1}{k}$$
 $$P\left(\exists\: B_i\:|\:|B_i|>\frac{4n}{k}\right)\leq \frac{k}{2}\cdot\frac{1}{k} = \frac{1}{2}$$
 \section{Random Sampling}
-I have $S[1,n] = [i_1,\ldots,i_n]$ and I want to extract $m \leq n$ from S \textbf{randomly with uniform probability} meaning that $P($extracting $i_j)\frac{1}{n}$.\\
-\texttt{rand(a, b) =} extract a random number from $[a,b]$. We consider two main scenarios: $n$ known and $n$ unknown.
+I have $S[1,n] = [i_1,\ldots,i_n]$ and I want to extract $m \leq n$ elements from S randomly \textbf{with uniform probability} meaning that $P(\text{extracting }i_j)\frac{1}{n}$.\\
+\texttt{rand(a, b)} extracts a random number from $[a,b]$. We consider two main scenarios: $n$ known and $n$ unknown.
 \paragraph{Disk model} The sequence is of $n$ elements stored in a read-only file: $n$ is known.\\
-$S = [1, n]$, I build $S'$ copy of $S$. With $s =$ the number of currently sampled items (starting from $0$), we take\\\texttt{rand(1, n-s)} and swap that item with the $n$th item. Now I repeat the process with $n-1$, having sampled $s=1$ items.\\
-We sample exactly $m$ items (repeat the process $m$ times) but we copy the entire array so we use a lot of space. We also jump a lot in the $S'$ array, so a lot of I/Os. Even though we do $m$ swaps, so low time complexity, the bottleneck are the I/Os. But if $S$ contains non-atomic items, like strings, I don't need to copy the objects but just to copy the pointers: $|S'| = \#$ items, not total length.\\\\
-We want to avoid the I/Os, for example by using just the indexes of the items: we choose the index to sample, sort them and access the original untouched $S$ just jumping in the wanted indexes.\\
-We keep a dictionary $D$ initialized as empty, $D=\emptyset$. While $|D|<m$, we pick $p =$ \texttt{rand(1, n)} and if $p\not\in D$ we insert $p$ in $D$. Basically: we pick $m$ random indexes. Then we sort $D$ and extract the corresponding items from $S$.\\
-As for the efficiency, we have to see how many times we pick a $p$ already in $D$. $P(p\in D) = \frac{|D|}{n} \leq \frac{m}{n}$ and we can reason that $m\leq \frac{n}{2}$: if $m > \frac{n}{2}$ I can invert the problem and put in $D$ the items that I \textbf{don't} want to sample. With $m\leq \frac{n}{2}$ we have $P(p\in D) \leq \frac{\frac{n}{2}}{n} = \frac{1}{2}$, so that on average we pick two $p$ and one of them will go in $D$.\\\\
-Another solution is to extract $m$ numbers in $[1, n]$: if they are all distinct, we sort and pick from $D$, otherwise we repeat from the start. To see if they are all distinct, I sort and if I have repetitions then two continuous items are the same.\\
+$S = [1, n]$, build $S'$ copy of $S$. With $s =$ the number of currently sampled items (starting from $0$), we take\\\texttt{rand(1, n-s)} and swap that item with the $n$th item. Repeat the process with $n-1$, having sampled $s=1$ items.\\
+We sample exactly $m$ items (repeat the process $m$ times) but we copy the entire array so we use a lot of space. We also jump a lot in the $S'$ array, so a lot of I/Os. Even though we do $m$ swaps, so low time complexity, the bottleneck are the I/Os. But if $S$ contains non-atomic items, like strings, I don't need to copy the entire objects but I can just copy the pointers: $|S'| = \#$ items, not total length.\\\\
+We want to avoid the I/Os, for example by using just the indexes of the items: choose the index to sample, sort them and access the original untouched $S$ just jumping in the wanted indexes.\\
+We keep a dictionary $D$ initialized as $D=\emptyset$. While $|D|<m$, we pick $p =$ \texttt{rand(1, n)} and if $p\not\in D$ we insert $D = D \cup \{p\}$. We basically pick $m$ random indexes, then we sort $D$ and extract the corresponding items from $S$.\\
+As for the efficiency, we have to see how many times we pick a $p$ already in $D$ $$P(p\in D) = \frac{|D|}{n} \leq \frac{m}{n}$$ We can reason that $m\leq \frac{n}{2}$: if $m > \frac{n}{2}$ I can invert the problem and put in $D$ the items that I \textbf{don't} want to sample. With $m\leq \frac{n}{2}$ we have $$P(p\in D) \leq \frac{\frac{n}{2}}{n} = \frac{1}{2}$$ On average we pick two $p$ and one of them will go in $D$.\\\\
+Another solution is to extract $m$ numbers in $[1, n]$: if they are all distinct, we sort and pick those indexes, otherwise we repeat from the start. To see if they are all distinct, I sort and if I have repetitions then two continuous items are the same.\\
 It's not useful in practice: the probability of being successful is the same as the probability of having $m$ distinct items among $n$, or the birthday paradox.
 \paragraph{Streaming model}
-A fourth solution with $n$ known but in the streaming model: I have a continuous stream of items and I want to decide immediately for each item whether to take it or not.\\$M = 2$, $n = 8$ items which are $[a, b, c, d, e, f, g, h]$,\\$P = [.5, .5, 0, .5, 1, 0, 1, 1] \leftarrow Rand(0,1)$\\
-$P($sample $i_j) = \frac{m - s}{n - j + 1}$ with $s$ being the number of the currently sampled items. If $P \leq \frac{m - s}{n - j + 1}$ then $i_j$ is picked.
+A fourth solution with $n$ known but in the streaming model: I have a continuous stream of items and I want to decide immediately for each item whether to take it or not.\\
+$P(\text{sample }i_j) = \frac{m - s}{n - j + 1}$ with $s$ being the number of the currently sampled items. If $P \leq \frac{m - s}{n - j + 1}$ then $i_j$ is picked.\\
+An example:
 \begin{list}{}{}
+	\item $M = 2$, $n = 8$ items which are $[a, b, c, d, e, f, g, h]$
+	\item $P = [.5, .5, 0, .5, 1, 0, 1, 1] \leftarrow$ \texttt{rand[0,1]}
 	\item $s = 0, j = 1$ extracts a probability ($.5$) and compare $P$ against the $P($sample $i_j)$\\
 	$P = .5 \leq \frac{2 - 0}{8 - 1 + 1} = \frac{1}{4}$, first item not picked
 	\item $s = 0, j = 2, P = .5 \leq \frac{2 - 0}{8 - 2 + 1} = \frac{2}{7}$, not picked
@@ -416,16 +419,17 @@ $P($sample $i_j) = \frac{m - s}{n - j + 1}$ with $s$ being the number of the cur
 	\item $s = 1, j = 6, P = 0 \leq \frac{2 - 1}{8 - 6 + 1} = \frac{1}{3}$, $f$ is picked
 	\item $M = 2$ and we've picked two items, the end
 \end{list}
-At $m=1$ surely $s=0$, $P($pick $i_j) = P($not picking $i_1,\ldots, i_{j-1})\cdot P($pick $i_j) = $\begin{list}{}{}
-	\item $P($not picking $i_1,\ldots, i_{j-1}) = 1 - \sum_{k=1}^{j-1} P($pick $i_k) = 1- \frac{j-1}{n}$ because every $j_k$ is picked with probability $\frac{1}{n}$ independently from the others.
-	\item $P($pick $i_j)$ is given by the algorithm $= \frac{m - s}{n - j + 1} = \frac{1}{n-j+1}$
+At $m=1$ surely $s=0$ $$P(\text{pick }i_j) = P(\text{not picking }i_1,\ldots, i_{j-1})\cdot P(\text{pick }i_j) = $$\begin{list}{}{}
+	\item $P(\text{not picking }i_1,\ldots, i_{j-1}) = 1 - \sum_{k=1}^{j-1} P(\text{pick }i_k) = 1- \frac{j-1}{n}$ because every $j_k$ is picked with probability $\frac{1}{n}$ independently from the others.
+	\item $P(\text{pick }i_j) = \frac{m - s}{n - j + 1} = \frac{1}{n-j+1}$ given by the algorithm
 \end{list}
-$ = \frac{n-j+1}{n}\cdot\frac{1}{n-j+1} = \frac{1}{n}$ so we have a uniform probability when picking $m=1$ items.
-What is $P($pick $i_j$ given that we have to pick other $s$ elements$)$? At $j$ we are left with $n-j+1$ items to consider and we have to pick yet $m-s$ items. So we can choose $m-s$ items among $n-j+1$ items: $\left(\begin{array}{c}
+$$ = \frac{\cancel{n-j+1}}{n}\cdot\frac{1}{\cancel{n-j+1}} = \frac{1}{n}$$ So we have a uniform probability when picking $m=1$ items.\\
+What is $P(\text{pick }i_j\text{ given that we have to pick other }s\text{ elements})$? At $j$ we are left with $n-j+1$ items to consider and we have to pick yet $m-s$ items. So we can choose $m-s$ items among $n-j+1$ items: $\left(\begin{array}{c}
 n-j+1\\m-s
 \end{array}\right)$ possibilities. The positive event is the event where $i_j$ has been picked, so $m-s-1$ other samples to choose other than $i_j$ among the $n-j$ remaining without $i_j$: $\left(\begin{array}{c}
 n-j\\m-s-1
 \end{array}\right)$. Solving the ratio we get $\frac{m-s}{n-j+1}$.
+%TODO from here
 \paragraph{Reservoir Sampling} Still streaming model but $n$ is unknown. $S = [a, b, c, d, e, f, g, h, i\ldots]$, $M = 3$. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} $\_, \_, \_, 2, 4, 1, 2, 3, 1$, with the last $1$ is the $h$ position, always drawn from the interval $[1, j]$. The number assigned are always smaller than the position $j$.
 \begin{list}{}{}
 	\item We consider the item $d$, extracts position $2 < 3 = M$ and substitutes $b$ in the reservoir, $R = [a, d, c]$
