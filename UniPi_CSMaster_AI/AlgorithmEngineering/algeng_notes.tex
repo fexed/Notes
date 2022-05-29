@@ -384,12 +384,12 @@ Some $t_i$ will be totally covered by a bucket $B_j$, because if $B_i$ has size 
 This means that the $a$ samples are distributed between $s_{i-1}$ and $s_i$: part in the end of $t_{j-1}$, part inside $t_j$ and part in the beginning of $t_{j+1}$. How many samples inside $t_j$, the block covered by $B_i$? They are surely $< a+1$, so $$P(\exists\: t_j\:|\: t_j\text{ is covered entirely by some }B_i) \leq P(\exists\:t_j\:|\:t_j\text{ contains less than }a+1\text{ samples})$$
 We now apply the \textbf{union bound}: the probability of existence is upper bounded by the number of possibilities times the probability of one of the events. $$P(\exists\:t_j\:|\:t_j\text{ contains less than }a+1\text{ samples}) \leq \frac{k}{2}\cdot P(t_1\text{ contains less than }a+1\text{ samples})$$
 We need to estimate the latter, how many samples will go to $t_1$. $$P(\text{sample occurs in }t_1) = \frac{|t_1|}{n}= \frac{\frac{2n}{k}}{n} = \frac{2}{k}$$
-and the average number of samples in $t_1$, given $$X_i = 1\text{ if the }i\text{th item is in }t_1$$
+and the average number of samples in $t_1$, given $X_i = 1\text{ if the }i\text{th item is in }t_1$
 $$X = \text{\# of samples in }t_1 = \sum_{i = 1}^{(a+1)k - 1} X_i$$
 $$E[X] = E\left[\sum_i X_i\right] = \sum_{i = 1}^{(a+1)k - 1} E[X_1] = ((a+1)k - 1)\frac{2}{k} \geq 2(a+1) - 1$$ because $k \geq 2$ and $2(a+1) - 1 \geq \frac{3}{2}(a+1)$
 $$E[X]\geq \frac{3}{2}(a+1) \Leftrightarrow a+1 \leq \frac{2}{3}E[X] = \left(1-\frac{1}{3}\right)E[X]$$
-$P(t_1$ contains $< a+1$ sample$) = P(X < a+1)$ and we use the \textbf{Chernov Bound}: $P(X < (1-\delta)E[X]) \leq e^{-\frac{\delta^2}{2}E[X]}$
-$$P(X<a+1)\leq P(X<(1-\frac{1}{3})E[X]) \leq e^{-\frac{1}{18}E[X]} \leq e^{-\frac{1}{18}\cdot\frac{3}{2}(a+1)} = e^{-\frac{1}{12}(a+1)}$$
+$P(t_1$ contains $< a+1$ sample$) = P(X < a+1)$ and we use the \textbf{Chernov Bound}: $$P(X < (1-\delta)E[X]) \leq e^{-\frac{\delta^2}{2}E[X]}$$
+$$P(X<a+1)\leq P\left(X<\left(1-\frac{1}{3}\right)E[X]\right) \leq e^{-\frac{1}{18}E[X]} \leq e^{-\frac{1}{18}\cdot\frac{3}{2}(a+1)} = e^{-\frac{1}{12}(a+1)}$$
 Given that $(a+1)=12\ln k$ this becomes $$e^{-\frac{1}{12}(12\ln k)} = e^{-\ln k} = \frac{1}{k}$$ $$P(t_1\text{ contains }< a+1\text{ samples}) \leq \frac{1}{k}$$
 $$P\left(\exists\: B_i\:|\:|B_i|>\frac{4n}{k}\right)\leq \frac{k}{2}\cdot\frac{1}{k} = \frac{1}{2}$$
 \section{Random Sampling}
@@ -425,8 +425,8 @@ What is $P($pick $i_j$ given that we have to pick other $s$ elements$)$? At $j$ 
 n-j+1\\m-s
 \end{array}\right)$ possibilities. The positive event is the event where $i_j$ has been picked, so $m-s-1$ other samples to choose other than $i_j$ among the $n-j$ remaining without $i_j$: $\left(\begin{array}{c}
 n-j\\m-s-1
-\end{array}\right)$. Solving the ratio we get $\frac{m-s}{n-j+1}$.\pagebreak
-\paragraph{} In the \textbf{reservoir sampling}, still streaming model but $n$ is unknown. $S = [a, b, c, d, e, f, g, h, i\ldots]$, $M = 3$. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} $\_, \_, \_, 2, 4, 1, 2, 3, 1$, with the last $1$ is the $h$ position, always drawn from the interval $[1, j]$. The number assigned are always smaller than the position $j$.
+\end{array}\right)$. Solving the ratio we get $\frac{m-s}{n-j+1}$.
+\paragraph{Reservoir Sampling} Still streaming model but $n$ is unknown. $S = [a, b, c, d, e, f, g, h, i\ldots]$, $M = 3$. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} $\_, \_, \_, 2, 4, 1, 2, 3, 1$, with the last $1$ is the $h$ position, always drawn from the interval $[1, j]$. The number assigned are always smaller than the position $j$.
 \begin{list}{}{}
 	\item We consider the item $d$, extracts position $2 < 3 = M$ and substitutes $b$ in the reservoir, $R = [a, d, c]$
 	\item $e$, position $4 > 3$ nothing changes
@@ -444,7 +444,7 @@ $$P(i_j\in R\text{ after }n\text{ steps})= P(i_j\in R\text{ after }n-1\text{ ste
 	\item $P(i_n\text{ is taken}) = \frac{m}{n}$
 	\item $P(i_j\text{ is not kicked out}) = \frac{m-1}{m}$ ($m$ positions for $i_n$ minus the one occupied by $i_j$)
 \end{list}
-$$=\frac{m}{n-1} \left( \left( 1-\frac{m}{n}\right) + \frac{\not m}{n}\cdot\frac{m-1}{\not m}\right) = \frac{m}{n-1}\left(\frac{n - \not m}{n} + \frac{\not m - 1}{n}\right) =\frac{m}{\not n-\not 1}\cdot\frac{\not n - \not 1}{n}= \frac{m}{n}$$
+$$=\frac{m}{n-1} \left( \left( 1-\frac{m}{n}\right) + \frac{\cancel{m}}{n}\cdot\frac{m-1}{\cancel{m}}\right) = \frac{m}{n-1}\left(\frac{n - \cancel{m}}{n} + \frac{\cancel{m} - 1}{n}\right) =\frac{m}{\cancel{n- 1}}\cdot\frac{\cancel{n - 1}}{n}= \frac{m}{n}$$
 The base case is $n=m$, the starting point, and we have $P(i_n$ stored in $R) = \frac{m}{j} = \frac{m}{m} = 1$, guaranteed by the initialization.
 \paragraph{Disk Striping} $D > 1$. Several disks, the pages of the disks are linked: first page of all $D$ disks are a single page. So it's considered as a single disk with $B' = D\cdot B$\\
 In sorting, the bound is $O(\frac{n}{DB}\cdot\log_{\frac{M}{DB}} \frac{n}{M})$ over $D$ disks with disk striping. The lower bound is $\Omega(\frac{n}{DB}\cdot\log_{\frac{M}{B}} \frac{n}{M})$
