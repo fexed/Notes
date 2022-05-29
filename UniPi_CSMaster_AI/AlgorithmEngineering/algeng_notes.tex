@@ -445,15 +445,15 @@ An example with $M = 3$
 	\item $h$, $R = [f, g, h]$
 	\item $i$, $R = [i, g, h]$
 \end{list}
-%TODO from here
 So the probability that $i_j$ is stored in $R$ is $\frac{m}{j}$: the probability is $\in [1,j]$ and $m$ are the values needed to pick it.\\
-$P(i_j\in R$ after $n$ steps$)$ must be $\frac{1}{n}$. Since when we discard an item it's discarded forever, in order for $i_j$ to be in $R$ at the $n$th step it had to be in the reservoir at the $n-1$th step. At the $n$th step, in order for $i_j$ to stay in $R$ either two cases need to happen: $i_n$ is not taken (therefore $R$ doesn't change) or $i_n$ is taken and goes in a position different from the one of $i_j$.\\
+$P(i_j\in R$ after $n$ steps$)$ must be $\frac{1}{n}$. Since when we discard an item it's discarded forever, in order for $i_j$ to be in $R$ at the $n$th step it had to be in the reservoir at the $n-1$th step. At the $n$th step, in order for $i_j$ to stay in $R$ either two cases need to happen: $i_n$ is not taken (therefore $R$ doesn't change) or $i_n$ is taken and goes in a position different from the one of $i_j$.
+\pagebreak
 $$P(i_j\in R\text{ after }n\text{ steps})= P(i_j\in R\text{ after }n-1\text{ steps})\cdot( P(i_n\text{ is not taken})+ P(i_n\text{ is taken})\cdot P(i_j\text{ is not kicked out}))=$$
 \begin{list}{}{}
-	\item $P(i_j\in R\text{ after }n-1\text{ steps}) = \frac{m}{n-1}$
-	\item $P(i_n\text{ is not taken}) = 1-\frac{m}{n}$
-	\item $P(i_n\text{ is taken}) = \frac{m}{n}$
-	\item $P(i_j\text{ is not kicked out}) = \frac{m-1}{m}$ ($m$ positions for $i_n$ minus the one occupied by $i_j$)
+	\item $P(i_j\in R\text{ after }n-1\text{ steps}) = \frac{\displaystyle m}{\displaystyle n-1}$
+	\item $P(i_n\text{ is not taken}) = 1-\frac{\displaystyle m}{\displaystyle n}$
+	\item $P(i_n\text{ is taken}) = \frac{\displaystyle m}{\displaystyle n}$
+	\item $P(i_j\text{ is not kicked out}) = \frac{\displaystyle m-1}{\displaystyle m}$ ($m$ positions for $i_n$ minus the one occupied by $i_j$)
 \end{list}
 $$=\frac{m}{n-1} \left( \left( 1-\frac{m}{n}\right) + \frac{\cancel{m}}{n}\cdot\frac{m-1}{\cancel{m}}\right) = \frac{m}{n-1}\left(\frac{n - \cancel{m}}{n} + \frac{\cancel{m} - 1}{n}\right) =\frac{m}{\cancel{n- 1}}\cdot\frac{\cancel{n - 1}}{n}= \frac{m}{n}$$
 The base case is $n=m$, the starting point, and we have $P(i_n$ stored in $R) = \frac{m}{j} = \frac{m}{m} = 1$, guaranteed by the initialization.
@@ -464,7 +464,7 @@ $$\frac{\log_2 \frac{n}{M}}{\log_2 \frac{M}{DB}}\cdot \frac{\log_2 \frac{M}{B}}{
 $$\frac{\log_2 \frac{M}{B}}{\log_2 \frac{M}{B} - \log_2 D}$$
 $$\frac{1}{1 - \frac{\log_2 D}{\log_2 \frac{M}{B}}}$$
 $$\frac{1}{1 - \log_{\frac{M}{B}} D}$$
-$\frac{M}{B}$ tipically thousands, $D$ at most 10-20, so $\log_{\frac{M}{B}} D < 1$. $M\to\infty \Rightarrow 1$ optimal. $M\to DB \Rightarrow \infty$, very very slow.
+$\frac{\displaystyle M}{\displaystyle B}$ tipically thousands, $D$ at most 10-20, so $\log_{\frac{M}{B}} D < 1$. $M\to\infty \Rightarrow 1$ optimal. $M\to DB \Rightarrow \infty$, very very slow.
 \section{Randomized data structures}
 \subsection{Treap} From binary search TREe and hEAP.\\
 Every node is divided in two parts: one is the key and the other is the priority. A treap is a binary search tree according to the key and a heap according to the priority. To distinguish, letters for the key and numbers for the priority and we consider a maximum heap.\\
@@ -547,9 +547,9 @@ Then you recurse: find the root in the left subtree (topmost point) and create t
 	\end{tikzpicture}
 \end{center}
 This was the approach in computational geometry, but the data structures are exactly the same.\\
-So we start from the root, and we check if it's in the 3-sided range query. In this case is in the query, so we return it as a result. Since the root is inside the query, we go both left and right: this corresponds to going to the left and right subtree in the treap. In the left subtree, we recur: is the root in the query? In this case, no but the height (priority) is still larger than the "bottom", the $c$ value, we go down. But we don't go to the left subtree (it's totally discarded) we go to the right subtree. If we went to the right subtree from the topmost root, that point it's still not in the query and still above $c$. Being in the right subtree, this time we go its left subtree and discard its right subtree. Basically we move toward the $b$ value when we are on the right and toward $a$ when we are on the left.\\
-When we arrive in a node below the $c$ value we know that, being a maximum heap, everything below that has a lower priority so we can drop everything.\\
-As for the \textbf{complexity}, we want to evaluate how much "wasted work" is done, as in how many nodes outside the query we evaluate. The number of points is equal to the depth of the tree, because we go only left or only right and always down one level, so given $h$ height of the treap, the number of extra points we check is $O(h)$, one node extra per level at most. Inside the query we evaluate both left and right subtrees, but those are all "good" points that go into the result, so it's no wasted work. The particular case happens when we check the node just above $c$ and in the query zone: for each of those nodes we check both subtrees, all of them will have priority $< c$ and will be cut out, but we check them. Those subtrees are at most twice the number of points of the result, the number of occurrencies. So the total number of work wasted is $h$ to the left, $h$ to the right plus the occurrencies for the subtrees below $c$. The total cost then is $O(h$ $+$ occurrencies$)$. Of course the occurrencies cannot be avoided, as we have to list them.\\
+So \textbf{start from the root} and \textbf{check if it's in the} 3-sided range \textbf{query}. In this case \textbf{is in the query, so we return it as a result and we go both left and right}: this corresponds to going to the left and right subtree in the treap. In the left subtree, we recur: is the root in the query? In this case, no but the height (priority) is still larger than the "bottom", the $c$ value, so we go down but we don't go to the left subtree, which it's totally discarded, \textbf{we go to the right subtree}. If we went to the right subtree from the topmost root, that point it's still not in the query and still above $c$. Being in the right subtree, this time we go its left subtree and discard its right subtree. Basically \textbf{we move toward the $b$ value when we are on the right and toward $a$ when we are on the left}.\\
+When we arrive in a node below the $c$ value we know that, being a maximum heap, everything below that has a lower priority so we can drop everything.
+\subparagraph{Complexity} We want to evaluate how much "wasted work" is done, as in \textbf{how many nodes outside the query we evaluate}. The number of points is equal to the depth of the tree, because we go only left or only right and always down one level, so given $h$ height of the treap, the number of extra points we check is $O(h)$, one node extra per level at most. Inside the query we evaluate both left and right subtrees, but those are all "good" points that go into the result, so it's no wasted work. The particular case happens when we check the node just above $c$ and in the query zone: for each of those nodes we check both subtrees, all of them will have priority $< c$ and will be cut out, but we check them. Those subtrees are at most twice the number of points of the result, the number of occurrencies. So the total number of work wasted is $h$ to the left, $h$ to the right plus the occurrencies for the subtrees below $c$. The total cost then is $O(h + \text{occurrencies})$. Of course the occurrencies cannot be avoided, as we have to list them.\\
 The extra cost, $h$, is typically $\log n$ if the treap is balanced with $n$ being the number of points.
 \paragraph{Rotation} Considering 
 \begin{center}
@@ -580,12 +580,13 @@ We create a root with a logical key between the maximum key of $T_1$ and the min
 The reverse operation is the split.
 \paragraph{Split($k, T$)} Splitting $T$ according to the key $k$ means creating a treap $T_{<k}$ with keys $< k$ and another treap $T_{>k}$ with keys $> k$. This assuming $k\not\in T$. The split is trivial when the key is the root, so I need to put myself in a situation where $k$ occupies the root. So we first insert $k,\infty$, so that it goes to the root. At insertion, $k,\infty$ will be a leaf, so we rotate to reestablish the heap priority, arriving in a situation where we have $k,\infty$ as root with a left and a right subtree. The left subtree will be $T_{<k}$ and the right subtree will be $T_{>k}$ so the we delete the root. This costs $O(h)$ for insertion, $O(h)$ for rotations and constant for deleting the root, overall $O(h)$.
 \paragraph{On average, a treap is balanced} By drawing the priorities at random, the average treap is balanced. $h$ height of the treap, it's $n$ if it's just a path or $\log n$ if it's balanced, but $h = O(\log n)$ on average. Let's prove it.\\
-Let's create an indicator variable $A_k^i = \left\{ \begin{array}{c l}
+Let's create an indicator variable $$A_k^i = \left\{ \begin{array}{c l}
 1&\text{if }x_i\text{ is a proper ancestor of }x_k\\
 0&\text{otherwise}
-\end{array}\right.$\\
-$depth(x_k) = \sum_{i=1}^k A_k^i$ which counts the proper ancestors of $x_k$. $E[depth(x_k)] = E[\sum_{i=1}^k A_k^i] = \sum_{i=1}^k E[A_k^i]$ and the expected value of a indicator variable is the probability of it being 1 so $= \sum_{i=1}^k P(A_k^i = 1)$ which is the probability of $x_i$ being on the path to $x_k$. We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted. So $\sum_{i=1}^k P(A_k^i = 1)$ we consider $x_i < x_k$ or vice versa, is totally symmetric. So $priority(x_i) > priority(x_k)$\\
-Theorem: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
+\end{array}\right.$$
+$$\text{depth}(x_k) = \sum_{i=1}^k A_k^i = \text{proper ancestors of }x_k$$ $$E[\text{depth}(x_k)] = E\left[\sum_{i=1}^k A_k^i\right] = \sum_{i=1}^k E[A_k^i]=$$ and the expected value of a indicator variable is the probability of it being 1 so $$= \sum_{i=1}^k P(A_k^i = 1)$$ which is the probability of $x_i$ being on the path to $x_k$.\\
+We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted, and $x_i < x_k$ or vice versa, is totally symmetric. So $\text{priority}(x_i) > \text{priority}(x_k)$\\
+\textbf{Theorem}: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
 Various cases:
 \begin{enumerate}
 	\item $x_r$ with largest priority, so $x_r,\ldots, x_i,\ldots, x_k$, so $x_r$ becomes the root of the treap and the $x_i,\ldots, x_k$ go to the right subtree. So we consider the subtree.\\
@@ -594,9 +595,15 @@ Various cases:
 	\item $x_i$ has the largest priority $\Rightarrow x_i$ is the root of the treap and $x_k$ goes to the right, so $x_i$ is the ancestor.
 	\item $x_j$ has the largest priority, where $x_j\neq x_i$ and $x_j \in X(i,k)$, it's one of the items $\Rightarrow x_j$ to the root, $x_i$ to the left and $x_k$ to the right. So $x_i$ is surely \textbf{not an ancestor} of $x_k$.
 \end{enumerate}
-$P(x_i$ ancestor of $x_k) = P(x_i$ has the largest priority of $X(i,k))$ and because the priorities are picked at random $= \frac{1}{|X(i,k)|} = \frac{1}{k - i + 1}$ if $i < k$ or $\frac{1}{i - k + 1}$ if $i > k$. Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$\\
-$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} = \sum_{i = 1}^{k-1} \frac{1}{k-i + 1} + \sum_{i = k+1}^n \frac{1}{i - k + 1}$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$). With $k < n$ we have that both quantities are $\leq \log_2 n$, so $O(\log n)$.\\
+$$P(x_i\text{ ancestor of }x_k) = P(x_i\text{ has the largest priority of }X(i,k))=$$ Since the priorities are picked at random $$= \frac{1}{|X(i,k)|} = \left\{\begin{array}{c c}
+\frac{1}{\displaystyle k - i + 1} & \text{if }i<k\\
+\frac{1}{\displaystyle i - k + 1} & \text{if }i>k
+\end{array}\right.$$
+Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$
+$$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} =  \underset{\simeq \log_2k}{\underbrace{\sum_{i = 1}^{k-1}\frac{1}{k-i + 1}}} + \underset{\simeq \log_s(n-k+1)}{\underbrace{\sum_{i = k+1}^n \frac{1}{i - k + 1}}}$$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$).\\
+With $k < n$ we have that both quantities are $\leq \log_2 n$, so $O(\log n)$.\\
 If the keys are inserted in random order, so that priority = order of insertion, so average depth is $O(\log n)$.
+\pagebreak
 \subsection{Skip lists} We have a list of items $L_0 = -\infty \rightarrow 3 \rightarrow 6 \rightarrow 7 \rightarrow 10 \rightarrow 15 \rightarrow 16 \rightarrow +\infty$ with $\pm\infty$ logical marks. The search in lists is very bad, the idea is to create levels of lists. List of level $L_1 = -\infty \ldots +\infty$ with vertical pointers.
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
@@ -614,12 +621,12 @@ We can promote $k$ items to $L_1$, $k + \frac{n}{k} \Rightarrow k = \sqrt{n}$. T
 So keep track of the items that go down and adjust the pointers of those items.
 \paragraph{Height of the skip list} $L =$ \# of levels of the skip list on $n$ items $= \max_k L(k)$ with $L(k) =$ level of the $k$th item. So the height of the skip list, the levels of the skip list, is the maximum level among the items.\\
 $P(L(k) \geq l) = $ the probability of extracting $l$ tails (independent coin tosses) $= \left(\frac{1}{2}\right)^l$.\\
-$P(L \geq l) = P(\max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdot\left(\frac{1}{2}\right)^l = \frac{n}{2^l}$ for the union bound.
+$$P(L \geq l) = P(\max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdot\left(\frac{1}{2}\right)^l = \frac{n}{2^l}$$ for the union bound.
 \begin{enumerate}
 	\item $l \leq \log_2 n \rightarrow \frac{n}{2^l} \geq \frac{n}{2^{\log n}} = \frac{n}{n} = 1$ so the inequality is not significant, because a probability is always $\leq 1$
 	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
 \end{enumerate}
-$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$\\\\
+$$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$$
 In the search process we have, with high probability, $O(\log n)$ "down steps". For the number of "right steps", let's observe the process in reverse: from the bottom we go to the left for as many right pointers we find, but we go up as soon as we find a downward pointer. How many right pointers before a vertical pointer on average? We go left when we don't have a vertical pointer, which means with probability $\frac{1}{2}$ because of the coin toss, so it's a sequence of heads ended by a tail (which means going up) so on average we have $2$ right steps. Every level is independent, so it applies to every level.\\
 So $O(\log n)$ down steps and $O(\log n)$ right steps for the search process, so the total cost of search is $O(\log n)$. Insertion is a search plus a constant number of pointers change, deletion is a search plus a constant number of pointers change so everything is $\log n$.
 \section{Set Intersection}
@@ -650,32 +657,39 @@ n\\m
 We compare the $41\in B$ with 16, 19, 25 and then 60 $\in A$, respectively with step $1, 2, 4, 8, 16$. So we don't go one-by-one but we jump exponentially, we go on as long as we find an element that is larger, 41. When it's smaller, with 60, we stop. We discard the elements we skip until we encounter the larger element: now we know that $41$, our element, is between this element and the previous element we compared with (34), so the longer the jump the more we discard.\\
 41 is $b_j$, compared with $a_{i_{j-1} + 2^k}$ and we go ahead until $a_{i_{j-1} + 2^{k-1}} < b_j \leq a_{i_{j-1} + 2^k}$\\
 When the element is found (let's say in position $a_f \leq a_{i_{j-1} + 2^k}$), the search for the next element, $b_{j+1}$ will start from $a_{f+1}$. Also we always have $a_{i_{j-1}} \leq b_{j-1} < a_{i_{j-1} +1}$.
-\paragraph{Complexity} Let's see how much work is done in a repetitive way. $\Delta_j = \min\{n, 2^k\}$, because if $2^k > n$ we would jump outside the array, so $\Delta_j \leq 2^k$. Also, whenever I search for $b_j$ we find it in the element $a_{i_j}$: we can say that $a_{i_{j-1} + 2^{k-1}} < a_{i_j} \leq a_{i_{j-1} + 2^k}$, so $2^{k-1} < i_j - i_{j-1} \leq 2^k$ which means $2^k < 2(i_j - i_{j-1})$. So we have that $\Delta_j < 2(i_j - i_{j-1})$\\
-$\sum_{j=1}^m \Delta_j < 2\sum_{j=1}^m (i_j - i_{j-1})$ which is a telescopic sum: $i_1 - i_0 + i_2 - i_1 + i_3 - i_2 + \ldots + i_m - i_{m-1}$, where we can simplify all the elements except for $i_0 = 0$ and $i_m$. So we have $\sum_{j=1}^m \Delta_j < 2 i_m$, and $i_m$ is the position of the last element of $B$ inside $A$, which cannot be greater than $n$, so $i_m \leq n$, which means $\sum_{j=1}^m \Delta_j \leq 2n$: there's an overlap, but it's still proportional to $A$.\\
-The algorithm does $\log_2 \Delta_j$ jumps (jumping "\textit{in powers of two}") plus the binary search inside the last portion (when we encounter the greater element): that portion is surely smaller than $\Delta_j$. So the algorithm costs $\sum_{j=1}^m O(\log_2\Delta_j + \log_2 \Delta_j)$, so $\sum_{j=1}^m O(\log_2\Delta_j) = O\left(\sum_{j=1}^m\log_2\Delta_j\right)$. The Jensen inequality says that this can be upper bounded by $O\left(m\cdot\log_2\frac{\sum\Delta_j}{m}\right) = O(m\cdot\log\frac{2n}{m})$ because $\Delta_j \leq 2n$\\
+\paragraph{Complexity} Let's see how much work is done in a repetitive way. $\Delta_j = \min\{n, 2^k\}$ because if $2^k > n$ we would jump outside the array, so $\Delta_j \leq 2^k$. Also, whenever I search for $b_j$ we find it in the element $a_{i_j}$: we can say that $$a_{i_{j-1} + 2^{k-1}} < a_{i_j} \leq a_{i_{j-1} + 2^k}$$ $$2^{k-1} < i_j - i_{j-1} \leq 2^k$$ $$2^k < 2(i_j - i_{j-1})$$ $$\Delta_j < 2(i_j - i_{j-1})$$
+$$\sum_{j=1}^m \Delta_j < 2\sum_{j=1}^m (i_j - i_{j-1})$$ which is a telescopic sum: $i_1 - i_0 + i_2 - i_1 + i_3 - i_2 + \ldots + i_m - i_{m-1}$, where we can simplify all the elements except for $i_0 = 0$ and $i_m$. So we have $$\sum_{j=1}^m \Delta_j < 2 i_m$$ and $i_m$ is the position of the last element of $B$ inside $A$, which cannot be greater than $n$, so $i_m \leq n$, which means $$\sum_{j=1}^m \Delta_j \leq 2n$$ There's an overlap, but it's still proportional to $A$.\\
+The algorithm does $\log_2 \Delta_j$ jumps (jumping "\textit{in powers of two}") plus the binary search inside the last portion (when we encounter the greater element): that portion is surely smaller than $\Delta_j$. So the algorithm costs $$\sum_{j=1}^m O(\log_2\Delta_j + \log_2 \Delta_j)$$ $$\sum_{j=1}^m O(\log_2\Delta_j) = O\left(\sum_{j=1}^m\log_2\Delta_j\right)$$ The Jensen inequality says that this can be upper bounded by $$O\left(m\cdot\log_2\frac{\sum\Delta_j}{m}\right) = O\left(m\cdot\log\frac{2n}{m}\right)$$ because $\Delta_j \leq 2n$\\
 In reality it's exactly $O(m(1+\log\frac{n}{m}))$
 \subsection{Two-level memory approach} As usual $A, B$ with $|A| = n > |B| = m$ and we partition $A$ into logical blocks of size $L$ (memory word or page size, for example). For every partition we take the first key, and we build $A'$ which consists of only those first keys elements, so $|A'| = \frac{n}{L}$. We want to find out in what blocks of $A$ we can find the elements of $B$, by exploiting $A'$: the arrays are sorted, so this is enough.\\
 We merge $A'$ and $B$, and so we find in which blocks of $A$ can fall the elements of $B$, by using the keys as dividers in the merged $A'+B$ array. This merge costs $O\left(m + \frac{n}{L}\right)$.\\
 This also produces buckets in $B$, and $B_i$ will be intersected with $A_i$. How many blocks of $A_i$ will be considered at most? $m$, because $B$ has $m$ elements, so in the worst case is one element of $B$ per block of $A$. So we have $|B| + mL = m + mL = O(mL)$.\\
 So the total cost is $O(mL + \frac{n}{L})$. Not optimal but very good, one of the best algorithms.
-\subsection{Interpolation search} Search in a set $X \subseteq N$, which is sorted $X=\{x_1,x_2,\ldots,x_n\}$. Let's define $b = \frac{x_n - x_1 + 1}{n}$ and partition $X$ into buckets of size $b$ \textbf{of the universe}. So with $b= 3$ the bucket $B_1 = \{1,2,3\}$, $B_2 = \{4,5,6\}$\ldots
+\subsection{Interpolation search} Search in a set $X \subseteq N$, which is sorted $X=\{x_1,x_2,\ldots,x_n\}$. Let's define $b = \frac{\displaystyle x_n - x_1 + 1}{\displaystyle n}$ and partition $X$ into buckets of size $b$ \textbf{of the universe}. So with $b= 3$ the bucket $B_1 = \{1,2,3\}$, $B_2 = \{4,5,6\}$\ldots
 \begin{center}
 	\begin{tabular}{c c c c | c c | c | c c | c c | c | c}
 	X= & 1 & 2 & 3 & 8 & 9 & 17 & 19 & 20 & 28 & 30 & 32 & 36\\
 	 & \multicolumn{3}{c}{$B_1$} & \multicolumn{2}{c}{$B_3$} & \multicolumn{1}{c}{$B_6$} & \multicolumn{2}{c}{$B_7$} & \multicolumn{2}{c}{$B_{10}$} & \multicolumn{1}{c}{$B_{11}$} & \multicolumn{1}{c}{$B_{12}$}
 	\end{tabular}
 \end{center}
-For every bucket we have pointers in the index array $I = 1,3,0,0,4,5\ldots$ with the indexes of the beginning and the end of the bucket in $X$. If I want to search for $y$, given that I partitioned the universe I know already the bucket of $y$: it's $B_J$ with $J = \lfloor\frac{y-x_1}{b}\rfloor + 1$, so we do a binary search over $B_J$ looking for $y$. It costs constant, for computing $J$, plus the binary search over $B_J$ which costs $O(\log_2 b)$
+For every bucket we have pointers in the index array $I = 1,3,0,0,4,5\ldots$ with the indexes of the beginning and the end of the bucket in $X$. If I want to search for $y$, given that I partitioned the universe I know already the bucket of $y$: it's $B_J$ with $J = \left\lfloor\frac{\displaystyle y-x_1}{\displaystyle b}\right\rfloor + 1$, so we do a binary search over $B_J$ looking for $y$. It costs constant, for computing $J$, plus the binary search over $B_J$ which costs $O(\log_2 b)$
 \paragraph{Theorem} Time complexity is $O(\log_2 \Delta)$ where $$\Delta = \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}}$$ It's the first time that a complexity depends on the distribution of the data.
-\subparagraph{Proof} The maximum is surely larger than the average so $\max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\sum_{i=1}^n x_i - x_{i-1}}{n-1}$, again a telescopic sum, so $= \frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$. So $$\max_{2,\ldots,n} x_i - x_{i-1} \geq b$$
-Also $B_J$ cannot contain more than $\frac{b}{\min_{2,\ldots,n} x_i - x_{i-1}}$ since every element is spaced from the next by at least $\min_{2,\ldots,n} x_i - x_{i-1}$
+\subparagraph{Proof} The maximum is surely larger than the average so $$\max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\sum_{i=1}^n x_i - x_{i-1}}{n-1}=$$ again a telescopic sum, so $$= \frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$$ $$\max_{2,\ldots,n} x_i - x_{i-1} \geq b$$
+Also $B_J$ cannot contain more than $\frac{\displaystyle b}{\displaystyle \min_{2,\ldots,n} x_i - x_{i-1}}$ since every element is spaced from the next by at least $\min_{2,\ldots,n} x_i - x_{i-1}$
 $$|B_J| \leq \frac{b}{\min_{2,\ldots,n} x_i - x_{i-1}} \leq \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}} = \Delta$$
+\pagebreak
 \section{Data Compression}
 \paragraph{Entropy} Of a source, assuming an alphabet $\Sigma$ of symbols (characters, or digits in the case of integers), with a probability distribution $\{p_\sigma\}$ over $\Sigma$.\\
-The entropy of a source is $H = \sum_\sigma p_\sigma\cdot\log_2 \frac{1}{p_\sigma} = H_0$, sometimes specified as $H_0$ which means no context, every symbol is independent from the previous one.\\
-We know that $H_0 \geq 0$ and $\sum_\sigma p_\sigma = 1$ because is a probability distribution. In order for $H = 0 \Leftrightarrow$ either $p_\sigma = 0$ or $\log_2\frac{1}{p_\sigma} = 0 \Leftrightarrow p_\sigma = 0$ or $p_\sigma = 1$. Because the sum is 1, this means that if $\exists\:\sigma'\:|\:p_{\sigma'}=1 \Rightarrow \forall\:\sigma\neq\sigma'\:\:p_\sigma = 0$. So entropy is $0$ when one symbol has probability 1 and the other have probability $0$.\\
-An upper bound is $H \leq \log_2 |\Sigma|$. The formula of the entropy has its maximum value when all the $p_\sigma$ are equal, so $H \leq \log_2 |\Sigma| \Leftrightarrow p_\sigma = \frac{1}{|\Sigma|}$, a uniform probability: we would have $\sum_\sigma \frac{1}{|\Sigma|}\cdot\log_2|\Sigma| = |\Sigma|\cdot\left(\frac{1}{|\Sigma|}\cdot\log_2|\Sigma|\right) = \log_2|\Sigma|$. So we have found that $$\text{Highly skewed probability }0 \leq H \leq \log_2 |\Sigma|\text{ Uniform probability}$$
-We also have a \textbf{theorem}, of Shannon: any prefix-code for source $\Sigma$ takes an average number of bits $\geq H$ per symbol of $\Sigma$.\\
+The entropy of a source is $$H = \sum_\sigma p_\sigma\cdot\log_2 \frac{1}{p_\sigma} = H_0$$ sometimes specified as $H_0$ which means no context, every symbol is independent from the previous one.\\
+We know that $H_0 \geq 0$ and $\sum_\sigma p_\sigma = 1$ because is a probability distribution.
+\begin{list}{}{}
+	\item $H = 0 \Leftrightarrow p_\sigma = 0\vee \log_2\frac{1}{p_\sigma} = 0 \Leftrightarrow p_\sigma = 0\vee p_\sigma = 1$\\
+	Because the sum is 1, this means that if $$\exists\:\sigma'\:|\:p_{\sigma'}=1 \Rightarrow \forall\:\sigma\neq\sigma'\:\:p_\sigma = 0$$
+	So entropy is $0$ when one symbol has probability 1 and the other have probability $0$
+	\item An upper bound is $H \leq \log_2 |\Sigma|$. The formula of the entropy has its maximum value when all the $p_\sigma$ are equal, so $H \leq \log_2 |\Sigma| \Leftrightarrow p_\sigma = \frac{1}{|\Sigma|}$, a uniform probability: we would have $$\sum_\sigma \frac{1}{|\Sigma|}\cdot\log_2|\Sigma| = |\Sigma|\cdot\left(\frac{1}{|\Sigma|}\cdot\log_2|\Sigma|\right) = \log_2|\Sigma|$$
+\end{list}
+So we have found that $$\text{Highly skewed probability }0 \leq H \leq \log_2 |\Sigma|\text{ Uniform probability}$$
+We also have the \textbf{Theorem of Shannon}: any prefix-code for source $\Sigma$ takes an average number of bits $\geq H$ per symbol of $\Sigma$.\\
 Considering a random variable $X_\sigma$ that gets value $\log_2 \frac{1}{p_\sigma}$ with probability $p_\sigma$, $E[X] = \sum_\sigma p_\sigma\cdot\log_2\frac{1}{p_\sigma} = H$, so $\log_2 \frac{1}{p_\sigma}$ defines the information content of $\sigma$: the \textbf{entropy is the average information content of each symbol}.\\
 This also states that the optimal encoding for a symbol $\sigma$ is a codeword of length $\log_2\left(\frac{1}{p(\sigma)}\right)$
 \paragraph{Code C} Algorithm that assigns sequence of bits (codewords) to symbols $\sigma\in\Sigma$.\\
@@ -698,9 +712,9 @@ c\rightarrow 01
 \end{array}\right.$, with b being the most probable symbol having the shortest length and a and c having same length, where we would get $E[C'] = \frac{1}{4}\cdot2 + \frac{1}{2}\cdot1 + \frac{1}{4}\cdot2 = 1.5$ bits which is better (and optimal, we will prove it).\\
 $\forall\:C$ prefix-free $E[C] \geq H$ (Shannon), so if we can make the length of the codeword of $\sigma$ exactly $\log_2 \frac{1}{p_\sigma}$ bits we have optimality. Formally, if $|\text{cw}(\sigma)| = \log_2\frac{1}{p_\sigma} \Rightarrow C$ is optimal. But $\log_2\frac{1}{p_\sigma}$ is a real number, which cannot be a length. For it to belong to $N$, we should have $p_\sigma = 2^{-x}$.
 \subsection{Integer coding}
-$\Sigma = N$, we will consider sequences of integers $S = s_1s_2\ldots s_n$ with $s_i\in N$ and possibly repetitive (one or more of $s_i$ can repeat). Sometimes we have increasing sequences, such that $s_i < s_{i+1}$: if we have a sequence like this we can transform is into a sequence comprised of the first element and the next element encoded as the distance from the first, the third element encoded as the distance from the original second, and so on. So $S' = 1\:3\:5\:6\:9\ldots$ will be $S = 1\:2\:2\:1\:3\ldots$, these are called $d$-gaps, or gaps, and are used in place of the increasing sequences for the encoding. Of course we can revert $S$ to its original sequence $S'$ by making the prefix sum: a number is the sum of the previous numbers, so by summing the numbers from left to right.\\
+$\Sigma = N$, we will consider sequences of integers $S = s_1s_2\ldots s_n$ with $s_i\in N$ and possibly repetitive (one or more of $s_i$ can repeat). Sometimes we have increasing sequences, such that $s_i < s_{i+1}$: if we have a sequence like this we can transform is into a sequence built by the first element and the second element encoded as the distance from the first, the third element encoded as the distance from the original second, and so on. $$S' = 1\:3\:5\:6\:9\ldots \mapsto S = 1\:2\:2\:1\:3\ldots$$ These are called $d$-gaps, or gaps, and are used in place of the increasing sequences for the encoding. Of course we can revert $S$ to its original sequence $S'$ by making the prefix sum: a number is the sum of the previous numbers, so by summing the numbers from left to right.\\
 This increasing sequences occur in search engines (page ids), databases (keys), hash tables (positions of unempty slots)\ldots\\
-Also if $x\in Z$ we can encode them as integers with $2x$ if $x \geq 0$ or $-2x + 1$ if $x < 0$.\\\\
+Also if $x\in Z$ we can encode them as integers with $2x$ if $x \geq 0$ or $-2x + 1$ if $x < 0$.
 \paragraph{Fixed length code} Up to now we took the maximum $s_i^* = \max_i s_i$ and encoded each $s_i$ with $1+ \lfloor \log_2 s_i^*\rfloor$ bits, a fixed-size encoding.\\
 With $m = s^*$, the fixed length code encodes $s_i$ with $1+ \lfloor \log_2 m\rfloor$ bits.\\
 This is optimal when $$1+ \log_2 m = \log_2 \frac{1}{p(x)}\Leftrightarrow \log_2 2m = \log_2 \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2m}$$
@@ -957,6 +971,7 @@ y = & \text{aba} & \text{t} & \text{e}\\
 In the first phases, we compare the right part of both strings and $x$ could end up before or after $y$, it's not important. At some point, it will compare $a,b$ and since $a< b$ we will have a situation where $x$ comes before $y$. Then we compare $\alpha$, but they are equal and thanks to the stable sort the relative order between $x$ and $y$ will not change (possibly changing distance, but they will not "invert" order). This applies to every pair of strings, so the final order of strings will be a sorted order.
 \subparagraph{More precise complexity} Let's assume binary strings, with $0,1$ digits and of $b$ length. We can apply the LSD radix sort to groups of $r$ bits each: $\frac{b}{r}$ groups. Each group of $r$ bits can be interpreted as a symbol, so $\sigma = 2^r$ maximum configurations of $r$ bits (from all zeroes to all ones)\\
 $\frac{b}{r}$ phases each costing $n+2^r$, so the total cost is $O(\frac{b}{r}(n+2^r))$: the minimum is in $r=\log n$ and so the complexity becomes $(\frac{b}{\log n})\cdot(n+n) = O\left(\frac{n\cdot b}{\log n}\right) = O\left(\frac{N}{\log n}\right)$ time.
+\pagebreak
 \subsection{Multi-key Quicksort}
 The invariant is that that there is a prefix $[0, i-1]$ shared by the strings in $R$, $i$ is the character we compare and at the beginning $i=1$
 \begin{lstlisting}[style=myPython]
@@ -1823,6 +1838,7 @@ It's good but there are a lot of random accesses. We want to solve two problems:
 	\item The data structure itself.\\
 	Over the array we do binary search for $P$\$ and $P$\#, but we want something better: a \textbf{trie}. In the trie, the strings are stored as triples so for every node (every position in the string) we need to do an I/O to access the memory and decode the triple. A much more compact data structure is the patricia trie.
 \end{enumerate}
+\pagebreak
 \subsection{Patricia Trie} Compacted trie where we store just the first letter of every edge of the trie. The search consists of three steps:
 \begin{enumerate}
 	\item Downward traversal: the node represents the position of the bit to compare and go in the edge of the corresponding bit. If stop before reaching a leaf, then we pick any descending leaf.
