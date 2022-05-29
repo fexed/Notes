@@ -426,9 +426,9 @@ At $m=1$ surely $s=0$ $$P(\text{pick }i_j) = P(\text{not picking }i_1,\ldots, i_
 $$ = \frac{\cancel{n-j+1}}{n}\cdot\frac{1}{\cancel{n-j+1}} = \frac{1}{n}$$ So we have a uniform probability when picking $m=1$ items.\\
 What is $P(\text{pick }i_j\text{ given that we have to pick other }s\text{ elements})$? At $j$ we are left with $n-j+1$ items to consider and we have to pick yet $m-s$ items. So we can choose $m-s$ items among $n-j+1$ items: $\left(\begin{array}{c}
 n-j+1\\m-s
-\end{array}\right)$ possibilities. The positive event is the event where $i_j$ has been picked, so $m-s-1$ other samples to choose other than $i_j$ among the $n-j$ remaining without $i_j$: $\left(\begin{array}{c}
+\end{array}\right)$ possibilities. The positive event is when $i_j$ has been picked, so $m-s-1$ other samples to choose other than $i_j$ among the $n-j$ remaining without $i_j$: $\left(\begin{array}{c}
 n-j\\m-s-1
-\end{array}\right)$. Solving the ratio we get $\frac{m-s}{n-j+1}$.
+\end{array}\right)$. Solving the ratio we get $\frac{\displaystyle m-s}{\displaystyle n-j+1}$.
 \paragraph{Reservoir Sampling} Still streaming model but $n$ is unknown. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} so the number assigned is always $\geq$ than the current position.\\
 An example with $M = 3$
 \begin{center}
@@ -585,15 +585,16 @@ Let's create an indicator variable $$A_k^i = \left\{ \begin{array}{c l}
 0&\text{otherwise}
 \end{array}\right.$$
 $$\text{depth}(x_k) = \sum_{i=1}^k A_k^i = \text{proper ancestors of }x_k$$ $$E[\text{depth}(x_k)] = E\left[\sum_{i=1}^k A_k^i\right] = \sum_{i=1}^k E[A_k^i]=$$ and the expected value of a indicator variable is the probability of it being 1 so $$= \sum_{i=1}^k P(A_k^i = 1)$$ which is the probability of $x_i$ being on the path to $x_k$.\\
-We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted, and $x_i < x_k$ or vice versa, is totally symmetric. So $\text{priority}(x_i) > \text{priority}(x_k)$\\
-\textbf{Theorem}: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow priority(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
+We consider $X(i,k)=\{x_i,x_{i+1},\ldots,x_{k-1}, x_k\}$ sorted, and $x_i < x_k$ or vice versa, is totally symmetric.\\
+So $\text{priority}(x_i) > \text{priority}(x_k)$\\
+\textbf{Theorem}: $\forall\: i \neq k$ we have that $x_i$ is a proper ancestor of $x_k \Leftrightarrow \text{priority}(x_i)$ is the largest in $X(i,k) = \{x_i,\ldots,x_k\}$. In the minimum heap the priority would be the smallest.\\
 Various cases:
 \begin{enumerate}
-	\item $x_r$ with largest priority, so $x_r,\ldots, x_i,\ldots, x_k$, so $x_r$ becomes the root of the treap and the $x_i,\ldots, x_k$ go to the right subtree. So we consider the subtree.\\
+	\item $x_r$ with largest priority and $x_r,\ldots, x_i,\ldots, x_k$, $\Rightarrow x_r$ becomes the root of the treap and the $x_i,\ldots, x_k$ goes to the right subtree. So we consider the subtree.\\
 	Same for $x_r$ with largest priority and $x_i,\ldots, x_k,\ldots, x_r$. $x_r$ still root and $x_i,\ldots,x_k$ in the left subtree.\\
-	So we restrict the attention to the $X(i,k)$ set.
-	\item $x_i$ has the largest priority $\Rightarrow x_i$ is the root of the treap and $x_k$ goes to the right, so $x_i$ is the ancestor.
-	\item $x_j$ has the largest priority, where $x_j\neq x_i$ and $x_j \in X(i,k)$, it's one of the items $\Rightarrow x_j$ to the root, $x_i$ to the left and $x_k$ to the right. So $x_i$ is surely \textbf{not an ancestor} of $x_k$.
+	So this case is not significative, we restrict the attention to the $X(i,k)$ set.
+	\item $x_i$ has the largest priority $\Rightarrow x_i$ is the root of the treap and $x_k$ goes to the right, so $x_i$ \textbf{is an ancestor} of $x_k$.
+	\item $x_j$ has the largest priority, where $x_j\neq x_i$ and $x_j \in X(i,k)$, it's one of the items $\Rightarrow x_j$ to the root, $x_i$ to the left and $x_k$ to the right. So $x_i$ \textbf{is not an ancestor} of $x_k$.
 \end{enumerate}
 $$P(x_i\text{ ancestor of }x_k) = P(x_i\text{ has the largest priority of }X(i,k))=$$ Since the priorities are picked at random $$= \frac{1}{|X(i,k)|} = \left\{\begin{array}{c c}
 \frac{1}{\displaystyle k - i + 1} & \text{if }i<k\\
@@ -601,8 +602,9 @@ $$P(x_i\text{ ancestor of }x_k) = P(x_i\text{ has the largest priority of }X(i,k
 \end{array}\right.$$
 Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$
 $$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} =  \underset{\simeq \log_2k}{\underbrace{\sum_{i = 1}^{k-1}\frac{1}{k-i + 1}}} + \underset{\simeq \log_s(n-k+1)}{\underbrace{\sum_{i = k+1}^n \frac{1}{i - k + 1}}}$$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$).\\
-With $k < n$ we have that both quantities are $\leq \log_2 n$, so $O(\log n)$.\\
-If the keys are inserted in random order, so that priority = order of insertion, so average depth is $O(\log n)$.
+With $k < n$ we have that both quantities are $\leq \log_2 n$, so
+$$P(x_i\text{ ancestor of }x_k) = O(\log n)$$
+If the keys are inserted in random order, so that priority = order of insertion, then the average depth is $O(\log n)$.
 \pagebreak
 \subsection{Skip lists} We have a list of items $L_0 = -\infty \rightarrow 3 \rightarrow 6 \rightarrow 7 \rightarrow 10 \rightarrow 15 \rightarrow 16 \rightarrow +\infty$ with $\pm\infty$ logical marks. The search in lists is very bad, the idea is to create levels of lists. List of level $L_1 = -\infty \ldots +\infty$ with vertical pointers.
 \begin{center}
@@ -623,28 +625,40 @@ So keep track of the items that go down and adjust the pointers of those items.
 $P(L(k) \geq l) = $ the probability of extracting $l$ tails (independent coin tosses) $= \left(\frac{1}{2}\right)^l$.\\
 $$P(L \geq l) = P(\max_k L(k) \geq l) = P(\exists\: k\:|\: L(k) \geq l) \leq n\cdot\left(\frac{1}{2}\right)^l = \frac{n}{2^l}$$ for the union bound.
 \begin{enumerate}
-	\item $l \leq \log_2 n \rightarrow \frac{n}{2^l} \geq \frac{n}{2^{\log n}} = \frac{n}{n} = 1$ so the inequality is not significant, because a probability is always $\leq 1$
-	\item $l > \log_2 n \rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
+	\item $l \leq \log_2 n \Rightarrow \frac{n}{2^l} \geq \frac{n}{2^{\log n}} = \frac{n}{n} = 1$ so the inequality is not significant, because a probability is always $\leq 1$
+	\item $l > \log_2 n \Rightarrow \frac{n}{2^l} < \frac{n}{2^{\log n}} = 1$
 \end{enumerate}
 $$P(L \geq c\cdot\log_2 n) \leq \frac{n}{2^{c\cdot\log_2 n}} = \frac{n}{(2^{\log n})^c} = \frac{n}{n^c} = \frac{1}{n^{c-1}}$$
-In the search process we have, with high probability, $O(\log n)$ "down steps". For the number of "right steps", let's observe the process in reverse: from the bottom we go to the left for as many right pointers we find, but we go up as soon as we find a downward pointer. How many right pointers before a vertical pointer on average? We go left when we don't have a vertical pointer, which means with probability $\frac{1}{2}$ because of the coin toss, so it's a sequence of heads ended by a tail (which means going up) so on average we have $2$ right steps. Every level is independent, so it applies to every level.\\
+In the search process we have, with high probability, \textbf{$O(\log n)$ "down steps"}. For the number of "right steps", let's observe the process in reverse: from the bottom we go to the left for as many right pointers we find, but we \textbf{go up as soon as we find a downward pointer}. How many right pointers before a vertical pointer on average? We \textbf{go left when we don't have a vertical pointer}, which means with probability $\frac{1}{2}$ because of the coin toss, so \textbf{it's a sequence of heads ended by a tail} (which means going up) so on average we have $2$ right steps. Every level is independent, so it applies to every level.\\
 So $O(\log n)$ down steps and $O(\log n)$ right steps for the search process, so the total cost of search is $O(\log n)$. Insertion is a search plus a constant number of pointers change, deletion is a search plus a constant number of pointers change so everything is $\log n$.
 \section{Set Intersection}
 From a mathematical point of view we have $A,B\subseteq N$ and we want to compute $A \cap B$ fast. With $|A| = n, |B| = m$, in the case of unsorted sets, the comparison has complexity of $O(n\cdot m)$. We assume sorted sets, so we first sort $A$ and $B$ and then apply one of the algorithms that we'll see.
 \subsection{Merge Based Intersection}
 Based on the merge procedure seen in merge sort. For example $A = \underline{1},5,8,9,\ldots$ and $B = \underline{2}, 5, 9,\ldots$ with pointers on $1\in A$ and $2\in B$, the first elements. In the merge sort we do the comparison and write the minimum, advance the pointer in the corresponding list and go on. In the example we would end up with $1, 2, 5, 5, 8,\ldots$ But we want to simplify this. In this algorithm, whenever two items are compared, the minimum one is discarded and if the items are equal then it goes into the intersection.\\
 It's linear in both lists, so the complexity is $O(n + m)$. This approach is optimal whenever $n$ is in the same order of $m$, or equal.
-\subsection{Binary Search} Assuming $n > m$. We take an element from $B$ and binary search in $A$, for each element of $B$. Every search takes $\log n$, so this costs $O(m\cdot\log n)$. This approach is better than the previous, of $O(n + m)$ complexity, when $m\log n < n \Leftrightarrow m < \frac{n}{\log n}$. So it's better up to a very long $B$, which means that doing a continuous binary search is better than the merge based intersection.\\
-This is true in theory, in practice scanning (the merge based intersection) is typically very fast.
-\subsection{Mutual Partitioning} Still $n > m$. Let's say we take the first item of $B$, binary search over $A$ and find that it's between two certain values in $A$. When we pick the second item of $B$, in the binary search we start from scratch, but it's nonsensical because the second item is larger than the previous item of $B$, so we can search only in the last right partition of $A$ that's left. This way we always go to the right, but if the first item is at the beginning of $A$ we don't advance very much so we try to balance the partitioning: instead of picking the first element of $B$, we pick the middle element in position $\frac{m}{2}$.\\ If that middle element is found to occur between two elements in $A$, and this splits $A$ into $A_1$, until the left element included, and $A_2$ from the right element included. This also splits $B$ into two parts: the left half until the middle element excluded, $B_1$, and the right half from the middle element excluded, $B_2$. If that element is found in $A$, we return it (it belongs to the intersection) and we do the same process with the two halves.\\
-After $\log n$ steps, the binary search, we have turned $A \cap B$ into two problems: $A_1 \cap B_1$ and $A_2 \cap B_2$, over which we can recurse.\\
-We have that $|B_1| = |B_2| = \frac{m}{2}$, with a $\pm 1$ in case of odd $m$. Those two partitions will be again divided, and so on. So we make $\log m$ recursive steps. So the complexity $T(n, m) = O(\log n)$ (for the binary search) $+ T(n_1, \frac{m}{2})$ (for recursion over $A_1 \cap B_1$) $+ T(n_2, \frac{m}{2})$ (for recursion over $A_2\cap B_2$). To solve this we have to make some assumptions:
+\subsection{Binary Search} Assuming $n > m$. For each element in $B$, we binary search for it in $A$. Every search takes $\log n$, so this costs $O(m\cdot\log n)$.\\
+This approach is better than the previous, of $O(n + m)$ complexity, when $m\log n < n \Leftrightarrow m < \frac{n}{\log n}$. So it's better up to a very long $B$, which means that doing a continuous binary search is better than the merge based intersection.\\
+This is true in theory, \textbf{in practice scanning} (the merge based intersection) \textbf{is typically very fast}.
+\subsection{Mutual Partitioning} Still $n > m$. Let's say we take the first item of $B$, binary search over $A$ and find that it's between two certain values in $A$. When we pick the second item of $B$, in the binary search we start from scratch, but it's nonsensical because \textbf{the second item is larger than the previous item of $B$}, so we can \textbf{search only in the last right partition of $A$} that's left. This way we always go to the right, but if the first item is at the beginning of $A$ we don't advance very much so we try to balance the partitioning: instead of picking the first element of $B$, we pick the middle element (in position $\frac{m}{2}$).\\
+That middle element will be found to occur between two elements in $A$, and this splits $A$ into:
 \begin{list}{}{}
-	\item If the partitioning is fully unbalanced (the middle element of $B$ goes either all the way to the left or all the way to the right of $A$)\\
-	 It's a good case because, although we keep all $A$ we still drop half of $B$. We either have $A_1 = \emptyset$ or $A_2 = \emptyset$ but still dropping $\frac{m}{2}$ elements. So in this case $n,m \rightarrow n, \frac{m}{2}\rightarrow n, \frac{m}{4}\ldots$ supposing that every step is fully unbalanced. We have all $n$, so the cost is guided by the binary search over $A$ with $|A| = n$ which we do $\log m$ times, so the total cost is $O(\log n \cdot \log m)$\\
-	 The worst case is the opposite of this one, which is the best case.
-	 \item If the item of $B$ that we search ends up in the middle of $A$, so $|A_1| = |A_2| = \frac{n}{2}$ and $T(n, m) = O(\log n) + T(\frac{n}{2}, \frac{m}{2}) + T(\frac{n}{2}, \frac{m}{2})$ which if solved gives $T(n, m) = O(m(1 + \log\frac{n}{m}))$\\
-	 We will comment on how this is an optimal bound and how we cannot do less comparisons than this one.
+	\item $A_1$: until the left element included
+	\item $A_2$: from the right element included
+\end{list}
+This also splits $B$ into two parts: 
+\begin{list}{}{}
+	\item $B_1$: the left half until the middle element excluded
+	\item $B_2$: the right half from the middle element excluded
+\end{list}
+If that element is found in $A$, we return it (it belongs to the intersection) and we do the same process with the four halves that are left.\\
+After $\log n$ steps, the binary search, we have turned $A \cap B$ into two problems: $A_1 \cap B_1$ and $A_2 \cap B_2$, over which we can recurse.\\
+We have that $|B_1| = |B_2| = \frac{m}{2}$, with a $\pm 1$ in case of odd $m$. Those two partitions will be again divided, and so on. So we make $\log m$ recursive steps. The complexity is 
+$$T(n, m) = \underset{\text{Binary Search}}{\underbrace{O(\log n)}}+ \underset{\text{Recursion over }A_1 \cap B_1}{\underbrace{T\left(n_1, \frac{m}{2}\right)}}+ \underset{\text{Recursion over }A_2 \cap B_2}{\underbrace{T\left(n_2, \frac{m}{2}\right)}}$$
+To solve this we have to make some assumptions:
+\begin{list}{}{}
+	\item If the partitioning is \textbf{fully unbalanced} (the middle element of $B$ goes either all the way to the left or all the way to the right of $A$)\\
+	 It's a \textbf{good case} because, although we keep all $A$ \textbf{we still drop half of $B$}. We either have $A_1 = \emptyset$ or $A_2 = \emptyset$ but still dropping $\frac{m}{2}$ elements. So in this case $n,m \rightarrow n, \frac{m}{2}\rightarrow n, \frac{m}{4}\ldots$ supposing that every step is fully unbalanced. We have all $n$, so the cost is guided by the binary search over $A$ with $|A| = n$ which we do $\log m$ times, so the total cost is $O(\log n \cdot \log m)$
+	 \item If the partitioning is \textbf{fully balanced}, meaning that the item of $B$ that we search for ends up in the middle of $A$, so $|A_1| = |A_2| = \frac{n}{2}$ and $T(n, m) = O(\log n) + T(\frac{n}{2}, \frac{m}{2}) + T(\frac{n}{2}, \frac{m}{2})$ which if solved gives $T(n, m) = O(m(1 + \log\frac{n}{m}))$
 \end{list}
 A theorem states that if we have $s(n)$ solutions, a comparison based algorithm must execute $\Omega(\log_2 S(n))$ comparisons. In this scenario, $|B| = m$ can intersect $|A| = n$ in $\left(\begin{array}{c}
 n\\m
@@ -674,8 +688,8 @@ So the total cost is $O(mL + \frac{n}{L})$. Not optimal but very good, one of th
 \end{center}
 For every bucket we have pointers in the index array $I = 1,3,0,0,4,5\ldots$ with the indexes of the beginning and the end of the bucket in $X$. If I want to search for $y$, given that I partitioned the universe I know already the bucket of $y$: it's $B_J$ with $J = \left\lfloor\frac{\displaystyle y-x_1}{\displaystyle b}\right\rfloor + 1$, so we do a binary search over $B_J$ looking for $y$. It costs constant, for computing $J$, plus the binary search over $B_J$ which costs $O(\log_2 b)$
 \paragraph{Theorem} Time complexity is $O(\log_2 \Delta)$ where $$\Delta = \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}}$$ It's the first time that a complexity depends on the distribution of the data.
-\subparagraph{Proof} The maximum is surely larger than the average so $$\max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\sum_{i=1}^n x_i - x_{i-1}}{n-1}=$$ again a telescopic sum, so $$= \frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$$ $$\max_{2,\ldots,n} x_i - x_{i-1} \geq b$$
-Also $B_J$ cannot contain more than $\frac{\displaystyle b}{\displaystyle \min_{2,\ldots,n} x_i - x_{i-1}}$ since every element is spaced from the next by at least $\min_{2,\ldots,n} x_i - x_{i-1}$
+\subparagraph{Proof} The maximum is surely larger than the average so $$\max_{2,\ldots,n} x_i - x_{i-1} \geq \frac{\overset{\text{Telescopic sum}}{\overbrace{\sum_{i=1}^n x_i - x_{i-1}}}}{n-1}=\frac{x_n - x_1}{n-1} \geq \frac{x_n - x_1 + 1}{n} = b$$
+$B_J$ cannot contain more than $\frac{\displaystyle b}{\displaystyle \min_{2,\ldots,n} x_i - x_{i-1}}$ since every element is spaced from the next by at least $\min_{2,\ldots,n} x_i - x_{i-1}$
 $$|B_J| \leq \frac{b}{\min_{2,\ldots,n} x_i - x_{i-1}} \leq \frac{\max_{2,\ldots,n} x_i - x_{i-1}}{\min_{2,\ldots,n} x_i - x_{i-1}} = \Delta$$
 \pagebreak
 \section{Data Compression}
@@ -690,7 +704,7 @@ We know that $H_0 \geq 0$ and $\sum_\sigma p_\sigma = 1$ because is a probabilit
 \end{list}
 So we have found that $$\text{Highly skewed probability }0 \leq H \leq \log_2 |\Sigma|\text{ Uniform probability}$$
 We also have the \textbf{Theorem of Shannon}: any prefix-code for source $\Sigma$ takes an average number of bits $\geq H$ per symbol of $\Sigma$.\\
-Considering a random variable $X_\sigma$ that gets value $\log_2 \frac{1}{p_\sigma}$ with probability $p_\sigma$, $E[X] = \sum_\sigma p_\sigma\cdot\log_2\frac{1}{p_\sigma} = H$, so $\log_2 \frac{1}{p_\sigma}$ defines the information content of $\sigma$: the \textbf{entropy is the average information content of each symbol}.\\
+Considering a random variable $X_\sigma$ that gets value $\log_2 \frac{1}{p_\sigma}$ with probability $p_\sigma$ $$E[X] = \sum_\sigma p_\sigma\cdot\log_2\frac{1}{p_\sigma} = H$$ so $\log_2 \frac{1}{p_\sigma}$ defines the information content of $\sigma$: the \textbf{entropy is the average information content of each symbol}.\\
 This also states that the optimal encoding for a symbol $\sigma$ is a codeword of length $\log_2\left(\frac{1}{p(\sigma)}\right)$
 \paragraph{Code C} Algorithm that assigns sequence of bits (codewords) to symbols $\sigma\in\Sigma$.\\
 For example, if $\Sigma = \{$a, b, c$\}, C = \left[\begin{array}{l}
@@ -719,15 +733,13 @@ Also if $x\in Z$ we can encode them as integers with $2x$ if $x \geq 0$ or $-2x 
 With $m = s^*$, the fixed length code encodes $s_i$ with $1+ \lfloor \log_2 m\rfloor$ bits.\\
 This is optimal when $$1+ \log_2 m = \log_2 \frac{1}{p(x)}\Leftrightarrow \log_2 2m = \log_2 \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2m}$$
 Which is a uniform distribution from $1$ to $m$, apart from the $2$, which is the case where the fixed-length encoding is optimal.
-\paragraph{Unary code} With $x>0$, $U(x)=00\ldots01$ with $x-1$ zeroes before $1$, therefore the overall length is $x$ bits, assuming $x > 0$.\\
+\paragraph{Unary code} With $x>0$
+$$U(x)=\underset{x-1\text{ zeros}}{\underbrace{0\ldots0}}1\:\:\:\:\:|U(x)| = x$$
 Very efficient for small $x$, but with large $x$ it's inefficient. For which distribution it's optimal? We apply what we've seen before: $$|U(x)| = x = \log \frac{1}{p(x)} \Leftrightarrow  2^x = \frac{1}{p(x)} \Leftrightarrow p(x) = 2^{-x}$$ So it's optimal for highly skewed distributions, very concentrated to small numbers.
 
-\paragraph{$\gamma$-code} Improvement over the unary code, still for $x > 0$.\\
-$\gamma(9) = \begin{array}{c c c}
-000 & 1001 & \\
-|\text{bin(9)}|-1\text{ zeros} & \text{bin(9)} &
-\end{array} = 0001001$ with bin$(x)$ being the binary representation of $x$.\\
-In general, $\gamma(x) = |\text{bin}(x)| - 1$ zeros followed by bin$(x)$.\\
+\paragraph{$\gamma$-code} Improvement over the unary code, still for $x > 0$.
+$$\gamma(x) = \underset{|\text{bin(x)}|-1\text{ zeros}}{\underbrace{0\ldots0}}\:\underset{\text{Binary repr. of }x}{\underbrace{\text{bin}(x)}}$$
+For example: $\gamma(9) = 000\:1001$\\
 bin$(x)$ surely starts with $1$, so to decode you read the number of zeroes until you find the first $1$ and then you know how many bits to read after that $1$\\
 $$|\gamma(x)| = 2\text{bin}(x) - 1 = 2\left(\lfloor\log_2 x\rfloor + 1\right) - 1 = 2\lfloor\log_2 x\rfloor + 1\text{ bits}$$
 Ignoring the floor, in order to get the optimal distribution for the $\gamma$-code we need $$|\gamma(x)| = \log_2\frac{1}{p(x)} \Leftrightarrow 2\log_2 x + 1 = \log_2\frac{1}{p(x)} \Leftrightarrow \log_2 2x^2 = \log \frac{1}{p(x)} \Leftrightarrow p(x) = \frac{1}{2x^2}$$
@@ -736,16 +748,15 @@ The sequence $0\underline{10}00\underline{111}\,\underline{1}0\underline{11}$ is
 From the CPU point of view is a bad code because of bit shifts: scan the number of bits and then read the number, and bits shifts break the pipeline of the processor.\\
 Also for very large numbers we have lots of zeroes so a long decoding time.
 
-\paragraph{$\delta$-code} Again for $x>0$, $\delta(x) = \gamma(|$bin$(x)|)$ followed by bin$(x)$\\
-For example, $\delta(14) = \begin{array}{c c c}
-\gamma(4) & 1110 & \\
-\gamma(|\text{bin(14)}|) & \text{bin(14)} &
-\end{array} = 00\:100\:\:1110$\\
+\paragraph{$\delta$-code} Again for $x>0$, $$\delta(x) = \gamma(|\text{bin}(x)|)\text{bin}(x)$$
+For example, $\delta(14) = \underset{\gamma(|\text{bin(14)}|)}{\underbrace{\gamma(4)}} \underset{\text{bin(14)}}{\underbrace{1110}} = 00\:100\:\:1110$\\
 $\delta$-code is advantageous with large numbers.$$|\delta(x)| = |\gamma(|\text{bin}(x)|)| + |\text{bin}(x)| = \left(2\log_2 |\text{bin}(x)| + 1\right) \left(\log_2 x + 1\right) = 2\log_2(\log_2 x + 1) + 1 + (\log_2 x + 1)=$$
 $$= 2\log_2\log_2 x + \log_2 x + 2 \Rightarrow p(x) = \frac{1}{2x(\log_2 x)^2}$$
 
-\paragraph{Rice encoding} Depends on a parameter $k$, given $x \geq 0$ computes $q = \lfloor\frac{x}{2^k}\rfloor$ and $r = x - q2^k$ with $0\leq r \leq 2^k$. For example, given $x=13, k=2$, we have $q = 3, r = 1$.\\
-The Rice encoding is the unary encoding of $q+1$ ($U(q+1)$) followed by the binary encoding of $r$ on $k$ bits ($B(r)$) which can always be encoded in $\leq k$ bits because $r \leq 2^k$, so we can use always $k$ bits. In our example $R_2(13) = 0001\:01$, while with $k=3$ we have $R_3(13) = 01\:101$ (because $q=1$ and $r=5$).
+\paragraph{Rice encoding} Depends on a parameter $k$: given $x \geq 0$ computes $$q = \left\lfloor\frac{x}{2^k}\right\rfloor$$ $$r = x - q2^k \text{ with } 0\leq r \leq 2^k$$
+$$R_k(x) = U(q+1)\text{bin}(r)$$
+$\text{bin}(r)$ is encoded on $k$ bits: $r$ can always be encoded in $\leq k$ bits because $r \leq 2^k$. \\
+For example, given $x=13, k=2$, we have $q = 3, r = 1$, hence $R_2(13) = 0001\:01$, while with $k=3$ we have $q=1$ and $r=5$ hence $R_3(13) = 01\:101$
 \subparagraph{Geometric distribution} $p$ successes and $1-p$ failures, the geometric distribution is $P($the first success is after $x$ experiments$)$. $P(1) = p, P(2) = (1-p)p,\ldots,P(x) = (1-p)^{x-1}p$.\\
 Also $2^k$ is almost equal to $\frac{\ln 2}{p}$\\\\
 $R_k$ is optimal for the geometric distribution.\\
