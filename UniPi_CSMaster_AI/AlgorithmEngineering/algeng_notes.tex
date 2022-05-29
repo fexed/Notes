@@ -429,8 +429,14 @@ n-j+1\\m-s
 \end{array}\right)$ possibilities. The positive event is the event where $i_j$ has been picked, so $m-s-1$ other samples to choose other than $i_j$ among the $n-j$ remaining without $i_j$: $\left(\begin{array}{c}
 n-j\\m-s-1
 \end{array}\right)$. Solving the ratio we get $\frac{m-s}{n-j+1}$.
-%TODO from here
-\paragraph{Reservoir Sampling} Still streaming model but $n$ is unknown. $S = [a, b, c, d, e, f, g, h, i\ldots]$, $M = 3$. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} $\_, \_, \_, 2, 4, 1, 2, 3, 1$, with the last $1$ is the $h$ position, always drawn from the interval $[1, j]$. The number assigned are always smaller than the position $j$.
+\paragraph{Reservoir Sampling} Still streaming model but $n$ is unknown. Reservoir initialized with first $M$ items, $R = [a, b, c]$. For each value in $S$ we pick $p=$\texttt{rand(1, j)} so the number assigned is always $\geq$ than the current position.\\
+An example with $M = 3$
+\begin{center}
+	\begin{tabular}{r c c c c c c c c c c c}
+	$S=[$ & a&b&c&d&e&f&g&h&i&\ldots&]\\
+	\texttt{rand(1, j)=} & \_&\_&\_&2&4&1&2&3&1
+	\end{tabular}
+\end{center}
 \begin{list}{}{}
 	\item We consider the item $d$, extracts position $2 < 3 = M$ and substitutes $b$ in the reservoir, $R = [a, d, c]$
 	\item $e$, position $4 > 3$ nothing changes
@@ -439,6 +445,7 @@ n-j\\m-s-1
 	\item $h$, $R = [f, g, h]$
 	\item $i$, $R = [i, g, h]$
 \end{list}
+%TODO from here
 So the probability that $i_j$ is stored in $R$ is $\frac{m}{j}$: the probability is $\in [1,j]$ and $m$ are the values needed to pick it.\\
 $P(i_j\in R$ after $n$ steps$)$ must be $\frac{1}{n}$. Since when we discard an item it's discarded forever, in order for $i_j$ to be in $R$ at the $n$th step it had to be in the reservoir at the $n-1$th step. At the $n$th step, in order for $i_j$ to stay in $R$ either two cases need to happen: $i_n$ is not taken (therefore $R$ doesn't change) or $i_n$ is taken and goes in a position different from the one of $i_j$.\\
 $$P(i_j\in R\text{ after }n\text{ steps})= P(i_j\in R\text{ after }n-1\text{ steps})\cdot( P(i_n\text{ is not taken})+ P(i_n\text{ is taken})\cdot P(i_j\text{ is not kicked out}))=$$
