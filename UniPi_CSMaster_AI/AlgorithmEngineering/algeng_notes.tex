@@ -333,27 +333,37 @@ $$\Leftrightarrow T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) +
 $$\Leftrightarrow \frac{1}{3}T(n) \leq O(n) + \frac{1}{3}\cdot T\left(\frac{2}{3}n\right) \Leftrightarrow$$
 $$\Leftrightarrow T(n) \leq O(n) + T\left(\frac{2}{3}n\right)$$
 By applying the master theorem, we have that $T(n) = O(n)$.
-%TODO from here
-\paragraph{Dual Pivot} \textbf{3-Way Partitioning} made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (swaps impacts on memory and comparison on CPU), but the problem here is mispredictions on the CPU, modern CPU do look-ahead in the computing and, if it badly predicts the future comparisons, it has to break the stack and go back. So with fewer comparisons it's better, it reduces the mispredictions. 10\% circa speed-up factor.\\
-The pivots maintain an invariant: the first partition, until index $l-1$, are items smaller than the first pivot ($p$), then there's a partition of items $p\leq \ldots \leq q$ with $q$ being the second pivot and this partition starts at $l$ and ends at $k-1$. Then there's a partition of items that are still to be processed from index $k$ to $g$, and at the end a partition of elements $> q$.
+\paragraph{Dual Pivot} \textbf{3-Way Partitioning} made with 2 pivot taken at random: it reduces the number of comparisons and it increases the number of swaps. This seems totally ineffective (\textbf{swaps impacts on memory} and \textbf{comparisons impact on CPU}), but the problem here is \textbf{mispredictions by the CPU}: modern CPUs do look-ahead in the computing and, if it badly predicts the future comparisons, it has to break the stack and go back. So with fewer comparisons it's better, it reduces the mispredictions: 10\% circa speed-up factor.\\
+The pivots maintain an invariant:
+\begin{list}{}{}
+	\item First partition $[0, l-1]$: items $<p$
+	\item Second partition $[l, k-1]$: items $p\leq \ldots\leq q$
+	\item Third partition $[k, g]$: unprocessed items
+	\item Fourth partition $[g+1, n]$: items $>q$
+\end{list}
 \begin{center}
 	\includegraphics[scale=1]{7.png}
 \end{center}
-We take $S[k]$ and compare it to $p$. If $S[k]<p$ then swap (insert $S[k]$ in position $l$ and increase $l$). Else, we compare $S[k]$ with $q$. If $S[k]\leq q$ we don't have to do anything, it's already in the correct position. Else, $S[k] > q$: we start from $g$ and go back until we find an element $\leq q$ and we swap $S[k]$ with that element.
+We take $S[k]$ and compare it to $p$. If $S[k]<p$ then swap (insert $S[k]$ in position $l$ and increase $l$).\\
+Else, we compare $S[k]$ with $q$. If $S[k]\leq q$ we don't have to do anything, it's already in the correct position. Else, $S[k] > q$: we start from $g$ and go back until we find an element $\leq q$ and we swap $S[k]$ with that element.
 \paragraph{Bounded Quick Sort} Bounding the recursive calls. Transform the deepness of the tree (the number of recursive calls) from $n$ to $\log n$, but the time complexity remains $n^2$ in the worst case.\\
-The trick is removing tail recursion. Techniques applied by compilers, we'll do by hand.\\
+The trick is \textbf{removing tail recursion}. Techniques applied by compilers, we'll do by hand.\\
 \begin{center}
 	\includegraphics[scale=1]{8.png}
 \end{center}
-Generic call, between positions $i$ and $j$. If $j - i > n_0$ (so if is sufficiently small, the array is in cache so we go fast) then we do insertion sort.\\
+Let's see a generic call, between positions $i$ and $j$.\\
+If $j - i > n_0$ (so if the remaining portion is sufficiently small, the array is in cache so we go fast) then we do insertion sort.\\
 In the other case, with $\frac{i+j}{2}$ being the middle element, we do the partitioning: assuming the pivot on the left of the middle ($i \leq p < \frac{i+j}{2}$), the left partition of the pivot is smaller so contains less than half elements. So $i \leq p < \frac{i+j}{2}$, then recurse on the left because it has fewer elements, but we do not recurse on the right because it has a lot of elements so after the recursive call on the left we simply move $i$ by doing $i = p + 1$. Else, with $p$ on the right part, recurse on the right partition and then do $j = p-1$
-\paragraph{Multi Way Quicksort} Key idea, given that we have a long array $S$ to be sorted and that doesn't fit in internal memory: we want to partition $S$ among $k$ buckets $B_1,B_2,B_3,\ldots,B_k$. Every bucket is associated to a pivot: $k-1$ pivots, a logical pivot $s_0 = -\infty$ at the beginning, $s_k = \infty$ at the end and $s_1,s_2,s_3,\ldots,s_{k-1}$ between the buckets.\\
-$B_i=\{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$, so the "right" pivot is part of the bucket ($s_i \in B_i$). The goal is having balanced $B_i \forall\:i$, so $|B_i| = \frac{n}{k}$.\\
-The idea is similar to merge sort but in reverse: we use $k$ buckets of size $B$ in a memory of size $M$, so we want to guarantee that $k\cdot B \leq M$. We sample at random $(k-1)$ pivots from $S$ (done with a scan $O(\frac{n}{B})$ I/Os). Not easy, sampling at random, we will see. We sort the the pivots $s_1 < s_2 < \ldots < s_{k-1}$, with 0 I/Os because those are all in internal memory. But we cannot assume that the buckets in memory can contain the $S$'s buckets. So we fetch $B$ items from $S$ and distribute the items according to the pivots and do until a bucket is full. When a page is full, we write it as a page of the corresponding bucket (according to the pivot). This takes $O(\frac{n}{B})$ I/Os.\\
-In total, $O(\frac{n}{B}) + \sum_{i=1}^k T(|B_i|)$ I/Os and balanced with $|B_i| \simeq \frac{n}{k}$ so $O(\frac{n}{B}) + \sum_{i=1}^k T(\frac{n}{k})$. If we solve the recursive call using a tree, like in quick sort, this becomes $O(\frac{n}{B}\log_k \frac{n}{B})$.
+\paragraph{Multi Way Quicksort} Key idea, given that we have a long array $S$ to be sorted and that doesn't fit in internal memory: we want to partition $S$ among $k$ buckets $B_1,B_2,B_3,\ldots,B_k$. Every bucket is associated to a pivot: $k-1$ pivots, a logical pivot $s_0 = -\infty$ at the beginning, $s_k = \infty$ at the end and $s_1,s_2,s_3,\ldots,s_{k-1}$ between the buckets.
+$$B_i=\{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$$
+So the "right" pivot is part of the bucket ($s_i \in B_i$). The goal is having balanced buckets $B_i \forall\:i$, so $|B_i| = \frac{\displaystyle n}{\displaystyle k}$.\\
+The idea is similar to merge sort but in reverse: we use $k$ buckets of size $B$ in a memory of size $M$, so we want to guarantee that $k\cdot B \leq M$.
+\pagebreak
 \begin{enumerate}
-	\item Pick at random $(a + 1)k - 1$ samples from $S$, the pivots $\Rightarrow A$
-	\item Sort the samples in $A$
+	\item Sample at random $(a + 1)k - 1$ samples from $S$, the pivots $\Rightarrow A$\\
+	This costs a scan, so $O(\frac{n}{B})$
+	\item Sort the samples in $A$ so that $s_1<\ldots<s_{k-1}$\\
+	All the pivots are in internal memory so it costs 0 I/Os.
 	\item $s_i = A[(a+1)i]$\\
 	Until the last block has $a$ items
 	\begin{center}
@@ -361,21 +371,27 @@ In total, $O(\frac{n}{B}) + \sum_{i=1}^k T(|B_i|)$ I/Os and balanced with $|B_i|
 	\end{center}
 	We sampled $(a+1)(k-1) + a = (a+1)k -1$ items
 \end{enumerate}
-If $a = 0$ the number of samples is $k-1$, no oversampling, fast sort ($O(k\log k)$) but no room to play around with the items. If $a > 0$ the sorting costs $O((ak)\log (ak))$. We chose $a = \Theta(\log k)$, only a logarithmic oversampling to get the balance $$a + 1 = 12\ln k$$ Balanced $\Rightarrow |B_i| < 4\cdot\frac{n}{k}$
+If $a = 0$ the number of samples is $k-1$, no oversampling, fast sort ($O(k\log k)$) but no room to play around with the items. If $a > 0$ the sorting costs $O((ak)\log (ak))$. We chose $a = \Theta(\log k)$, only a logarithmic oversampling to get the balance $$a + 1 = 12\ln k$$
+But we cannot assume that the memory can contain the $S$'s buckets, so  we fetch $B$ items from $S$ and distribute the items according to the pivots and do until a bucket is full. When a page is full, we write it as a page of the corresponding bucket (according to the pivot). This takes $O(\frac{n}{B})$ I/Os.\\
+In total, $O(\frac{n}{B}) + \sum_{i=1}^k T(|B_i|)$ I/Os and balanced with $|B_i| \simeq \frac{n}{k}$ so $O(\frac{n}{B}) + \sum_{i=1}^k T(\frac{n}{k})$. If we solve the recursive call using a tree, like in quick sort, this becomes $O(\frac{n}{B}\log_k \frac{n}{B})$.\\
+Balanced $\Rightarrow |B_i| < 4\cdot\frac{n}{k}$
 \paragraph{Proof} By contradiction. We want to estimate $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k})$ and prove that it is $\leq \frac{1}{2}$ so that on average two extractions are enough to guarantee that one is correct.\\
-$B_i = \{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$ by definition. $A_{sort}$  contains samples from $S$.\\
-$S_{sort}$ is composed of $\frac{k}{2}$ cells of size $\frac{2n}{k}$: $t_0, t_1, \ldots, t_\frac{k}{2}$.\\
-Some pieces of $t_i$ will be totally covered by a bucket $B_j$, because since $B_i$ has size of at least $\frac{4n}{k}$ it's not possible for it to be totally included into a $t_i$. $B_j$ has twice the size, so at least one $t_i$ will be totally covered by it. So this means that $P(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k}) \leq P(\exists\: t_j\:|\: t_j$ is covered entirely by some $B_i)$. So the element before the beginning of $B_i$, which is $s_{i-1}$, it's contained in some point of some $t_{j-1}$ and the last element, $s_i$, is in some part of $t_{j+1}$.
+$B_i = \{S[j]\:|\: s_{i-1} < S[j] \leq s_i\}$ by definition. $A_{sort}$  contains samples from $S \Rightarrow S_{sort}$ is composed of $\frac{k}{2}$ cells of size $\frac{2n}{k}$: $t_0, t_1, \ldots, t_\frac{k}{2}$.\\\\
+Some $t_i$ will be totally covered by a bucket $B_j$, because if $B_i$ has size of at least $\frac{4n}{k}$ it's not possible for it to be totally included into a $t_i$: $B_j$ has twice the size, so at least one $t_i$ will be totally covered by it. So this means that $$P\left(\exists\:B_i\:|\:|B_i|\geq \frac{4n}{k}\right) \leq P(\exists\: t_j\:|\: t_j\text{ is covered entirely by some }B_i)$$ So the element before the beginning of $B_i$, which is $s_{i-1}$, it's contained in some point of some $t_{j-1}$ and the last element, $s_i$, is in some part of $t_{j+1}$.
 \begin{center}
 	\includegraphics[scale=0.75]{4.png}
 \end{center}
-This means that the $a$ samples are distributed in that part, between $s_{i-1}$ and $s_i$: part in $t_{j-1}$, part in $t_j$ and part in the beginning of $t_{j+1}$. How many samples inside $t_j$, the block covered by $B_i$? They are surely $< a+1$, so\\$P(\exists\: t_j\:|\: t_j$ is covered entirely by some $B_i) \leq P(\exists\:t_j\:|\:t_j$ contains less than $a+1$ samples$)$\\
-We now apply the \textbf{union bound}: the probability of existence is upper bounded by the number of possibilities times the probability of one of the events. So $P(\exists\:t_j\:|\:t_j$ contains less than $a+1$ samples$) \leq \frac{k}{2}\cdot P(t_1$ contains less than $a+1$ samples$)$. We need to estimate the latter, how many samples will go to $t_1$. $P($sample occurs in $t_1) = \frac{\frac{2n}{k}}{n} = \frac{2}{k}$, and the average number of samples in $t_1$, given $X_i = 1$ if the $i$th item is in $t_1$, is $X =$ \# of samples in $t_1 = \sum_{i = 1}^{(a+1)k - 1} X_i$. So $E[X] = E[\sum_i X_i] = \sum_{i = 1}^{(a+1)k - 1} E[X_1] = ((a+1)k - 1)\frac{2}{k} \geq 2(a+1) - 1$ because $k \geq 2$ and $2(a+1) - 1 \geq \frac{3}{2}(a+1)$.\\
-So $E[X]\geq \frac{3}{2}(a+1) \Leftrightarrow a+1 \leq \frac{2}{3}E[X] = (1-\frac{1}{3})E[X]$\\\\
+This means that the $a$ samples are distributed between $s_{i-1}$ and $s_i$: part in the end of $t_{j-1}$, part inside $t_j$ and part in the beginning of $t_{j+1}$. How many samples inside $t_j$, the block covered by $B_i$? They are surely $< a+1$, so $$P(\exists\: t_j\:|\: t_j\text{ is covered entirely by some }B_i) \leq P(\exists\:t_j\:|\:t_j\text{ contains less than }a+1\text{ samples})$$
+We now apply the \textbf{union bound}: the probability of existence is upper bounded by the number of possibilities times the probability of one of the events. $$P(\exists\:t_j\:|\:t_j\text{ contains less than }a+1\text{ samples}) \leq \frac{k}{2}\cdot P(t_1\text{ contains less than }a+1\text{ samples})$$
+We need to estimate the latter, how many samples will go to $t_1$. $$P(\text{sample occurs in }t_1) = \frac{|t_1|}{n}= \frac{\frac{2n}{k}}{n} = \frac{2}{k}$$
+and the average number of samples in $t_1$, given $$X_i = 1\text{ if the }i\text{th item is in }t_1$$
+$$X = \text{\# of samples in }t_1 = \sum_{i = 1}^{(a+1)k - 1} X_i$$
+$$E[X] = E\left[\sum_i X_i\right] = \sum_{i = 1}^{(a+1)k - 1} E[X_1] = ((a+1)k - 1)\frac{2}{k} \geq 2(a+1) - 1$$ because $k \geq 2$ and $2(a+1) - 1 \geq \frac{3}{2}(a+1)$
+$$E[X]\geq \frac{3}{2}(a+1) \Leftrightarrow a+1 \leq \frac{2}{3}E[X] = \left(1-\frac{1}{3}\right)E[X]$$
 $P(t_1$ contains $< a+1$ sample$) = P(X < a+1)$ and we use the \textbf{Chernov Bound}: $P(X < (1-\delta)E[X]) \leq e^{-\frac{\delta^2}{2}E[X]}$
 $$P(X<a+1)\leq P(X<(1-\frac{1}{3})E[X]) \leq e^{-\frac{1}{18}E[X]} \leq e^{-\frac{1}{18}\cdot\frac{3}{2}(a+1)} = e^{-\frac{1}{12}(a+1)}$$
-Given that $(a+1)=12\ln k$ this becomes $e^{-\frac{1}{12}(12\ln k)} = e^{-\ln k} = \frac{1}{k}$ so $P(t_1$ contains $< a+1$ samples$) \leq \frac{1}{k}$.\\
-So $P(\exists\: B_i\:|\:|B_i|>\frac{4n}{k})\leq \frac{k}{2}\cdot\frac{1}{k} = \frac{1}{2}$
+Given that $(a+1)=12\ln k$ this becomes $$e^{-\frac{1}{12}(12\ln k)} = e^{-\ln k} = \frac{1}{k}$$ $$P(t_1\text{ contains }< a+1\text{ samples}) \leq \frac{1}{k}$$
+$$P\left(\exists\: B_i\:|\:|B_i|>\frac{4n}{k}\right)\leq \frac{k}{2}\cdot\frac{1}{k} = \frac{1}{2}$$
 \section{Random Sampling}
 I have $S[1,n] = [i_1,\ldots,i_n]$ and I want to extract $m \leq n$ from S \textbf{randomly with uniform probability} meaning that $P($extracting $i_j)\frac{1}{n}$.\\
 \texttt{rand(a, b) =} extract a random number from $[a,b]$. We consider two main scenarios: $n$ known and $n$ unknown.
