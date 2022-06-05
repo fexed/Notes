@@ -49,7 +49,7 @@ def code(a, lo, hi):
     else:
         pcode = ""
     # FOR DEBUGGING PURPOSES: next line shows the integer being encoded
-    # pcode = '%d "%s", ' % (a[p], pcode)
+    print('%d between %d and %d -> "%s" ' % (a[p], apmin, apmax, pcode))
     # recursively encode
     before = a[:p]   # elements before a[p]
     after = a[p+1:]  # elements after a[p]
@@ -105,4 +105,9 @@ def bits(k):
 
 # ----- sample array
 
-a = [1, 2, 3, 5, 7, 9, 11, 15, 18, 19, 20, 21]
+a = [1, 6, 10, 16, 17, 20, 34]
+print(a)
+encoding = icode(a)
+print(encoding)
+decoding = idecode(encoding)
+print(decoding)
