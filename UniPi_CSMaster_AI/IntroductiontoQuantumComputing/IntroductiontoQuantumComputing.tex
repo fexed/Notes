@@ -317,8 +317,13 @@ Reversibility is connected to information loss: an irreversible operation produc
 \paragraph{Reversible Circuits} Realize bijection. We have digital circuits with same number of input and outputs. Any classical irreversible circuit can be transformed in a equivalent reversible one (computes same one), by adding new inputs and new outputs and replacing irreversible operations with reversible ones. The extra inputs represent information that we must keep in order to maintain the reversability.\\
 With an irreversible classical circuit of depth $T$ and space $S$, the reversible version uses $O(S+ST)$ space and $T$ depth.
 \subparagraph{Reversible AND} Also known as Toffoli gate.
+
 \begin{center}
-	\includegraphics[scale=0.5]{10.png}
+	\begin{quantikz}
+		\lstick{$x_0$} & \gate[wires=3]{AND} & \qw \rstick{$x_0$}\\
+		\lstick{$x_1$} & &\qw \rstick{$x_1$}\\
+		\lstick{$x_2$} & &\qw \rstick{$x_2\oplus(x_0\wedge x_1)$}
+	\end{quantikz}
 \end{center}
 \paragraph{Universality} A set of gates is universal for classical computation if, for any positive integer $n,m$ and any function $f : \{0,1\}^n\rightarrow \{0,1\}^m$, a circuit can be constructed for computing $f$ using only gates from that set.\\
 Well-known sets are \{AND, OR, NOT\}, \{AND, XOR, NOT\}, \{NAND\}, \{NOR\}:  NAND and NOR gates have the \textbf{functional completeness} property assuming unlimited fanout (a gate can be connected to unlimitedly many nodes).\\\\
@@ -1150,8 +1155,15 @@ $$|\tilde{5}\rangle = \frac{1}{N}\left(\ket{0} + e^{2\pi i\frac{5}{2}}\ket{1}\ri
 	\item 
 \end{list}
 \paragraph{The Circuit}
+
+
 \begin{center}
-	\includegraphics[scale=0.5]{25.png}
+	\begin{quantikz}
+		\lstick{$\ket{J_1}$}&\qw\slice{0}&\gate{H}\slice{1}&\gate{U_2}\slice{2}&\gate{U_3}\slice{}&\ \ldots\ \qw &\gate{U_n}\slice{n}&\qw&\qw&\qw&\ \ldots\ \qw&\qw&\qw&\ \ldots\ \\
+		\lstick{$\ket{J_2}$}&\qw&\qw&\ctrl{-1}&\qw&\ \ldots\ \qw&\qw&\qw&\gate{H}&\gate{U_2}&\ \ldots\ \qw&\gate{U_n}&\qw&\ \ldots\ \\
+		\lstick{\vdots}&&&&\ctrl{-2}&\qw&&&&\ctrl{-1}&\qw&&\\
+		\lstick{$\ket{J_n}$}&\qw&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-3}&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-2}&\qw&\ \ldots\
+	\end{quantikz}
 \end{center}
 \begin{enumerate}
 	\item $|j_1\ldots j_n\rangle$
