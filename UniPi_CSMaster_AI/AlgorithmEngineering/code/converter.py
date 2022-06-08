@@ -20,12 +20,12 @@ def parse(x : str):
     return orig
 
 
-num = 0.53928457
-k = 1
+num = 0.21
+k = 5
 conv = converter(num, k)
 orig = parse(conv)
 err = num-orig
 print("converter(" + str(num) + ", " + str(k) + ") = " + conv)
 print("Parsed yields\t" + str(orig))
 print("Estimated error is 2^(-" + str(k) + ") = " + str(2**-k))
-print("Computed error = " + ("{:.10f}").format(err))
+print("Computed error = " + str(err))
