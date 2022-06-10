@@ -1,4 +1,3 @@
-from cmath import log
 import math
 
 
@@ -56,8 +55,8 @@ def nextgeq(val : int, H : str, L : str, h : int, l : int):
     Lval = binval[-l:]
     eta = select(H, int(Hval, 2), "0") + 1
     if H[eta] == "1":
-        grp = eta - int(Hval, 2)
         while H[eta] == "1":
+            grp = eta - int(Hval, 2)
             Lgrp = group(L, grp, l)
             if int(Lval, 2) < int(Lgrp, 2): return Hval+Lgrp
             else:
@@ -79,6 +78,8 @@ check(nums, H, L)
 elem = access(pos, H, L, h, l)
 first = nextgeq(8, H, L, h, l)
 second = nextgeq(32, H, L, h, l)
+assert int(first, 2) == 9
+assert int(second, 2) == 40
 
 print("S =", nums)
 print("H", H)
