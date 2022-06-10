@@ -16,13 +16,14 @@ def pfordeltaencoding(S : list):
     for s in S:
         bins = bin(s)[2:]
         if len(bins) > b:
-            B += ("1"*b)
+            B += ("1"*b)  # mark is all bits to 1
             W += ("{0:0"+str(w)+"b}").format(s)
         elif len(bins) < b:
             B += ("{0:0"+str(b)+"b}").format(s)
         else:
             B += bins
             if bins == ("1"*b):
+                # s is the maximum value representable on b bits, so I add s to W as well
                 W += ("{0:0"+str(w)+"b}").format(s)
     return W, B
 
