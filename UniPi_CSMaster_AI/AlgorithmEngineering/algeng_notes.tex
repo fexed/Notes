@@ -66,7 +66,7 @@ Classes will be recorded on Microsoft Teams. Also the book "The Magic of Algorit
 \paragraph{Course} \textbf{Design} and \textbf{analysis} of algorithms but also insights about \textbf{implementation}, with reference to libraries and considerations about what happens when using certain algorithms. The use case is \textbf{big data}.
 \subsection{Algorithms} 
 \paragraph{Algorithms} Knuth's definition: "\textit{a finite, definite, effective procedure that takes some input and returns an output, with the output being the answer to the problem you want to solve}."\begin{list}{}{}
-	\item \textbf{Finite}: a \textbf{finite sequence of steps}, not only a finite numbers of operations but also \textbf{the algorithm must terminate}. \texttt{while (true) do ...} will go on forever, so it's not an algorithm. The number of steps must be \textit{very definite and reasonable}, which relates to the efficiency of the algorithm.
+	\item \textbf{Finite}: a \textbf{finite sequence of steps}, not only a finite number of operations but also \textbf{the algorithm must terminate}. \texttt{while (true) do ...} will go on forever, so it's not an algorithm. The number of steps must be \textit{very definite and reasonable}, which relates to the efficiency of the algorithm.
 	\item \textbf{Definite}: the steps are definite in an unambiguous way.
 	\item \textbf{Effective}: every step is basic, atomic, something that we can execute in small or constant time, constant is not a very precise word (seconds? Milliseconds?) so we will accept the "small time" rough definition. Also, the mapping input $\rightarrow$ output must always be correct, which is the biggest difference with IA. An algorithm outputs the correct output for each input.
 \end{list}
@@ -92,7 +92,7 @@ With a $k$ times faster machine, we can imagine that we're using $k$ original ma
 	\item With a linear algorithm on a $k$ times faster machine $\Rightarrow n = kt$\\
 	The \textbf{linear algorithm takes full advantage of the faster machine}
 	\item With a quadratic algorithm on a $k$ times faster machine $\Rightarrow n = \sqrt{kt}$\\
-	The \textbf{quadratic has a small advantage of a multiplicative factor} $\sqrt{k}$
+	The \textbf{quadratic algorithm has a small advantage of a multiplicative factor} $\sqrt{k}$
 	\item With an exponential algorithm on a $k$ times faster machine $\Rightarrow n = \log_2(kt)$\\
 	The \textbf{exponential algorithm has a negligible advantage of a sum factor} $\log_2 k$, basically none
 \end{list}
@@ -257,12 +257,12 @@ $$\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{M}$$
 We don't know how items are consumed on the disks, given $D$ disks. With $k = 2, D = 2$ we can take advantage of the parallelism on the first load. But once loaded in memory, we may consume the pages asymmetrically, so we may end up reading a lot from a disk and very few times from the other. Possibly, every page on the first disk is used before the second page on the second disk. So by adding more disks we take full advantage because they are the denominators. The known optimal bound is:
 $$\Theta\left(\frac{n}{BD}\cdot\log_{\frac{M}{B}}\frac{n}{BD}\right)$$
 For 1 disk is $O(\frac{n}{B}\cdot\log_{\frac{M}{B}}\frac{n}{B})$\\
-For $D$ disks we can consider one big disk with $B' = D\cdot B$ page size, so the heads of the disks are fixed together and move together. We do not change the algorithm, so the complexity is simply $$O\left(\frac{n}{B'}\cdot\log_{\frac{M}{B'}}\frac{n}{B'}\right) = O\left(\frac{n}{DB}\cdot\log_{\frac{M}{DB}}\frac{n}{B'}\right)$$ With D in the base of the logarithm reducing it, making the value larger, but the impact is small and the simplicity of the management with this method makes it worth it. This is called \textbf{disk striping}.
+For $D$ disks we can consider one big disk with $B' = D\cdot B$ page size, so the heads of the disks are fixed together and move together. We do not change the algorithm, so the complexity is simply $$O\left(\frac{n}{B'}\cdot\log_{\frac{M}{B'}}\frac{n}{B'}\right) = O\left(\frac{n}{DB}\cdot\log_{\frac{M}{DB}}\frac{n}{DB}\right)$$ With D in the base of the logarithm reducing it, making the value larger, but the impact is small and the simplicity of the management with this method makes it worth it. This is called \textbf{disk striping}.
 \paragraph{Binary Decision Trees} Every node $(a,b)$ generates a comparison, the left branch is followed if $a<b$ and the right if $a>b$: it \textbf{represents an algorithm}. The \textbf{leafs are sorted permutations according to the path of comparisons}, total number of leafs is $n!$. The question is how big should be the tree so that it's a sorting algorithm, so to reach a number of leafs that's at least $n!$, the number of possible permutations of $n$ elements? It grows by $2^t$ nodes for every level $t$, so $2^t > n!$ and we have the lower bound.\\
 The left subtree, where the comparison is $a < b$, simply generates (by following a path) all the permutations in which $a$ comes before $b$, whatever number of elements are between them. The right path, vice versa, generates permutations where $b$ comes before $a$.
 \subparagraph{Lower bounds} Binary decision trees provide a lower bound of sorting in the RAM model. Now let's see the I/O lower bound, so not counting comparisons but read/written pages.\\
 The main idea is that \textbf{whenever I fetch a page I fetch $B$ items}, not just two, so we can do many comparisons before loading another page. And the page goes in internal memory where there are more items which we compare. Whenever the items goes to internal memory we have to avoid repeating comparisons.\\
-The memory $M$ consists of several items. When we bring the page of size $B$ in internal memory, we already have $M-B$ other items in the memory. So with one I/O we can execute many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. We can assume that the items in memory are sorted, so the item brought can go in 4 position (before the first, between the first two\ldots).\\
+The memory $M$ consists of several items. When we bring the page of size $B$ in internal memory, we already have $M-B$ other items in the memory. So with one I/O we can execute many comparisons. If $B = 1$ and $M - B = 3$, so 3 items in $M$ and 1 item brought from disk. We can assume that the items in memory are sorted, so the item brought can go in 4 positions (before the first, between the first two\ldots).\\
 In general, the $B$ items can enter the $M-B$ items in $n$ ways. The memory consists of $M$ cells, so $n = \left(\begin{array}{c}
 M\\B
 \end{array}\right)\cdot B!$ with $B!$ because we have to account for the shuffling, but it needs to be counted only once when the items are first loaded. We have $\left(\begin{array}{c}
@@ -288,7 +288,7 @@ M\\B
 \end{array}\right)^{t}\cdot \left(B!\right)^{\frac{n}{B}} \geq n!$$
 To compute, consider that $\log\left(\begin{array}{c}
 a\\b
-\end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multi way merge sort bound. $t = \Omega(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M})$
+\end{array}\right) = b\log_2 \frac{a}{b}$ and solving for $t$ gives the multi way merge sort bound. $$t = \Omega\left(\frac{n}{B}\log_{\frac{M}{B}} \frac{n}{M}\right)$$
 \paragraph{Two sorting paradigms} The following:
 \begin{list}{}{}
 	\item \textbf{Merge-based} paradigm: partition (computationally free, $O(1)$), recursion, recombination (merge, $O(\frac{n}{B})$)
@@ -301,7 +301,7 @@ Let's refresh the quick sort. %TODO
 \end{array}\right.$$ and we want the average number of comparisons $$E\left[\sum_{u=1}^m\sum_{v>u}^m X_{u,v}\right] = \sum_{u=1}^m\sum_{v>u}^m E\left[X_{u,v}\right] = $$
 The average of an indicator value (which $X_{u,v}$ is) is the sum of all possible values times their probability $$= \sum_{u=1}^m\sum_{v>u}^m \left(1\cdot P(S[u]\text{ is compared to }S[v]) + 0\cdot P(S[u]\text{ is not compared to }S[v])\right) = $$
 $$=\sum_u \sum_v P(S[u]\text{ is compared to }S[v])$$
-Let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part and when one of the elements is a pivot. With just one pivot and two parts, then $S[u]$ is compared to $S[v]$ only when one of them is the pivot. So $P(S[u]\text{ is compared to}S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
+Let's focus on the probability that taken two items they are compared. Comparison in quick sort is particular, may only occur in the partition part and when one of the elements is a pivot. With just one pivot and two parts, then $S[u]$ is compared to $S[v]$ only when one of them is the pivot. So $P(S[u]\text{ is compared to }S[v]) = P(S[u]$ or $S[v]$ is choosen as pivot in one call that involves both of them$)$
 \begin{list}{}{}
 	\item Case $a$: the pivot is smaller or greater than both items, so both items go to the same partition: not significative because they can be compared in the next time 
 	\item Case $b$: the pivot is between the two items, so no comparison because they'll go to different partitions.
@@ -317,7 +317,7 @@ Pick a random pivot and do a \textbf{three-way partition}:
 	\item Partition of $n_=$ elements of the same value as the pivot (trivially sorted)
 	\item Partition of $n_>$ larger elements than the pivot (unsorted)
 \end{list}
-If the elements falls into the middle partition we can immediately know which elements it is.\\
+If $k$ falls into the middle partition we can immediately know which elements it is.\\
 For example, $[3,2,0,\vline7,7,7,\vline10,8,9]$, if $k$ is 4 we can answer that, being that there are $3$ elements in the left partition, the 4th ranked element is a 7.\\
 \textbf{If $k$ falls in the $=$ partition, I'm done}. \textbf{If it falls in one of the other two}, I don't yet know but we \textbf{can already discard some items}:
 \begin{list}{}{}
@@ -601,7 +601,7 @@ $$P(x_i\text{ ancestor of }x_k) = P(x_i\text{ has the largest priority of }X(i,k
 \frac{1}{\displaystyle i - k + 1} & \text{if }i>k
 \end{array}\right.$$
 Not $\frac{1}{n}$ because we consider only the subset of $X(i,k)$
-$$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} =  \underset{\simeq \log_2k}{\underbrace{\sum_{i = 1}^{k-1}\frac{1}{k-i + 1}}} + \underset{\simeq \log_s(n-k+1)}{\underbrace{\sum_{i = k+1}^n \frac{1}{i - k + 1}}}$$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$).\\
+$$\sum_{i=1, i\neq k}^n \frac{1}{|X(i,k)|} =  \underset{\simeq \log_2k}{\underbrace{\sum_{i = 1}^{k-1}\frac{1}{k-i + 1}}} + \underset{\simeq \log_2(n-k+1)}{\underbrace{\sum_{i = k+1}^n \frac{1}{i - k + 1}}}$$ the first goes like $\log_2 k$ (because it goes like $\frac{1}{k} + \frac{1}{k-1} + \ldots + \frac{1}{2}$) and the second goes like $\log_2 (n - k + 1)$ (because it goes like $\frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n-k+1}$).\\
 With $k < n$ we have that both quantities are $\leq \log_2 n$, so
 $$P(x_i\text{ ancestor of }x_k) = O(\log n)$$
 If the keys are inserted in random order, so that priority = order of insertion, then the average depth is $O(\log n)$.
@@ -802,7 +802,7 @@ Now the encoder goes to the left part, whose first index is $l=1$ and last is $r
 The decoder knows that the value in position $3$ is $\geq 3$ and reasoning from the right, the value is also $\leq 6$. Four possible values, so 2 bits to encode in that range. The encoder writes $00$. Now it would proceed to the left part, but there are two elements from index $1$ to $2$ and the values are again from $1$ and not greater than $2$ because we just encoded $3$, so it's information that the decoder already knows and it starts working on the right part.\\
 It needs to encode $5$, just encoded $3$ and we're on the right part, so the value must be $\geq 4$. It also knows that the last value in this part is at most $8$ because we encoded $9$, so the middle element is between $4$ and $8$, so five elements so $3$ bits where it's encoded $1$, the difference between the actual value $5$ and the minimum value $4$. We proceed, with the $7$. It's at least $6$ (we just encoded $5$) and at most $8$, so two bits.\\
 It proceeds like this.\\\\
-In short: we have $low, l, hi, r$, we find $m = \lfloor\frac{l+r}{2}\rfloor$ and know that $low+m-l\leq S[m]\leq hi + m - r$ so we encode $S[m] - (low + m - l)$ with $\rceil\log_2 B\rceil$ bits where $B = hi + l - r - low +1$ (or, simply, the bound size: right - left + 1).
+In short: we have $low, l, hi, r$, we find $m = \lfloor\frac{l+r}{2}\rfloor$ and know that $low+m-l\leq S[m]\leq hi + m - r$ so we encode $S[m] - (low + m - l)$ with $\lceil\log_2 B\rceil$ bits where $B = hi + l - r - low +1$ (or, simply, the bound size: right - left + 1).
 \paragraph{Effectivness} The bits represents values in ranges, so if the ranges are small we use fewer bits. So it's efficient when values are clustered, "dense".
 \paragraph{Elias Fano codes} Where we can access any value in the compressed sequence very efficiently. We have $n$ increasing values in the range $[0, u)$, $b = \lceil\log_2 u\rceil$ bits for the representation and $l = \lceil\log_2(\frac{u}{n})\rceil$, $h = b-l$. An example with $n = 8, u = 32, b = 5, l = 2, h = 3$
 \begin{center}
@@ -937,7 +937,7 @@ $$\begin{array}{c c c c c c}
 \end{array}$$
 We go down until we have one item per bucket in each level. If we had "019", it would've gone in the second bucket of the second level, so we would have done a third level.\\
 \textbf{For each element $s_i$ we create $d_i$ nodes} (arrays), \textbf{its distinguishing prefix}, but those nodes are in general shared with other strings. So $\forall$ string $s$ we create $d_s$ nodes. The total number of nodes (arrays) $\leq d = \sum_s d_s$ because some nodes are shared between strings. The arrays are of size $\sigma$, so in space terms we have $O(d\cdot \sigma)$. The sorting time is composed of: the time required to create the tree of arrays of $d\cdot\sigma$ nodes, so $O(d\cdot\sigma)$, then we have to scan the final set of strings, the last level, which is at most every possible node of the last level, another $O(d\cdot\sigma)$. So the cost is $O(d\sigma)$. This is not a comparison-based algorithm, so the lower bound stated before doesn't apply.
-\paragraph{Trie} A \textbf{data structure}. It's a tree, every node is an array of $\sigma$ positions where each position have a pointer to other nodes ($\sigma$-ary tree). The \textbf{MSD algorithm builds a trie}.\\
+\paragraph{Trie} A \textbf{data structure}. It's a tree, every node is an array of $\sigma$ positions where each position has a pointer to other nodes ($\sigma$-ary tree). The \textbf{MSD algorithm builds a trie}.\\
 Good and bad properties. The good is that the array is very sparsely populated, with big $\sigma$, so it's very efficient in time for searches, but it's inefficient in space ($d\cdot\sigma$).\\
 Given a pattern $P[1,p]$ of $p$ characters, we can check if $P$ is in the trie or not in $O(p)$, optimal in time. With arrays it's very inefficient in space, though, because most of the arrays would be empty or almost empty especially in the leafs. We need another way of implementing an array, there are two possibilities: binary search tree or hashtable, let's see the second one.
 \subparagraph{Trie with hashtables} We insert $\langle$digit, pointer$\rangle$ pairs. The idea is to create an hashtable for every node whose size is proportional to the number of distinct pairs ($\equiv\#$ edges, the pointers in the arrays). For example, an hashtable $T$ of $3$ positions where we insert the pairs $\langle 1,p_1\rangle, \langle 2,p_2\rangle, \langle \sigma,p_\sigma\rangle$ can be populated by applying the hash function to the keys and end up like $\begin{array}{c c l}
@@ -1639,7 +1639,7 @@ These stability in the ordering guarantees that the mapping is trivial.
 \end{center}
 These operations are just Rank$_{char}$(pos) and Select$_{char}$(pos) and the reason why these operations are so popular nowadays. Rank$_i$(pos) tells how many "i"s are above pos.
 \paragraph{Decompression} After decompressing in the inverse order of the compression, we end up with $L$.\\
-First thing to do is to find $F$: sort $L$ and find $F$. We now need to construct the string, and the first character from which we start, constructing from right to left, is \# which is the first character of $F$. So the last character of $T$ is the corresponding character in $L$, which in the example is an "i". Whenever I have an item in $L$, I compute the corresponding character in $F$ and iterate. The corresponding "i" in $F$ of the first "i" in $L$ is the first $i$ we find in $F$, in the second row. And so on.\\
+First thing to do is to find $F$: sort $L$ and find $F$. We now need to construct the string, and the first character from which we start, constructing from right to left, is \# which is the first character of $F$. So the last character of $T$ is the corresponding character in $L$, which in the example is an "i". Whenever I have an item in $L$, I compute the corresponding character in $F$ and iterate. The corresponding "i" in $F$ of the first "i" in $L$ is the first "i" we find in $F$, in the second row. And so on.\\
 Several issues regarding efficiency in time and space.
 \section{Hashing and Dictionary Problem} 
 \paragraph{Hashing} Typically related to the \textbf{Dictionary problem}: we have a set of objects $D=\{o_1,\ldots,o_n\}$ with every $o_i$ associated to $\langle$key, satellite information$\rangle$. We want to solve queries like:
