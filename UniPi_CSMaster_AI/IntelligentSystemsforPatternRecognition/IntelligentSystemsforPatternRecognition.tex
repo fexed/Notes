@@ -399,7 +399,7 @@ $$P(X\:|\:\mathbf{d}) = \int_H P(X\:|\:h)P(h\:|\:\mathbf{d})\:dh$$
 \paragraph{Regularization} $P(h)$ introduces \textbf{preference across hypothesis}, penalizes complexity: complex hypothesis have lower prior probability, and hypothesis prior embodies trade-off between complexity and degree of fit.
 The MAP hypothesis $h_{MAP}$ can be rearranged in a minimization problem with $\log_2$ (so to count the number of bits).
 $$\max_h P(\mathbf{d}\:|\:h)P(h)\Leftrightarrow\min_h\underbrace{-\overset{\text{Bits needed for the data}}{\overbrace{\log_2(P(\mathbf{d}\:|\:h))}}-\overset{\text{Model complexity}}{\overbrace{\log_2P(h)}}}$$
-The highlighted part is the number of bits needed to represent the date with the number of bits needed to represent the hypothesis. By optimizing only based on $\log_2(P(\underline{d}\:|\:h))$ we choose the hypothesis $h$ that best fits the data, potentially leading to overfitting. With the other term, $\log_2P(h)$ we penalize big models.
+The highlighted part is the number of bits needed to represent the data+ with the number of bits needed to represent the hypothesis. By optimizing only based on $\log_2(P(\underline{d}\:|\:h))$ we choose the hypothesis $h$ that best fits the data, potentially leading to overfitting. With the other term, $\log_2P(h)$ we penalize big models.
 \paragraph{Maximum-Likelihood Learning} Find the model $\theta$ that is most likely to have \textbf{generated} the data $\underline{d}$ from a family of parameterized distributions $P(x\:|\:\theta)$
 $$\theta_{ML} = \arg\max_{\theta\in \Theta} P(\mathbf{d}\:|\:\theta)$$
 Optimization problem that considers the likelihood function $L(\theta\:|\:x)=P(x\:|\:\theta)$
@@ -546,7 +546,7 @@ Factorization should be chosen in a way that nodes $X_v$ and $X_i$ are not in th
 \subparagraph{Maximal Clique Factorization} Define $X = X_1,\ldots,X_n$ as the random variables associated to the $N$ nodes of the undirected graph $G$ $$P(X)=\frac{1}{Z}\prod_C \psi(X_C)$$
 $X_C$ are the random variables in the maximal clique $C$, $\psi(X_C)$ is the \textbf{potential function} over the maximal clique $C$ and $Z$ is the partition function ensuring normalization.
 $$Z = \sum_X\prod_C\psi(X_C)$$
-The partition function $Z$ is the computational bottleneck of undirected modes: $O(K^N)$ for $N$ discrete random variables with $K$ distinct values.
+The partition function $Z$ is the computational bottleneck of undirected models: $O(K^N)$ for $N$ discrete random variables with $K$ distinct values.
 \paragraph{Potential Functions} \textbf{Potential functions} $\psi(X_C)$ \textbf{are not probabilities}, they express which configuration of the local variables are preferred. For example $\psi(X_1,X_2)=\left\{ \begin{array}{l l}
 1&\text{if }X_1 = X_2\\
 4&\text{if }X_2 = 2X_1\\
@@ -612,7 +612,7 @@ $$P(y_t\:|\:y_{t-1})$$
 Also head-to-tail: observation at time $t$ is independent from $t=1,\ldots,t-1$: \textbf{first-order Markov assumption}.\\
 Reference population is a set of independent and identically distributed sequences $y^1, \ldots, y^N$\\
 Difference sequences $y^1, \ldots, y^N$ generally have different lengths $T^1,\ldots,T^N$
-\paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on the $t-1$ previous nodes.\\
+\paragraph{Markov Chain} First-Order Markov Chain is a directed graphical model for sequences such that element $x_t$ only depends on the previous node $x_{t-1}$.\\
 We have X = $x-1,\ldots,x_T$ that can be represented as 
 $$x_1\rightarrow \ldots\rightarrow x_{t-1}\rightarrow x_t\rightarrow\ldots\rightarrow x_T$$
 So we can write $$P(\text{X}) = P(x_1,\ldots,x_T) = P(x_1)\cdot\prod_{i=2}^T P(x_i\:|\:x_{i-1})$$
