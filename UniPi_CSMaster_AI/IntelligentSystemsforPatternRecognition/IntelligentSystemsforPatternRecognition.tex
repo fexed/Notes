@@ -118,7 +118,7 @@ $$\tau\in[-(T^1-1),\ldots,0,\ldots,(T^1-1)]$$
 The maximum $\phi_{\mathbf{x}^1\mathbf{x^2}}(\tau)$ with respect to $\tau$ identifies the displacement of $\mathbf{x}^1$ vs $\mathbf{x}^2$
 \subparagraph{Normalized cross-correlation} Returns an amplitude independent value
 $$\overline{\phi}_{\mathbf{x}^1\:\mathbf{x}^2}(\tau) = \frac{\phi_{\mathbf{x}^1\:\mathbf{x}^2}}{\sqrt{\sum_{t=0}^{T^1-1}(x^1(t))^2\cdot\sum_{t=0}^{T^2-1}(x^2(t))^2}} \in [-1,+1]$$
-With $\overline{\phi}_{\mathbf{x}*1\:\mathbf{x}*2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
+With $\overline{\phi}_{\mathbf{x}^1\:\mathbf{x}^2}(\tau) = +1$ mean that the two time series have the exact same shape if aligned at time $\tau$. Nearing $-1$ we get the maximum anticorrelation, same shape but opposite sign. Near 0 we get that the two signals are completely \textbf{linearly} uncorrelated.\\
 Note that we measure \textbf{linear correlation}.\\\\
 Cross correlation looks like the convolution $$(f * g)[n]=\sum_{t=-M}^M f(n-t)g(t)$$ but we have a flipped sign ($n-t$ instead of $t-\tau$).\\
 Cross-correlation is not symmetric, whereas convolution is ($f * g = g * f$).
@@ -152,7 +152,7 @@ $$\frac{a_0}{2}+\sum_{k=1}^\infty\left(a_k\cos(kx)+b_k\sin(kx)\right)$$
 \paragraph{Representing function in Complex space} Using $\cos(kx)-i\:\sin(kx) = e^{-ikx}$ with $i=\sqrt{-1}$ we can rewrite the Fourier series as $$\sum_{k=-\infty}^\infty c_k e^{ikx}$$
 on the orthonormal system $$\{1,e^{ix},e^{-ix},e^{2ix},e^{-2ix},\ldots\}$$
 \paragraph{Representing Discrete Time Series} Consider $\mathbf{x}=x_0,\ldots,x_{N-1}$ of length $N$ and $x_n\in \mathbb{R}$. Using the exponential formulation, the orthonormal system is finite, from $\mathbf{e}_0$ to $\mathbf{e}_{N-1}$ each $\in \mathbb{C}^N$\\
-The $n$-th component of the $k$-th vector is $$[e_k]n=e^{\frac{-2\pi ink}{2}}$$
+The $n$-th component of the $k$-th vector is $$[e_k]_n=e^{\frac{-2\pi ink}{2}}$$
 \paragraph{Discrete Fourier Transform} Given a time series $\mathbf{x} = x_0,\ldots,x_{N-1}$ its DFT in frequency domain is the sequence $$X_k = \sum_{n=1}^{N-1}x_ne^{\frac{-2\pi ink}{N}}$$
 And can be inverted to go back to the time domain $$x_k = \frac{1}{N}\sum_{k=1}^{N-1}X_ke^{\frac{2\pi ink}{N}}$$
 \paragraph{Basic Spectral Quantities in SFT}
@@ -240,7 +240,7 @@ Reasoning in changes of intensity: edges are those points where the intensity ch
 	\includegraphics[scale=0.5]{4.png}
 \end{center}
 Typically using an edge detector filter on each pixel and turning pixels white or black by thresholding
-\subparagraph{Edges and Gradients} The image gradient (graylevel) is $$\nabla I = \left[\frac{\partial I}{\partial x},\frac{\partial I}{\partial y}\right]$$ which is basically two images, gradient in both $x$ and $y$ directions. Edge are pixel regions where intensity gradient changes abruptly. The return of finite difference methods:
+\subparagraph{Edges and Gradients} The image gradient (graylevel) is $$\nabla I = \left[\frac{\partial I}{\partial x},\frac{\partial I}{\partial y}\right]$$ which is basically two images, gradient in both $x$ and $y$ directions. Edges are pixel regions where intensity gradient changes abruptly. The return of finite difference methods:
 \begin{list}{}{}
 	\item $G_x = \frac{\partial I}{\partial x} \simeq I(x+1,y)-I(x-1,y)$
 	\item $G_y = \frac{\partial I}{\partial y} \simeq I(x,y+1)-I(x,y-1)$
@@ -291,7 +291,7 @@ $$\nabla^2_{norm}g_\sigma(x,y)=\sigma^2\left(\frac{\partial^2g_\sigma}{\partial 
 The LoG can be approximated by the Difference of Gaussians (DoG) for efficiency, so to reuse part of the computations.
 $$g_{k\sigma_0}(x,y) - g_{\sigma_0}(x,y) \simeq (k-1)\sigma_0^2\nabla^2g_{(k-1)\sigma_0}$$
 SIFT uses LoG.
-\paragraph{Affine Detectors} Laplacia-based detectors are invariant to scale thanks to the maximization in scale-space. Still not invariant to affine-transformation.
+\paragraph{Affine Detectors} Laplacian-based detectors are invariant to scale thanks to the maximization in scale-space. Still not invariant to affine-transformation.
 \begin{center}
 	\includegraphics[scale=0.5]{7.png}\\
 	\includegraphics[scale=0.5]{8.png}
