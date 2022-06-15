@@ -897,7 +897,7 @@ Latent variables likelihood $$P(x) = \int_\mathbf{z} \prod_{i=1}^N P(x_i\:|\:z)P
 The assumption is that latent variables conditional and marginal distribution are more tractable than the joint distribution $P(X)$.
 \paragraph{Tractability} Introducing hidden variables can make the posteriors intractable. We need stuff that simplify those posteriors: Bayesian learning introduces priors which introduce integrals in the posteriors computation which are not always analytically or computationally tractable.
 \subsubsection{Kullback-Leibler Divergence}
-An information theoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{q(z\:|\:x)}\right] = E_q[\log q(z)] - E_q[\log p(z\:|\:x)]$$
+An information theoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{p(z\:|\:x)}\right] = E_q[\log q(z)] - E_q[\log p(z\:|\:x)]$$
 Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
 	\item if $q$ and $p$ high, then good (close to $0$)
 	\item if $q$ is high and $p$ is low, then it's unhappy (large divergence)
@@ -917,7 +917,7 @@ How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) =
 Because $\frac{P(x)}{P(x,z)} = \frac{1}{P(z\:|\:x)}$. So it's an optimization problem of finding $\Theta$ and $\phi$ that maximize $L(x,\Theta,\phi)$ reduced to a minimization problem with KL.\\
 We can assume the existence of a probability $Q(z\:|\:\phi)$ which allows to bound the likelihood $P(x\:|\:\Theta)$ from below using $L(x,\Theta,\phi)$.\\
 $L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$ choosing $Q(z\:|\:\phi)=P(z\:|\:x,\Theta)$. So the problem now becomes maximizing ELBO. Maximum Likelihood learning with hidden variables can be approached by maximization of the ELBO $$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$.
-If $P(z\:|\:x,\Theta)$ is tractable then we use it s $Q(z\:|\:\phi)$ (optimal ELBO). Otherwise we choose $Q(z\:|\:\phi)$ as a tractable family of distributions: find $\phi$ that minimize $KL(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta))$ or find $\phi$ that maximize $L(\:,\phi)$.
+If $P(z\:|\:x,\Theta)$ is tractable then we use it as $Q(z\:|\:\phi)$ (optimal ELBO). Otherwise we choose $Q(z\:|\:\phi)$ as a tractable family of distributions: find $\phi$ that minimize $KL(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta))$ or find $\phi$ that maximize $L(\:,\phi)$.
 \paragraph{Example} Bag of Words representations are classical examples of multinomial data. A BOW dataset $X$ is the $N\times M$ document matrix, with $N$ number of vocabulary items $w_j$ and $M$ is the number of documents $d_i$ and $x_{ij} = n(w_j,d_i)$ the number of occurrences of $w_j$ in $d_i$.\\
 Often $M$ is very very large ($\simeq 30$k elements). So we want a smaller representation. Mixture of topics: a topic identifies a pattern in the co-occurrence of multinomial items $w_j$ within the documents. Mixture, so we associate an interpretation (topic) to each item in a document, whose interpretation is then a mixture of the items' topics. We use Latent Variables.
 \paragraph{Latent Dirichlet Allocation} LDA models a document as a mixture of topics $z$. We assign one topic $z$ to each item $w$ with probability $P(w\:|\:z,\beta)$ and pick a topic for the whole document with probability $P(z\:|\:\Theta)$
@@ -1027,7 +1027,7 @@ So $\forall\:v^l\in L$ $$\frac{\partial L}{\partial M_{ij}} = \frac{1}{L}\sum_{l
 We have the clamped expectation under the empirical distribution $\frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l) = E_{v_i^lv_j^l\in L}[v_i^lv_j^l] = \langle v_iv_j\rangle_c$
 $$=\underset{\text{Wake}}{\underbrace{\langle v_iv_j\rangle_c}} - \underset{\text{Dream}}{\underbrace{\langle v_iv_j\rangle_M}} = \Delta M_{ij}$$
 So we're focusing on the neurons $i, j$ and the link between them $M_{ij}$, and we increase the connection when both are 1 so when $\langle v_iv_j\rangle_c$ is larger, so Hebbian learning. The second term $\langle v_iv_j\rangle_M$, if they are in disagreement then they are flipped then it's zero, if instead they are coactive (both on or off) then it's close to $-1$. It's anti-Hebbian, has the purpose of nearing the expectation of the model towards the reality.\\
-When $\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = 0-1$, we get that the model thinks that they are correlated while they are different in reality, so the model stop believing that they are correlated.\\\\
+When $\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = 0-1$, we have that the model thinks that they are correlated while in reality they are different, so the model stops believing that they are correlated.\\\\
 With hidden variables doesn't change much. We have $s=[hv]$
 The wake hebbian term $\sum_h s_is_jP(h\:|\:v)$ and the dream anti-hebbian term $\sum_ss_is_jP(s)$
 $$\frac{\partial P(v\:|\:M)}{\partial M_{ij}} = \sum_h s_is_jP(h\:|\:v) - \sum_ss_is_jP(s) = \langle s_is_j\rangle_c - \langle s_is_j\rangle_M = \Delta M_{ij}$$
