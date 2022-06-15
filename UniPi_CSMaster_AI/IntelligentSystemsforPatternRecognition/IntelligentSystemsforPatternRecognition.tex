@@ -1093,7 +1093,7 @@ To be avoided when:
 Variational inference and sampling are efficient ways to learn approximations to intractable distribution. Neural networks can be used as variational functions or to implement sampling processes.
 \section{Sampling Methods} 
 \paragraph{Sampling} Drawing a set of realizations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
-If we have a sampling set we can use it to approximate $p(x)$ using the \textbf{empirical distribution} $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = i]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
+If we have a sampling set we can use it to approximate $p(x)$ using the \textbf{empirical distribution} $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = x]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
 We can also approximate the expectation of a function $f$ $$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l)$$
 We need sampling when $p(x)$ is intractable. For example, in Bayesian models the parameters are random variables but the posteriors are often intractable so we can use sampling to obtain the model parameters.
 \paragraph{Sampling Procedure as Distributions} A sampler $S$ is a procedure that generates a sample set $X$ from a generic distribution $p(x)$. Since $X$ contains realizations of random variables, also $X$ has a probability distribution. We denote with $\hat{p}_S(X)$ the probability to obtain the sample set $X$ from the sampler $S$.\\
@@ -1222,7 +1222,7 @@ A set of weights that are applied to a 5$\times$5 region of the image. It's a \t
 	\includegraphics[scale=0.5]{53.png}
 \end{center}
 With a number of slices equal to the number of image channels. Basically a filter per channel color, but they are convolved together still giving a $28\times28$ feature map even with 3 color channels for example. The \textbf{convolution map stays bidimensional}.
-\paragraph{Stride} Basic convolution slides the filter on the image one pixel at the time (stride = 1). The slide value is an hyperparameter. The stride reduces the number of multiplication, sumbsampling the image. With a stride of 2 for example we would end up with a $14\times14$ map.
+\paragraph{Stride} Basic convolution slides the filter on the image one pixel at the time (stride = 1). The slide value is an hyperparameter. The stride reduces the number of multiplication, subsampling the image. With a stride of 2 for example we would end up with a $14\times14$ map.
 \paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride $S$ and size $K\times K$, on a image $W\times H$?\\
 For example, a $3\times 3$ filter with stride $2$, $K=3, S=2$ on a $7\times 7$ image: output image is $3\times 3$.
 $$W'=\frac{W-K}{S}+1$$
@@ -1291,7 +1291,7 @@ Training by variants of the standard backpropagation that account for the fact t
 \end{center}
 The gradient $\Delta w_i$ is obtained by summing the contributions from all the connections sharing that weight.\\
 We can write convolution as dense multiplication with shared weights.\\\\
-Backpropagating gradients from convolutional layer $N$ to layer $N-1$ is not as simple as transposing the weight matrix: need \textbf{deconvolution with zero paddign}.
+Backpropagating gradients from convolutional layer $N$ to layer $N-1$ is not as simple as transposing the weight matrix: need \textbf{deconvolution with zero padding}.
 \end{multicols}
 \paragraph{Deconvolution}
 \begin{center}
@@ -1351,9 +1351,6 @@ $$(I*K)(i,j)=\sum_m\sum_nI(i-lm,i-ln)K(m,n)$$
 \end{center}
 Basically convoluting every now and then. Similar to striding but size is preserved.
 \paragraph{Fully Convolutional Networks} Due to not maintaining the original dimension we cannot perform semantic segmentation, so we need \textbf{Fully Convolutional Networks}
-\begin{center}
-	\includegraphics[scale=0.5]{72.png}
-\end{center}
 \begin{list}{}{}
 	\item A convolutional part to extract interesting features at various scales
 	\item Fuse information from feature maps of different scales
