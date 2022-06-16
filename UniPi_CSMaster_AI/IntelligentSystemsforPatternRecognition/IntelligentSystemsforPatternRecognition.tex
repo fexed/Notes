@@ -1779,7 +1779,7 @@ Example of sequence generation:
 \begin{center}
 	\includegraphics[scale=0.5]{125.png}
 \end{center}
-$u_t$ is the binary state update gate, that determine if RNN state is going to be updated or copied (skip). Replacing gated update by copying increases the network memory (LSTM has an exponential fading effect due to the multiplicative gate).
+$u_t$ is the binary state update gate, that determines if RNN state is going to be updated or copied (skip). Replacing gated update by copying increases the network memory (LSTM has an exponential fading effect due to the multiplicative gate).
 \paragraph{Hierarchical Sequential Structure}
 Many sequences have latent hierarchical structures that we want to model explicitly. E.g.: Wikipedia represented as a sequence of characters. The hierarchy would be characters, words, sentences, paragraphs, documents.
 \paragraph{Explicit Boundaries} If explicit boundaries are available, we can have different layers for each level of abstraction. Combining representations from the lower layer to obtain representation for the higher layer. The problem is that typically there are no explicit boundaries available.
@@ -1794,7 +1794,7 @@ Many sequences have latent hierarchical structures that we want to model explici
 \end{center}
 \paragraph{Recap}\begin{list}{}{}
 	\item Recurrence: update at each timestep, linear scan of the sequence, path length $=n$
-	\item Convoluzion: update at each timestep but lopok at the last $k$ timesteps, path length $=\log_k(n)$
+	\item Convolution: update at each timestep but look at the last $k$ timesteps, path length $=\log_k(n)$
 	\item Attention: update the entire sequence in parallel, path length $=1$
 	\item Zoneout: randomly disable unit update
 	\item CW-RNN: blocks of units with different update frequencies, static
@@ -1835,7 +1835,7 @@ $$h_t = \tanh(x_tW_{xh}+h_{t-1}W_{hh})$$
 But the weight matrices $W_{xh}$ and $W_{hh}$ are randomly initialized under stability conditions (\textbf{Echo State Property}) on the dynamical system and left fixed.\\\\
 The \textbf{reservoir} is a large layer of recurrent units, sparsely connected, randomly initialized under the ESP and left \textbf{untrained}.\\\\
 The \textbf{readout} is a linear combination of the reservoir state variables and can be trained in closed form.
-$$y_y = h_tW_{hy}$$
+$$y_t = h_tW_{hy}$$
 $$W_{hy} = (H^TH)^{-1}H^TD$$
 \paragraph{Architecture} Composed of a reservoir and readout
 \paragraph{Setup} Initialize $W_{xh}$ and $W_{hh}$ randomly and scale $W_{hh}$ to meet the contractive/stability property.
@@ -1855,7 +1855,7 @@ $$\forall\:s\in (\mathbb{R}^{N_X})^N \wedge \forall\:h_0,z_0\in\mathbb{R}^{N_H}\
 \textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
 \textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
 We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
-\paragraph{Initialization} Generate a random matrix $W$ (e.g. from a uniform distribution $[-1,1]$ and then scale by the desired spectral radius ($<1$) $$W_{hh} =\rho_{desired}\frac{W}{\rho(W)}$$
+\paragraph{Initialization} Generate a random matrix $W$ (e.g. from a uniform distribution $[-1,1]$) and then scale by the desired spectral radius ($<1$) $$W_{hh} =\rho_{desired}\frac{W}{\rho(W)}$$
 Now $\rho(W_{hh}) = \rho_{desired}$: the \textbf{spectral radius is a key hyperparameter of the reservoir}.
 \paragraph{Dynamical Transient} If the system is globally asymptotically stable, then all the possible trajectories will synchronize \textbf{after a transient}, not instantaneously.\\
 \textbf{Washout} is initial part of the time-series in which the state could be still affected by initialization condition (where the ESP could still not hold). The washout states of the reservoir should be discarded.
