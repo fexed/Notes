@@ -2193,14 +2193,14 @@ The environment state is not usually visible to the agent (unobservable environm
 Even if $S_t^e$ is visible, it may contain irrelevant information.
 \paragraph{Agent State} The agent state $S_t^a$ is the internal representation owned by agent $a$: it's whatever information the agent uses to select its next action. Generally speaking is a function of history, $S_t^a = f(H_t)$, and it's the information used by reinforcement learning algorithms.
 \paragraph{Information (Markov) State} An information state (Markov state) contains all useful information from the history. A state $S_t$ is Markov $\Leftrightarrow P(S_{t+1}\:|\:S_1,\ldots,S_t) = P(S_{t+1}\:|\:S_t)$.\\
-The future is independent of the past given the present (\textbf{d-separation}), meaning $H_{1:t}\rightarrow S_t \rightarrow GH_{t+1:\infty}$. The state is a \textbf{sufficient statistic for the future}. The environment state $S_t^e$ and the history $H_t$ are Markov.
+The future is independent of the past given the present (\textbf{d-separation}), meaning $H_{1:t}\rightarrow S_t \rightarrow H_{t+1:\infty}$. The state is a \textbf{sufficient statistic for the future}. The environment state $S_t^e$ and the history $H_t$ are Markov.
 \paragraph{Observability}
 \begin{list}{}{}
 	\item \textbf{Fully Observable Environment}: full observability means that the agent \textbf{directly} observes the environment state.
 	$$O_t = S_t^a = S_t^e$$
 	Formally, it's a \textbf{Markov Decision Process} (\textbf{MDP}).
 	\item \textbf{Partially Observable Environment}: partial observability means that the agent \textbf{indirectly} observes the environment. E.g.: a robot with a camera may not know its absolute location, a trading agent only observes current prices, a poker player only observes public cards\ldots\\
-	Formally, $S_t^a\neq S_t^e$ and the problem is a \textbf{Partially Observable Markov Decision Process} (\textbf{POMDP}). The agent need to build its own state representation $S_t^a$:
+	Formally, $S_t^a\neq S_t^e$ and the problem is a \textbf{Partially Observable Markov Decision Process} (\textbf{POMDP}). The agent needs to build its own state representation $S_t^a$:
 	\begin{list}{}{}
 		\item History $S_t^a = H_t$
 		\item Beliefs on environment state $S_t^a = [P(S_t^e=s^1),\ldots,P(S_t^e=s^N)]$
@@ -2430,7 +2430,7 @@ Formally
 $$v_{k+1}(s) = \max_{a\in A}\left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v_k(s')\right)$$
 $$v_{k+1} = \max_{a\in A}(R^a + \gamma P^a v_k)$$
 \subsubsection{Extensions}
-\subparagraph{Asynchronous Backups} Dynamic programming methods described so fare used synchronous backups, where all states are backed up in parallel.\\
+\subparagraph{Asynchronous Backups} Dynamic programming methods described so far used synchronous backups, where all states are backed up in parallel.\\
 Asynchronous dynamic programming backs up states individually, in any order: for each selected state, apply the appropriate backup. This can significantly reduce computation, and it's guaranteed to converge if all states continue to be selected. There are three simple approaches for asynchronous dynamic programming:
 \begin{list}{}{}
 	\item \textbf{In-Place Dynamic Programming}\\
@@ -2458,7 +2458,7 @@ So far: solve a known MDP (states, transition, rewards, actions). In a model-fre
 	\item Model-Free Control: optimize the value function of an unknown MDP
 \end{list}
 \subsubsection{Monte-Carlo Reinforcement Learning}
-\paragraph{MC} MC methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of DMP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
+\paragraph{MC} MC methods learn directly from episodes of experience. An episode terminates, so we learn from a sequence of state-action-reward. We assume to accumulate a certain number of these episodes, and MC works based on statistics. MC is model-free: no knowledge of MDP transition/rewards. Also \textbf{complete episodes} (they terminate, no bootstrapping).\\
 Uses the simplest idea: the value is the mean return across episodes.\\
 But can only apply Monte-Carlo to episodic MDPs, where \textbf{all episodes must terminate}.
 \subparagraph{MC Policy Evaluation} Goal: learn $v_\pi$ from episodes of experience under policy $\pi$
@@ -2647,7 +2647,7 @@ Important for various reasons:
 \end{list}
 \paragraph{Off-Policy Control by Q-Learning} Allow both behavior and target policies to improve. The target policy $\pi$ is greedy with respect to $Q(S_t,A_t)$
 $$\pi(S_{t+1})=\arg\max_{a'} Q(S_{t+1}, a')$$
-The behavior policy $mu$ is $\epsilon$-greedy with respect to $Q(s,a)$.\\
+The behavior policy $\mu$ is $\epsilon$-greedy with respect to $Q(s,a)$.\\
 The Q-learning target then simplifies to
 $$R_{t+1}+\gamma Q(S_{t+1}, A') = R_{t+1} + \gamma Q(S_{t+1}, \arg\max_{a'} Q(S_{t+1}, a'))= R_{t+1} + \max_{a'} \gamma Q(S_{t+1}, a')$$
 \subparagraph{Theorem} Q-learning control converges to the optimal action-value function, $Q(s,a)\rightarrow q_*(s,a)$
@@ -2912,7 +2912,7 @@ $$\Delta\theta=\alpha\cdot\underset{\text{Policy gradient}}{\underbrace{\nabla_\
 $$\nabla_\theta J(\theta)= E_{\pi_\theta}\left[\nabla_\theta\log\pi_\theta(s,a)Q^{\pi_\theta}(s,a)\right]$$
 \paragraph{Score Function} Compute the policy gradient analytically. Then, assume policy $\pi_\theta$ is differentiable whenever it is non-zero and we know the gradient $\nabla_\theta\pi_\theta(s,a)$.\\
 The \textbf{likelihood ratios} exploit the following fundamental identity
-$$\nabla_\theta\pi_\theta(s,a)=\pi_\theta(s,a)\frac{\nabla_\theta\pi_\theta(s,a)}{\pi_\theta(s,a)} = \pi_\theta(s,a)\nabla_\theta\log\pi-\theta(s,a)$$
+$$\nabla_\theta\pi_\theta(s,a)=\pi_\theta(s,a)\frac{\nabla_\theta\pi_\theta(s,a)}{\pi_\theta(s,a)} = \pi_\theta(s,a)\nabla_\theta\log\pi_\theta(s,a)$$
 The \textbf{score function} is $\nabla_\theta\log\pi_\theta(s,a)$
 \subparagraph{Softmax Policy} Weight actions using a linear combination features $\phi(s,a)^T\theta$. The probability of action is proportional to exponentiated weight $$\pi_\theta(s,a)\sim e^{\phi(s,a)^T\theta}$$
 The \textbf{score function} is $$\nabla_\theta\log\pi_\theta(s,a)=\phi(s,a)-E_{\pi_\theta}[\phi(s,\:)]$$
