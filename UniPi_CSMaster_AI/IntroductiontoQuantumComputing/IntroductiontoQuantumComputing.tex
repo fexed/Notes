@@ -983,8 +983,8 @@ $$T=\left[\begin{array}{c c}
 \end{array}\right]$$
 Any classical computation can be implemented by a quantum circuit of Toffoli gates.
 \paragraph{Quantum Parallelism} An oracle computing a function is a black-box that computes said function. Quantum if used with quantum bits.\\
-$U_f$ is implemented, due to reversibility, with input $\ket{x}$ of size $n$ and another qubit $|y\rangle$ used to store the result. The output is $\ket{x}$ and $|y\otimes f(x)\rangle$. It's reversible
-$$|x,y\rangle\mapsto_{U_f} |x,y\otimes f(x)\rangle \mapsto_{U_f} |x, (y\otimes f(x))\otimes f(x) \rangle = |x,y\rangle$$
+$U_f$ is implemented, due to reversibility, with input $\ket{x}$ of size $n$ and another qubit $|y\rangle$ used to store the result. The output is $\ket{x}$ and $|y\oplus f(x)\rangle$ ($\oplus$ is the addition modulo 2). It's reversible
+$$|x,y\rangle\mapsto_{U_f} |x,y\oplus f(x)\rangle \mapsto_{U_f} |x, (y\oplus f(x))\oplus f(x) \rangle = |x,y\rangle$$
 In general $\ket{x}$ is of size $n$, meaning $f:\{0,1\}^n\rightarrow\{0,1\}$. To prepare the $\ket{x}$ (data register) in a superposition we apply the Hadamard gate, and we can generalize this procedure on an arbitrary number of qubits:
 Toffoli gate and the quantum implementation:
 \begin{center}
@@ -1013,14 +1013,14 @@ To exploit quantum parallelism, we need the ability to extract information about
 \gateoutput{$y\oplus f(x)$} &\qw & \qw & \qw
 	\end{quantikz}
 \end{center}
-$$f(0)\otimes f(1)=\left\{\begin{array}{c l}
+$$f(0)\oplus f(1)=\left\{\begin{array}{c l}
 0 & f\hbox{ is constant}\\
 1 & f\hbox{ is balanced}
 \end{array}\right.$$
 This circuit solves Deutsch's problem in just one pass. The Hadamard gate on the state $\ket{1}$ is to let the amplitude interfere in order to grasp global properties of the function. The last part measures in the Hadamard basis.
 $$|\psi_1\rangle = \ket{+}\ket{-} = \frac{\ket{0}+\ket{1}}{\sqrt{2}}\frac{\ket{0}-\ket{1}}{\sqrt{2}} = \frac{1}{\sqrt{2}}\ket{0}\ket{-} + \frac{1}{\sqrt{2}}\ket{1}\ket{-}$$
 Recall that the oracle $U_f$ works like this\begin{list}{}{}
-	\item $\ket{x}\ket{-} = \ket{x}\frac{\ket{0}-\ket{1}}{\sqrt{2}} \mapsto_{U_f} \ket{x}\frac{|0\oplus f(x)\rangle - |1\otimes f(x)\rangle}{\sqrt{2}} = \ket{x}\frac{|f(x)\rangle - |\overline{f(x)}\rangle}{\sqrt{2}} = \left\{\begin{array}{l l}
+	\item $\ket{x}\ket{-} = \ket{x}\frac{\ket{0}-\ket{1}}{\sqrt{2}} \mapsto_{U_f} \ket{x}\frac{|0\oplus f(x)\rangle - |1\oplus f(x)\rangle}{\sqrt{2}} = \ket{x}\frac{|f(x)\rangle - |\overline{f(x)}\rangle}{\sqrt{2}} = \left\{\begin{array}{l l}
 	\ket{x}\frac{\ket{0}-\ket{1}}{\sqrt{2}} = \ket{x}\ket{-} & f(x) = 0\\
 	\ket{x}\frac{\ket{1}-\ket{0}}{\sqrt{2}} = -\ket{x}\ket{-} & f(x) = 1
 \end{array}	 \right.$\\
@@ -1062,7 +1062,7 @@ Query register: uniform superposition of all values.\\
 Answer register: uniform superposition of state $\ket{0}$ and $\ket{1}$.
 $$|\psi_2\rangle = \frac{1}{\sqrt{2^n}}U_f\left(\sum_{x\in\{0,1\}^n}\ket{x}\ket{-}\right) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} U_f(\ket{x}\ket{-}) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} (-1)^{f(x)}\ket{x}\ket{-}$$
 Let's see on a single qubit
-$$H|x_i\rangle = \frac{\ket{0}+(-1)^{x_i}\ket{1}}{\sqrt{2}} = \frac{1}{\sqrt{2}} \sum_{z_i\in\{0,1\}} (-1)^{x_i}|z_1\rangle=\left\{\begin{array}{l l}
+$$H|x_i\rangle = \frac{\ket{0}+(-1)^{x_i}\ket{1}}{\sqrt{2}} = \frac{1}{\sqrt{2}} \sum_{z_i\in\{0,1\}} (-1)^{x_i}\ket{z_i}=\left\{\begin{array}{l l}
 \frac{1}{\sqrt{2}}\frac{\ket{0}+\ket{1}}{\sqrt{2}} & x_i = 0\\
 \frac{1}{\sqrt{2}}\frac{\ket{0}-\ket{1}}{\sqrt{2}} & x_i = 1\\
 \end{array}\right.$$
