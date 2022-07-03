@@ -1089,7 +1089,7 @@ We have $x_0,\ldots,x_{N-1}$ and $y_0,\ldots,y_{N-1}$
 Primitive root of unity $\omega_N = e^{\frac{2\pi i}{N}}$
 $$y_N = \frac{1}{\sqrt{N}} = \sum_{j=0}^{N-1} e^{\frac{2\pi ijk}{N}}x_j= \sum_{j=0}^{N-1} \omega_N^{jk}x_j$$
 So we have $$y_N = F_N x$$ with $F_N$ unitary matrix, given by the $k$ indexes. $k=0$ we have all ones in the first row.
-$$F_n = \frac{1}{\sqrt{N}}\left[\begin{array}{c c c c}
+$$F_N = \frac{1}{\sqrt{N}}\left[\begin{array}{c c c c}
 1 & \ldots & \ldots & 1\\
 1 & w_N & \ldots & \omega_N^{N-1}\\
 \vdots\\
@@ -1106,25 +1106,25 @@ $F_N$ needs to be unitary so this multiplication must be $I$, so $(F_N\cdot F_N^
 0&s\neq t\\
 1&s = t
 \end{array}\right.$\\
-It's provable that $\sum_{j=0}^{N-1}\omega_N^{kj}=\left\{\begin{array}{l l}
+It's provable that $$\sum_{j=0}^{N-1}\omega_N^{kj}=\left\{\begin{array}{l l}
 N&k= 0\hbox{ mod }N\\
 0&k\neq 0\hbox{ mod }N
-\end{array}\right.$\\
+\end{array}\right.$$
 So essentially we have $$(F_NF_N^H)_{st} = \frac{1}{N}\sum_{j=0}\omega_N^{js}\omega_N^{-jt}= \frac{1}{N}\sum_{j=0}^{N-1}\omega_N^{j(s-t)}$$
-So it's unitary %TODO proof
+So it's unitary
 \subparagraph{Example} $n=1, N=2$ $$F_2=\frac{1}{\sqrt{2}}\left[\begin{array}{c c}
 1&1\\1&-1
 \end{array}\right] = H$$
 $$\omega_2 = \cos\pi + i\sin\pi$$
+So $\ket{y} = H^{\otimes n}\ket{x}$ it's already a QFT over the group $\mathbb{Z}_2\otimes\ldots\otimes\mathbb{Z}_2$
 \paragraph{Quantum Fourier Transform} We're in the quantum world, so we're working with quantum states. When we measure we collapse from a state, losing the superposition.\\
-$|y\rangle = H^{\otimes n}\ket{x}$ is already a quantum Fourier transform, over a group $Z_2\otimes Z_2\otimes\ldots\otimes Z_2$, binary.\\
-Thanks to Coppersmith in 1994, we pass from $O(N\log N) = O(2^n n)$ of the fast (classical) Fourier transform to the $O(n^2)$ of the quantum one, so from exponential to polynomial: an exponential speedup. But they don't compute the same quantities.\\\\
+Thanks to Coppersmith in 1994, we go from $O(N\log N) = O(2^n n)$ of the fast (classical) Fourier transform to the $O(n^2)$ of the quantum one, so from exponential to polynomial: an exponential speedup. But they don't compute the same quantities.\\\\
 We define QFT on an orthonormal basis $$\ket{0},\ket{1}\ldots|N-1\rangle$$
 $$|\tilde{j}\rangle = QFT(|j\rangle)$$
-More in general, with $$x=\sum_{j=0}^{N-1} x_j|j\rangle$$ $$|\tilde{x}\rangle = QFT(\ket{x})$$
+More in general, with $$\ket{x}=\sum_{j=0}^{N-1} x_j|j\rangle$$ $$|\tilde{x}\rangle = QFT(\ket{x})$$
 To define, we start from the classical definition applying to each element of the basis
 $$|\tilde{j}\rangle = QFT(|j\rangle) = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1} e^{\frac{2\pi ijk}{N}}|k\rangle$$
-So QFT transforms from the canonical $Z$ basis (computational basis) to the Fourier basis.
+So QFT transforms from the canonical $\mathbb{Z}$ basis (computational basis) to the Fourier basis.
 \subparagraph{Example} $n=1$, 1-qubit
 $$|\tilde{0}\rangle=\frac{1}{\sqrt{2}}(\ket{0}+\ket{1})\:\:\:\:\:|\tilde{1}\rangle=\frac{1}{\sqrt{2}}(\ket{0}-\ket{1})$$
 $$|\tilde{j}\rangle=\frac{1}{\sqrt{2}}(\ket{0}+e^{\pi ij}\ket{1})$$
@@ -1141,7 +1141,7 @@ $$|\tilde{j}\rangle = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{\frac{2\pi ijk}{2^n}}
 with $k=k_1k_2\ldots k_n$ which are digits of the binary representation, so can be rewritten in decimal representation as $k = \sum_{s=1}^n k_s2^{n-s}$
 $$= \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}e^{2\pi ij\sum_{s=1}^n k_s2^{-s}}|k_1\ldots k_n\rangle =$$
 $$=\frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\prod_{s=1}^n e^{\frac{2\pi ij k_s}{2^s}}|k_1\ldots k_n\rangle =$$
-If you isolate the first qubit you get a tensor product because of the $\prod$, and the $sum_k$ decomposes into the sums $\sum_{k_1}\sum_{k_2}\ldots$
+If you isolate the first qubit you get a tensor product because of the $\prod$, and the $\sum_k$ decomposes into the sums $\sum_{k_1}\sum_{k_2}\ldots$
 $$=\frac{1}{\sqrt{N}}\left(\ket{0}+e^{\frac{2\pi ij}{2^1}}\ket{1} \right)\otimes\left(\ket{0}+e^{\frac{2\pi ij}{2^2}}\ket{1} \right)\otimes \ldots\otimes \left(\ket{0}+e^{\frac{2\pi ij}{2^n}}\ket{1} \right)$$
 Each qubit has been transformed into something very similar to an Hadamard gate, except for the exponent of $e$.\\
 So we went from $$|j\rangle = |j_1\ldots j_n\rangle = |j_1\rangle\otimes\ldots\otimes|j_n\rangle$$ to $$|\tilde{j}\rangle=\frac{1}{\sqrt{N}}\left(\ket{0} + e^{\frac{2\pi ij}{2^1}}\ket{1}\right)\otimes\ldots\otimes\left(\ket{0} + e^{\frac{2\pi ij}{2^n}}\ket{1}\right)$$
@@ -1184,7 +1184,7 @@ $$|\tilde{5}\rangle = \frac{1}{N}\left(\ket{0} + e^{2\pi i\frac{5}{2}}\ket{1}\ri
 	\item[] \ldots
 	\item[$n$.] $\frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i(\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n})}\ket{1}\right)\otimes|j_2\ldots j_n\rangle=$\\
 	And given that 
-	$j = \sum_{s=1}^nj_s 2^{n-s} = j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0$ so we have
+	$j = \sum_{s=1}^nj_s 2^{n-s} = j_1 2^n+j_22^{n-1}+\ldots +j_n 2^0$ so we have
 	$\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n} = \frac{1}{2^n}(j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0)$ we have that\\
 	$=\frac{1}{\sqrt{2}}\left(\ket{0} + e^{\frac{2\pi ij}{2^n}}\ket{1}\right)\otimes |j_2\ldots j_n\rangle$\\
 	But we end up with the $n$th configuration on the first qubit!
@@ -1270,18 +1270,22 @@ We need to represent in the quantum world this oracle: $U_\beta\ket{x}$. Our dat
 $$U_\beta\ket{x}=\left\{\begin{array}{l l}
 \ket{x}&x\neq\beta\\-\ket{x}&x=\beta
 \end{array}\right.$$
-Identity if the state is $\neq\beta$
+Identity if the state is $\neq\beta$ (with $-1$ in position $(\beta,\beta)$)
 $$U_\beta = \left[\begin{array}{c c c c c}
 1\\
 &1\\
 & &\ddots\\
 & & &-1\\
 & & & &\ddots\\
-\end{array}\right]\hbox{ with }-1\hbox{ in position }(\beta,\beta)$$
-$$U_\beta\ket{x}=(-1)^{\hbox{Oracle}(x)}\ket{x}$$
+\end{array}\right] = \left[\begin{array}{cc c}
+(-1)^{\text{Oracle}(0)}\\
+&\ddots\\
+& & (-1)^{\text{Oracle}(N-1)}\\
+\end{array}\right]$$
+$$U_\beta\ket{x}=(-1)^{\text{Oracle}(x)}\ket{x}$$
 \paragraph{Construction of the Grover Oracle} Classical boolean functions can be converted to reversible quantum circuits.
 $\ket{x}$ enters the circuit that output $\ket{x}$. The circuit is in xor with a $\ket{0}$ that emits $|f(x)\rangle$ such that if $f(x)=0$ nothing happens, so $\ket{0}\rightarrow\ket{0} = |f(x)\rangle$.\\
-If $f(x) = 1$ then $\ket{0}\rightarrow\ket{1}=|f(x)\rangle$.
+If $f(x) = 1$ then $\ket{0}\rightarrow\ket{1}$.
 \begin{center}
 	\includegraphics[scale=0.5]{30.png}
 \end{center}
@@ -1305,7 +1309,7 @@ Two important states:
 	\item $\ket{\psi}$ superposition of all the state
 	\item $\ket{\beta}$ the target state
 \end{list}
-I consider $span\{\ket{\beta},\ket{\psi}\}$ which is a plane in $R^N$ (dimension 2). They are not orthogonal
+I consider $span\{\ket{\beta},\ket{\psi}\}$ which is a plane in $\mathbb{R}^N$ (dimension 2). They are not orthogonal
 $$\langle\beta\ket{\psi} = \frac{1}{\sqrt{N}}\neq 0$$
 But for very large $N$ they are \textbf{almost orthogonal}.\\
 We consider $\ket{\phi}\in span\{\ket{\beta},\ket{\psi}\}$ such that $\langle\phi\ket{\beta}=0$: we can take $\ket{\psi}$ and remove the components in directions of $\ket{\beta}$
@@ -1358,7 +1362,7 @@ $$k\theta + \frac{\theta}{2} = \frac{\pi}{2}$$
 $$k = \left(\frac{\pi}{2}-\frac{\theta}{2}\right)\frac{1}{\theta}$$
 But $\frac{\pi}{2}$ is irrational so we want an approximation
 $(2k+1)\frac{\theta}{2}\simeq\frac{\pi}{2}$
-$$k=\lfloor\frac{\pi}{2\theta}-\frac{1}{2}\rfloor$$
+$$k=\left\lfloor\frac{\pi}{2\theta}-\frac{1}{2}\right\rfloor$$
 For a sufficiently large $N$ we can approximate $\arcsin\left(\frac{\theta}{2}\right) = \frac{\theta}{2} = \frac{1}{\sqrt{N}}$ (from the Taylor expansion of $\arcsin$) getting
 $$k\simeq\left(\frac{\pi}{2}-\frac{1}{\sqrt{N}}\right)\frac{\sqrt{N}}{2} = \frac{\pi}{4}\sqrt{N}-\frac{1}{2}$$
 So the number of iterations $$t\simeq\frac{\pi}{4}\sqrt{N}$$
