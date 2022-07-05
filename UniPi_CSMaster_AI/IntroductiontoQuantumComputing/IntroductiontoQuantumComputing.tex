@@ -1519,10 +1519,10 @@ Input: a positive integer $N$ with $n=\lceil\log_2 N\rceil$ bits.\\
 Output: a factor $p$ of $N$
 \begin{enumerate}
 	\item If $N$ is even, output 2 and stop
-	\item Use a polynomial time algorithm to determine if $_N$ is a prime or a power of a prime. If this is the case, declare it and stop.
+	\item Use a polynomial time algorithm to determine if $N$ is a prime or a power of a prime. If this is the case, declare it and stop.
 	\item Randomly choose an integer $a$ such that $1<a<N$ and run Euclid's algorithm to determine $GCD(a,N)$. If it's $>1$, return it and stop.
 	\item If $a$ and $N$ are coprime, use a Quantum Circuit to find the order $r$ of $a$ mod $N$
-	\item If $r$ is even and $a^{r/2}$ mod $N\neq -1$ compute GCD($a^{\frac{r}{2}}-1,N$) and GCD($a^{\frac{r}{2}}+1,N$) and return at least one non trivial factor of $N$.\\
+	\item If $r$ is even and $a^{\frac{r}{2}}$ mod $N\neq -1$ compute GCD($a^{\frac{r}{2}}-1,N$) and GCD($a^{\frac{r}{2}}+1,N$) and return at least one non trivial factor of $N$.\\
 	Otherwise
 \end{enumerate}
 \paragraph{Observations} The algorithm returns with high probability a non trivial factor of any composite $N$.\\
@@ -1533,7 +1533,7 @@ All steps can be performed efficiently on a classical computer, except (as far a
 	\item The order-finding step could return $r\:|\:a^{r/2}\hbox{ mod }N \equiv -1$
 	\item The reduction to the order-finding problem doesn't work if $r\equiv 1\hbox{ mod }2$ or $a^{r/2}\hbox{ mod }N \equiv -1$
 \end{list}
-\subparagraph{Theorem} Let $N = \prod_{j=1}^kp_j^{n_j}$ be the factorization of $N$, with $p_i\neq p_j$ for $i\neq j$. If $a$ is a random element in $Z_N^*$ (i.e. $0<a<N$ and coprime with $N$), and $r = order(a)$ then
+\subparagraph{Theorem} Let $N = \prod_{j=1}^kp_j^{n_j}$ be the factorization of $N$, with $p_i\neq p_j$ for $i\neq j$. If $a$ is a random element in $\mathbb{Z}^*$ (i.e. $0<a<N$ and coprime with $N$), and $r = order(a)$ then
 $$P\left(r\equiv 0\hbox{ mod }2\wedge a^{r/2}\not\equiv -1\hbox{ mod }N\right)\geq 1-\frac{1}{2^k}$$
 The algorithm only needs to be repeated a constant number of times to successfully factor $N$ with a high probability of success. The expected number of iterations needed to find a factor doesn't grow with $N$. Shor's algorithm can factor in a number of operations polynomial in the dimension of $N$.\\
 \textbf{Exponential speed-up} compared to the best classical algorithm.
@@ -1612,7 +1612,7 @@ $$d(\psi, \delta) = \sqrt{(\psi_x - \delta_x)^2-(\psi_y-\delta_y)^2} = \|\psi-\d
 		\lstick{$\ket{0}$} & \qw & \gate{R_y(\theta_\psi)} & \qw & \gate{R_y(\theta_\delta)} & \qw & \qw \rstick{$\ket{\hbox{res}}$}\\
 	\end{quantikz}
 	\end{center}
-The gate $R_y(\theta_\psi$ corresponds to amplitude encoding the value $\psi$, and the \begin{quantikz} \meter{$0$}\end{quantikz} gate means we measure only when the qubit $e$ is $0$. Why does it work?
+The gate $R_y(\theta_\psi)$ corresponds to amplitude encoding the value $\psi$, and the \begin{quantikz} \meter{$0$}\end{quantikz} gate means we measure only when the qubit $e$ is $0$. Why does it work?
 \begin{enumerate}
 	\item We start from $\ket{0_e0}$ and put into superposition the first qubit
 	$$|0_e0\rangle \Rightarrow \frac{1}{\sqrt{2}}(\ket{0}+\ket{1})\ket{0} = \frac{1}{\sqrt{2}}(\ket{00}+\ket{10})$$
@@ -1626,9 +1626,9 @@ The gate $R_y(\theta_\psi$ corresponds to amplitude encoding the value $\psi$, a
 	\item $H$ applied on $\ket{e}$. Knowing that $H\ket{0} = \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})$ and $H\ket{1} = \frac{1}{\sqrt{2}}(\ket{0} - \ket{1})$ we get
 	$$\Rightarrow \frac{1}{\sqrt{2}}\left(\frac{1}{\sqrt{2}}(\ket{0_e\delta}-\ket{1_e\delta})+\frac{1}{\sqrt{2}}(\ket{0_e\psi} + \ket{1_e\psi})\right) =$$
 	We do some refactoring: take out $\frac{1}{\sqrt{2}}$
-	$$= \frac{1}{\sqrt{4}}\left(\ket{0_e\delta}-\ket{1_e\delta} + \ket{0_e\psi} + \ket{1_e\psi}\right) =$$
+	$$= \frac{1}{2}\left(\ket{0_e\delta}-\ket{1_e\delta} + \ket{0_e\psi} + \ket{1_e\psi}\right) =$$
 	and group by $\ket{0}_e$ and $\ket{1}_e$
-	$$= \frac{1}{\sqrt{4}}\left(\ket{0_e}(\ket{\psi}+\ket{\delta}) + \ket{1_e}(\ket{\psi}-\ket{\delta})\right)$$
+	$$= \frac{1}{2}\left(\ket{0_e}(\ket{\psi}+\ket{\delta}) + \ket{1_e}(\ket{\psi}-\ket{\delta})\right)$$
 	\item We post select on $\ket{0}_e$. $\psi$ and $\delta$ are normalized, so
 	$$P(\ket{0}_e) = \|\frac{1}{2}(\psi+\delta)\|_2^2 = \frac{1}{4}\|\psi + \delta\|_2^2  = 1-\frac{1}{4}\|\psi-\delta\|_2^2 \Leftrightarrow P(\ket{0}_e)-1 = -\frac{1}{4}\|\psi-\delta\|_2^2 = d(\psi, \delta)^2$$
 	So given $s$ shots, the distance is given by $\#\ket{0}_e$, the number of times that the algorithm measures $0$ on the first qubit.
@@ -1676,7 +1676,7 @@ in circuit can be represented as
 	\end{quantikz}
 \end{center}
 We want to load our first values on this quantum memory. Let's say we want to encode in the memory address $d_0$
-$$\ket{Q} = \psi_0\ket{d_0}\ket{0}_R+\sum_{j=0,j\neq d_0}^{M-1} \psi_k\ket{j}_B\ket{0}_R$$
+$$\ket{Q} = \psi_0\ket{d_0}\ket{0}_R+\sum_{j=0,j\neq d_0}^{M-1} \psi_j\ket{j}_B\ket{0}_R$$
 We amplitude encode the value $\theta_0$ in the memory address $d_0 = \ket{00}$ and $\theta_1$ in $d_1 = \ket{01}$ (the empty dot activates the control gate when the qubit is 0, the full dot activates when the qubit is 1).
 \begin{center}
 	\begin{quantikz}
@@ -1686,13 +1686,13 @@ We amplitude encode the value $\theta_0$ in the memory address $d_0 = \ket{00}$ 
 	\end{quantikz}
 \end{center}
 So we applied a controlled gate $C_{00}R_y(\theta_1)$
-$$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+\sum_{j=0,j\neq d_0}^{M-1} \psi_k\ket{j}_B\ket{0}_R$$
+$$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+\sum_{j=0,j\neq d_0}^{M-1} \psi_j\ket{j}_B\ket{0}_R$$
 $$\ket{\theta_0}_R = \cos\theta_0\ket{0}+\sin\theta_0\ket{1}$$
 We want to encode in memory address $d_1 = \ket{01}$ the value $\theta_1$
-$$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+ \psi_1\ket{d_1}\ket{\theta_1}_R+\sum_{j=0,j\neq d_0,j\neq d_1}^{M-1} \psi_k\ket{j}_B\ket{0}_R$$
+$$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+ \psi_1\ket{d_1}\ket{\theta_1}_R+\sum_{j=0,j\neq d_0,j\neq d_1}^{M-1} \psi_j\ket{j}_B\ket{0}_R$$
 The final formula is
 $$\ket{Q} = \sum_{l=0}^{M-1}  \psi_{d_l}\ket{d_l}(\cos\theta_l\ket{0}_R + \sin\theta_l\ket{1}_R) + \sum_{j\not\in\{d_l\}} \psi_j\ket{j}\ket{0}_R$$
-So we allocate more space than needed. If $M = 3$ we still allocate 4 memory addresses: $\theta_1, \theta_2,\theta_3$ are real data, and $\theta_4$ is a dummy value. How to manage it? We don't want the $\sum_{j=0,j\neq d_0,j\neq d_1}^{M-1} \psi_k\ket{j}_B\ket{0}_R$ part, we simply need a post selection on qubit $\ket{\:}_R$, ignoring the unused addresses.
+So we allocate more space than needed. If $M = 3$ we still allocate 4 memory addresses: $\theta_1, \theta_2,\theta_3$ are real data, and $\theta_4$ is a dummy value. How to manage it? We don't want the $\sum_{j=0,j\neq d_0,j\neq d_1}^{M-1} \psi_j\ket{j}_B\ket{0}_R$ part, we simply need a post selection on qubit $\ket{\:}_R$, ignoring the unused addresses.
 \section{Towards a Quantum Programming Language}
 \paragraph{Quantum Computation} We've seen it mostly from the point of view of gates and circuits. This covers the \textbf{data flow} aspects, but not the \textbf{control flow} aspect.\\
 Selinger (2002) moves the perspective to programming languages for quantum devices, with the typical constructs: conditionals, loops\ldots in this sense we find both data flow and control flow aspects, hardware independent.\\
@@ -1841,7 +1841,7 @@ $$\Gamma = A$$
 	\item $q\oplus =p$ CNOT gate, $p$ control bit
 \end{list}
 The output of a quantum flowchart is in general mixed state. The map associated with a QFC must send mixed states to mixed states.
-\paragraph{Notation} $c\in \mathbb{C}, \overline{c} \in \mathbb{C}$, $C^{n\times m}$ with $n$ rows and $m$ columns.\\
+\paragraph{Notation} $c\in \mathbb{C}, \overline{c} \in \mathbb{C}$, $\mathbb{C}^{n\times m}$ with $n$ rows and $m$ columns.\\
 $I$ identity matrix, $A= (a_{ij})_{ij}$, $A^* = (\overline{a}_{ji})_{ij}$ \textbf{conjugate transposed}\\
 With $A,B,C,D\in \mathbb{C}^{n\times m}$ we can write
 $$\left(\begin{array}{c c}
@@ -1872,11 +1872,10 @@ Order is important: lexicographic order taken
 	\item Create quantum superposition $H0 = \frac{1}{\sqrt{2}}\mathbf{0} + \frac{1}{\sqrt{2}}\mathbf{1}$
 	\item Entanglement CNOT$(H\mathbf{0}\otimes\mathbf{0})=\frac{1}{\sqrt{2}}\mathbf{00}+\frac{1}{\sqrt{2}}\mathbf{11}$
 \end{list}
-\paragraph{Measurements} Capability to observe the value of a qubit and convert it into a classical bit. E.g. $q = \alpha\ket{1}+\beta\ket{1}$ has overall probability of $|\alpha|^2+|\beta|^2=1$ and we measure $q=0$ with probability $|\alpha|^2$ and $q=1=$ with probability $|\beta|^2$.\\
+\paragraph{Measurements} Capability to observe the value of a qubit and convert it into a classical bit. E.g. $q = \alpha\ket{1}+\beta\ket{1}$ has overall probability of $|\alpha|^2+|\beta|^2=1$ and we measure $q=0$ with probability $|\alpha|^2$ and $q=1$ with probability $|\beta|^2$.\\
 Given 
 $$\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}$$
-If we measure the first qubit we end up in $\alpha\ket{00}+\beta\ket{01}$ with probability $P_0=|\alpha|^2+|\beta|^2$ and in $\gamma\ket{10}+\delta\ket{11}$ with probability $P_0=|\gamma|^2+|\delta|^2$. If we measure the second qubit from $P_0$ we may end up in $\alpha\ket{00}$ with probability $P_{00}\frac{|\alpha|^2}{|\alpha|^2+|\beta|^2}$.\\
-The overall probability of measuring $\alpha\ket{00}$ is $P_{0}\cdot P_{00} = |\alpha|^2$
+If we measure the first qubit we end up in $\alpha\ket{00}+\beta\ket{01}$ with probability $P_0=|\alpha|^2+|\beta|^2$ and in $\gamma\ket{10}+\delta\ket{11}$ with probability $P_0=|\gamma|^2+|\delta|^2$. If we measure the second qubit from $P_0$ we may end up in $\alpha\ket{00}$ with probability $P_{00} = \frac{|\alpha|^2}{|\alpha|^2+|\beta|^2}$. The overall probability of measuring $\alpha\ket{00}$ is $P_{0}\cdot P_{00} = |\alpha|^2$
 \subparagraph{Selinger's Convention} We normalize each state in such a way that the sum of the squares of the amplitudes is equal to the overall probability that this state is reached. No necessary to renormalize each state after every measurement.\\\\
 Recall that, given a state vector $u\in \mathbb{C}^{2^n}$ of $n$ qubits that completely describes the state of the quantum system. But an external observer has only partial knowledge: may be in state $u$ or $v$ with equal probability (e.g. measure qubit but don't observe the result)
 $$\frac{1}{2}\{u\}+\frac{1}{2}\{v\}$$
