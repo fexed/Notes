@@ -1062,7 +1062,7 @@ Query register: uniform superposition of all values.\\
 Answer register: uniform superposition of state $\ket{0}$ and $\ket{1}$.
 $$|\psi_2\rangle = \frac{1}{\sqrt{2^n}}U_f\left(\sum_{x\in\{0,1\}^n}\ket{x}\ket{-}\right) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} U_f(\ket{x}\ket{-}) = \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} (-1)^{f(x)}\ket{x}\ket{-}$$
 Let's see on a single qubit
-$$H|x_i\rangle = \frac{\ket{0}+(-1)^{x_i}\ket{1}}{\sqrt{2}} = \frac{1}{\sqrt{2}} \sum_{z_i\in\{0,1\}} (-1)^{x_i}\ket{z_i}=\left\{\begin{array}{l l}
+$$H|x_i\rangle = \frac{\ket{0}+(-1)^{x_i}\ket{1}}{\sqrt{2}} = \frac{1}{\sqrt{2}} \sum_{z_i\in\{0,1\}} (-1)^{x_iz_i}\ket{z_i}=\left\{\begin{array}{l l}
 \frac{1}{\sqrt{2}}\frac{\ket{0}+\ket{1}}{\sqrt{2}} & x_i = 0\\
 \frac{1}{\sqrt{2}}\frac{\ket{0}-\ket{1}}{\sqrt{2}} & x_i = 1\\
 \end{array}\right.$$
@@ -1158,9 +1158,9 @@ So the the phase applied is qubit dependent
 \subparagraph{Example} $n=3, |j\rangle=|101\rangle$
 $$|\tilde{5}\rangle = \frac{1}{N}\left(\ket{0} + e^{2\pi i\frac{5}{2}}\ket{1}\right)\otimes\left(\ket{0} + e^{2\pi i\frac{5}{4}}\ket{1}\right)\otimes\left(\ket{0} + e^{2\pi i\frac{5}{8}}\ket{1}\right)$$
 \paragraph{Building Blocks for the Circuit}\begin{list}{}{}
-	\item $H|j_s\rangle\mapsto\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\frac{2\pi i}{2}j_s}\ket{1}\right)$
+	\item $$H|j_s\rangle\mapsto\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\displaystyle \frac{2\pi i}{2}j_s}\ket{1}\right)$$
 	\item Something that depends on the index and does the right rotation: the $U_s$ rotation gate depending on $s$.\\
-	$U_s|j_t\rangle\mapsto e^{\frac{2\pi i }{2^s}j_t}|j_t\rangle$\\
+	$$U_s|j_t\rangle\mapsto e^{\displaystyle \frac{2\pi i }{2^s}j_t}|j_t\rangle$$
 	Just applies a phase.
 	\item 
 \end{list}
@@ -1176,17 +1176,17 @@ $$|\tilde{5}\rangle = \frac{1}{N}\left(\ket{0} + e^{2\pi i\frac{5}{2}}\ket{1}\ri
 	\end{quantikz}
 \end{center}
 \begin{enumerate}
-	\item $|j_1\ldots j_n\rangle$
-	\item $H|j_1\rangle = \frac{1}{\sqrt{2}}\left(\ket{0} e^{\frac{2\pi i}{2}j_1}\ket{1}\right)\otimes |j_2\ldots j_n\rangle$
-	\item Apply the gate only when $j_2$ is 1 (the black dot means that), but that's how $U$ works, it has a 0 on the $\ket{0}$\\
-	$\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}\ket{1}\right)\otimes|j_2\ldots j_n\rangle$
-	\item $\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}e^{\frac{2\pi i}{2^3}j_1}\ket{1}\right)\otimes|j_2\ldots j_n\rangle$
+	\item $$|j_1\ldots j_n\rangle$$
+	\item $$H|j_1\rangle\otimes |j_2\ldots j_n\rangle = \frac{1}{\sqrt{2}}\left(\ket{0} + e^{\frac{2\pi i}{2}j_1}\ket{1}\right)\otimes |j_2\ldots j_n\rangle$$
+	\item Apply the gate only when $j_2$ is 1 (the black dot means that), but that's how $U$ works, it has a 0 on the $\ket{0}$
+	$$\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}\ket{1}\right)\otimes|j_2\ldots j_n\rangle$$
+	\item $$\frac{1}{\sqrt{2}}\left(\ket{0}+e^{\frac{2\pi i}{2}j_1}e^{\frac{2\pi i}{2^2}j_2}e^{\frac{2\pi i}{2^3}j_1}\ket{1}\right)\otimes|j_2\ldots j_n\rangle$$
 	\item[] \ldots
-	\item[$n$.] $\frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i(\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n})}\ket{1}\right)\otimes|j_2\ldots j_n\rangle=$\\
+	\item[$n$.] $$\frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i(\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n})}\ket{1}\right)\otimes|j_2\ldots j_n\rangle=$$
 	And given that 
 	$j = \sum_{s=1}^nj_s 2^{n-s} = j_1 2^n+j_22^{n-1}+\ldots +j_n 2^0$ so we have
-	$\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n} = \frac{1}{2^n}(j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0)$ we have that\\
-	$=\frac{1}{\sqrt{2}}\left(\ket{0} + e^{\frac{2\pi ij}{2^n}}\ket{1}\right)\otimes |j_2\ldots j_n\rangle$\\
+	$\frac{j_1}{2}+\frac{j_2}{2^2}+\ldots+\frac{j_n}{2^n} = \frac{1}{2^n}(j_1 2^n+j_s^{n-1}+\ldots +j_n 2^0)$ we have that
+	$$=\frac{1}{\sqrt{2}}\left(\ket{0} + e^{\frac{2\pi ij}{2^n}}\ket{1}\right)\otimes |j_2\ldots j_n\rangle$$
 	But we end up with the $n$th configuration on the first qubit!
 \end{enumerate}
 So we implements QFT in the reverse order, applying for example swap gates at the beginning or changing the configuration of the qubits at the end.
@@ -1227,11 +1227,11 @@ The \textbf{QPE problem} is formulated as follows: given that we have the abilit
 \begin{enumerate}
 	\item My state is $\ket{0}\ket{\psi}$
 	\item $\ket{\psi}$ doesn't change and we apply $H$ to $\ket{0}$ which becomes $\ket{+}$\\
-	The state is $\frac{1}{\sqrt{2}}(\ket{0}+\ket{1})\ket{\psi} = \frac{1}{\sqrt{2}}\ket{0}\ket{\psi} + \frac{1}{\sqrt{2}}\ket{1}\ket{\psi}$
-	\item $U$ applies only on the second qubit.\\
-	The state is $\frac{1}{\sqrt{2}}\ket{0}\ket{\psi} + \frac{1}{\sqrt{2}}e^{i\theta_\psi}\ket{1}\ket{\psi}$
-	\item $H\ket{0} = \ket{+}$ and $H\ket{1} = \ket{-}$, but $H$ applied only on the first qubit.\\
-	The state is $\frac{1}{\sqrt{2}}(\frac{\ket{0}+\ket{1}}{\sqrt{2}})\ket{\psi} + \frac{1}{\sqrt{2}}e^{i\theta_\psi}(\frac{\ket{0}-\ket{1}}{\sqrt{2}})\ket{\psi} = \frac{1}{2}[(1+e^{i\theta_\psi})\ket{0} + (1-e^{i\theta_\psi})\ket{1}]\ket{\psi}$
+	The state is $$\frac{1}{\sqrt{2}}(\ket{0}+\ket{1})\ket{\psi} = \frac{1}{\sqrt{2}}\ket{0}\ket{\psi} + \frac{1}{\sqrt{2}}\ket{1}\ket{\psi}$$
+	\item $U$ is applied only on the second qubit when the first is $\ket{1}$.\\
+	The state is $$\frac{1}{\sqrt{2}}\ket{0}\ket{\psi} + \frac{1}{\sqrt{2}}e^{\displaystyle i\theta_\psi}\ket{1}\ket{\psi}$$
+	\item $H\ket{0} = \ket{+}$ and $H\ket{1} = \ket{-}$, and $H$ is applied only on the first qubit.\\
+	The state is $$\frac{1}{\sqrt{2}}\left(\frac{\ket{0}+\ket{1}}{\sqrt{2}}\right)\ket{\psi} + \frac{1}{\sqrt{2}}e^{\displaystyle i\theta_\psi}\left(\frac{\ket{0}-\ket{1}}{\sqrt{2}}\right)\ket{\psi} = \frac{1}{2}\left(\left(1+e^{\displaystyle i\theta_\psi}\right)\ket{0} + \left(1-e^{\displaystyle i\theta_\psi}\right)\ket{1}\right)\ket{\psi}$$
 \end{enumerate}
 The probability of measuring $\ket{0}$ in the first qubit is the square of the amplitude. So we've encoded the information in the amplitudes, and they are different so I can distinguish them. The drawback is that we perform a complex circuit.\\\\
 With QFE this is different. $\theta$ in general is $\in \mathbb{R}$. The beginning of the QPE circuit is this:
@@ -1241,7 +1241,7 @@ With QFE this is different. $\theta$ in general is $\in \mathbb{R}$. The beginni
 We apply a power of $U$: $U^{2^{n-1}}$ for $n$ bits, all the powers from $2^{n-1}$ to $2^0$.
 \begin{enumerate}
 	\item $\ket{0}^{\otimes n}\ket{\psi}$
-	\item $\left(\frac{1}{\sqrt{2}}\right)^n (\ket{0}+\ket{1})^{\otimes n}\ket{\psi}$
+	\item $$\left(\frac{1}{\sqrt{2}}\right)^n (\ket{0}+\ket{1})^{\otimes n}\ket{\psi}$$
 	\item We have that $$U^k\ket{\psi} = \left(e^{i\theta_\psi}\right)^k\ket{\psi}$$
 	The control bit is entangled, so by applying the $U$ gate the phase kicks back to the control bit.
 	$$\left[\begin{array}{c c}
@@ -1685,7 +1685,7 @@ We amplitude encode the value $\theta_0$ in the memory address $d_0 = \ket{00}$ 
 		\lstick{$\ket{0}_R$} & \qw & \gate{R_y(\theta_0)} & \qw & \gate{R_y(\theta_1)} & \qw
 	\end{quantikz}
 \end{center}
-So we applied a controlled gate $C_{00}R_y(\theta_1)$
+So we applied a controlled gate $C_{00}R_y(\theta_0)$
 $$\ket{Q} = \psi_0\ket{d_0}\ket{\theta_0}_R+\sum_{j=0,j\neq d_0}^{M-1} \psi_j\ket{j}_B\ket{0}_R$$
 $$\ket{\theta_0}_R = \cos\theta_0\ket{0}+\sin\theta_0\ket{1}$$
 We want to encode in memory address $d_1 = \ket{01}$ the value $\theta_1$
@@ -1703,9 +1703,9 @@ Loops and recursion are allowed, through an intuitive denotational semantics (pi
 The \textbf{fundamental operations} are: \textbf{unitary transformations} and \textbf{measurements}.\\
 Quantum algorithms interleave classical and quantum computation.
 \paragraph{Hardware} Not important for now: Knull's QRAM model, classical device sends quantum circuits to a quantum device which returns some measurement. The classical controller can then decide what to do next. We assume to have some idealized hardware: no limits of memory, any unitary transformation, no noise, no error correction needed\ldots
-\paragraph{Approach} States are exactly not state vectors, but they are density matrices. Several advantages: \begin{list}{}{}
+\paragraph{Approach} States are not exactly state vectors, but they are density matrices. Several advantages: \begin{list}{}{}
 	\item Pure states $\ket{\psi}$ are representable together with \textbf{mixed states} (e.g. measure, so collapse, but don't look at the measurement, getting $a_1\ket{\psi_1}+\ldots+a_n\ket{\psi_n}$ which is not a superposition)
-	\item For the recursion, we need a complete partial order, state vectors do not follow it but density matrices do
+	\item For the recursion, we need a total partial order, state vectors do not follow it but density matrices do
 	\item Abstract away from the global phase
 	\item Main advantage: drastically reduce the number of square roots
 \end{list} 
@@ -1869,10 +1869,10 @@ $$q = \alpha\mathbf{00} + \beta\mathbf{01} + \gamma\mathbf{10} + \delta\mathbf{1
 Order is important: lexicographic order taken
 \subparagraph{Unitary Transformations}
 \begin{list}{}{}
-	\item Create quantum superposition $H0 = \frac{1}{\sqrt{2}}\mathbf{0} + \frac{1}{\sqrt{2}}\mathbf{1}$
+	\item Create quantum superposition $H\mathbf{0} = \frac{1}{\sqrt{2}}\mathbf{0} + \frac{1}{\sqrt{2}}\mathbf{1}$
 	\item Entanglement CNOT$(H\mathbf{0}\otimes\mathbf{0})=\frac{1}{\sqrt{2}}\mathbf{00}+\frac{1}{\sqrt{2}}\mathbf{11}$
 \end{list}
-\paragraph{Measurements} Capability to observe the value of a qubit and convert it into a classical bit. E.g. $q = \alpha\ket{1}+\beta\ket{1}$ has overall probability of $|\alpha|^2+|\beta|^2=1$ and we measure $q=0$ with probability $|\alpha|^2$ and $q=1$ with probability $|\beta|^2$.\\
+\paragraph{Measurements} Capability to observe the value of a qubit and convert it into a classical bit. E.g. $q = \alpha\ket{0}+\beta\ket{1}$ has overall probability of $|\alpha|^2+|\beta|^2=1$ and we measure $q=0$ with probability $|\alpha|^2$ and $q=1$ with probability $|\beta|^2$.\\
 Given 
 $$\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}$$
 If we measure the first qubit we end up in $\alpha\ket{00}+\beta\ket{01}$ with probability $P_0=|\alpha|^2+|\beta|^2$ and in $\gamma\ket{10}+\delta\ket{11}$ with probability $P_0=|\gamma|^2+|\delta|^2$. If we measure the second qubit from $P_0$ we may end up in $\alpha\ket{00}$ with probability $P_{00} = \frac{|\alpha|^2}{|\alpha|^2+|\beta|^2}$. The overall probability of measuring $\alpha\ket{00}$ is $P_{0}\cdot P_{00} = |\alpha|^2$
