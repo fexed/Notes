@@ -1,0 +1,104 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{multicol}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage[bookmarks]{hyperref}
+\usepackage[a4paper, total={18cm, 25cm}]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\graphicspath{ {./img/} }
+\usepackage{listings}
+\usepackage{makecell}
+\usepackage{qtree}
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usetikzlibrary{quantikz, shapes, arrows}
+\usepackage{blochsphere}
+\usepgflibrary{shapes}
+\usepackage{cancel}
+\usepgfplotslibrary{fillbetween}
+\definecolor{backcolour}{RGB}{255,255,255}
+\definecolor{codegreen}{RGB}{27,168,11}
+\definecolor{codeblue}{RGB}{35,35,205}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{205,35,56}
+\lstdefinestyle{myPython}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{codeblue},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\small\ttfamily,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=2pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	language=python
+}
+\newcommand*\triangled[1]{\tikz[baseline=(char.base)]{
+            \node[regular polygon, regular polygon sides=3,draw,inner sep=1pt] (char) {#1};}}
+            
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead{}
+\begin{document}
+\title{The HHL Algorithm}
+\author{Federico Matteoni}
+\date{A.A. 2021/22}
+\maketitle
+\section{Introduction}
+The HHL algorithm was designed by Aram Harrow, Avinatan Hassidim and Seth Lloyd, and pulished in 2008.\\
+Linear systems of equations are very commonplace throughout all the fields of science and field of research. The efficient manipulation of matrices has become a requirement for many different algorithms and applications, ranging from fluid simulation to machine learning. In all these fields, one of the most common problem is finding a solution to a linear system of equations.\\
+Most classical methods compute an exact solution in polynomial time: this is a different setup from other quantum algorithms, that improve over the exponential time required from their classical counterparts. Linear systems in real context, however, may contain matrices with millions of parameters, and even a polynomial algorithm can take too long to compute.\\
+HHL is an algorithm that approximates a function of the solution vector of a linear system with logarithmic time complexity. This speedup has significant implications regarding applications of machine learning algorithms on quantum computers.
+\section{Linear Systems}
+Given a matrix $A \in \mathbb{C}^{N\times N}$ and a vector $b\in \mathbb{C}^{N}$, the solution of the linear system is $x\in \mathbb{C}^{N}$ such that $Ax = b$. For example, with $N=2$:
+$$A=\left(\begin{array}{c c}
+1&-\frac{1}{3}\\-\frac{1}{3}&1
+\end{array}\right)\:\:\:x=\left(\begin{array}{c}
+x_1\\x_2
+\end{array}\right)\:\:\:b=\left(\begin{array}{c}
+1\\0
+\end{array}\right)$$
+The problem can be written as finding $x_1,x_2\in\mathbb{C}$ such that
+$$\left\{\begin{array}{l}
+\displaystyle x_1-\frac{x_2}{3}=1\\
+\displaystyle -\frac{x_1}{3}+x_2=0
+\end{array}\right.$$
+The HHL algorithm requires some conditions on the components of the problem:
+\begin{list}{}{}
+	\item The matrix $A$ must be
+	\begin{list}{}{}
+		\item Hermitian, meaning $A = A^H \Leftrightarrow a_{ij} = \overline{a}_{ij}$
+		\item $s$-sparse, meaning at most $s$ non-zero elements per row or column
+		\item with conditioning number $\mathbf{k}$, meaning $\mathbf{k}=\frac{\lambda_{\text{max}}}{\lambda_{\text{min}}}$ %TODO check
+	\end{list}
+	\item The vector $b$ must be unitary, meaning $\|b\|=1$
+\end{list}
+Given $\epsilon$ accuracy, solving this problem on a classical computer requires $$O\left(Ns\mathbf{k}\left(\frac{1}{\epsilon}\right)\right)$$ while the HHL algorithm can compute \textbf{a function of the solution} in $$O\left(\frac{\log(N)s^2\mathbf{k}^2}{\epsilon}\right)$$
+By using the HHL algorithm we obtain an exponential speedup in $N$, dimension of the system, but we have a very important difference: the classical algorithm returns the exact solution, while HHL can only approximate a function of the solution. The solution can still be obtained, but reading it requires a time linear in the number of elements of the solution, which can cancel out the obtained speedup. So this algorithm is very useful when we're interested in a function $x^TMx$ of the solution $x$ rather than in the solution itself.
+\section{Encoding the Problem in the Quantum World}
+We can assume $b$ normalized, meaning $\|b\|=1$, and we want to map it into $\ket{b}$. We will encode $b$ in $\ket{b}$ using the \textbf{amplitude encoding}: each $b_i$ will be the amplitude of the $i$th element of the basis of the quantum state.
+$A$ is an Hermitian matrix. This means that it is a square matrix that's equal to its transposed conjugate, $A=A^H$. Hence, it has a spectral decomposition: given $\lambda_j\in\mathbb{R}$ eigenvalue of $\ket{u_j}$, the $j$th eigenvector, we have 
+$$A=\sum_{j=0}^{N-1} \lambda_j\ket{u_j}\bra{u_j}$$
+$$A^{-1} = \sum_{j=0}^{N-1}\lambda_j^{-1}\ket{u_j}\bra{u_j}$$
+The eigenvectors of $A$ form a basis, hence we can rewrite $b$ in that basis
+$$\ket{b} = \sum_{j=1}^{N-1}b_j\ket{u_j}$$
+with $b_j\in\mathbb{C}$. $\ket{x}$ can also be expressed in this form:
+$$\ket{x}=A^{-1}\ket{b}=\sum_{i=0}^{2^{n_b}-1}\lambda_i^{-1}b_i\ket{u_i}$$
+The goal of HHL is to find $\ket{x}$ in this form and store it in a quantum register.\\
+This requires some normality conditions:
+$$\sum_{j=0}^{2^{n_b}-1}|b_j|^2=1\:\:\:\sum_{i=0}^{2^{n_b}-1}|\lambda_i^{-1}b_i|^2=1$$
+\section{The Algorithm Step-by-Step}
+
+\end{document}  
