@@ -58,9 +58,9 @@
 \maketitle
 \section{Introduction}
 The HHL algorithm was designed by Aram Harrow, Avinatan Hassidim and Seth Lloyd, and published in 2008.\\
-Linear systems of equations are very commonplace throughout all the fields of science and branches of research. The efficient manipulation of matrices has become a requirement for many different algorithms and applications, ranging from fluid simulation to machine learning. In all these fields, one of the most common problem is finding a solution to a linear system of equations.\\
+Linear systems of equations are very commonplace throughout all the fields of science and branches of research. The efficient manipulation of matrices has become a requirement for many different algorithms and applications, ranging from fluid simulation to machine learning. In all these fields, one of the most common problems is finding a solution to a linear system of equations.\\
 Most classical methods compute an exact solution in polynomial time: this is a different setup from other quantum algorithms, that improve over the exponential time required from their classical counterparts. Linear systems in real contexts, however, may contain matrices with millions of parameters, and even a polynomial algorithm can take too long to compute.\\
-HHL is an algorithm that approximates a function of the solution vector of a linear system with logarithmic time complexity. This speedup has significant implications regarding applications of machine learning algorithms on quantum computers.
+HHL is an algorithm that approximates a function of the solution vector of a linear system with logarithmic time complexity. This exponential speedup has significant implications regarding applications of machine learning algorithms on quantum computers.
 \section{Linear Systems}
 Given a matrix $A \in \mathbb{C}^{N\times N}$ and a vector $b\in \mathbb{C}^{N}$, the solution of the linear system is $x\in \mathbb{C}^{N}$ such that $Ax = b$.\\
 For example, with $N=2$:
@@ -80,32 +80,33 @@ The HHL algorithm requires some conditions on the components of the problem:
 \begin{list}{}{}
 	\item The matrix $A$ must be
 	\begin{list}{}{}
-		\item Hermitian, meaning $A = A^H \Leftrightarrow a_{ij} = \overline{a}_{ij}$
+		\item Hermitian, meaning $A = A^H \Leftrightarrow a_{ij} = \overline{a}_{ji}$
 		\item $s$-sparse, meaning at most $s$ non-zero elements per row or column
-		\item with conditioning number $\mathbf{k}$, meaning $\mathbf{k}=\frac{\lambda_{\text{max}}}{\lambda_{\text{min}}}$
+		\item with conditioning number $\mathbf{k}$, meaning $\mathbf{k}=\frac{\lambda_{\text{max}}}{\lambda_{\text{min}}}$ where $\lambda_i$ are eigenvalues of $A$.
 	\end{list}
 	\item The vector $b$ must be unitary, meaning $\|b\|=1$
 \end{list}
-Given $\epsilon$ accuracy, solving this problem on a classical computer requires $$O\left(Ns\mathbf{k}\left(\frac{1}{\epsilon}\right)\right)$$ while the HHL algorithm can compute \textbf{a function of the solution} in $$O\left(\frac{\log(N)s^2\mathbf{k}^2}{\epsilon}\right)$$
-By using the HHL algorithm we obtain an exponential speedup in $N$, dimension of the system, but we have a very important difference: the classical algorithm returns the exact solution, while HHL can only approximate a function of the solution. The solution can still be obtained, but reading it requires a time linear in the number of elements of the solution, which can cancel out the obtained speedup. So this algorithm is very useful when we're interested in a function $x^TMx$ of the solution $x$ rather than in the solution itself.
+Given $\epsilon$ accuracy, solving this problem on a classical computer requires $$O\left(\frac{Ns\mathbf{k}}{\epsilon}\right)$$ while the HHL algorithm can compute \textbf{a function of the solution} in $$O\left(\frac{\log(N)s^2\mathbf{k}^2}{\epsilon}\right)$$
+By using the HHL algorithm we obtain an exponential speedup in $N$, dimension of the system, but we have a very important difference: the classical algorithm returns the exact solution, while \textbf{HHL can only approximate a function of the solution}. The solution can still be obtained, but reading it requires a time linear in the number of elements of the solution, which cancels out the obtained speedup. So this algorithm is very useful when we're interested in a function $x^TMx$ of the solution $x$ rather than in the solution itself.
 \section{Encoding the Problem in the Quantum World}
-We can assume $b$ normalized, meaning $\|b\|=1$, and we want to map it into $\ket{b}$. We will encode $b$ in $\ket{b}$ using the \textbf{amplitude encoding}: each $b_i$ will be the amplitude of the $i$th element of the basis of the quantum state.
+We can assume $b$ normalized, meaning $\|b\|=1$, and we want to map it into $\ket{b}$. We will encode $b$ in $\ket{b}$ using the \textbf{amplitude encoding}: each $b_i$ will be the amplitude of the $i$th element of the basis of the quantum state.\\
 $A$ is an Hermitian matrix. This means that it is a square matrix that's equal to its transposed conjugate, $A=A^H$. Hence, it has a spectral decomposition: given $\lambda_j\in\mathbb{R}$ eigenvalue of $\ket{u_j}$, the $j$th eigenvector, we have 
 $$A=\sum_{j=0}^{N-1} \lambda_j\ket{u_j}\bra{u_j}\Leftrightarrow A^{-1} = \sum_{j=0}^{N-1}\lambda_j^{-1}\ket{u_j}\bra{u_j}$$
 The eigenvectors of $A$ form a basis, hence we can rewrite $b$ in that basis
 $$\ket{b} = \sum_{j=1}^{N-1}b_j\ket{u_j}$$
-with $b_j\in\mathbb{C}$. $\ket{x}$ can also be expressed in this form:
+with $b_j\in\mathbb{C}$.\\
+$\ket{x}$ can also be expressed in this form:
 $$\ket{x}=A^{-1}\ket{b}=\sum_{i=0}^{2^{n_b}-1}\lambda_i^{-1}b_i\ket{u_i}$$
 The goal of HHL is to find $\ket{x}$ in this form and store it in a quantum register.\\
-It is worth highlighting how $A$ will be used: the matrix will not be encoded in some register but will be encoded as the Hamiltonian of the QPE, meaning $A$ will be encoded in $U=e^{iAt}$. Hamiltonian is a term that refers to the type of simulation: $U\:|\:\|U-e^{-iAt}\|\leq\epsilon$ with $e^{-iAt}$ being the ideal evolution and $\|M\|$ the spectral norm (square root of the eigenvalue with max modulo of $A^*A$)\\
-This encoding must guarantee the following conditions:
+It is worth highlighting how $A$ will be used: the matrix will not be encoded in some register but will be encoded as the Hamiltonian of the QPE, meaning $A$ will be encoded in $U=e^{iAt}$. Hamiltonian is a term that refers to the type of evolution of a system: given $U=e^{iAt}$, $A$ is called Hamiltonian of $U$ and describes its evolution over time $t$.\\
+This encoding must guarantee the following normality conditions:
 $$\sum_{j=0}^{2^{n_b}-1}|b_j|^2=1\:\:\:\sum_{i=0}^{2^{n_b}-1}|\lambda_i^{-1}b_i|^2=1$$
 \section{The Algorithm Step-by-Step}
 The register setup of the algorithm is as follows:
 \begin{list}{}{}
-	\item A register $b$ of the most significative qubits, which will be used for encoding the $b$ vector.
+	\item A register $b$ of the most significative qubits, which will be used to encode the vector $b$.
 	\item A register $c$ which will be used by the QPE algorithm to contain the clock qubits of the rotation. This is equivalent to containing the phases of the eigenvalues of the $A$ matrix.\\
-	We use basis encoding: the phase is encoded in the basis element.\\
+	We use basis encoding: the phase is encoded in the basis vector element.\\
 	The number of qubits in this register, $n$, dictates the accuracy of the computation.
 	\item The least significative qubit is a register containing the ancillar qubit $a$. It will be discarded at the end of the computation.
 \end{list}
@@ -132,7 +133,7 @@ This way of writing the eigenvalue will encode the phase $\phi$ through basis en
 	\item If the control bit is $\ket{1}$, then $U$ is applied to $\ket{b}$ which is equivalent to multiplying the $\ket{1}$ qubit of $\ket{c_j}$ times $e^{2\pi i\phi2^j}$
 \end{list}
 Hence, after applying the $U$ gates we end up with
-$$\ket{\Psi_3} = \ket{b}\otimes\left(\frac{1}{\sqrt{2^n}}(\ket{0}+e^{2\pi i\phi 2^{n-1}}\ket{1})\otimes \ldots \otimes (\ket{0}+e^{2\pi i\phi 2^{n-n}}\ket{1})\right)\otimes \ket{0}_a =\ket{b}\frac{1}{\sqrt{2}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\ket{k}\ket{0}_a$$
+$$\ket{\Psi_3} = \ket{b}\otimes\left(\frac{1}{\sqrt{2^n}}(\ket{0}+e^{2\pi i\phi 2^{n-1}}\ket{1})\otimes \ldots \otimes (\ket{0}+e^{2\pi i\phi 2^{n-n}}\ket{1})\right)\otimes \ket{0}_a =\ket{b}\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\ket{k}\ket{0}_a$$
 \subsubsection{IQFT}
 The inverse of Quantum Fourier Transform applies a matrix $U_I$ defined as the following
 $$U_I=\frac{1}{\sqrt{N}}\left(
@@ -147,26 +148,25 @@ $$\omega_N=e^{\frac{i2\pi}{N}}$$
 So by applying IQFT to a basis vector, we it in a superposition of all the basis vectors weighted by the powers of the $N$th root of the unity
 $$U_I\ket{k}=\frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}\omega_N^{-jk}\ket{j} = \frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}e^{\frac{-i2\pi jk}{N}}\ket{j}$$
 In HHL only the clock qubits are modified
-$$\ket{\Psi_4} = \ket{b}IQFT\left(\frac{1}{\sqrt{2}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\ket{k}\right)\ket{0}_a= \ket{b}\frac{1}{\sqrt{2}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\:IQFT(\ket{k})\ket{0}_a=$$
-$$=\ket{b}\frac{1}{\sqrt{2}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\left(\sum_{y=0}^{2^n-1} e^{-\frac{2\pi iyk}{N}}\ket{y}\right)\ket{0}_a =\ket{b}\frac{1}{\sqrt{2}}\sum_{k=0}^{2^n-1}e^{2\pi ik(\frac{\phi-y}{N})}\ket{y}\ket{0}_a$$
+$$\ket{\Psi_4} = \ket{b}IQFT\left(\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\ket{k}\right)\ket{0}_a= \ket{b}\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\:IQFT(\ket{k})\ket{0}_a=$$
+$$=\ket{b}\frac{1}{2^n}\sum_{k=0}^{2^n-1}e^{2\pi i\phi k}\left(\sum_{y=0}^{2^n-1} e^{-\frac{2\pi iyk}{N}}\ket{y}\right)\ket{0}_a =\ket{b}\frac{1}{2^n}\sum_{k=0}^{2^n-1}e^{2\pi ik(\frac{\phi-y}{N})}\ket{y}\ket{0}_a$$
 Only the $\ket{y}$ for which $\frac{\phi - y}{N} = 0$ will have a non-zero amplitude of $\sum_{k=0}^{2^n-1}e^{0} = 2^n$, otherwise the amplitude will be $\sum_{k=0}^{2^n-1}e^{2\pi ik(\frac{\phi-y}{N})}=0$ due to destructive interference. So, by ignoring the zero amplitude states we will have
 $$\ket{\Psi_4}=\frac{1}{2^n}\ket{b}\sum_{k=0}^{2^n-1}e^{2\pi ik\cdot 0}\ket{N\phi}\ket{0}_a = \ket{b}\ket{N\phi}\ket{0}_a$$
 So we use the clock qubits to encode information about $\phi$, which is the phase of $U$.\\
-By using the fact that the accuracy depends on the number of qubits $n$, that $A$ is the Hamiltonian of $U$ meaning $U = e^{iAt}$, and $U$ is diagonal in the basis formed by the eigenvectors $\ket{u_j}$ of $A$, we can infer that if $\ket{b}=\ket{u_j}$ then $U\ket{b}=e^{i\lambda_jt}\ket{u_j}$. By equalizing $i\lambda_jt=2\pi i\phi$ we obtain $\phi = \frac{\lambda_jt}{2\pi}$, so
+By using the fact that the accuracy depends on the number of qubits $n$, that $A$ is the Hamiltonian of $U$ meaning $U = e^{iAt}$, and $U$ is diagonal in the basis formed by the eigenvectors $\ket{u_j}$ of $A$, we can infer that if $\ket{b}=\ket{u_j}$ then $U\ket{b}=e^{i\lambda_jt}\ket{u_j}$. With $i\lambda_jt=2\pi i\phi$ we obtain $\phi = \frac{\lambda_jt}{2\pi}$, so
 $$\ket{\Psi_4}=\ket{u_j}\ket{N\frac{\lambda_jt}{2\pi}}\ket{0}_a$$
 This way the eigenvalues of $A$ are encoded through basis encoding in the clock qubits.\\
 In the general case $\ket{b} = \sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}$, and by using the superposition
 $$\ket{\Psi_4}=\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\ket{N\frac{\lambda_jt}{2\pi}}\ket{0}_a$$
 We also have non-integer $\lambda_j$ in the general case. Hence we choose $t$ such that $\overline{\lambda_j}=N\frac{\lambda_jt}{2\pi}$ is integer.
 $$\ket{\Psi_4}=\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\ket{\overline{\lambda_j}}\ket{0}_a$$
-Because the values encoded with $\ket{\overline{\lambda_j}}$ are different from the values encoded by $\ket{\lambda_j}$
 \subsection{Rotation and Measurement of the Ancillar Qubit}
 The next step is rotating $\ket{0}_a$. The goal is obtaining
 $$\ket{\Psi_5}=\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\ket{\overline{\lambda_j}}\left(\sqrt{1-\frac{C^2}{\overline{\lambda_j}^2}}\ket{0}_a+\frac{C}{\overline{\lambda_j}}\ket{1}_a\right)$$
 When the ancillar qubit is measured, its wavefunction will collapse either to $\ket{0}$ or to $\ket{1}$. When $\ket{0}$ is measured, the result is discarded and the computation is repeated until we measure $\ket{1}$. As such, the final interesting wave function is
 $$\ket{\Psi_6}=\frac{\displaystyle 1}{\displaystyle \sqrt{\sum_{j=0}^{2^{n_b}-1}\left|\frac{b_jC}{\overline{\lambda_j}}\right|^2}}\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\ket{\overline{\lambda_j}}\frac{C}{\overline{\lambda_j}}\ket{1}_a$$
 The factor at the beginning is needed for normalization purposes. Since $|\frac{b_jC}{\overline{\lambda_j}}|^2$ is the probability of measuring $\ket{1}$ on the ancillar qubit, $C$ must be chosen as big as possible. The result looks like $\ket{x}$, but the correct result would be measured only using the eigenvector basis formed by $\ket{u_j}$ instead of the computational basis formed by $\ket{0},\ket{1}$. We cannot factorize the result in a tensor product between registers $b$ and $c$, because the $b$ register is in entanglement with the clock qubits $\ket{\overline{\lambda_j}}$, hence we cannot convert the $b$ register in the computation basis: we have to de-compute the state and disentangle the $b$ and $c$ registers.\\
-Note that this measurement of the ancillar qubit can be, and usually is, done a the end of the computation. But since that this qubit is no longer modified, measuring now gives the same result.
+Note that this measurement of the ancillar qubit can be, and usually is, done at the end of the computation. But since that this qubit is no longer modified, measuring now gives the same result.
 \subsection{Inverse Quantum Phase Estimation}
 The decomputation with the goal of disentangling the registers $b$ and $c$ is achieved via IQPE. Applying the inverse of the QPE is done by applying the three steps stated before, in reverse order.
 \subsubsection{QFT}
@@ -182,16 +182,24 @@ So we apply QFT on the clock qubits
 $$\ket{\Psi_7}=\frac{1}{ \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\:QFT(\ket{\overline{\lambda_j}})\frac{C}{\overline{\lambda_j}}\ket{1}_a=$$
 $$=\frac{1}{ \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}b_j\ket{u_j}\left(\frac{1}{\sqrt{2^n}}\sum_{y=0}^{2^n-1}e^{\frac{2\pi iy\overline{\lambda_j}}{N}}\ket{y}\right)\frac{C}{\overline{\lambda_j}}\ket{1}_a$$
 \subsubsection{Controlled Rotations}
-As before, using $U^{-1}=e^{-iAt}$ applied if the $r$th clock qubit is $\ket{1}$. This is equivalent to multiplying by $e^{-i\lambda_jty}$ is the $c$ register is $\ket{y}$ since $2\pi i\phi=i\lambda_j t$
+As before, using $U^{-1}=e^{-iAt}$ applied if the $r$th clock qubit is $\ket{1}$. This is equivalent to multiplying by $e^{-i\lambda_jty}$ if the $c$ register is $\ket{y}$, since $2\pi i\phi=i\lambda_j t$
 $$\ket{\Psi_8}=\frac{1}{\sqrt{2^n}\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\overline{\lambda_j}}\ket{u_j}\left(\sum_{y=0}^{2^n-1}e^{-i\lambda_jty}e^{\frac{2\pi iy\overline{\lambda_j}}{N}}\ket{y}\right)\ket{1}_a=$$
 Since $\overline{\lambda_k}=\frac{N\lambda_j t}{2\pi}$, the two exponential terms cancel out
 $$=\frac{1}{\sqrt{2^n} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\overline{\lambda_j}}\ket{u_j}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a=$$
-$$=\frac{1}{\left(\sqrt{2^n}\right)^{\frac{Nt}{2\pi}} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\lambda_j}\ket{u_j}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a=$$
-$$=\frac{1}{\sqrt{2^n} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\ket{x}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a$$
+$$=\frac{1}{\sqrt{2^n}\left(\frac{Nt}{2\pi}\right) \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\lambda_j}\ket{u_j}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a=$$
+$$=\frac{C}{\sqrt{2^n} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\ket{x}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a$$
+The clock qubits in the register $c$ and the register $b$ are now disentangled, and the register $b$ now contains $\ket{x}$.
 \subsubsection{Applying the Hadamard Gates}
-The clock qubits in the register $c$ and the register $b$ are now disentangled, and the register $b$ now contains $\ket{x}$. We apply the Hadamard gates to the clock qubits
-$$\ket{\Psi_9} = \frac{1}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\lambda_j}\ket{u_j}\ket{0}^{\otimes n}\ket{1}_a =\frac{1}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\ket{x}_b\ket{0}^{\otimes n}\ket{1}_a$$
+We apply the Hadamard gates to the clock qubits
+$$\ket{\Psi_9} = \frac{1}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\lambda_j}\ket{u_j}\ket{0}^{\otimes n}\ket{1}_a =\frac{C}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\ket{x}_b\ket{0}^{\otimes n}\ket{1}_a=$$
 If $C\in\mathbb{R}$ then given that $\sum_{i=0}^{2^{n_b}-1}|\lambda_i^{-1}b_i|^2=1$ we have
-$$\ket{\Psi_9}=\frac{1}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_j}{\lambda_j}|^2}}\ket{x}_b\ket{0}^{\otimes n}\ket{1}_a=\ket{x}_b\ket{0}_c^{\otimes n}\ket{1}_a$$
+$$=\frac{1}{\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_j}{\lambda_j}|^2}}\ket{x}_b\ket{0}^{\otimes n}\ket{1}_a=\ket{x}_b\ket{0}_c^{\otimes n}\ket{1}_a$$
 With the register $b$ correctly storing the solution $\ket{x}$.
+
+\nocite{Harrow_2009}
+\nocite{https://doi.org/10.48550/arxiv.2108.09004}
+\nocite{qiskit}
+\renewcommand\refname{References}
+\bibliographystyle{abbrv}
+\bibliography{hhlalgorithm}
 \end{document}  
