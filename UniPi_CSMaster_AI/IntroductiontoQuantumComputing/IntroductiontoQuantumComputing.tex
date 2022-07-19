@@ -690,10 +690,10 @@ The denominator vanishes only if $p(m) = 0$, meaning that the result $m$ will ne
 The completeness equation expresses the fact that probabilities sum to one: $$\sum_m p(m) = \sum_m \langle\psi|M_m^+M_m\ket{\psi} = \langle\psi|I\ket{\psi} = \langle\psi\ket{\psi} = 1$$
 \paragraph{Example} %TODO
 \paragraph{Projective Measurements} For many applications of quantum computation and quantum information we will mostly perform \textbf{projective measurements}, as subset of the possible measurements.\\
-Defined in terms of the Hermitian operator: an operator $M$ is Hermitian if it's self-adjoint: $M^+ = M$\\
+Defined in terms of the Hermitian operator: an operator $M$ is Hermitian if it's self-adjoint $M^H = M$\\
 In physics, Hermitian operators are called observable: \textbf{an observable is a property of a physical system that can be measured} (position, polarization\ldots), and to each physical observable there corresponds an Hermitian operator.\\
 All eigenvalues of an observable (so of an Hermitian operator) are real, and the eigenvectors are orthogonal. The \textbf{possible outcomes of a measurement correspond to the eigenvalues of the observable} $M$.\\
-Observables can be thought of as questions we can pose to quantum systems: each question admits a set of answers, the eigenvalues of the observable.\\\\Any observable $M$ can be written as its \textbf{spectral decomposition} $$M = \sum_m P_m = \sum_m m|u_m\rangle\langle u_m|$$
+Observables can be thought of as questions we can pose to quantum systems: each question admits a set of answers, the eigenvalues of the observable.\\\\Any observable $M$ can be written as its \textbf{spectral decomposition} $$M = \sum_m mP_m = \sum_m m|u_m\rangle\langle u_m|$$
 \begin{list}{}{}
 	\item $m$ are the real eigenvalues of $M$ (outcomes)
 	\item $|u_m\rangle$ is the eigenvector associated to $m$
@@ -857,7 +857,7 @@ $$\sqrt{\frac{11}{6}}\left(\sqrt{\frac{1}{11}}|00\rangle+\sqrt{\frac{5}{11}}|01\
 \subsubsection{Recap}
 \begin{list}{}{}
 	\item \textbf{Space-State} postulate\\
-	Any physical system is associated to a Hilbert space (the state space). An isolated system is completely described by its state vector (unit vector in the state space). A qubit is the simplest isolated system, and a qubit can be any physical system that can be described by a vector $\in \mathbb{C}^2$. Two states differing by a relative state are not equivalent.
+	Any physical system is associated to a Hilbert space (the state space). An isolated system is completely described by its state vector (unit vector in the state space). A qubit is the simplest isolated system, and a qubit can be any physical system that can be described by a vector $\in \mathbb{C}^2$. Two states differing by a relative phase are not equivalent.
 	\item \textbf{Evolution} postulate\\
 	Using the simplified Discrete Time Evolution, the evolution of a quantum system from $\ket{\psi}$ in $t_1$ to $\ket{\psi'}$ in $t_2$ is described by a unitary transformation $U$ (applied gate) that depends only on $t_1$ and $t_2$.
 	\item \textbf{Measurement} postulate\\
@@ -1056,7 +1056,7 @@ Classical (exact) solution, in the best case we query twice getting two differen
 	\lstick{$\ket{0}$} & \qw\slice{$\ket{\psi_0}$}&\qw &[2mm] \gate{H^{\otimes n}}\qwbundle{n} & \qw\slice{$\ket{\psi_1}$} & \gate[wires=2][2cm]{U_f}
 \gateinput{$x$}
 \gateoutput{$x$}\slice{$\ket{\psi_2}$} & [2mm] \gate{H^{\otimes n}}& \qw\qwbundle{n} & \qw\slice{$\ket{\psi_3}$} & \meter{} & \qw \\
-\lstick{$\ket{1}$} & \qw & \qw & \qw & \qw & \gateinput{$y$}
+\lstick{$\ket{1}$} & \qw & \qw & \gate{H} & \qw & \gateinput{$y$}
 \gateoutput{$y\oplus f(x)$} & \qw & \qw & \qw & \qw & \qw
 	\end{quantikz}
 \end{center}
@@ -1078,8 +1078,7 @@ So
 $$|\psi_3\rangle = H^{\otimes n}\left(\frac{1}{\sqrt{2^n}}\sum_x(-1)^{f(x)}\ket{x} \right)\ket{-} = \frac{1}{\sqrt{2^n}}\left(\sum_x (-1)^{f(x)}H^{\otimes n}\ket{x}\right)\ket{-} =$$ $$= \frac{1}{\sqrt{2^n}}\left( \sum_x (-1)^{f(x)}\frac{1}{\sqrt{2^n}}\sum_{z\in\{0,1\}^n}(-1)^{x\cdot z}\ket{z}\right)\ket{-} = \frac{1}{2^n}\sum_{z\in\{0,1\}^n}\left(\sum_{x\in\{0,1\}^n}(-1)^{f(x)+x\cdot z}\ket{z}\right)\ket{-}$$
 Let's consider the amplitude of the state $\ket{z} = |0\ldots 0\rangle$
 $$\frac{1}{2^n}\sum_{x\in\{0,1\}^n}(-1)^{f(x)+0} = \frac{1}{2^n}\sum_{x\in\{0,1\}^n}(-1)^{f(x)}=\left\{\begin{array}{l l}
--1&f\hbox{ is constant and }=0\\
-+1&f\hbox{ is constant and }=1\\
+\pm1&f\hbox{ is constant}\\
 0&f\hbox{ is balanced}\\
 \end{array}\right.$$
 So if $f$ is constant, the amplitude of $|0\ldots0\rangle$ is $\pm 1$ (all other amplitudes are 0 since $|\psi_3\rangle$ is a unit vector), and a measurement in the computational basis is certain to return all zeroes (the binary string 0\ldots 0).\\
@@ -1238,7 +1237,7 @@ The \textbf{QPE problem} is formulated as follows: given that we have the abilit
 	The state is $$\frac{1}{\sqrt{2}}\left(\frac{\ket{0}+\ket{1}}{\sqrt{2}}\right)\ket{\psi} + \frac{1}{\sqrt{2}}e^{\displaystyle i\theta_\psi}\left(\frac{\ket{0}-\ket{1}}{\sqrt{2}}\right)\ket{\psi} = \frac{1}{2}\left(\left(1+e^{\displaystyle i\theta_\psi}\right)\ket{0} + \left(1-e^{\displaystyle i\theta_\psi}\right)\ket{1}\right)\ket{\psi}$$
 \end{enumerate}
 The probability of measuring $\ket{0}$ in the first qubit is the square of the amplitude. So we've encoded the information in the amplitudes, and they are different so I can distinguish them. The drawback is that we perform a complex circuit.\\\\
-With QFE this is different. $\theta$ in general is $\in \mathbb{R}$. The beginning of the QPE circuit is this:
+With QFT this is different. $\theta$ in general is $\in \mathbb{R}$. The beginning of the QPE circuit is this:
 \begin{center}
 	\includegraphics[scale=0.5]{28.png}
 \end{center}
@@ -1254,10 +1253,12 @@ We apply a power of $U$: $U^{2^{n-1}}$ for $n$ bits, all the powers from $2^{n-1
 	\end{array}\right]\left(\left[\begin{array}{c}
 	\alpha\\\beta
 	\end{array}\right]\otimes\ket{\psi}\right)$$
-	\item[Final.] $$\left(\frac{1}{\sqrt{2}}\right)^n (\ket{0}+e^{i\theta_\psi 2^{n-1}}\ket{1})\otimes(\ket{0}+e^{i\theta_\psi 2^{n-2}}\ket{1}|)\otimes\ldots\otimes(\ket{0}+e^{i\theta_\psi 2^{0}}\ket{1})\otimes\ket{\psi}$$
+	\item[Final.] $$\left(\frac{1}{\sqrt{2}}\right)^n (\ket{0}+e^{i\theta_\psi 2^{n-1}}\ket{1})\otimes(\ket{0}+e^{i\theta_\psi 2^{n-2}}\ket{1}|)\otimes\ldots\otimes(\ket{0}+e^{i\theta_\psi 2^{0}}\ket{1})\otimes\ket{\psi}=$$
+$$=\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1} e^{i\theta_\psi k}\ket{k}$$
 \end{enumerate}
 Now we want to retrieve $\theta_\psi$. The QFT of $|j\rangle$ was $$|\tilde{j}\rangle = \frac{1}{\sqrt{N}}\left(\ket{0}+e^{\frac{2\pi ij}{2}}\ket{1}\right)\otimes\ldots\otimes\left(\ket{0}+e^{\frac{2\pi ij}{2^n}}\ket{1}\right)$$
-These two configurations are very similar, they differ for the exponent. So it's the same of QPE except that $\theta_\psi$ is replace by $\frac{2\pi}{2^n}j$.\\
+These two configurations are very similar, they differ for the exponent. So it's the same of QPE except that $\theta_\psi$ is replace by $\frac{2\pi}{2^n}j$.
+$$\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1} e^{i\theta_\psi k}e^{-\frac{2\pi ik}{2^n}}\ket{k} = \frac{1}{\sqrt{2^n}}\ket{2^n \theta_\psi}$$
 The final circuit is composed with the inverse of the QFT, where we need to run the circuit backwards, measuring $|2^n\theta_\psi\rangle$
 \begin{center}
 	\includegraphics[scale=0.5]{29.png}
@@ -2175,8 +2176,8 @@ Also note that $M = \{M_m\} = \{M_{m_1},\ldots,M_{m_n}\}$ is a family of measure
 "\textbf{Quantum data, classical flow}", referring to conditional and loops: in order to make a decision we must make a measure.\\
 \texttt{qvar} : S $\rightarrow \mathbb{P}$(qVar) variables appearing in a statement. For example:
 \begin{list}{}{}
-	\item qvar(skip) = emptyset
-	\item qvar(q:=|0>) = \{q\}
+	\item qvar(skip) = $\emptyset$
+	\item qvar(q:=$\ket{0}$) = \{q\}
 	\item qvar($\overline{q}$:=U[$\overline{q}$]) = $\overline{q}$
 	\item qvar(\texttt{S1;S2}) = qvar(\texttt{S1}) $\cup$ qvar(\texttt{S2})
 	\item qvar(\texttt{if ($\underset{m}{\square}$ M[$\overline{q}$] = $m\rightarrow$ S$m$) fi}) = $\overline{q}\cup\bigcup_m$ qvar(\texttt{S$m$})
@@ -2186,7 +2187,7 @@ Given a statement \texttt{S}, $H_{all}$ can be understood as $H_{qvar(\texttt{S}
 \paragraph{Quantum Configuration} $\langle \texttt{S},\rho\rangle$ where
 \begin{list}{}{}
 	\item \texttt{S} is a \textbf{quantum statement} or, taking into account the termination of the computation, the special statement for the empty program ($\epsilon$)\\
-	$\langle \texttt{S},\rho\rangle$ = nothing to be done, terminated in state $\rho$
+	$\langle \epsilon,\rho\rangle$ = nothing to be done, terminated in state $\rho$
 	\item $\rho\in D(H_{all})$ is a \textbf{partial density operator} denoting the global state of quantum variables.\\
 	$tr(\rho)=1\Rightarrow$ density operator, $tr(\rho)\leq 1\Rightarrow$ partial density operator (with $tr(\mathbf{A}) = \sum_i a_{ii}$).\\
 	$D(H)$ is the sate of all partial density operators of Hilbert space $H$
@@ -2283,7 +2284,7 @@ Quantum gates that rotate basis states in basis states have classical counterpar
 	\end{array}\right)\mapsto\ket{1011}$$
 	\item \textbf{Amplitude Encoding} encodes the information as the coefficients of the basis vector. For example, given $$v=\left(\begin{array}{c}
 	v_0\\v_1
-	\end{array}\right)$$ normalized ($|v|=1$), in can be encoded as $$v = v_0\ket{0}+v_1\ket{1}$$
+	\end{array}\right)$$ normalized ($|v|=1$), it can be encoded as $$v = v_0\ket{0}+v_1\ket{1}$$
 	\item \textbf{Hamiltonian Encoding} encodes the matrix as the Hamiltonian in a unitary gate, for example $$U=e^{iAt}$$ encodes the matrix $A$ as the Hamiltonian of the unitary gate $U$
 \end{list}
 \end{document}  

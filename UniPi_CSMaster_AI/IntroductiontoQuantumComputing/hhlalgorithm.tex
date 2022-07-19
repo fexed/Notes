@@ -110,7 +110,7 @@ The register setup of the algorithm is as follows:
 	The number of qubits in this register, $n$, dictates the accuracy of the computation.
 	\item The least significative qubit is a register containing the ancillar qubit $a$. It will be discarded at the end of the computation.
 \end{list}
-The HHL algorithm follows 5 main steps: state preparation, QPE, ancillar qubit rotation, IQPE (Inverse QPE).
+The HHL algorithm follows 4 main steps: state preparation, QPE, ancillar qubit rotation, IQPE (Inverse QPE).
 \subsection{State Preparation}
 We have a total of $n_b + n + 1$ qubits which are initialized as
 $$\ket{\Psi_0}=\ket{0\ldots0}_b\ket{0\ldots0}_c\ket{0}_a = \ket{0}^{\otimes n_b}\ket{0}^{\otimes n}\ket{0}$$
@@ -124,7 +124,7 @@ The QPE algorithm is also used for estimating eigenvalues. It has three componen
 \subsubsection{Superposition of Clock Qubits}
 As first step of the QPE, we apply Hadamard gates to the clock qubits in order to create a superposition
 $$\ket{\Psi_2} = (I^{\otimes n_b}\otimes H^{\otimes n}\otimes I)\ket{\Psi_1}= \ket{b}\frac{1}{\sqrt{2^n}}(\ket{0}+\ket{1})^{\otimes n}\ket{0}$$
-\subsubsection{Controlled Rotation}
+\subsubsection{Controlled Rotations}
 The next step is the controlled rotation, using the clock qubits as control and $\ket{b}$ as target. The number $n$ of qubits in the register $c$ will control the number of controlled gates, which are in the form $U^r$ with $r$ index of the clock qubit. So $\ket{c_j}$ will control the gate $U^{2^j}=e^{iAt2^j}$.\\
 To understand how this works, let's consider $\ket{b}$ as a eigenvector of $U$ of eigenvalue $e^{2\pi i\phi}$, meaning $U\ket{b}=e^{2\pi i\phi}\ket{b}$.
 This way of writing the eigenvalue will encode the phase $\phi$ through basis encoding in the register $c$.
@@ -187,6 +187,7 @@ $$\ket{\Psi_8}=\frac{1}{\sqrt{2^n}\sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\over
 Since $\overline{\lambda_k}=\frac{N\lambda_j t}{2\pi}$, the two exponential terms cancel out
 $$=\frac{1}{\sqrt{2^n} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\overline{\lambda_j}}\ket{u_j}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a=$$
 $$=\frac{1}{\sqrt{2^n}\left(\frac{Nt}{2\pi}\right) \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\overline{\lambda_j}}|^2}}\sum_{j=0}^{2^{n_b}-1}\frac{b_jC}{\lambda_j}\ket{u_j}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a=$$
+And since $\sum_{j=0}^{2^{n_b}-1}\frac{b_j}{\lambda_j}\ket{u_j}=\ket{x}$
 $$=\frac{C}{\sqrt{2^n} \sqrt{\sum_{j=0}^{2^{n_b}-1}|\frac{b_jC}{\lambda_j}|^2}}\ket{x}\sum_{y=0}^{2^n-1}\ket{y}\ket{1}_a$$
 The clock qubits in the register $c$ and the register $b$ are now disentangled, and the register $b$ now contains $\ket{x}$.
 \subsubsection{Applying the Hadamard Gates}
