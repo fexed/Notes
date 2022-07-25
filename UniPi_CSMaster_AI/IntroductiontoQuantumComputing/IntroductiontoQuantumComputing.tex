@@ -965,7 +965,7 @@ With a $$f:\{0,1\}\rightarrow\{0,1\}$$ we have 4 functions
 \end{center}
 With classical algorithms we need two queries to see if a function is balanced or constant. In quantum algorithms we need to query the oracle only once because we can exploit quantum parallelism. Feed the circuit with a superposition of inputs and the oracle returns a superposition of outputs. This is the \textbf{Deutsch algorithm}, and the \textbf{Deutsch problem} is the following: given a black box for computing an unknown function $f:\{0,1\}\rightarrow\{0,1\}$, determine if the function is balanced or constant by making queries to $f$.
 \subsection{Classical Computations on Quantum Computers}
-We want to compute functions $$f:\{0,1\}^n\rightarrow\{0,1\}$$ We need to have a \textbf{reversible computation}, so unitary gates: can't feed the entire input sequence into a gate. We take any classical logic circuits computing out function, than change each gate into a reversible version. Once we have a computable function with reversible gate than we can translate it into a quantum ambient.\\
+We want to compute functions $$f:\{0,1\}^n\rightarrow\{0,1\}$$ We need to have a \textbf{reversible computation}, so unitary gates: can't feed the entire input sequence into a gate. We take any classical logic circuit computing a function, then change each gate into its reversible version. Once we have a computable function with reversible gate then we can translate it into a quantum ambient.\\
 To translate a gate into a reversible version we use Toffoli gates, which are reversible versions of the AND. Toffoli gates are C-CNOT. With $C= 0$ is AND, with $C=1$ is a NAND.\\
 Toffoli gate and the quantum implementation:
 \begin{center}
@@ -993,8 +993,8 @@ In general $\ket{x}$ is of size $n$, meaning $f:\{0,1\}^n\rightarrow\{0,1\}$. To
 Toffoli gate and the quantum implementation:
 \begin{center}
 	\begin{quantikz}
-		\lstick[wires=3]{$n$\\qubits} & \rstick{$\ket{0}$} &&& \gate{H} & \gate[wires=4]{U_f} &\qw\\
-		&\rstick{\vdots} &&&&&\qw\\
+		\lstick[wires=3]{$n$\\qubits} & \rstick{$\ket{0}$} &&& \gate{H} & \gate[wires=4, nwires=2]{U_f} &\qw\\
+		&\rstick{\vdots} &&&&&\\
 		&\rstick{$\ket{0}$} &&& \gate{H} &&\qw\\
 		&\rstick{$\ket{0}$} &&& \qw && \qw
 	\end{quantikz}
@@ -1201,21 +1201,15 @@ $$F_N=\frac{1}{\sqrt{N}}\left[\begin{array}{c c c}
 \vdots& &\\
 1
 \end{array}\right]\hbox{ with the }(j,k)\hbox{ entry being }e^{\frac{2\pi ijk}{N}}$$
-The circuit is
-\iffalse
+The circuit is (with swap gates at the beginning)
 \begin{center}
 	\begin{quantikz}
-		\lstick{$\ket{J_1}$}&\qw&\gate{H}&\gate{U_2}&\gate{U_3}&\ \ldots\ \qw &\gate{U_n}&\qw&\qw&\qw&\ \ldots\ \qw&\qw&\qw&\ \ldots\ \\
-		\lstick{$\ket{J_2}$}&\qw&\qw&\ctrl{-1}&\qw&\ \ldots\ \qw&\qw&\qw&\gate{H}&\gate{U_2}&\ \ldots\ \qw&\gate{U_n}&\qw&\ \ldots\ \\
-		\lstick{\vdots}&&&&\ctrl{-2}&\qw&&&&\ctrl{-1}&\qw&&\\
-		\lstick{$\ket{J_n}$}&\qw&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-3}&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-2}&\qw&\ \ldots\
+		\lstick{$\ket{J_1}$}&\swap{3}\qw&\qw&\gate{H}&\gate{U_2}&\gate{U_3}&\ \ldots\ \qw &\gate{U_n}&\qw&\qw&\qw&\ \ldots\ \qw&\qw&\qw&\ \ldots\ \\
+		\lstick{$\ket{J_2}$}&\qw&\swap{1}\qw&\qw&\ctrl{-1}&\qw&\ \ldots\ \qw&\qw&\qw&\gate{H}&\gate{U_2}&\ \ldots\ \qw&\gate{U_n}&\qw&\ \ldots\ \\
+		\lstick{\vdots}&\qw&\targX{}&&&\ctrl{-2}&\qw&&&&\ctrl{-1}&\qw&&\\
+		\lstick{$\ket{J_n}$}&\targX{}\qw&\qw&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-3}&\qw&\qw&\qw&\ \ldots\ \qw&\ctrl{-2}&\qw&\ \ldots\
 	\end{quantikz}
 \end{center}
-\fi
-\begin{center}
-	\includegraphics[scale=0.5]{26.png}
-\end{center}
-With the swap gates in purple.
 \paragraph{Quantum Phase Estimation} Any unitary matrix is diagonalizable, has an orthonormal basis of eigenvectors and has a set of eigenvalues in the form $e^{i\theta_\psi}$ associated to an eigenstate $\ket{\psi}$
 $$U\ket{\psi} = e^{i\theta_\psi}\ket{\psi}$$
 The \textbf{QPE problem} is formulated as follows: given that we have the ability of preparing $\ket{\psi}$ and to use $U$, can we extract $\theta_\psi$ which is the angle of the rotation (the \textbf{phase})? Yes, also without QFT. Let's see the intuition on how we could do without QFT.
@@ -1238,9 +1232,15 @@ The \textbf{QPE problem} is formulated as follows: given that we have the abilit
 The probability of measuring $\ket{0}$ in the first qubit is the square of the amplitude. So we've encoded the information in the amplitudes, and they are different so I can distinguish them. The drawback is that we perform a complex circuit.\\\\
 With QFT this is different. $\theta$ in general is $\in \mathbb{R}$. The beginning of the QPE circuit is this:
 \begin{center}
-	\includegraphics[scale=0.5]{28.png}
+	\begin{quantikz}
+		\lstick[wires=3]{$n$}&  \lstick{$\ket{0}$}  & \qw & \gate[wires=3, nwires=2]{H^{\otimes n}} & \ctrl{3}\qw & \qw & \qw & \qw\\
+		&\lstick{\vdots} & & & &  \\
+		&\lstick{$\ket{0}$} &\qw\slice{0}&\qw\slice{1}&\qw\slice{2}&\qw&\ctrl{1}\slice{}&\qw\\
+		&\lstick{$\ket{\psi}$} &\qwbundle[alternate]{}&\qwbundle[alternate]{}&\gate{U^{2^{n-1}}}\qwbundle[alternate]{}&\ldots&\gate{U^{2^{0}}}\qwbundle[alternate]{}&\qwbundle[alternate]{}&
+	\end{quantikz}
 \end{center}
 We apply a power of $U$: $U^{2^{n-1}}$ for $n$ bits, all the powers from $2^{n-1}$ to $2^0$.
+\pagebreak
 \begin{enumerate}
 	\item $\ket{0}^{\otimes n}\ket{\psi}$
 	\item $$\left(\frac{1}{\sqrt{2}}\right)^n (\ket{0}+\ket{1})^{\otimes n}\ket{\psi}$$
@@ -1260,7 +1260,12 @@ These two configurations are very similar, they differ for the exponent. So it's
 $$\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1} e^{i\theta_\psi k}e^{-\frac{2\pi ik}{2^n}}\ket{k} = \frac{1}{\sqrt{2^n}}\ket{2^n \theta_\psi}$$
 The final circuit is composed with the inverse of the QFT, where we need to run the circuit backwards, measuring $|2^n\theta_\psi\rangle$
 \begin{center}
-	\includegraphics[scale=0.5]{29.png}
+	\begin{quantikz}
+		\lstick[wires=3]{$n$ qubits}&  \lstick{$\ket{0}$}  & \qw & \gate[wires=3, nwires=2]{H^{\otimes n}} & \ctrl{3}\qw & \qw & \qw & \qw & \gate[wires=3, nwires=2]{IQFT}& \qw \rstick[wires=3]{$\ket{2^n\theta_\psi}$}\\
+		&\lstick{\vdots} & & & & & &\\
+		&\lstick{$\ket{0}$} &\qw\slice{0}&\qw\slice{1}&\qw\slice{2}&\qw&\ctrl{1}\slice{}&\qw & &\qw  \\
+		&\lstick{$\ket{\psi}$} &\qwbundle[alternate]{}&\qwbundle[alternate]{}&\gate{U^{2^{n-1}}}\qwbundle[alternate]{}&\qwbundle[alternate]{}\ldots&\gate{U^{2^{0}}}\qwbundle[alternate]{}&\qwbundle[alternate]{}&\qwbundle[alternate]{}&
+	\end{quantikz}
 \end{center}
 \subsection{Grover's Algorithm} 
 Searching in an unstructured set of elements, from $O(N)$ to $O(\sqrt{N})$.\\We have a list of $N$ objects in a quantum memory and we want to retrieve a target element.\\
@@ -1290,12 +1295,23 @@ $$U_\beta\ket{x}=(-1)^{\text{Oracle}(x)}\ket{x}$$
 \paragraph{Construction of the Grover Oracle} Classical boolean functions can be converted to reversible quantum circuits.
 $\ket{x}$ enters the circuit that output $\ket{x}$. The circuit is in xor with a $\ket{0}$ that emits $|f(x)\rangle$ such that if $f(x)=0$ nothing happens, so $\ket{0}\rightarrow\ket{0} = |f(x)\rangle$.\\
 If $f(x) = 1$ then $\ket{0}\rightarrow\ket{1}$.
+
 \begin{center}
-	\includegraphics[scale=0.5]{30.png}
+	\begin{quantikz}
+		\lstick[wires=3]{$\ket{x}$} & \gate[wires=3, nwires=2]{f} & \qw\rstick[wires=3]{$\ket{x}$}\\\
+		& & \\
+		& & \qw \\
+		\lstick{$\ket{0}$} & \targ{}\vqw{-1} & \qw\rstick{$\ket{f(x)}$} & 
+	\end{quantikz}
 \end{center}
 But we don't want to initialize it to $\ket{0}$ but to $\ket{-}$, such that the last register remains $\ket{-}$ and the Oracle outputs $(-1)^{f(x)}\ket{x}$
 \begin{center}
-	\includegraphics[scale=0.5]{31.png}
+	\begin{quantikz}
+		\lstick[wires=3]{$\ket{x}$} & \gate[wires=3, nwires=2]{f} & \qw\rstick[wires=3]{$(-1)^{f(x)}\ket{x}$}\\\
+		& & \\
+		& & \qw \\
+		\lstick{$\ket{-}$} & \targ{}\vqw{-1} & \qw\rstick{$\ket{-}$} & 
+	\end{quantikz}
 \end{center}
 \paragraph{Grover Algorithm}
 \begin{enumerate}
@@ -1403,9 +1419,16 @@ Application of QPE: quantum order-finding. Factorization is solved via a reducti
 The problem is finding $r$ given $a$ and $N$ with GCD$(a,N)=1$.\\
 Also called period because $f(x) = a^x\hbox{ mod }N$ is periodic with period $r$. Indeed $\forall\:s\:\:f(s+r)=a^{s+r}\hbox{ mod }N = a^s\hbox{ mod }N = f(s)$
 \paragraph{Shor's Algorithm} The idea is to use QPE: given $U\ket{\psi}=e^{2\pi i\theta}\ket{\psi}$ with $\ket{\psi}$ eigenvector and $e^{2\pi i\theta}$ corresponding eigenvalues.
+
 \begin{center}
-	\includegraphics[scale=0.5]{37.png}
+	\begin{quantikz}
+	\lstick[wires=3]{$t$ counting qubits} & \lstick{$\ket{0}$} & \gate{H} & \qw&\qw\ldots&\ctrl{3}&\gate[wires=3, nwires=2]{IQFT} & \meter{} & \rstick[wires=3]{\ket{2^t\theta}} \\
+	& & & & & & & & & \\
+	& \lstick{$\ket{0}$} & \gate{H} & \ctrl{1} & \qw\ldots & \qw & \qw & \meter{} & \\
+	\lstick{Eigenvector of $U$} & \lstick{$\ket{\psi}$} & \qwbundle[alternate]{} & \gate{U^{2^0}}\qwbundle[alternate]{} &\qwbundle[alternate]{} \ldots & \gate{U^{2^t-1}}\qwbundle[alternate]{} &\qwbundle[alternate]{}
+	\end{quantikz}
 \end{center}
+
 The accuracy and the probability of success of QPE depends on the number of counting qubits $t$. Need to define a unitary operator that computes $$f(x) = a^x\hbox{ mod }N$$ and whose eigenvalues contain the order $r$, so that we can apply QPE to estimate the eigenvalues and recover $r$.
 \paragraph{Construction of $U_a$} Given $N, n=\lceil\log_2N\rceil, a$
 $$U_a|y\rangle=\left\{\begin{array}{ll}
@@ -1457,8 +1480,14 @@ $$=\ket{1} + \frac{1}{r}\sum_{k=1}^{r-1}\left(\frac{1-(\omega^{-sk})^r}{1-\omega
 And $\omega = e^{\frac{2\pi i}{r}}$ so the sum in parenthesis is $0$, so the superposition of all the states is just 
 $$=\ket{1} = |0\ldots01\rangle$$
 with $n-1$ zeros and a $1$, so $n=\lceil\log N\rceil$ bits.
-\paragraph{Circuit} QPE circuit adapted\begin{center}
-	\includegraphics[scale=0.5]{39.png}
+\paragraph{Circuit} QPE circuit adapted
+\begin{center}
+	\begin{quantikz}
+	\lstick[wires=3]{$t$ qubits} & \lstick{$\ket{0}$} & \gate{H} & \qw&\qw\ldots&\ctrl{3}&\gate[wires=3, nwires=2]{IQFT} & \meter{} & \rstick[wires=3]{\ket{2^t\frac{s}{t}}} \\
+	& & & & & & & & & \\
+	& \lstick{$\ket{0}$} & \gate{H} & \ctrl{1} & \qw\ldots & \qw & \qw & \meter{} & \\
+	\lstick{$n=\lceil\log N\rceil$ qubits} & \lstick{$\ket{1}$} & \qwbundle[alternate]{} & \gate{U^{2^0}}\qwbundle[alternate]{} &\qwbundle[alternate]{} \ldots & \gate{U^{2^t-1}}\qwbundle[alternate]{} &\qwbundle[alternate]{}
+	\end{quantikz}
 \end{center}
 $$ t= 2n+1+\left\lceil\log\left(2+\frac{1}{2\epsilon}\right)\right\rceil$$
 With $t$ qubits we will obtain an estimate of $\frac{s}{r}$ accurate to $2n+1$ bits with probability of at least $1-\epsilon$. We need that accuracy to be able to recover $r$ from the phase $\frac{s}{r}$ (with a classical algorithm).\\
@@ -2253,10 +2282,6 @@ These relations are also linear: for both total or partial, if $$\vDash\{P_i\}S\
 	\item[(R-LP)] $\frac{\displaystyle \{Q\}S\{M_0^*PM_0+M_1^*QM_1\}}{\displaystyle \{M_0^*PM_0+M_1^*QM_1\}\texttt{while }M[\overline{q}]=1\texttt{ do }S\texttt{ od}\{P\}}$
 	\item[(R-OP)] $\frac{\displaystyle P\sqsubseteq P'\:\:\{P'\}S\{Q'\}\:\:Q'\sqsubseteq Q}{\displaystyle \{P\}S\{Q\}}$
 \end{list}
-\paragraph{Exam} The exam is a informal discussion on the topics of the course, plus a "big question": a subject prepared and presented with a small report (circa 5 pages) in English, no slides but a oral presentation. The report may be theoretical or an implementation. Not strict to the exams schedule.\\
-The graduation thesis may be done including this presentation.\\
-If more students select the same subject, they may study it together but they have to make two separate reports.\\
-A initial list of subjects is on the moodle (propose via mail and discuss with the professors).
 \section{Quick References}
 \paragraph{Hermitian Matrix} $A$ is Hermitian if it is equal to its transpose conjugate.
 $$A = A^* = A^H = \overline{A}^T$$
