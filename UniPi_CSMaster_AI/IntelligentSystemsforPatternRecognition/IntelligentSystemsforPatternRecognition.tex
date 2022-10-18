@@ -342,27 +342,31 @@ Scaling and dilation is akin to a sort of frequency: high scale mean stretched w
 \paragraph{DWT} Discrete Wavelet Transform: uses a finite set of scales and shifts rather than "any possible value" as in the continuous wavelet transform.
 
 \section{Generative and Graphical Models}
-Generative referring to the probability that we learn: if we know the distribution probability of data we can generate new data.\\
-Graphical referring to graphical formalisms that describe in a syntetic way the structures we'll see.
-\paragraph{Generative Learning} ML models that represent knowledge inferred from data under the form of probabilities:
+These models \textbf{learn probabilities} and are \textbf{represented graphically}.
 \begin{list}{}{}
-	\item Probabilities can be sampled: new data can be generated
-	\item Supervised, unsupervised, weakly supervised learning tasks
+	\item Generative refers to the the fact that we learn probabilities: if we know the distribution probability of data we can generate new data
+	\item Graphical refers to the graphical formalisms that describe in a syntetic way the dependencies and influences
+\end{list}
+\paragraph{Generative Learning} ML \textbf{models that represent knowledge inferred from data under the form of probabilities}:
+\begin{list}{}{}
+	\item Probabilities can be sampled, so that new data can be generated
+	\item Supervised, unsupervised or weakly supervised learning tasks
 	\item More easily incorporate prior knowledge on data and tasks
 	\item Interpretable knowledge (how data is generated)
 \end{list}
-The majority of modern tasks are composed by a large number of variables\begin{list}{}{}
+Most modern tasks are composed by a large number of variables
+\begin{list}{}{}
 	\item Modeling the joint distribution of all variables can become impractical
 	\item Exponential size of the parameter space
 	\item Computationally impractical to train and predict
 \end{list}
 \paragraph{The Graphical Models Framework}
 \begin{list}{}{}
-	\item \textbf{Representation} Graphical models are a compact way to represent exponentially large probability distributions. Encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
+	\item \textbf{Representation} Graphical models are a compact way to represent exponentially large probability distributions: we can encode conditional independence assumptions, and different classes of graph structures imply different assumptions/capabilities.
 	\item \textbf{Inference} How to query (predict with) a graphical model? Probability of unknown $X$ given observations $\mathbf{d}$, $P(X\:|\:\mathbf{d})$, the \textbf{most likely hypothesis} (parameters) $X$.
 	\item \textbf{Learning} Find the right model parameters.
 \end{list}
-\paragraph{Representation} A graph whose nodes are random variables and edges represent probabilistic relationships between the variables.\\
+\paragraph{Representation} A graph whose \textbf{nodes are random variables} and \textbf{edges represent probabilistic relationships} between the variables.\\
 Different classes of graphs:
 \begin{list}{}{}
 	\item Directed edges express \textbf{causal relationships}.
@@ -375,18 +379,18 @@ Different classes of graphs:
 \end{center}
 \paragraph{Generate new knowledge} Complex data can be generated if the model is powerful enough to capture its distribution.
 \subsection{Probability Refresher}
-\texttt{todo}
+\texttt{todo sorry in the mean time refer to other courses or online}
 \subsubsection{Inference and Learning in Probabilistic Models}
-\paragraph{Inference} How can one determine the distribution of the values of one/several random variables given the observed values of others?
+\paragraph{Inference} How to determine the distribution of the values of one or more random variables, given the observed values of other random variables?
 $$P(\text{graduate}\:|\:\text{exam}_1,\ldots,\text{exam}_n)$$
 From a \textbf{machine learning point of view}: given a set of observations $\mathbf{d}$ and a set of hypothesis $\{h_i\}_i^K=1$, how can I use them to predict the distribution of a random variable $X$?
-\paragraph{Learning} Learning is a \textbf{very specific inference problem}: given a set of observations $\mathbf{d}$ and a probabilistic model of a given structure, how do I find the parameters $\theta$ of its distribution? Amounts to determining the best hypothesis $h_\theta$ regulated by a set of parameters $\theta$.
-\paragraph{Three Approaches}
+\paragraph{Learning} Learning is a \textbf{very specific inference problem}: given a set of observations $\mathbf{d}$ and a probabilistic model of a given structure, how do I find the parameters $\theta$ of its distribution? Amounts to \textbf{determining the best hypothesis $h_\theta$ regulated by a set of parameters $\theta$}.
+\paragraph{Three Approaches to Inference}
 \begin{list}{}{}
-	\item \textbf{MAP} (Maximum a-Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
-$$h_{MAP} = \arg\max_{h\in H} P(h\:|\:d) = \arg\max_{h\in H}\underbrace{ P(d\:|\:h)P(h)}$$
+	\item \textbf{MAP} (Maximum a Posteriori): infer $X$ from $P(X\:|\:h_{MAP})$ where $h_{MAP}$ is the maximum a-posteriori hypothesys given $d$
+$$h_{MAP} = \arg\max_{h\in H} P(h\:|\:\mathbf{d}) = \arg\max_{h\in H}\underbrace{ P(\mathbf{d}\:|\:h)P(h)}$$
 There are two distributions multiplied together, so they need to be coherent.
-	\item \textbf{ML} assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood (ML) estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(\mathbf{d}\:|\:h)$$
+	\item \textbf{ML} (Maximum Likelihood): assuming uniform prioris $P(h_i)=P(h_j)$ yields the maximum likelihood estimate $P(X\:|\:h_{ML})$ $$h_{ML} = \arg\max_{h\in H} P(\mathbf{d}\:|\:h)$$
 Any probability can be obtained from the Joint Probability Distribution $P(X_1,\ldots,X_n)$ by marginalization but at an exponential cost (e.g. $2^{n-1}$ for a marginal distribution from binary RV)
 	\item \textbf{Bayesian}: consider all hypothesis weighted by their probabilities
 $$P(X\:|\:\mathbf{d})=\sum_i P(X\:|\:h_i)P(h_i\:|\:\mathbf{d})$$
@@ -395,16 +399,16 @@ $$P(X\:|\:\mathbf{d}) = \int_H P(X\:|\:h)P(h\:|\:\mathbf{d})\:dh$$
 	ML and MAP are point estimates of the Bayesian, since they infer based only on one most likely hypothesis. MAP and Bayesian predictions become closer as more data gets available.\\
 	MAP is a regularization of the ML estimation.
 \end{list}
-\paragraph{Regularization} $P(h)$ introduces \textbf{preference across hypothesis}, penalizes complexity: complex hypothesis have lower prior probability, and hypothesis prior embodies trade-off between complexity and degree of fit.
+\paragraph{Regularization} Computing $P(h)$ introduces \textbf{preference across hypothesis}, penalizes complexity: complex hypothesis have lower prior probability, and hypothesis prior embodies trade-off between complexity and degree of fit.
 The MAP hypothesis $h_{MAP}$ can be rearranged in a minimization problem with $\log_2$ (so to count the number of bits).
 $$\max_h P(\mathbf{d}\:|\:h)P(h)\Leftrightarrow\min_h\underbrace{-\overset{\text{Bits needed for the data}}{\overbrace{\log_2(P(\mathbf{d}\:|\:h))}}-\overset{\text{Model complexity}}{\overbrace{\log_2P(h)}}}$$
-The highlighted part is the number of bits needed to represent the data+ with the number of bits needed to represent the hypothesis. By optimizing only based on $\log_2(P(\underline{d}\:|\:h))$ we choose the hypothesis $h$ that best fits the data, potentially leading to overfitting. With the other term, $\log_2P(h)$ we penalize big models.
-\paragraph{Maximum-Likelihood Learning} Find the model $\theta$ that is most likely to have \textbf{generated} the data $\underline{d}$ from a family of parameterized distributions $P(x\:|\:\theta)$
+The highlighted part is the number of bits needed to represent the data and the number of bits needed to represent the hypothesis. By optimizing only based on $\log_2(P(\underset{\uparrow}{\mathbf{d}}\:|\:h))$ we choose the hypothesis $h$ that best fits the data, potentially leading to overfitting. With the other term, $\log_2P(h)$, we penalize big models.
+\paragraph{Maximum-Likelihood Learning} Find the model $\theta$ that is \textbf{most likely to have generated} the data $\mathbf{d}$ from a family of parameterized distributions $P(x\:|\:\theta)$
 $$\theta_{ML} = \arg\max_{\theta\in \Theta} P(\mathbf{d}\:|\:\theta)$$
 Optimization problem that considers the likelihood function $L(\theta\:|\:x)=P(x\:|\:\theta)$
 as a function of $\theta$, which can be solved with $$\frac{\partial L(\theta\:|\:x)}{\partial\theta}=0$$
 The \textbf{learning assumes that all random variables $X$ are visible}, as in Naive Bayes.\\
-If the probabilistic model contains both observed random variables $\mathbf{X}$ (i.e. training data) and unobserved (hidden/latent) variables $\mathbf{Z}$ (e.g. data clusters), the ML learning can still be used to estimate model parameters:
+If the probabilistic model contains both observed random variables $\mathbf{X}$ (i.e. training data) and unobserved (also called hidden or latent) variables $\mathbf{Z}$ (e.g. data clusters), the ML learning can still be used to estimate model parameters:
 \begin{list}{}{}
 	\item Expectation-Maximization algorithm optimizes the complete likelihood
 	$$L_c(\theta\:|\:\mathbf{X},\mathbf{Z})=P(\mathbf{X},\mathbf{Z}\:|\:\theta) = P(\mathbf{Z}\:|\:\mathbf{X},\theta)P(\mathbf{X}\:|\:\theta)$$
@@ -436,6 +440,7 @@ $$P(Y_1,\ldots,Y_N,C) = P(C)\prod_{i=1}^N P(Y_i\:|\:C)$$
 \begin{center}
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
+\pagebreak
 \paragraph{Full-Plate Notation}
 \begin{multicols}{2}
 \begin{list}{}{}
@@ -457,10 +462,12 @@ $$P(Y_1,\ldots,Y_N,C) = P(C)\prod_{i=1}^N P(Y_i\:|\:C)$$
 \begin{center}
 	\includegraphics[scale=0.5]{18.png}
 \end{center}
-Undirected graph $G = (V,E)$ (a.k.a. Markov Networks). Also with shaded/empty nodes to denote observed/unobserved variables.\\
-Nodes $v\in V$ represent random variables $X_v$ (shaded meaning unobserved and empty meaning unobserved).\\
-Edges $e\in E$ represent bidirectional dependencies between variables (constraints).\\
-Often arranged in a structure that is coherent with the data/constraint we want to model.\\
+Undirected graphs $G = (V,E)$ (a.k.a. Markov Networks). Also with shaded/empty nodes to denote observed/unobserved variables.
+\begin{list}{}{}
+	\item \textbf{Nodes} $v\in V$ represent \textbf{random variables} $X_v$, with the shaded node meaning that it's \textbf{observed} and empty node meaning that it's \textbf{unobserved}.
+	\item \textbf{Edges} $e\in E$ represent \textbf{bidirectional dependencies} between variables (\textbf{constraints})
+\end{list}
+Usually arranged in a structure that is coherent with the data/constraint we want to model.\\
 Often used in image processing to impose spatial constraints (e.g. smoothness)
 \subsection{Conditional Independence and Causality}
 Can we reason on the structure of the graph to infer direct/indirect relationships between random variables?
@@ -472,6 +479,7 @@ There are substructures in the Bayesian networks with which we can build everyth
 \end{center}
 Taking only the parents it's not sufficient, we need also the children and the co-parents (nodes that are parents of one of my children). So it contains parents, children and children's parents.
 $$P(A\:|\:Mb(A), Z) = P(A\:|\:Mb(A))\:\:\forall\:Z\not\in Mb(A)$$
+\pagebreak
 \paragraph{Joint Probability Factorization}
 \begin{multicols}{2}
 An application of the chain rule and local Markov property.\begin{enumerate}
