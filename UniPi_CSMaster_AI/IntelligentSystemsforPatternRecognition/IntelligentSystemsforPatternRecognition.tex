@@ -976,8 +976,13 @@ Often $M$ is very very large ($\simeq 30$k elements). So we want a smaller repre
 Each document has its personal topic proportion $\Theta$ sampled from a distribution. $\Theta$ defines a multinomial distribution, but it is a random variable as well. $\alpha$ is the prior.
 \paragraph{Dirichlet distribution} Conjugate prior to multinomial distribution.\\
 If the likelihood is multinomial with a Dirichlet prior, then posterior is Dirichlet.
-$$P(\Theta\:|\:\alpha) = \frac{\Gamma(\sum_{k=1}^K \alpha_k)}{\prod_{k=1}^K\Gamma(\alpha_k)}\prod_{k=1}^K\Theta_k^{\alpha_k-1}$$
-$\Gamma$ is the generalization of the factorial, $\alpha_k$ is the Dirichlet parameter and is a prior count of the $k$the topic which controls the mean shape and sparsity of multinomial parameters $\theta$. With a big $\alpha$ we make the topics almost equiprobable, while with lower $\alpha$ we get substatially different proportions (less and less topics active). So big $\alpha$ means that every document can express each topic, while low $\alpha$ is almost deterministic. Usually, $\alpha = 1$ or similar but smaller.\\\\
+$$P(\Theta\:|\:\alpha) = \frac{\displaystyle \Gamma\left(\sum_{k=1}^K \alpha_k\right)}{\displaystyle \prod_{k=1}^K\Gamma(\alpha_k)}\prod_{k=1}^K\Theta_k^{\alpha_k-1}$$
+$\Gamma$ is the generalization of the factorial, $\alpha_k$ is the Dirichlet parameter and is a prior count of the $k$th topic which controls the mean shape and sparsity of multinomial parameters $\theta$.
+\begin{list}{}{}
+	\item $\alpha$ larger means that the topics are almost equiprobable, so every document can express each topic
+	\item $\alpha$ lower provides substantially different proportions, almost deterministic
+\end{list}
+Usually $\alpha \simeq 1$ or smaller.\\\\
 LDA finds a set of $K$ projection functions on the $K$-dimensional topic simplex.\begin{center}
 	\includegraphics[scale=0.5]{41.png}
 \end{center}
@@ -1005,7 +1010,7 @@ Given $\Phi=\{\gamma,\phi,\lambda\}$ as \textbf{variational approximation parame
 $$Q(\theta,z,\beta\:|\:\Phi) = Q(\theta\:|\:\gamma)\prod_{n=1}^NQ(z_n\:|\:\phi_n)\prod_{k=1}^KQ(\beta_k\:|\:\lambda_k)$$
 Then we have the model parameters $\Psi=\alpha,\beta$ of sample distribution $P(\theta,z,w\:|\:\alpha,\beta)=P(\theta,z,w\:|\:\Psi)$
 \paragraph{Variational Expectation-Maximization} Find the $\Phi, \Psi$ that maximize the ELBO
-$$L(w,\Phi,\Psi) = E_Q[\log P(\Theta,z,w\:|\:\Psi)] - E_Q[\log Q(\Theta,z,\Psi\:|\:\Phi)]$$
+$$L(w,\Phi,\Psi) = \mathbb{E}_Q[\log P(\Theta,z,w\:|\:\Psi)] - \mathbb{E}_Q[\log Q(\Theta,z,\Psi\:|\:\Phi)]$$
 by alternate maximization:
 \begin{list}{}{}
 	\item Fix $\Psi$ and update variational parameters $\Psi^*$ (\textbf{E-Step})
@@ -1013,6 +1018,7 @@ by alternate maximization:
 	\item Repeat until little improvement on the likelihood
 \end{list}
 Unlike EM, variational EM has no guarantee to reach a local maximizer of $L$.
+\pagebreak
 \subsection{Boltzmann Machines}
 Examples of Markov Random Fields:
 \begin{multicols}{2}
@@ -1054,18 +1060,18 @@ Couple of simplifications:
 	\item bias $b$ is just another row in the weight matrix $M$
 	\item consider only visible random variables, meaning $s = v$
 \end{list}
-We use probabilistic learning techniques to fit the parameters, i.e. maximizing the log-likelihood (note that $\langle x\rangle = E[x]$) $$L(M)=\frac{1}{L}\sum_{l=1}^L \log P(v_l\:|\:M)$$
+We use probabilistic learning techniques to fit the parameters, i.e. maximizing the log-likelihood (note that $\langle x\rangle = \mathbb{E}[x]$) $$L(M)=\frac{1}{L}\sum_{l=1}^L \log P(v_l\:|\:M)$$
 given the $P$ visible training patterns $v_l$, the set of all the visible units (so it's a joint distribution $v_{l1},\ldots,v_{ln}$). We need a way to write the likelihood $P(v_l\:|\:M)$, and we can use the Boltzmann-Gibbs. So we can optimize it solving a maximum likelihood problem.
 $$\log P(v_l\:|\:M) = \log \frac{e^{-E(v)}}{Z} = -E(v) - \log Z$$
 $$\frac{\partial L}{\partial M_{ij}} = \frac{\partial (-E(v) - \log Z)}{\partial M_{ij}}\Leftrightarrow$$
 Given that $E(v) = -\frac{1}{2}v^TM^Tv = -\sum_{ij} M_{ij} v_1v_j$ we get that every $M_{ij}$ will be constant except for the $M_{ij}$ we are differentiating leaving with $v_iv_j$. As for $\log Z$, differentiating the potential function leaves us with $\sum_v P(v\:|\:M)v_iv_j$ from $\partial\log\partial\exp\cdot\partial E$
 $$\Leftrightarrow v_iv_j - \sum_v P(v\:|\:M)v_iv_j = 0$$
-The second term is $\sum_v P(v\:|\:M)v_iv_j = E_{v_iv_j\in P(v\:|\:M)}[v_iv_j] = \langle v_iv_j\rangle_M$ the expectation of the coactivation of two units $v_i,v_j$ when the values of those two units are taken from $P(v\:|\:M)$ the distribution learned by the model $M$.\\
+The second term is $\sum_v P(v\:|\:M)v_iv_j = \mathbb{E}_{v_iv_j\in P(v\:|\:M)}[v_iv_j] = \langle v_iv_j\rangle_M$ the expectation of the coactivation of two units $v_i,v_j$ when the values of those two units are taken from $P(v\:|\:M)$ the distribution learned by the model $M$.\\
 So for a single $l$:
 $$v_i^lv_j^l - \langle v_iv_j\rangle_M$$
 not introducing $l$ in the second term because it's marginalized, all the possible values in all possible configurations, it's an expectation and the data is already included in the formulation.\\
 So $\forall\:v^l\in L$ $$\frac{\partial L}{\partial M_{ij}} = \frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l)-\langle v_iv_j\rangle_M=$$
-We have the clamped expectation under the empirical distribution $\frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l) = E_{v_i^lv_j^l\in L}[v_i^lv_j^l] = \langle v_iv_j\rangle_c$
+We have the clamped expectation under the empirical distribution $\frac{1}{L}\sum_{l=1}^L (v_i^lv_j^l) = \mathbb{E}_{v_i^lv_j^l\in L}[v_i^lv_j^l] = \langle v_iv_j\rangle_c$
 $$=\underset{\text{Wake}}{\underbrace{\langle v_iv_j\rangle_c}} - \underset{\text{Dream}}{\underbrace{\langle v_iv_j\rangle_M}} = \Delta M_{ij}$$
 So we're focusing on the neurons $i, j$ and the link between them $M_{ij}$, and we increase the connection when both are 1 so when $\langle v_iv_j\rangle_c$ is larger, so Hebbian learning. The second term $\langle v_iv_j\rangle_M$, if they are in disagreement then they are flipped then it's zero, if instead they are coactive (both on or off) then it's close to $-1$. It's anti-Hebbian, has the purpose of nearing the expectation of the model towards the reality.\\
 When $\langle v_iv_j\rangle_c - \langle v_iv_j\rangle_M = 0-1$, we have that the model thinks that they are correlated while in reality they are different, so the model stops believing that they are correlated.\\\\
@@ -1135,7 +1141,7 @@ Variational inference and sampling are efficient ways to learn approximations to
 \section{Sampling Methods} 
 \paragraph{Sampling} Drawing a set of realizations $X = \{x_1,\ldots,x_L\}$ of a random variable $x$ with a distribution $p(x)$. The set contains $L$ samples.\\
 If we have a sampling set we can use it to approximate $p(x)$ using the \textbf{empirical distribution} $$p(x)\simeq \frac{1}{L}\sum_{l=1}^L I[X_l = x]$$ with $I[c] = 1 \Leftrightarrow c$ is true.\\
-We can also approximate the expectation of a function $f$ $$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l)$$
+We can also approximate the expectation of a function $f$ $$\mathbb{E}_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l)$$
 We need sampling when $p(x)$ is intractable. For example, in Bayesian models the parameters are random variables but the posteriors are often intractable so we can use sampling to obtain the model parameters.
 \paragraph{Sampling Procedure as Distributions} A sampler $S$ is a procedure that generates a sample set $X$ from a generic distribution $p(x)$. Since $X$ contains realizations of random variables, also $X$ has a probability distribution. We denote with $\hat{p}_S(X)$ the probability to obtain the sample set $X$ from the sampler $S$.\\
 A \textbf{sampler} and its properties \textbf{are fully defined by its distribution} $\hat{p}_S(X)$. In general
@@ -1145,18 +1151,17 @@ $$\hat{p}(X) \neq p(x)$$
 	\item $\hat{p}(X)$ is the distribution over the samples set and defined by the sampling procedure
 \end{list}
 Let us consider the sampling approximation of the expectation
-$$E_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l) = \hat{f}_X$$
+$$\mathbb{E}_{p(x)}[f(x)]\simeq \frac{1}{L}\sum_{l=1}^L f(x_l) = \hat{f}_X$$
 Since $\hat{f}_X$ estimates a value, we could ask:
 \begin{list}{}{}
 	\item Is $\hat{f}_X$ an unbiased estimator?
 	\item How much is the variance of the approximation?
 \end{list}
-An unbiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning: let $\hat{p}(X)$ the distribution over all possible realizations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$E_{\hat{p}(X)}[\hat{f}_X] = E_{p(x)}[f(x)]$$
+An unbiased estimator $\hat{\Theta}$ of the unknown $\Theta \Rightarrow$ the approximation is exact on average. Meaning: let $\hat{p}(X)$ the distribution over all possible realizations of the sampling set $X$, then $\hat{f}_X$ is unbiased estimator if $$\mathbb{E}_{\hat{p}(X)}[\hat{f}_X] = \mathbb{E}_{p(x)}[f(x)]$$
 This is true provided that $\hat{p}(x_l) = p(x_l)$\\
 A sampler with this property is called \textbf{valid} because it draws samples from the desired distribution.\\\\
-The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$. Let $$\Delta\hat{f}_X = \hat{f}_X - E_{\hat{p}(X)}[\hat{f}_X]$$ then the variance of $\hat{f}(X)$ is given by $$E_{\hat{p}_X}[(\Delta\hat{f}_X)^2]$$
-we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average, i.e. to $E_{p(X)}[f(X)]$.\\\\
-So if the sampler has same marginals $(\hat{p}(x_l)=p(x_l))$ and draws sample independently $(\hat{p}(x_l,x_{l'}) = \hat{p}(x_l)\hat{p}(x_{l'}))$ we obtain $$E_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\text{Var}_{p(x)}[f(x)]$$
+The variance of $\hat{f}(X)$ tells us how much we can rely on the approximation computed using the sampling set $X$. Let $$\Delta\hat{f}_X = \hat{f}_X - \mathbb{E}_{\hat{p}(X)}[\hat{f}_X]$$ then the variance of $\hat{f}(X)$ is given by $\mathbb{E}_{\hat{p}_X}[(\Delta\hat{f}_X)^2]$ and we would like low variance meaning that $\hat{f}(X)$ is quite always close to the average, i.e. to $\mathbb{E}_{p(X)}[f(X)]$.\\\\
+So if the sampler has same marginals $(\hat{p}(x_l)=p(x_l))$ and draws sample independently $(\hat{p}(x_l,x_{l'}) = \hat{p}(x_l)\hat{p}(x_{l'}))$ we obtain $$\mathbb{E}_{\hat{p}_X}[(\Delta \hat{f}_X)^2] = \frac{1}{L}\text{Var}_{p(x)}[f(x)]$$
 The variance reduces linearly with respect to the number of samples provided that $\text{Var}_{p(x)}[f(x)]$ is finite.\\\\
 We've shown that we need sampling to approximate expectations and to do inference in Bayesian models. Properties of the sampling procedure depends on $\hat{p}(X)$:
 \begin{list}{}{}
@@ -1538,6 +1543,7 @@ there is little residual information of the input inside of the memory.
 \end{list}
 Weights are shared between timesteps.
 \pagebreak
+%TODO FROM HERE
 \paragraph{Backward Propagation}
 \begin{center}
 	\includegraphics[scale=0.5]{156.png}
