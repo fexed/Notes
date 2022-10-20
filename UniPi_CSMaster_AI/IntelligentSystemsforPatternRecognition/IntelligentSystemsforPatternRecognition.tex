@@ -921,16 +921,15 @@ $$\theta^m = \theta^{m-1} - v_m\nabla L_n(\theta^{m-1})$$
 $$\nabla L_{nk}(\theta) = \sum_t f_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_t\sum_{y,y'}f_k(y,y',X_t^n)P(y,y'\:|\:X^n)-\frac{\theta_k}{N\sigma^2}$$
 (remembering to divide the regularization by the number of terms $N$), with$P(y,y'\:|\:X^n)$ estimated by sum-product inference.
 \paragraph{Applications} Linear CRF have various applications: POS-tagging, semantic role identification, bioinformatics. Feature functions have the form $f_k(X_k,Y_k)=I_{y_k=\hat{y}_k}q(X_c)$, with $f_k$ non-zero only for a specific output configuration $\hat{y}_k$, and then depending only on $X_k$ (the features not shared by the classes). $q(X_c)$ is the observation functions: word begins with capital, ends with -ing\ldots\\
-In computer vision they can be used to define bi-dimensioal lattice on images, bg/fg segmentation and to impost constraints.
-%TODO FROM HERE
+In computer vision they can be used to define bi-dimensional lattice on images, bg/fg segmentation and to impost constraints.
 \subsection{Bayesian Learning and Variational Inference}
 Introducing basic concepts of variational learning useful for both generative models and deep learning.
 \begin{list}{}{}
 	\item \textbf{Bayesian Latent Variable} models: class of generative models for which variational or approximated methods are needed
 	\item \textbf{Latent Dirichlet Allocation}: possibly the simplest Bayesian latent variable model, with many applications in unsupervised text analytics, machine vision,\ldots
 \end{list}
-\paragraph{Latent Variables} Unobserved random variables that define a hidden generative process of observed data. They explain complex relation between many observable variables. An example: hidden states in HMM/CRF.\\
-Latent variables likelihood $$P(x) = \int_\mathbf{z} \prod_{i=1}^N P(x_i\:|\:z)P(\mathbf{z})\:d\mathbf{z}$$ with a graph like $Z \longrightarrow X$ so of nodes $\{Z,X\}$ and a directed arc $(Z,X)$.
+\paragraph{Latent Variables} \textbf{Unobserved random variables that define a hidden generative process of observed data}. They explain the complex relations between many observable variables. Examples of latent variables are the hidden states in HMM/CRF.\\
+Latent variables likelihood $$P(x) = \int_\mathbf{z}\:\:\prod_{i=1}^N  P(x_i\:|\:z)\cdot P(\mathbf{z})\:\:d\mathbf{z}$$ with a graph like $Z \longrightarrow X$ so of nodes $\{Z,X\}$ and a directed arc $(Z,X)$.
 \paragraph{Latent Spaces} Spaces where high-dimensional data can be represented. Each of the $M$ samples is made of $N$ features represented internally with $k<<N$ dimensions.
 \begin{center}
 	\includegraphics[scale=0.5]{39.png}
@@ -938,23 +937,24 @@ Latent variables likelihood $$P(x) = \int_\mathbf{z} \prod_{i=1}^N P(x_i\:|\:z)P
 The assumption is that latent variables conditional and marginal distribution are more tractable than the joint distribution $P(X)$.
 \paragraph{Tractability} Introducing hidden variables can make the posteriors intractable. We need stuff that simplify those posteriors: Bayesian learning introduces priors which introduce integrals in the posteriors computation which are not always analytically or computationally tractable.
 \subsubsection{Kullback-Leibler Divergence}
-An information theoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = E_q\left[\log\frac{q(z)}{p(z\:|\:x)}\right] = E_q[\log q(z)] - E_q[\log p(z\:|\:x)]$$
+An information theoretic measure of closeness of two distributions $p$ and $q$ $$KL(q\|p) = \mathbb{E}_q\left[\log\frac{q(z)}{p(z\:|\:x)}\right] = \mathbb{E}_q[\log q(z)] - \mathbb{E}_q[\log p(z\:|\:x)]$$
 Tells how the distribution $q$ differs from $p$. It's a divergence so it is asymmetric, $KL(q\|p) \neq KL(p\|q)$\begin{list}{}{}
-	\item if $q$ and $p$ high, then good (close to $0$)
-	\item if $q$ is high and $p$ is low, then it's unhappy (large divergence)
-	\item if $q$ is low we don't care (due to the expectation)
+	\item if $q$ and $p$ are high, then $KL(q\|p)\simeq 0$
+	\item if $q$ is high and $p$ is low, then there's divergence so $KL(q\|p)$ it's large
+	\item if $q$ is low we don't care, due to the expectation
 \end{list}
-The expectation $E_q$ means taking all possible assignments $z$ weighted according to the probability $q(z)$.
+The expectation $\mathbb{E}_q$ means taking all possible assignments $z$ weighted according to the probability $q(z)$
+$$\mathbb{E}_Q[P(Z)] = \sum_z P(Z)\cdot Q(Z)$$
 \paragraph{Jensen Inequality} Property of linear operators on convex/concave functions $$\lambda f(x) + (1-\lambda)f(x)\geq f(\lambda x + (1-\lambda)x)$$
 Which generalizes to
 $$\frac{\sum_ia_if(x_i)}{\sum_ia_i}\geq f\left(\frac{\sum_ia_ix_i}{\sum_ia_i}\right)$$
-The curve is longer than the line connecting the two points. With concave we have $\leq$. Applied to probability $$f(E[X])\geq E[f(X)]$$
-$$\log(E[X])\geq E[\log(X)]$$
+The curve is longer than the line connecting the two points. With concave we have $\leq$. Applied to probability $$f(E[X])\geq \mathbb{E}[f(X)]$$
+$$\log(\mathbb{E}[X])\geq \mathbb{E}[\log(X)]$$
 The log-likelihood for a model with a single hidden variable $Z$ and parameters $\theta$ with a single sample assumed for simplicity is the following
 $$\log P(x\:|\:\Theta) = \log\int_zP(x,z\:|\:\Theta)dz = \log\int_z\frac{Q(z\:|\:\phi)}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)dz$$
-$Q$ is a distribution, used over $z$ with parameters $\phi$ and $Q(z\:|\:\phi)\neq 0$. That is the definition of expectation, we have $\int_zQ(z\:|\:\phi)\cdot \frac{1}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)$ which is $\sum_z q\cdot g(z)$. Using Jensen we have $$\log P(x\:|\:\Theta)= \log E_Q\left[\frac{P(x,z)}{Q(z)}\right] \geq E_Q\left[\log \frac{P(x,z)}{Q(z)}\right]= \underset{\text{Expectation of joint distribution}}{\underbrace{E_Q[\log P(x,z)]}} - \underset{\text{Entropy}}{\underbrace{E_Q[\log Q(z)]}} = L(x,\Theta,\phi)$$
+$Q$ is a distribution, used over $z$ with parameters $\phi$ and $Q(z\:|\:\phi)\neq 0$. That is the definition of expectation, we have $\int_zQ(z\:|\:\phi)\cdot \frac{1}{Q(z\:|\:\phi)}P(x,z\:|\:\Theta)$ which is $\sum_z q\cdot g(z)$. Using Jensen we have $$\log P(x\:|\:\Theta)= \log \mathbb{E}_Q\left[\frac{P(x,z)}{Q(z)}\right] \geq \mathbb{E}_Q\left[\log \frac{P(x,z)}{Q(z)}\right]= \underset{\text{Expectation of joint distribution}}{\underbrace{\mathbb{E}_Q[\log P(x,z)]}} - \underset{\text{Entropy}}{\underbrace{\mathbb{E}_Q[\log Q(z)]}} = L(x,\Theta,\phi)$$
 So we are lower bounding $\log P(x\:|\:\Theta)$ with the expected joint distribution minus the entropy. So we have a lower bound on something I want to maximize: we can maximize the lower bound. Maximizing this term entails that we're supported by the data (using the expectation of joint distribution $E_Q[\log P(x,z)]$).\\
-How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) = ?$ We introduce $Q(z)$ by marginalization $$\int_z Q(z)\log P(x) - \int_z Q(z)\log\frac{P(x,z)}{Q(z)} = \int_z Q(z)\log\frac{P(x)Q(z)}{P(x,z)}=E_Q\left[\log \frac{Q(z)}{P(z\:|\:x)}\right] = KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right)$$
+How good is this lower bound? Meaning $\log P(x\:|\:\Theta) - L(x,\Theta,\phi) = ?$ We introduce $Q(z)$ by marginalization $$\int_z Q(z)\log P(x) - \int_z Q(z)\log\frac{P(x,z)}{Q(z)} = \int_z Q(z)\log\frac{P(x)Q(z)}{P(x,z)}=\mathbb{E}_Q\left[\log \frac{Q(z)}{P(z\:|\:x)}\right] = KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right)$$
 Because $\frac{P(x)}{P(x,z)} = \frac{1}{P(z\:|\:x)}$. So it's an optimization problem of finding $\Theta$ and $\phi$ that maximize $L(x,\Theta,\phi)$ reduced to a minimization problem with KL.\\
 We can assume the existence of a probability $Q(z\:|\:\phi)$ which allows to bound the likelihood $P(x\:|\:\Theta)$ from below using $L(x,\Theta,\phi)$.\\
 $L(x,\Theta,\phi)$ is called \textbf{variational bound} or \textbf{ELBO} (evidence lower bound). The optimal bound is obtained from $KL\left(Q(z\:|\:\phi)\|P(z\:|\:x,\Theta)\right) = 0$ choosing $Q(z\:|\:\phi)=P(z\:|\:x,\Theta)$. So the problem now becomes maximizing ELBO. Maximum Likelihood learning with hidden variables can be approached by maximization of the ELBO $$\max_{\Theta,\phi}\sum_{n=1}^N L(x_n,\Theta,\phi)$$ where $\Theta$ are the model parameters and $\phi$ is used in $Q(z\:|\:\phi)$.
