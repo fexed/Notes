@@ -1549,9 +1549,9 @@ Weights are shared between timesteps.
 	\includegraphics[scale=0.5]{156.png}
 \end{center}
 The gradient is
-$$\frac{\partial L_t}{\partial W} = \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\underset{{\frac{\partial h_t}{\partial h_{t-1}}\cdot\frac{h_{t-1}}{\partial h_{t-2}}\cdot\ldots\cdot\frac{\partial h_{k+1}}{\partial h_k}}}{\underbrace{\frac{\partial h_t}{\partial h_k}}}\cdot\frac{\partial h_k}{\partial W}$$
+$$\frac{\partial L_t}{\partial W} = \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\underset{\text{Chain rule}}{\underbrace{\frac{\partial h_t}{\partial h_k}}}\cdot\frac{\partial h_k}{\partial W}$$
 Inside $\frac{\partial h_t}{\partial h_k}$ we have the chain rule
-$$\frac{\partial L_t}{\partial W} =  \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right)\cdot\frac{\partial h_k}{\partial W}$$
+$$\frac{\partial L_t}{\partial W} =  \sum_{k=1}^t\frac{\partial L_t}{\partial h_t}\cdot \overset{\text{Chain rule}}{\overbrace{\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right)}} \cdot\frac{\partial h_k}{\partial W}$$
 So the gradient is a recursive product of hidden activation gradients (Jacobian). We want to bound the update to compensate for the vanishing/exploding gradients. We have $$h_l = \tanh(W_{hl}h_{l-1}+W_{in}x_l)$$ $$\frac{\partial h_{l+1}}{\partial h_l} = D_{l+1}W_{hl}^T$$ where the activation Jacobian is $$D_{l+1} = diag(1-\tanh^2(W_{hl}h_l + W_{in}x_{l+1}))$$
 meaning a diagonal matrix with $\tanh^{-1}(\partial_i^t)$ on the diagonal.
 $$\frac{\partial L_t}{\partial h_k} = \frac{\partial L_t}{\partial h_t}\left(\prod_{l=k}^{t-1}\frac{\partial h_{l+1}}{\partial h_l}\right) = \frac{\partial L_t}{\partial h_t}\prod_{l=k}^{t-1}D_{l+1}W_{hl}^T $$
@@ -1561,11 +1561,11 @@ We bound the spectral radius $\sigma$. Can shrink to zero or increase exponentia
 	\item $\sigma < 1 \Rightarrow$ \textbf{vanishing}
 	\item $\sigma > 1 \Rightarrow$ \textbf{exploding}
 \end{list}
-\subparagraph{Gradient Clipping for Exploding Gradients} Easiest to solve, by just limiting the gradient.\\
+\subparagraph{Gradient Clipping for Exploding Gradients} The exploding gradients problem is the easiest to solve: we can simply limit the gradients.\\
 With $g=\frac{\partial L_t}{\partial W}$ our gradient and $\Theta_0$ our max value for the gradient
 $$\|g\|>\Theta_0\Rightarrow g=\frac{\Theta_0}{\|g\|}g$$
-Rescaling doesn't work for gradient vanish as total gradient is a sum of time dependent gradients (preserving relative contribution from each time makes it exponentially decay).
-\subparagraph{Constant Error Propagation} Solution seem to be having the Jacobian with spectral radius $\sigma = 1$.\\
+This rescaling \textbf{doesn't work for the gradient vanishing problem}, as total gradient is a sum of time dependent gradients (preserving relative contribution from each time makes it exponentially decay).
+\subparagraph{Constant Error Propagation} A solution to gradient vanishing seems to be having the Jacobian with spectral radius $\sigma = 1$.\\
 Change the activation function and constrain the recurrent weight matrix
 $$\frac{\partial h_{l+1}}{\partial h_l}=D_{l+1}W_h^T$$
 \subparagraph{Activation functions} The popular choices (sigmoids, tanhs) are always contractive ($\sigma < 1$). Alternatives: modReLU (ReLU generalized to the $\mathbb{C}$ domain) or identity.
@@ -1737,18 +1737,17 @@ Context information $S$ is used to remind what's important, used to look at diff
 \begin{center}
 	\includegraphics[scale=0.5]{114.png}
 \end{center}
-The $\tanh$ layer fuse each encoding with the current context $s$
-$$e_i = a(s, h_i)$$
-$e_i$ is the relevance between the context $s$ and the hidden state $h_i$.\\
-The we have the differentiable softmax max selecto operator
-$$\alpha_i = \frac{e^{e_i}}{\sum_j e^{e_j}}$$
-Then we aggregate with the seed by soft attention voting
-$$c= \sum_i \alpha_ih_i$$
-Basically
 \begin{list}{}{}
-	\item \textbf{Relevance} $e_i = a(s, h_i)$
-	\item \textbf{Normalization} $\alpha_i = \frac{\exp(e_i)}{\sum_j \exp(e_j)}$
-	\item \textbf{Aggregation} $c= \sum_i \alpha_ih_i$
+	\item \textbf{Relevance}\\
+	The $\tanh$ layer fuse each encoding with the current context $s$
+	$$e_i = a(s, h_i)$$
+	$e_i$ is the relevance between the context $s$ and the hidden state $h_i$
+	\item \textbf{Normalization}\\
+	Differentiable softmax max select operator
+	$$\alpha_i = \frac{e^{e_i}}{\sum_j e^{e_j}}$$
+	\item \textbf{Aggregation}\\
+	Aggregate with the seed by soft attention voting
+	$$c= \sum_i \alpha_ih_i$$
 \end{list}
 Context $s$ is the past output state, the seed takes into account a subset of the input states.\\
 An advanced example: Google Neural Machine Translation (GNMT)
@@ -1770,11 +1769,11 @@ $Net$ could be anything: a feedforward FF($s, h_i$), linear $s^Th_i$\ldots
 	\includegraphics[scale=0.5]{118.png}
 \end{center}
 Encoder-decoder architecture.
-\paragraph{Self Attention} For each element of an input sequence $X_i$ project into three vectors: query, key and value. A kind of associative database.
+\paragraph{Self Attention} Each element of an input sequence $X_i$ is projected into three vectors: \textbf{query}, \textbf{key} and \textbf{value}. A kind of associative database.
 \begin{center}
 	\includegraphics[scale=0.5]{119.png}
 \end{center}
-For each vector, we compute attention over all other vectors.
+For each vector, we compute attention over all three other vectors.
 $$SA(Q_i, K, V) = \sum_j\text{Softmax}_j\left(\frac{Q_i\cdot K^T}{\sqrt{d_k}}\right)V_j$$
 Can be done multi-headed as well
 $$\text{Attention}(Q,K,V)=\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
@@ -1856,10 +1855,10 @@ In a RNN we have a state update $$h_t=\tanh(x_t W_{xh} + h_{t-1}W_{hh})$$
 
 and an output function $$y_t = h_tW_{hy}$$
 \begin{center}
-	\includegraphics[scale=0.5]{101.png}
+	\includegraphics[scale=0.25]{101.png}
 \end{center}
 \end{multicols}
-Fading/Exploding memory is the situation where the influence of inputs far in the past vanishes/explodes in the current state, due to many non-linear transformation.\\
+\paragraph{Fading and Exploding} Fading/Exploding memory is the situation where the influence of inputs far in the past vanishes/explodes in the current state, due to many non-linear transformation.\\
 Gradients, too, might vanish/explode during propagation through many non-linear transformations, making it difficult to train on long-term dependencies.\\
 To overcome these instabilities, there are lots of approaches:
 \begin{list}{}{}
@@ -1872,6 +1871,7 @@ Randomization is computationally cheaper than optimization.
 	\includegraphics[scale=0.5]{102.png}
 \end{center}
 Randomization means efficiency: training algorithms become cheaper and simpler. Model transfer: don't need to transmit all the weights. Amenable to neuromorphic implementations (ad hoc hardware implementations).
+\pagebreak
 \paragraph{Reservoir Computing}
 \begin{center}
 	\includegraphics[scale=0.5]{103.png}
