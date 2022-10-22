@@ -2049,7 +2049,7 @@ Of course we can't access the true distribution, so we approximate.\\
 Sample $z$ from a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$ (the powerful deterministic part, e.g. a neural network) representing $P(\tilde{x}\:|\:z)$ through $g$.\\
 At training time, sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
 $$z\simeq N(\mu(x),\sigma(x))$$
-But it's not so easy, we would like to train maximizing something non differentiable
+But it's not so easy, we would like to train by maximizing something differentiable
 $$L(D)=\prod_{i=1}^N\underset{\text{Intractable}}{\underbrace{P(x_i)}}=\prod_{i=1}^N\int \underset{\text{Non differentiable}}{\underbrace{P(x_i\:|\:z)P(z)}}\:dz$$
 $P(x_i)$ is intractable so we lower bound it with \textbf{variational approximation}.\\
 The non-differentiable part we handle with \textbf{reparametrization}.
@@ -2063,24 +2063,24 @@ We can sample white noise and rescale that noise with the $\mu$ and the $\sigma$
 The non-differentiable part is in $N(0,1)$ so the gradient can flow to $z$ because sampling is limited to non differentiated variable $\epsilon$.\\
 $\mu$ and $\sigma$ are generated with an encoder.
 \paragraph{Variational Approximation} ELBO (Evidence Lower Bound)
-$$\log P(x\:|\:\theta)\geq E_Q[\log P(x,z)] - E_Q[\log Q(z)] = L(x,\theta,\phi)$$
-The $Q$ function is anything that can approximate the distribution with its own parameters. Maximizing the ELBO allows approximating from below the intractable log-likelihood $\log P(x)$
-$$ L(x,\theta,\phi) = E_Q[\log P(x\:|\:z)] + \underset{KL(Q(z|\phi)\|P(z))}{\underbrace{E_Q[\log P(z)] - E_Q[\log Q(z)]}}$$
-$E_Q[\log P(z)] - E_Q[\log Q(z)] = KL(Q(z|\phi)\|P(z))$ is the KL, and $P(x\:|\:z)$ is the decoder estimate of the conditional (made possible through reparametrization). $P(z)$ is a probability from which is simple to sample form. $Q(z)$ has parameters, any function that can be matched against the distribution, so the $Q$ can be played by a neural network (the encoder). This KL will enforce $Q$ to behave like the prior.
+$$\log P(x\:|\:\theta)\geq \mathbb{E}_Q[\log P(x,z)] - \mathbb{E}_Q[\log Q(z)] = L(x,\theta,\phi)$$
+The $Q$ function is anything that can approximate the distribution, and has its own parameters. Maximizing the ELBO allows approximating from below the intractable log-likelihood $\log P(x)$
+$$ L(x,\theta,\phi) = \mathbb{E}_Q[\log P(x\:|\:z)] + \underset{KL(Q(z|\phi)\|P(z))}{\underbrace{\mathbb{E}_Q[\log P(z)] - \mathbb{E}_Q[\log Q(z)]}}$$
+$\mathbb{E}_Q[\log P(z)] - \mathbb{E}_Q[\log Q(z)] = KL(Q(z|\phi)\|P(z))$ is the KL, and $P(x\:|\:z)$ is the decoder estimate of the conditional (made possible through reparametrization). $P(z)$ is a probability from which is simple to sample form. $Q(z)$ has parameters, any function that can be matched against the distribution, so the $Q$ can be played by a neural network (the encoder). This KL will enforce $Q$ to behave like the prior.
 \subsection{Variational Autoencoder}\begin{center}
 	\includegraphics[scale=0.55]{144.png}
 \end{center}
 \paragraph{Training} Performed by backpropagation on $\theta,\phi$ to optimize the ELBO
-$$L(x,\theta,\phi) = \underset{\text{Reconstruction}}{\underbrace{E_Q[\log P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]}} - \underset{\text{Regularization}}{\underbrace{KL(Q(z|x,\phi)\|P(z|\theta))}}$$
+$$L(x,\theta,\phi) = \underset{\text{Reconstruction}}{\underbrace{\mathbb{E}_Q[\log P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]}} - \underset{\text{Regularization}}{\underbrace{KL(Q(z|x,\phi)\|P(z|\theta))}}$$
 The $Q$ function is a Gaussian, $P(z|\theta)$ is also a Gaussian, so $KL$ is between two Gaussians and can be computed in closed form.\\
 We train the encoder to behave like a Gaussian prior, with zero-mean and unit-variance.
 \paragraph{VAE Final Loss} In principle we would like to optimize the following loss by SGD
-$$E_{X\sim D}[E_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
 Which with reparametrization becomes
-$$E_{X\sim D}[E_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
 No expectation is w.r.t. distributions that depend on model parameters: we can move gradients into them.
 \subparagraph{Information Theoretic Interpretation}
-$$E_{X\sim D}[E_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{\log P(x|z)}}]-KL(\underset{\text{Bits for convertion}}{\underbrace{Q(z|x,\phi)}}\|P(z))$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{\log P(x|z)}}]-KL(\underset{\text{Bits for convertion}}{\underbrace{Q(z|x,\phi)}}\|P(z))$$
 \begin{list}{}{}
 	\item $\log P(x|z)$ tells the number of bits required to reconstruct $x$ from $z$ under the ideal encoding (i.e. $Q(z|x)$ is generally suboptimal)
 	\item The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. Meaning that $Q(z|x,\phi)$ is the number of bits required to convert an uninformative sample from $P(z)$ into a sample from $Q(z|x)$
@@ -2091,7 +2091,6 @@ $$E_{X\sim D}[E_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{
 \begin{center}
 	\includegraphics[scale=0.5]{145.png}
 \end{center}
-\pagebreak
 \paragraph{Conditional Generation (CVAE)} Learn conditional distributions\begin{center}
 	\includegraphics[scale=0.5]{146.png}
 \end{center}
@@ -2105,7 +2104,7 @@ then sample it to generate the output. What if we learn to generate samples rath
 \begin{center}
 	\includegraphics[scale=0.5]{148.png}
 \end{center}
-$$C = \min_{\theta_G}\max_{\theta_D}\left(E_x[\log\underset{\text{Discriminator's output for real data }x}{\underbrace{ (D_{\theta_D}(x))}}]-E_z[\log\underset{\text{Discriminator's output for fake data }G(z)}{\underbrace{(1-D_{\theta_D}(G_{\theta_G}(z)))}}]\right)$$
+$$C = \min_{\theta_G}\max_{\theta_D}\left(\mathbb{E}_x[\log\underset{\text{Discriminator's output for real data }x}{\underbrace{ (D_{\theta_D}(x))}}]-\mathbb{E}_z[\log\underset{\text{Discriminator's output for fake data }G(z)}{\underbrace{(1-D_{\theta_D}(G_{\theta_G}(z)))}}]\right)$$
 With $D$ being the output of the discriminator, and $G$ the output of the GAN. So:
 \begin{list}{}{}
 	\item Discriminator tries to maximize $C$ such that $D_{\theta_D}(x)\rightarrow 1$ and $D_{\theta_D}(G_{\theta_G}(z))\rightarrow 0$
@@ -2122,6 +2121,7 @@ The last doesn't really work well. The cost that the generator receives in respo
 \paragraph{Wasserstein Distance Models} Attempts to solve the hardness of training generators by optimizing the Wasserstein distance (EMD) between the generator and empirical distribution filtered through the discriminator function $D$
 $$G^* = \arg\min_G W(\mu,\mu_G) = \arg\min_G\sup_{\|D\|_L\leq 1}(E_{x\sim\mu}[D(x)]-E_{x\sim\mu_G}[D(x)])$$
 This is a constraint satisfaction problem due to $\sup_{\|D\|_L\leq 1}$, which makes the discriminator Lipschitz bounded by 1. In practice it's not easy, we put a constraint on the magnitude of the constraints.
+\pagebreak
 \paragraph{DCGAN Architecture}
 \begin{center}
 	\includegraphics[scale=0.5]{149.png}
@@ -2144,9 +2144,9 @@ $$G:\{x,z\}\rightarrow y$$
 \begin{center}
 	\includegraphics[scale=0.5]{153.png}
 \end{center}
-The discriminator discriminates the $z$s from the encoder from the $z$ from the distribution.
+The discriminator discriminates the $z$ from the encoder from the $z$ from the distribution.
 \paragraph{Training AAE} We replace the second term with an adversarial loss
-$$L(x) = E_Q[\log P(x\:|\:z)]-\underset{\text{Replaced}}{\underbrace{KL(Q(z\:|\:x)\|P(z))}}$$
+$$L(x) = \mathbb{E}_Q[\log P(x\:|\:z)]-\underset{\text{Replaced}}{\underbrace{KL(Q(z\:|\:x)\|P(z))}}$$
 \begin{list}{}{}
 	\item \textbf{Reconstruction phase}: update encoder and decoder to minimize reconstruction error
 	\item \textbf{Regularization phase}: update discriminator to distinguish true prior samples from generated samples. Update generator to fool the discriminator.
@@ -2216,7 +2216,7 @@ Reinforcement learning is characterized, with respect to other ML tasks, by:
 	\item No supervisor, only a \textbf{reward} signal
 	\item Delayed \textbf{asynchronous feedback}
 	\item Time matters (\textbf{sequential data}, continual learning)
-	\item Agent's \textbf{actions affect the subsequent data} it receives (\textbf{inherently non-stationarity})
+	\item Agent's \textbf{actions affect the subsequent data} it receives (\textbf{inherently non-stationary})
 \end{list}
 Reinforcement learning is used in:
 \begin{list}{}{}
@@ -2279,23 +2279,23 @@ The future is independent of the past given the present (\textbf{d-separation}),
 \subsection{Components}
 A RL agent may include one or more of these:
 \begin{list}{}{}
-	\item \textbf{Policy}: agent's behavior function (may be implicit in the value function)
-	\item \textbf{Value function}: how good is each state and/or action
-	\item \textbf{Model}: agent's representation of the environment
-\end{list}
-\subparagraph{Policy} A policy $\pi$ is the agent's behavior. It's a map from state $s$ to action $a$:
-\begin{list}{}{}
-	\item Deterministic policy $a = \pi(s)$
-	\item Stochastic policy $\pi(a\:|\:s) = P(A_t = a\:|\:S_t = s)$
-\end{list}
-\subparagraph{Value Function} How "good" is a specific state/action for an agent? The value function $v$ is a predictor of future reward. Used to evaluate goodness/badness of a states, therefore used to select between actions
+	\item \textbf{Policy}: agent's behavior function (may be implicit in the value function)\\
+	A policy $\pi$ is the agent's behavior. It's a map from state $s$ to action $a$. Can be of two main types:
+	\begin{list}{}{}
+		\item \textbf{Deterministic policy} $a = \pi(s)$
+		\item \textbf{Stochastic policy} $\pi(a\:|\:s) = P(A_t = a\:|\:S_t = s)$
+	\end{list}
+	\item \textbf{Value function}: how good is each state and/or action\\
+	How "good" is a specific state/action for an agent? The value function $v$ is a predictor of future reward. Used to evaluate goodness/badness of a states, therefore used to select between actions
 $$v_\pi(s)= E_\pi[R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots\:|\:S_t=s]$$
 Expected (discounted) future reward following policy $\pi$ from state $s$.
-\subparagraph{Model} A model predicts what the environment will do next.\\
+	\item \textbf{Model}: agent's representation of the environment\\
+	A model predicts what the environment will do next.\\
 Predict next state $s'$ following an actions $a$
 $$P_{ss'}^a = P(S_{t+1} = s'\:|\:S_t = s, A_t = a)$$
 Predict next reward
 $$R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$$
+\end{list}
 \paragraph{Characterizing RL Agents}\begin{list}{}{}
 	\item Value based: implicit policy, value function given
 	\item Policy based
@@ -2314,7 +2314,7 @@ Exploration finds more information about the environment, while exploitation exp
 \paragraph{Overview} Reinforcement Learning is a general-purpose framework for decision making. It's for an agent with the capacity to act and observe. The state is the sufficient statistics to characterize the future, depends on the history of actions and observations (environment state vs agent state).\\
 Success is measured by a scalar reward signal: the goal is to select actions to maximize future reward (exploit) and in order to be effective we should not forget to explore.
 \subsection{Markov Decision Processes}
-\paragraph{MDP} Markov decision processes formally describe an environment for reinforcement learning: environment is \textbf{fully observable}, i.e. the current state completely characterizes the process. Almost all Reinforcement Learning problems can be formalized as MDPs, for example:
+\paragraph{MDP} Markov decision processes formally describes an environment for reinforcement learning: the environment is \textbf{fully observable}, i.e. the current state completely characterizes the process. Almost all Reinforcement Learning problems can be formalized as MDPs, for example:
 \begin{list}{}{}
 	\item Partially observable problems can be converted into MDPs
 	\item Bandits are MDPs with one state
@@ -2329,7 +2329,8 @@ A Markov decision process is a Markov chain with rewards and actions. It is an e
 \end{list}
 The \textbf{return} $G_t$ is the total discounted reward from time-step $t$
 $$G_t = R_{t+1} + \gamma R_{t+1}+\ldots = \sum_{k=0}^\infty \gamma^kR_{t+k+1}$$
-The values of receiving reward $R$ after $k+1$ time steps is $\gamma^k R$. $\gamma$ values immediate reward vs delayed reward:
+The values of receiving reward $R$ after $k$ time steps is $\gamma^k R$.\\
+The parameter $\gamma$ leverages the preference immediate reward and delayed reward:
 \begin{list}{}{}
 	\item $\gamma\simeq 0$ leads to "myopic" evaluation
 	\item $\gamma\simeq 1$ leads to "far-sighted" evaluation
@@ -2346,24 +2347,24 @@ $$v(s)=E[G_t\:|\:S_t=s]$$
 	\item Immediate reward $R_{t+1}$
 	\item Discounted value of successor state $\gamma v(S_{t+1})$
 \end{list}
-$$v(s)=E[G_t\:|\:S_t=s] = E\left[\sum_{k=0}^\infty\gamma^kR_{t+k+1}\:|\:S_t\right]=$$
-$$= E\left[R_{t+1}+\sum_{k=1}^\infty\gamma^k R_{t+k+1}\:|\:S_t\right]= E\left[R_{t+1}+\gamma\left(R_{t+2}+\sum_{k=2}^\infty\gamma^k R_{t+k+1}\right)\:|\:S_t\right]=$$
-$$= E[R_{t+1}+\gamma G_{t+1}\:|\:S_t] = E[R_{t+1}+\gamma v(S_{t+1})\:|\:S_t] =$$
-$$= E[R_{t+1}\:|\:S_t=s] + \gamma E[v(S_{t+1})\:|\:S_t=s]=$$
+$$v(s)=\mathbb{E}[G_t\:|\:S_t=s] = \mathbb{E}\left[\sum_{k=0}^\infty\gamma^kR_{t+k+1}\:|\:S_t\right]=$$
+$$= \mathbb{E}\left[R_{t+1}+\sum_{k=1}^\infty\gamma^k R_{t+k+1}\:|\:S_t\right]= \mathbb{E}\left[R_{t+1}+\gamma\left(R_{t+2}+\sum_{k=2}^\infty\gamma^k R_{t+k+1}\right)\:|\:S_t\right]=$$
+$$= \mathbb{E}[R_{t+1}+\gamma G_{t+1}\:|\:S_t] = \mathbb{E}[R_{t+1}+\gamma v(S_{t+1})\:|\:S_t] =$$
+$$= \mathbb{E}[R_{t+1}\:|\:S_t=s] + \gamma \mathbb{E}[v(S_{t+1})\:|\:S_t=s]=$$
 $$=R_s+\gamma\sum_{s'}P_{ss'}v(s')$$
-With $E[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
+With $[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
 \subparagraph{Policy} A policy $\pi$ is a distribution over actions $a$ given states $s$ $$\pi(a\:|\:s) = P(A_t=a\:|\: S_t=s)$$
 Defines the behavior of an agent, MDP policises depends only on the current state (\textbf{Markovian}) and are \textbf{stationary} (time-independent): $\forall\:t>0\:\:A_t\sim \pi(\:\:|\:s)$
 \subparagraph{Value Function with Policy} The action-value function $q_\pi(s,a)$ is the expected return starting from state $s$ taking action $a$ and then following the policy $\pi$
-$$q_\pi(s,a) = E_\pi[G_t\:|\:S_t=s, A_t=a]$$
+$$q_\pi(s,a) = \mathbb{E}_\pi[G_t\:|\:S_t=s, A_t=a]$$
 \begin{center}
 	\includegraphics[scale=0.5]{161.png}
 \end{center}
 \paragraph{Bellman Expectation Equation with Value and Action-Value function}
 The state-value function can be decomposed into immediate reward plus discounted value of successor state
-$$v_\pi(s) = E_\pi[R_{t+1} + \gamma v_\pi(S_{t+1})\:|\:S_t=s] = \sum_{a\in A }\pi(a\:|\:s)q_\pi(s,a)$$
+$$v_\pi(s) = \mathbb{E}_\pi[R_{t+1} + \gamma v_\pi(S_{t+1})\:|\:S_t=s] = \sum_{a\in A }\pi(a\:|\:s)q_\pi(s,a)$$
 Similarly we can decompose the action-value function
-$$q_\pi(s,a) = E_\pi[R_{t+1}+\gamma q_\pi(S_{t+1}, A_{t+1})\:|\:S_t=s, A_t=a] = R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_\pi(s')$$
+$$q_\pi(s,a) = \mathbb{E}_\pi[R_{t+1}+\gamma q_\pi(S_{t+1}, A_{t+1})\:|\:S_t=s, A_t=a] = R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_\pi(s')$$
 One more step of nesting: the expected return of being in a state reachable from $s$ through action $a$ and then continue following the policy $\pi$
 $$v_\pi(s) = \sum_{a\in A} \pi(a\:|\:s) \left(R_s^a + \gamma\sum_{s'\in S} P_{ss'}^a v_\pi(s')\right)$$
 The expected return of any action $a'$ taken from states reachable from $s$ through action $a$ (and then following policy $\pi$)
