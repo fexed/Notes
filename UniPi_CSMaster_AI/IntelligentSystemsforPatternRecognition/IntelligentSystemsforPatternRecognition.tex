@@ -1884,7 +1884,7 @@ The \textbf{reservoir} is a large layer of recurrent units, sparsely connected, 
 The \textbf{readout} is a linear combination of the reservoir state variables and can be trained in closed form.
 $$y_t = h_tW_{hy}$$
 $$W_{hy} = (H^TH)^{-1}H^TD$$
-\paragraph{Architecture} Composed of a reservoir and readout
+\paragraph{Architecture} Composed of the reservoir and a linear readout layer.
 \paragraph{Setup} Initialize $W_{xh}$ and $W_{hh}$ randomly and scale $W_{hh}$ to meet the contractive/stability property.
 \paragraph{Training} Drive the network with the input signal. Discard an initial transient and train the readout.
 \paragraph{Reservoir} Non-linearly embeds the input into a higher dimensional feature space where the original problem is more likely to be solved linearly (Cover's Theorem). We use this randomized basis expansion computed by a pool of randomized filters. Provides a "rich" set of input-driven dynamics. Dynamics are driven by the state transition function.
@@ -1893,15 +1893,20 @@ $$h_t = F(x_t, h_{t-1}) = \tanh(x_tW_{xh} + h_{t-1}W_{hh})$$
 The iterated version is the function applied to an arbitrarily long sequence $s = [x_1,\ldots,x_t]$ returning the final state $h_t$
 $$\hat{F}:(\mathbb{R}^{N_X})^*\times \mathbb{R}^{N_H}\rightarrow \mathbb{R}^{N_H}$$
 For example $$\hat{F}(s,h_0)=\left\{\begin{array}{c l}
-h_0&\text{if }s=[]\\
+h_0&\text{if }s=[\:]\\
 F(x_t,\hat{F}([x_1,\ldots,x_{t-1}],h_0))&\text{if }s=[x_1,\ldots,x_t]
 \end{array}\right.$$
 \paragraph{Echo State Property} A valid ESN should satisfy the ESP.\\
 An ESN satisfies the ESP whenever
 $$\forall\:s\in (\mathbb{R}^{N_X})^N \wedge \forall\:h_0,z_0\in\mathbb{R}^{N_H}\text{ we have }\|\hat{F}(s, h_0)-\hat{F}(s,z_0)\|\rightarrow 0\text{ as }N\rightarrow\infty$$
-\textbf{Sufficient condition} involving the control of the maximum singular value of $W_{hh}$, this \textbf{theorem}: if the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
-\textbf{Necessary condition}, involving the control of the maximum eigenvalue in modulus of $W_{hh}$, this \textbf{theorem}: if the spectral radius of $W_{hh}$ is not $< 1$ then the ESN does not satisfy the ESP.\\\\
-We know that $$\rho(W_{hh})\leq \|W_{hh}\|_n$$
+\begin{list}{}{}
+	\item A \textbf{sufficient condition} is the following \textbf{theorem}, which involves the control of the maximum singular value of $W_{hh}$\\
+	If the maximum singular value of $W_{hh}$ is $< 1$ then the ESN satisfies the ESP for any possible input.\\
+	Recall: the singular values of a matrix are the modulus of its eigenvalues
+	\item A \textbf{necessary condition} is the following \textbf{theorem}, which involves the control of the maximum eigenvalue in modulus of $W_{hh}$\\
+	If the spectral radius of $W_{hh}$ is $\geq 1$ then the ESN does not satisfy the ESP
+\end{list}
+We know that $$\rho(W_{hh})\leq \|W_{hh}\|$$
 \paragraph{Initialization} Generate a random matrix $W$ (e.g. from a uniform distribution $[-1,1]$) and then scale by the desired spectral radius ($<1$) $$W_{hh} =\rho_{desired}\frac{W}{\rho(W)}$$
 Now $\rho(W_{hh}) = \rho_{desired}$: the \textbf{spectral radius is a key hyperparameter of the reservoir}.
 \paragraph{Dynamical Transient} If the system is globally asymptotically stable, then all the possible trajectories will synchronize \textbf{after a transient}, not instantaneously.\\
@@ -1917,14 +1922,15 @@ Now $\rho(W_{hh}) = \rho_{desired}$: the \textbf{spectral radius is a key hyperp
 To solve, typically the training is performed offline in closed form.
 \section{Neural Reasoning}
 Not using classical algorithms because we may not have a proper input but only sensor information (e.g. robot navigation). The model needs to learn how to encode the structure from the raw data and then solve the problem. Another example is question answering, where we need to memorize facts, the question and the answer: a bit too much for the dynamical RNN memories, so we need an external memory.
-\paragraph{Memory Networks General Idea} \begin{center}
+\paragraph{Memory Networks General Idea} 
+The memory module typically is a matrix of $N$ slots, sometimes with fixed size other times with dynamic memory. The neural network reads/writes from/to the memory module. Where to read and write can be done with attention.
+\begin{center}
 	\includegraphics[scale=0.5]{127.png}
 \end{center}
-The memory module typically is a matrix of $N$ slots, sometimes with fixed size other times with dynamic memory. The neural network reads/writes from/to the memory module. Where to read and write can be done with attention.
 \subsection{Memory Network}
 \paragraph{Components}\begin{list}{}{}
 	\item \textbf{Input Feature Map}: encodes the input in a feature vector
-	\item \textbf{Generalization}: decide what input (or function of it) to write to memory
+	\item \textbf{Generalization}: decide what input (or function of it) write into memory
 	\item \textbf{Output Feature Map}: reads the relevant memory slots
 	\item \textbf{Response}: returns the prediction given the retrieved memories
 \end{list}
@@ -1932,7 +1938,7 @@ The memory module typically is a matrix of $N$ slots, sometimes with fixed size 
 \begin{center}
 	\includegraphics[scale=0.75]{128.png}
 \end{center}
-The memory contains the facts $x_i$. We search for memories matching the query, then we have a query driven soft-attention with the softmax. We combine the output memories.\\
+The memory contains the facts $x_i$. We search for memories matching the query, then we have a query driven soft-attention with the softmax. Finally we combine the output memories.\\
 We can have extensions, for example we may need more than a single step for more complex models (stacking multiple memory network layers to get several iterations of reasoning):
 \begin{center}
 	\includegraphics[scale=0.5]{129.png}
@@ -1985,30 +1991,39 @@ Write operation is actually performed by composing adding and erasing operations
 Not yet of practical use, not straightforward to train.\\
 Has advantages over GRNN when it comes to learn to program.
 \section{Unsupervised Learning}
-\paragraph{The Problem} Characterize the data (data distribution and variances) to allow the understanding of data, the generation of new observations and ultimately \textbf{reasoning}. Connects to autoencoders and manifold learning.\begin{center}
+\paragraph{The Problem} Characterize the data (meaning finding data distribution and variances) to allow the understanding of data, the generation of new observations and ultimately \textbf{reasoning}. Connects to autoencoders and manifold learning.\begin{center}
 	\includegraphics[scale=0.5]{138.png}
 \end{center}
 Another reason is that \textbf{labeled data is costly and difficult to obtain}. A sustainable future for deep learning: learning the latent structure of data, discover important features, learn task independent representations and introduce (if any) supervision only on few examples.
 \paragraph{Why Generative?} Focusing too much on discrimination rather than on characterizing data can cause issues, e.g.: reduced interpretability, adversarial examples.\\
 Generative model try to characterize data distribution. \begin{list}{}{}
 	\item Understand data to understand the world
-	\item Understand data variances to learn to steer them
+	\item Understand data variances to learn how to steer them
 	\item Understand normality to detect anomalies
 \end{list}
-\paragraph{Approaching the Problem from a DL Perspective} Given training data, learn a (deep) NN that can generate new samples form (an approximation of) the data distribution.\begin{center}
+\paragraph{Approaching the Problem from a DL Perspective} Given training data, learn a (deep) NN that can generate new samples from (an approximation of) the data distribution.\begin{center}
 	\includegraphics[scale=0.5]{139.png}
 \end{center}
 Two approaches:
 \begin{list}{}{}
-	\item \textbf{Explicit} (learn a model density $P_\theta(x)$), which can be \textbf{visible} (work only on visible data, tractable densities, sampling RNNs) and \textbf{latent} (assume there's something else, intractable densities).\\
-	Latent can also be variational (Variational Autoencoders) and stochastic (Boltzmann Machines).
-	\item \textbf{Implicit} (learn a process that samples data from $P_\theta(x)\simeq P(x)$). Can be divided into \textbf{direct models} (generative adversarial networks) and \textbf{stochastic models} (generative stochastic networks)
+	\item \textbf{Explicit}: learn a model density $P_\theta(x)$, which can be 
+	\begin{list}{}{}
+		\item \textbf{Visible}: work only on visible data, tractable densities, sampling RNNs\ldots
+		\item \textbf{Latent}: assume there's something else, intractable densities\ldots\\
+		Latent can also be variational (Variational Autoencoders) and stochastic (Boltzmann Machines)
+\end{list}		
+	\item \textbf{Implicit}: learn a process that samples data from $P_\theta(x)\simeq P(x)$, which can be divided into
+	\begin{list}{}{}
+		\item \textbf{Direct models}: Generative Adversarial Networks
+		\item \textbf{Stochastic models}: Generative Stochastic Networks
+	\end{list}
 \end{list}
 \paragraph{Learning With Fully Visible Information} If all information is fully visible, the joint distribution can be computed from the chain rule factorization (Bayesian Networks).
 $$P(x)=\prod_i^NP(x_i\:|\:x_1,\ldots,x_{i-1})$$
-Can be seen as conditioning the color of the pixel $i$ based on previous pixels. Need to be able to define a sensible ordering for the chain rule, and conditional distribution difficult to compute.\\
-We can use RNNs: use their ability to handle previous data. Scan the image according to a schedule and encode the dependency from previous pixels in the states of an RNN.\\\\
-With only visible information we try to learn the $\theta$ parametrized model distribution
+For example: conditioning the color of the pixel $i$ based on the previous pixels.\\
+Need to be able to \textbf{define a sensible ordering} for the chain rule, and keep in mind that \textbf{conditional distributions are difficult to compute}.\\
+We can use RNNs: use their ability to handle previously seen data. Scan the image according to a schedule and encode the dependency from previous pixels in the states of an RNN.\\\\
+With only visible information we try to learn the $\theta$ parameterized model distribution
 $$P_\theta(x)=\prod_i^NP_\theta(x_i\:|\:x_1,\ldots,x_{i-1})$$
 Then we introduce a latent process regulated by unobservable variables $z$
 $$P_\theta(x)=\int \underbrace{P_\theta(x\:|\:z)} P_\theta(z)\:\:dz$$
@@ -2021,11 +2036,18 @@ We introduced a probabilistic twist on AE
 \begin{center}
 	\includegraphics[scale=0.5]{141.png}
 \end{center}
-There's sampling on $z$, so I can't backpropagate from $\tilde{x}$.\\
-We need a \textbf{deeper probabilistic push}: as an additional push in the probabilistic interpretation, we assume to be able to generate the reconstruction from a sampled latent representation.\\
-Transform $z\mapsto\tilde{x}$ with $P(x\:|\:z)$ transformed into something simpler: a stochastic part and a deterministic part. The stochastic part must be as simple as possible, and the deterministic part as powerful as possible. For example, a probability distribution from which we can sample is not multivariate nor discrete, is a Gaussian, so the stochastic part is a Gaussian. Sample $z$ from the Gaussian, into the powerful deterministic part and transform to represent some other distribution.\\
-So we sample latent variables $z$ from the true prior $P(z)$ and sample from the true conditional $P(\tilde{x}\:|\:z)$.\\\\
-Of course we can't access the true distribution, so we approximate. We sample $z$ from a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$ (neural network) representing $P(\tilde{x}\:|\:z)$ through a NN $g$. At training time sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
+The problem is that there's sampling on $z$, so I \textbf{can't backpropagate from $\tilde{x}$}.\\
+We need a \textbf{deeper probabilistic push}: we \textbf{assume to be able to generate the reconstruction} from a sampled latent representation.\\
+The process $z\mapsto\tilde{x}$ with $P_d(\tilde{x}\:|\:z)$ is transformed into something simpler: a \textbf{stochastic part} and a \textbf{deterministic part}.
+\begin{list}{}{}
+	\item The \textbf{stochastic part} must be \textbf{as simple as possible}.\\
+	For example, a probability distribution from which we can sample that is not multivariate nor discrete: a Gaussian. So \textbf{the stochastic part is a Gaussian}
+	\item The \textbf{deterministic part} must be \textbf{as powerful as possible}.
+\end{list}
+Sample $z$ from the Gaussian and feed it into the powerful deterministic part, transforming it to represent some other distribution.\\\\
+Of course we can't access the true distribution, so we approximate.\\
+Sample $z$ from a simpler distribution (e.g. Gaussian), decode $z$ into $\tilde{x}$ with a decoder $g$ (the powerful deterministic part, e.g. a neural network) representing $P(\tilde{x}\:|\:z)$ through $g$.\\
+At training time, sample $z$ conditioned on data $x$ and train the decoder $g$ to reconstruct $x$ itself from $z$.
 $$z\simeq N(\mu(x),\sigma(x))$$
 But it's not so easy, we would like to train maximizing something non differentiable
 $$L(D)=\prod_{i=1}^N\underset{\text{Intractable}}{\underbrace{P(x_i)}}=\prod_{i=1}^N\int \underset{\text{Non differentiable}}{\underbrace{P(x_i\:|\:z)P(z)}}\:dz$$
