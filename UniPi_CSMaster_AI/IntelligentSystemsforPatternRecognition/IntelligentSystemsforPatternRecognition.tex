@@ -2354,7 +2354,7 @@ $$= \mathbb{E}[R_{t+1}\:|\:S_t=s] + \gamma \mathbb{E}[v(S_{t+1})\:|\:S_t=s]=$$
 $$=R_s+\gamma\sum_{s'}P_{ss'}v(s')$$
 With $[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
 \subparagraph{Policy} A policy $\pi$ is a distribution over actions $a$ given states $s$ $$\pi(a\:|\:s) = P(A_t=a\:|\: S_t=s)$$
-Defines the behavior of an agent, MDP policises depends only on the current state (\textbf{Markovian}) and are \textbf{stationary} (time-independent): $\forall\:t>0\:\:A_t\sim \pi(\:\:|\:s)$
+\textbf{A policy defines the behavior of an agent}, depending only on the current state (\textbf{Markovian}), and are \textbf{stationary} (time-independent): $\forall\:t>0\:\:A_t\sim \pi(\:\:|\:s)$
 \subparagraph{Value Function with Policy} The action-value function $q_\pi(s,a)$ is the expected return starting from state $s$ taking action $a$ and then following the policy $\pi$
 $$q_\pi(s,a) = \mathbb{E}_\pi[G_t\:|\:S_t=s, A_t=a]$$
 \begin{center}
@@ -2383,15 +2383,15 @@ The optimal value function determines the best possible performance in the MDP. 
 	\includegraphics[scale=0.5]{163.png}\\
 	\includegraphics[scale=0.5]{164.png}
 \end{center}
-\paragraph{Optimal Policy} Define a partial ordering over policies $$\pi\geq \pi'\text{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
+\paragraph{Optimal Policy} Let's start by defining a partial ordering over policies $$\pi\geq \pi'\text{ if }\forall\:s\:\:v_\pi(s)\geq v_{\pi'}(s)$$
 \subparagraph{Theorem} For any Markov Decision process\begin{list}{}{}
-	\item There exist an optimal policy $\pi_*$ that is better or equal than all the others: $\forall\pi\:\:\pi_*\geq \pi$
+	\item There exists an optimal policy $\pi_*$ that is better or equal than all the others: $\exists\:\pi_*\:|\:\forall\:\pi\:\:\pi_*\geq \pi$
 	\item All optimal policies achieve the optimal value function: $v_{\pi_*}(s) = v_*(s)$
 	\item All optimal policies achieve the optimal action-value function: $q_{\pi_*}(s,a) = q_*(s,a)$
 \end{list}
-An optimal policy can be found by maximizing over $q_*(s,a)$
+\textbf{An optimal policy can be found by maximizing over $q_*(s,a)$}
 $$\pi_*(a\:|\:s)=\left\{\begin{array}{l l}
-1&\text{if }a=\arg\max_{a\in A} q_*(s,a)\\
+1&\text{if }a=\arg\displaystyle \max_{a\in A} q_*(s,a)\\
 0&\text{otherwise}
 \end{array}\right.$$
 There is always a deterministic optimal policy for any MDP. If we know $q_*(s,a)$ we straightforwardly find the optimal policy.
@@ -2451,7 +2451,7 @@ Formally
 $$v_{k+1}(s) = \sum_{a\in A} \pi(a\:|\:s)\left(R_s^a+\gamma\sum_{s'\in S}P_{ss'}^av_k(s')\right)$$
 $$v_{k+1} = R^\pi +\gamma P^\pi v_k$$
 \paragraph{Improving a Policy} Given a policy $\pi$\begin{list}{}{}
-	\item Evaluate the policy: $v_\pi(s) = E[R_{t+1} + \gamma R_{t+2} + \ldots\:|\:S_t =s]$
+	\item Evaluate the policy: $v_\pi(s) = \mathbb{E}[R_{t+1} + \gamma R_{t+2} + \ldots\:|\:S_t =s]$
 	\item Improve the policy by acting grededily with respect to $v_\pi$:
 	$\pi' = \text{Greedy}(\pi)$
 	\item Repeat
@@ -2474,7 +2474,7 @@ $$q_\pi(s,\pi'(s)) = \max_{a\in A}q_\pi(s,a) = q_\pi(s, \pi(s)) = v_\pi(s)$$
 We satisfy Bellman optimality
 $$v_\pi(s) = \max_{a\in A}q_\pi(s,a)$$
 Therefore, $\forall\:s\in S\:\:v_\pi(s) = v_*(s)$ and $\pi$ is an optimal policy.
-\subparagraph{Modified Policy Improvement} Does policy evaluation need to converge to $v_{\pi_*}$? Introduce a stopping condition, e.g. $\epsilon$-convergence of value function or stopping after $k$ iterations (e.g. $k=3$ sufficient in smallgridworld).\\
+\subparagraph{Modified Policy Improvement} Does policy evaluation need to converge to $v_{\pi_*}$? Introducing a stopping condition, e.g. $\epsilon$-convergence of value function or stopping after $k$ iterations (e.g. $k=3$ sufficient in smallgridworld).\\
 Why update the policy every iteration? Stop after $k=1$, equivalent to value iteration.\\
 \textbf{Generalized policy iteration}\begin{list}{}{}
 	\item Policy Evaluation: estimate $v_\pi$, \textbf{any} policy evaluation
@@ -2488,7 +2488,7 @@ Why update the policy every iteration? Stop after $k=1$, equivalent to value ite
 \end{list}
 \subparagraph{Theorem} \textbf{Principle of Optimality}\\
 A policy $\pi(a\:|\:s)$ achieves the optimal value from state $s$ (i.e. $v_\pi(s) = v_*(s)$) $\Leftrightarrow$ for any state $s'$ reachable from $s$, $\pi$ achieves the optimal value from state $s'$, $v_\pi(s') = v_*(s')$
-\paragraph{Deterministic Value Iteration} If we know the solution to subproblems $v_*(s')$, then solution $v_*(s)$ can be found by one-step lookeahead
+\paragraph{Deterministic Value Iteration} If we know the solution to subproblems $v_*(s')$, then solution $v_*(s)$ can be found by one-step lookahead
 $$v_*(s) = \max_{a\in A} R_s^a + \gamma\sum_{s'\in S} P_{ss'}^av_*(s')$$
 Value iteration applies these updates iteratively. Intuition: start with final rewards and work backwards (still works with loopy, stochastic MDPs).
 \paragraph{Value Iteration} Problem: find optimal policy $\pi$\\
@@ -2535,7 +2535,7 @@ But can only apply Monte-Carlo to episodic MDPs, where \textbf{all episodes must
 $$S_1,A_1,R_2,\ldots,R_k\sim \pi$$
 Recall that return is the total discounted reward
 $$G_t = R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{T-1}R_T$$
-At time $t$ I am in state $S_t$. Recall the value function is the expected return $$v_\pi(s)=E[G_t\:|\:S_t=s]$$
+At time $t$ I am in state $S_t$. Recall the value function is the expected return $$v_\pi(s)=\mathbb{E}[G_t\:|\:S_t=s]$$
 MC policy evaluation uses empirical mean return instead of expected return.
 \subparagraph{Incremental Mean MC Update} Update $V(s)$ incrementally after episode $S_1,A_1,R_2,\ldots, R_T$. For each state $S_t$ with return $G_t$\begin{list}{}{}
 	\item Increment counter $N(s) = N(s) + 1$ (number of time I've seen state $s$)
@@ -2633,7 +2633,7 @@ Using weight $(1-\lambda)\lambda^{n-1}$
 $$G_t^\lambda = (1-\lambda)\sum_{n=1}^\infty \lambda^{n-1}G_t^{(n)}$$
 Update as appropriate (TD($\lambda$))
 $$V(S_t) = V(S_t) + \alpha\left(G_t^\lambda - V(S_t)\right)$$
-But this Forward View need until infinity, so I need to do the computation in a smart way.\\
+But this Forward View needs until infinity, so I need to do the computation in a smart way.\\
 The TD($\lambda$) weight function is:
 \begin{center}
 	\includegraphics[scale=0.5]{170.png}
@@ -2645,7 +2645,7 @@ The TD($\lambda$) weight function is:
 \end{list}
 Eligibility trace combines both
 $$E_0(s) = 0$$
-$$E_t(s) = \lambda\gamma E_{t-1}(s) + 1(S_t;s)$$
+$$E_t(s) = \lambda\gamma E_{t-1}(s) + \mathbf{1}_{S_t=s}$$
 With fading memory of the past (frequency) and adds 1 whenever $S_t = s$ (recency)
 \paragraph{Backward View TD($\lambda$)} The forward view provides the theory, while the \textbf{backward view provides the mechanism}.\\
 Update online, every step, from incomplete sequences. Using eligibility traces for solving the credit assignment problem by trading between the frequency heuristic (assign credit to most frequent states) and recency heuristic (assign credit to most recent states).\\
@@ -2675,8 +2675,8 @@ All $m$ actions are tried with non-zero probability:\begin{list}{}{}
 	\item With probability $\epsilon$ choose an action at random
 \end{list}
 $$\pi(a\:|\:s)= \left\{\begin{array}{c l}
-\frac{\epsilon}{m}+(1-\epsilon)&\text{if }a^*=\arg\max_{a\in A}Q(s,a)\\
-\frac{\epsilon}{m}&\text{otherwise}
+\displaystyle \frac{\epsilon}{m}+(1-\epsilon)&\displaystyle \text{if }a^*=\arg\max_{a\in A}Q(s,a)\\
+\displaystyle \frac{\epsilon}{m}&\text{otherwise}
 \end{array}\right.$$
 \paragraph{Monte-Carlo Control} Every episode
 \begin{list}{}{}
@@ -2740,8 +2740,8 @@ So far $V(s)$ and $Q(s,a)$ are lookup tables, vectors/matrices: an entry for eve
 The new approach is:
 \begin{list}{}{}
 	\item Estimate value function with function approximation 
-	$$\hat{v}(s;W)\simeq v_\pi(s)$$
-	$$\hat{q}(s,a;W)\simeq q_\pi(s,a)$$
+	$$\hat{v}(s;\mathbf{w})\simeq v_\pi(s)$$
+	$$\hat{q}(s,a;\mathbf{w})\simeq q_\pi(s,a)$$
 	\item Generalize from seen states to unseen states
 	\item Update parameters $W$ using MC or TD learning
 \end{list}
@@ -2753,9 +2753,9 @@ Tipically, the last with a softmax to get the outputs.\\
 Which function approximator in those boxes? Anything. Focus on linear models and neural networks (differentiable methods). In addition, we require training methods suitable for non-stationary and non-iid data.
 \subsubsection{Incremental Methods}
 \paragraph{Stochastic Gradient Descent} Goal: find parameter vector $W$ minimizing mean-squared error between approximate value $\hat{v}(s;W)$ and true value function $v_\pi(s)$
-$$J(W) = E_\pi[(v_\pi(S)-\hat{v}(S;W))^2]$$
+$$J(W) = \mathbb{E}_\pi[(v_\pi(S)-\hat{v}(S;W))^2]$$
 Gradient solution
-$$\Delta W= -\frac{1}{2}\alpha\nabla_{W}J(W) = \alpha E_\pi[v_\pi(S) - \hat{v}(S;W)]\nabla_W\hat{v}(S;W)$$
+$$\Delta W= -\frac{1}{2}\alpha\nabla_{W}J(W) = \alpha \mathbb{E}_\pi[v_\pi(S) - \hat{v}(S;W)]\nabla_W\hat{v}(S;W)$$
 Stochastic approximation (\textbf{sampling}, single sample so no expectation)
 $$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W))\nabla_W\hat{v}(S;W)$$
 We need $\pi$, so to know how to model things. The \textbf{feature vector state} is represented by a feature vector
@@ -2772,7 +2772,7 @@ For example:
 	\item Neural embedding
 \end{list}
 \paragraph{Linear Value Function Approximation} Values as a linear combination of state features $$\hat{v}(S;W) = x(S)^TW$$
-Objective function is quadratics in parameters $W$.\\
+Objective function is quadratic in parameters $W$.\\
 Stochastic gradient descent converges to global optimum, simple (LMS) update rule
 $$\nabla_W\hat{v}(S;W)=x(S)$$
 $$\Delta W=\alpha(v_\pi(S)-\hat{v}(S;W)x(S))$$
@@ -2968,7 +2968,7 @@ Focus again on \textbf{model-free} reinforcement learning.
 How to measure the quality of a policy $\pi_\theta$?
 \begin{list}{}{}
 	\item \textbf{Episodic Environments}: use start value
-	$$J_1(\theta) = V^{\pi_\theta}(s_1) = E_{\pi_\theta}[v_1]$$
+	$$J_1(\theta) = V^{\pi_\theta}(s_1) = \mathbb{E}_{\pi_\theta}[v_1]$$
 	\item \textbf{Continuous Environments}:
 	\begin{list}{}{}
 		\item \textbf{Average Value} $$J_{\overline{V}}(\theta) = \sum_s d^{\pi_\theta}(s)V^{\pi_\theta}(s)$$
@@ -2979,13 +2979,13 @@ How to measure the quality of a policy $\pi_\theta$?
 \paragraph{Policy Gradient} Let $J(\theta)$ be any policy objective function. Policy gradient algorithms search for a local maximum in $J(\theta)$ by ascending the gradient for the policy with respect to $\theta$
 $$\Delta\theta=\alpha\cdot\underset{\text{Policy gradient}}{\underbrace{\nabla_\theta J(\theta)}}$$
 \subparagraph{Theorem} For any differentiable policy $\pi_\theta(s,a)$, for any of the policy objective function $J_1,J_{\overline{R}},\frac{1}{1-\gamma}J_{\overline{V}}$, the policy gradient is
-$$\nabla_\theta J(\theta)= E_{\pi_\theta}\left[\nabla_\theta\log\pi_\theta(s,a)Q^{\pi_\theta}(s,a)\right]$$
+$$\nabla_\theta J(\theta)= \mathbb{E}_{\pi_\theta}\left[\nabla_\theta\log\pi_\theta(s,a)Q^{\pi_\theta}(s,a)\right]$$
 \paragraph{Score Function} Compute the policy gradient analytically. Then, assume policy $\pi_\theta$ is differentiable whenever it is non-zero and we know the gradient $\nabla_\theta\pi_\theta(s,a)$.\\
 The \textbf{likelihood ratios} exploit the following fundamental identity
 $$\nabla_\theta\pi_\theta(s,a)=\pi_\theta(s,a)\frac{\nabla_\theta\pi_\theta(s,a)}{\pi_\theta(s,a)} = \pi_\theta(s,a)\nabla_\theta\log\pi_\theta(s,a)$$
 The \textbf{score function} is $\nabla_\theta\log\pi_\theta(s,a)$
 \subparagraph{Softmax Policy} Weight actions using a linear combination features $\phi(s,a)^T\theta$. The probability of action is proportional to exponentiated weight $$\pi_\theta(s,a)\sim e^{\phi(s,a)^T\theta}$$
-The \textbf{score function} is $$\nabla_\theta\log\pi_\theta(s,a)=\phi(s,a)-E_{\pi_\theta}[\phi(s,\:)]$$
+The \textbf{score function} is $$\nabla_\theta\log\pi_\theta(s,a)=\phi(s,a)-\mathbb{E}_{\pi_\theta}[\phi(s,\:)]$$
 \subparagraph{Gaussian Policy} Natural choice in continuous action spaces.\\
 The mean is a linear combination of state features $\mu(s) = \phi(s)^T\theta$.\\
 The variance $\sigma^2$ may be fixed or parametrized.\\
@@ -3024,7 +3024,7 @@ Actor-critic algorithms maintain two sets of parameters:
 	\item \textbf{Actor}: updates policy parameters $\theta$ in the direction suggested by the critic
 \end{list}
 They follow an approximated policy gradient
-$$\nabla_\theta J(\theta) \simeq E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)Q_w(s,a)]$$
+$$\nabla_\theta J(\theta) \simeq \mathbb{E}_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)Q_w(s,a)]$$
 $$\Delta\theta = \alpha\nabla_\theta\log\pi_\theta(s,a)Q_w(s,a)$$
 \paragraph{Estimating the Action-Value Function} The critic is solving a familiar problem: policy evaluation, how good is policy $\pi_\theta$ for current parameters $\theta$?\\
 This problem was explored previously with: Monte-Carlo policy evaluation, Temporal-Difference learning, TD($\lambda$).
@@ -3043,7 +3043,7 @@ Luckily, if we choose a value function approximation carefully, we can avoid int
 \paragraph{Reducing Variance Using a Baseline} We subtract a baseline function $B(s)$ from the policy gradient.\\
 Can reduce variance without changing expectation. A good baseline is the state value function $B(s) = V^{\pi_\theta}(s)$, so we can rewrite the policy gradient using the advantage function $A^{\pi_\theta}(s,a)$
 $$A^{\pi_\theta}(s,a) =Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s)$$
-$$\nabla_\theta J(\theta) = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)A^{\pi_\theta}(s,a)]$$
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)A^{\pi_\theta}(s,a)]$$
 \paragraph{Estimating the Advantage Function} The advantage function can significantly reduce variance of policy gradient, so the critic should really estimate the advantage function. For example, by estimating both $V^{\pi_\theta}(s)$ and $Q^{\pi_\theta}(s,a)$ using two function approximators and two parameter vectors
 $$V_v(s)\simeq V^{\pi_\theta}(s)$$
 $$Q_w(s,a)\simeq Q^{\pi_\theta}(s,a)$$
@@ -3051,9 +3051,9 @@ $$A(s,a) = Q_w(s,a)-V_v(s)$$
 and updating both value functions by, e.g., TD learning.\\
 Given a true value function $V^{\pi_\theta}(s)$ and the TD error $\delta^{\pi_\theta}$ $$\delta^{\pi_\theta} = r+\gamma V^{\pi_\theta}(s')-V^{\pi_\theta}(s)$$
 is an unbiased estimate of the advantage function
-$$E[\delta^{\pi_\theta}\:|\:s,a]=E[r+\gamma V^{\pi_\theta}(s')\:|\:s,a]-V^{\pi_\theta}(s) = Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s) = A^{\pi_\theta}(s,a)$$
+$$\mathbb{E}[\delta^{\pi_\theta}\:|\:s,a]=\mathbb{E}[r+\gamma V^{\pi_\theta}(s')\:|\:s,a]-V^{\pi_\theta}(s) = Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s) = A^{\pi_\theta}(s,a)$$
 We can use the TD error to compute the policy gradient
-$$\nabla_\theta J(\theta) = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\delta^{\pi_\theta}]$$
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\delta^{\pi_\theta}]$$
 In practice, need to approximate TD error
 $$\delta_v = r+\gamma V_v(s')-V_v(s)$$
 Only one set of critic parameters $v$ is needed.
@@ -3062,30 +3062,30 @@ Only one set of critic parameters $v$ is needed.
 The vanilla gradient is sensitive to these reparametrizations. In practice, since changing some parameters can affect probabilities (i.e. policy) more than others, is there a mean to rescale the gradient to avoid this effect?
 \paragraph{Covariant/Natural Policy Gradient} Parametrization independent. It fits ascent direction that is closest to vanilla gradient, when changing policy by a small fixed amount
 $$\nabla_\theta^{nat}\pi_\theta(s,a) = G_\theta^{-1}\nabla_\theta\pi_\theta(s,a)$$
-where $G_\theta$ is the \textbf{Fisher information matrix} $$G_\theta = E_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\nabla_\theta\log\pi_\theta (s,a)^T]$$
+where $G_\theta$ is the \textbf{Fisher information matrix} $$G_\theta = \mathbb{E}_{\pi_\theta}[\nabla_\theta\log\pi_\theta(s,a)\nabla_\theta\log\pi_\theta (s,a)^T]$$
 \paragraph{Trust Region Policy Optimization} Generalizes natural policy gradient.\\
 Optimizes expected advantage under new policy state distribution.
-$$E_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t}A_t\right]\text{ such that }E_t\left[KL\left(\pi_{\theta_{old}}(s_t,a_t)\|\pi_\theta(s_t,a_t)\right)\right]\leq \delta$$
+$$\mathbb{E}_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t)}A_t\right]\text{ such that }\mathbb{E}_t\left[KL\left(\pi_{\theta_{old}}(s_t,a_t)\|\pi_\theta(s_t,a_t)\right)\right]\leq \delta$$
 Uses \textbf{importance sampling} to align old-new policies in expectation (regularizes to stay close to old policy)
 $$\theta'=\theta+\alpha G_\theta^{-1}\nabla_\theta\pi_\theta(s,a)$$
 $$\alpha=\sqrt{\frac{2\epsilon}{\nabla_\theta\pi_\theta(s,a)^TG_\theta\nabla_\theta\pi_\theta(s,a)}}$$
 \paragraph{Proximal Policy Optimization} Build on Trust Region Policy Optimization efficacy and efficiency, but sticking to first-order optimization. Use a penalty instead of a KL constraint in the loss
-$$\max_\theta E_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t}A_t\right]-\beta\overline{KL}_{\pi_{\theta_{old}}}(\pi_\theta)$$
+$$\max_\theta \mathbb{E}_t\left[\frac{\pi_\theta(s_t,a_t)}{\pi_{\theta_{old}}(s_t,a_t}A_t\right]-\beta\overline{KL}_{\pi_{\theta_{old}}}(\pi_\theta)$$
 Clipped Proximal Policy Optimization simplifies the objective function to
-$$\max_\theta E_t[\min(r_t(\theta)A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t)]$$
+$$\max_\theta \mathbb{E}_t[\min(r_t(\theta)A_t, \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t)]$$
 $$r_t(\theta)=\underset{\text{Old policy under which samples have been collected}}{\overset{\text{Current policy that we want to refine}}{\frac{\overbrace{\pi_\theta(s_t,a_t)}}{\underbrace{\pi_{\theta_{old}}(s_t,a_t)}}}}$$
 \subsubsection{Deep Policy Networks}
 Represent policy by deep network with weights $u$
 $$a=\pi_u(a\:|\:s)\text{ or } a=\pi_u(s)$$
 Define objective function as total discounted reward
-$$J(u) = E[r_1+\gamma r_2+\gamma^2r_3+\ldots\:|\:u]$$
+$$J(u) = \mathbb{E}[r_1+\gamma r_2+\gamma^2r_3+\ldots\:|\:u]$$
 Optimize objective end-to-end by stochastic gradient descent.\\
 Adjust policy parameters $u$ to achieve more reward.
 \paragraph{Policy Gradients} How to make high-value actions more likely:
 \begin{list}{}{}
-	\item The gradient of a stochastic policy $\pi(a\:|\:s,u)$ is given by $$\nabla_u J(u) = E_\pi[\nabla_u\log\pi_u(a\:|\:s)Q^\pi(s,a)]$$
+	\item The gradient of a stochastic policy $\pi(a\:|\:s,u)$ is given by $$\nabla_u J(u) = \mathbb{E}_\pi[\nabla_u\log\pi_u(a\:|\:s)Q^\pi(s,a)]$$
 	\item The gradient of a deterministc policy $a=\pi(s)$ is given by
-	$$\nabla_u J(u) = E_\pi[\nabla_aQ^\pi(s,a)\nabla_u a]$$
+	$$\nabla_u J(u) = \mathbb{E}_\pi[\nabla_aQ^\pi(s,a)\nabla_u a]$$
 \end{list}
 Assuming $a$ continuous and $Q$ differentiable.
 \paragraph{Actor-Critic Algorithm}
