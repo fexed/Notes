@@ -1061,10 +1061,10 @@ Couple of simplifications:
 	\item consider only visible random variables, meaning $s = v$
 \end{list}
 We use probabilistic learning techniques to fit the parameters, i.e. maximizing the log-likelihood (note that $\langle x\rangle = \mathbb{E}[x]$) $$L(M)=\frac{1}{L}\sum_{l=1}^L \log P(v_l\:|\:M)$$
-given the $P$ visible training patterns $v_l$, the set of all the visible units (so it's a joint distribution $v_{l1},\ldots,v_{ln}$). We need a way to write the likelihood $P(v_l\:|\:M)$, and we can use the Boltzmann-Gibbs. So we can optimize it solving a maximum likelihood problem.
+given the $L$ visible training patterns $v_l$, the set of all the visible units (so it's a joint distribution $v_{l1},\ldots,v_{ln}$). We need a way to write the likelihood $P(v_l\:|\:M)$, and we can use the Boltzmann-Gibbs. So we can optimize it solving a maximum likelihood problem.
 $$\log P(v_l\:|\:M) = \log \frac{e^{-E(v)}}{Z} = -E(v) - \log Z$$
 $$\frac{\partial L}{\partial M_{ij}} = \frac{\partial (-E(v) - \log Z)}{\partial M_{ij}}\Leftrightarrow$$
-Given that $E(v) = -\frac{1}{2}v^TM^Tv = -\sum_{ij} M_{ij} v_1v_j$ we get that every $M_{ij}$ will be constant except for the $M_{ij}$ we are differentiating leaving with $v_iv_j$. As for $\log Z$, differentiating the potential function leaves us with $\sum_v P(v\:|\:M)v_iv_j$ from $\partial\log\partial\exp\cdot\partial E$
+Given that $E(v) = -\frac{1}{2}v^TM^Tv = -\sum_{ij} M_{ij} v_iv_j$ we get that every $M_{ij}$ will be constant except for the $M_{ij}$ we are differentiating leaving with $v_iv_j$. As for $\log Z$, differentiating the potential function leaves us with $\sum_v P(v\:|\:M)v_iv_j$ from $\partial\log\partial\exp\cdot\partial E$
 $$\Leftrightarrow v_iv_j - \sum_v P(v\:|\:M)v_iv_j = 0$$
 The second term is $\sum_v P(v\:|\:M)v_iv_j = \mathbb{E}_{v_iv_j\in P(v\:|\:M)}[v_iv_j] = \langle v_iv_j\rangle_M$ the expectation of the coactivation of two units $v_i,v_j$ when the values of those two units are taken from $P(v\:|\:M)$ the distribution learned by the model $M$.\\
 So for a single $l$:
@@ -1269,7 +1269,7 @@ A set of weights that are applied to a 5$\times$5 region of the image. It's a \t
 \end{center}
 With a number of slices equal to the number of image channels. Basically a filter per channel color, but they are convolved together still giving a $28\times28$ feature map even with 3 color channels for example. The \textbf{convolution map stays bidimensional}.
 \paragraph{Stride} Basic convolution slides the filter on the image one pixel at the time (stride = 1). The slide value is an hyperparameter. The stride reduces the number of multiplication, subsampling the image. With a stride of 2 for example we would end up with a $14\times14$ map.
-\paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride $S$ and size $K\times K$, on a image $W\times H$?\\
+\paragraph{Activation Map Size} What is the size of the image after applying a filter with a given stride $S$ and size $K\times K$, on a image of size $W\times H$?\\
 For example, a $3\times 3$ filter with stride $2$, $K=3, S=2$ on a $7\times 7$ image: output image is $3\times 3$.
 $$W'=\frac{W-K}{S}+1$$
 $$H'=\frac{H-K}{S}+1$$
@@ -1286,7 +1286,6 @@ Very simple: \begin{center}
 \end{center}
 Max pooling is the one used more frequently, but there's more: average pooling, L2-norm pooling, even random pooling.\\
 It's uncommon to use zero padding with pooling.
-$$W' = \frac{W-K}{S} + 1$$
 \paragraph{Convolutional Architecture}
 \begin{center}
 	\includegraphics[scale=0.5]{55.png}
@@ -1323,12 +1322,13 @@ $s_i$ is a convolutional neuron with a kernel size $3\times1$
 \end{center}
 \subparagraph{Cross-Channel Pooling and Spatial Invariance}
 \begin{center}
-	\includegraphics[scale=0.5]{60.png}
+	\includegraphics[scale=0.33]{60.png}
 \end{center}
 \subparagraph{Hierarchical Feature Organization}
 \begin{center}
 	\includegraphics[scale=0.5]{61.png}
 \end{center}
+Note how a single unit, e.g. $g_3$, can "see" some units of the previous layer, in this case $h_2, h_3, h_4$, and in turn through them it can "see" some more units of the layer below that, in this example $x_1,\ldots,x_5$. A \textbf{hierarchical view of the features}.
 \paragraph{CNN Training}
 Training by variants of the standard backpropagation that account for the fact that connections share weights (convolution parameters).
 \begin{multicols}{2}
@@ -1375,7 +1375,7 @@ $$\mu_b=\frac{1}{N_b}\sum_{i=1}^{N_b}x_i$$
 $$\sigma_b^w=\frac{1}{N_b} \sum_{i=1}^{N_b}(x_i-\mu_b)^2$$
 $$\hat{x}_i = \frac{x_i-\mu_b}{\sqrt{\sigma^2_b+\epsilon}}$$
 \paragraph{ResNet Trick} A ultra-deep network, with 152 layers. Begun working in 2015 thanks to a trick: the input to the block $X$ bypasses the convolution and is combined with its residual $f(X)$. When backpropagating, the gradient flows in full through these bypass connections.
-\paragraph{Deconvolution Network} Attach a DeConvNet to a target layer, pluggin an input and forward porpagation activations until layers, then backpropagate on the DeConvNet and see what parts of the reconstructed image are affected.
+\paragraph{Deconvolution Network} Attach a DeConvNet to a target layer, plugging an input and forward propagating activations until the fully connected layers, then backpropagate on the DeConvNet and see what parts of the reconstructed image are affected.
 \begin{center}
 	\includegraphics[scale=0.5]{68.png}
 \end{center}
