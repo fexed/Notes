@@ -896,7 +896,7 @@ $$P(Y_t,Y_{t-1}\:|\:X)\simeq\underset{\text{Forward message}}{\underbrace{\alpha
 	\item \textbf{Backward message} $\beta_t(i) = \sum_i\psi_{t+1}(i,j,X_{t+1})\beta_{t+1}(i)$
 \end{list}
 Also Viterbi can be used, because we can do Max-Product. The expensive part is the computation of the exponential summation in $Z(X)$. The forward-backward algorithm computes it efficiently as normalization term of $P(Y_t,Y_{t-1}\:|\:X)$. More articulated posteriors interact with $Z(X)$, which is a summation over everything that's not observable, difficult when there's a lot of unobservable variables. Exact inference in CRF other than chain-like is likely to be computationally impractical. We need to approximate: Markov Chain Monte Carlo (sample $y$ rather than estimate $P(y)$) or Variational Belief Propagation (reduce to message passing on trees).
-\paragraph{Training LCRF}Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^n\log P(y^n\:|\:x^n,\Theta)$$
+\paragraph{Training LCRF}Maximum (conditional) log-likelihood, for training $$\max_\Theta L(\Theta) = \max_\Theta\sum_{n=1}^N\log P(y^n\:|\:x^n,\Theta)$$
 We can substitute the LCRF conditional formulation because $P(y^n\:|\:x^n,\Theta) = \frac{1}{Z(X)}\exp(\sum \Theta_k f_k)$\\
 getting $\log \frac{1}{Z(X)}\exp(\sum \Theta_k f_k) = \log \exp(\sum \Theta_k f_k)-\log Z(X)$
 $$L(\Theta)=\sum_n\sum_t\sum_k \Theta_kf_k(Y_t^n,Y_{t-1}^n,X_t^n)-\sum_n\log Z(X^n)\underset{\text{Regularization term}}{\underbrace{-\sum_k\frac{\Theta_k^2}{2\sigma^2}}}$$
