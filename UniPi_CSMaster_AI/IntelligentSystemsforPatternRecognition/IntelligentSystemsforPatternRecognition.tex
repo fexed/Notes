@@ -2324,7 +2324,7 @@ A Markov decision process is a Markov chain with rewards and actions. It is an e
 	\item $S$ finite \textbf{set of states}
 	\item $A$ finite \textbf{set of actions} $a$
 	\item $P$ state \textbf{transition matrix} such that $P_{ss'}^a = P(S_{t+1}=s'\:|\:S_t=s, A_t=a)$
-	\item $R$ is a \textbf{reward function} such that $R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$
+	\item $R$ is a \textbf{reward function} such that $R_s^a = \mathbb{E}[R_{t+1}\:|\:S_t=s,A_t=a]$
 	\item $\gamma\in [0,1]$ \textbf{discount factor}
 \end{list}
 The \textbf{return} $G_t$ is the total discounted reward from time-step $t$
@@ -2341,7 +2341,7 @@ An example: student Markov decision process
 	\includegraphics[scale=0.5]{160.png}
 \end{center}
 \subparagraph{Value Function} Measures the long-term value of being in a certain state $s$. The state-value function $v(s)$ of a Markov decision process is the \textbf{expected return starting from state $s$}
-$$v(s)=E[G_t\:|\:S_t=s]$$
+$$v(s)=\mathbb{E}[G_t\:|\:S_t=s]$$
 \paragraph{Bellman Equation for MDPs} The value function $v(S_t)$ can be decomposed into two parts
 \begin{list}{}{}
 	\item Immediate reward $R_{t+1}$
@@ -2352,7 +2352,7 @@ $$= \mathbb{E}\left[R_{t+1}+\sum_{k=1}^\infty\gamma^k R_{t+k+1}\:|\:S_t\right]= 
 $$= \mathbb{E}[R_{t+1}+\gamma G_{t+1}\:|\:S_t] = \mathbb{E}[R_{t+1}+\gamma v(S_{t+1})\:|\:S_t] =$$
 $$= \mathbb{E}[R_{t+1}\:|\:S_t=s] + \gamma \mathbb{E}[v(S_{t+1})\:|\:S_t=s]=$$
 $$=R_s+\gamma\sum_{s'}P_{ss'}v(s')$$
-With $[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
+With $\mathbb{E}[v(S_{t+1})\:|\:S_t=s]$ being the expected state-value of being in any state reachable from $s$, and $s\sim P(s'\:|\:s)$
 \subparagraph{Policy} A policy $\pi$ is a distribution over actions $a$ given states $s$ $$\pi(a\:|\:s) = P(A_t=a\:|\: S_t=s)$$
 \textbf{A policy defines the behavior of an agent}, depending only on the current state (\textbf{Markovian}), and are \textbf{stationary} (time-independent): $\forall\:t>0\:\:A_t\sim \pi(\:\:|\:s)$
 \subparagraph{Value Function with Policy} The action-value function $q_\pi(s,a)$ is the expected return starting from state $s$ taking action $a$ and then following the policy $\pi$
