@@ -24,7 +24,7 @@ This work is a survey on some common machine learning systems aimed at image gen
 \end{abstract}
 
 \section{Introduction}
-In January 2021, OpenAI labs presented\cite{dallepaper} a text-to-image generative discrete variational autoencoder model to the public with a readily available demo online. In that demo, users could simply type a prompt and, after less than few minutes, a small selection of artistic interpretations of that prompt would be presented. While not being the first text-to-image machine learning model to be presented, it can be argued that DALL-E is the first that had a big impact on the public: in the following months many examples of images generated with that tool would be posted on social media, and many more sophisticated models would surface, taking advantage of the increasing interest in the image generation and \textit{artificial creativity} field.\\
+In January 2021, OpenAI labs presented DALL-E \cite{dallepaper}, a text-to-image generative discrete variational autoencoder model to the public with a readily available demo online. In that demo, users could simply type a prompt and, after less than few minutes, a small selection of artistic interpretations of that prompt would be presented. While not being the first text-to-image machine learning model to be presented, it can be argued that DALL-E is the first that had a big impact on the public: in the following months many examples of images generated with that tool would be posted on social media, and many more sophisticated models would surface, taking advantage of the increasing interest in the image generation and \textit{artificial creativity} field.\\
 Many of the most recent and successful of these systems stem from the "Diffusion Probabilistic Models" \cite{diffusionmodels} family of machine learning approaches, while some of the earliest examples are Generative Adversarial Networks \cite{GANs} with alternative techniques for the sample generation \cite{stylegan} compared to the classical GAN approaches.
 \section{Models}
 Image generation, and broadly speaking every kind of data generated through machine learning, is achieved with a family of models called "Generative Models". These models, in contrast with the family of "Discriminative Models", aim to generate new samples of data after learning its distribution, while the goal of discriminative models is to distinguish between different samples of data. Mathematically speaking, given a set of samples $X$ and the corresponding labels $Y$, a generative model learns $p(X, Y)$ while a discriminative model learns $p(X\:|\:Y)$. Generative models can be explicit, when the directly learn $p(X)$, or implicit, if they learn how to sample from $p(X)$ without directly learning it.\\
@@ -32,7 +32,7 @@ Text-to-image generation can be achieved with many different kinds of generative
 \subsection{Generative Adversarial Networks}
 A Generative Adversarial Network (GAN) \cite{GANs} is composed of two main parts: \begin{list}{-}{}
 	\item A Generator $\mathcal{G}$ that learns to generate plausible data with the goal of confusing the discriminator
-	\item A Discriminator $\mathcal{D}$ that learns to distinguish between the real data and the fake data, penalizing the generator when it produces non-plausible data
+	\item A Discriminator $\mathcal{D}$ that learns to distinguish between the real data and the fake data, penalizing the generator when it produces non-plausible samples
 \end{list}
 The trick that GANs employ to be able to sample data from complex, high-dimensional distributions, is to sample from a very simple distribution (usually a Gaussian, $\mathcal{N}(0, 1)$) and to train a differentiable distribution (usually a Neural Network, $\mathcal{G}$) to transform the sampled random noise into data from the target distribution: \begin{list}{-}{}
 	\item Sample $z\sim\mathcal{N}(0,1)$
@@ -45,7 +45,7 @@ C = \min_\mathcal{G}\max_\mathcal{D}\left( \mathbb{E}_x[\log\mathcal{D}(x)] -\ma
 \end{equation}
 This represents a hard two-player game, where the optimal solution resides in a saddle point that corresponds to the concurrent $\min\max$.\\
 Most of the works in literature that employ GANs for data generation focus on developing different strategies that adapt the general architecture of these models to the interested data domain. Among the first examples of image generations that reached the general public is thispersondoesnotexist.com, a website released by nVidia which employs a particular GAN architecture, called StyleGAN, to generate highly realistic human portraits. Released in December 2018 with StyleGAN \cite{stylegan} and updated in December 2019 with StyleGAN2 \cite{stylegan2}, this project may represent the first public impact with state-of-the-art automatic image generation via machine learning models.\\
-The original motivation behind StyleGAN was to unbox and better understand the image synthesis process and the properties of the latent spaces employed by the GANs, to both better control the generative process and to better compare different generators between each other. By taking inspiration from the style-transfer literature \cite{styletransfer}, which studies techniques of merging the content of an image with the artistic style of another, the StyleGAN proposed a redesigned generative process: the input latent code $z$ is mapped into an intermediate latent space $\mathcal{W}$ which is used to control the generator $\mathcal{G}$ at each layer together with added Gaussian noise. This is in contrast to traditional generators, which feed the input directly to the generating network thus using the latent data just in the input layer. StyleGAN uses latent data to control the generative process at each layer, with $\mathcal{W}$ fed via adaptive instance normalization (AdaIN, \eqref{adain}): it normalizes each feature map $x_i$ separately given the style $y = (y_s, y_b)$ which is synthesized from $\mathcal{W}$ via learned transformations.
+The original motivation behind StyleGAN was to unbox and better understand the image synthesis process and the properties of the latent spaces employed by the GANs, to both better control the generative process and to better compare different generators between each other. By taking inspiration from the style-transfer literature \cite{styletransfer}, which studies techniques of merging the content of an image with the artistic style of another, the StyleGAN proposed a redesigned generative process: the input latent code (random noise) $z$ is mapped into an intermediate latent space $\mathcal{W}$ which is used to control the generator $\mathcal{G}$ at each layer together with added Gaussian noise. This is in contrast to traditional generators, which feed the input directly to the generating network thus using the latent data just in the input layer. StyleGAN uses latent data to control the generative process at each layer, with $\mathcal{W}$ fed via adaptive instance normalization (AdaIN, \eqref{adain}): it normalizes each feature map $x_i$ separately given the style $y = (y_s, y_b)$ which is synthesized from $\mathcal{W}$ via learned transformations.
 \begin{equation}
 \hbox{AdaIN}(x_i, y) = y_{si}\frac{x_i-\mu(x_i)}{\sigma(x_i)} + y_{bi}
 \label{adain}
@@ -59,6 +59,51 @@ Besides thispersondoesnotexists, StyleGANs have been used in other online demos 
 \label{styleganimage}
 \end{figure}
 \subsection{Diffusion Probabilistic Models}
+One of the main limitation in machine learning, and in generative models in particular, is the tractability of the probability distributions involved. Learning, sampling and evaluation are often still analytically or computationally intractable when using highly flexible families of models, thus requiring a tradeoff between these two conflicting goals: flexibility and tractability. Diffusion Probabilistic Models (DPM) \cite{diffusionmodels} aim to achieve both, by taking inspiration from statistical physics.\\
+DPMs are built by two main processes:
+\begin{list}{-}{}
+	\item A Diffusion Process which converts any complex data distribution into a simple one (e.g. a Gaussian)
+	\item A Reverse Process which defines the generative model
+\end{list}
+The diffusion process gradually converts an input data distribution $q(x^{(0)})$ into a tractable distribution $p(y)$ by repeated application of a Markov Diffusion Kernel \eqref{MarkovDiffusionKernel} where $\beta$ is the diffusion rate
+\begin{equation}
+T_p(y\:|\:y';\beta)
+\label{MarkovDiffusionKernel}
+\end{equation}
+
+\begin{equation}
+p(y)=\int T_p(y\:|\:y';\beta)p(y')\:dy'
+\label{dpmpy}
+\end{equation}
+\begin{equation}
+q\left(x^{(t)}\:|\:x^{(t-1}\right) = T_p\left(x^{(t)}\:|\:x^{(t-1)};\beta\right)
+\label{dpmqx}
+\end{equation}
+The forward trajectory corresponds to performing $T$ steps of diffusion starting from the data distribution and is defined in \eqref{dpmforward}, which exhibits clear Markovian dynamics showing a prior and a first-order transition
+\begin{equation}
+q\left(x^{(0\ldots T)}\right)=q\left(x^{(0)}\right)\prod^T_{t=1}q\left(x^{(t)}\:|\:x^{(t-1)}\right)
+\label{dpmforward}
+\end{equation}
+The forward diffusion kernel $q\left(x^{(t)}\:|\:x^{(t-1)}\right)$ for example may correspond to a Gaussian Diffusion into a Gaussian distribution with identity covariance, defined in \eqref{forwarddiffusiongaussian}
+\begin{equation}
+q\left(x^{(t)}\:|\:x^{(t-1)}\right) = \mathcal{N}\left(x^{(t-1)}\sqrt{1-\beta_t},\:\mathbf{I}\beta_t\right)
+\label{forwarddiffusiongaussian}
+\end{equation}
+The generative distribution is trained to describe the same trajectory of the forward process but in reverse, thus yielding the reverse process described in \eqref{dpmreverse}
+\begin{equation}
+p\left(x^{(0\ldots T)}\right)=p\left(x^{(T)}\right)\prod^T_{t=1}p\left(x^{(t-1)}\:|\:x^{(t)}\right)
+\label{dpmreverse}
+\end{equation}
+During learning, and in the Gaussian diffusion kernel scenario taken as example, only the mean and covariance of the kernel need to be estimated:
+\begin{list}{-}{}
+	\item $f_\mu(x^{(t)}, t)$ defines the mean of the reverse Markov transitions
+	\item $f_\sigma(x^{(t)}, t)$, defines the covariance of the reverse Markov transitions
+\end{list}
+Both can be defined via neural networks or other function fitting technique and the cost of these functions defines the computational cost of the overall algorithm. Those are used in the reverse diffusion kernel defined in \eqref{reverseduiffusiongaussian}
+\begin{equation}
+p\left(x^{(t-1)}\:|\:x^{(t)}\right)=\mathcal{N}\left(f_\mu(x^{(t)},t),\:f_\sigma(x^{(t)},t)\right)
+\label{reverseduiffusiongaussian}
+\end{equation}
 % NOTE
 % Considerazioni finali riguardo: necessità di invisible watermarking (https://github.com/ShieldMnt/invisible-watermark)
 
