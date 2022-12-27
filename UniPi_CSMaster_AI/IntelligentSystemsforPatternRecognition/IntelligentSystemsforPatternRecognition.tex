@@ -1991,12 +1991,12 @@ Write operation is actually performed by composing adding and erasing operations
 Not yet of practical use, not straightforward to train.\\
 Has advantages over GRNN when it comes to learn to program.
 \section{Unsupervised Learning}
-\paragraph{The Problem} Characterize the data (meaning finding data distribution and variances) to allow the understanding of data, the generation of new observations and ultimately \textbf{reasoning}. Connects to autoencoders and manifold learning.\begin{center}
+\paragraph{The Goal} Characterize the data, meaning \textbf{finding data distribution and variances}, to allow the understanding of data, the generation of new observations and ultimately \textbf{reasoning}. Connects to autoencoders and manifold learning.\begin{center}
 	\includegraphics[scale=0.5]{138.png}
 \end{center}
 Another reason is that \textbf{labeled data is costly and difficult to obtain}. A sustainable future for deep learning: learning the latent structure of data, discover important features, learn task independent representations and introduce (if any) supervision only on few examples.
-\paragraph{Why Generative?} Focusing too much on discrimination rather than on characterizing data can cause issues, e.g.: reduced interpretability, adversarial examples.\\
-Generative model try to characterize data distribution. \begin{list}{}{}
+\paragraph{Why Generative?} Focusing too much on discrimination rather than on characterizing data can cause issues, e.g.: reduced interpretability, adversarial examples\ldots\\
+Generative models try to characterize data distribution. \begin{list}{}{}
 	\item Understand data to understand the world
 	\item Understand data variances to learn how to steer them
 	\item Understand normality to detect anomalies
@@ -2029,6 +2029,7 @@ Then we introduce a latent process regulated by unobservable variables $z$
 $$P_\theta(x)=\int \underbrace{P_\theta(x\:|\:z)} P_\theta(z)\:\:dz$$
 But $P_\theta(x\:|\:z)$ it's typically intractable.
 \paragraph{NN With Latent Variables?} An Autoencoder.
+\subsection{Autoencoders}
 \begin{center}
 	\includegraphics[scale=0.5]{140.png}
 \end{center}
@@ -2062,7 +2063,7 @@ We can sample white noise and rescale that noise with the $\mu$ and the $\sigma$
 \end{center}
 The non-differentiable part is in $N(0,1)$ so the gradient can flow to $z$ because sampling is limited to non differentiated variable $\epsilon$.\\
 $\mu$ and $\sigma$ are generated with an encoder.
-\paragraph{Variational Approximation} ELBO (Evidence Lower Bound)
+\paragraph{Variational Approximation} ELBO (Evidence Lower BOund)
 $$\log P(x\:|\:\theta)\geq \mathbb{E}_Q[\log P(x,z)] - \mathbb{E}_Q[\log Q(z)] = L(x,\theta,\phi)$$
 The $Q$ function is anything that can approximate the distribution, and has its own parameters. Maximizing the ELBO allows approximating from below the intractable log-likelihood $\log P(x)$
 $$ L(x,\theta,\phi) = \mathbb{E}_Q[\log P(x\:|\:z)] + \underset{KL(Q(z|\phi)\|P(z))}{\underbrace{\mathbb{E}_Q[\log P(z)] - \mathbb{E}_Q[\log Q(z)]}}$$
@@ -2075,12 +2076,12 @@ $$L(x,\theta,\phi) = \underset{\text{Reconstruction}}{\underbrace{\mathbb{E}_Q[\
 The $Q$ function is a Gaussian, $P(z|\theta)$ is also a Gaussian, so $KL$ is between two Gaussians and can be computed in closed form.\\
 We train the encoder to behave like a Gaussian prior, with zero-mean and unit-variance.
 \paragraph{VAE Final Loss} In principle we would like to optimize the following loss by SGD
-$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\log P(x|z)]-KL(Q(z|x,\phi)\|P(z))]$$
 Which with reparametrization becomes
-$$\mathbb{E}_{X\sim D}[\mathbb{E}_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z)]$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{\epsilon\sim N(0,1)}[\log P(P(x|z=\mu(x)+\sigma^{1/2}(x)\cdot\epsilon,\theta)]- KL(Q(z|x,\phi)\|P(z))]$$
 No expectation is w.r.t. distributions that depend on model parameters: we can move gradients into them.
 \subparagraph{Information Theoretic Interpretation}
-$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{\log P(x|z)}}]-KL(\underset{\text{Bits for convertion}}{\underbrace{Q(z|x,\phi)}}\|P(z))$$
+$$\mathbb{E}_{X\sim D}[\mathbb{E}_{Z\sim Q}[\underset{\text{Bits for reconstruction}}{\underbrace{\log P(x|z)}}]-KL(\underset{\text{Bits for convertion}}{\underbrace{Q(z|x,\phi)}}\|P(z))]$$
 \begin{list}{}{}
 	\item $\log P(x|z)$ tells the number of bits required to reconstruct $x$ from $z$ under the ideal encoding (i.e. $Q(z|x)$ is generally suboptimal)
 	\item The second part tells how much information of $x$ we're giving away by picking it up from $Q$ instead of the non-informative prior $P$. Meaning that $Q(z|x,\phi)$ is the number of bits required to convert an uninformative sample from $P(z)$ into a sample from $Q(z|x)$
@@ -2215,7 +2216,7 @@ Reinforcement learning is characterized, with respect to other ML tasks, by:
 \begin{list}{}{}
 	\item No supervisor, only a \textbf{reward} signal
 	\item Delayed \textbf{asynchronous feedback}
-	\item Time matters (\textbf{sequential data}, continual learning)
+	\item \textbf{Sequential data}, continual learning
 	\item Agent's \textbf{actions affect the subsequent data} it receives (\textbf{inherently non-stationary})
 \end{list}
 Reinforcement learning is used in:
@@ -2287,14 +2288,14 @@ A RL agent may include one or more of these:
 	\end{list}
 	\item \textbf{Value function}: how good is each state and/or action\\
 	How "good" is a specific state/action for an agent? The value function $v$ is a predictor of future reward. Used to evaluate goodness/badness of a states, therefore used to select between actions
-$$v_\pi(s)= E_\pi[R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots\:|\:S_t=s]$$
+$$v_\pi(s)= \mathbb{E}_\pi[R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots\:|\:S_t=s]$$
 Expected (discounted) future reward following policy $\pi$ from state $s$.
 	\item \textbf{Model}: agent's representation of the environment\\
 	A model predicts what the environment will do next.\\
 Predict next state $s'$ following an actions $a$
 $$P_{ss'}^a = P(S_{t+1} = s'\:|\:S_t = s, A_t = a)$$
 Predict next reward
-$$R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$$
+$$R_s^a = \mathbb{E}[R_{t+1}\:|\:S_t=s,A_t=a]$$
 \end{list}
 \paragraph{Characterizing RL Agents}\begin{list}{}{}
 	\item Value based: implicit policy, value function given
@@ -2305,8 +2306,8 @@ $$R_s^a = E[R_{t+1}\:|\:S_t=s,A_t=a]$$
 \subsection{Problems}
 \paragraph{Learning vs Planning} Two fundamental problems in sequential decision making:
 \begin{list}{}{}
-	\item Reinforcement Learning: environment initially unknown, agent interacts with it and improves its policy
-	\item Planning (reasoning, introspection, search,\ldots): a model of the environment is known, the agent performs computations with its model (no external interaction) and it improves its policy
+	\item \textbf{Reinforcement Learning}: \textbf{unknown environment} at least initially, the agent interacts with it and improves its policy
+	\item \textbf{Planning} (reasoning, introspection, search,\ldots): a \textbf{model of the environment is known}, the agent performs \textbf{computations with its model} (\textbf{no external interaction}) and it improves its policy
 \end{list}
 \paragraph{Exploration vs Exploitation} Reinforcement learning is based on trial-and-error. The agent should discover a good policy from its experiences of the environment, without losing too much reward along the way.\\
 Exploration finds more information about the environment, while exploitation exploits known information to maximize reward. Effective reinforcement learning requires a trade between exploration and exploitation.
