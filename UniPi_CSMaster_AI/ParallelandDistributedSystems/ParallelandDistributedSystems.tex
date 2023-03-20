@@ -210,43 +210,41 @@ Coherency works at the cache line level!
 \paragraph{\texttt{taskset}} To restrict the cores of a process, \texttt{taskset -c 0-3 command} restricts \texttt{command} to the cores 0, 1, 2 and 3.
 
 \section{Patterns}
-Computations with particular shapes and semantics that can be understood and implemented depending on the situations, not linked to languages and technicalities. Patterns are a useful concepts, allow programmers to reuse experience of other programmers an not reinventing the wheel.\\
-Parallel patterns:
-\begin{list}{}{}
-	\item Data parallel
-	\item Stream parallel
-\end{list}
-The same patterns can be referred with different names.
+\textbf{Computations with common and particular shapes and semantics} that can be understood and implemented depending on the situations, not linked to languages and technicalities. Patterns are a useful concepts, allow programmers to reuse experience of other programmers an not reinventing the wheel.\\
+Parallel patterns can be of two kinds: \textbf{data parallel}, \textbf{stream parallel}. For each pattern there are more than one name used in literature.
 \subsection{Data Parallel Patterns}
-Parallelism comes from data: we split the data in pieces, compute a set of results that can be combined into a single final result. The book translation examples is a data parallel pattern. What matters is $L$.\\
+\textbf{Parallelism comes from data}: we \textbf{split the data in pieces}, \textbf{compute a set of results} that can be \textbf{combined into a single final result}. The book translation example is a situation where we can apply data parallel patterns. What matters is the latency $L$, we want to be able to provide the result faster once I have the full collection available.\\
 The general pattern is:
 \begin{list}{}{}
-	\item Decomposition
-	\item Partial results
-	\item Recomposition
-\end{list}\begin{multicols}{2}
+	\item \textbf{Decomposition}
+	\item \textbf{Partial results}
+	\item \textbf{Recomposition}
+\end{list}
+Different choices in each phase yield different data patterns.
+\begin{multicols}{2}
 \subparagraph{Map Pattern} Also called applytoall:\begin{list}{}{}
-	\item $\forall$ item of the collection
-	\item Function $f($item$)$
-	\item $\forall$ $f($item$) \rightarrow$ isomorphic collection
+	\item Decomposition: $\forall$ item of the collection, which is of course the minimum decomposition of a collection
+	\item Partial results: $f($item$)$, the result of a function $f$ applied to each item
+	\item Recomposition: $\forall$ $f($item$)$, yielding an isomorphic collection to the original one.
 \end{list}
 \subparagraph{Reduce Pattern} Also called fold:\begin{list}{}{}
-	\item $\forall$ item of the collection
-	\item $\oplus(x,y)$
-	\item $\oplus(\oplus(a,b),\oplus(c,d))$
+	\item Decompose again $\forall$ item of the collection
+	\item Partial results: apply a binary function $\oplus(x,y)$ (e.g. the $+$)
+	\item Recombination: $\oplus(\oplus(a,b),\oplus(c,d))$
 \end{list}
 \end{multicols}
 \subparagraph{Stencil Pattern} \begin{list}{}{}
-	\item In partially overlapping position, e.g. of a matrix or an image
-	\item Function $f($item$)$
-	\item $\forall$ $f($item$) \rightarrow$ isomorphic collection
+	\item Decompose into partially overlapping partitions of the data, e.g. of a matrix or an image
+	\item Partial results: the application of a function $f($item$)$
+	\item $\forall$ $f($item$)$, again an isomorphic collection
 \end{list}
 Different kind of problems: overlapping positions will yield the new value, so we have to account for that.
 \subparagraph{"Google" mapreduce}
 \begin{list}{}{}
-	\item $\forall$ items
-	\item $f($item$) + \oplus($item$, $item$)$
-	\item Item
+	\item Again decompose $\forall$ items
+	\item Compute $f($item$) + \oplus($item$_i, $item$_j)$\\
+	With $f\mapsto \langle K, V\rangle$ key-value pair and the $\oplus$ function that sums the values of the corresponding keys.
+	\item A single item
 \end{list}
 What I apply to each item is an $f$ that maps to $\langle$key, value$\rangle$ and $\oplus$ applies the sum to each value.\\
 For example in a document, $f($word$)=\langle w,1\rangle$ and $\oplus(\langle w_k,v_1\rangle,\langle w_k,v_2\rangle) = \langle w_k, \oplus(v_1,v_2)\rangle$\\
@@ -256,8 +254,8 @@ This is \texttt{map(f)} and \texttt{reduce($\oplus$)}, but we want something lik
 So I want building blocks, something that guarantees correctness of implementation that can be used to build upon. For example \texttt{map(function<A(B)>, collection<B>)}\\
 So build a bag of tools that we can combine to undertake common situations with good efficiency, speedup, scalability\ldots
 \subsection{Stream Parallel Patterns}
-Stream of data, flowing in time. In data parallel we process a data collection, while in stream parallel we don't have data appearing all at the same time. So stream as a collection with items appearing at different times. We want to take the single items and try to process in parallel, parallel execution of $f$ over different items of the stream.\\
-What matters is $T_S$
+Stream of data, flowing in time. In data parallel we process a data collection, while in stream parallel \textbf{we don't have data appearing all at the same time}. So \textbf{stream as a collection with items appearing at different times}. We want to take the single items and try to process in parallel, parallel execution of $f$ over different items of the stream.\\
+What matters is the service time $T_S$, to be able to sustain the flow of data and process the next available item as soon as it arrives.
 \paragraph{Pipeline}
 \begin{center}
 	\includegraphics[scale=0.5]{3.png}
@@ -272,8 +270,9 @@ We have a number $nw$ of instances of the same function $f$ each processing one 
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
 \end{center}
-We have no interference between computations of $x_i,x_j$ with $i\neq j$, no need for synchronization.
-\paragraph{} $T_C \simeq m\cdot T_S$ and $T_S$ in sequential is $\simeq L$ this means that I can try to decrease the latency by decreasing the stages in the pipeline or the workers in a farm.
+We have no interference between computations of $x_i,x_j$ with $i\neq j$, no need for synchronization.\\\\
+The completion time $T_C$ is $\simeq m\cdot T_S$ (number of tasks times service time). In the sequential stages, $T_S = L$. This means that given a stream of item to be computed in a parallel fashion, and I want to increase $T_C$ or $T_S$, the I would need to decrease the latency of the stages in my pipeline or the workers in my farm.\\
+If we have pipe(seq($f$), seq($g$)) then by decreasing the latency of $f$ we will already improve the performances of the overall computation. Keep in mind that \textbf{not every kind of computation can be parallelized}.
 \paragraph{Two Tier Model} Let's assume a grammar of patterns.\begin{list}{}{}
 	\item Pat = Seq(f) $|$ DPP $|$ SPP
 	\item DPP = Map(Pat) $|$ Reduce(Pat)
