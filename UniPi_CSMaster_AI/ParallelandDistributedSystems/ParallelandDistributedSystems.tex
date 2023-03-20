@@ -304,8 +304,22 @@ The completion time is $T_C$
 $$T_C(\hbox{Pipeline}(s_1,\ldots,s_k)) = \left(\sum_{i=1}^k L(s_i)\right) + (m-1)\max_{i=1}^k\{L_i\}$$
 and when $m >> k$ we can approximate it with
 $$T_C = mT_S$$
-because the number of tasks required, the "base of the parallelogram", will dominate the number of tasks, the "height of the parallelogram".
-\paragraph{Boundary Conditions} We have to take into account the interarrival time $T_A$, time spent to get another item from the input stream, and the interdeparture time $T_D$, the time spent to get another item into the output stream.\\
+because the number of tasks required, the "base of the parallelogram", will dominate the number of workers, the "height of the parallelogram".\\
+What if I want to achieve a given performance? For example, given a Pipeline($S_1, S_2, S_3$) where $S_1$ and $S_3$ both take 1s and $S_2$ takes 2s, and we want a $T_A=T_S=$ 1s. We can't do much, by necessity $T_S=\max\{$1s, 5s, 2s$\}=$ 5s, and in general I don't know what's inside each stage of the pipeline so I can't perform optimization inside those. In this case, we can take the \textbf{bottleneck}, the slowest stage ($S_2$), and shorten the $T_S$ by adding a farm in its place: Pipeline($S_1$, Farm($S_2,\:$), $S_3$). This computes the very same result:
+\begin{list}{}{}
+	\item With the first form, Pipeline($S_1, S_2, S_3$), we compute $S_3(S_2(S_1(x_i)))$
+	\item With the second form, Pipeline($S_1$, Farm($S_2,\:$), $S_3$), we compute $S_1(x_i)$ which delivers the result to the scheduler of Farm($S_2,\:$), where each worker computes $S_2$ and the scheduler selects which worker will compute it yielding $S_2(S_1(x_i))$. The farm then delivers the result to $S_3$, which will output the final result $S_3(S_2(S_1(x_i)))$
+\end{list}
+This works well if every timing remains the same. But if a worker in the $S_2$'s farm takes longer we may encounter a situation where $S_3$ receives a $x_{i+1}$ before receiving $x_i$. This may be irrelevant or be unacceptable depending on the kind of application. With 5 workers in the farm, we end up with $T_S=$ 1s.\\
+Another approach would be to consider the original pipeline as a single task computing $P(x) = S_3(S_2(S_1(x)))$ and building a farm with workers that each compute $P$. $P(x)$ has a latency $L = 1+5+1 =$ 7s, so with a farm composed by 7 $P$ we have a $T_S =$ 1s.\\
+Which is better depends:
+\begin{list}{}{}
+	\item Pipeline($S_1, S_2, S_3$) has $T_S=5$s and $nw=3$
+	\item Pipeline($S_1$, Farm($S_2,5$), $S_3$) has $T_S=1$s and $nw=7$ ($+2$ for $E$ and $C$)
+	\item Farm($P, 7$) has $T_S=1$s and $nw=7$ ($+2$ for $E$ and $C$)
+\end{list}
+Noting that each farm adds $2$ workers. So by refactoring with the farm we need more workers, which can be a decision point in implementing this kind of refactoring.
+\paragraph{Boundary Conditions} We have to take into account the \textbf{interarrival time} $T_A$, time spent to get another item from the input stream, and the \textbf{interdeparture time} $T_D$, the time spent to get another item into the output stream.\\
 Let's suppose that $L(s_i) = i$ seconds, so ideally $T_S = k$ seconds: we process 1 item each $k$ seconds. If $T_A > L(s_i)$ we have to wait the second item when I finish processing the first, same thing for the next after the second: the interrarival time looks like an interstage between $s_{i-1}$ and $s_i$.\\
 $T_D$ behaves at the same way: we have to wait that $T_D$ finishes before giving it out output, behaving like an interstage.\\
 So the previous behavior, analyzed before, happens $\Leftrightarrow T_A<T_S$ and $T_D<T_S$ \textbf{something that we have always to take into account}.
@@ -317,13 +331,12 @@ This can appear as a pipeline of three stages, where the Emitter produces to the
 $$T_S(\hbox{Farm}(s,nw)) = \max\left\{t_E, \frac{T_w}{nw}, t_C\right\}$$
 We assume to have $m$ tasks
 $$T_C(\hbox{Farm}(s,nw)) = m\cdot T_S(\hbox{Farm}(s,nw))$$
-With boundary conditions
+If we take into account the boundary conditions
 $$T_S=\max\{T_s(\hbox{Farm}()),T_A,T_D\}$$
 What if we want to achieve a given performance? Compute a $nw$ suitable to achieve a wanted performance by inverting the very same formulas.\\
 With a target $T_S = T_A = 1$s
 $$T_S = 1\hbox{s} = \max\left\{t_E, t_C, \frac{10\hbox{s}}{nw}\right\}$$
 But $t_E,t_C$ are negligible so $$\frac{10\hbox{s}}{nw} = 1\hbox{s} \Rightarrow nw = 10$$
-%TODO riascoltare 2a parte 2/03
 \subsubsection{Map} We consider it as made by three phases:
 \begin{list}{}{}
 	\item Split: divide the collection into sub collections, a \textbf{set of subcollections}
@@ -337,7 +350,6 @@ No concept of $T_C$ because the map is applied to a single collection.\\
 If I have multiple collections we consider a splitter node as $s_1$, map ($t_f$) as $s_2$ and merger node as $s_3$, giving
 $$T_S=\max\{t_{split}, t_{map}, t_{merge}\}$$
 $$t_{map} = \frac{m}{nw}t_f$$
-\pagebreak
 \subsubsection{Reduce}
 From a vector we want to output the sum: a scalar from a collection. We split in $t_{split}$, then each of the $nw$ workers applies the function $\oplus$ to its subcollection in $\frac{m}{nw}t_\oplus$ and finally we merge in $nw\cdot t_\oplus$ because we have to compute $\oplus$ over all the $nw$ subresults.
 $$L=t_{split} + \left(\frac{m}{nw}-1\right)t_\oplus+(nw-1)t_\oplus$$
