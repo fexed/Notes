@@ -337,7 +337,7 @@ What if we want to achieve a given performance? Compute a $nw$ suitable to achie
 With a target $T_S = T_A = 1$s
 $$T_S = 1\hbox{s} = \max\left\{t_E, t_C, \frac{10\hbox{s}}{nw}\right\}$$
 But $t_E,t_C$ are negligible so $$\frac{10\hbox{s}}{nw} = 1\hbox{s} \Rightarrow nw = 10$$
-\subsubsection{Map} We consider it as made by three phases:
+\subsubsection{Map} The map data parallel pattern is composed by three main phases:
 \begin{list}{}{}
 	\item Split: divide the collection into sub collections, a \textbf{set of subcollections}
 	\item Map: compute the \textbf{set of subresults}
@@ -347,9 +347,10 @@ With $m$ dimension of the collection and $t_f$ to compute the function of the ma
 $t_{split}$ and $t_{merge}$ are non-negligible in distributed architectures, but are negligible in shared-memory architecture.
 $$T_S(\hbox{Map}) = L(\hbox{Map})$$
 No concept of $T_C$ because the map is applied to a single collection.\\
-If I have multiple collections we consider a splitter node as $s_1$, map ($t_f$) as $s_2$ and merger node as $s_3$, giving
+If I have multiple collections we can consider a 3-stage pipeline composed by a splitter node as $s_1$, the map as $s_2$ and merger node as $s_3$, giving
 $$T_S=\max\{t_{split}, t_{map}, t_{merge}\}$$
 $$t_{map} = \frac{m}{nw}t_f$$
+The structure of a map resembles that of a farm, thus to increment the performances we can increment the number of the workers that implement split/merge operations. This requires synchronization between the workers of the split/merge operations in order to avoid the repetition of elements.
 \subsubsection{Reduce}
 From a vector we want to output the sum: a scalar from a collection. We split in $t_{split}$, then each of the $nw$ workers applies the function $\oplus$ to its subcollection in $\frac{m}{nw}t_\oplus$ and finally we merge in $nw\cdot t_\oplus$ because we have to compute $\oplus$ over all the $nw$ subresults.
 $$L=t_{split} + \left(\frac{m}{nw}-1\right)t_\oplus+(nw-1)t_\oplus$$
@@ -363,8 +364,12 @@ But we have efficiency 1 only in the first phase, then half, then one fourth\ldo
 $$L=t_{split}+\lceil\log_2 m\rceil t_\oplus$$
 provided that $nw \geq \frac{m}{2}$. If we use threads, the split phase is just telling the threads what they have to do, then we merge with a simple loop.
 \subsubsection{Stencil}
-For example computing the average of three neighbor items in a vector, with necessary boundary conditions.\\
-Split phase that produces for example two halves of the vector: when computing the right extreme of the first half, I need to add the first item of the second vector, same with the left extreme of the second half: we have some shared positions. No problem when reading, the problem if we write the shared position. We can use a buffer for the write, using the old values only for reading and swapping the vectors. Or we can use a small buffer to host modified values the neighborhood.
+For example computing the average of three neighbor items in a vector, with \textbf{necessary boundary conditions}.\\
+Split phase that produces for example two halves of the vector: when computing the right extreme of the first half, I need to add the first item of the second vector, same with the left extreme of the second half: we have some shared positions. No problem when reading, the \textbf{problem arises when we write the shared position}.
+\begin{list}{}{}
+	\item A first solution would be to \textbf{use 2 buffers}: we read from a buffer and write to another buffer, and we swap the buffer before restarting such that we use the new values to read and the old values to write.
+	\item Another solution is to \textbf{use a small buffer to host modified values in the neighborhood}. The result is kept in a buffer before being written to the array. The buffers are written when we move to such a position that the edited previous position are no longer read: the buffer would need to contain at most half the radius of the stencil operation.
+\end{list}
 $$L(\hbox{Stencil}) = t_{split} + \frac{m}{nw}t_{stencil} +t_{merge}$$
 Where $t_{stencil}$ includes buffer management with the second solution and $t_{merge}$ includes swapping the buffers in the first solution.
 \paragraph{Composition} Given a Pipeline($s_1,s_2,s_3$) with $s_i$ sequential, $s_2$ may be data parallel (map), $m$ stream items and each being a vector of $k$ items.
@@ -372,8 +377,10 @@ $$L = L_1+L_2+L_3$$
 $$T_S=\max\{L_1,L_2,L_3\}$$
 $$T_C\simeq m\cdot T_S$$
 $s_2$ is sequential but can be turned into a map, takes $L_2$ so I can imagine $t_f \simeq \frac{L_2}{k}$
-$$T_S(\hbox{Pipeline}) = \max\left\{L_1,L_3,\frac{L_2}{nw_{map}}\right\}$$
-$s_2$ is the slowest stage, we can use a Farm$(s_2, new_{farm})$, but in this case latency stays the same, while using the Map the latency decreases.
+$$T_S(\hbox{Pipeline}) = \max\left\{L_1,L_3,\frac{L_2}{nw_{\hbox{map}}}\right\}$$
+Note how the latency decreases. This of course \textit{if} $s_2$ can be turned into a map: I \textbf{need to be able to check the code}.\\
+Another approach, as we saw before, is this: given that $s_2$ is the slowest stage, we can use a Farm$(s_2, nw_{\hbox{farm}})$. However in this case latency stays the same.
+\paragraph{Single Owner Computes rule} Is a more general pattern: each part of the data structure has a \textbf{single owner} who is \textbf{in charge of performing the computing} of the new values in that particular part.
 \paragraph{Overhead related to memory allocations} New objects are created when instantiating inputs and results, for example. This requires allocating memory in the heap, with corresponding \texttt{malloc}s and \texttt{free}s. So we may need to be smarter, with solutions that work on thread-level memories, small heaps where to allocate objects and releasing when no more needed.
 \subparagraph{\texttt{jmalloc} library} Used in BSD systems, FireFox and Facebook among others.\\
 It manages \textbf{chunks of memory} called \textbf{arenas}, distributed in a round robin way per thread with each thread using one arena. A metaarena is used a common place.\\
