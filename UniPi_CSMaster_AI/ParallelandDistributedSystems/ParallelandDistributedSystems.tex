@@ -179,36 +179,6 @@ We will have patterns of parallel computation that differentiate in how we proce
 \end{list}
 The maximum speedup is $\frac{\hbox{work}}{\hbox{span}}$, because in every case I need to go from the first to the goal node. I take the longest one because at least the longest path must be computed, and all the rest can be done in parallel and I assume to have enough resources to compute the rest in the time of the span.\\
 We \textbf{cannot use this model for reasoning about multiple tasks}, because it does not take into account the parallelism achieved in exploiting different tasks in the same program but \textbf{only takes into account what happens for a single task}. But it can be used, e.g., to reason about a single node of a pipeline.
-\section{Technicalities}
-\paragraph{Examples}
-A simple program that "translates" an ASCII file by transforming lower letters into capital letters. We split the text into $n_{workers}$ parts, we wait for all the threads to finish and then verify the performances.
-\\The translator is:
-\begin{lstlisting}[style=myC]
-#include <string>
-
-char translate_char(char c) {
-	if (islower(c))
-		return(toupper(c));
-	else
-		return(tolower(c));
-}
-\end{lstlisting}
-%TODO
-\subsection{Threads}
-We used to write instructions sequentially. At a given point now we \texttt{fork} another flow of computation: we get two flows that are executed together \textbf{in the same address space}, so the new thread inherits all the memory of the original thread.
-\paragraph{Concurrence} \texttt{todo} %TODO
-\paragraph{Packaged Threads}
-\paragraph{Overheads} % repeatedly fork an join an see what happens, measure mean time of fork-join
-All the time spent that is not involved in the sequential execution: time spent organizing the parallel computation, gathering solutions\ldots so there's a tradeoff between the time spent to setup the parallel activity and the time earned because of the parallel execution.\\
-What can we do to get rid of the setup time? I can create the threads once and reuse them when needed: \textbf{threadpools}.
-\paragraph{Cache Coherence Protocols} Snoopy, or directories of shared data consulted any time I access shared data and propagates the edits.\\
-Coherency works at the cache line level!
-\subparagraph{In Stencil} Reuse cache coherence protocols for each write.
-\subparagraph{False Sharing Problem} We use padding techniques to transform the vector in such way that the original vector has some pad values up to the point where the cache line finishes. This is used in maps.
-\subparagraph{Disabling} Sometimes useful to speed up the computations.
-\subparagraph{} So we have to take into account that we have to ensure locality as much as possible and be careful of the possibilities of fault sharing problems, like similar iterations in short time.
-\paragraph{\texttt{taskset}} To restrict the cores of a process, \texttt{taskset -c 0-3 command} restricts \texttt{command} to the cores 0, 1, 2 and 3.
-
 \section{Patterns}
 \textbf{Computations with common and particular shapes and semantics} that can be understood and implemented depending on the situations, not linked to languages and technicalities. Patterns are a useful concepts, allow programmers to reuse experience of other programmers an not reinventing the wheel.\\
 Parallel patterns can be of two kinds: \textbf{data parallel}, \textbf{stream parallel}. For each pattern there are more than one name used in literature.
@@ -386,6 +356,19 @@ Another approach, as we saw before, is this: given that $s_2$ is the slowest sta
 It manages \textbf{chunks of memory} called \textbf{arenas}, distributed in a round robin way per thread with each thread using one arena. A metaarena is used a common place.\\
 Arenas A1, A2,\ldots, Ak are assigned in round robin to th1, th2\ldots. When some data comes from an arena, and we free that data we free the original arena not the local one. \texttt{jmalloc} has its own API, but other than that it uses the classical API: \texttt{malloc} and \texttt{free}, same as stdlib.\\
 Taking a normal program \texttt{a.out}, with \texttt{./a.out p1 \ldots pk} we will go with \texttt{malloc} and \texttt{free} of the stdlib. If we prefix with \texttt{LD\_PRELOAD=libjmalloc.so ./aout p1 \ldots pk} then \texttt{malloc} and \texttt{free} will be loaded from the \texttt{jmalloc} library.
+\section{Technicalities}
+\subsection{Threads}
+To create a thread using the \texttt{std::thread} library we use \texttt{auto tid = new std::thread(function, ...);} which starts a new flow control that runs the passed function. We are used to writing instructions sequentially, now we \texttt{fork} another flow of computation: we get two flows that are executed together \textbf{in the same address space}, so \textbf{the new thread inherits all the memory of the original thread}.\\
+Correctly handling the threads is fundamental, e.g. by \texttt{join}ing them at the end of a computation or \texttt{detach}ing them if needed: \textbf{detach separates the thread from the process} allowing the \textbf{execution to continue independently} (\texttt{detach}ed threads cannot be \texttt{join}ed).\\
+Another useful method is \texttt{yield()}, which signals to the scheduler that this thread can release the processor and be rescheduled later. This is useful in non-timesharing contexts or when a thread describes a very long computation.
+\subsection{Synchronization}
+Two fundamental approached: \textbf{controlling data sharing} (\texttt{mutex}es) and \textbf{waiting on events} (condition variables).
+\paragraph{Mutexes} \texttt{std::mutex} objects are used to implement \textbf{mutual exclusion} with \texttt{lock} before and \texttt{unlock} after a certain block of code that needs to be executed by just one thread at a time. Thus \texttt{mutex} objects need to be shared.\\
+Often the critical section that needs to be protected is very small and lasts for a small block of data. \texttt{std::lock\_guard} mechanism can be declared having a \texttt{std::mutex} as parameter. It tries to acquire the mutex's lock when declared and will automatically release it when its scope ends (by its object destroyer).\\
+Last mechanism is the \texttt{std::try\_lock} function: it returns immediately with \texttt{true} if the lock has been acquired, \texttt{false} otherwise.
+\paragraph{Condition variables} \texttt{std::condition\_variable} objects provide the method \texttt{wait} that takes a \texttt{mutex} and optionally a predicate as parameters, and the methods \texttt{notify\_one()} and \texttt{notify\_all()}.\\
+We call the \texttt{wait} on some shared data, waiting for some kind of event. Once we call the \texttt{wait}, the thread is asleep and releases the lock on the mutex until some other thread calls one of the \texttt{notify} methods (and the relative \texttt{unlock}!).\\
+With \texttt{notify\_one} only one of the waiting threads is put in the ready list, whereas with \texttt{notify\_all} every waiting thread will be put in the ready list. When a thread is awaken by a notify method, it will try to reacquire the lock. Once a thread is awake and has reacquired the lock, \textbf{it needs to re-check the condition it was waiting} because there's no guarantee that, due to scheduling, the condition has not been invalidate between the \texttt{notify} event and the thread actually being put into execution. So usually the \texttt{wait} are put inside a \texttt{while(condition)} loop.
 \section{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
 One of the reasons could be that the computation per se is unbalanced.
 \subsection{Static Techniques}
