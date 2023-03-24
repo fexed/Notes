@@ -389,6 +389,61 @@ As for threads, the operation \texttt{new} which creates a new thread, and \text
 It manages \textbf{chunks of memory} called \textbf{arenas}, distributed in a round robin way per thread with each thread using one arena. A metaarena is used a common place.\\
 Arenas A1, A2,\ldots, Ak are assigned in round robin to th1, th2\ldots. When some data comes from an arena, and we free that data we free the original arena not the local one. \texttt{jmalloc} has its own API, but other than that it uses the classical API: \texttt{malloc} and \texttt{free}, same as stdlib.\\
 Taking a normal program \texttt{a.out}, with \texttt{./a.out p1 \ldots pk} we will go with \texttt{malloc} and \texttt{free} of the stdlib. If we prefix with \texttt{LD\_PRELOAD=libjmalloc.so ./a.out p1 \ldots pk} then \texttt{malloc} and \texttt{free} will be loaded from the \texttt{jmalloc} library.
+\subsection{Implementation of Patterns}
+We spoke about stream (pipeline, farm) and data (map, reduce, stencil) parallel patterns. Let's discuss some general techniques to implement them. The basic structure of a pipeline is: an inputstream, outputstream and a number of stages implementing functions $f_i$. So the parameters are $\{f_i, is, os\}$ , and our tools are threads/asyncs etc. from C++.\\
+There are two main approaches to the implementation: \textbf{template based} implementation and \textbf{macro data flow} implementation (MDF).
+\paragraph{Template Based} We assume that for each pattern (pipelines, farms, maps, stencil\ldots) we have a template, which is composed by three parts:
+\begin{list}{}{}
+	\item a \textbf{target architecture}, e.g.: shared-memory multi-core, cluster/network of workstations, cloud\ldots
+	\item \textbf{concurrent activity graph}, a graph representing concurrent activities with their communication channels
+	\item \textbf{performance modeling}
+\end{list}
+\textbf{An example is a template of a pipeline} in a shared-memory multi-core environment: template(pipeline, SMmulticore). We have two choices:
+\begin{list}{}{}
+	\item Take a number of \textbf{concurrent threads} linked by communication channels like queues. Given $m$ stages, we have $m-1$ queues and the performance model is speedup$(m)\simeq m$ when each stage has circa the same $t_S$.
+	
+	\item Use a \textbf{queue} to pile up tasks which are $\langle f, x_i\rangle$ pairs: $f$ represents the function that needs to be computed on $x_i$. We have a number of threads, each takes a task from the queue, computes $f(x_i)$ and puts into the queue $\langle g, f(x_i)\rangle$ with $g$ representing the next stage of the pipeline that needs to be computed.\\
+	There are two main issues: the queue represents a bottleneck and we need to handle the ordering of the tasks, but both can be tackled in various ways. For example, splitting the queue in a set of queues or adding the information $i$ to the pair put in the queue to handle the ordering.\\
+	Performances of this model are very different: we don't have the limitation of having all tasks with same $t_S$. Provided to have a sufficient $t_A$ (interarrival time) and given $nw$ \textbf{workers}, not stages, we have speedup($nw) \simeq nw$. With $nw$ being the number of threads used, the workers, we have $nw+2$ stages (the input and output stages count!)
+\end{list}
+We can consider another alternative
+\begin{list}{}{}
+	\item Take a number of parallel activities, with a round-robin schedule delivering data and with a sorter gathering and sorting the results. The scheduler tags each task with the appropriate number, so that the sorter can correctly sort the results.\\
+	We have $nw$ concurrent activities, and thus $nw$ queues plus the queue of the sorter. With a small enough interarrival time $t_A$, we can achieve a speedup($nw$) = $nw$
+\end{list}
+So on the same architecture we can implement a pipeline in at least three different ways. What if we change architecture, e.g. from SMmulticore to COW (cluster of workstation)? A COW is a cluster of multicores, basically, so we can use any template seen before. Each workstation is a stage and the communication channels are something like TCP/IP sockets, achieving once again a speedup circa the number of stages.\\
+Another template is to have each workstation provide a number of workers, with a scheduler queue and a sorter queue as output like the last template seen earlier. These workstation work in a pipeline, with input/output communication channels, and each implementing an array of worker threads.
+\begin{center}
+	\includegraphics[scale=0.5]{27.png}
+\end{center}
+In this example, $t_S\simeq\frac{\max\{t_1,t_2,t_3\}}{nw}$ and the main source of overhead is in the scheduling/gathering part in each of the workstations. But each workstation orders the results that will be generally ignored, what's important is to maintain the arrival order in the final output. So we can take away the sort at the end of each workstation, ending up with something like $t_1\simeq t_2 = t_{\hbox{scheduling}} + \frac{t_f}{nw}$ and $t_3 = t_{\hbox{scheduling}} + \frac{t_f}{nw} + t_{\hbox{sorting}}$, but given that $t_S=\max\{t_1, t_2, t_3\}$ we still have overhead. We can decouple the sorting stage outside the last workstation and add a sorting stage, with the only task of sorting what it gets.\\\\
+The key idea is that \textbf{template based implementation provide a kind of library} with a number of items made of $\langle$pattern, graph, hardware, performance model$\rangle$ from which we can select the best template suited for our specific situation.
+\paragraph{Macro Data Flow} With \textbf{data flow} we denote models where the \textbf{order of the computations are dictated by the flow of data} rather than the program counter.\\
+We are used to flows where the order of the instructions is dictated by the program counter. In data flow, we execute instructions in the order dictated by how data flows, meaning that operations are executed only when the required data is available. An example: if we want to compute $(a+b)\cdot(c-d)$ with \textbf{imperative style} programming the evaluation would go something like: \begin{lstlisting}[style=myC]
+temp1 = a+b;
+temp2 = c-d;
+res = temp1*temp2;
+\end{lstlisting}
+With the program counter pointing to \texttt{1} at $t_1$, to \texttt{2} at $t_2$ and so on. With \textbf{data flow} we have a radically different approach we have a tree of operations:
+\begin{center}
+	\includegraphics[scale=0.5]{28.png}
+\end{center}
+To compute $*$ I need the $+$ and $-$ trees, and each tree requires computing some other values\ldots In a sense, the syntax dictates the order of operations. So we interpret this as having, for each operation, a node specifying the function, input arcs and output arcs. E.g. $\langle+, a, b, out\rangle$
+\begin{center}
+	\includegraphics[scale=0.5]{29.png}
+\end{center}
+Each arc possess a token that signals its availability. If we start with $a$ and $c$ available, neither $+$ nor $-$ instructions are executed. Once $b$ is available, the $+$ action becomes \textbf{fireable}. The macro data flow graph \textbf{gathers all fireable operations and executes them}. The \textbf{execution empties the input tokens of an action and fills its output token}(s), thus becoming a non-fireable action. Given a set of fireable actions, we can \textbf{execute those in every order we want}.\\
+In \textbf{\textit{Macro} Data Flow}, instead of considering action nodes composed by input tokens, output tokens and simple functions, we instead consider the possibility of having entire portions of code, methods, as the computable part of the node. Given a program, which uses some patterns e.g. pipe(seq, farm(seq), seq), its pattern tree is compile into a \textbf{MDF graph}. We have a \textbf{graph repository} and a \textbf{pool of executors}. Any time I have some input data, I \textbf{create a copy of the MDF graph and place it in the repository with the instantiated input tokens}. Each executor performs a loop where they get the fireable instruction, computes the action and delivers the output tokens where they need to go.
+\begin{center}
+	\includegraphics[scale=0.4]{30.png}
+\end{center}
+The key is the compilation of the parallel patterns.
+\begin{center}
+	\includegraphics[scale=0.4]{31.png}\\
+	\includegraphics[scale=0.5]{32.png}\\
+	\includegraphics[scale=0.5]{33.png}
+\end{center}
+MDF can issue some problems. First, the concurrency over the repository of course. Another problem is the result tokens delivery: each graph can need input tokens coming from different computations, and such we need to handle it. Another thing is maintaining the list of fireable instructions
 \section{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
 One of the reasons could be that the computation per se is unbalanced.
 \subsection{Static Techniques}
