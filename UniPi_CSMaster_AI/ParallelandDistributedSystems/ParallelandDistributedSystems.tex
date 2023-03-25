@@ -443,7 +443,46 @@ The key is the compilation of the parallel patterns.
 	\includegraphics[scale=0.5]{32.png}\\
 	\includegraphics[scale=0.5]{33.png}
 \end{center}
-MDF can issue some problems. First, the concurrency over the repository of course. Another problem is the result tokens delivery: each graph can need input tokens coming from different computations, and such we need to handle it. Another thing is maintaining the list of fireable instructions
+MDF can issue some problems. First, the concurrency over the repository of course.\\
+Another problem is the result tokens delivery: each graph can need input tokens coming from different computations, and such we need to handle it.\\
+Another thing is maintaining the list of fireable instructions. For efficiency reasons, we maintain a \textbf{counter} inside the node (along with the function, the input tokens and the output destinations). This counter tells how many input tokens are needed to compute the function, and each time a token becomes available the counter is decreased by 1. When the counter is 0, then the instruction is fireable so the last thread who delivers the final input token is in charge of putting the receiving node in the fireable list.\\
+Another is the out stream must be efficiently maintained, possibly reordering the results when needed.\\
+Finally, we need to take into account some kind of graph ID to distinguish of course the various copies of the same graph.\\
+So a node would in the end by composed by:
+\begin{list}{}{}
+	\item \textbf{Graph ID}, identifying the copy of the graph
+	\item \textbf{Instruction ID}
+	\item The \textbf{function} to be computed 
+	\item \textbf{Counter}, the number of needed input tokens
+	\item A list of \textbf{input tokens}, each being a pointer with a presence bit
+	\item A list of \textbf{output tokens}, each containing the graph ID, instruction ID and position to where the token needs to be delivered or \texttt{NULL} if the result should be directed to the output stream.
+\end{list}
+Remember that the executors are threads in a pool. Each thread asks for a fireable action from the repository, which is unique, and computes it. Ideally, all threads begin at the same time so each thread asks the repository for a fireable action. The repository delivers to the first, then delivers to the second one (which was waiting in the meantime), then to the third (which as well was waiting for the first and the second thread to be served) and so on. This means that each thread waits a bit before beginning the computation. With double or triple buffering techniques we can mitigate this. Another way would be to deliver 2 tasks (fireable nodes) to each thread the first time. This way, once a thread delivers a result it can ask for another task while computing the task it already has.\\\\
+Another issue would be present when a thread delivers a result to the repository and then gets a task which requires among its input the result that it just computed. This is a locality situation, so we can exploit some cache principles to speed up this, for example assigning a thread some task which uses tokens that it has computed (\textbf{affinity scheduling}). This optimizes computing times but it's not easy to implement, so we use caching and we take it into account when communicating between repository and executioners.
+\section{Refactoring Rules}
+To write our programs we can use the following grammar:
+\begin{center}
+Pat ::= Seq() $|$ Pipe(Pat$_1$, Pat$_2$) $|$ Comp(Pat$_1$, Pat$_2$) $|$ Farm(Pat, $nw$) $|$ Map(Pat) $|$ Reduce(Pat)
+\end{center}
+And a program is a pattern applied to some input
+\begin{center}
+Prog = Pat:$x$
+\end{center}
+We describe trees
+\begin{center}
+	\includegraphics[scale=0.5]{34.png}
+\end{center}
+\textbf{Refactoring} or rewriting means looking at the semantic of the pattern and recognize shapes with the same \textbf{functional semantics} (\textit{what} is being computed) but different \textbf{non-functional semantics} (\textit{how} it is being computed, meaning different parallelism degrees or ordering of computation).
+\paragraph{Refactoring Rules}
+\begin{list}{}{}
+	\item Farm($x, n$) $\equiv$ Farm($x, m$) with $m\neq n$ (\textbf{pardegree change})
+	\item Pipe($x, y$) $\equiv$ Comp($x, y$) (\textbf{pipe intro/elim})
+	\item Pipe(Farm($x, \:$), Farm($y, \:$)) $\equiv$ Farm(Pipe($x, y$),$\:$)
+	\item $x \equiv$ Farm($x$) (\textbf{farm intro/elim})
+	\item Map(Comp($x, y$)) $\equiv$ Comp(Map($x,y$)) (\textbf{map fusion})
+	\item \ldots
+\end{list}
+The questions revolve around choosing the best one.
 \section{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
 One of the reasons could be that the computation per se is unbalanced.
 \subsection{Static Techniques}
