@@ -370,6 +370,25 @@ With \texttt{notify\_one} only one of the waiting threads is put in the ready li
 \texttt{std::packaged\_task} decouples the moments of having a function to call from the moment of calling that function. With \texttt{get\_future} we can get the future relative to the packaged task and use it. To compute the packaged task we call it passing the arguments, e.g. the packaged task of the function \texttt{t1 func(t2);} is \texttt{auto pt = new packaged\_task(func);} has future \texttt{auto future<t1> ft = pt.get\_future();} and can be called with \texttt{pt(arg);} with \texttt{arg} of type \texttt{t2}. The result can be obtained with \texttt{t1 res = ft.get();}.
 \subsection{Promises}
 \texttt{std::promise} can be used in two ways: using its future like before or call \texttt{set\_value} on it. They can be viewed as \textbf{placeholders}.
+\subsection{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
+One of the reasons could be that the computation per se is unbalanced.
+\subsubsection{Static Techniques}
+Related to the usage of different splitting policies.
+\paragraph{Chunk policy} Take the vector and split into adjacent parts
+\paragraph{Cyclic policy} First item to first thread, second to second thread\ldots e.g. with two threads: first to th1, second to th2, third to th1, fourth to th2\ldots
+\paragraph{Mix} A cyclic distribution of blocks. Split into blocks and assign the first to a thread, the second to the next\ldots following the cyclic policy.
+\subsubsection{Dynamic Techniques}
+We can do much more, adapting to the situation giving more things to do to the thread that so far have done less.
+\paragraph{Autoscheduling} Threads are not assigned a block/item or a distribution, but each threads \textit{asks} for something to be computed. Some code like \begin{lstlisting}
+while (more work to do) {
+	ask work
+	compute
+	deliver result
+}
+\end{lstlisting}
+The threads that gets longer tasks stops asking for more tasks for a while, and more tasks will be executed by the other threads. When tasks are almost finished, it may happen that some thread gets the "last" long task still taking longer than all the other threads. But it's not as impactful as stated before, as it's the worst case.\\
+In general, prefetch $k \simeq 2$ or $3$ tasks
+\paragraph{Job Stealing} Bunch of tasks, cyclic static assignment. With $nw$ threads and $m$ tasks, each thread gets $\frac{m}{nw}$ tasks. With job stealing, the thread that has finished its tasks and perceives that there's more to compute, steals a task from another thread. Problems: "size" of the steal, synchronize accesses, who to target\ldots the solution is a random policy: threads that finishes their own assigned task steal a random number $\in[0, nw]$ and steal that number of tasks.
 \subsection{Overhead}
 Standard computer of course have a processor and a memory, connected by some kind of bus. This bus represents a bottleneck (the \textbf{Von Neumann Bottleneck}). We can improve by having two memories: an instruction memory and a data memory.\\\\
 By exploding the Von Neumann model a bit, we have a \textbf{main memory}, a number of \textbf{cache} levels faster and smaller going from the main memory to the processor, and the \textbf{processor}. Usually the last level of cache, closest to the processor, takes 1 or 2 $\tau$ (clock cycles) to perform the operations, while the main memory takes around 80 to 100 $\tau$. This follows the \textbf{locality principle} which is divided into \textbf{spatial locality} (if a given address $i$ is accessed, then it's likely that addresses $i+1$ and so on will be accessed soon)  and \textbf{temporal locality} (an accessed address is likely to be accessed again soon), enabling the concept of \textbf{working set} (the set of addresses that are likely of being accessed in a small amount of time).\\\\
@@ -506,117 +525,7 @@ Performance models are used in two ways:
 	\item \textbf{Optimize} by figuring out the parameters, e.g. $nw$
 \end{list}
 \subsection{Optimization}
-In RPLSH we can do \texttt{optimize main with max resources}.
-\section{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
-One of the reasons could be that the computation per se is unbalanced.
-\subsection{Static Techniques}
-Related to the usage of different splitting policies.
-\paragraph{Chunk policy} Take the vector and split into adjacent parts
-\paragraph{Cyclic policy} First item to first thread, second to second thread\ldots e.g. with two threads: first to th1, second to th2, third to th1, fourth to th2\ldots
-\paragraph{Mix} A cyclic distribution of blocks. Split into blocks and assign the first to a thread, the second to the next\ldots following the cyclic policy.
-\subsection{Dynamic Techniques}
-We can do much more, adapting to the situation giving more things to do to the thread that so far have done less.
-\paragraph{Autoscheduling} Threads are not assigned a block/item or a distribution, but each threads \textit{asks} for something to be computed. Some code like \begin{lstlisting}
-while (more work to do) {
-	ask work
-	compute
-	deliver result
-}
-\end{lstlisting}
-The threads that gets longer tasks stops asking for more tasks for a while, and more tasks will be executed by the other threads. When tasks are almost finished, it may happen that some thread gets the "last" long task still taking longer than all the other threads. But it's not as impactful as stated before, as it's the worst case.\\
-In general, prefetch $k \simeq 2$ or $3$ tasks
-\paragraph{Job Stealing} Bunch of tasks, cyclic static assignment. With $nw$ threads and $m$ tasks, each thread gets $\frac{m}{nw}$ tasks. With job stealing, the thread that has finished its tasks and perceives that there's more to compute, steals a task from another thread. Problems: "size" of the steal, synchronize accesses, who to target\ldots the solution is a random policy: threads that finishes their own assigned task steal a random number $\in[0, nw]$ and steal that number of tasks.
-\paragraph{Autoscheduling + variable size chunks}
-
-\paragraph{Template Based Implementation} For each pattern (pipe, farm, map, stencil\ldots) we have templates:\begin{list}{}{}
-	\item for each target architecture (multicore, cloud\ldots)
-	\item activity graph
-	\item performance modelling, also a way to have an idea of what we can achieve in terms of perfomance
-\end{list}
-Let's analyze a template for a pipeline on a shared memory multicore machine (\texttt{template(pipeline, SMmulticore)}):
-$$\longrightarrow\hbox{thread}\rightarrow\hbox{thread}\rightarrow\ldots\rightarrow\hbox{thread}\longrightarrow$$
-With the $\rightarrow$ being communication channels (queues). Modelling the speedup$(m)\simeq m$ with $m$ being the number of stages, so a linear speedup, if and only if $\max\{t_i\}\simeq t_j$ so the times of each stage are more or less the same.\\\\
-But we can have another template
-$$x_m\ldots x_2\:x_1\longrightarrow\hbox{queue}$$
-Where in the queue we put "\texttt{compute} $f$ \texttt{over} $x_i$" as $\langle f,x_i\rangle$ for each $i$. Each worker gets $\langle f,x\rangle$ and puts in the queue $\langle g, f(x)\rangle$. For $\langle g,x\rangle$ returns $\langle h,g(x)\rangle$ and for $\langle h,x\rangle$ returns $\langle$ end$,h(x)\rangle$.\\
-So the queue will have different types of tasks: the input tasks are assigned to $f$ but the intermediate tasks are assigned to $g$ or $h$: it's a pipeline. Of course, the end tasks means outputting on the output queue.\\
-A problem: the queue is a bottleneck. We can use some techniques: set of queues, local queues\ldots Also the ordering, but i can keep the index $i$ for each stage and use it at the end to keep in a buffer and output in the correct order.\\
-With modeling provided sufficient $T_A$, the speedup can be proportional to $nw$ and not $m$.\\\\
-Another template is a round-robin scheduler that assigns to some workers that deliver results to sorter with respect to the input order. The scheduler gives $\langle i, x_i\rangle$ and the output is $h(g(f(x_i)))$ ordered on $i$. Pipeline. Uses $nw+2$ concurrent activities, with a queue for each worker plus a queue for the sorter. With $T_A$ low, we have speedup circa $nw$.\\\\
-Changing architecture, from shared memory multicore to a clustered workstation. I can use any template ported to a cluster. For example
-$$\hbox{workstation}_1\rightarrow_{\hbox{TCP/IP}}\hbox{workstation}_2\ldots$$
-The speedup is circa the number of stages. But we can also have a number of workers in each workstation, with a scheduler and a merger per each. A kind of composed template, the third inside the stages of the first.
-$$T_S\simeq\frac{\max\{T_i\}_{nw}}{nw}$$
-The overhead is in the scheduling and merging parts of each stage. The scheduling is necessary, but in the ordering part we sort data on the input order, but we can do that just at the end of the last stage.
-\paragraph{Macro Data Flow Implementation} With Data Flow we denote the operations where the order of computations are dictated by the flow of data encountered by the program counter.\\
-So we have nodes that are composed of $\langle$ operator, variables, output$\langle$. For example, $$(a+b)\cdot(c-d)$$ can be represented as 
-\begin{center}
-	\includegraphics[scale=0.5]{7.png}
-\end{center}
-We have tokens on the inputs, that represent when data are available. When all data is available, the node becomes "fireable". This technique can be used to implement parallel patterns, Macro because instead of considering operations as nodes with functions an input/output nodes we consider macros with full portions of code instead of primitive functions.\\
-Let's consider a program \texttt{main.cpp} that uses some pattern internally from a pattern library. First step: from a pattern tree we compile the MDF (Macro Data Flow graph). We have a graph repository and a pool of executors: anytime I have some input data I create a copy of the graph in the repository with the tokens that represent the data.\begin{center}
-	\includegraphics[scale=0.5]{8.png}
-\end{center}
-Each executor executes a loop where they get a fireable instruction, compute and deliver the output tokens.
-\paragraph{Compiler} From the Pattern Tree it outputs the MDF graph.
-\begin{list}{}{}
-	\item Compile(Pipe($f,g$)) $\rightarrow$ $\langle f,$ in, A$\rangle$, $\langle g,$ A, out$\rangle$
-	\item Compile(Seq($f$)) $\rightarrow$ $\langle f,$ in, out$\rangle$
-	\item Compile(Farm($f$)) $\rightarrow$ Compile($f$) for each instance of input
-	\item Compile(Map($f$)) $\rightarrow$ Compile($f$) for each element of the input collection
-	\begin{center}
-		\includegraphics[scale=0.5]{9.png}
-	\end{center}
-	\item Compile(Reduce($f$)) $\rightarrow$ \begin{center}
-		\includegraphics[scale=0.5]{10.png}
-	\end{center}
-\end{list}
-Each one of the graphs has one input token and one output token, mandatory to be able to compose the graph. The Farm parallelism disappears %TODO
-and third %TODO
-\paragraph{Problems}\begin{list}{}{}
-	\item Contention over repository
-	\item Token delivery
-	\item Maintain the list of fireable instructions
-	\item Reordering on the out stream
-\end{list}
-\paragraph{Refactoring Rules}
-The grammar used to write our program is:
-\begin{center}
-	Pat = Seq() $|$ Pipe(Pat$_1$, Pat$_2$) $|$ Comp(Pat$_1$, Pat$_2$) $|$ Farm(Pat, $nw$) $|$ Map(Pat) $|$ Reduce(Map)\\
-	Prog $\Rightarrow$ Pat : $x$\\
-	\includegraphics[scale=0.5]{12.png}
-\end{center}
-Whit \textbf{functional semantics} we mean \textbf{what is computed}. \textbf{Non-functional semantics} refers to \textbf{how} the result \textbf{is computed}.\\
-So refactoring rules describe the equivalences in the \textbf{functional semantics}. So different performance, parallelism degrees\ldots\\
-Some examples:
-\begin{list}{}{}
-	\item Farm($x, n$) $\equiv$ Farm($x, m$) with $n\neq m$
-	\item Pipe($x, y$) $\equiv$ Comp($x, y$)
-	\item Pipe(Farm($x, \_$), Farm($y, \_$)) $\equiv$ Farm(Pipe($x, y$) \_)
-\end{list}
-How to figure out the better ones? We will consider a small set of rules:
-\begin{list}{}{}
-	\item \textbf{Pipe introduction/elimination}: Comp($x,y$) $\equiv$ Pipe($x,y$)
-	\item \textbf{Farm introduction/elimination}: $x \equiv$ Farm$(x)$
-	\item \textbf{Map fusion}: Map(Comp($x,y$)) $\equiv$ Comp(Map($x,y$))
-	\item \textbf{Pardegree change}: Farm($x, n$) $\equiv$ Farm($x, m$) with $n\neq m$
-\end{list}
-The idea is to write a program (so a tree $T_0$) and apply the rules (via a tool) getting $T_1,T_2,\ldots$ all functionally equivalent to $T_0$. Usually the goal is a low $T_{S_i}$. We take the produced trees, mapping each to its $T_S$ and reducing to $\min$ to get the minimum $T_{S_k}$.\\
-But maybe we compute worse trees. I can do another thing: taking $T_0$ trying to find the path in the possible trees. I apply rules and measure the metric (in this example, $T_S$). Then I don't go exploring all the subtrees, applying all applicable rules, but I just go one level down and pick the best one each time. We follow a path that always gives a better (or equivalent) performing solution. But this is \textbf{not possible}.
-%TODO why, 2nd part 22/03
-With a lot of approximations and details ignored, I can figure out the best parallel architecture.
-\paragraph{Normal Form} Speaking of stream parallel computations. Optimizes the service time $T_S$ (more precisely, the throughput).\\
-We can derive the normal form from every pattern tree, only with stream parallel patterns\begin{enumerate}
-	\item \textbf{Get the frontier}, set of all the sequential leaves in the tree, \textbf{left to right}.
-	\item Comp(frontier), so sequential composition in the order they appear.
-	\item Farm(Comp(frontier))
-\end{enumerate}
-This process always aims at optimizing the parallel computation. Unless there are some particular reasons. We take the whole set of things to compute an put them together (1 and 2), meaning creating a chunk of code that do the work: \textbf{increase the grain of the computation}.\\
-This optimizes the service time taking also into account resources.
-\paragraph{Performance Models} Used to evaluate or to optimize.\\
-\textbf{Evaluate} meaning that, having a tree, we evaluate a metric (e.g. $T_S$) visiting the tree from the leaves. For each leaf we're interested in the sequential time ($T_S = L$ for the sequential nodes). The we go up one step visiting the parents: we have the parameters of the subtree and can compute $T_S$ of the node given its subtrees. We can repeat until the root.\\\
-The visit of a tree is also a pattern, so if I take that pattern (visiting a tree from the leaves upward) passing the tree as a parameter I can get a number of different \textbf{visitors}: $T_S$ in this case is a visitor. For example, for Visitor(\# resources) we would visit the tree in the same way but using a different formula for computing the contribution of each node.\\
-\textbf{Optimize} the parameters, for example the parallel degrees of the stages. In \texttt{rplsh} we used \texttt{optimize main with max resources}. How it's implemented? We take the tree, with Pipe in the root, same as before. We turn the tree with the $nw$ figured out, but we have a certain number of resources. For example we want to shrink the number of resources to match the number of cores.
+In RPLSH we can do \texttt{optimize main with max resources}, with resources meaning number of available processing threads.
 \paragraph{RPLShell} \begin{center}
 	\includegraphics[scale=0.5]{13.png}
 \end{center}
@@ -627,7 +536,7 @@ The visit of a tree is also a pattern, so if I take that pattern (visiting a tre
 	\item \textbf{Visitors} the elements that visit the tree upwards.
 \end{list}
 \paragraph{Autonomic Management of Non Functional Features} In long running computations.\\
-For example the classical variations in network load between night and day. Autonomic because %TODO
+For example the classical variations in network load between night and day. Autonomic because autonomous + automatic.\\
 Born from industrial processes management, changing behaviors of the systems. Different architectures of the controller:
 \begin{list}{}{}
 	\item \textbf{MAPE Loop} (Monitor, Analyze, Plan, Execute loop)\\
@@ -646,16 +555,16 @@ This is implemented in the \textbf{control program} of our manager. Very crude \
 \end{list}
 \subparagraph{Example}
 \begin{center}
-	\begin{tabular}{c | c c c}
-	& \textbf{Event} & \textbf{Condition} & \textbf{Action}\\
+	\begin{tabular}{c | c c c c}
+	& \textbf{Event} & \textbf{Condition} & \textbf{Action} & \textbf{Priority}\\
 	\hline
-	$R_1$ & Change $T_A$ & \makecell{Less than the\\previous one} & Adding a worker\\\\
-	$R_2$ & Change $T_A$ & \makecell{More than the\\previous one} & Removing a worker\\\\
-	$R_3$ & Change $T_A$ & \makecell{Less than the\\previous one AND\\$nw$ just decreased} & \texttt{nop}, update $T_A$\\\\
-	$R_4$ & Change $T_A$ & \makecell{More than the\\previous one AND\\$nw$ just increased} & \texttt{nop}, update $T_A$
+	$R_1$ & Change $T_A$ & \makecell{Less than the\\previous one} & Adding a worker & LOW\\\\
+	$R_2$ & Change $T_A$ & \makecell{More than the\\previous one} & Removing a worker & LOW\\\\
+	$R_3$ & Change $T_A$ & \makecell{Less than the\\previous one AND\\$nw$ just decreased} & \texttt{nop}, update $T_A$ & HIGH\\\\
+	$R_4$ & Change $T_A$ & \makecell{More than the\\previous one AND\\$nw$ just increased} & \texttt{nop}, update $T_A$ & HIGH
 	\end{tabular}
 \end{center}
-\paragraph{Contracts}\begin{enumerate} %TODO
+\paragraph{Contracts}\begin{enumerate}
 	\item Propagate the "contract" top-down and try to implement it "best-effort"
 	\item Manage to keep contracts satisfied 
 \end{enumerate}
@@ -664,12 +573,13 @@ We're taking into accounts performance, but often power consumption is more impo
 	\includegraphics[scale=0.5]{15.png}
 \end{center}
 \section{Vectorization}
-Very old technique. %TODO
-Given $x, y, z$ as vectors of $x_i, y_i, z_i$ from $0$ to $n-1$ and $\forall\:i\in[0,n-1]\:\:z_i=f(x_i,y_i)$, implemented e.g. as a \texttt{for}. If the computation $f(x_i, y_i)$ is indepdendent of the other loop iterations (that is, $x_i$ is independent from all other $x_j, j\neq i$) then this is easily parallelized. A classical example is matrix multiplication: $$\forall\:i\:\:\forall\:j\:\:\forall\:k\:\:c_{ij} = a_{ik}\cdot b_{kj}$$
-2 steps: we need to have zeroes in the first positions and %TODO
-We have ways to load/store vectors to %TODO
-
-Hardware designed specifically, vector processors. Registers that can be seen as vectors of tot bits numbers: 256 bits vector registers seen as 4 64 bits numbers, or 8 32 bits numbers and so on. With special commands, for example \texttt{VADD.I32 R1, R2, R3} meaning R1 = R2 + R3 with I32 meaning 32 bit numbers with I index.
+Very old technique, since the first computers people thought about vectorizable code with vector units attached outside the processor that could be used as I/O. The main idea is to have some \textbf{vectors of items and produce an output vector}. E.g. $\forall\:i\in[0, n-1]\:\:\:z_i = f(x_i, y_i)$. In most languages you have the \texttt{for} construct and we're used to think about it sequentially. But if each loop iteration is independent from the others (meaning that $z_i = f(x_i, y_i)$ is independent from $z_j = f(x_j, y_j)$ with $i\neq j$) then this each iteration is easily computable in parallel.\\
+A classical example is matrix multiplication: $$\forall\:i\:\:\forall\:j\:\:\forall\:k\:\:c_{ij} = a_{ik}\cdot b_{kj}$$
+Using a sufficient number of ALUs we can parallelize the computation
+\begin{center}
+	\includegraphics[scale=0.5]{38.png}
+\end{center}
+We have ways to load/store vectors to fill contiguous portions of memory in one shot. This requires specifically designed hardware, vector processors. Registers that can be seen as vectors of tot bits numbers: 256 bits vector registers seen as 4 64 bits numbers, or 8 32 bits numbers and so on. With special commands, for example \texttt{VADD.I32 R1, R2, R3} meaning R1 = R2 + R3 with I32 meaning 32 bit numbers with I index.
 \paragraph{Conditions} In \texttt{g++} we can explicitly ask with \texttt{-03 -ftree-vectorize} and with \texttt{-fopt-info-vec-[missed/all]} ask what cannot be vectorize.\\
 The conditions are:
 \begin{list}{}{}
@@ -678,14 +588,14 @@ The conditions are:
 	\item Cannot call external code in the loop body, functions or libraries.
 	\item No conditional code.\\
 	It'd require compiling two paths, so complicates things.
-	\item No overlapping pointers.\\
-	
+	\item No overlapping pointers.
 \end{list}
+%TODO from here lez. 19
 \paragraph{\texttt{\#pragma}} Indications to the compiler\\
 \texttt{\#pragma GCC ivdep} tells the compiler whatever it thinks of the loop, to consider it as independent iterations.\\
 \texttt{\#pragma GCC unroll n} tells the compiler that the following loop should be unrolled \texttt{n} times. Useful for short loops.\\\\
-So vectorization very useful for mathematical operations, such as differential equations. Requires to take a bit of care in the core to be able to vectorize. If we don't convince the compiler, we can use the \texttt{pragma}.\\
-If we vectorize Farm($f,nw$), the speedup with the vectorized $f$ with respect to the non-vectorized $f$ is smaller. Because the vectorized code in general is faster, so non-vectorized Speedup($nw$) $Z$ Vectorized Speedup($nw$).\\
+So vectorization very useful for mathematical operations, such as differential equations. Requires to take a bit of care in the code to be able to vectorize. If we don't convince the compiler, we can use the \texttt{pragma}.\\
+If we vectorize Farm($f,nw$), the speedup with the vectorized $f$ with respect to the non-vectorized $f$ is smaller. Because the vectorized code in general is faster, so non-vectorized Speedup($nw$) $\neq$ Vectorized Speedup($nw$).\\
 But vectorization can radically change the $T_S$ of the stages of a Farm, for instance, and introduce waiting times for workers. You don't change the sequential fraction, just the non-sequential fraction.
 \paragraph{Libraries} Libraries include operations used often, e.g. \texttt{Blas} (basic linear algebra system) or \texttt{Lapack} or \texttt{NKL}.\\
 For instance \texttt{blas} provides \texttt{gemm} for very optimized matrix multiplications.\\
