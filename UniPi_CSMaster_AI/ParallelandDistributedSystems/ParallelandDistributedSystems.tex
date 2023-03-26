@@ -459,7 +459,7 @@ So a node would in the end by composed by:
 \end{list}
 Remember that the executors are threads in a pool. Each thread asks for a fireable action from the repository, which is unique, and computes it. Ideally, all threads begin at the same time so each thread asks the repository for a fireable action. The repository delivers to the first, then delivers to the second one (which was waiting in the meantime), then to the third (which as well was waiting for the first and the second thread to be served) and so on. This means that each thread waits a bit before beginning the computation. With double or triple buffering techniques we can mitigate this. Another way would be to deliver 2 tasks (fireable nodes) to each thread the first time. This way, once a thread delivers a result it can ask for another task while computing the task it already has.\\\\
 Another issue would be present when a thread delivers a result to the repository and then gets a task which requires among its input the result that it just computed. This is a locality situation, so we can exploit some cache principles to speed up this, for example assigning a thread some task which uses tokens that it has computed (\textbf{affinity scheduling}). This optimizes computing times but it's not easy to implement, so we use caching and we take it into account when communicating between repository and executioners.
-\section{Refactoring Rules}
+\section{Optimizing}
 To write our programs we can use the following grammar:
 \begin{center}
 Pat ::= Seq() $|$ Pipe(Pat$_1$, Pat$_2$) $|$ Comp(Pat$_1$, Pat$_2$) $|$ Farm(Pat, $nw$) $|$ Map(Pat) $|$ Reduce(Pat)
@@ -473,7 +473,7 @@ We describe trees
 	\includegraphics[scale=0.5]{34.png}
 \end{center}
 \textbf{Refactoring} or rewriting means looking at the semantic of the pattern and recognize shapes with the same \textbf{functional semantics} (\textit{what} is being computed) but different \textbf{non-functional semantics} (\textit{how} it is being computed, meaning different parallelism degrees or ordering of computation).
-\paragraph{Refactoring Rules}
+\subsection{Refactoring Rules}
 \begin{list}{}{}
 	\item Farm($x, n$) $\equiv$ Farm($x, m$) with $m\neq n$ (\textbf{pardegree change})
 	\item Pipe($x, y$) $\equiv$ Comp($x, y$) (\textbf{pipe intro/elim})
@@ -482,7 +482,31 @@ We describe trees
 	\item Map(Comp($x, y$)) $\equiv$ Comp(Map($x,y$)) (\textbf{map fusion})
 	\item \ldots
 \end{list}
-The questions revolve around choosing the best one.
+The questions revolve around choosing the best one. This is a \textbf{space exploration problem}: starting with the original tree $t_0$, using the refactoring rules we produce a number of derived trees and for each we measure a goal function (e.g. service time, so $T_{S0}$ for $t_0$). We move toward the best one, and repeat. So we do not explore the whole tree of derived graphs, but just the sub level of the current best graph. This greedy path should bring to a better solution, a better graph thus a better pattern for the current problem. This is \textbf{not possible}. Let's see why with a counterexample, e.g. Pipe(Seq($f$), Farm(Seq($g$), Seq($h$)) with $T_{S0}$ and show a way to reach a better $T_S$ with intermediate steps that have a worse $T_S$.
+\begin{center}
+	\includegraphics[scale=0.5]{35.png}
+	\includegraphics[scale=0.75]{36.png}\\
+	\includegraphics[scale=0.75]{37.png}
+\end{center}
+Each of these steps lowers the $T_S$: e.g. we imagine a bottleneck on one stage and introduce a farm there, then a bottleneck on the remaining stage and introduce another farm ending in $t_3$. But let's see another possible path: starting from $t_0$, in $t_4$ we remove the farm in the second stage, ending with Pipe(Seq, Seq, Seq). This would increase $T_S$. Then in $t_5$ we remove the pipeline, ending with Comp(Seq, Seq, Seq), once again increasing $T_S$. In $t_5$ we introduce a farm making Farm(Comp(Seq, Seq, Seq)) and here we can decrease $T_S$ as much as we want by increasing the parallelism degree, up to $T_S=\max\{T_{\hbox{scheduler}}, \frac{T_w}{nw}, T_{\hbox{collector}}\}$ with $T_w = t_f+t_g+t_h$ in our case, so with a $nw$ such that the maximum becomes either the time required by the scheduler or the collector.\\\\
+So by performing a greedy search we easily fall into local minima, and thus we have to generate as much configuration as possible. So taken a certain tree $t_0$, using the rules we get all trees with depth $< k$ and then we apply map($T_S$) followed by a reduce($\min$) (or reduce($\max$) depending on what we want in place of $T_S$).
+\subsection{Normal Form}
+Speaking about stream parallel computations. Earlier we saw how the best pattern for the example was Farm(Comp(Seq, Seq, Seq)). \textbf{This pattern is optimal with respect to the $T_S$} taking in account the resources (same or smaller $T_S$ using the same or fewer resources).\\
+Given a tree composed only by stream parallel patterns:
+\begin{enumerate}
+	\item Get the \textbf{frontier}, which is the \textbf{set of the sequential leafs}, \textbf{from left to right}.
+	\item Compose the frontier \textbf{Comp(frontier)}
+	\item Farm it out \textbf{Farm(}Comp(frontier)\textbf{)}
+\end{enumerate}
+This \textbf{always optimizes} the stream parallel computation in \textbf{stateless} situation. The principle is to transform a set of small computations spread around and put them into a big chunk of code with an input and on output, so \textbf{increase the grain of the computation}. The \textbf{grain} is \textbf{the ration between time spent computing and time spent organizing the computation}.
+\subsection{Performance Model Usage}
+Performance models are used in two ways:
+\begin{list}{}{}
+	\item \textbf{Evaluate} a certain value, e.g. $T_S$, by visiting the tree from leafs to root and computing the required value.
+	\item \textbf{Optimize} by figuring out the parameters, e.g. $nw$
+\end{list}
+\subsection{Optimization}
+In RPLSH we can do \texttt{optimize main with max resources}.
 \section{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it fishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
 One of the reasons could be that the computation per se is unbalanced.
 \subsection{Static Techniques}
