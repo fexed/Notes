@@ -590,7 +590,6 @@ The conditions are:
 	It'd require compiling two paths, so complicates things.
 	\item No overlapping pointers.
 \end{list}
-%TODO from here lez. 19
 \paragraph{\texttt{\#pragma}} Indications to the compiler\\
 \texttt{\#pragma GCC ivdep} tells the compiler whatever it thinks of the loop, to consider it as independent iterations.\\
 \texttt{\#pragma GCC unroll n} tells the compiler that the following loop should be unrolled \texttt{n} times. Useful for short loops.\\\\
@@ -600,22 +599,22 @@ But vectorization can radically change the $T_S$ of the stages of a Farm, for in
 \paragraph{Libraries} Libraries include operations used often, e.g. \texttt{Blas} (basic linear algebra system) or \texttt{Lapack} or \texttt{NKL}.\\
 For instance \texttt{blas} provides \texttt{gemm} for very optimized matrix multiplications.\\
 Use libraries because they are very optimized, exploiting all the possible optimizations.
-\paragraph{GRPPI} C++ library that implements common parallel patterns, using standard threads or other backends (e.g. omp, tdd or fastflow). The backend is only modeled by the \texttt{execution} parameter.
+\subsection{GRPPI} C++ library that implements common parallel patterns, using standard threads or other backends (e.g. omp, tdd or fastflow). The backend is only modeled by the \texttt{execution} parameter.
 \section{OpenMP}
+Part of a big family of tools useful to build parallel applications.
 \paragraph{MPi} Directed to clusters and workstations, multicores
-\paragraph{CDA/OpenCL} For GPU
-\paragraph{OpenMP} Parallel for, targets shared memory multicores (and GPU/FPGA). Very dated, since 1997 the version 1.0: no GPU, even multicores were not very popular.\\
-At the beginning very simple API that provided launching threads in parallel and something related to the parallel for. Each version improved on that, introducing: tasks, target accelerators, depend clauses on tasks (to tell that a task must be executed only after the completion of another task), memory management, task reduction (among values of different tasks), task affinity\ldots\\
-When we speak about shared memory multicores, we speak of some situation where in the board we have more than one sockets with multicore in each socket.
+\paragraph{CUDA/OpenCL} For GPU
+\paragraph{OpenMP} Targets shared memory multicores (and GPU/FPGA). Very dated, since 1997 the version 1.0: no GPU, even multicores were not very popular.\\
+At the beginning it offered very simple APIs that provided launching threads in parallel and something related to the parallel \texttt{for}. Each version improved on that, introducing: tasks, target accelerators, depend clauses on tasks (to tell that a task must be executed only after the completion of another task), memory management, task reduction (among values of different tasks), task affinity\ldots\\
+When we speak about shared memory multicores, we speak of some situation where the motherboard has more than one socket, with each processor being multicore.
 \paragraph{Concepts}\begin{list}{}{}
 	\item \textbf{Directives}, which OpenMP is based on. Directives, in C/C++ environment, are kind of pragmas which can be understood as portions of compiler
 	\item OpenMP is \textbf{compiler-based}
-	
 \end{list}
 As pros:
 \begin{list}{}{}
 	\item Few lines of code are required to run parallel code, opposed to writing all the logic by oneself
-	\item Keep sequential code, means we can perform functional debugging and then adding parallel pragmas
+	\item Keep sequential code, means we can perform functional debugging and then adding parallel \texttt{pragma}s
 \end{list}
 As main con we need to rewrite the compiler, not entirely (such as the parser), but everything related to the usage of the pragmas must be generated at compile time.\\
 E.g. the map seen in the GRPPI library is written at higher level but in the library, doesn't touch the compiler.\\\\
