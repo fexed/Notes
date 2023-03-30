@@ -1040,11 +1040,10 @@ All-to-all building blocks
 \end{center}
 \subparagraph{Graph Transformers} For example having a Pipeline with a Farm as intermediate stage, meaning \texttt{ff.Pipe<int> mPipe(S1, Farm2, S3);}, we can optimize it including the sequential computation of the first stage S1 in the emitter of the Farm and the sequential computation of the last stage S3  in the collector of the Farm. We can declare a \texttt{optlevel opt;} optimizer and then set \texttt{opt.remove\_collector = true;}, \texttt{opt.merge\_with\_emitter = true;} and optimize with \texttt{optimize\_static(mPipe, opt);}. All this at declaration phase.
 \paragraph{Concurrency Throttling} Useful to handle the pressure from the input, adding or removing workers accordingly. It's possible to declare a Farm with a given $nw$ and freeze some of the workers. Meaning that the emitter only perceives the non-frozen workers, the frozen workers are "ghosts" and may be unfrozen when needed.
-
-\section{Parsec} Benchmarks %TODO lesson 28
+\section{Parsec} Benchmarks
 \begin{list}{}{}
 	\item \textbf{Blockslides} Portfolio of options, to compute the prices require partial differential equations
-	\item \textbf{Cammeal}\\
+	\item \textbf{Canneal}\\
 	Simulated Annealing
 	\item \textbf{Dedup}
 	\item \textbf{Ferret} Pipeline
@@ -1066,16 +1065,20 @@ We don't mind the order of accesses in the state but it has to be accessed in mu
 	\includegraphics[scale=0.5]{19.png}\\
 	\includegraphics[scale=0.5]{20.png}
 \end{center}
+Due to the state, the mutex, we have an increased $T_S$ due to the fact that each time a job arrives to be computed, it needs to wait that the state is accessed and updated.\\
+We would like to reuse as many concept as possible, from the ones we've seen so far with stateless parallel computations. With data parallel computations, we take a collection of type $T$, split into chunks and give each to some workers, building an output collection: the idea is that each worker takes something from the original collection and puts something into the output collection. Distributing data from the original collection to the workers, in real-world applications at a scale, is a very costly operation, often implemented with ad-hoc communication channels. So usually, when operating with many data parallel computation, we try to use the map-fusion refactoring rule as much as possible, ideally keeping just one distribution phase and not spending time redistributing data to workers at each stage. So with stateful computation we need to \textbf{look at the patterns that can be reasonably exploited}.
 \paragraph{Accumulator} We have a parallel pattern and a \textbf{state pattern} (accumulator). Each parallel activity updates the pattern using a function $f$ (associative and commutative). The result is the final value of the state.\\
 Characteristics are: type of global states and functions and whether or not the intermediate results means something.
-\paragraph{Successive Approximation} %TODO
+\paragraph{Successive Approximation} Set of worker in a master-worker configuration (one master emits tasks and receives answers from a set of workers). In this example, the goal is to find a certain value by successive approximations: we are exploring a tree of solutions and we are going towards some best value. What if two workers, $w_1$ and $w_2$, return both a solution that is better than the current one maintained by the master? So, $w_1 \Rightarrow\langle$sol'$\rangle$ and $w_2\Rightarrow\langle$sol''$\rangle$ and we do not know the relationship between the two solutions other than each of them is better than the current sol. Only one of them is the best solution, and in the meanwhile there could be other $w_i$ performing computations that could become useless once we know the new best solution.\\
+What should be avoided, e.g. when sol' is better than sol'', is that $w_2$ updates the state sol \textit{after} $w_1$ has updated it. So we need an atomic step that performs read-and-update.
 \paragraph{Example} An emitter and $nw$ workers, followed by a collector.\\
 Without state, $t_S=\max\{t_e, t_c, \frac{t_w}{nw}\}$ because $nw$ tasks, $nw$ workers each $t_w$ giving $nw$ results.\\
 With state, $nw$ tasks with $t_f+nw\cdot t_s$ giving $nw$ results. So $\frac{t_f}{nw}+t_s$. The Speedup($nw$) $\simeq nw$. With $m$ tasks
 $$\frac{m(t_f + t_s)}{m(\frac{t_f}{nw}+t_s)}$$
 $$\lim_{nw\to\infty} = \frac{t_f + t_s}{t_s} = \frac{t_f}{t_s} + 1$$
 With $k$ stages, $m$ tasks and $t_f+t_s$ time in each stage per each task
-$$k\cdot m(t_f+t_s) = $$
+$$\frac{k\cdot m(t_f+t_s)}{m(t_f + k\cdot t_s)} = \frac{t_f + t_s}{\frac{t_f}{k} + t_s}$$
+With a large enough $k$ the $\frac{t_f}{k}\rightarrow 0$ so the approximation goes like the farm.
 \paragraph{Common State Patterns}\begin{list}{}{}
 	\item \textbf{Resource}: lock, replace, unlock
 	\item \textbf{Accumulator}: $x_i, s= f(x_i, state)$ with $f$ associative and commutative.\\
