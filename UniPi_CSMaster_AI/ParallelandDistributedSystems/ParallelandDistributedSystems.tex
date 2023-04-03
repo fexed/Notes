@@ -1291,15 +1291,19 @@ You need a lot of code to \textbf{specify everything}. In particular three kinds
 OpenCL is both for CPU and GPU, so figuring out the config means how many cores on CPU too. On CPU, can do conditionals and divergent code in general, things you can't do on GPU.\\
 OpenCL can be used for FPGAs too.
 \subsection{FPGAs}
-Devices with components that can be programmed to act as other components simply configuring them at the beginning, somehow. Basically: logical gates, small registers, small ALUs\ldots\\
-A FPGA is an array where the single cell can act as if it is:
+\textbf{Devices with components that can be programmed to act as other components} by simply configuring them at the beginning, somehow. Basically we have components like logical gates, small registers, small ALUs, etc. that we can place and configure (almost) as we like.\\
+A FPGA is a matrix where a \textbf{single cell} can act like:
 \begin{list}{}{}
-	\item a small (5-7bit input and 1bit output) boolean network: made with a kind of EPROM which uses the input bits as an address and stores a single bit output
-	\item a 1 bit register
-	\item a router redirecting to a neighbor cell
+	\item a small (5-7 bit input and 1 bit output) \textbf{boolean network}. It is made with a kind of EPROM which uses the input bits as an address and stores a single bit output
+	\item a \textbf{1-3 bit register}
+	\item a \textbf{router}, redirecting to a neighbor cell (North, East, South, West)
 \end{list}
-The columns can host some RAM blocks, 1KB memory for intermediate values, or DSP blocks, basically multiplying addresses (multiply two inputs, adds the result with a register, stores the result of the addition in that register while propagating it too).\\
-These are organized in columns so that there are columns composed solely of cells interleaved with RAM/DSP columns: a cells column may implement a certain function that stores the result in a RAM column, that may be routed in a way to do come floating point operations in a DSP column\ldots
+A recent addition: \textbf{columns can host} some
+\begin{list}{}{}
+	\item \textbf{RAM blocks} 1KB memory for intermediate values
+	\item \textbf{DSP blocks} which basically multiply addresses: multiply two inputs, adds the result with a register, stores the result of the addition in that register while propagating it too
+\end{list}
+These are \textbf{organized in columns} so that \textbf{there are columns composed solely of cells interleaved with RAM/DSP columns}: a cells column may implement a certain function that stores the result in a RAM column, that may be routed in a way to do come floating point operations in a DSP column, and so on.
 \subparagraph{RTL} Register Transfer Level code used to program FPGA. An example is Verilog:
 \begin{lstlisting}[style=myC]
 module Name (input [N-1:0]x, input [N-1:0]y, output [N:0]z);
