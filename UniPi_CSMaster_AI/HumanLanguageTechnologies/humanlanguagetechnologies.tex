@@ -76,22 +76,22 @@ Understanding the difficulties in dealing with NL and the capabilities of curren
 	\item Repeat!
 \end{enumerate}
 \paragraph{Motivations} Language is the most distinctive feature of human intelligence, \textbf{it shapes thought}. Emulating language capabilities is a scientific challenge, a \textbf{keystone for intelligent systems} (see: Turing test)
-\paragraph{Structured vs unstructured data} The largest amount of information shared with each other is unstructured, primarily text. Information is mostly communicated by e-mails, reports, articles, conversations, media\ldots and attempts to turn text to structured (HTML) or microformat only scratched the surface.\\
-Problems: requires universal agreed \textbf{ontologies} and additional effort. Entity linking attempts to provide a bridge.
+\paragraph{Structured vs unstructured data} The majority of \textbf{information shared with each other is unstructured}, primarily text. Information is mostly communicated by e-mails, reports, articles, conversations, media\ldots and attempts to turn text to structured (HTML) or microformat only scratched the surface of \textbf{structuring unstructured information}.\\
+Problems: requires universal agreed \textbf{ontologies} and additional effort. \textbf{Entity linking} attempts to provide a bridge.
 \section{State of the Art}
 \paragraph{Early History} During 1950s, up until AI winter.
-\paragraph{Resurgence in the 1990s} Thanks to statistical methods, novelty, to study language. Challenges arise: NIST, Netflix, DARPA Grand Challenge\ldots\\
+\paragraph{Resurgence in the 1990s} Thanks to statistical methods, novelty, with the goal of \textbf{studying language}. Challenges arise: NIST, Netflix, DARPA Grand Challenge\ldots\\
 During 2010s: deep learning, neural machine translation\ldots
 \paragraph{Statistical Machine Learning} Supervised training with \textbf{annotated} documents.\\
 The paradigm is composed of the following:
 \begin{list}{}{}
-	\item Training set $\{x_i,y_y\}$
-	\item Representation: choose a set of features to represent data $x\mapsto \phi(x) \in R^D$
-	\item Model: choose an hypothesis function to compute $f(x) = F_\Theta(\phi(x))$
-	\item Evaluation: define the cost function on error with respect to examples $J(\Theta) = \sum_i (f(x_i) - y_i)^2$
-	\item Optimization: find parameters $\Theta$ that minimize $J(\Theta)$
+	\item \textbf{Training set}, composed of labeled data $\{x_i,y_y\}$
+	\item \textbf{Representation}: choose a set of features to represent data $x\mapsto \phi(x) \in R^D$
+	\item \textbf{Model}: choose an hypothesis function to compute $f(x) = F_\Theta(\phi(x))$
+	\item \textbf{Evaluation}: define the cost function on error with respect to examples $J(\Theta) = \sum_i (f(x_i) - y_i)^2$
+	\item \textbf{Optimization}: find parameters $\Theta$ that minimize $J(\Theta)$
 \end{list}
-It's a generic method, applicable to any problem.
+It's a \textbf{generic method}, applicable to any problem.
 \paragraph{Traditional Supervised Learning Approach} Freed us from devising algorithms and rules, requiring the creation of annotated training sets and imposing the tyranny of feature engineering.\\
 Standard approach for each new problem:
 \begin{list}{}{}
@@ -117,10 +117,10 @@ Background: philosophy, linguistics and statistics ML (feature vectors).
 \subparagraph{Dealing with Sentences} A sentence is a sequence of words: build a representation of a sequence from those of its words (compositional hypothesis). Sequence to sequence models.\\
 Is there more structure in a sentence than a sequence of words? In many cases, tools forgets information when translating sentences into sequences of words, discarding much of the structure.
 \section{Language Modeling}
-\paragraph{Probabilistic Language Model} The goal is to assign a probability to a sentence.
+\paragraph{Probabilistic Language Model} The \textbf{goal is to assign a probability score to a sentence}.
 \begin{list}{}{}
 	\item \textbf{Machine Translation}: $P($high winds tonight$) > P($large winds tonight$)$
-	\item \textbf{Spell Correction}: $P($about fifteen minutes from$) > P($about fifteen minuets from$)$
+	\item \textbf{Spell Correction}: $P($about fifteen \underline{minutes} from$) > P($about fifteen \underline{minuets} from$)$
 	\item \textbf{Speech Recognition}: $P($I saw a van$) > P($eye saw a van$)$
 	\item \textbf{Language Identification}: $s$ from unknown language (italian or english) and $L$ita, $L$eng language models for italian and english $\Rightarrow$ $L$ita$(s) > L$eng$(s)$
 	\item Summarization, question answering\ldots
@@ -146,9 +146,9 @@ So more complex models are needed to handle such dependencies.
 Maximum because it's the one that maximize $P($Training set $|$ Model$)$
 \paragraph{Shannon Visualization Method} Generate random sentences:
 \begin{list}{}{}
-	\item Choose a random bigram $(\langle s\rangle,w)$ according to its probability
+	\item Choose a random bigram $($\texttt{<s>}$,w)$ according to its probability
 	\item Choose a random bigram $(w,x)$ according to its probability
-	\item Repeat until we pick $\langle/s\rangle$
+	\item Repeat until we pick \texttt{</s>}
 \end{list}
 \paragraph{Shannon Game} Generate random sentences by selecting the words according to the probabilities of the language models.
 \begin{lstlisting}[style=myPython]
@@ -159,8 +159,8 @@ def gentext(cpd, word, length=20):
 		print(word, end = ' ')
 	print("")
 \end{lstlisting}
-\paragraph{Perils of Overfitting} N-grams only word well for word prediction if the test corpus looks like the training corpus. In real life, this is often not the case.\\
-We need to train robust models able to adapt.
+\paragraph{Perils of Overfitting} N-grams only work well for word prediction if the test corpus looks like the training corpus. In real life, this is often not the case.\\
+We \textbf{need to train robust models able to adapt}.
 \subparagraph{Smoothing} Many rare (but not impossible) combinations of word sequences never occur in training, so MLE incorrectly assigns zero to many parameters (sparse data).\\
 If a new combination occurs during testing, it is given a probability of zero and the entire sequence gets a probability of zero (infinite perplexity).\\
 Parameters are \textbf{smoothed}/regularized to reassign some probability mass to unseen events (meaning removing probability from seen ones in order to maintain the joint distribution that sums to 1)
@@ -182,7 +182,7 @@ The result is that our estimates are sparse. No counts at all for the vast bulk 
 	\item Compare the accuracies
 \end{list}
 \paragraph{Language Identification Task} Build a model for each language and compute probability that text is of such language.
-$$lang = arg\max_l P_l(text)$$
+$$lang = \arg\max_l P_l(text)$$
 \paragraph{Difficulty of Extrinsic Evaluation} Extrinsic evaluation is time-consuming, can take days to run an experiment. Recent benchmarks like GLUE have become popular due to the effectiveness.\\
 Intrinsic evaluation us an approximation called \textbf{perplexity}: it's a poor approximation unless the test data looks just like the training data.
 \paragraph{Perplexity} The intuition is the notion of surprise: how surprised is the language model when it sees the test set? Where surprise is a measure of "I didn't see that coming". The more surprised is, the lower the probability it assigned to the test set, and the higher the probability the less surprised it is.\\
