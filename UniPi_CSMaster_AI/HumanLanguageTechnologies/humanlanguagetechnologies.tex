@@ -439,7 +439,32 @@ Optimal if the independence assumptions hold. Also is very fast, low storage req
 \paragraph{Example: SpamAssassin} Naive Bayes widely used in spam filtering.
 \section{Tokenization}
 \paragraph{Regular Expressions}
-Formal language for specifying text strings. Letters inside square brackets, or specified ranges, like [] and [A-Z], or negations.
+Formal language for specifying text strings. Letters inside square brackets, or specified ranges, like [] and [A-Z], or negations.\\
+Please refer to online sources. Below is a quick reference table taken from the slides:
+\begin{multicols}{2}
+\begin{center}
+	\begin{tabular}{c | l | l}
+	\textbf{Pattern} & \textbf{Matches} & \textbf{Example}\\
+	\hline
+	{[A-Z]} & A single uppercase letter & e\underline{X}ample t3xt\\
+	{[a-z]} & A single lowercase letter & \underline{e}Xample t3xt\\
+	{[0-9]} & A single digit & eXample t\underline{3}xt\\
+	{[\^{}eX]} & Neither 'e' nor 'X' & eX\underline{a}mple t3xt\\
+	ple & The literal pattern 'ple' & eXam\underline{ple} t3xt\\
+	\end{tabular}
+\end{center}
+\columnbreak
+\begin{center}
+	\begin{tabular}{c | l | l}
+	\textbf{Pattern} & \textbf{Matches} & \textbf{Example}\\
+	\hline
+	colou?r & Optional previous character & \underline{color}, \underline{colour}\\
+	oo*h! & 0 or more of previous character & \underline{oh!}, \underline{ooooh!}\\
+	oo+h! & 1 or more of previous character & \underline{ooh!}, \underline{oooh!}\\
+	beg.n & Any single character & \underline{begin}, \underline{beg\$n}
+	\end{tabular}
+\end{center}
+\end{multicols}
 \paragraph{Tokenization} To do before analysis, for information retrieval and extraction, and spell-checking. Three tasks:\begin{enumerate}	
 	\item Segmenting/tokenizing words in running text
 	\item Normalizing word formats
@@ -460,6 +485,14 @@ Google N-grams has $N = 1$ trillion and $|V| = 13$ million.
 \paragraph{Stanza Tokenizer} Toolkit, ternary classifier to distinguish between: normal character, end of token and end of sentence.
 \paragraph{Clitics} Some languages have composite words: lascia-mi, lascia-me-lo\ldots Splitting clitics is important for parsing, since clitics incorporate relevant syntactic components (e.g. pronouns corresponding to an object of the verb).\\
 Train 4-class tokenizer: normal character, end of token, end of sentence, start of clitic.
+\paragraph{Normalization} We need to normalize terms (e.g. pick one from U.S.A. and USA). Most commonly we \textbf{implicitly define equivalence classes of terms}, e.g. by removing the periods in a term. Another technique is \textbf{case folding}, where we reduce all letters to lowercase. But this may be appropriate for information retrieval tasks, while for sentiment analysis this cannot be applied, because there could be difference between e.g. "THAT'S GREAT" and "that's great".\\
+\textbf{Lemmatization} is another technique, where we reduce variant to base term, e.g. "am", "are" and "is" reduced to "be".
+\subparagraph{Morphology and Stemming} A \textbf{morpheme} is the smaller meaningful unit that make up words. Two types:
+\begin{list}{}{}
+	\item \textbf{Stems}, the core
+	\item \textbf{Affixes}, bits and pieces that are attached to the stems to change meaning and grammatical function
+\end{list}
+\textbf{Stemming} is a technique where we \textbf{reduce terms to their roots} before indexing. Basically a crude removal of affixes.
 \section{Classification}
 \begin{enumerate}
 	\item Define classes/categories
