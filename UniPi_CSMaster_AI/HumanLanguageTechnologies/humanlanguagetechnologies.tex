@@ -14,6 +14,8 @@
 \usepackage{pgfplots}
 \usepackage{tikz}
 \usepgflibrary{shapes}
+\usepackage{amsmath}
+\usepackage{amsfonts}
 \usepgfplotslibrary{fillbetween}
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
@@ -628,6 +630,11 @@ Excluding the denominator because we're taking the maximum. It's composed by lik
 	\item Word likelihood probabilities $P(w_i\:|\:t_i)$\\
 	The probability that given a tag $t_i$, it corresponds to the word $w_i$
 \end{list}
+To recap, POS tagging can be done in two ways:
+\begin{list}{}{}
+	\item As an Hidden Markov Model $$\hat{t}_1^n \simeq \arg\max_{t_1^n}\prod_{i=1}^n\underset{\hbox{Emission}}{\underbrace{P(w_i\:|\:t_i)}}\cdot \underset{\hbox{Transition}}{\underbrace{P(t_i\:|\:t_{i-1})}}$$ 
+	\item As a sequence of classifiers $$\hat{t}_i \simeq \arg\max_{t_i}P(t_i\:|\:w_{i-k},\ldots,w_{i+k})$$
+\end{list}
 \subsubsection{Sequence Tagging} For example classifying each token independently using information about the surrounding tokens (sliding window) as input features.\\
 For sequence tagging, sequence models work better: HMMs, MEMMs, conditional random fields, convolutional neural networks\ldots
 \paragraph{Discriminative Model} Estimate $P(y\:|\:x)$ in order to predict $y$ directly from $x$
@@ -656,12 +663,22 @@ For example:\begin{list}{}{}
 	\end{array}\right.$
 	\item \ldots
 \end{list}
-\paragraph{Problems} Using Classifiers for Sequence Labeling presents some problems. It's not easy to integrate information from hidden labels on both sides. We make an hard decision on each token, when we should rather choose a global optimum: the best labeling for the whole sequence, and keeping each local decision as just a probability, not a hard decision.\\
-Probabilistic sequence models allow integrating uncertainty over multiple, interdependent classifications and collectively determine the most likely global assignment. Some common approaches are: HMMs (Hidden Markov Models), CRFs (Conditional Random Fields), MEMMs as simplified versions of CRFs, RNNs\ldots
-\paragraph{MEMM} HMM works backwards from the tags to the outputs, while a Maximum Entropy Markov Model works backwards: from the words to the probabilities of the tags. An MEMM is a discriminative model that extends a standard maximum entropy classifier by assuming that the unknown values to be learned are connected in a Markov chain.
+\paragraph{Problems} Using Classifiers for Sequence Labeling presents some problems. It's not easy to integrate information from hidden labels on both sides. We \textbf{make an hard decision on each token}, when we \textbf{should rather choose a global optimum}: the \textbf{best labeling for the whole sequence}, and keeping each local decision as just a probability, not a hard decision.\\
+\textbf{Probabilistic sequence models allow integrating uncertainty} over multiple, interdependent classifications and collectively determine the most likely global assignment. Some common approaches are: HMMs (Hidden Markov Models), CRFs (Conditional Random Fields), MEMMs as simplified versions of CRFs, RNNs\ldots
+\paragraph{MEMM} HMM works in a forward fashion from the tags to the outputs, while a \textbf{Maximum Entropy Markov Model works backwards, from the words to the probabilities of the tags}. An MEMM is a discriminative model that extends a standard maximum entropy classifier by assuming that the unknown values to be learned are connected in a Markov chain.
 $$P(q_1,\ldots,q_N\:|\:o_1,\ldots,o_N)=\prod_t^N P(q_t\:|\:q_{t-1},o_t)$$
 The probability of a certain label $s$ is modeled in the same way as a maximum entropy classifier $$P(q\:|\:q',o)=\frac{e^{w\cdot f(o,q)}}{\sum_{o,q'}e^{w\cdot f(o,q')}}=\hbox{Softmax}_{o,q}(w\cdot f(o,q))$$
-where $f(o,q)$ is a vector of joint $(o,q)$ features and $w$ are the corresponding weights.
+where $f(o,q)$ is a vector of joint $(o,q)$ features and $w$ are the corresponding weights.\\
+\textbf{Entropy} is the \textbf{measure of the uncertainty of a distribution}". Given an event $x$ and its probability $p_x$, the "surprise" is $\log\left(\frac{1}{p_x}\right)$ and \textbf{entropy is the expectation of the surprise over $p$}:
+$$H(p) = \mathbb{E}_p\left(\log\frac{1}{p_x}\right) = -\sum_xp_x\log p_x$$
+The problem is modeled as such:
+\begin{list}{}{}
+	\item \textbf{Objective function}: $H(p)$
+	\item \textbf{Goal}: among all the distributions that satisfy the constraints,choose $p^*$ such that it maximizes $H(p)$
+\end{list}
+$$p^* = \arg\max_{p\in P} H(p)$$
+How to represent constraints? We need that the observed feature expectations equals the predicted ones.
+$$\mathbb{E}_p f_j = \mathbb{E}_{\tilde{p}}f_j$$
 \begin{center}
 	\includegraphics[scale=0.5]{16.png}
 \end{center}
@@ -683,7 +700,7 @@ $$v_t(j) = \max_{i=1} v_{t-1}(i)P(q_j\:|\:q_i, o_t)\:\:\:\:\hbox{ for } 1\leq j\
 Given a text, find the entities with proper names: person names, city names\ldots the "capitalized things". Typical approach is based on rules, might not be accurate enough. An approach based on ML needs training data, labeling them and using a classifier. Labeling may be easy: annotate each word, but an entity may span more words (name and surname, for example) or be non-continguous, overlapping with other words and perhaps other named entities (examples in biomedical entities).\\
 Typical, named entities systems handle very few categories:
 \begin{center}
-	\includegraphics[scale=0.33]{20.png} %TODO rewrite
+	\includegraphics[scale=0.33]{20.png}
 \end{center}
 \paragraph{Approaches} As with partial parsing and chinking, there are two basic approaches (and hybrids):
 \begin{list}{}{}
