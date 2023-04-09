@@ -495,29 +495,41 @@ Train 4-class tokenizer: normal character, end of token, end of sentence, start 
 \textbf{Stemming} is a technique where we \textbf{reduce terms to their roots} before indexing. Basically a crude removal of affixes.
 \section{Classification}
 \begin{enumerate}
-	\item Define classes/categories
-	\item Label text
+	\item \textbf{Define classes}/categories
+	\item \textbf{Label} text
 	\item Extract features
-	\item Select classifier: Naive Bayes Classifiers, Decision Trees, SVMs, Neural Networks\ldots
-	\item Train it
-	\item Use it to classify new examples
+	\item \textbf{Select a classifier}: Naive Bayes Classifiers, Decision Trees, SVMs, Neural Networks\ldots
+	\item \textbf{Train} it
+	\item Use it to \textbf{classify} new examples
 \end{enumerate}
-The data is easier to handle if it's linearly separable. Naive Bayes is slightly more general than DTs.
-\paragraph{Naive Bayes} Simple model, can scale easily to millions of training examples, efficient and fast in training and classification.\\
-A major limitation is the independence assumption, which has two consequences: the linear ordering of words is ignored (bag of words model) and the words are independent of each other given the class.\\
-It's an inappropriate assumption if there are strong conditional dependencies between the variables. Classifiers may end up "double-counting" the effect of highly correlated features, pushing the classifier closer to a given labeled than is justified.
-\paragraph{Decision Trees} Capable to generate understandable rules, and perform classification without requiring much computation. Can handle continuous and categorical variables and provide clear indication of the important features.\\
-But it's prone to errors in classification problems with many classes and small numbers of training examples. Also can be computationally expensive to train: need to compare all possible splits, and pruning can be expensive.
-\paragraph{Linear vs non-linear algorithms} We find out if data is linearly or non linearly separable only empirically.\\
+The data is easier to handle if it's linearly separable. Naive Bayes models are slightly more general than Decision Trees.
+\paragraph{Naive Bayes} \textbf{Simple model}, can scale easily to millions of training examples, \textbf{efficient} and \textbf{fast} in training and classification.\\
+\textbf{A major limitation is the independence assumption}, which has two consequences: the linear \textbf{ordering of words is ignored} (due to the employing of a bag of words model) and the \textbf{words are independent of each other given the class}.\\
+It's an \textbf{inappropriate assumption if there are strong conditional dependencies} between the variables. Classifiers may end up "double-counting" the effect of highly correlated features, pushing the classifier closer to a given label than justified. Nonetheless, Naive Bayes models do well in a large number of tasks, because often we are interested in \textbf{classification accuracy} rather than an accurate probability estimation.
+\paragraph{Decision Trees} DTs are \textbf{capable to generate understandable rules}, and perform classification without requiring much computation. They \textbf{can handle continuous and categorical variables} and provide clear indication of the important features.\\
+But DTs are \textbf{prone to errors in classification problems with many classes and small numbers of training examples}, and also they can be \textbf{computationally expensive to train}: we need to compare all possible splits, and pruning can be expensive.
+\paragraph{Linear vs non-linear algorithms} We can find out if data is linearly or non linearly separable \textbf{only empirically}.\\
 Linear algorithms, when data is linearly separable, are simpler and uses less parameters, but high dimensional data (like for NLP) usually isn't linearly separable. For non linearly separable data, non linear algorithms are more accurate, although more complicated and with more parameters, like kernel methods.
 \subsection{Linear Binary Classification}
-Data: $\{(x_i,y_i)\}$ for $i=1,\ldots,n$\begin{list}{}{}
-	\item $x \in R^d$
-	\item $y \in \{-1,+1\}$
-\end{list}
-Question: find a linear decision boundary $$wx + b$$ an hyperplane such that the classification rule associated with it has minimal probability of error.\\
+Data: $\{(x_i,y_i)\}$ for $i=1,\ldots,n$ with $x \in R^d$ and $y \in \{-1,+1\}$. Question: find a \textbf{linear decision boundary} $wx + b$, an \textbf{hyperplane}, such that the classification rule associated with it has minimal probability of error.\\
 Classification rule: $$y = sign(wx+b)$$
-\paragraph{Perceptron} Solves if linearly separable. Basic idea: go through all existing data patterns whose label is known, if correct continue. If not, add to the weights a quantity proportional to the product of the input pattern with $y$ ($-1$ or $+1$)
+In \textbf{online fashion}: given one datapoint at the time, update the weights as necessary (to lower the classification error)
+\paragraph{Perceptron} Compute a weighted sum and output 1 if it exceeds a threshold:
+$$z=\sum_i x_iw_i \:\:\:\: y = \left\{ \begin{array}{l l}
+1 & z\geq\hbox{threshold}\\
+0 & \hbox{else}
+\end{array} \right.$$
+Solves if linearly separable. Basic idea for the \textbf{learning rule of a perceptron}: go through all existing data patterns whose label is known, if correct continue. If not, add to the weights a quantity proportional to the product of the input pattern with $y$ ($-1$ or $+1$)
+\subparagraph{Multi-Layer Perceptron} A MLP architecture has some properties:
+\begin{list}{}{}
+	\item No connections within a layer
+	\item No direct connections between input and output layers
+	\item \textbf{Fully connected between layers}
+\end{list}
+Usually more than 3 layers, and in general the number of input units, output units and hidden layers' units can all differ from each other.\\\\
+The result of the weighted sum $z$ is passed through an \textbf{activation function}, whose output feeds the next layer. Typical examples are $\sigma$ and $\tanh$.
+\paragraph{Universal Approximation Theorem} A 2 layer network can approximate any continuous function.\\
+There's no guarantee on the width of each layer, which can be exponentially large.
 \subsection{Hidden Markov Models}
 \paragraph{Markov Chain} Stochastic model describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event.
 \begin{center}
@@ -531,16 +543,23 @@ Loopbacks because a phone is circa 100ms but phones are captured every 10ms, so 
 \begin{center}
 	\includegraphics[scale=0.5]{14.png}
 \end{center}
-\begin{center}
-	\includegraphics[scale=0.5]{13.png} %TODO riscrivere
-\end{center}
+\begin{list}{}{}
+	\item A set of $N$ \textbf{hidden states} $Q = q_1,\ldots,q_N$
+	\item A \textbf{transition probability matrix} $A = a_{11},\ldots,a_{NN}$\\
+	Each $a_{ij}$ represents the probability of moving from state $i$ to state $j$ such that $\forall\:i\:\:\sum_{j=1}^N a_{ij} = 1$
+	\item A sequence of $T$ \textbf{observations} $O = o_1,\ldots,o_T$\\
+	Each $o_i$ is drawn from a vocabolary $V = v_1,\ldots,v_V$
+	\item A sequence of \textbf{observation likelihoods}, also called \textbf{emission probabilities}, $B = b_i(o_t)$\\
+	Each expresses the probability of an observation $o$ being generated from a state $i$
+	\item A special \textbf{start state} $q_0$ and an \textbf{end state} $q_F$ that are not associated with observations. This are coupled with transition probabilities $a_{01},\ldots,a_{0N}$ from the start state and $a_{1F},\ldots,a_{NF}$ into the end state
+\end{list}
 \paragraph{Markov Assumption} $$P(q_i\:|\:q_1,\ldots,q_{i-1} = P(q_i\:|\:q_{i-1})$$
 \paragraph{Output-independence assumption} $$P(o_t\:|\:O_1^{t-1},q_1^t)P(o_t\:|\:q_t)$$
 \paragraph{Three basic problems}
 \begin{list}{}{}
-	\item \textbf{Evaluation}: given the observation sequence $O = (o_1,\ldots,o_T)$ and a HMM model $\Phi = (A, B)$, how to efficiently compute $P(O\:|\:\Phi)$ the probability of the observation sequence given the model?
-	\item \textbf{Decoding}: given the observation sequence $O = (o_1,\ldots,o_T)$ and an HMM model $\Phi = (A, B)$, how do we choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$ that is optimal in some sense (i.e. best explains the observations)?
-	\item \textbf{Learning}: how do we adjust the model parameters $\Phi = (A,B)$ (transition and emission probabilities) to maximise $P(O\:|\:\Phi)$?
+	\item \textbf{Evaluation}: given the observation sequence $O = (o_1,\ldots,o_T)$ and a HMM model $\Phi = (A, B)$, how to efficiently compute $P(O\:|\:\Phi)$ (the \textbf{probability of the observation sequence given the model})?
+	\item \textbf{Decoding}: given the observation sequence $O = (o_1,\ldots,o_T)$ and an HMM model $\Phi = (A, B)$, how do we choose a corresponding state sequence $Q = (q_1,\ldots,q_T)$ that is \textbf{optimal} in some sense (i.e. best explains the observations)?
+	\item \textbf{Learning}: how do we adjust the model parameters $\Phi = (A,B)$ (transition and emission probabilities) to maximize $P(O\:|\:\Phi)$?
 \end{list}
 \paragraph{Computing the likelihood} Given an HMM $\lambda = (A, B)$ and an observation sequence $O$, determine the likelihood $P(O, \lambda)$.
 $$P(O\:|\:Q)=\prod_{i=1}^T P(o_i\:|\:q_i)$$
