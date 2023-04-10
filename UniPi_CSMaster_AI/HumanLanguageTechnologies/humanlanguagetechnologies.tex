@@ -716,24 +716,24 @@ For $N$ classes we have $2N + 1$ tags, with IOB encoding: an I and a B for each 
 \end{center}
 Summary of the approaches.
 \section{Convolutional Neural Networks for NLP}
-The main CNN idea is to compute vectors for every poissible word subsequence of a certain length, regardless of whether the phrase is grammatially correct, and group them afterwards. Not very linguistically nor cognitively plausible.\\
+The main idea for the application of CNNs on NLP is to \textbf{compute vectors for every possible word subsequence of a certain length}, regardless of whether the phrase is grammatically correct, and group them afterwards. Not very linguistically nor cognitively plausible.\\
 Convolution is classically used to extract features from images
 $$(f * g)(n) = \sum_{m=-M}^M f(n-m)g(m)$$
 Much like a "sliding window" across the data.
 \begin{center}
 	\includegraphics[scale=0.5]{23.png}
 \end{center}
-A convolutional layer in a NN is composed by a set of filters: combines a local selection of input values into an output value, sweeping across all input.\\
+A convolutional layer in a NN is composed by a \textbf{set of filters}: combines a local selection of input values into an output value, sweeping across all input.\\
 During training each filter specializes into recognizing some kind of relevant combination of features. CNNs work well on stationary features (independent from position). Filters have additional parameters that define:\begin{list}{}{}
-	\item Behavior at the start/end of documents (\textbf{padding})
-	\item Size of the sweep step (\textbf{stride})
-	\item Possible presence of holes in the filter window (\textbf{dilation})
+	\item \textbf{Padding}: the behavior at the start/end of documents
+	\item \textbf{Stride}: the size of the sweep step
+	\item \textbf{Dilation}: the possible presence of holes in the filter window
 \end{list}
 \paragraph{Distant Supervision} Use the convolutional neural network to further refine the embeddings: word embeddigns from plain text are completely clueless about their sentiment behavior. Collect 10M tweets containing positive emoticons, used as distantly supervised labels to train sentiment-aware embeddings.
 \paragraph{Sentiment Specific Word Embeddings} The idea is to build sentiment specific word embeddings where we return also the polarity of the word: positive, neutral or negative.\\
 Sentiment Specific Embeddings are learned:
 \begin{list}{}{}
-	\item The generic loss function is $L_{CW}(x, x^c) = \max(0, 1-f_\theta(x)_0 + f_\theta(x^c)_0)$
+	\item The generic loss function is $$L_{CW}(x, x^c) = \max(0, 1-f_\theta(x)_0 + f_\theta(x^c)_0)$$
 	\item The SS loss function is
 	$$L_{SS}(x, x^c) = \max(0, 1 - d_s(x)f_\theta(x)_1 + d_s(x^c)f_\theta(x^c)_1)$$
 	$$L(x,x^c) = \alpha L_{CW}(x,x^c)+(1-\alpha)L_{SS}(x,x^c)$$
@@ -751,15 +751,18 @@ Sentiment Specific Embeddings are learned:
 	\end{array}\right.$$
 \end{list}
 With $x$ sentence, $x^c$ corrupted sentence obtained by replacing the center word with a random word, $f(x)\in \{0,1\}^2$ is the function computed by the network and $d_s(x)\in\{1,-1\}$ represents the polarity of $x$.
+\paragraph{Ensemble of Classifiers} Fro example, \textbf{combine the outputs of two different 2-layer CNNs} with similar architectures but \textbf{differing in the choice of certain parameters} (such as the number of convolutional filters).
 \paragraph{Sentiment Classification from a Single Neuron} A char-level LSTM with 4096 units has been trained on 82M reviews from Amazon, only to predict the next character. After training, one of the units had a very high correlation with sentiment, resulting in \textbf{state-of-the-art accuracy when used as a classifier}. The model can also be used to generate text: by setting the value of the sentiment unit, one can control the sentiment of the resulting text.
 \subsection{Regularization} 
 We can use \textbf{dropout}: creating a masking vector $r$ of Bernoulli random variables with probability $p$ (hyperparameter) of being 1 and delete features during training $$h = W(r\otimes z) + b$$
 Prevents overfitting. Not used at test time, scaling final vector by probability $p$. Usually yields an accuracy increase of 2-4\%.
+\paragraph{Pitfalls when using word vectors} A common problem in training word vectors is how to handle words that are not present in the training dataset. This is solved by using pre-trained word vectors, which are trained on huge amounts of data.\\
+A problem would be the fine-tuning of these pre-trained vectors. If we have a small training set, then we shouldn't fine-tune the word vectors, otherwise then it is better to fine-tune.
 \section{Recurrent Neural Networks}
 Up until now, whether we grouped words or not each word/group would be handled independently from the others.
 \paragraph{Recap} A language model assigns to each sentence $W$ a probability $P(W) = P(w_1,\ldots,w_n)$. Alternatively we want to compute $P(w_n\:|\:w_1,\ldots,w_{n-1})$.\\
 The model that computes either probability is called \textbf{Language Model}, and language modeling is the task of estimating a language model.\\
-The Markov assumption is that $w_n$ depends only on the preceding $n-1$ words. $n$-gram models have sparsity (out-of-vocabulary words and never-seen-prefixes) and storage problems (counts for every $n$-gram): bigger $n$ makes the sparsity problem words, typically $n<5$.\\
+The Markov assumption is that $w_n$ depends only on the preceding $n-1$ words. $n$-gram models have sparsity (out-of-vocabulary words and never-seen-prefixes) and storage problems (counts for every $n$-gram): bigger $n$ makes the sparsity problem worseolt, typically $n<5$.\\
 \textbf{Neural Language Models} improves over $n$-gram language models: no sparsity and no need to store all observed $n$-grams, but still problems: fixed window is too small, never large enough, and no symmetry in the input where each word is still treated independently and multiplied by completely different weights. We need a \textbf{neural architecture that can process any length input}.
 \paragraph{Recurrent} Because they perform the same process for every element where \textbf{the output depends on the previous elements}. RNNs have a "memory" which captures information about what has been calculated so far. In theory, RNNs can make use of information in arbitrarily long sequences.
 \begin{center}
@@ -878,23 +881,27 @@ AKA phrase structure grammar or \textbf{context free grammar}.
 \end{center}
 \paragraph{Context Free Grammars} $G = (N,\Sigma, R, S)$
 \begin{list}{}{}
-	\item Set of non-terminal symbols $N$
-	\item Set of terminal symbols $\Sigma$ disjoint from $N$
-	\item set of rules/productions $R$ in the form $A\rightarrow\beta$ with $A$ non-terminal, $\beta$ string of symbols from the infinte set of strings $(\Sigma\cup N)^*$
-	\item A designated start symbol $S \in N$
+	\item Set of \textbf{non-terminal symbols} $N$
+	\item Set of \textbf{terminal symbols} $\Sigma$ disjoint from $N$
+	\item \textbf{Set of rules}/productions $R$ in the form $A\rightarrow\beta$ with $A$ non-terminal, $\beta$ string of symbols from the infinte set of strings $(\Sigma\cup N)^*$
+	\item A designated \textbf{start symbol} $S \in N$
 \end{list}
+The language that $G$ generates, $L(G)$, is the set of every string that can be produced starting from $S$ with the rules in $R$. Formally:
 $$L(G) = \{w\in \Sigma^*, S\rightarrow w\}$$
 \paragraph{Constituency Parsing} Requires phase structure grammar and produces phrase structure parse tree.
 \subparagraph{Statistical Parsing} Three components \begin{list}{}{}
-	\item GEN is a function from a string to a set of candidate trees
-	\item $\Phi$ maps a candidate to a feature vector
-	\item $W$ is the parameter vector
+	\item GEN is a function from a string to a set of candidate trees.\\
+	GEN enumerates a set of candidates for a sentence. It can be a context-free grammar, a finite-state machine, the top N most probable analyses from a probabilistic grammar\ldots
+	\item $\Phi$ maps a candidate to a feature vector $\in\mathbb{R}^d$ and defines the representation of a candidate.\\
+	A \textbf{feature} is a function on a structure, e.g. $h(x) =$ the number of times that a particular structure is seen in $x$.\\
+	A \textbf{feature vector} is $\phi(x)=\langle h_1(x),\ldots,h_d(x)\rangle$ defined by a set of functions $h_1,\ldots,h_d$
+	\item $W$ is a parameter vector $\in\mathbb{R}^d$ and maps a candidate to a real-valued score.
 \end{list}
 Training by giving a set of sentences $X$ and the set of possible outputs (trees) $Y$ to learn a function $F_W:X\rightarrow Y$.\\
 Parsing is choosing the highest scoring tree $$F_W(x)=\arg\max_{y\in GEN(x)}\Phi(y)\cdot W$$
 % skip the details
 \subsubsection{Dependency Grammar}
-\paragraph{Dependency Structure} Shows which words depend on (modify or are arguments of) which other words. The syntactic structure of a sentence is described only in terms of the words in a sentence and a set if directed binary grammatical relations among the words.
+\paragraph{Dependency Structure} Shows which words depend on (modify or are arguments of) which other words. The syntactic structure of a sentence is described only in terms of the words in a sentence and a set of directed binary grammatical relations among the words.
 \paragraph{Difference Between Constituency Tree and Dependency Trees}
 \begin{center}
 	\includegraphics[scale=0.5]{37.png}
@@ -970,7 +977,7 @@ $$\hbox{Right-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S|s, s|B
 (Connects without removing, to delay decision and keep words on the stack that might need further connections to children)
 $$\hbox{Reduce}\:\:\:\:\:\frac{\langle S|s, B, A\rangle}{\langle S, B, A\rangle}$$
 \paragraph{Non-Projective Transitions} \begin{list}{}{}
-	\item 
+	\item \texttt{todo 12-Parsing.pptx::57}
 \end{list}
 \paragraph{Learning Procedure}
 \begin{list}{}{}
@@ -978,10 +985,9 @@ $$\hbox{Reduce}\:\:\:\:\:\frac{\langle S|s, B, A\rangle}{\langle S, B, A\rangle}
 	\item Emulate the parser and at each parser state extract a context representation of the state, in terms of features.
 	\item Provide the features as input and the suggested action as output to the classifier.
 \end{list}
-\paragraph{Dependency Shift-Reduce Parsers}
 \paragraph{CoNLL-X Shared Task} Assign labeled dependency structures for a range of languages by means of a fully automatic dependency parser.
 \paragraph{Problems with Oracles} Only suggest the correct path. If a parser makes mistakes, it finds itself in a state never seen in training and doesn't know how to recover, causing error propagation.
-\subsubsection{Graph-Based Parsing}
+\subsubsection{Graph-Based Depencency Parsing}
 For an input sequence $x$ define a graph $G_x=(V_x, A_x)$ where\begin{list}{}{}
 	\item $V_x=\{0,1,\ldots,n\}$
 	\item $A_x=\{(i,j,k)\:|\:i,j\in V$ and $k \in L\}$
