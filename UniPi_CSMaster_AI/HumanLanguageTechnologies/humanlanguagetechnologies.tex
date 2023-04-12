@@ -1587,9 +1587,11 @@ Typical pattern is to load a model, then initialize two objects:
 	\item Model, three types: encoders (e.g. BERT), decoders (e.g. GPT2), encoder-decoders
 \end{list}
 \subsubsection{Transformers Architectures}
-From pretrained word embeddings: start with pretrained word embeddings with no context, and learn to incorporate context in an LSTM or transformer while training on the task.\\
-Issues: the training data we have for out downstream task (like question answering) must be sufficient to teach all contextual aspects of language. Also most of the parameters in our network are randomly initialized.\\\\
-In modern NLP we pretrain the whole model: all (or almost all) NLP networks are initialized via pretraining. Pretraining methods hide parts of the inputs from the model, and then train the model to reconstruct those parts.\\This has been effective at building strong representations of language, parameter initialization for strong NLP models and probability distributions over language that we can sample from.
+From \textbf{pretrained word embeddings}: start with pretrained word embeddings with no context, and learn to incorporate context in an LSTM or transformer while training on the task.\\
+Issues: the training data we have for our downstream task (like question answering) must be sufficient to teach all contextual aspects of language. Also most of the parameters in our network are randomly initialized.\\\\
+In modern NLP we \textbf{pretrain the whole model}: all (or almost all) NLP networks' \textbf{parameters are initialized via pretraining}. Pretraining methods hide parts of the inputs from the model, and then train the model to reconstruct those parts.\\
+This has been \textbf{effective at building strong representations} of language, parameter initialization for strong NLP models and probability distributions over language that we can sample from.
+\pagebreak
 \paragraph{Pretraining Transformers} Two-step development\begin{center}
 	\includegraphics[scale=0.5]{74.png}
 \end{center}
@@ -1606,9 +1608,12 @@ In modern NLP we pretrain the whole model: all (or almost all) NLP networks are 
 The training may help because the SGD sticks (relatively) close to $\hat{\theta}$ during finetuning. So, maybe the finetuning local minima near $\hat{\theta}$ tend to generalize well, and/or the gradients of finetuning loss near $\hat{\theta}$ propagate nicely.
 \paragraph{Pretraining for Three Types of Architectures}
 \begin{list}{}{}
-	\item \textbf{Decoders}: language models, nice to generate from, can't condition on future words.
-	\item \textbf{Encoders}: bidirectional context so can condition on future (how to pretrain?)
-	\item \textbf{Encoder-Decoders}: good parts of both, what's the best way to pretrain them?
+	\item \textbf{Decoders}: language models, nice to generate from, can't condition on future words.\\
+	Examples: GPT-3, LaMDA
+	\item \textbf{Encoders}: bidirectional context so can condition on future (how to pretrain?)\\
+	Examples: BERT and its variants
+	\item \textbf{Encoder-Decoders}: good parts of both, what's the best way to pretrain them?\\
+	Examples: Transformers, Meena
 \end{list}
 \subparagraph{Pretraining Decoders} When using language model pretrained decoders, we can ignored that they were trained to model $P_\theta(w_t\:|\:w_{1:t-1})$. We can finetune them by adding a classifier on the last word hidden state
 $$h_1,\ldots,h_T = \hbox{Decoder}(w_1,\ldots,w_T)$$
@@ -1616,8 +1621,8 @@ $$y\simeq Aw_T + b$$
 Where $A$ and $b$ are randomly initialized and specified by the downstream task. Gradients backpropagate through the whole network.\begin{center}
 	\includegraphics[scale=0.5]{75.png}
 \end{center}
-Red means pretrained, so note how the linear layer hasn't been pretrained and must be learned from scratch.\\
-It's natural to pretrain decoders as languege models and then using them as generators, finetuning their $P_\theta(w_t\:|\:w_{1:t-1})$. This is helpful in tasks where the output is a sequence, with a vocabulaty like that at pretraining time.
+Red means pretrained, so note how \textbf{the linear layer hasn't been pretrained and must be learned from scratch}.\\
+It's natural to pretrain decoders as language models and then using them as generators, finetuning their $P_\theta(w_t\:|\:w_{1:t-1})$. This is helpful in tasks where the output is a sequence, with a vocabulary like that at pretraining time.
 $$h_1,\ldots,h_T = \hbox{Decoder}(w_1,\ldots,w_T)$$
 $$w_t\simeq Aw_{t-1} + b$$
 With $A,b$ pretrained in the language model.\\\\
@@ -1656,6 +1661,10 @@ Replace different-length spans from the input with unique placeholders, then dec
 		\item 50\% of the time $B$ is an actual sentence that follows $A$ and 50\% of the time it's a random sentence.
 	\end{list}
 \end{multicols}
+\paragraph{In-Context Learning} So far, pretrained models have been used mainly by \textbf{sampling} them (with a prompt) or \textbf{finetuning} them on the task we want. Very large language models seem to performe some kind of \textbf{learning without gradient steps}, just using the examples that are provided as context. These examples seem to specify the task to be performed.
+\paragraph{Distillation} Most pretrained language models are extremely large and expensive. The idea of distillation is very simple: train a \textbf{teacher} with pretraining and finetuning techniques to achieve maximum accuracy, then label a large amount of examples with the teacher. The \textbf{student} will be a much smaller model (e.g. 50x smaller) which is trained to mimic the teacher output with MSE or cross entropy.\\
+An hypothesis on why this works well is that large language models tend to be oversized, because modeling language is the "ultimate" NLP task. In most application tasks only a subset of the features are effectively used, and the student focuses on those features.
+\pagebreak
 \section{Analysis of Language Models}
 Aka BERTology
 \paragraph{Questions About Language Models} \begin{list}{}{}
@@ -1853,7 +1862,6 @@ How can we build a model to solve SQuAD? Problem formulation:
 	\end{list}
 	\item Output: $1\leq$ start $\leq$ end $\leq N$
 \end{list}
-\pagebreak
 \paragraph{LSTM-based vs BERT-based}
 \begin{center}
 	\includegraphics[scale=0.33]{123.png}
@@ -1974,8 +1982,7 @@ Different from reading comprehension because we don't assume a given passage, no
 	\item \textbf{Answer type detection}: expected answer type is determined applying heuristic rules to the dependency tree
 	\item \textbf{Relation detection}: additional relations are inferred and the answer entity is identified
 \end{enumerate}
-\paragraph{Memory} Vanilla NN only store memory in their parameters, which can be billions from billions of documents, but cannot be extended through usage
-.\\
+\paragraph{Memory} Vanilla NN only store memory in their parameters, which can be billions from billions of documents, but cannot be extended through usage.\\
 Open Domain Question Answering must combine\begin{list}{}{}
 	\item Access to external memory (\textbf{Document Retriever})
 	\item Reading comprehension (\textbf{Document Reader})
