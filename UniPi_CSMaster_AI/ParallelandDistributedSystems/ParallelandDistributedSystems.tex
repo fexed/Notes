@@ -86,6 +86,12 @@ In origin, everything happened in a single clock cycle: fetch, decode, execute, 
 An approach is to have few powerful cores and more less powerful cores (for example, in the Xeon Phi processors). Now, the processors follow this architecture, with the performance of a single core decreasing a bit with every generation but it's leveled by adding more cores.\\\\
 Up to the 2000, during the single core era, code written years before will run faster on newer machines. Now, code could run slower due to not exploiting more cores and the decreasing in performance of the single core.\\With accelerators the situation is even more different: for example GPUs, accelerator for graphics libraries, with their own memory and specialized in certain kinds of operations. This can require the transfer of data between the accelerator's memory and the main memory, so the architecture of the accelerator is impactful on the overall performance.
 \chapter{General Paradigms of Parallel Programming}
+\paragraph{Why Study Parallel Programming}
+\begin{list}{}{}
+	\item Because \textbf{parallelism is everywhere}. While in the past it has been exclusive to high-performance environments, today parallelism is in every user-available devices, from PCs to smartphones. This requires studying and developing parallel computing theory, practice and methodologies rather than focusing on sequential counterparts.
+	\item Because \textbf{heterogeneous architecture are becoming important}. Most processing elements have some kind of co-processor, e.g. GP-GPUs which feature a large number of cores only usable for data parallel computations. Parallel programming frameworks should be able to support these architecture in a seamless fashion. Other examples are FPGAs or even other architectures like clusters/networks of workstations (COW and NOW respectively).
+	\item Because \textbf{code reuse is an issue}. Often we speak about problems which have already been treated, and sequential code already exists that solves those problem, or part of those. This code may have been through years of debugging and fine-tuning, and rewriting it in a parallel fashion is simply unfeasabile, nor should be done (\textit{don't reinvent the wheel}). Parallel software frameworks should support the possibility to reuse sequential code, orchestrating its execution in a parallel fashion.
+\end{list}
 \paragraph{Parallelism} \textbf{Execution of different parts of a program on different computing devices at the same time}.\\
 We can imagine different flows of control (sequences of instruction) that all together are a program and are executed on different computing devices. Note that more flows on a singe computing device is \textbf{concurrency}, not parallelism.
 \paragraph{Concurrency} It's a similar concept: \textbf{things that \textit{may} happen in parallel with respect to the ordering between elements}. So given more flows of control, any schedule of these flows can be executed with interleaving.
@@ -143,24 +149,29 @@ On one side we can have \textbf{more speed with more resources} (computing devic
 On the other side we can employ \textbf{more complex applications with more resources}. For example more precise computations, so extra resources not for improving the time but to improve the quality of the computations.\\
 A recent perspective is to \textbf{aim at computing results with less energy} thanks to parallelism.\\\\
 We've seen the SpeedUp($n$) = $\frac{T_{seq}}{T_{par}(n)}$, where the plot has to lie below the bisection of the cartesian graph.
+\pagebreak
 \subsection{Base Measurements}
-\paragraph{Latency $L$} Measure of the \textbf{wall-clock time between the start and end of the single task}.
+\paragraph{Latency $L$} Measure of the \textbf{wall-clock time between the start and end of the single task}.\\
+The latency related to a number of tasks is called \textbf{completion time} or $T_c$.
+\begin{list}{}{}
+	\item With a sequential system, we have $T_c = L\cdot m$ for $x_m,\ldots,x_1$ inputs.
+	\item With a parallel system, we have $T_c\simeq m\cdot T_s$ because we reason at regime.
+\end{list}
+We are \textbf{interested in minimizing latency when we want to complete a computation as soon as possible}.
 \paragraph{Service Time $T_s$} It's related to the possibility of executing more tasks. It's the measure of the \textbf{time between the delivery of two consecutive results}, for example between $f(x_i)$ and $f(x_{i+1})$\\
 Even if $x_i$ and $x_{i+1}$ arrive at the same time, $f$ would still be computing $f(x_i)$ so it'll start computing $f(x_{i+1})$ when it has finished.\\
-In a sequential system, $T_s = L$.
-\paragraph{Completion Time $T_c$} The latency related to a number of tasks.\\
-With a sequential system, we have $T_c = L\cdot m$ for $x_m,\ldots,x_1$ inputs.\\
-With a parallel system, we have $T_c\simeq m\cdot T_s$ because we reason at regime.
+In a sequential system, $T_s = L$.\\
+Also called \textbf{throughput}. We are interested in \textbf{minimizing service time when we want to have results output as frequently as possible} without caring about the latency of the single task.
 \paragraph{Example} A 3 stage pipeline, with each node being sequential and with latency $L_i$ for node $i$.\\
 At $t_0$ the first stage $N_1$ gets the first tasks and computes it in $L_1$, then $N_2$ computes in $L_2$ and $N_3$ computes in $L_3$ so a total of $t_0 + L_1 + L_2 + L_3$.\\
 When the pipeline is filled, $T_s$ is dominated by the longest $L_i$, so $T_s = \max\{L_1, L_2, L_3\}$ and $T_c = \sum L_i + (m-1)T_s$\\
 If $m$ is large with respect to $n=$ number of stages, the "base of the parallelogram" would be very long, so $m >> n \Leftrightarrow T_c = m\cdot T_s$
-\pagebreak
 \subsection{Derived Measurements}
-\paragraph{SpeedUp} $$\hbox{SpeedUp}(n) = \frac{T_{seq}}{T_{par}(n)}$$ Could be latencies, service times\ldots depending on what we want to measure the speedup of.
-\paragraph{Scalability} $$\hbox{Scalability}(n)=\frac{T_{par}(1)}{T_{par}(n)}$$
-\paragraph{Efficiency} $$\hbox{Efficiency}(n) = \frac{\hbox{Ideal parallel time}(n)}{T_{par}(n)} = \frac{\frac{T_{seq}}{n}}{T_{par}(n)} = \frac{T_{seq}}{n\cdot T_{par}(n)} = \frac{\hbox{SpeedUp}(n)}{n}$$
-Measures the tradeoff between what you gain with the speedup and the cost of the speedup.
+\paragraph{SpeedUp} $$\hbox{SpeedUp}(n) = \frac{T_{seq}}{T_{par}(n)}$$ Could be latencies, service times\ldots depending on what we want to measure the speedup of, and measures how good our parallelization is.
+\paragraph{Scalability} Measures how efficient the parallel implementation is in achieving a better performance on greater parallelism degrees.
+$$\hbox{Scalability}(n)=\frac{T_{par}(1)}{T_{par}(n)}$$
+\paragraph{Efficiency}Measures the tradeoff between what you gain with the speedup and the cost of the speedup.
+ $$\hbox{Efficiency}(n) = \frac{\hbox{Ideal parallel time}(n)}{T_{par}(n)} = \frac{\frac{T_{seq}}{n}}{T_{par}(n)} = \frac{T_{seq}}{n\cdot T_{par}(n)} = \frac{\hbox{SpeedUp}(n)}{n}$$
 \paragraph{Throughput} $$\hbox{Throughput} = \frac{1}{T_s}$$
 \paragraph{Amdahl Law} Taken the total time of a computation, $T_{seq}$, it can be divided into something that can and something that cannot be computed in parallel (for example, dividing the book is a sequential activity). So we can say that\\$T_{seq} =$ serial fraction + parallel fraction and the \textbf{serial fraction cannot be parallelized}. $f\in[0,1]\:|\:f\cdot T_{seq}$ is the serial fraction.
 $$T_{seq} = f\cdot T_{seq} + (1-f)\cdot T_{seq}$$
