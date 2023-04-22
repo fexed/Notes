@@ -432,6 +432,28 @@ It manages \textbf{chunks of memory} called \textbf{arenas}, distributed in a ro
 Arenas A1, A2,\ldots, Ak are assigned in round robin to th1, th2\ldots. When some data comes from an arena, and we free that data we free the original arena not the local one. \texttt{jmalloc} has its own API, but other than that it uses the classical API: \texttt{malloc} and \texttt{free}, same as stdlib.\\
 Taking a normal program \texttt{a.out}, with \texttt{./a.out p1 \ldots pk} we will go with \texttt{malloc} and \texttt{free} of the stdlib. If we prefix with \texttt{LD\_PRELOAD=libjmalloc.so ./a.out p1 \ldots pk} then \texttt{malloc} and \texttt{free} will be loaded from the \texttt{jmalloc} 
 library.
+\subsubsection{Reducing Overhead}
+Let's discuss few general techniques that can be used to design better parallel application reducing different kinds of overheads.
+\paragraph{Data Locality} This principle states that \textbf{computations should take place where data is located}, basically \textbf{avoiding unnecessary data movement}. Even with the same parallelism degree, two different computations may produce a different overhead, e.g. due to point-to-point thread synchronization, which may result in vastly different speeds. In general, data locality should be enforced as much as possible:
+\begin{list}{}{}
+	\item Tasks should be scheduled to thread pools avoiding to schedule a task whose input has been just computed by thread $i$ to some thread $j\neq i$.
+	\item In a divide\&conquer algorithm where the divide phase always generates two tasks, one of those two tasks should be kept by the thread performing the divide phase. That thread would be blocked anyway waiting for the results, therefore it can (and should) be used. Given that it already has both subtasks, using one exploits locality.
+	\item When executing a matrix multiplication, thread already accessing row $A[i][]$ and column $B[][j]$ to compute $C[i][j]$ should be preferably given tasks that use again row $A[i][]$ to preserve locality.
+\end{list}
+\paragraph{Overlapping Computation and Communication} In general, a node (e.g. a pipeline stage) performs a process-send-receive cycle which results in the following time needed to process a single item: $T_{rec} + T_{proc} + T_{send}$. If we suppose to have hardware support to receive and transmit data, then the send/receive are dominated by latency or bandwith ($\mathbf{B}$) and may be approximated, resulting in $T_{comm}(n) = T_{setup}+\frac{n}{\mathbf{B}}$
+\begin{list}{}{}
+	\item \textbf{Triple Buffering}: we setup three threads working on three distinct buffers: $B_0, B_1, B_2$, with thread 0 managing data in $B_0$ and the other two threads initially idle.\\
+	When thread 0 receives the whole input task, it moves to receive the next input task into buffer $B_1$, while thread 1 can start processing data in $B_0$. After thread 0 has received data in $B_1$ \textit{and} thread 1 will have completed processing the data in $B_1$, then thread 0 will start receiving in $B_2$, thread 1 will start computing in $B_1$ and thread 2 will start sending the result that is now contained in $B_0$. From this moment the three threads will work at regime.\\
+	Each time slot has duration of $\max\{T_{rec}, T_{proc}, T_{send}\}$ and each thread that completed processing/sending/receiving in buffer $B_i$ will repeat the operation on buffer $B_{(i+1)\%3}$\\
+	Remember that this works only for \textbf{stream of tasks} (cannot work when processing a single item) and only with hardware support for parallelism between communication and computation.
+	\item \textbf{Double Buffering}: we can use buffering to partially hide communication in stream processing also when we only can run one communication at the same time. This adopts the same approach of triple buffering, and can be implemented in two ways:
+	\begin{list}{}{}
+		\item One buffer for receiving and one for computing/sending.\\
+		Two threads will switch buffers to receive input tasks and to compute/send results, with latency given by $\max\{T_{rec}, T_{proc}+T_{send}\}$
+		\item One buffer for receiving/computing and one for sending.\\
+		Two threads will switch buffers to receive/process the input and to send results, with latency given by $\max\{T_{rec}+T_{proc}, T_{send}\}$
+	\end{list}
+\end{list}
 \subsection{Implementation of Patterns}
 We spoke about stream (pipeline, farm) and data (map, reduce, stencil) parallel patterns. Let's discuss some general techniques to implement them. The basic structure of a pipeline is: an inputstream, outputstream and a number of stages implementing functions $f_i$. So the parameters are $\{f_i, is, os\}$ , and our tools are threads/asyncs etc. from C++.\\
 There are two main approaches to the implementation: \textbf{template based} implementation and \textbf{macro data flow} implementation (MDF).
