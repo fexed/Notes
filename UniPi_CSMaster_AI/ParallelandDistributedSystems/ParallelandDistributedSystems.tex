@@ -386,15 +386,16 @@ Often these are implemented via threadpools, but these methods better expose the
 \texttt{std::packaged\_task} decouples the moments of having a function to call from the moment of calling that function. With \texttt{get\_future} we can get the future relative to the packaged task and use it. To compute the packaged task we call it passing the arguments, e.g. the packaged task of the function \texttt{t1 func(t2);} is \texttt{auto pt = new packaged\_task(func);} has future \texttt{auto future<t1> ft = pt.get\_future();} and can be called with \texttt{pt(arg);} with \texttt{arg} of type \texttt{t2}. The result can be obtained with \texttt{t1 res = ft.get();}.
 \subsection{Promises}
 \texttt{std::promise} can be used in two ways: using its future like before or call \texttt{set\_value} on it. They can be viewed as \textbf{placeholders}.
-\subsection{Load Balancing} Giving the same amount of work to all the cores involved. Even if a single thread takes longer than all the other, we wait that it finishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
-One of the reasons could be that the computation per se is unbalanced.
+\subsection{Load Balancing} Load balancing is the problem of \textbf{giving the same amount of work to all the components involved}. Even if a single thread takes longer than all the other, we wait that it finishes so we have a lot of empty time in the other threads. The efficiency lowers a lot, and poor speedup too.\\
+One of the reasons could be that the computation per sé is unbalanced, for example if we have a number of concurrent activities that is much larger than the number of processing elements, even worse if the time spent computing the single activity varies.
 \subsubsection{Static Techniques}
-Related to the usage of different splitting policies.
-\paragraph{Chunk policy} Take the vector and split into adjacent parts
-\paragraph{Cyclic policy} First item to first thread, second to second thread\ldots e.g. with two threads: first to th1, second to th2, third to th1, fourth to th2\ldots
+Related to the usage of different splitting policies. Static load balancing devise a scheduling policy of concurrent activities to processing elements \textbf{before} the start of the computation.
+\paragraph{Chunk policy} The $m$ concurrent activities are split into $n$ chunks: the chunk $i$ includes concurrent activities from $i\cdot\Delta$ to $(i+1)\cdot\Delta$ with $\Delta=\frac{m}{n}$
+\paragraph{Cyclic policy} The $m$ concurrent activities are assigned to the $n$ processing elements in a round robin fashion: $i$ is assigned to processing element $P_j$ such that $j = i \hbox{mod} n$\\\\
+Both are easy to implement. The chunk policy performs better when we have uniformly distributed execution times, while cyclic distributions performs better when "hot spots" are present. In both cases, there are distributions of execution times that completely invalid the load balancing.
 \paragraph{Mix} A cyclic distribution of blocks. Split into blocks and assign the first to a thread, the second to the next\ldots following the cyclic policy.
 \subsubsection{Dynamic Techniques}
-We can do much more, adapting to the situation giving more things to do to the thread that so far have done less.
+We can do much more, adapting to the situation giving more things to do to the thread that so far have done less. Static load balancing devise a scheduling policy of concurrent activities to processing elements \textbf{while} the computation is running.
 \paragraph{Autoscheduling} Threads are not assigned a block/item or a distribution, but each threads \textit{asks} for something to be computed. Some code like \begin{lstlisting}
 while (more work to do) {
 	ask work
