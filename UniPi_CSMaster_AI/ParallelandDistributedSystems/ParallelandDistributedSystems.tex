@@ -460,24 +460,25 @@ We spoke about stream (pipeline, farm) and data (map, reduce, stencil) parallel 
 There are two main approaches to the implementation: \textbf{template based} implementation and \textbf{macro data flow} implementation (MDF).
 \paragraph{Template Based} We assume that for each pattern (pipelines, farms, maps, stencil\ldots) we have a template, which is composed by three parts:
 \begin{list}{}{}
-	\item a \textbf{target architecture}, e.g.: shared-memory multi-core, cluster/network of workstations, cloud\ldots
-	\item \textbf{concurrent activity graph}, a graph representing concurrent activities with their communication channels
-	\item \textbf{performance modeling}
+	\item \textbf{Target architecture}, e.g.: shared-memory multi-core, cluster/network of workstations, cloud\ldots
+	\item \textbf{Concurrent activity graph}, a graph representing concurrent activities with their communication channels
+	\item \textbf{Performance model}
 \end{list}
-\textbf{An example is a template of a pipeline} in a shared-memory multi-core environment: template(pipeline, SMmulticore). We have two choices:
+\textbf{An example is a template of a pipeline} in a shared-memory multi-core environment:\\
+\texttt{template(pipeline, SMmulticore)}. We have two choices:
 \begin{list}{}{}
 	\item Take a number of \textbf{concurrent threads} linked by communication channels like queues. Given $m$ stages, we have $m-1$ queues and the performance model is speedup$(m)\simeq m$ when each stage has circa the same $t_S$.
 	
-	\item Use a \textbf{queue} to pile up tasks which are $\langle f, x_i\rangle$ pairs: $f$ represents the function that needs to be computed on $x_i$. We have a number of threads, each takes a task from the queue, computes $f(x_i)$ and puts into the queue $\langle g, f(x_i)\rangle$ with $g$ representing the next stage of the pipeline that needs to be computed.\\
-	There are two main issues: the queue represents a bottleneck and we need to handle the ordering of the tasks, but both can be tackled in various ways. For example, splitting the queue in a set of queues or adding the information $i$ to the pair put in the queue to handle the ordering.\\
-	Performances of this model are very different: we don't have the limitation of having all tasks with same $t_S$. Provided to have a sufficient $t_A$ (interarrival time) and given $nw$ \textbf{workers}, not stages, we have speedup($nw) \simeq nw$. With $nw$ being the number of threads used, the workers, we have $nw+2$ stages (the input and output stages count!)
+	\item Use a \textbf{queue} to pile up tasks which are $\langle f, x_i\rangle$ pairs: $f$ represents the \textbf{function that needs to be computed} on $x_i$. We have a number of threads, each takes a task from the queue, computes $f(x_i)$ and puts into the queue $\langle g, f(x_i)\rangle$ with $g$ \textbf{representing the next stage} of the pipeline that needs to be computed.\\
+	There are \textbf{two main issues}: \textbf{the queue represents a bottleneck}, and we \textbf{need to handle the ordering} of the tasks, but both can be tackled in various ways. For example, splitting the queue in a set of queues or adding the information $i$ to the pair put in the queue to handle the ordering.\\
+	Performances of this model are very different: we don't have the limitation of having all tasks with same $t_S$. Provided to have a sufficient $t_A$ (\textbf{interarrival time}) and given $nw$ \textbf{workers}, not stages, we have speedup$(nw) \simeq nw$. With $nw$ being the number of threads used, the workers, we have $nw+2$ stages (the input and output stages count!)
 \end{list}
 We can consider another alternative
 \begin{list}{}{}
-	\item Take a number of parallel activities, with a round-robin schedule delivering data and with a sorter gathering and sorting the results. The scheduler tags each task with the appropriate number, so that the sorter can correctly sort the results.\\
+	\item Take a number of \textbf{parallel activities}, with a \textbf{round-robin schedule delivering data} and with a \textbf{sorter that gathers and sorts the results}. The scheduler tags each task with the appropriate number, so that the sorter can correctly sort the results.\\
 	We have $nw$ concurrent activities, and thus $nw$ queues plus the queue of the sorter. With a small enough interarrival time $t_A$, we can achieve a speedup($nw$) = $nw$
 \end{list}
-So on the same architecture we can implement a pipeline in at least three different ways. What if we change architecture, e.g. from SMmulticore to COW (cluster of workstation)? A COW is a cluster of multicores, basically, so we can use any template seen before. Each workstation is a stage and the communication channels are something like TCP/IP sockets, achieving once again a speedup circa the number of stages.\\
+So \textbf{on the same architecture we can implement a pipeline in at least three different ways}. What if we change architecture, e.g. from SMmulticore to COW (cluster of workstation)? A COW is a cluster of multicores, basically, so we can use any template seen before. Each workstation is a stage and the communication channels are something like TCP/IP sockets, achieving once again a speedup circa the number of stages.\\
 Another template is to have each workstation provide a number of workers, with a scheduler queue and a sorter queue as output like the last template seen earlier. These workstation work in a pipeline, with input/output communication channels, and each implementing an array of worker threads.
 \begin{center}
 	\includegraphics[scale=0.5]{27.png}
@@ -509,12 +510,15 @@ The key is the compilation of the parallel patterns.
 	\includegraphics[scale=0.5]{32.png}\\
 	\includegraphics[scale=0.5]{33.png}
 \end{center}
-MDF can issue some problems. First, the concurrency over the repository of course.\\
-Another problem is the result tokens delivery: each graph can need input tokens coming from different computations, and such we need to handle it.\\
-Another thing is maintaining the list of fireable instructions. For efficiency reasons, we maintain a \textbf{counter} inside the node (along with the function, the input tokens and the output destinations). This counter tells how many input tokens are needed to compute the function, and each time a token becomes available the counter is decreased by 1. When the counter is 0, then the instruction is fireable so the last thread who delivers the final input token is in charge of putting the receiving node in the fireable list.\\
-Another is the out stream must be efficiently maintained, possibly reordering the results when needed.\\
-Finally, we need to take into account some kind of graph ID to distinguish of course the various copies of the same graph.\\
-So a node would in the end by composed by:
+MDF can issue some \textbf{problems}:
+\begin{list}{}{}
+	\item Of course, the \textbf{concurrency over the repository}
+	\item The \textbf{delivery of the result tokens}: each graph can need input tokens coming from different computations, and such we need to handle it.
+	\item \textbf{Maintaining the list of fireable instructions}. For efficiency reasons, we maintain a \textbf{counter} inside the node (along with the function, the input tokens and the output destinations). This counter tells how many input tokens are needed to compute the function, and each time a token becomes available the counter is decreased by 1. When the counter is 0, then the instruction is fireable so the last thread who delivers the final input token is in charge of putting the receiving node in the fireable list.
+	\item \textbf{Efficiently maintaining the output stream}, possibly reordering the results when needed.
+	\item Need to \textbf{take into account some kind of graph ID} in order to distinguish the various copies of the same graph.
+\end{list}
+So \textbf{a node is composed by}:
 \begin{list}{}{}
 	\item \textbf{Graph ID}, identifying the copy of the graph
 	\item \textbf{Instruction ID}
@@ -525,6 +529,9 @@ So a node would in the end by composed by:
 \end{list}
 Remember that the executors are threads in a pool. Each thread asks for a fireable action from the repository, which is unique, and computes it. Ideally, all threads begin at the same time so each thread asks the repository for a fireable action. The repository delivers to the first, then delivers to the second one (which was waiting in the meantime), then to the third (which as well was waiting for the first and the second thread to be served) and so on. This means that each thread waits a bit before beginning the computation. With double or triple buffering techniques we can mitigate this. Another way would be to deliver 2 tasks (fireable nodes) to each thread the first time. This way, once a thread delivers a result it can ask for another task while computing the task it already has.\\\\
 Another issue would be present when a thread delivers a result to the repository and then gets a task which requires among its input the result that it just computed. This is a locality situation, so we can exploit some cache principles to speed up this, for example assigning a thread some task which uses tokens that it has computed (\textbf{affinity scheduling}). This optimizes computing times but it's not easy to implement, so we use caching and we take it into account when communicating between repository and executioners.
+\paragraph{Template vs MDF} \textbf{Template} based implementations \textbf{achieve better performances when computing tasks with constant execution time}, because it has less runtime overhead with respect to MDF. On the other side, \textbf{computations with highly variable computing times  are more efficient on MDF} based implementations, as these have \textbf{better load balancing properties} with respect to template based implementation.\\
+\textbf{Porting MDF based implementations to new architectures is easier} than porting template based implementations, since it requires only the development of a new MDF interpreter, whereas porting of template based implementations require rewriting the template library and performance models.\\
+\textbf{Template based implementations are more suited to support static optimization techniques}, since a compile phase is needed anyway to implement.
 \section{Optimizing}
 To write our programs we can use the following grammar:
 \begin{center}
@@ -564,7 +571,24 @@ Given a tree composed only by stream parallel patterns:
 	\item Compose the frontier \textbf{Comp(frontier)}
 	\item Farm it out \textbf{Farm(}Comp(frontier)\textbf{)}
 \end{enumerate}
-This \textbf{always optimizes} the stream parallel computation in \textbf{stateless} situation. The principle is to transform a set of small computations spread around and put them into a big chunk of code with an input and on output, so \textbf{increase the grain of the computation}. The \textbf{grain} is \textbf{the ration between time spent computing and time spent organizing the computation}.
+This \textbf{always optimizes} the stream parallel computation in \textbf{stateless} situation. The principle is to transform a set of small computations spread around and put them into a big chunk of code with an input and on output, so \textbf{increase the grain of the computation}. The \textbf{grain} is \textbf{the ratio between time spent computing and time spent organizing the computation}.
+\subsection{Adaptability}
+Parallel programs needs to take into account the variability of the environment. These variations can be:
+\begin{list}{}{}
+	\item \textbf{Endogenous} when those \textbf{depends on the parallel application features}. For example, when computation phases have different "weights" and, given constant number of resources, some phases see and underutilization of the computational resources while other phases see an overutilization, leading to poor performance in general.
+	\item \textbf{Exogenous} when those \textbf{depends on the target architecture features/behavior}, representing causes that are external to the parallel applications. For example, non-exclusive target architecture access, when other parallel applications are running on the same resources.
+\end{list}
+This generates two distinct kinds of problems:
+\begin{list}{}{}
+	\item \textbf{Resource under utilization}, because unused resources may be dedicated to more useful tasks
+	\item \textbf{Resource over utilization}, because more resources could greatly improve the performances
+\end{list}
+These problems could lead to load unbalancing, unsatisfactory performances and poor efficiency. It's then natural to think of adaptability processes that could dynamically adapt the application execution to the varying features of the environment. For example, multi-grid applications, where computation is adapted based on the portion that is being computed (e.g. in fluid simulation, more accuracy is needed in more complex portions of space). We have two kinds of adaptation:
+\begin{list}{}{}
+	\item \textbf{Static Adaptation} where the partition takes into account the features of the computation and splits more deeply the areas that are subject to more intensive computations, as to achieve a generally good load balancing.
+	\item \textbf{Dynamic Adaptation} where the initial partitioning is uniform and, at runtime, when a partition turns out to be too "computationally intensive" it may be dynamically split.
+\end{list}
+A \textbf{general adaption schema} has been proposed. The adaption schema is organized in two steps, with the \textbf{decision step}, where the behavior of the execution is monitored, and the \textbf{execution step}, where a plan is devised and executed to implement the decisions taken. It is also logically divided in two layers, with the \textbf{generic layer}, encapsulating all the decisions and actions that are not specific of the particular application, and the \textbf{domain specific layer}, with application-specific details.
 \subsection{Performance Model Usage}
 Performance models are used in two ways:
 \begin{list}{}{}
