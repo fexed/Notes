@@ -572,7 +572,14 @@ Given a tree composed only by stream parallel patterns:
 	\item Farm it out \textbf{Farm(}Comp(frontier)\textbf{)}
 \end{enumerate}
 This \textbf{always optimizes} the stream parallel computation in \textbf{stateless} situation. The principle is to transform a set of small computations spread around and put them into a big chunk of code with an input and on output, so \textbf{increase the grain of the computation}. The \textbf{grain} is \textbf{the ratio between time spent computing and time spent organizing the computation}.
-\subsection{Adaptability}
+\subsection{Performance Model Usage}
+Performance models are used in two ways:
+\begin{list}{}{}
+	\item \textbf{Evaluate} a certain value, e.g. $T_S$, by visiting the tree from leafs to root and computing the required value.
+	\item \textbf{Optimize} by figuring out the parameters, e.g. $nw$
+\end{list}
+\subsection{Optimization}
+\subsubsection{Adaptability}
 Parallel programs needs to take into account the variability of the environment. These variations can be:
 \begin{list}{}{}
 	\item \textbf{Endogenous} when those \textbf{depends on the parallel application features}. For example, when computation phases have different "weights" and, given constant number of resources, some phases see and underutilization of the computational resources while other phases see an overutilization, leading to poor performance in general.
@@ -598,15 +605,15 @@ The \textbf{analysis}, which is the second part of the decision step, \textbf{mu
 \end{list}
 During the \textbf{plan devising phase} of the execution step the computation proceeds without interference, while the parallel structure of the application is exploited to find out the points where to intervene requiring \textbf{minimum downtime} of the application.\\\\
 After having devised a list of actions $a_1,\ldots,a_k$, the \textbf{commit phase} implements the decisions taken. Each $a_i$ is \textbf{defined in terms of the actuators}, provided by the implementation of the pattern.
-\subsection{Performance Model Usage}
-Performance models are used in two ways:
+\paragraph{Measures} Time (throughput) and service time (latency) are the most common measures against which we usually want to optimize, but there are other measures that impact a lot. For example:
 \begin{list}{}{}
-	\item \textbf{Evaluate} a certain value, e.g. $T_S$, by visiting the tree from leafs to root and computing the required value.
-	\item \textbf{Optimize} by figuring out the parameters, e.g. $nw$
+	\item \textbf{Power Consumption}: very important and also lately very popular, due to the impact on computers and the whole computer science industry on the environment. Can be affected in several ways.\\
+	An example is a technique called \textbf{DVFS}, standing for Dynamic Voltage Frequency Scaling. Power consumption is more or less proportional to the cube of the frequency of the processor, and most modern processors have a range of frequencies at which they can operate. You can usually read the power consumption, with approximate values that are useful for this purpose, so we read these values and build an approximated model that can tell how much power has been consumed for a particular computation. This presents a \textbf{trade-off between the time required to perform the computation and the power consumed}. This because we may have a deadline, thus a "good time to achieve", and a certain "power cap". So we want to meet the deadline using smallest power possible.\\
+	For example, run for a certain time at a frequency (e.g. 1GHz), then for the same amount of time at another frequency (e.g. 2GHz). Measure the number of tasks computed and the power consumed per each scenario, and figure out some constants to train a model that tells the information we want (the frequency at which we want to run)
 \end{list}
-\subsection{Optimization}
+\paragraph{RPLShell}
 In RPLSH we can do \texttt{optimize main with max resources}, with resources meaning number of available processing threads.
-\paragraph{RPLShell} \begin{center}
+\begin{center}
 	\includegraphics[scale=0.5]{13.png}
 \end{center}
 \begin{list}{}{}
