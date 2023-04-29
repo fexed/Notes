@@ -261,6 +261,7 @@ Two kinds:
 Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text (no need for human-labeled data!).\\
 Usual context size is 5 words before and after. Features can be multi-word expressions. Longer windows can capture more semantics and less syntax.\\
 A typical size for $h$ is 200-300.
+\pagebreak
 \subparagraph{Skip-Gram}
 \begin{multicols}{2}
 \begin{list}{}{}
@@ -2079,6 +2080,7 @@ $$u = \sum_{j=1}^z p_ih_i$$
 $$\hat{y} = R\phi(q + Hu)$$
 where $\hat{y}\in R^{|V|}$ represents the model answer.
 \subparagraph{Training} Given $\{(x_i,y_i)\}_{i=1}^n$, use the Cross Entropy loss function $H(y,\hat{y})$ in an end-to-end training with standard backpropagation through time (BPTT) algorithm.
+\pagebreak
 \subparagraph{Architecture}
 \begin{center}
 	\includegraphics[scale=0.5]{98.png}
@@ -2129,18 +2131,18 @@ Three approaches
 \begin{center}
 	\includegraphics[scale=0.5]{103.png}
 \end{center}
-%TODO racconto algoritmo fine 1a parte 02/05
+\pagebreak
 \begin{enumerate}
-	\item Begin at the NP immediately dominating the pronoun
-	\item Go up the tree to first NP or S, and call this X and the path $p$
+	\item Begin at the NP node that s immediately dominating the pronoun, in the parse tree of S
+	\item Go up the tree to first NP or S node encountered, and call this node X and the path to reach it $p$
 	\item Traverse all branches below X to the left of $p$, left-to-right breadth-first.\\
 	Propose as antecedent any NP that has a NP or S between it and X
-	\item If X is the highest S in the sentence, traverse the parse trees of the previous sentences in the order of recency. Traverse each tree left-to-right, breadth-first. When an NP is encountered, propose as antecedent.\\
+	\item If X is the highest S node in the sentence, traverse the parse trees of the previous sentences in the order of recency. Traverse each tree left-to-right, breadth-first. When an NP is encountered, propose as antecedent.\\
 	If X is not the highest node, go to step 5.
 	\item From node X go up the tree to the first NP or S. Call it X, and the path $p$.
 	\item If X is an NP and the path $p$ to X came from a non-head phrase of X (a specifier or adjunt, such a possessive, PP, apposition, or relative clause), propose X as antecedent
-	\item Travers all branches below X to the left of the path, in a left-to-right breadth-first manner. Propose any NP encountered as the antecedent
-	\item If X is an S node, traverse all branches of X to the right of the path, but do not go below any NP or S encountered. Propose any NP as the antecedent
+	\item Traverse all branches below X to the left of the path, in a left-to-right breadth-first manner. Propose any NP encountered as the antecedent
+	\item If X is an S node, traverse all branches of X to the right of the path, but do not go below any NP or S encountered. Propose any NP as the antecedent.
 	\item Go to step 4
 \end{enumerate}
 "\textit{The naive approach is quite good. Computationally speaking, it will be a long time before a semantically based alghorithm is sophisticated enough to perform as well, and these results set a very high standard for any other approach to aim for.\\Yet, there is every reason to pursue a semantically based approach. The naive algorithm does not work. Any one can think of examples where it fails. In these cases it not only fails, it gives no indication that it has failed and offers no help in finding the real antecedent.}"
@@ -2197,14 +2199,16 @@ The model is composed of:
 	\includegraphics[scale=0.5]{113.png}
 \end{center}
 $\hat{x}_i$ is an attention-weighted average of the word embeddings in the span.
+\begin{multicols}{3}
 \begin{list}{}{}
 	\item \textbf{Attention scores} $$\alpha_t = W_\alpha\cdot \hbox{FFNN}_\alpha(x^*_t)$$
-	dot product of weight vector and transformed hidden state
+	Dot product of weight vector and transformed hidden state
 	\item \textbf{Attention distribution} $$a_{ij} = \frac{e^{\alpha_t}}{\sum_{k=\hbox{START}(i)}^{\hbox{END}(i)}e^{\alpha_k}}$$
-	just a softmax over attention scores for the span
+	Simply a softmax over attention scores for the span
 	\item \textbf{Final Representation} $$\hat{x}_i = \sum_{k=\hbox{START}(i)}^{\hbox{END}(i)} a_{ij}x_t$$
-	attention-weighted sum of word embeddings
+	Attention-weighted sum of the word embeddings
 \end{list}
+\end{multicols}
 The vector that represents the span of text is
 $$g_i = [x_{\hbox{START}(i)},x_{\hbox{END}(i)},\hat{x}_i, \phi(i)]$$
 which contains
@@ -2262,7 +2266,7 @@ Predictions generally makes sens but are not all factually correct. Why?\begin{l
 Knowledge-aware LMs are important. LM pretrained representations can benefit downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base for a fact, e.g. with SQL, query the LM with a natural language prompt. Of course this requires the LM to have high quality on recalling facts.
 \subparagraph{Querying Traditional Knowledgebases}
 \begin{center}
-	\includegraphics[scale=0.5]{104.png}
+	\includegraphics[scale=0.33]{104.png}
 \end{center}
 \paragraph{Querying LM as Knowledgebases} Pretrain LM over unsdtructured  text and then query with natural language.
 \begin{center}
@@ -2402,21 +2406,24 @@ Chatbots are a very challenging application of all the elements we've seen so fa
 \begin{center}
 	\includegraphics[scale=0.33]{115.png}
 \end{center}
-\pagebreak
+
+\paragraph{Task Oriented vs Open Domain}
 \begin{multicols}{2}
-\paragraph{Open Domain (harder)}
-\begin{list}{}{}
-	\item The user can take the conversation anywhere
-	\item No necessarily a well-defined goal or intention
-	\item conversations on social media sites like Twitter and Reddit are typically open domain
-\end{list}
 \paragraph{Task Oriented (easier)}
 \begin{list}{}{}
 	\item The space of possible inputs and outputs is somewhat limited
 	\item The system is trying to achieve a very specific goal
 	\item Technical customer support or shopping assistants are examples of closed domain problems
 \end{list}
+\columnbreak
+\paragraph{Open Domain (harder)}
+\begin{list}{}{}
+	\item The user can take the conversation anywhere
+	\item No necessarily a well-defined goal or intention
+	\item conversations on social media sites like Twitter and Reddit are typically open domain
+\end{list}
 \end{multicols}
+\paragraph{Retrieval Based vs Generative}
 \begin{multicols}{2}
 \paragraph{Retrieval Based (easier)}
 \begin{list}{}{}
@@ -2440,6 +2447,7 @@ Chatbots are a very challenging application of all the elements we've seen so fa
 \end{list}
 \end{multicols}
 
+\paragraph{Short vs Long conversations}
 \begin{multicols}{2}
 \paragraph{Short Conversation (easier)}
 \begin{list}{}{}
@@ -2452,6 +2460,7 @@ Chatbots are a very challenging application of all the elements we've seen so fa
 	\item Alexa Prize Challenge aims at building a socialbot capable of engaging users for 20 minutes
 \end{list}
 \end{multicols}
+\pagebreak
 \subsection{Task-Oriented}
 Task-oriented dialogue systems interact with a user in order to complete a specific task.
 \begin{list}{}{}
@@ -2463,7 +2472,7 @@ Task-oriented dialogue systems interact with a user in order to complete a speci
 \end{list}
 A possible pipeline is
 \begin{center}
-	\includegraphics[scale=0.5]{116.png}
+	\includegraphics[scale=0.33]{116.png}
 \end{center}
 \paragraph{Natural Language Understanding} It involves several key tasks
 \begin{list}{}{}
@@ -2481,7 +2490,6 @@ Can train an LSTM that takes in text and entities and directly chooses an action
 	\includegraphics[scale=0.5]{118.png}
 \end{center}
 \paragraph{Dialogue State} It consists of all the information given so far, including user-specified constraints on the slots.
-%TODO example of dialogue
 \paragraph{Dialogue Act Labeling and Slot Filling} Given an user utterance, the system needs to identify
 \begin{list}{}{}
 	\item The dialogue act label
@@ -2511,8 +2519,8 @@ Human-level response generation ability.\\
 	\includegraphics[scale=0.5]{122.png}
 \end{center}
 \subsection{Retrieval-Based}
-Most system today rely on retrieval
-\paragraph{Templates} Many requests can be answered with templates. Select the most relevant response from a collection of templates, determine the slots required to fill it and instantiate the template with those values. Slots filler can be extracted from user utterance or retrieved with a query.
+Most systems today are retrieval-based.
+\paragraph{Templates} Many requests can be answered with templates. Select the most relevant response from a collection of templates, determine the slots required to fill it and instantiate the template with those values. Slot fillings can be extracted from user utterance or retrieved with a query.
 \paragraph{Retrieval-Based Chat} Basic idea: given an utterance, find the most similar in the database and return it.
 \begin{center}
 	\includegraphics[scale=0.5]{133.png}
@@ -2655,20 +2663,20 @@ Real scientific question of whether we need explicit, localist language and know
 	\item We lose powerful accuracy improvement techniques such as task-specific architecture and hyperparameter tuning
 \end{list}
 \paragraph{Deep Sequence Models} RNNs are shown to be effective for a variety of language processing tasks. Somewhat surprisingly, these seemingly purely sequential models are very capable at modeling syntactic phenomena, and using them result in very strong dependency parsers for a variety of languages. Empirical evidence for their capabilities of learning the subject-verb agreement, relation in naturally occurring text, from relatively indirect supervision.
-\paragraph{The 3 Equivalent NLP-Complete Super Tasks} Language modeling, question answering and dialogue systems.
-\subparagraph{QA Completeness} Every task may be recast as a QA task.\\
-An obstacle: necessary inputs to QA. We need to \textbf{be able to understand text, images and databases} to really answer all kinds of questions.
+\paragraph{The 3 Equivalent NLP-Complete Super Tasks} Three tasks that represent the goal of most NLP systems:\\
+\textbf{language modeling}, \textbf{question answering} and \textbf{dialogue systems}.
+\subparagraph{QA Completeness} \textbf{Every task may be recast as a QA task}.\\
+An obstacle is represented by the necessary inputs to QA. We need to \textbf{be able to understand text, images and databases} to really answer all kinds of questions.
 \subparagraph{Seq2SQL}
 \begin{center}
 	\includegraphics[scale=0.5]{142.png}
 \end{center}
-Another obstacle: architecture engineering. We don't yet know the right model architecture for comprehensive QA and joint multitask learning. Architecture search was an active area of research, but usually applied to simpler/known tasks\ldots
+Another obstacle is the \textbf{architecture engineering}. We don't yet know the right model architecture for comprehensive QA and joint multitask learning. Architecture search was an active area of research, but usually applied to simpler/known tasks\ldots
 \begin{center}
 	\includegraphics[scale=0.5]{143.png}
 \end{center}
-Also, difficult to obtain significant benefits from tree structure models: non GPU friendly, high sensitivity to parse errors.\\
-Convolutional Reasoning without trees.
-\paragraph{Machine Translation} The problem with pre-training is that there's no interaction between the two languages during it.\\
+Also, difficult to obtain significant benefits from tree structured models: non GPU friendly, high sensitivity to parse errors\ldots
+\paragraph{Machine Translation} The problem with pre-training is that there's no interaction between the two languages during the process.\\
 \textbf{Self-Training}: label unlabeled data to get noisy training examples. Might be circular.
 \begin{center}
 	\includegraphics[scale=0.5]{144.png}
@@ -2678,25 +2686,30 @@ Convolutional Reasoning without trees.
 	\includegraphics[scale=0.5]{145.png}
 \end{center}
 \subsection{Huge Models} For several tasks, performance seems to increase with $\log($model size$)$.
-\paragraph{GPT-2 Reactions} Pro-Release \begin{list}{}{}
+\paragraph{GPT-2 Reactions} 
+\begin{multicols}{2}
+Pro-Release \begin{list}{}{}
 	\item This model isn't much different from existing work
 	\item Not long until these models are easy to train
-	\item Photoshop
-	\item Researchers should study this model to learn defenses
+	\item Researchers should study this model to learn possible defenses
 	\item Dangerous PR hype
-	\item Reproducibility is crucial for science
+	\item \textbf{Reproducibility} is crucial for science
 \end{list}
+\columnbreak
 Against-Release \begin{list}{}{}
 	\item Danger of fake reviews, news comments\ldots, but already done by companies and governments
-	\item Precedent: "even if this model isn't dangerous, later ones might be"
+	\item It may set a \textbf{precedent}: "even if this model isn't dangerous, later ones might be"
 	\item Smaller model still being released
 \end{list}
-Who should make these decisions? NLP experts, computer security experts, technology and society experts, ethics experts\ldots?\\
-Need for more interdisciplinary science. Many other examples of NLP with big social ramifications, especially with regards to biases/fairness.
+\end{multicols}
+\paragraph{Responsibility} Who should make these decisions? NLP experts, computer security experts, technology and society experts, ethics experts\ldots?\\
+Need for more \textbf{interdisciplinary science}. Many other examples of NLP with big social ramifications, especially with regards to biases/fairness.
 \paragraph{High Impact Decisions} Growing interest in using NLP to help with high impact decision making: judicial decisions, hiring, grading tests\ldots\\
 Plus side: can quickly evaluate a machine learning system for some kinds of bias. However, machine learning reflects or even amplifies bias in training data, which could lead to the creation of even more biased data.
+\pagebreak
 \section{Thinking Fast and Slow}
 Two ways to make choices:
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item \textbf{System 1}: \textbf{fast}, intuitive, automatic thinking
 	\begin{list}{}{}
@@ -2710,6 +2723,7 @@ Two ways to make choices:
 		\item Need causal relationships to be able to make sense of environment
 		\item Categorizes events/things for quick recall
 	\end{list}
+	\columnbreak
 	\item \textbf{System 2}: \textbf{slow}, rational, calculating thinking
 	\begin{list}{}{}
 		\item Employed when things get difficult
@@ -2721,12 +2735,11 @@ Two ways to make choices:
 		\item Uncertainty and doubt live here
 	\end{list}
 \end{list}
+\end{multicols}
 Systems 1 and 2 may explain the current dichotomy in approaches to AI:
 \begin{list}{}{}
-	\item Deep Learning for perceptive tasks (vision, language)
+	\item Deep Learning for perceptive tasks and System 1 (vision, language)
 	\item Symbolic or rule based formal systems for System 2 (planning and reasoning)
 \end{list}
-An important goal of AI research would be to overcome this dichotomy.
-%TODO prospect theory
-
+An important goal of AI research would be to \textbf{overcome this dichotomy}: a \textit{unified model}.
 \end{document}
