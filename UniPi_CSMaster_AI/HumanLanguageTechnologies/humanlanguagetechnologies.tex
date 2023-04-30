@@ -1570,7 +1570,7 @@ The decoder has both those layers, with an attention layer between them that hel
 \paragraph{Training Tricks}
 \begin{list}{}{}
 	\item \textbf{Residual Connections}: deep networks are bad at learning the identity function. Therefore, directly passing "raw" embeddings to the next layer can be helpful
-	$$x_l = F(x_{l-1} + x_{l-1}$$
+	$$x_l = F(x_{l-1} + x_{l-1})$$
 	\item \textbf{Layer Normalization}: may be difficult to train the parameters of a given layer because its input from the layer beneath keeps shifting. Solution: reduce uninformative variation by normalizing to zero mean and std. dev. one within each layer
 	$$x_l' = \frac{x_l - \mu_l}{\sigma_l + \epsilon}$$
 	Helps models to train faster.
@@ -1642,7 +1642,7 @@ BERT-base is 12 layers, BERT-large is 24 layers, of transformer encoders.
 Problem: mask token never seen at fine-tuning. Solution: $15\%$ of the words to predict don't replace with [MASK] 100\% of the time. Instead: 80\% of the time replace with [MASK], 10\% replace with random word, and 10\% keep the same.\\
 To learn relationships between sentences (\textbf{next sentence prediction}), predict whether Sentence $B$ is actual sentence that follows Sentence $A$, or a random sentence.
 \paragraph{Wordpiece} These models give a good balance between the flexibility of single characters and the efficiency of full words for decoding. Also sidesteps the need for special treatment of unknown words: common words are in the vocabulary, while other words are built from pieces (e.g. hypathia = h \#\#yp \#\#ati \#\#a)\\
-Wordpiece model: given a training corpus and a number of desired tokes $D$, select $D$ wordpieces such that the resulting corpus is minimal in the number of wordpieces when segmented according to the chosen wordpiece model.
+Wordpiece model: given a training corpus and a number of desired tokens $D$, select $D$ wordpieces such that the resulting corpus is minimal in the number of wordpieces when segmented according to the chosen wordpiece model.
 \paragraph{Pretraining Encoder-Decoders} For those we could do something like language modeling, but where a prefix $w_1,\ldots,w_T$ of every input is provided to the encoder and is not predicted.
 $$h_1,\ldots,h_T = \hbox{Encoder}(w_1,\ldots,w_T)$$
 $$h_{T+1},\ldots,h_2 = \hbox{Decoder}(w_1,\ldots,w_T,h_1,\ldots,h_T)$$
