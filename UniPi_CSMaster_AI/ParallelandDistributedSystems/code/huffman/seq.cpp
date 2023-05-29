@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include "utimer.cpp"
 
 #define MAX_HEIGHT 50
 
@@ -121,15 +122,15 @@ bool isLeaf(const shared_ptr<Node>& node) {
     return !(node->left) && !(node->right);
 }
 
-void printCodes(const shared_ptr<Node>& root, int list[], int top, map<char, string>& codes) {
+void generateCodes(const shared_ptr<Node>& root, int list[], int top, map<char, string>& codes) {
     if (root->left) {
         list[top] = 0;
-        printCodes(root->left, list, top + 1, codes);
+        generateCodes(root->left, list, top + 1, codes);
     }
 
     if (root->right) {
         list[top] = 1;
-        printCodes(root->right, list, top + 1, codes);
+        generateCodes(root->right, list, top + 1, codes);
     }
 
     if (isLeaf(root)) {
@@ -138,31 +139,23 @@ void printCodes(const shared_ptr<Node>& root, int list[], int top, map<char, str
             code += to_string(list[i]);
         }
         codes[root->value] = code;
-        //cout << root->value << " - " << code << endl;
     }
 }
 
-void Huffman(const vector<char>& items, const vector<int>& frequencies, int size, map<char, string>& codes) {
+map<char, string> Huffman(const vector<char>& items, const vector<int>& frequencies, int size) {
+    map<char, string> codes;
     auto root = buildHuffmanTree(items, frequencies, size);
 
     int list[MAX_HEIGHT];
     int top = 0;
 
-    printCodes(root, list, top, codes);
+    generateCodes(root, list, top, codes);
+    return codes;
 }
 
-void readFileData(const string& filename, vector<char>& items, vector<int>& frequencies) {
-    ifstream file(filename);
-    if (!file) {
-        cout << "Cannot open: " << filename << endl;
-        return;
-    }
-
-    string text;
-    getline(file, text);
-    file.close();
-    
+void readFileData(string& text, vector<char>& items, vector<int>& frequencies) {  
     if (!text.empty()) {
+        /*
         for (size_t i = 0; i < text.size() - 1; i++) {
             for (size_t j = i + 1; j < text.size(); j++) {
                 if (text[i] > text[j]) {
@@ -172,9 +165,9 @@ void readFileData(const string& filename, vector<char>& items, vector<int>& freq
                 }
             }
         }
+        */
 
         for (char ch : text) {
-            ch = tolower(ch);  //to simplify things a bit
             bool found = false;
             size_t index = 0;
             for (; index < items.size(); index++) {
@@ -194,25 +187,23 @@ void readFileData(const string& filename, vector<char>& items, vector<int>& freq
     }
 }
 
-void encodeFile(const string& filename, map<char, string>& codes) {
-    ifstream file(filename);
-    if (!file) {
-        cout << "Cannot open: " << filename << endl;
-        return;
-    }
-
-    string text;
-    getline(file, text);
-    file.close();
-    
+string encodeFile(const string& text, map<char, string>& codes) {
+    string encoded;
     if (!text.empty()) {
-        string encoded;
         for (char ch : text) {
-            cout << codes[ch] << " ";
+            #ifdef OUTPUT
+            cout << codes[ch];
+            #endif
+
             encoded += codes[ch];
         }
+
+        #ifdef OUTPUT
         cout << endl;
+        #endif
     }
+
+    return encoded;
 }
 
 int main(int argc, char **argv) {
@@ -221,22 +212,35 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    ifstream file(argv[1]);
+    if (!file) {
+        cout << "Cannot open: " << argv[1] << endl;
+        return -2;
+    }
+
+    string text;
+    getline(file, text);
+    file.close();
+
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;
+    int size = 0;
+    string encoded;
 
-    readFileData(argv[1], items, frequencies);
-
-    int size = items.size();
-
-    cout << "Character - Huffman code\n-----\n";
-    Huffman(items, frequencies, size, codes);
+    {
+        utimer tseq("Huffman codes sequential");
+        readFileData(text, items, frequencies);
+        size = items.size();
+        codes = Huffman(items, frequencies, size);
+        encoded = encodeFile(text, codes);
+    }
+    
+    #ifdef OUTPUT
     for (auto const& x : codes) {
         std::cout << x.first << " - " << x.second << std::endl;
     }
-    cout << "-----\nEncoded file\n-----\n";
-
-    encodeFile(argv[1], codes);
+    #endif
 
     return 0;
 }
