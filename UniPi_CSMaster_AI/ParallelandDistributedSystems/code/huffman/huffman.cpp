@@ -143,18 +143,6 @@ void generateCodes(const shared_ptr<Node>& root, int list[], int top, map<char, 
 
 void readFileData(string& text, vector<char>& items, vector<int>& frequencies) {  
     if (!text.empty()) {
-        /*
-        for (size_t i = 0; i < text.size() - 1; i++) {
-            for (size_t j = i + 1; j < text.size(); j++) {
-                if (text[i] > text[j]) {
-                    char temp = text[i];
-                    text[i] = text[j];
-                    text[j] = temp;
-                }
-            }
-        }
-        */
-
         for (char ch : text) {
             bool found = false;
             size_t index = 0;

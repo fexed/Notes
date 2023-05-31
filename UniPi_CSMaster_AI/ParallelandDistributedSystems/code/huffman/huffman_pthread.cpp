@@ -3,19 +3,21 @@
 #include <algorithm>
 #include <pthread.h>
 
-#define MAX_THREADS 10
+#ifndef MAX_THREADS
+    #define MAX_THREADS 10
+#endif
 #define PORTION_SIZE 1000
 
 typedef struct {
     shared_ptr<string> text;
     vector<char> items;
     vector<int> frequencies;
-} WorkerData;
+} FarmWorkerData;
 unsigned int currentStartingPosition = 0;
 pthread_mutex_t farmMutex;
 
 void* computePortionData(void* param) {
-    WorkerData* data = (WorkerData*)param;
+    FarmWorkerData* data = (FarmWorkerData*)param;
     int startingPosition;
 
     while(1) {
@@ -30,6 +32,8 @@ void* computePortionData(void* param) {
 
     pthread_exit(NULL);
 }
+
+
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -58,7 +62,7 @@ int main(int argc, char **argv) {
     {
         utimer tthreads("Huffman codes pthread");
         pthread_t threads[MAX_THREADS];
-        WorkerData data[MAX_THREADS];
+        FarmWorkerData data[MAX_THREADS];
         int numPortions = fileContent.length() / PORTION_SIZE;
         int start = 0;
 
