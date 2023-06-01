@@ -6,7 +6,7 @@ I will keep this updated as much as I can. For every doubt, correction and fix, 
 
 🗑️ marks notes that are not very good but may contain few useful tidbits of information
 
-## UniPi Master's Degree (Artificial Intelligence)
+## UniPi
 
 Course | Notes | Project | Other
 ------|---------|----------|------
