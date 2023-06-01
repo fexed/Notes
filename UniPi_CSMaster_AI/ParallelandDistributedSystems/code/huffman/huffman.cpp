@@ -196,3 +196,15 @@ string decodeText(const string& text, map<char, string> codes) {
 
     return decoded;
 }
+
+string readFile(char* filename) {
+    ifstream file(filename);
+    if (!file) {
+        cout << "Cannot open: " << filename << endl;
+        return "";
+    }
+    string fileContent;
+    getline(file, fileContent);
+    file.close();
+    return fileContent;
+}

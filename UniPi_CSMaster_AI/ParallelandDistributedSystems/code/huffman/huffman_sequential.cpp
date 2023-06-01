@@ -7,15 +7,9 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    ifstream file(argv[1]);
-    if (!file) {
-        cout << "Cannot open: " << argv[1] << endl;
-        return -2;
-    }
-
-    string text;
-    getline(file, text);
-    file.close();
+    string text = readFile(argv[1]);
+    if (text == "") return -2;
+    
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;

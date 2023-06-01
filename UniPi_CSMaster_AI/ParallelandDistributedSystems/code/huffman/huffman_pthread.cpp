@@ -41,16 +41,9 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    ifstream file(argv[1]);
-    if (!file) {
-        cout << "Cannot open: " << argv[1] << endl;
-        return -2;
-    }
-
-    string fileContent;
-    getline(file, fileContent);
-    file.close();
-    shared_ptr<string> text = make_shared<string>(fileContent);
+    shared_ptr<string> text = make_shared<string>(readFile(argv[1]));
+    if (*text == "") return -2;
+    
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;
@@ -63,21 +56,22 @@ int main(int argc, char **argv) {
         utimer tthreads("Huffman codes pthread");
         pthread_t threads[MAX_THREADS];
         FarmWorkerData data[MAX_THREADS];
-        int numPortions = fileContent.length() / PORTION_SIZE;
+        int numPortions = text->length() / PORTION_SIZE;
         int start = 0;
 
         for (int i = 0; i < MAX_THREADS; i++) {
             data[i].text = text;
 
             if (pthread_create(&threads[i], NULL, computePortionData, (void*)&data[i]) != 0) {
-                perror("Error creating thread");
-                return 1;
+                cout << "Error creating thread" << endl;
+                return -3;
             }
         }
+
         for (int i = 0; i < MAX_THREADS; i++) {
             if (pthread_join(threads[i], NULL) != 0) {
-                perror("Error joining thread");
-                return 1;
+                cout << "Error joining thread" << endl;
+                return -4;
             } else {
                 for (int j = 0; j < data[i].items.size(); j++) {
                     std::vector<char>::iterator itr = std::find(items.begin(), items.end(), data[i].items[j]);
