@@ -8,6 +8,12 @@
 
 using namespace std;
 
+#define ARG_CHECK \
+if (argc != 2) { \
+    cout << "Usage: " << argv[0] << " <filename>" << endl; \
+    return -1; \
+} \
+
 struct Node {
     char value;
     unsigned int frequency;

@@ -36,14 +36,11 @@ void* computePortionData(void* param) {
 
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        cout << "Usage: " << argv[0] << " <filename>" << endl;
-        return -1;
-    }
+    ARG_CHECK
 
     shared_ptr<string> text = make_shared<string>(readFile(argv[1]));
     if (*text == "") return -2;
-    
+
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;
