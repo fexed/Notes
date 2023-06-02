@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <iomanip>
 
 #define MAX_HEIGHT 50
 
@@ -39,6 +40,23 @@ shared_ptr<Node> createNode(char item, unsigned int frequency) {
 
 shared_ptr<MinHeap> createMinimumHeap(unsigned int capacity) {
     return make_shared<MinHeap>(capacity);
+}
+
+void printMinimumHeap(const shared_ptr<Node>& root, int level = 0, char prefix = ' ') {
+    if (!root)
+        return;
+
+    printMinimumHeap(root->right, level + 1, '/');
+
+    for (int i = 0; i < level; i++)
+        cout << "    ";
+
+    if (prefix != ' ')
+        cout << prefix << "----";
+
+    cout << root->value << endl;
+
+    printMinimumHeap(root->left, level + 1, '\\');
 }
 
 // perform rotations
