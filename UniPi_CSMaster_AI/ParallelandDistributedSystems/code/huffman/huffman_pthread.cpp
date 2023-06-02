@@ -51,7 +51,7 @@ void* buildHeap(void* param) {
         pthread_mutex_unlock(&heapMutex);
 
         if(index >= data->items->size()) break;
-        data->minHeap->list.push_back(createNode(data->items->at(index), data->frequencies->at(index)));
+        data->minHeap->list[index] = createNode(data->items->at(index), data->frequencies->at(index));
     }
 
     pthread_exit(NULL);
@@ -102,6 +102,9 @@ int main(int argc, char **argv) {
         }
 
         auto minHeap = createMinimumHeap(items.size());
+        for (int i = 0; i < items.size(); i++) {
+            minHeap->list.push_back(nullptr);
+        }
         HeapWorkerData heapData[MAX_THREADS];
         for (int i = 0; i < MAX_THREADS; i++) {
             heapData[i].minHeap = minHeap;
@@ -123,8 +126,21 @@ int main(int argc, char **argv) {
 
         minHeap->size = items.size();
         buildMinimumHeap(minHeap);
-        
+        while (minHeap->size != 1) {
+            auto left = extract(minHeap);
+            auto right = extract(minHeap);
 
+            auto top = createNode('$', left->frequency + right->frequency);
+
+            top->left = left;
+            top->right = right;
+
+            insert(minHeap, top);
+        }
+        auto root = extract(minHeap);
+        generateCodes(root, list, top, codes);
+        encoded = encodeFile(*text, codes);
+        
 //        readFileData(text, items, frequencies);
 
 //        size = items.size();
