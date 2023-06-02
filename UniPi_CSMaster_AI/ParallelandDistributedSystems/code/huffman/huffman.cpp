@@ -209,8 +209,13 @@ string readFile(char* filename) {
         cout << "Cannot open: " << filename << endl;
         return "";
     }
-    string fileContent;
-    getline(file, fileContent);
+    string fileContent = "";
+    string tmpstring = "";
+    while (file.good()) {
+        getline(file, tmpstring);
+        fileContent += tmpstring;
+        fileContent += "\n";
+    }
     file.close();
     return fileContent;
 }
