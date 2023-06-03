@@ -6,6 +6,9 @@
 #ifndef MAX_THREADS
     #define MAX_THREADS 100
 #endif
+#ifndef VERIFY
+    #define VERIFY false
+#endif
 #define PORTION_SIZE 1000
 
 typedef struct {
@@ -186,18 +189,19 @@ int main(int argc, char **argv) {
             }
         }
     }
-    
-    {
-        utimer decode("Decoding text");
-        decoded = decodeText(encoded, codes);
-    }
 
-    if (decoded == *text) {
-        cout << "Verified!" << endl;
-    } else {
-        cout << "Encoding not verified..." << endl;
-    }
+    if (VERIFY) {   
+        {
+            utimer decode("Decoding text");
+            decoded = decodeText(encoded, codes);
+        }
 
+        if (decoded == *text) {
+            cout << "Verified!" << endl;
+        } else {
+            cout << "Encoding not verified..." << endl;
+        }
+    }
     
     return 0;
 }

@@ -1,6 +1,10 @@
 #include "huffman.cpp"
 #include "utimer.cpp"
 
+#ifndef VERIFY
+    #define VERIFY false
+#endif
+
 int main(int argc, char **argv) {
     ARG_CHECK
 
@@ -28,15 +32,17 @@ int main(int argc, char **argv) {
         encoded = encodeText(text, codes);
     }
 
-    {
-        utimer decode("Decoding text");
-        decoded = decodeText(encoded, codes);
-    }
+    if (VERIFY) {   
+        {
+            utimer decode("Decoding text");
+            decoded = decodeText(encoded, codes);
+        }
 
-    if (decoded == text) {
-        cout << "Verified!" << endl;
-    } else {
-        cout << "Encoding not verified..." << endl;
+        if (decoded == text) {
+            cout << "Verified!" << endl;
+        } else {
+            cout << "Encoding not verified..." << endl;
+        }
     }
 
     return 0;
