@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
     int top = 0;
     int size = 0;
     string encoded;
+    string decoded;
 
     {
         utimer tseq("Huffman codes sequential");
@@ -24,7 +25,18 @@ int main(int argc, char **argv) {
         auto root = buildHuffmanTree(items, frequencies, size);
 
         generateCodes(root, list, top, codes);
-        encoded = encodeFile(text, codes);
+        encoded = encodeText(text, codes);
+    }
+
+    {
+        utimer decode("Decoding text");
+        decoded = decodeText(encoded, codes);
+    }
+
+    if (decoded == text) {
+        cout << "Verified!" << endl;
+    } else {
+        cout << "Encoding not verified..." << endl;
     }
 
     return 0;

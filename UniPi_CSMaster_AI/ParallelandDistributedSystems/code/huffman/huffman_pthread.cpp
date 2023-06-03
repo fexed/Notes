@@ -4,7 +4,7 @@
 #include <pthread.h>
 
 #ifndef MAX_THREADS
-    #define MAX_THREADS 10
+    #define MAX_THREADS 100
 #endif
 #define PORTION_SIZE 1000
 
@@ -13,16 +13,16 @@ typedef struct {
     vector<char> items;
     vector<int> frequencies;
 } PortionWorkerData;
-unsigned int currentStartingPosition = 0;
+unsigned int portionStartingPosition = 0;
 pthread_mutex_t portionMutex;
 
 void* computePortionData(void* param) {
     PortionWorkerData* data = (PortionWorkerData*)param;
-    int startingPosition;
+    unsigned int startingPosition;
 
     while(1) {
         pthread_mutex_lock(&portionMutex);
-        startingPosition = currentStartingPosition++;
+        startingPosition = portionStartingPosition++;
         pthread_mutex_unlock(&portionMutex);
 
         if (startingPosition*PORTION_SIZE >= data->text->length()) break;
@@ -43,7 +43,7 @@ pthread_mutex_t heapMutex;
 
 void* buildHeap(void* param) {
     HeapWorkerData* data = (HeapWorkerData*)param;
-    int index;
+    unsigned int index;
 
     while(1) {
         pthread_mutex_lock(&heapMutex);
@@ -53,6 +53,20 @@ void* buildHeap(void* param) {
         if(index >= data->items->size()) break;
         data->minHeap->list[index] = createNode(data->items->at(index), data->frequencies->at(index));
     }
+
+    pthread_exit(NULL);
+}
+
+typedef struct {
+    string portion;
+    shared_ptr<map<char, string>> codes;
+    string encodedPortion;
+} PortionEncoderData;
+
+void* portionEncoder(void* param) {
+    PortionEncoderData* data = (PortionEncoderData*)param;
+
+    data->encodedPortion = encodeText(data->portion, *(data->codes));
 
     pthread_exit(NULL);
 }
@@ -69,6 +83,7 @@ int main(int argc, char **argv) {
     int list[MAX_HEIGHT];
     int top = 0;
     string encoded;
+    string decoded;
 
     {
         utimer tthreads("Huffman codes pthread");
@@ -89,7 +104,7 @@ int main(int argc, char **argv) {
                 cout << "Error joining thread" << endl;
                 return -4;
             } else {
-                for (int j = 0; j < portionData[i].items.size(); j++) {
+                for (unsigned int j = 0; j < portionData[i].items.size(); j++) {
                     std::vector<char>::iterator itr = std::find(items.begin(), items.end(), portionData[i].items[j]);
                     if (itr != items.cend()) {
                         frequencies[std::distance(items.begin(), itr)] += portionData[i].frequencies[j];
@@ -102,7 +117,7 @@ int main(int argc, char **argv) {
         }
 
         auto minHeap = createMinimumHeap(items.size());
-        for (int i = 0; i < items.size(); i++) {
+        for (unsigned int i = 0; i < items.size(); i++) {
             minHeap->list.push_back(nullptr);
         }
         HeapWorkerData heapData[MAX_THREADS];
@@ -139,16 +154,50 @@ int main(int argc, char **argv) {
         }
         auto root = extract(minHeap);
         generateCodes(root, list, top, codes);
-        encoded = encodeFile(*text, codes);
-        
-//        readFileData(text, items, frequencies);
 
-//        size = items.size();
-//        auto root = buildHuffmanTree(items, frequencies, size);
+        int textLength = text->size();
+        int portionSize = textLength / MAX_THREADS;
+        int remaining = textLength % MAX_THREADS;
+        auto it = text->begin();
+        PortionEncoderData portionEncoderData[MAX_THREADS];
+        for (int i = 0; i < MAX_THREADS; i++) {
+            int currentPortionSize = portionSize + (remaining > 0 ? 1 : 0);
 
-//        generateCodes(root, list, top, codes);
-//        encoded = encodeFile(text, codes);
+            portionEncoderData[i].portion = string(it, it + currentPortionSize);
+            portionEncoderData[i].codes = make_shared<map<char, string>>(codes);
+
+            if (pthread_create(&threads[i], NULL, portionEncoder, (void*)&portionEncoderData[i]) != 0) {
+                cout << "Error creating thread" << endl;
+                return -3;
+            }
+
+            it += currentPortionSize;
+            remaining--;
+        }
+
+        encoded = "";
+
+        for (int i = 0; i < MAX_THREADS; i++) {
+            if (pthread_join(threads[i], NULL) != 0) {
+                cout << "Error joining thread" << endl;
+                return -4;
+            } else {
+                encoded += portionEncoderData[i].encodedPortion;
+            }
+        }
     }
+    
+    {
+        utimer decode("Decoding text");
+        decoded = decodeText(encoded, codes);
+    }
+
+    if (decoded == *text) {
+        cout << "Verified!" << endl;
+    } else {
+        cout << "Encoding not verified..." << endl;
+    }
+
     
     return 0;
 }

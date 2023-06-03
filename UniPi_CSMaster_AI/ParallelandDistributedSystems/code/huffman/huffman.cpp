@@ -187,7 +187,7 @@ void readFileData(string& text, vector<char>& items, vector<int>& frequencies) {
     }
 }
 
-string encodeFile(const string& text, map<char, string> codes) {
+string encodeText(const string& text, map<char, string> codes) {
     string encoded;
     if (!text.empty()) {
         for (char ch : text) {
