@@ -5,4 +5,4 @@ threads:
 	g++ -std=c++17 -Wall -pedantic -pthread huffman_pthread.cpp -o huffman 
 
 fastflow:
-	g++ -std=c++17 -g -Wall -pedantic huffman_fastflow.cpp -o huffman
+	g++ -std=c++17 -Wall -pedantic -pthread huffman_fastflow.cpp -o huffman
