@@ -9,6 +9,25 @@
 
 using namespace ff;
 
+typedef struct {
+    vector<char> items;
+    vector<int> frequencies;
+} PortionWorkerData;
+struct testStage: ff_node_t<PortionWorkerData> {
+    PortionWorkerData data;
+
+    int svc_init() {
+        data = PortionWorkerData();
+        return 0;
+    }
+
+    PortionWorkerData* svc(string portion) {
+        readFileData(portion, data.items, data.frequencies);
+
+        return &data;
+    }
+};
+
 int main(int argc, char **argv) {
     ARG_CHECK
 
@@ -26,6 +45,12 @@ int main(int argc, char **argv) {
     {
         utimer tfastflow("Huffman codes fastflow");
         
+        vector<unique_ptr<ff_node>> W;
+        W.push_back(make_unique<testStage>())
+        W.push_back(make_unique<testStage>())
+        W.push_back(make_unique<testStage>())
+        W.push_back(make_unique<testStage>())
 
+        
     }
 }
