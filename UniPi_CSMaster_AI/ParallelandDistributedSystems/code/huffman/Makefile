@@ -1,8 +1,8 @@
 seq:
-	g++ -std=c++17 huffman_sequential.cpp -o huffman -Wall
+	g++ -std=c++17 -Wall -pedantic huffman_sequential.cpp -o huffman
 
 threads:
-	g++ -std=c++17 huffman_pthread.cpp -o huffman -Wall -pthread
+	g++ -std=c++17 -Wall -pedantic -pthread huffman_pthread.cpp -o huffman 
 
 fastflow:
-	g++ -std=c++17 -g huffman_fastflow.cpp -o huffman -Wall
+	g++ -std=c++17 -g -Wall -pedantic huffman_fastflow.cpp -o huffman
