@@ -3,17 +3,39 @@
 #include <ff/ff.hpp>
 #include <ff/pipeline.hpp>
 
+#ifndef MAX_THREADS
+    #define MAX_THREADS 100
+#endif
 #ifndef VERIFY
     #define VERIFY false
 #endif
+#define PORTION_SIZE 1000
 
 using namespace ff;
+
+struct InputStage: ff_node_t<string, string> {
+    string text;
+
+    InputStage(const string& param) : text(param) {}
+
+    string* svc(string* ignored) {
+        unsigned int pos = 0;
+
+        while(pos * PORTION_SIZE <= text.length()) {
+            string portion = text.substr(pos*PORTION_SIZE, PORTION_SIZE);
+            ff_send_out(&portion);
+            pos++;
+        }
+
+        return EOS;
+    }
+};
 
 typedef struct {
     vector<char> items;
     vector<int> frequencies;
 } PortionWorkerData;
-struct testStage: ff_node_t<PortionWorkerData> {
+struct FarmWorker: ff_node_t<string, PortionWorkerData> {
     PortionWorkerData data;
 
     int svc_init() {
@@ -21,8 +43,8 @@ struct testStage: ff_node_t<PortionWorkerData> {
         return 0;
     }
 
-    PortionWorkerData* svc(string portion) {
-        readFileData(portion, data.items, data.frequencies);
+    PortionWorkerData* svc(string* portion) {
+        readFileData(*portion, data.items, data.frequencies);
 
         return &data;
     }
@@ -45,12 +67,18 @@ int main(int argc, char **argv) {
     {
         utimer tfastflow("Huffman codes fastflow");
         
-        vector<unique_ptr<ff_node>> W;
-        W.push_back(make_unique<testStage>())
-        W.push_back(make_unique<testStage>())
-        W.push_back(make_unique<testStage>())
-        W.push_back(make_unique<testStage>())
+        vector<unique_ptr<ff_node>> portionFarmWorkers;
+        for (int i = 0; i < MAX_THREADS; i++) {
+            portionFarmWorkers.push_back(make_unique<FarmWorker>());
+        }
+        ff_Farm<PortionWorkerData> portionFarm(move(portionFarmWorkers));
 
-        
+        ff_Pipe<> pipeline(
+            make_unique<InputStage>(*text),
+            portionFarm
+        );
+
+        pipeline.run_and_wait_end();
     }
+    return 0;
 }
