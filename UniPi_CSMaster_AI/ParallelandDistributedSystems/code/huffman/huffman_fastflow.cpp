@@ -22,11 +22,10 @@ struct InputStage: ff_node_t<string, string> {
         unsigned int pos = 0;
 
         while(pos * PORTION_SIZE <= text.length()) {
-            string portion = text.substr(pos*PORTION_SIZE, PORTION_SIZE);
-            ff_send_out(&portion);
+            string* portion = new string(text.substr(pos*PORTION_SIZE, PORTION_SIZE));
+            ff_send_out(portion);
             pos++;
         }
-
         return EOS;
     }
 };
@@ -36,6 +35,18 @@ typedef struct {
     vector<int> frequencies;
 } PortionWorkerData;
 struct FarmWorker: ff_node_t<string, PortionWorkerData> {
+
+    PortionWorkerData* svc(string* portion) {
+        PortionWorkerData* data = new PortionWorkerData();
+        readFileData(*portion, data->items, data->frequencies);
+        free(portion);
+        ff_send_out(data);
+
+        return GO_ON;
+    }
+};
+
+struct FarmCollector: ff_node_t<PortionWorkerData, PortionWorkerData> {
     PortionWorkerData data;
 
     int svc_init() {
@@ -43,10 +54,19 @@ struct FarmWorker: ff_node_t<string, PortionWorkerData> {
         return 0;
     }
 
-    PortionWorkerData* svc(string* portion) {
-        readFileData(*portion, data.items, data.frequencies);
+    PortionWorkerData* svc(PortionWorkerData* portionData) {
+        for (unsigned int j = 0; j < portionData->items.size(); j++) {
+            std::vector<char>::iterator itr = std::find(data.items.begin(), data.items.end(), portionData->items[j]);
+            if (itr != data.items.cend()) {
+                data.frequencies[std::distance(data.items.begin(), itr)] += portionData->frequencies[j];
+            } else {
+                data.items.push_back(portionData->items[j]);
+                data.frequencies.push_back(portionData->frequencies[j]);
+            }
+        }
+        free(portionData);
 
-        return &data;
+        return GO_ON;
     }
 };
 
@@ -75,7 +95,8 @@ int main(int argc, char **argv) {
 
         ff_Pipe<> pipeline(
             make_unique<InputStage>(*text),
-            portionFarm
+            portionFarm,
+            make_unique<FarmCollector>()
         );
 
         pipeline.run_and_wait_end();
