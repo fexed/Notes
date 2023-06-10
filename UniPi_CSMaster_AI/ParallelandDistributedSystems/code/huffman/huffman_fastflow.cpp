@@ -39,33 +39,55 @@ struct FarmWorker: ff_node_t<string, PortionWorkerData> {
     PortionWorkerData* svc(string* portion) {
         PortionWorkerData* data = new PortionWorkerData();
         readFileData(*portion, data->items, data->frequencies);
-        free(portion);
-        ff_send_out(data);
+        delete portion;
+
+        return data;
+    }
+};
+
+struct FarmCollector: ff_node_t<PortionWorkerData, PortionWorkerData> {
+    PortionWorkerData* data;
+
+    FarmCollector(PortionWorkerData* portionWorkerData) : data(portionWorkerData) {}
+
+    PortionWorkerData* svc(PortionWorkerData* portionData) {
+        for (unsigned int j = 0; j < portionData->items.size(); j++) {
+            std::vector<char>::iterator itr = std::find(data->items.begin(), data->items.end(), portionData->items[j]);
+            if (itr != data->items.cend()) {
+                data->frequencies[std::distance(data->items.begin(), itr)] += portionData->frequencies[j];
+            } else {
+                data->items.push_back(portionData->items[j]);
+                data->frequencies.push_back(portionData->frequencies[j]);
+            }
+        }
+        delete portionData;
 
         return GO_ON;
     }
 };
 
-struct FarmCollector: ff_node_t<PortionWorkerData, PortionWorkerData> {
-    PortionWorkerData data;
+struct HeapIndexer: ff_node_t<int> {
+    int max;
 
-    int svc_init() {
-        data = PortionWorkerData();
-        return 0;
-    }
+    HeapIndexer(int max) : max(max) {}
 
-    PortionWorkerData* svc(PortionWorkerData* portionData) {
-        for (unsigned int j = 0; j < portionData->items.size(); j++) {
-            std::vector<char>::iterator itr = std::find(data.items.begin(), data.items.end(), portionData->items[j]);
-            if (itr != data.items.cend()) {
-                data.frequencies[std::distance(data.items.begin(), itr)] += portionData->frequencies[j];
-            } else {
-                data.items.push_back(portionData->items[j]);
-                data.frequencies.push_back(portionData->frequencies[j]);
-            }
+    int* svc(int* ignored) {
+        for (int i = 0; i < max; i++) {
+            ff_send_out(new int(i));
         }
-        free(portionData);
 
+        return EOS;
+    }
+};
+
+struct HeapWorker: ff_node_t<int> {
+    shared_ptr<MinHeap> minHeap;
+    PortionWorkerData* data;
+
+    HeapWorker(shared_ptr<MinHeap> minHeap, PortionWorkerData* portionWorkerData) : minHeap(minHeap), data(portionWorkerData) {}
+
+    int* svc(int* index) {
+        minHeap->list[*index] = createNode(data->items[*index], data->frequencies[*index]);
         return GO_ON;
     }
 };
@@ -87,19 +109,57 @@ int main(int argc, char **argv) {
     {
         utimer tfastflow("Huffman codes fastflow");
         
+        unique_ptr<InputStage> inputStage = make_unique<InputStage>(*text);
         vector<unique_ptr<ff_node>> portionFarmWorkers;
         for (int i = 0; i < MAX_THREADS; i++) {
             portionFarmWorkers.push_back(make_unique<FarmWorker>());
         }
         ff_Farm<PortionWorkerData> portionFarm(move(portionFarmWorkers));
+        PortionWorkerData* data = new PortionWorkerData();
+        unique_ptr<FarmCollector> collector = make_unique<FarmCollector>(data);
 
-        ff_Pipe<> pipeline(
-            make_unique<InputStage>(*text),
+        ff_Pipe<> dataPipeline(
+            inputStage,
             portionFarm,
-            make_unique<FarmCollector>()
+            collector
         );
+        dataPipeline.run_and_wait_end();
+        
+        auto minHeap = createMinimumHeap(data->items.size());
+        for (unsigned int i = 0; i < data->items.size(); i++) {
+            minHeap->list.push_back(nullptr);
+        }
+        
+        unique_ptr<HeapIndexer> heapIndexer = make_unique<HeapIndexer>(data->items.size());
+        vector<unique_ptr<ff_node>> heapFarmWorkers;
+        for (int i = 0; i < MAX_THREADS; i++) {
+            heapFarmWorkers.push_back(make_unique<HeapWorker>(minHeap, data));
+        }
+        ff_Farm<int> heapFarm(move(heapFarmWorkers));
 
-        pipeline.run_and_wait_end();
+        ff_Pipe<> heapPipeline(
+            heapIndexer,
+            heapFarm
+        );
+        heapPipeline.run_and_wait_end();
+
+        minHeap->size = data->items.size();
+        buildMinimumHeap(minHeap);
+        while (minHeap->size != 1) {
+            auto left = extract(minHeap);
+            auto right = extract(minHeap);
+
+            auto top = createNode('$', left->frequency + right->frequency);
+
+            top->left = left;
+            top->right = right;
+
+            insert(minHeap, top);
+        }
+        auto root = extract(minHeap);
+        generateCodes(root, list, top, codes);
+
+        printCodes(codes);
     }
     return 0;
 }

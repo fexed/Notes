@@ -237,3 +237,9 @@ string readFile(char* filename) {
     file.close();
     return fileContent;
 }
+
+void printCodes(map<char, string>& codes) {
+    for (const auto& pair : codes) {
+        std::cout << pair.first << " -> " << pair.second << std::endl;
+    } 
+}
