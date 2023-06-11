@@ -16,14 +16,13 @@ using namespace ff;
 struct Partitioner: ff_node_t<string, string> {
     string text;
 
-    Partitioner(const string& param) : text(param) {}
+    Partitioner(const string& text) : text(text) {}
 
     string* svc(string* ignored) {
         unsigned int pos = 0;
 
         while(pos * PORTION_SIZE <= text.length()) {
-            string* portion = new string(text.substr(pos*PORTION_SIZE, PORTION_SIZE));
-            ff_send_out(portion);
+            ff_send_out(new string(text.substr(pos*PORTION_SIZE, PORTION_SIZE)));
             pos++;
         }
         return EOS;
@@ -94,6 +93,7 @@ struct CodesBuilder: ff_node_t<PortionWorkerData, map<char, string>> {
             minHeap->list.push_back(createNode(data->items[i], data->frequencies[i]));
         }
         minHeap->size = data->items.size();
+        delete data;
         buildMinimumHeap(minHeap);
         while (minHeap->size != 1) {
             auto left = extract(minHeap);
@@ -125,10 +125,9 @@ struct EncoderPartitioner: ff_node_t<map<char, string>, EncoderData> {
         unsigned int pos = 0;
 
         while(pos * PORTION_SIZE <= text.length()) {
-            string portion(text.substr(pos*PORTION_SIZE, PORTION_SIZE));
             EncoderData* data = new EncoderData();
-            data->portion = portion;
-            data->codes = *codes;
+            data->portion = string(text.substr(pos*PORTION_SIZE, PORTION_SIZE));;
+            data->codes = map<char, string>(*codes);
             ff_send_out(data);
             pos++;
         }
