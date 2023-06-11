@@ -7,7 +7,7 @@
     #define MAX_THREADS 100
 #endif
 #ifndef VERIFY
-    #define VERIFY false
+    #define VERIFY true
 #endif
 #define PORTION_SIZE 1000
 
@@ -35,13 +35,21 @@ typedef struct {
     vector<int> frequencies;
 } PortionWorkerData;
 struct FarmWorker: ff_node_t<string, PortionWorkerData> {
+    PortionWorkerData* data;
+
+    FarmWorker() {
+       data = new PortionWorkerData();
+    }
 
     PortionWorkerData* svc(string* portion) {
-        PortionWorkerData* data = new PortionWorkerData();
         readFileData(*portion, data->items, data->frequencies);
         delete portion;
 
-        return data;
+        return GO_ON;
+    }
+    
+    void eosnotify(ssize_t id) {
+        ff_send_out(data);
     }
 };
 
@@ -80,6 +88,19 @@ struct HeapIndexer: ff_node_t<int> {
     }
 };
 
+struct HeapWorker: ff_node_t<int> {
+    shared_ptr<MinHeap> minHeap;
+    PortionWorkerData* data;
+
+    HeapWorker(shared_ptr<MinHeap> minHeap, PortionWorkerData* portionWorkerData) : minHeap(minHeap), data(portionWorkerData) {}
+
+    int* svc(int* index) {
+        minHeap->list[*index] = createNode(data->items[*index], data->frequencies[*index]);
+        delete index;
+        return GO_ON;
+    }
+};
+
 struct PortionEncoder: ff_node_t<string> {
     map<char, string> codes;
 
@@ -88,6 +109,7 @@ struct PortionEncoder: ff_node_t<string> {
     string* svc(string* portion) {
         string* encoded = new string("");
         *encoded = encodeText(*portion, codes);
+        delete portion;
         return encoded;
     }
 };
@@ -101,28 +123,21 @@ struct Concat: ff_node_t<string> {
 
     string* svc(string* portion) {
         *result += *portion;
-        return GO_ON;
-    }
-};
-
-struct HeapWorker: ff_node_t<int> {
-    shared_ptr<MinHeap> minHeap;
-    PortionWorkerData* data;
-
-    HeapWorker(shared_ptr<MinHeap> minHeap, PortionWorkerData* portionWorkerData) : minHeap(minHeap), data(portionWorkerData) {}
-
-    int* svc(int* index) {
-        minHeap->list[*index] = createNode(data->items[*index], data->frequencies[*index]);
+        delete portion;
         return GO_ON;
     }
 };
 
 int main(int argc, char **argv) {
+    // Checking the correct usage of this tool
+    // usage: ./huffman <filename>
     ARG_CHECK
 
+    // Reading and handling file
     shared_ptr<string> text = make_shared<string>(readFile(argv[1]));
     if (*text == "") return -2;
 
+    // Initializing common variables
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;
@@ -184,7 +199,6 @@ int main(int argc, char **argv) {
         auto root = extract(minHeap);
         generateCodes(root, list, top, codes);
 
-        
         unique_ptr<Partitioner> partitioner = make_unique<Partitioner>(*text);
         vector<unique_ptr<ff_node>> encoders;
         for (int i = 0; i < MAX_THREADS; i++) {
