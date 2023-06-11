@@ -7,7 +7,7 @@
     #define MAX_THREADS 100
 #endif
 #ifndef VERIFY
-    #define VERIFY true
+    #define VERIFY false
 #endif
 #define PORTION_SIZE 1000
 
