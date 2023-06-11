@@ -243,3 +243,7 @@ void printCodes(map<char, string>& codes) {
         std::cout << pair.first << " -> " << pair.second << std::endl;
     } 
 }
+
+bool check(string original, string decoded) {
+    return original.compare(decoded) == 0;
+}

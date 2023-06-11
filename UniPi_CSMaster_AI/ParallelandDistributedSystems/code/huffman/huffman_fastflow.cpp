@@ -13,10 +13,10 @@
 
 using namespace ff;
 
-struct InputStage: ff_node_t<string, string> {
+struct Partitioner: ff_node_t<string, string> {
     string text;
 
-    InputStage(const string& param) : text(param) {}
+    Partitioner(const string& param) : text(param) {}
 
     string* svc(string* ignored) {
         unsigned int pos = 0;
@@ -80,6 +80,31 @@ struct HeapIndexer: ff_node_t<int> {
     }
 };
 
+struct PortionEncoder: ff_node_t<string> {
+    map<char, string> codes;
+
+    PortionEncoder(map<char, string> codes) : codes(codes) {}
+
+    string* svc(string* portion) {
+        string* encoded = new string("");
+        *encoded = encodeText(*portion, codes);
+        return encoded;
+    }
+};
+
+struct Concat: ff_node_t<string> {
+    string* result;
+
+    Concat(string* result) : result(result) {
+        *result = "";
+    }
+
+    string* svc(string* portion) {
+        *result += *portion;
+        return GO_ON;
+    }
+};
+
 struct HeapWorker: ff_node_t<int> {
     shared_ptr<MinHeap> minHeap;
     PortionWorkerData* data;
@@ -109,7 +134,7 @@ int main(int argc, char **argv) {
     {
         utimer tfastflow("Huffman codes fastflow");
         
-        unique_ptr<InputStage> inputStage = make_unique<InputStage>(*text);
+        unique_ptr<Partitioner> inputStage = make_unique<Partitioner>(*text);
         vector<unique_ptr<ff_node>> portionFarmWorkers;
         for (int i = 0; i < MAX_THREADS; i++) {
             portionFarmWorkers.push_back(make_unique<FarmWorker>());
@@ -159,7 +184,35 @@ int main(int argc, char **argv) {
         auto root = extract(minHeap);
         generateCodes(root, list, top, codes);
 
-        printCodes(codes);
+        
+        unique_ptr<Partitioner> partitioner = make_unique<Partitioner>(*text);
+        vector<unique_ptr<ff_node>> encoders;
+        for (int i = 0; i < MAX_THREADS; i++) {
+            encoders.push_back(make_unique<PortionEncoder>(codes));
+        }
+        ff_OFarm<PortionEncoder> encoderFarm(move(encoders));
+        unique_ptr<Concat> concat = make_unique<Concat>(&encoded);
+        
+        ff_Pipe<> encoderPipeline(
+            partitioner,
+            encoderFarm,
+            concat
+        );
+        encoderPipeline.run_and_wait_end();
     }
+
+    if (VERIFY) {   
+        {
+            utimer decode("Decoding text");
+            decoded = decodeText(encoded, codes);
+        }
+
+        if (check(*text, decoded)) {
+            cout << "Verified!" << endl;
+        } else {
+            cout << "Encoding not verified..." << endl;
+        }
+    }
+    
     return 0;
 }

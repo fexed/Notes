@@ -23,7 +23,7 @@ void* computePortionData(void* param) {
     PortionWorkerData* data = (PortionWorkerData*)param;
     unsigned int startingPosition;
 
-    while(1) {
+    while(1) { //TODO correct
         pthread_mutex_lock(&portionMutex);
         startingPosition = portionStartingPosition++;
         pthread_mutex_unlock(&portionMutex);
@@ -190,13 +190,14 @@ int main(int argc, char **argv) {
         }
     }
 
+
     if (VERIFY) {   
         {
             utimer decode("Decoding text");
             decoded = decodeText(encoded, codes);
         }
 
-        if (decoded == *text) {
+        if (check(*text, decoded)) {
             cout << "Verified!" << endl;
         } else {
             cout << "Encoding not verified..." << endl;

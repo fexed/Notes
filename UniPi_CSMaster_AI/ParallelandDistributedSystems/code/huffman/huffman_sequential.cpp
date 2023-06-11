@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
             decoded = decodeText(encoded, codes);
         }
 
-        if (decoded == text) {
+        if (check(text, decoded)) {
             cout << "Verified!" << endl;
         } else {
             cout << "Encoding not verified..." << endl;
