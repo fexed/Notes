@@ -11,4 +11,5 @@ do
     done
     sum=$(($sum/10))
     echo "$nw -> $sum usec"
+    echo "$nw;$sum" >> data_threads
 done
