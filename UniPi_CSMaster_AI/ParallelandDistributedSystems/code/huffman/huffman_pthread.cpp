@@ -75,11 +75,16 @@ void* portionEncoder(void* param) {
 }
 
 int main(int argc, char **argv) {
+    //cout << "Running threads implementation with " << MAX_THREADS << " workers" << endl;
+    // Checking the correct usage of this tool
+    // usage: ./huffman <filename>
     ARG_CHECK
 
+    // Reading and handling file
     shared_ptr<string> text = make_shared<string>(readFile(argv[1]));
     if (*text == "") return -2;
 
+    // Initializing common variables
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;

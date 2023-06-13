@@ -4,7 +4,7 @@
 #include <ff/pipeline.hpp>
 
 #ifndef MAX_THREADS
-    #define MAX_THREADS 100
+    #define MAX_THREADS 10
 #endif
 #ifndef VERIFY
     #define VERIFY false
@@ -159,6 +159,7 @@ struct Concat: ff_node_t<string> {
 };
 
 int main(int argc, char **argv) {
+    //cout << "Running fastflow implementation with " << MAX_THREADS << " workers" << endl;
     // Checking the correct usage of this tool
     // usage: ./huffman <filename>
     ARG_CHECK

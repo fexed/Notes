@@ -6,11 +6,15 @@
 #endif
 
 int main(int argc, char **argv) {
+    // Checking the correct usage of this tool
+    // usage: ./huffman <filename>
     ARG_CHECK
 
+    // Reading and handling file
     string text = readFile(argv[1]);
     if (text == "") return -2;
 
+    // Initializing common variables
     vector<char> items;
     vector<int> frequencies;
     map<char, string> codes;
