@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <iomanip>
+#include <bitset>
 
 #define MAX_HEIGHT 50
 
@@ -246,4 +247,36 @@ void printCodes(map<char, string>& codes) {
 
 bool check(string original, string decoded) {
     return original.compare(decoded) == 0;
+}
+
+int getPaddingLength(const string bitString) {
+    const unsigned int numberSize = sizeof(unsigned long long);
+    return numberSize - bitString.length() % numberSize;
+}
+
+vector<unsigned long long> getNumberSequence(const string bitString) {
+    const unsigned int numberSize = sizeof(unsigned long long);
+    string paddedString = string(getPaddingLength(bitString), '0') + bitString;
+    vector<unsigned long long> numbers;
+
+    for (unsigned int i = 0; i < paddedString.length(); i += numberSize) {
+        string block = paddedString.substr(i, numberSize);
+        bitset<numberSize> bits(block);
+        numbers.push_back(static_cast<unsigned long long>(bits.to_ullong()));
+    }
+
+    return numbers;
+}
+
+string getBitString(vector<unsigned long long> numbers) {
+    const unsigned int numberSize = sizeof(unsigned long long);
+    std::string bitString;
+
+    for (const unsigned long long& number : numbers) {
+        bitset<numberSize> bits(number);
+        string paddedString = bits.to_string();
+        bitString += paddedString;
+    }
+
+    return bitString;
 }

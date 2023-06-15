@@ -37,6 +37,18 @@ int main(int argc, char **argv) {
     }
 
     if (VERIFY) {   
+
+        auto numbers = getNumberSequence(encoded);
+        auto bitString = getBitString(numbers).substr(getPaddingLength(encoded));
+        cout << encoded << endl;
+        cout << endl;
+        cout << bitString << endl;
+        if (check(bitString, decoded)) {
+            cout << "Verified!" << endl;
+        } else {
+            cout << "BitString not verified..." << endl;
+        }
+        
         {
             utimer decode("Decoding text");
             decoded = decodeText(encoded, codes);
