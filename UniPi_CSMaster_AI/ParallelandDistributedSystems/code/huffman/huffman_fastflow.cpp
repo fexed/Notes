@@ -158,8 +158,16 @@ struct Concat: ff_node_t<string> {
     }
 };
 
+template <typename T>
+vector<unique_ptr<ff_node>> prepareWorkers() {
+    vector<unique_ptr<ff_node>> workers;
+    for (int i = 0; i < MAX_THREADS; i++) {
+        workers.push_back(make_unique<T>());
+    }
+    return workers;
+}
+
 int main(int argc, char **argv) {
-    //cout << "Running fastflow implementation with " << MAX_THREADS << " workers" << endl;
     // Checking the correct usage of this tool
     // usage: ./huffman <filename>
     ARG_CHECK
@@ -179,19 +187,19 @@ int main(int argc, char **argv) {
         utimer tfastflow("Huffman codes fastflow");
         
         unique_ptr<Partitioner> inputStage = make_unique<Partitioner>(*text);
-        vector<unique_ptr<ff_node>> portionFarmWorkers;
-        for (int i = 0; i < MAX_THREADS; i++) {
-            portionFarmWorkers.push_back(make_unique<FarmWorker>());
-        }
+
+        vector<unique_ptr<ff_node>> portionFarmWorkers = prepareWorkers<FarmWorker>();
         ff_Farm<PortionWorkerData> portionFarm(move(portionFarmWorkers));
+
         unique_ptr<FarmCollector> collector = make_unique<FarmCollector>();
+
         unique_ptr<CodesBuilder> coder = make_unique<CodesBuilder>(&codes);
+
         unique_ptr<EncoderPartitioner> partitioner = make_unique<EncoderPartitioner>(*text);
-        vector<unique_ptr<ff_node>> encoders;
-        for (int i = 0; i < MAX_THREADS; i++) {
-            encoders.push_back(make_unique<PortionEncoder>());
-        }
+
+        vector<unique_ptr<ff_node>> encoders = prepareWorkers<PortionEncoder>();
         ff_OFarm<PortionEncoder> encoderFarm(move(encoders));
+
         unique_ptr<Concat> concat = make_unique<Concat>(&encoded);
         
 
@@ -211,9 +219,6 @@ int main(int argc, char **argv) {
 
         auto numbers = getNumberSequence(encoded);
         auto bitString = getBitString(numbers).substr(getPaddingLength(encoded));
-        cout << encoded << endl;
-        cout << endl;
-        cout << bitString << endl;
         if (check(bitString, decoded)) {
             cout << "Verified!" << endl;
         } else {
