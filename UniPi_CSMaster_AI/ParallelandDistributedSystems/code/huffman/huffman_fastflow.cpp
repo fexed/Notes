@@ -2,6 +2,7 @@
 #include "utimer.cpp"
 #include <ff/ff.hpp>
 #include <ff/pipeline.hpp>
+#include <ff/map.hpp>
 
 #ifndef MAX_THREADS
     #define MAX_THREADS 10
@@ -33,10 +34,10 @@ typedef struct {
     vector<char> items;
     vector<int> frequencies;
 } PortionWorkerData;
-struct FarmWorker: ff_node_t<string, PortionWorkerData> {
+struct PortionWorker: ff_node_t<string, PortionWorkerData> {
     PortionWorkerData* data;
 
-    FarmWorker() {
+    PortionWorker() {
        data = new PortionWorkerData();
     }
 
@@ -186,20 +187,27 @@ int main(int argc, char **argv) {
     {
         utimer tfastflow("Huffman codes fastflow");
         
+        // Input stage, partitions the text into portions of PORTION_SIZE length
         unique_ptr<Partitioner> inputStage = make_unique<Partitioner>(*text);
 
-        vector<unique_ptr<ff_node>> portionFarmWorkers = prepareWorkers<FarmWorker>();
+        // Map that gathers data about characters and frequencies of each portion
+        vector<unique_ptr<ff_node>> portionFarmWorkers = prepareWorkers<PortionWorker>();
         ff_Farm<PortionWorkerData> portionFarm(move(portionFarmWorkers));
 
+        // Collects data for the sequential stage
         unique_ptr<FarmCollector> collector = make_unique<FarmCollector>();
 
+        // Sequential stage that computes the codes
         unique_ptr<CodesBuilder> coder = make_unique<CodesBuilder>(&codes);
 
+        // Partions the text to be encoded
         unique_ptr<EncoderPartitioner> partitioner = make_unique<EncoderPartitioner>(*text);
 
+        // Map that encodes the text
         vector<unique_ptr<ff_node>> encoders = prepareWorkers<PortionEncoder>();
         ff_OFarm<PortionEncoder> encoderFarm(move(encoders));
 
+        // Concatenates the already ordered encoded portions
         unique_ptr<Concat> concat = make_unique<Concat>(&encoded);
         
 
