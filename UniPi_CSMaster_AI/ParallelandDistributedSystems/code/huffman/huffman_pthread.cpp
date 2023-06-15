@@ -199,14 +199,17 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (VERIFY) {   
-
+    if (VERIFY) {
         auto numbers = getNumberSequence(encoded);
-        auto bitString = getBitString(numbers).substr(getPaddingLength(encoded));
-        if (check(bitString, decoded)) {
+        auto bitString = getBitString(numbers);
+        cout << text->length() << " characters to " << numbers.size() << " numbers" << endl;
+        cout << "Circa " << sizeof(char)*text->length() << " bytes to " << sizeof(unsigned long long)*numbers.size() << " bytes" << endl;
+
+        if (check(bitString, encoded)) {
             cout << "Verified!" << endl;
         } else {
             cout << "BitString not verified..." << endl;
+            cout << "Compare result is " << bitString.compare(decoded) << endl;
         }
         
         {
