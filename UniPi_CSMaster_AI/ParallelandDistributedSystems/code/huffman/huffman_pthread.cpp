@@ -75,7 +75,6 @@ void* portionEncoder(void* param) {
 }
 
 int main(int argc, char **argv) {
-    //cout << "Running threads implementation with " << MAX_THREADS << " workers" << endl;
     // Checking the correct usage of this tool
     // usage: ./huffman <filename>
     ARG_CHECK
@@ -92,12 +91,13 @@ int main(int argc, char **argv) {
     int top = 0;
     string encoded;
     string decoded;
+    pthread_t threads[MAX_THREADS]; // Threadpool
 
     {
         utimer tthreads("Huffman codes pthread");
-        pthread_t threads[MAX_THREADS];
-        PortionWorkerData portionData[MAX_THREADS];
 
+        // Splits the text into portions of length PORTION_SIZE and builds the required data structure
+        PortionWorkerData portionData[MAX_THREADS];
         for (int i = 0; i < MAX_THREADS; i++) {
             portionData[i].text = text;
 
@@ -107,6 +107,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Joins the threads and merges the data structures
         for (int i = 0; i < MAX_THREADS; i++) {
             if (pthread_join(threads[i], NULL) != 0) {
                 cout << "Error joining thread" << endl;
@@ -124,6 +125,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Builds the minimum heap, initally just putting the data in its vectors
         auto minHeap = createMinimumHeap(items.size());
         for (unsigned int i = 0; i < items.size(); i++) {
             minHeap->list.push_back(nullptr);
@@ -147,6 +149,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Sequential stage that generates the codes
         minHeap->size = items.size();
         buildMinimumHeap(minHeap);
         while (minHeap->size != 1) {
@@ -163,6 +166,7 @@ int main(int argc, char **argv) {
         auto root = extract(minHeap);
         generateCodes(root, list, top, codes);
 
+        // Splits the text in portions to be encoded by the threadpool
         int textLength = text->size();
         int portionSize = textLength / MAX_THREADS;
         int remaining = textLength % MAX_THREADS;
@@ -199,9 +203,6 @@ int main(int argc, char **argv) {
 
         auto numbers = getNumberSequence(encoded);
         auto bitString = getBitString(numbers).substr(getPaddingLength(encoded));
-        cout << encoded << endl;
-        cout << endl;
-        cout << bitString << endl;
         if (check(bitString, decoded)) {
             cout << "Verified!" << endl;
         } else {
