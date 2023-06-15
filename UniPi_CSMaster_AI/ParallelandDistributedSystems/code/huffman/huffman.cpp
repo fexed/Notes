@@ -239,19 +239,74 @@ string readFile(char* filename) {
     return fileContent;
 }
 
+int getPaddingLength(const string bitString) {
+    const unsigned int numberSize = sizeof(unsigned long long);
+    return numberSize - bitString.length() % numberSize;
+}
+
+void writeBitToFile(bool bit, std::ofstream& file, unsigned char& buffer, int& bitsInBuffer) {
+    buffer |= (bit ? 1 : 0) << (7 - bitsInBuffer);
+    bitsInBuffer++;
+
+    if (bitsInBuffer == 8) {
+        file.write(reinterpret_cast<const char*>(&buffer), sizeof(buffer));
+        buffer = 0;
+        bitsInBuffer = 0;
+    }
+}
+
+void writeBinaryFile(const string& filename, const string& content) {
+    string paddedString = string(getPaddingLength(content), '0') + content;
+    ofstream file(filename, ios::binary);
+    if (file.is_open()) {
+        unsigned char buffer = 0;
+        int bitsInBuffer = 0;
+
+        for (char ch : paddedString) {
+            writeBitToFile(ch == '1', file, buffer, bitsInBuffer);
+        }
+
+        file.close();
+    } else {
+        cout << "File write failed" << endl;
+    }
+}
+
+string readBinaryFile(const string& filename) {
+    ifstream file(filename, ios::binary);
+    string bitString;
+
+    if (file.is_open()) {
+        vector<unsigned char> buffer(std::istreambuf_iterator<char>(file), {});
+
+        for (const auto& byte : buffer) {
+            bitset<8> bits(byte);
+            bitString += bits.to_string();
+        }
+
+        file.close();
+    } else {
+        cout << "File read failed." << endl;
+    }
+    
+    unsigned int firstNonZero = bitString.find_first_not_of('0');
+    if (firstNonZero != string::npos) {
+        bitString = bitString.substr(firstNonZero);
+    } else {
+        bitString.clear();
+    }
+
+    return bitString;
+}
+
 void printCodes(map<char, string>& codes) {
     for (const auto& pair : codes) {
-        std::cout << pair.first << " -> " << pair.second << std::endl;
+        cout << pair.first << " -> " << pair.second << endl;
     } 
 }
 
 bool check(string original, string decoded) {
     return original.compare(decoded) == 0;
-}
-
-int getPaddingLength(const string bitString) {
-    const unsigned int numberSize = sizeof(unsigned long long);
-    return numberSize - bitString.length() % numberSize;
 }
 
 vector<unsigned long long> getNumberSequence(const string bitString) {
@@ -270,12 +325,18 @@ vector<unsigned long long> getNumberSequence(const string bitString) {
 
 string getBitString(vector<unsigned long long> numbers) {
     const unsigned int numberSize = sizeof(unsigned long long);
-    std::string bitString;
+    string bitString;
 
-    for (const unsigned long long& number : numbers) {
+    for (const unsigned long long number : numbers) {
         bitset<numberSize> bits(number);
-        string paddedString = bits.to_string();
-        bitString += paddedString;
+        bitString += bits.to_string();
+    }
+
+    unsigned int firstNonZero = bitString.find_first_not_of('0');
+    if (firstNonZero != string::npos) {
+        bitString = bitString.substr(firstNonZero);
+    } else {
+        bitString.clear();
     }
 
     return bitString;

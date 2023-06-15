@@ -6,9 +6,6 @@
 #ifndef MAX_THREADS
     #define MAX_THREADS 10
 #endif
-#ifndef VERIFY
-    #define VERIFY false
-#endif
 #define PORTION_SIZE 1000
 
 using namespace ff;
@@ -220,31 +217,6 @@ int main(int argc, char **argv) {
             concat
         );
         mainPipeline.run_and_wait_end();
-    }
-
-    if (VERIFY) {
-        auto numbers = getNumberSequence(encoded);
-        auto bitString = getBitString(numbers);
-        cout << text->length() << " characters to " << numbers.size() << " numbers" << endl;
-        cout << "Circa " << sizeof(char)*text->length() << " bytes to " << sizeof(unsigned long long)*numbers.size() << " bytes" << endl;
-
-        if (check(bitString, encoded)) {
-            cout << "Verified!" << endl;
-        } else {
-            cout << "BitString not verified..." << endl;
-            cout << "Compare result is " << bitString.compare(decoded) << endl;
-        }
-        
-        {
-            utimer decode("Decoding text");
-            decoded = decodeText(encoded, codes);
-        }
-
-        if (check(*text, decoded)) {
-            cout << "Verified!" << endl;
-        } else {
-            cout << "Encoding not verified..." << endl;
-        }
     }
     
     return 0;

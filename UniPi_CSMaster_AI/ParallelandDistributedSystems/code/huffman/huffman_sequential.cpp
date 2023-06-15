@@ -1,10 +1,6 @@
 #include "huffman.cpp"
 #include "utimer.cpp"
 
-#ifndef VERIFY
-    #define VERIFY false
-#endif
-
 int main(int argc, char **argv) {
     // Checking the correct usage of this tool
     // usage: ./huffman <filename>
@@ -36,30 +32,7 @@ int main(int argc, char **argv) {
         encoded = encodeText(text, codes);
     }
 
-    if (VERIFY) {
-        auto numbers = getNumberSequence(encoded);
-        auto bitString = getBitString(numbers);
-        cout << text.length() << " characters to " << numbers.size() << " numbers" << endl;
-        cout << "Circa " << sizeof(char)*text.length() << " bytes to " << sizeof(unsigned long long)*numbers.size() << " bytes" << endl;
-
-        if (check(bitString, encoded)) {
-            cout << "Verified!" << endl;
-        } else {
-            cout << "BitString not verified..." << endl;
-            cout << "Compare result is " << bitString.compare(decoded) << endl;
-        }
-        
-        {
-            utimer decode("Decoding text");
-            decoded = decodeText(encoded, codes);
-        }
-
-        if (check(text, decoded)) {
-            cout << "Verified!" << endl;
-        } else {
-            cout << "Encoding not verified..." << endl;
-        }
-    }
+    writeBinaryFile(string(argv[1]) + "_encoded.bin", encoded);
 
     return 0;
 }
