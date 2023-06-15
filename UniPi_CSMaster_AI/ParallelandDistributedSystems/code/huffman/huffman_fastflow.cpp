@@ -2,7 +2,6 @@
 #include "utimer.cpp"
 #include <ff/ff.hpp>
 #include <ff/pipeline.hpp>
-#include <ff/map.hpp>
 
 #ifndef MAX_THREADS
     #define MAX_THREADS 10
