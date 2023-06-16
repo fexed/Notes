@@ -1,9 +1,10 @@
 echo "Threads implementation"
+echo "" > data_threads
 for nw in {1..200}
 do
     make threads NW=$nw 1> /dev/null
     sum=0
-    for i in {1..10}
+    for i in {1..100}
     do
         tmp=$(./huffman_threads longfile)
         sum=$(($sum + $tmp))
