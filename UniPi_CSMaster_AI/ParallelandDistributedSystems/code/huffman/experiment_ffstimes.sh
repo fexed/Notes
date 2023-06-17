@@ -4,7 +4,7 @@ for nw in {1..200}
 do
     make fastflow NW=$nw 1> /dev/null
     sum=0
-    for i in {1..100}
+    for i in {1..10}
     do
         tmp=$(./huffman_fastflow longfile)
         sum=$(($sum + $tmp))
