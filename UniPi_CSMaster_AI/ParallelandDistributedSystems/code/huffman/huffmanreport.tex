@@ -66,16 +66,16 @@ Huffman coding may be implemented in various ways, each with its own approach. A
 \paragraph{Greedy} One of the first approaches that can be considered is the greedy approach. We begin with a binary tree rooted in a fake node, where each of the $n$ characters is contained in a separate subtree. The goal is to iteratively combine pairs of nodes with the smallest weights, creating a new tree where the weight of the root node is the sum of the weights of the merged nodes. This process loops until we obtain a complete binary tree.\\
 To implement this approach, we first need to sort the characters based on their frequencies. This sorting operation requires $O(n\cdot\log n)$ time, where $n$ is the number of unique characters. Then, we perform $n-1$ iterations of merging pairs of nodes and updating the overall tree. Therefore, the overall time complexity of this approach is $O(n\cdot\log n)$.
 \paragraph{Top-Down} Another approach to building the Huffman tree is a top-down approach. This method considers all possible ways of dividing the characters into two subtrees. Once a division is chosen, the process is repeated recursively for each of the two subtrees.\\
-This approach has a significant drawback in terms of time complexity. Since we have a binary decision for each character, the number of possible combinations grows exponentially with the number of characters. Specifically, for $n$ unique characters, the time complexity becomes $O(2^n)$. As a result, this approach is not feasible for larger values of $n$ as it quickly becomes computationally unfeasible.
+This approach has a significant drawback in terms of time complexity. Since we have a binary decision for each character, the number of possible combinations grows exponentially with the number of characters. Specifically, for $n$ unique characters, the time complexity becomes $O(2^n)$. As a result, this approach is not feasible for larger values of $n$ as it quickly becomes computationally expensive.
 \paragraph{Heap}The selected implementation of Huffman coding utilizes a heap data structure to store and encode the Huffman tree. This choice allows us to leverage well-known and optimized algorithms for heap operations. Traversing the heap, an operation involved in finding the nodes with the smallest weights and in inserting new nodes, has a time complexity of $O(n\cdot\log n)$.\\
 One significant advantage of using a heap-based approach is that we utilize a single tree throughout the encoding process. In contrast, the greedy approach, as discussed earlier, requires additional steps to merge nodes and update the overall tree, requiring more passages along the tree with each step. These extra operations introduce overhead and can potentially impact the efficiency of the encoding process.\\
 By utilizing the heap data structure, we can efficiently handle node operations and achieve a time complexity of $O(n\cdot\log n)$.
 \pagebreak
 \section{Implementation}
 The initial phase of the project focuses on implementing the sequential program. This approach allows for the development and testing of essential functionalities such as the heap logic, data structures, node insertion logic, encoding generation and file reading/writing.\\
-The sequential approach is beneficial in several ways. First, it helps identify and debug any issues in the heap implementation. By sequentially executing the program, it becomes easier to trace the flow of data and identify any inconsistencies or errors that may arise.\\
-Additionally, the sequential implementation allows for the validation of the generated encoding. By comparing the encoded output with the expected results, we can ensure the correctness of the encoding process.\\
-In summary, the sequential implementation phase serves as a crucial step in developing and testing the fundamental components of the project, ensuring their correctness, functionality, and correct memory usage.
+The sequential approach is beneficial in several ways. First, it helps identifying and debugging any issues in the heap implementation.\\
+Additionally, the sequential implementation allows for the validation of the generated encoding. By comparing the encoded output with the expected results, we can ensure the correctness of the encoding process, and any errors wouldn't be attributed to an incorrect orchetration of the parallel computation.\\
+The sequential implementation phase serves as a crucial step in developing and testing the fundamental components of the project, ensuring their correctness, functionality, and correct memory usage.
 \paragraph{Data} The remote machine's powerful components provide an advantage in terms of execution speed, even for slower or less efficient implementations. This means that the differences in runtime between the three implementations may not be significant when processing small files. The testing data includes paragraphs of "Lorem Ipsum Dolor" in a few variations. These variations are designed to test different aspects of the implementation, such as handling uppercase-lowercase letters and symbols. Additionally, a final testing file called "\texttt{longfile}" has been created by copying and pasting the paragraphs multiple times. This was done until the sequential approach took a few seconds to complete its computation without any compiler optimizations (without the "\texttt{-O3}" flag).\\
 The "longfile" serves as a suitable benchmark for performance evaluation. It allows to observe and compare the differences between optimized and non-optimized binaries, as well as the variations between sequential and parallel code execution. By using this file, the impact of different optimization techniques and parallelization can be better appreciated and analyzed.
 \paragraph{Memory Usage} During the implementation of all three approaches (sequential, \texttt{pthread}-based, and fastflow-based), one significant obstacle that was encountered was memory management. Initially, a traditional C++99 style approach was adopted, which involved heavy usage of \texttt{malloc}s and \texttt{free}s for variables and arrays declarations. However, this approach proved to be error-prone due to the complexity of both the implementation and the flow of data between modules.\\
@@ -85,13 +85,27 @@ However, it's important to note that there were still some areas that required e
 By aggregating functionalities such as file reading/writing, heap building, encoding generation and so on in a single file that was thoroughly implemented and tested, the implementation process became more efficient and time-saving. The only additional code required was an efficient orchestration of the parallel computation, which made use of the pre-existing and validated sequential code.\\
 This approach of code reuse, although challenging, proved to be highly beneficial. It allowed for the utilization of a solid foundation of well-tested code, reducing the need to re-implement and re-validate various components of the system. By focusing on the parallelization aspect and integrating it seamlessly with the existing sequential codebase, the project could efficiently harness the advantages of parallel computation while leveraging the benefits of code reuse.\\
 While the approach of code reuse and leveraging existing sequential code has its benefits, it does come with certain limitations. One of the downsides is that it may hinder the exploration and implementation of specific optimizations that are better suited for parallel computing systems. In the context of this project, it is possible that certain optimizations, such as an extensive rewrite of the encoding-generation algorithm, were not pursued to their full potential due to the focus on code reuse and integrating with the existing sequential code. Parallel computing systems often require a different approach and algorithmic design to fully exploit their capabilities, and this may involve significant changes to the code structure and logic.
-
+\paragraph{Parallel Flow} A key aspect in the project was efficiently orchestrating the parallel computation for the Huffman encoding algorithm. This task proved to be particularly difficult due to the limited experience in designing parallel applications. However, the development of this project served as a valuable learning experience and provided an opportunity to acquire skills that will be beneficial in future projects and implementations, especially exploiting modern hardware architectures.\\
+The parallel computation was approached by starting with the sequential implementation and identifying the parts of the algorithm that could be parallelized. This process involved considering various parallel computation patterns introduced during the course and assessing their applicability to the algorithm. The team focused on the patterns that showed the most promise in terms of ease of implementation and potential for significant computational speedup. These selected patterns were then thoroughly analyzed, their implementation designed, and then applied in the project.
 \section{Evaluation and Discussion}
 %• Should include experiments performed on the remote virtual machine, with proper plots (B&W only, please do not use colors)
 
 The execution times were computed by averaging the results of 10 runs over a file containing 9,292,657 characters, with 39 unique characters. With a time complexity of $O(n\cdot\log n)$ for the implementation, we can estimate the overall time required for execution to be approximately $206.13\tau$, where $\tau$ represents the time required to perform a single step dominated by the insertion in the heap.\\
 To estimate $\tau$, some early experiments were conducted. These experiments involved adding a number of fake data from a file to the heap and generating the encoding, measuring the time taken averaging over the number of data inserted. Based on these experiments, it was determined that a single step takes approximately 2000 $\mu$secs, considering all the necessary operations from reading to code computation. Therefore, the expected runtime for the sequential implementation is estimated to be around 412,260 $\mu$secs.\\
-After performing the experiments on the remote machine, the final results are presented in Table \ref{table:experiments}, which provides information on the measured runtimes.
+After performing the experiments on the remote machine, the final results are presented in Table \ref{table:experiments_wfile} and Table \ref{table:experiments_wofile}, which provides information on the measured runtimes.
+\begin{table}[H]
+\begin{center}
+	\begin{tabular}{c || c | c | c}
+	& Sequential & Threads ($nw = 32$) & FastFlow ($nw = 10$)\\
+	\hline
+	Mean ($\mu$sec) & 763530 & 409472 & 485303 \\
+	\hline
+	Speedup & --- & 1.865 & 1.573
+	\end{tabular}
+\end{center}
+\caption{Results of 10 runs over 9M characters with file read/write}
+\label{table:experiments_wfile}
+\end{table}
 \begin{table}[H]
 \begin{center}
 	\begin{tabular}{c || c | c | c}
@@ -102,9 +116,10 @@ After performing the experiments on the remote machine, the final results are pr
 	Speedup & --- & 4.430 & 2.578
 	\end{tabular}
 \end{center}
-\caption{Results of 10 runs over 9M characters}
-\label{table:experiments}
+\caption{Results of 10 runs over 9M characters without file read/write}
+\label{table:experiments_wofile}
 \end{table}
+All the following results are measured without including file read/write times.
 \begin{table}[H]
 \begin{center}
 	\begin{tabular}{c || c c c c c c}
@@ -135,7 +150,7 @@ After performing the experiments on the remote machine, the final results are pr
 \begin{center}
 	\includegraphics[scale=0.75]{runtimes.png}
 \end{center}
-\caption{Comparison between the average runtime of the three implementations}
+\caption{Comparison between the average runtime of the three implementations without file read/write}
 \label{figure:runtimes}
 \end{figure}
 By generating a plot that showcases the average runtime of an implementation in relation to the number of workers employed, we can obtain significant insights into scalability and efficiency. 
