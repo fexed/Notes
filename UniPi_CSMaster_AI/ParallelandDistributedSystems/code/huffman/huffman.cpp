@@ -16,6 +16,10 @@ if (argc != 2) { \
     return -1; \
 } \
 
+unsigned int g_NumberOfSwaps = 0;
+unsigned int g_NumberOfInserts = 0;
+unsigned int g_NumberOfInsertIters = 0;
+
 struct Node {
     char value;
     unsigned int frequency;
@@ -75,6 +79,7 @@ void makeMinimumHeap(shared_ptr<MinHeap> minHeap, int index) {
     }
 
     if (smallest != index) {
+        g_NumberOfSwaps++;
         swap(minHeap->list[smallest], minHeap->list[index]);
         makeMinimumHeap(minHeap, smallest);
     }
@@ -90,10 +95,12 @@ shared_ptr<Node> extract(shared_ptr<MinHeap> minHeap) {
 }
 
 void insert(shared_ptr<MinHeap> minHeap, shared_ptr<Node> node) {
+    g_NumberOfInserts++;
     minHeap->size++;
     int i = minHeap->size - 1;
 
     while (i > 0 && node->frequency < minHeap->list[(i - 1) / 2]->frequency) {
+        g_NumberOfInsertIters++;
         minHeap->list[i] = minHeap->list[(i - 1) / 2];
         i = (i - 1) / 2;
     }
@@ -126,7 +133,6 @@ shared_ptr<MinHeap> createAndBuildMinimumHeap(const vector<char>& items, const v
 
 shared_ptr<Node> buildHuffmanTree(const vector<char>& items, const vector<int>& frequencies, int size) {
     auto minHeap = createAndBuildMinimumHeap(items, frequencies, size);
-
     while (minHeap->size != 1) {
         auto left = extract(minHeap);
         auto right = extract(minHeap);

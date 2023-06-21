@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
 
         size = items.size();
         auto root = buildHuffmanTree(items, frequencies, size);
-
         generateCodes(root, list, top, codes);
+
         encoded = encodeText(text, codes);
     }
 

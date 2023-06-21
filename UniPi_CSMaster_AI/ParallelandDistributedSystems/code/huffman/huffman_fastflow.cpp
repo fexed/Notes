@@ -218,6 +218,8 @@ int main(int argc, char **argv) {
         );
         mainPipeline.run_and_wait_end();
     }
+
+    writeBinaryFile(string(argv[1]) + "_encoded.bin", encoded);
     
     return 0;
 }

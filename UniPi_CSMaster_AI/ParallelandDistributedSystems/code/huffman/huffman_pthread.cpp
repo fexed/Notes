@@ -195,6 +195,8 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+    writeBinaryFile(string(argv[1]) + "_encoded.bin", encoded);
     
     return 0;
 }
