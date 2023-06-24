@@ -1533,4 +1533,42 @@ The algorithmic cost is the sum of three elements: the \textbf{longest-running l
 	In each superstep, each vertex receives messages from its neighbors and updates its state.\\
 	After each superstep, each vertex exchange messages, and the computation proceed to the next superstep.
 \end{list}
+\section{Actor Model}
+It provides a simple and intuitive programming model for building concurrent and distributed systems. It \textbf{emphasizes message passing and actor isolation}, which helps in improving the modularity and scalability of the system.
+\paragraph{Actor} Computational entity that, in response to a message it receives, can concurrently:
+\begin{list}{}{}
+	\item Send a \textbf{finite number} of messages to other Actors
+	\item Create a \textbf{finite number} of new Actors
+	\item \textbf{Designate the behavior to be used for the next message} it receives
+\end{list}
+These are concurrent actions, so \textbf{no assumed order}. This makes this model significantly different from BSP. Decoupling sender from communications is a fundamental advancement, enabling asynchronous communications.
+\paragraph{Connections} An Actor can only communicate with the Actors to which it is connected. Connections can be implemented in different ways.
+\paragraph{Inherently Concurrent} Actor model is characterized by inherent concurrency of computation:
+\begin{list}{}{}
+	\item Withing and among Actors
+	\item By the dynamic creation of Actors
+	\item By the inclusion of Actor addresses in messages (allowing to send responses)
+	\item Interaction only through a direct asynchronous message passing with no restriction on the arrival order
+\end{list}
+\paragraph{Modularity} Modularity comes from the one-way asynchronous communication. Once a message has been sent, it becomes \textbf{responsibility of the receiver}. Messages are decoupled from the sender, delivedere by the system on a best-effort basis.\\
+\textbf{Sequential ordering is a special case derived from concurrent computation}.
+\paragraph{Indeterminacy} The Actor model is indeterminate because \textbf{the order in which messages are processed by actors is not fixed}. When multiple messages are waiting, the order in which they are processed is determined by the Actor's scheduling policy. This means that the behavior of an Actor may depend on the order of processing, and thus be unpredictable.\\
+The only guarantees are that \textbf{messages will be delivered} and that \textbf{processing happens atomically within an Actor}, avoiding race conditions and other issues.
+\paragraph{Quasi-Commutativity} Meaning that \textbf{the order in which messages are sent between actors does not affect the final outcome of the system}. This means that Actor model systems are resilient to message delays, losses and reordering.\\
+This, however, is not a guarantee that the system will behave correctly in all circumstances.
+\paragraph{Applications} The Actor model can be used to build
+\begin{list}{}{}
+	\item \textbf{Fault-Tolerant Systems}, allowing Actors to be restarted or moved to another machine in case of failure
+	\item \textbf{Scalable Systems}, allowing Actors to be dynamically created and distributed across machines
+	\item \textbf{Aynchronous Systems}, allowing one-way asynchronous communication between Actors, decoupling messages and eliminating the need for complex synchronization mechanisms
+	\item \textbf{Resilient Systems}, providing a reliable message delivery mechanism that ensures the atomic delivery
+\end{list}
+\paragraph{CAP Theorem} Also named \textbf{Brewer's Theorem}, it states that \textbf{it is impossible for a distributed data store to simultaneously provide more than two of the following}:
+\begin{list}{}{}
+	\item \textbf{Consistency}: every read receives the most recent write or an error
+	\item \textbf{Availability}: every request receives a response, without the guarantee of containing the most recent write
+	\item \textbf{Partition tolerance}: the system continues to operate despite an arbitrary number of messages being dropped or delayed
+\end{list}
+When a network partition failure happens, we may \textbf{cancel the operation} (decreasing availability but ensuring consistency) or \textbf{proceed with the operation} (providing availability but risking inconsistency).
+\paragraph{PACELC Theorem} Extending CAP, it states that \textbf{in case of network partitioning} (P) in a distributed system \textbf{one has to choose between Availability and Consistency} (as per CAP), but \textbf{else} (meaning even when the system has to run in absence of partitions) \textbf{one has to choose between Latency and Consistency}.
 \end{document}
