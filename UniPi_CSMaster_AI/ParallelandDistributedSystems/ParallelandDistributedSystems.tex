@@ -1511,4 +1511,26 @@ This distinction is used to separate \textbf{eager} and \textbf{lazy evaluation}
 	\item \textbf{Lazy evaluation} is when expressions are \textbf{evaluated only when a dependent expression is evaluated}
 \end{list}
 \textbf{All transformations are lazy}, and are only computed when an action requires a result. This results in \textbf{RDD logging transformation records instead of actual data} (like an \textbf{action plan}). So \textbf{think of an RDD as a set of instructions on how to compute the data via transformations}.
+\paragraph{GraphX} Distributed graph processing framework that allows to perform graph-parallel computations with ease. Lots of applications: social network analysis, web graph analysis, bioinformatics\ldots\\
+In GraphX a graph is represented as a set of vertices and edges, where \textbf{each vertex and edge can have an associated attribute} (e.g. label or weight). GraphX extends the RDD abstraction provided by Apache Spark to enable efficient distributed graph processing by using the \textbf{concept of Think Like a Vertex} (\textbf{TLAV}).
+\paragraph{TLAV} Programming model that emphasize the use of vertex-centric computations. \textbf{Each vertex receives messages from the neighbors} and \textbf{updates its stated} based on those messages.\\
+\textbf{Vertices are the primary units of computation}. Each vertex maintains its state (e.g. label and attribute) and can send messages to its neighbors. TLAV is a powerful abstraction that can be \textbf{used to express a wide range of graph algorithms in a concise manner}.
+\paragraph{BSP} \textbf{Bulk Synchronous Parallel}, is a \textbf{bridging model} for designing parallel algorithms
+\begin{center}
+	\includegraphics[scale=0.75]{40.png}
+\end{center}
+It is based on:
+\begin{list}{}{}
+	\item Computing elements capable of processing
+	\item Network of routing messages between pairs of computing elements
+	\item Entity that allows for the synchronization of all or a subset of elements
+\end{list}
+The algorithmic cost is the sum of three elements: the \textbf{longest-running local computation}, the \textbf{global communication between processors} and the \textbf{barrier synchronization} at the end of the superstep.
+\paragraph{GraphX} Built upon the actor model and BSP:
+\begin{list}{}{}
+	\item The actor model is used to represent vertices in a graph.  \textbf{Each vertex is represented as an actor}, which communicates with other actors by exchanging messages. By using the actor model, GraphX provides a programming model for distributed graph processing that is based on vertex-centric computations.
+	\item Computations proceeds in a \textbf{series of supersteps}, \textbf{where each consist of message passing and vertex computations}.\\
+	In each superstep, each vertex receives messages from its neighbors and updates its state.\\
+	After each superstep, each vertex exchange messages, and the computation proceed to the next superstep.
+\end{list}
 \end{document}
