@@ -1463,6 +1463,52 @@ An \textbf{heartbeat signal} is sent from the TaskTracker to the JobTracker to c
 There are few known limitations:
 \begin{list}{}{}
 	\item \textbf{No consideration of current system load} of the allocated machine, thus the actual availability, since every TaskTracker has a number of slots and every map or reduce task takes up one of them. Work is assigned to the tracker nearest to the data with an available slot regardless of the current system load.
+	\item If one TaskTracker is slow, it can delay the whole MapReduce job, because \textbf{everything can end up waiting for the slowest task}
 \end{list}
-
+\section{Apache Spark}
+One alternative to HDFS and MapReduce.\\
+Apache Spark is a \textbf{unified analytics engine for large-scale data processing}. It provides high-level APIs in many languages and an optimized engine that supports general execution graphs. Spark \textbf{performs in-memory cluster computing}, increasing the processing speed of an application, also supporting SQL queries, machine learning and graph algorithms.
+\paragraph{Basics} Every application consists of a \textbf{driver program} which \textbf{runs the main function} and \textbf{executes various parallel operations on a cluster}.\\
+The main abstraction provided is a \textbf{RDD} (Resilient Distributed Dataset):
+\begin{list}{}{}
+	\item \textbf{Collection of elements partitioned across the cluster} that can be operated in parallel
+	\item \textbf{RDD can be persisted in memory}, allowing efficient reuse across applications
+	\item \textbf{RDD automatically recovers from node failures}
+\end{list}
+The second main abstraction is \textbf{shared variables}
+\begin{list}{}{}
+	\item when a parallel function is being run as a set of tasks on different nodes, Sparks \textbf{ships a copy of each variable used in the function to each task}
+	\item a \textbf{variable may need to be shared across tasks}, \textbf{or between tasks and the driver} program.
+	\item Spark supports two types of shared variables:
+	\begin{list}{}{}
+		\item \textbf{Broadcast}, used to cache a value in memory on all nodes
+		\item \textbf{Accumulators}, only added to, such as counters and sums
+	\end{list}
+\end{list}
+\paragraph{RDDs} Fundamental data structure of Spark
+\begin{center}
+	\includegraphics[scale=0.75]{39.png}
+\end{center}
+\begin{list}{}{}
+	\item \textbf{Immutable distributed collection of objects}
+	\item \textbf{Each dataset} inside an RDD is \textbf{divided in logical partitions}, each \textbf{may be computed on different nodes} of a cluster
+	\item An RDD can contain any type of Python, Java or Scala objects, including user-defined classes
+\end{list}
+Formally, an RDD is a \textbf{read-only partitioned collection of records}. RDDs can be created through deterministic operations on either data on stable storage or other RDDs, and is a \textbf{fault-tolerant collection} of elements that can be operated on in parallel.\\
+There are two ways of creating an RDD:
+\begin{list}{}{}
+	\item \textbf{Parallelizing an existing collection} in the driver program
+	\item \textbf{Referencing a dataset} in an external storage system that offers an Hadoop Input Format
+\end{list}
+\paragraph{Operations} There are two supported types of operations:
+\begin{list}{}{}
+	\item \textbf{Transformations} create a new dataset from an existing one (e.g. map)
+	\item \textbf{Actions} return a value to the driver program after running some computation on the dataset (e.g. reduce)
+\end{list}
+This distinction is used to separate \textbf{eager} and \textbf{lazy evaluation} of programs:
+\begin{list}{}{}
+	\item \textbf{Eager evaluation} is when an expression is \textbf{evaluated as soon as its bound} to a variable
+	\item \textbf{Lazy evaluation} is when expressions are \textbf{evaluated only when a dependent expression is evaluated}
+\end{list}
+\textbf{All transformations are lazy}, and are only computed when an action requires a result. This results in \textbf{RDD logging transformation records instead of actual data} (like an \textbf{action plan}). So \textbf{think of an RDD as a set of instructions on how to compute the data via transformations}.
 \end{document}
