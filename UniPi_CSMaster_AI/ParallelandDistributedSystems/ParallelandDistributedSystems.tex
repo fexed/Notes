@@ -1565,10 +1565,35 @@ This, however, is not a guarantee that the system will behave correctly in all c
 \end{list}
 \paragraph{CAP Theorem} Also named \textbf{Brewer's Theorem}, it states that \textbf{it is impossible for a distributed data store to simultaneously provide more than two of the following}:
 \begin{list}{}{}
-	\item \textbf{Consistency}: every read receives the most recent write or an error
-	\item \textbf{Availability}: every request receives a response, without the guarantee of containing the most recent write
-	\item \textbf{Partition tolerance}: the system continues to operate despite an arbitrary number of messages being dropped or delayed
+	\item \textbf{Consistency}: all nodes should see the same data at the same time
+	\item \textbf{Availability}: node failures do not prevent survivors from continuing to operate
+	\item \textbf{Partition tolerance}: system continues to operate despite network partitions
 \end{list}
-When a network partition failure happens, we may \textbf{cancel the operation} (decreasing availability but ensuring consistency) or \textbf{proceed with the operation} (providing availability but risking inconsistency).
+When a network partition failure happens, we may \textbf{cancel the operation} (decreasing availability but ensuring consistency) or \textbf{proceed with the operation} (providing availability but risking inconsistency).\\
+The CAP theorem \textbf{describes the trade-offs that are involved in distributed systems}. It is \textbf{essential in making decisions} about the future of distributed system design, and \textbf{misunderstandings lead to erroneous or inappropriate design choices}. So the theorem basically says "only pick two". But \textbf{partition tolerance is mandatory in distributed systems}, and \textbf{consistency and availability cannot be achieved at the same time} in larger-scale distributed systems. So if there's a partition, \textbf{does the system give up availability or consistency}? CAP only prohibits the perfect availability and consistency in the presence of partitions.\\
+Consistency or availability is not a binary decision: with no consistency we're not always inconsistent, and with no availability we are not totally unavailable. This enables the concepts of \textbf{best-effort availability/consistency}.
+\subparagraph{Types of Consistency}
+\begin{list}{}{}
+	\item \textbf{Strong Consistency}: after an update, any subsequent access will return the same updated value
+	\item \textbf{Weak Consistency}: not guaranteed that subsequent accesses will return the updated value
+	\item \textbf{Eventual Consistency}, a specific form of weak consistency: it is guaranteed that if no new updates are made to an object, eventually all accesses will return the last updated value. Few variations:
+	\begin{list}{}{}
+		\item \textbf{Causal Consistency}: processes with causal relationships will see consistent data
+		\item \textbf{Read-your-write Consistency}: a process always accesses the data item after its update operation, and never sees the old value
+		\item \textbf{Session Consistency}: as long as the session exists, the system guarantees the read-your-write consistency
+		\item \textbf{Monotonic Read Consistency}: if a process has seen a particular value, any subsequent processes will never return any previous value
+		\item \textbf{Monotonic Write Consistency}: the system guarantees to serialize the writes by the same process
+	\end{list}
+\end{list}
+In practice a number of these approaches can be combined, with Monotonic Reads and Read-your-write the most desirable.
 \paragraph{PACELC Theorem} Extending CAP, it states that \textbf{in case of network partitioning} (P) in a distributed system \textbf{one has to choose between Availability and Consistency} (as per CAP), but \textbf{else} (meaning even when the system has to run in absence of partitions) \textbf{one has to choose between Latency and Consistency}.
+\section{Akka}
+Set of \textbf{libraries for designing scalable, resilient systems that are concurrent and distributed}. Eases the task of \textbf{achieving reliable behavior, fault tolerance and high performance}.\\
+To be successful, distributed systems must operate in environments where components crash without responding, messages get lost without trace and networks latency fluctuate.
+Akka provides and relieves:
+\begin{list}{}{}
+	\item Multi-thread without using low-level constructs, relieving from focusing on memory visibility issues
+	\item Transparent remote communication between systems, reliving writing and maintaining networking code
+	\item Clustered, elastic and scalable on-demand architecture, enabling a reactive system
+\end{list}
 \end{document}
