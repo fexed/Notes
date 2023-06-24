@@ -1415,4 +1415,54 @@ This is simplified, usually the RTL code is firstly run into simulators to check
 \paragraph{Xilinx} Assumes a kernel code written in C with no pointers, no recursion\ldots and other limitations, filled with pragmas with calls to a library of components (e.g. communication channels to interconnect different kernels to a buffer in hardware). With HLS (High Level Synthesis) tools, the "compiler", you get the bit stream.\\
 To operate the bitstream it's a different story. You have .ocl code where normally you have the \texttt{createProgram} with the GPU specified, that outputs a kernel that you can submit for execution in a queue, instead of the GPU you specify the bitstream obtained.\\
 Then, you can run on the FPGA or simulate it on CPU/GPU.
+\section{HDFS}
+\paragraph{Motivation} Acronym for Hadoop File System, used to \textbf{ease the task of merging the data across the resources of a cluster}. Inspired by Google File System (GFS), it's a \textbf{open-source implementation of GFS} usable by anyone regardless of budget and technical expertise. So the goal is to \textbf{provide a scalable, reliable and cost-effective solution for storing and managing large datasets}.
+\paragraph{Applications} The applications of HDFS have few characteristics in common:
+\begin{list}{}{}
+	\item \textbf{A lot of data} to deal with
+	\item \textbf{Origin}: capture data from your processes
+	\item \textbf{Evaluation}: combine these data with massive processing (e.g. machine learning)
+	\item \textbf{Application}: validate (e.g. the models for accuracy) and deploy
+\end{list}
+The solution is \textbf{distributed computing}: split this huge task into several smaller ones, execute in parallel on different machines and aggregate the data. This \textbf{scales horizontally}.
+\paragraph{MapReduce} It can be simplified as two steps:
+\begin{list}{}{}
+	\item \textbf{Mapping} the data
+	\item \textbf{Reducing} it to something meaningful
+\end{list}
+But it's already legacy, and has some problems.
+\begin{list}{}{}
+	\item It works in batches, so \textbf{if a problem arises you restart the whole process}
+	\item You have to \textbf{wait until you receive the complete results}, which is not optimal e.g. in real-time analytic systems.
+\end{list}
+\subsection{Hadoop}
+Big data was built on Hadoop because it scaled easily and processed with MapReduce because, although not being the most effective way, it worked and you could find people that could develop on it.\\
+Hadoop was developed in 2006 and was inspired by GFS, supported Java and Scala, with two main components: HDFS and MapReduce.
+\paragraph{HDFS} HDFS is the distributed file system used for distributed computing via Hadoop:
+\begin{list}{}{}
+	\item Used to store and replicate large (GB or TB) files across many machines
+	\item The architecture consists of:
+	\begin{list}{}{}
+		\item \textbf{NameNodes}, responsible for \textbf{keeping metadata about the cluster}: e.g. which node contains which file blocks.\\
+		They \textbf{act as coordinators} for the network, and \textbf{figure out where is best to store and replicate files}.
+		\item \textbf{DataNodes} simply \textbf{store files and execute commands} like replicating a file, writing a new one and such.
+	\end{list}
+\end{list}
+\paragraph{Master-Slave Architecture} The usual architecture of a HDFS is a master-slave one, with a NameNode acting as a controller that manages the file system and block mappings, and a series of DataNodes acting as workers,                           with a secondary NameNode acting as checkpoint. Even in more distributed systems, with more secondary NameNodes, the master one is still unique and the secondary communicate with each other and the master through switches.
+\paragraph{Blocks} Blocks are an additional abstraction, other than files. This because:
+\begin{list}{}{}
+	\item \textbf{Files can be larger than a single disk}
+	\item \textbf{Blocks are of fixed size}, easier to manager and manipulate
+	\item \textbf{Easy to replicate} and \textbf{do more fine grained load balancing}
+\end{list}
+The default size of a block is 64 MB. It is much larger than a filesystem block because it \textbf{minimizes overhead} rendering disk seek time almost constant. A drawback is that working with many small files in Hadoop is hard.
+\paragraph{MapReduce} The MapReduce system sits atop the file system and consists of a \textbf{JobTracker} to which \textbf{clients submit MapReduce jobs}.\\
+The JobTracker \textbf{pushes work to available TaskTracker nodes} in the cluster, \textbf{keeping the work close to the data}. If the work cannot be hosted on the same node where the data resides, priority is given to nodes on the same rack.\\
+If a TaskTracker fails or times out, that part of the job is rescheduled. Each node spawns a separate JVM process to prevent the TaskTracker itself from failing if the running job crashes the JVM.\\
+An \textbf{heartbeat signal} is sent from the TaskTracker to the JobTracker to check its status, and the informations can be viewed from a web browser.\\\
+There are few known limitations:
+\begin{list}{}{}
+	\item \textbf{No consideration of current system load} of the allocated machine, thus the actual availability, since every TaskTracker has a number of slots and every map or reduce task takes up one of them. Work is assigned to the tracker nearest to the data with an available slot regardless of the current system load.
+\end{list}
+
 \end{document}
