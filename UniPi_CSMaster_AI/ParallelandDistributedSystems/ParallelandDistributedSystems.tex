@@ -572,6 +572,9 @@ Given a tree composed only by stream parallel patterns:
 	\item Farm it out \textbf{Farm(}Comp(frontier)\textbf{)}
 \end{enumerate}
 This \textbf{always optimizes} the stream parallel computation in \textbf{stateless} situation. The principle is to transform a set of small computations spread around and put them into a big chunk of code with an input and on output, so \textbf{increase the grain of the computation}. The \textbf{grain} is \textbf{the ratio between time spent computing and time spent organizing the computation}.
+\subsection{Map Fusion}
+For example, given map($f$) $\cdot$ map($g$), meaning $x\mapsto f(x)\mapsto g(f(x))$, this is $\equiv$ map$(f(g))$ (meaning Map(Comp($f$, $g$))).\\
+In time terms, suppose that over a single item I take $t_f$ to compute $f$ and $t_g$ to compute $g$. To execute the map, I have to setup a set of parallel activities, split $x$, operate a map over each partition, merge each partition and again split, compute the second map over each partition and merge again. In shared memory split and merge is not significant, but it's still overhead payed. If I just split a single time, computing the map of the composition of the two maps, we have $k\cdot t_f\cdot t_g$, obviously larger than the single map but here the overhead has a smaller impact over the overall computation.
 \subsection{Performance Model Usage}
 Performance models are used in two ways:
 \begin{list}{}{}
