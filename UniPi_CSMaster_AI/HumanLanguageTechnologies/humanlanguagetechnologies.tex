@@ -240,8 +240,8 @@ We can compute the distance vectors between words, but neighboring words are not
 \paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddings})
 $$\hbox{Embed} : R^{|V|}\rightarrow R^k$$
 $$\hbox{Embed} : v(t) \mapsto e(t)$$
-Desired properties: represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
-\paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and \textbf{negative examples made replacing center word with random one}. The loss for the training is $$Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))$$
+This space should be able to represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
+\paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and \textbf{negative examples made replacing center word with random one}. The loss for the training is $$\mathlarger{Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))}$$
 with $x^{(w)}$ obtained by replacing the central word of $x$ with a random word.
 \paragraph{Word2Vec} Framework for learning words, much faster to train. Idea:\begin{list}{}{}
 	\item Collect a large corpus of text\\
@@ -256,12 +256,13 @@ Two kinds:
 \end{center}
 \begin{list}{}{}
 	\item \textbf{Skip-gram} (left): predict context words within window of size $m$ given the center word $w_t$
-	\item \textbf{CBoW} (right, and below): predict center word $w_t$ given context words within window of size $m$
+	\item \textbf{CBoW} (right): predict center word $w_t$ given context words within window of size $m$
 \end{list}
+\subparagraph{CBoW}
 \begin{center}
 	\includegraphics[scale=0.4]{4.png}
 \end{center}
-Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text:"no need for human-labeled data!\\
+Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text: no need for human-labeled data!\\
 Usual context size is 5 words before and after. Features can be multi-word expressions. Longer windows can capture more semantics and less syntax. A typical size for $h$ is 200-300.
 \subparagraph{Skip-Gram}
 \begin{multicols}{2}
@@ -308,7 +309,6 @@ Mirror of the skip-gram, where context words are used to predict target words.\\
 $h$ is computed from the average of the embeddings of the input context, $z_i$ is the similarity of $h$ with the words embedding of $w_i$ from $U$.
 \paragraph{Which Embeddings} $V$ and $U$ both define embeddigns, which to use? Usually just $V$. Sometimes average pairs of vectors from $V$ and $U$ into a single one or append one embedding vector after the other, doubling the length.
 \paragraph{GloVe} Global Vectors for Word Representation. Insight: the ratio of conditional probabilities may capture meaning.
-$$J = \sum_{i,j=1}^V f(X_{ij})\ldots$$
 \paragraph{fastText} Similar to CBoW, word embeddings averaged to obtain good sentence representation. Pretrained models.
 \paragraph{Co-Occurrence Counts}
 $$P(w_t,w_{t-i},\ldots,w_{t-1}) = \frac{P(w_t,w_{t-i},\ldots,w_{t-1})}{P(w_{t-i},\ldots,w_{t-1})}$$
@@ -326,10 +326,11 @@ SGNS is suggested to be a good baseline: faster to compute and performs well.
 \paragraph{Gensim} Cython
 \paragraph{Fang} Uses PyTorch
 \subsection{Evaluation}
-\paragraph{Polysemy} Word vector is a linear combination of its word senses.
-$$v_{pike} = \alpha_1v_{pike_1} + \alpha_2v_{pike_3} + \alpha_3v_3$$
-with $\alpha_i = \frac{f_i}{f_1+f_2+f_3}$ for the frequencies $f_i$.\\
-It's intrinsic evaluation.
+\paragraph{Polysemy} Word vector is a linear combination of its word senses. Intrinsic evaluation.
+$$\mathlarger{v_{pike} = \alpha_1v_{pike_1} + \alpha_2v_{pike_3} + \alpha_3v_3}$$
+\begin{center}
+with $\alpha_i = \mathlarger{\frac{f_i}{f_1+f_2+f_3}}$ for the frequencies $f_i$
+\end{center}
 \paragraph{Extrinsic Vector Evaluation} The proof of the pudding is in the eating. Test on a task, e.g. NER (Named Entity Recognition)
 \subsubsection{Embeddings in Neural Networks} An embedding layer is often used as fist layer in a neural network for processing text.\\
 It consists of a matrix $W$ of size $|V|\times d$ where $d$ is the size of the embedding space. $W$ maps words to dense representations.\\
@@ -359,9 +360,9 @@ It is initialized either with random weights or pretrained embeddings. During le
 	\includegraphics[scale=0.5]{8.png}
 \end{center}
 Given a sequence of $n$ tokens ($x_1,\ldots,x_n$), the language model learns to predict the probability of next token given the history
-$$P(x_1,\ldots,x_n)=\prod_{i=1}^n P(x_i\:|\:x_1^{i-1})$$
+$$\mathlarger{P(x_1,\ldots,x_n)=\prod_{i=1}^n P(x_i\:|\:x_1^{i-1})}$$
 The model is trained to minimize the negative log likelihood
-$$L = -\sum_{i=1}^n\left(\log P(x_i\:|\:x_1^{i-1})+\log P(x_i\:|\:x_{i+1}^n) \right)$$
+$$\mathlarger{L = -\sum_{i=1}^n\left(\log P(x_i\:|\:x_1^{i-1})+\log P(x_i\:|\:x_{i+1}^n) \right)}$$
 \paragraph{BERT} Semi-supervised training on large amounts of text, or supervised training on a specific task with a labeled dataset.
 \section{Text Classification}
 For example: positive/negative review identification, author identification, spam identification, subject identification\ldots
