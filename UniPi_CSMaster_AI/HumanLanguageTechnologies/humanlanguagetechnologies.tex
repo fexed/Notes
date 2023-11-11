@@ -16,6 +16,7 @@
 \usepgflibrary{shapes}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{relsize}
 \usepgfplotslibrary{fillbetween}
 \definecolor{backcolour}{RGB}{255,255,255}
 \definecolor{codegreen}{RGB}{27,168,11}
@@ -105,46 +106,45 @@ Standard approach for each new problem:
 \end{list}
 \paragraph{Technological Breakthroughs} Improved ML techniques but also large annotated datasets and more computing power, provided by GPUs and dedicated ML processors (like the TPU by Google).\\
 ML exploits parallelism: stochastic gradient descent can be parallelized (asynchronous stochastic gradient descent). No need to protect shared memory access, and low (half, single) precision is enough.
-\paragraph{Deep Learning Approach} Was a big breakthrough.\begin{list}{}{}
+\paragraph{Deep Learning (DL) Approach} Was a big breakthrough.\begin{list}{}{}
 	\item Design a model architecture
 	\item Define a loss function
 	\item Run the network letting the parameters and the data representations \textbf{self-organize} as to minimize the loss
-	\item End-to-end learning: no intermediate stages nor representation
 \end{list}
-\subparagraph{Feature representation} Use a vector with each entry representing a feature of the domain element\\
-	Deep Learning represents data as vectors. Images are vectors (matrices), but words? \textbf{Word Embeddings}: transform a word into a vector of hundreds of dimensions capturing many subtle aspects of its meaning. Computed by the means of \textbf{language model}.\\
-From a discrete to distributed representation. Words meaning are dense vectors of weights in a high dimensional space, with algebraic properties.\\
-Background: philosophy, linguistics and statistics ML (feature vectors).
+End-to-end learning: no intermediate stages nor representation.
+\subparagraph{Feature representation} Use a \textbf{vector}: each entry represents a feature of the domain element.\\
+\textbf{DL represents data as vectors}: images are vectors (matrices), but words? \textbf{Word Embeddings}: transform a word into a \textbf{vector of hundreds of dimensions} capturing many subtle aspects of its meaning. Word embeddings are computed by a \textbf{language model}.\\
+From a discrete to distributed representation: \textbf{words meaning are dense vectors} of weights in a high dimensional space, with algebraic properties. This representation has background in philosophy, linguistics and statistics ML (\textbf{feature vectors}).
 \subparagraph{Language Model} Statistical model which tells the probability that a word comes after a given word in a sentence.
-\subparagraph{Dealing with Sentences} A sentence is a sequence of words: build a representation of a sequence from those of its words (compositional hypothesis). Sequence to sequence models.\\
-Is there more structure in a sentence than a sequence of words? In many cases, tools forgets information when translating sentences into sequences of words, discarding much of the structure.
+\subparagraph{Dealing with sentences} A sentence is a sequence of words: build a representation of a sequence from those of its words (\textbf{compositional hypothesis}), thanks to \textbf{sequence to sequence models} (seq2seq models).\\
+Is there more structure in a sentence than a sequence of words? In many cases, tools forget information when translating sentences into sequences of words, discarding much of the structure.
 \section{Language Modeling}
 \paragraph{Probabilistic Language Model} The \textbf{goal is to assign a probability score to a sentence}.
-\begin{list}{}{}
-	\item \textbf{Machine Translation}: $P($high winds tonight$) > P($large winds tonight$)$
-	\item \textbf{Spell Correction}: $P($about fifteen \underline{minutes} from$) > P($about fifteen \underline{minuets} from$)$
-	\item \textbf{Speech Recognition}: $P($I saw a van$) > P($eye saw a van$)$
-	\item \textbf{Language Identification}: $s$ from unknown language (italian or english) and $L$ita, $L$eng language models for italian and english $\Rightarrow$ $L$ita$(s) > L$eng$(s)$
-	\item Summarization, question answering\ldots
+\begin{list}{}{Applications:}
+	\item \textbf{Machine Translation}: $P($"high winds tonight"$) > P($"large winds tonight"$)$
+	\item \textbf{Spell Correction}: $P($"about fifteen minutes from"$) > P($"about fifteen minuets from"$)$
+	\item \textbf{Speech Recognition}: $P($"I saw a van"$) > P($"eye saw a van"$)$
+	\item \textbf{Language Identification}: $s$ from unknown language (Italian or English) and $L_{\hbox{it}}$, $L_{\hbox{en}}$ language models for italian and english $\Rightarrow$ $L_{\hbox{it}}(s) > L_{\hbox{en}}(s)$
+	\item Summarization, question answering\ldots many other
 \end{list}
 We want to compute \begin{list}{}{}
-	\item $P(W) = P(w_1,w_2,\ldots,w_n)$ the probability of a sequence
-	\item $P(w_4\:|\:w_1,w_2,w_3,w_4)$ the probability of a word given some previous words
+	\item The probability of a sequence: $P(W) = P(w_1,w_2,\ldots,w_n)$
+	\item The probability of a word given some previous words: $P(w_4\:|\:w_1,w_2,w_3,w_4)$
 \end{list}
-The model that computes that is called the \textbf{language model}
-\paragraph{Markov Model and N-Grams} Simplify the assumption: the probability of a word given all the previous is the same of the probability of that word given just few (one, two\ldots) previous words. So $P(w_i\:|\:w_{i-},\ldots,w_1) = P(w_i\:|\:w_{i-1})$ (First order Markov chain).\\
-With a \textbf{$N$-gram}: $P(w_n\:|\:w_1^{n-1}) \simeq P(w_n\:|\:w_{n-N+1}^{n-1})$\\
-In general it's insufficient: language has \textbf{long distance dependencies}, but we can often get away with $N$-gram models. For example:\begin{list}{}{}
-	\item “The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{is} tall.”
-	\item “The \textbf{men} next to the large oak tree near the grocery store on the corner \textbf{are} tall.”
+The model that computes those probabilities is called \textbf{language model}. Let's see an example.
+\paragraph{Markov Model and N-Grams} \textbf{Simplify} the assumption: the probability of a word given all the previous is the same of the probability of that word given just few previous words. So e.g. a first-order Markov chain $$P(w_i\:|\:w_{i-1},\ldots,w_1) = P(w_i\:|\:w_{i-1})$$
+In general, with a \textbf{$N$-gram} we have a dependency on the previous $N$ words $$\mathlarger{P(w_n\:|\:w_1^{n-1}) \simeq P(w_n\:|\:w_{n-N+1}^{n-1})}$$
+In general it's insufficient: \textbf{language has long distance dependencies}, but we can often get away with $N$-gram models. For example:\begin{list}{}{}
+	\item "The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{is} tall."
+	\item "The \textbf{men} next to the large oak tree near the grocery store on the corner \textbf{are} tall."
 \end{list}
 Or even semantic dependencies:
 \begin{list}{}{}
-	\item “The \textbf{bird} next to the large oak tree near the grocery store on the corner \textbf{flies} rapidly.”
-	\item “The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{talks} rapidly.”
+	\item "The \textbf{bird} next to the large oak tree near the grocery store on the corner \textbf{flies} rapidly."
+	\item "The \textbf{man} next to the large oak tree near the grocery store on the corner \textbf{talks} rapidly."
 \end{list}
 So more complex models are needed to handle such dependencies.
-\paragraph{Maximum likelihood estimate}$$P(w_n\:|\:w_{n-N+1}^{n-1}) = \frac{\hbox{count}(w_{n-N+1}^{n-1},w_n)}{\hbox{count}(w_{n-N+1}^{n-1})}$$
+\paragraph{Maximum likelihood estimate (MLE)}$$\mathlarger{P(w_n\:|\:w_{n-N+1}^{n-1}) = \frac{\hbox{count}(w_{n-N+1}^{n-1},w_n)}{\hbox{count}(w_{n-N+1}^{n-1})}}$$
 Maximum because it's the one that maximize $P($Training set $|$ Model$)$
 \paragraph{Shannon Visualization Method} Generate random sentences:
 \begin{list}{}{}
@@ -163,45 +163,46 @@ def gentext(cpd, word, length=20):
 \end{lstlisting}
 \paragraph{Perils of Overfitting} N-grams only work well for word prediction if the test corpus looks like the training corpus. In real life, this is often not the case.\\
 We \textbf{need to train robust models able to adapt}.
-\subparagraph{Smoothing} Many rare (but not impossible) combinations of word sequences never occur in training, so MLE incorrectly assigns zero to many parameters (sparse data).\\
-If a new combination occurs during testing, it is given a probability of zero and the entire sequence gets a probability of zero (infinite perplexity).\\
-Parameters are \textbf{smoothed}/regularized to reassign some probability mass to unseen events (meaning removing probability from seen ones in order to maintain the joint distribution that sums to 1)
-\paragraph{Zipf's Law} A small number of events occur with high frequency, while a large number of events occur with small frequency. You can quickly collect statistics on the high frequency events, but you may have to wait an arbitrarily long time to get valid statistics on low frequency events.\\
+\subparagraph{Smoothing} Many rare, but not impossible, combinations of word sequences may never occur during training, so MLE incorrectly assigns zero to many parameters resulting in \textbf{sparse data}. If a new combination occurs during testing, it is given a \textbf{probability of zero} and the entire sequence gets a probability of zero: a scenario called \textbf{infinite perplexity}.\\
+To prevent this, parameters are \textbf{smoothed}, or regularized, to \textbf{reassign some probability mass to unseen events}, thus removing some probability from seen ones in order to maintain the joint distribution sum to 1.
+\paragraph{Zipf's Law} A small number of events occur with high frequency, while a large number of events occur with small frequency. You can quickly collect statistics on the high frequency events, but \textbf{you may have to wait an arbitrarily long time to get valid statistics on low frequency events}.\\
 The result is that our estimates are sparse. No counts at all for the vast bulk of things we want to estimate. Some of the zeroes in the table are really zeroes, but others are simply low frequency events you haven't seen yet: after all, anything can happen. How to address? By estimating the likelihood of unseen N-grams.
 \begin{center}
-	\includegraphics[scale=0.75]{1.png}
+	\includegraphics[scale=0.70]{1.png}
 \end{center}
 \textbf{Result}: $f$ is proportional to $\frac{1}{r}$, meaning that there is a constant $k\:|\:f\cdot r = k$
 \begin{center}
-	\includegraphics[scale=0.75]{2.png}
+	\includegraphics[scale=0.70]{2.png}
 \end{center}
 \subsection{Evaluation and Perplexity}
-\paragraph{Evaluation} Train parameters of our model on a training set. For the evaluation, we apply the model on new data and look at the model's performance: \textbf{test set}. We need a metric which tells us how well the model is performing: one of such is \textbf{perplexity}.
+\paragraph{Evaluation} After training the parameters of our model on the training set, we want to evaluate its results. For the evaluation, we apply the model on new data and look at the model's performance, using the test set. We need a \textbf{metric which tells us how well the model is performing}: one of such is \textbf{perplexity}.
 \paragraph{Extrinsic Evaluation} Evaluating N-gram models.\begin{list}{}{}
 	\item Put model A in a task (language identification, speech recognizer, machine translation system\ldots)
-	\item Run the task, get an accuracy for $A$
+	\item Run the task, get an accuracy for A
 	\item Put model B in the task, get accuracy for B
-	\item Compare the accuracies
+	\item Compare the two accuracies
 \end{list}
 \paragraph{Language Identification Task} Build a model for each language and compute probability that text is of such language.
 $$lang = \arg\max_l P_l(text)$$
 \paragraph{Difficulty of Extrinsic Evaluation} Extrinsic evaluation is time-consuming, can take days to run an experiment. Recent benchmarks like GLUE have become popular due to the effectiveness.\\
 Intrinsic evaluation us an approximation called \textbf{perplexity}: it's a poor approximation unless the test data looks just like the training data.
-\paragraph{Perplexity} The intuition is the notion of surprise: how surprised is the language model when it sees the test set? Where surprise is a measure of "I didn't see that coming". The more surprised is, the lower the probability it assigned to the test set, and the higher the probability the less surprised it is.\\
-So perplexity measures how well a model "fits" the test data. It uses the probability that the model assigns to the test corpus and normalizes for the number of words in the test corpus, taking the inverse. $$PP(w) = \sqrt[N]{\frac{1}{P(w_1\ldots w_N)}}$$
+\paragraph{Perplexity} The intuition is the notion of surprise: how surprised is the language model when it sees the test set? Where surprise is a measure of "I didn't see that coming". The more surprised is, the lower the probability it assigned to the test set, and the higher the probability the less surprised it is. Lower perplexity $\Rightarrow$ better model.\\
+So \textbf{perplexity measures how well a model "fits" the test data}. It uses the probability that the model assigns to the test corpus and normalizes for the number of words in the test corpus (the $\sqrt[N]{\:}$), taking the inverse. $$PP(w) = \sqrt[N]{\frac{1}{P(w_1\ldots w_N)}}$$
 Measures the weighted average branching factor in predicting the next word (lower is better).\\
 In the chain rule $$PP(w) = \sqrt[N]{\prod_{i=1}^N\frac{1}{P(w_i\:|\:w_1\ldots w_{i-1})}}$$
 And for bigrams $$PP(w) = \sqrt[N]{\prod_{i=1}^N\frac{1}{P(w_i\:|\:w_{i-1})}}$$
-Lower perplexity $\Rightarrow$ better model
 \section{Representation of Words}
-\paragraph{Word Meaning} Definition of \textbf{meaning}:\begin{list}{}{}
+\paragraph{Word Meaning} Let's start from the definition of \textbf{meaning}:\begin{list}{}{}
 	\item Idea represented by a word, phrase\ldots
 	\item Idea that a person wants to express by using words, signs\ldots
 	\item Idea expressed in a work of writing, art\ldots
 \end{list}
-\textbf{Signifier} (symbol) $\Leftrightarrow$ \textbf{Signified} (idea or concept) = \textbf{denotation}
-\paragraph{Linguistic Solution} Dictionary or lexical resources provide word definitions as well as synonyms, hypernums, antonyms\ldots example: \textbf{Wordnet}.
-\subparagraph{Problems with lexical resources} \begin{list}{}{}
+An important aspect is to distinguish signifier and signified.
+\begin{center}
+	\textbf{Signifier} (symbol) $\Leftrightarrow$ \textbf{Signified} (idea or concept) = \textbf{denotation}
+\end{center}
+\paragraph{Linguistic Solution} Dictionary or \textbf{lexical resources} provide word definitions as well as synonyms, hypernonyms, antonyms\ldots example: \textbf{Wordnet}. But there are \textbf{few problems} with lexical resources:
+\begin{list}{}{}
 	\item Imperfect, sometimes there are errors
 	\item Missing new meanings of words, hard to keep up-to-date
 	\item Subjective
@@ -209,27 +210,29 @@ Lower perplexity $\Rightarrow$ better model
 	\item Hard to compute accurate word similarity
 \end{list}
 \paragraph{Vector Space Model} The \textbf{VSM} is a representation for text used in information retrieval. A document is represented by a vector in a $n$-dimensional space $$v(d_1) = [t_1,\ldots, t_n]$$
-Each dimension corresponds to a separate term.\\
-The VSM considers words as discrete symbols.
-\subparagraph{One Hot Representation} A word occurrence is represented by one-hot vectors, with the vector dimension being the number of words in a vocabulary and $1$ in correspondence of the position of the represented word. Useful for representing a document by the sum of the word occurrence vector, and document similarity given by \textbf{cosine distance} (angle between vectors).
-\subparagraph{tf*idf Measure} Term frequency: frequency of the word.\\
-Inverse document frequency (idf): given $N$ total documents and $df_i=$ document frequency of word $i$, meaning the number of documents with word $i$
-$$idf_i=\log\frac{N}{df_i}$$
+Each dimension corresponds to a separate term: the VSM considers \textbf{words as discrete symbols}.
+\subparagraph{One Hot Representation} A \textbf{word occurrence is represented by one-hot vectors}: vectors where the dimension is the number of words in a vocabulary, of all $0$s and a single $1$ in correspondence of the position of the represented word. Useful for representing a document by the sum of the word occurrence vector, and document similarity given by \textbf{cosine distance} (angle between vectors).
+\subparagraph{tf*idf Measure} It's composed by:
+\begin{list}{}{}
+	\item \textbf{Term frequency}, $tf_i$: the frequency of the word $i$
+	\item \textbf{Document frequency}, $df_i$: the number of documents containing the word $i$
+	\item \textbf{Inverse document frequency}, $idf_i$: given $N$ documents and $df_i$ is computed with $idf_i=\log\frac{N}{df_i}$
+\end{list}
 \subparagraph{Classical VSM} Vector is all zeroes with $idf_t$ instead of $1$. The vector of a document is the sum of the vectors of its terms occurrence vectors.\\
 Doesn't capture similarity between terms.
 \paragraph{Problems with Discrete Symbols} All vectors are orthogonal, with no notion of similarity. Search engines try to address the issue using WordNet synonyms but it's better to encode the similarity in the vectors themselves.
-\subparagraph{Intuition} Model the meaning of a word by "embedding" it in a vector space. The meaning of a word is a vectors of numbers (vector models are also called \textbf{embeddings}), so a \textbf{dense vector space}. Contrast: word meaning is represented in many computational linguistic applications by a vocabulary index.
+\subparagraph{Intuition} Model the meaning of a word by "embedding" it in a vector space. The meaning of a word is a vector of numbers (vector models are also called \textbf{embeddings}), so a \textbf{dense vector space}. Contrast: word meaning is represented in many computational linguistic applications by a vocabulary index.
 \paragraph{Word Vectors/Embeddings} Build dense vector for each word chosen so that it is similar to vectors of words that appear in similar contexts.\\
 Four kinds:\begin{enumerate}
-	\item[] Sparse Vector Representations
+	\item[] \textbf{Sparse Vector Representations}
 	\item Mutual-information weighted word co-occurence matrices
-	\item[] Dense Vector Representations
+	\item[] \textbf{Dense Vector Representations}
 	\item Singular Value Decomposition (and Latent Semantic Analysis)
 	\item Neural Network Inspired models (word2vec, GloVe, fastText\ldots)
 	\item Brown Clusters
 \end{enumerate}
-\paragraph{Distributional Hypothesis} A word's meaning is given by the words that frequently appear close-by. Old idea but successful just with modern statistical NLP.\\
-When a word $w$ appears in a text, its context is the set of words that appear nearby (within a fixed-size window). Use of the many contexts of $w$ to build a representation of $w$.
+\paragraph{Distributional Hypothesis} A \textbf{word's meaning is given by the words that frequently appear close-by}. Old idea but successful enough with modern statistical NLP.\\
+When a word $w$ appears in a text, its context is the set of words that appear nearby, within a fixed-size window: use the many contexts of $w$ to build a representation of $w$.
 \subparagraph{Word Context Matrix} Is a $|V|\times|V|$ matrix $X$ that counts the frequencies of co-occurrence of words in a collection of contexts (i.e. text spans of a given length).
 \subparagraph{Co-Occurrence Matrix} Words $\equiv$ Context words. Rows of $X$ capture similarity yet $X$ is still high dimensional and sparse. One row per word with counts of occurrencies of any other word.\\
 We can compute the distance vectors between words, but neighboring words are not semantically related.
