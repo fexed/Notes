@@ -238,21 +238,21 @@ When a word $w$ appears in a text, its context is the set of words that appear n
 We can compute the distance vectors between words, but neighboring words are not semantically related.
 \subsection{Word Embeddings}
 \paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddings})
-$$Embed : R^{|V|}\rightarrow R^k$$
-$$Embed(v(t)) = e(t)$$
-Desired properties: remaining dimensions represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
-\paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and negative examples made replacing center word with random one. The loss for the training is $$Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))$$
+$$\hbox{Embed} : R^{|V|}\rightarrow R^k$$
+$$\hbox{Embed} : v(t) \mapsto e(t)$$
+Desired properties: represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
+\paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and \textbf{negative examples made replacing center word with random one}. The loss for the training is $$Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))$$
 with $x^{(w)}$ obtained by replacing the central word of $x$ with a random word.
 \paragraph{Word2Vec} Framework for learning words, much faster to train. Idea:\begin{list}{}{}
-	\item Collect a large corpus of text
-	\item Every word in a fixed vocabulary is represented by a vector
+	\item Collect a large corpus of text\\
+	Every word in a fixed vocabulary is represented by a vector
 	\item Go through each position $t$ in the text, which has a center word $c$ and context ("outside") words $o$
 	\item Use the similarity of the word vectors for $c$ and $o$ to calculate the probability of $o$ given $c$
 	\item Keep adjusting word vectors to maximize this probability
 \end{list}
 Two kinds:
 \begin{center}
-	\includegraphics[scale=0.5]{3.png}
+	\includegraphics[scale=0.45]{3.png}
 \end{center}
 \begin{list}{}{}
 	\item \textbf{Skip-gram} (left): predict context words within window of size $m$ given the center word $w_t$
@@ -261,38 +261,39 @@ Two kinds:
 \begin{center}
 	\includegraphics[scale=0.4]{4.png}
 \end{center}
-Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text (no need for human-labeled data!).\\
-Usual context size is 5 words before and after. Features can be multi-word expressions. Longer windows can capture more semantics and less syntax.\\
-A typical size for $h$ is 200-300.
-\pagebreak
+Embeddings are a by-product of the word prediction task. Even though it's a prediction task, the network can be trained on any text:"no need for human-labeled data!\\
+Usual context size is 5 words before and after. Features can be multi-word expressions. Longer windows can capture more semantics and less syntax. A typical size for $h$ is 200-300.
 \subparagraph{Skip-Gram}
 \begin{multicols}{2}
 \begin{list}{}{}
 	\item Inputs are one-hot representation of the word
-	\item $w\in R^{|Vocabulary|}$ are high-dimensional
+	\item $w\in R^{|Voc|}$ are high-dimensional
 	\item $v\in R^d$ is low dimensional: size of the embedding space $d$
 	\item $V\in R^{|Voc|\times d}$ input word matrix
 	\item row $t$ of $V$ is the input vector, representation for \textbf{center} word $w_t$
 	\item $U\in R^{d\times|Voc|}$ output matrix
-	\item column $o$ of $U$ is the output vector, representation for \textbf{context} word $w_o$
+	\item Column $o$ of $U$ is the output vector, representation for \textbf{context} word $w_o$
+	\item $v_t = w_tV$ embedding of word $w_t$
+	\item $z=v_tU$, $z_i$ is the similarity of $w_t$ with $w_i$
+	\item Softmax converts $z$ to a probability distribution $p_i$ $$p_i=\frac{e^{z_i}}{\sum_{j\in V}e^{z_j}}$$
 \end{list}
 \columnbreak
 \begin{center}
-	\includegraphics[scale=0.35]{5.png}
+	\includegraphics[scale=0.5]{5.png}
 \end{center}
 \end{multicols}
-$v_t = w_tV$ embedding of word $w_t$\\$z=v_tU$ $z_i$ is the similarity of $w_t$ with $w_i$\\Softmax converts $z$ to a probability distribution $p_i$ $$p_i=\frac{e^{z_i}}{\sum_{j\in V}e^{z_j}}$$
-Procedure
-\begin{list}{}{}
+\pagebreak
+\begin{list}{}{Procedure}
 	\item Lookup the embedded word vector for the center word $v_c = V[c] \in R^n$
 	\item Generate score vector $z = v_cU$
 	\item Turn the score vector into probabilities $\hat{y} =$ softmax$(z)$
 \end{list}
 $\hat{y}_{c-m},\ldots$ Those are the estimates of the probabilities of observing each context word. These should match the true probabilities, which are $$y^{c-m},\ldots, y^{(c-1)}, y^{(c+1)}, \ldots, y^{(c+m)}$$
 The training iterates through the whole corpus predicting surrounding words given the center word.
-\subparagraph{Objective Function} For each position $t=1,\ldots,T$ predict context words within a window of fixed size $m$ given each center word $w_t$ $$\hbox{Likelihood} = L(\Theta) = \prod_{t=1}^T\prod_{-m\leq j\leq m,\:\:j\neq 0} P(w_{t+j}\:|\:w_t,\Theta)$$
-While the objective function $J(\Theta)$ is the average negative log likelihood $$J(\Theta) = -\frac{1}{T}\log L(\Theta) = -\frac{1}{T}\sum_{t=1}^T\sum_{-m\leq j\leq m,\:\:j\neq 0} \log(P(w_{t+j}\:|\:w_t,\Theta)=$$
-To compute $P(o\:|\:c, \Theta)$ we use two vectors per word $w$: $v_w$ when $w$ center word and $u_w$ when $w$ context word. For a center word $c$ and a context word $o$:$$P(o\:|\:c) = \frac{e^{u_o v_c}}{\sum_{w\in V} e^{u_w v_c}}$$
+\subparagraph{Objective Function} For each position $t=1,\ldots,T$ predict context words within a window of fixed size $m$ given each center word $w_t$ $$\mathlarger{\hbox{Likelihood} = L(\Theta) = \prod_{t=1}^T\:\prod_{-m\leq j\leq m,\:\:j\neq 0} P(w_{t+j}\:|\:w_t,\Theta)}$$
+While the objective function $J(\Theta)$ is the average negative log likelihood $$\mathlarger{J(\Theta) = -\frac{1}{T}\log L(\Theta) = -\frac{1}{T}\sum_{t=1}^T\:\sum_{-m\leq j\leq m,\:\:j\neq 0} \log(P(w_{t+j}\:|\:w_t,\Theta))=}$$
+To compute $P(o\:|\:c, \Theta)$ we use two vectors per word $w$: $v_w$ when $w$ is a center word and $u_w$ when $w$ is a context word. For a center word $c$ and a context word $o$:
+$$\mathlarger{P(o\:|\:c) = \frac{e^{u_o v_c}}{\sum_{w\in V} e^{u_w v_c}}}$$
 With the dot product $u\cdot v = \sum_i u_iv_i$: larger product $\Rightarrow$ larger probability. Normalize over entire vocabulary to give probability distribution.\\
 $J(\Theta)$ is a function of all windows in the corpus, potentially billions: too expensive to compute. The solution is the stochastic gradient descent, sampling windows randomly and update after each one.
 \paragraph{Softmax}\begin{list}{}{}
