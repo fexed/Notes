@@ -1405,25 +1405,25 @@ In 2014 neural machine translation was introduced with an huge impact on the mac
 \begin{center}
 	\includegraphics[scale=0.6]{63.png}
 \end{center}
-A seq2seq model is versatile: a neural network takes an input an produces a neural representation, which is used as input by a second network that produces a sequence as output (\textbf{encoder-decoder model}). These models are useful for more than just MT, many natural language processing tasks can be phrased as sequence-to-sequence:
+seq2seq2 models are versatile: a neural network takes an input an produces a neural representation, which is used as input by a second network that produces a sequence as output (\textbf{encoder-decoder model}). These models are useful for more than just MT: \textbf{many natural language processing tasks can be phrased as sequence-to-sequence tasks}. Some examples are:
 \begin{list}{}{}
-	\item Summarization, long text to short text.
-	\item Dialogue, previous utterances to next utterance
-	\item Parsing, input text to sequence of parsing symbols
-	\item Code generation, natural language to e.g. Python code
+	\item \textbf{Summarization}, long text to short text.
+	\item \textbf{Dialogue}, previous utterances to next utterance
+	\item \textbf{Parsing}, input text to sequence of parsing symbols
+	\item \textbf{Code generation}, natural language to e.g. Python code
 \end{list}
-The seq2seq model is an example of \textbf{conditional language model}:\begin{list}{}{}
+seq2seq models are an example of \textbf{conditional language model}:\begin{list}{}{}
 	\item \textbf{Language model} because the decoder is predicting the next word of the target sentence $y$
 	\item \textbf{Conditional} because its predictions are also conditioned on the source sentence $x$
 \end{list}
 NMT directly calculates $$P(y\:|\:x) = P(y_1\:|\:x)P(y_2\:|\:y_1,x)\ldots P(y_T\:|\:y_1,\ldots,y_{T-1},x)$$
-To train a NMT system, get a big parallel corpus\ldots
+To train a NMT system, get a big parallel corpus\ldots same story.
 \begin{center}
 	\includegraphics[scale=0.6]{64.png}
 \end{center}
-\paragraph{Beam Search} We showed how to generate (decode) the target sentence by taking the argmax on each step of the decoder. But this is greedy decoding, taking the most probable word on each step, but it has problems e.g. it has no way to undo decisions! A better option would be to use \textbf{beam search}, to explore several hypothesis and select the best one. Ideally we want to find a translation $y$ that maximizes $$P(y\:|\:x) = \prod_{i=1}^T P(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
+\paragraph{Beam Search} We showed how to generate (decode) the target sentence by taking the $\arg\max$ on each step of the decoder. But \textbf{this is greedy decoding}, it takes the most probable word on each step, but it has problems: e.g. it has no way to undo decisions! A better option would be to use \textbf{beam search}, to explore several hypothesis and selecting the best one while also keeping a list of other good hypothesis. Ideally we want to find a translation $y$ that maximizes $$P(y\:|\:x) = \prod_{i=1}^T P(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
 We could try computing all possible sequences $y$: on each step $t$ of the decoder we're tracking $V^t$ possible partial translations with $V$ vocab size. This $O(V^T)$ complexity is too expensive, though, so \textbf{beam search}: we keep track of the $k$ most probable partial translations, with $k$ being the beam size ($k\simeq 5, 10$ in practice).\\
-An hypothesis has a score which is its log probability $$\hbox{score}(y_1,\ldots,y_t) = \sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
+An hypothesis has a score which is its $\log$ probability $$\hbox{score}(y_1,\ldots,y_t) = \sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
 Scores are all negative, the higher the better. We search for high-scoring hypothesis, tracking top $k$ on each step.\\
 Doesn't guarantee to find the most optimal solution, but it's far more efficient.
 \subparagraph{Example} With $k=2$
@@ -1439,7 +1439,7 @@ Then we go back finding the complete translations.
 $$\hbox{score}(y_1,\ldots,y_t) =\frac{1}{t}\sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,\ldots,y_{i-1},x)$$
 \begin{multicols}{2}
 \subparagraph{Benefits}\begin{list}{}{}
-	\item Better Performance: more fluent, better use of context and of phrase similarities
+	\item Better performance: more fluent, better use of context and of phrase similarities
 	\item Single neural network to be optimized end-to-end: no subcomponents to be individually optimized
 	\item Requires much less human engineering effort: no feature engineering, same method for all language pairs.
 \end{list}
@@ -1459,15 +1459,17 @@ $$\hbox{score}(y_1,\ldots,y_t) =\frac{1}{t}\sum_{i=1}^t \log P_{LM}(y_i\:|\:y_1,
 	\item morphological agreement errors
 	\item low-resource language pair
 \end{list}
-NMT is the flagship task for NLP deep learning: it has pioneered many of the recent innovations of NLP. In 2021 NMT research continues to thrive, researchers have found many improvements to the vanilla seq2seq NMT system presented thus far. But one improvement is so integral that is has become the new vanilla.
-\paragraph{Attention} Seq2seq has a bottleneck: the encoding needs to capture all the information about the source sentence, it's an \textbf{information bottleneck}.\\
+NMT is the flagship task for NLP deep learning: it has pioneered many of the recent innovations of NLP. In 2021 NMT research continues to thrive, researchers have found many improvements to the vanilla seq2seq NMT system presented thus far. But one improvement is so integral that is has become the new vanilla: \textbf{Attention Is All You Need}.
+\subsection{Attention} Seq2seq has a bottleneck: the encoding needs to capture all the information about the source sentence, it's an \textbf{information bottleneck}.\\
 \textbf{Attention} provides a solution to the bottleneck problem. The core idea is: on each step of the decoder, focus on a particular part of the source sequence.
+\paragraph{Attention} Given a set of vector values and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query.\\
+The intuition is the following: the weighted sum is a selective summary of the information contained in the values, where the query determines which values to focus on. Attention is a way to obtain a fixed-size representation of an arbitrary set of representations (the values), dependent on some other representation (the query).
 \begin{center}
 	\includegraphics[scale=0.6]{67.png}
 \end{center}
 \subparagraph{In equations}\begin{list}{}{}
 	\item We have the hidden states in the encoder $h_1,\ldots,h_N\in R^h$
-	\item On timestep $t$ we have the decoded hidden state $s_t \in R^h$
+	\item On timestep $t$ we have the decoder hidden state $s_t \in R^h$
 	\item We get the attention scores $e^t$ for this step 
 	$$e^t=[s_t^Th_1,\ldots,s_t^Th_N]\in R^N$$
 	\item We take the softmax to get the attention distribution for this step (probability distribution that sums to 1)
@@ -1491,12 +1493,10 @@ We've seen it in translation, but this can be applied to other NLP tasks. It has
 A more general definition of attention is: given a set of vector values, and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query. We sometimes say that the query \textit{attends to} the values. E.g. in the seq2seq + attention model, each decoder hidden state (query) \textit{attends to} all the encoder hidden states (values).\\
 \textbf{Attention is all you need}. Self-attention helps to contextualize words: a limit on word embeddings was that each word had a single vector, with attention we can introduce into the representation the context into which they appears, allowing to observe other words.
 %skip until Google neural MT architecture
-\subsection{Self-Attention}
+\subsubsection{Self-Attention}
 Sequence to sequence models with attention are quite effective in transduction tasks, but their sequential nature limits parallelism. The \textbf{transformer} transduction model relies entirely on self-attention to compute representations of its input and output: it doesn't use sequence aligned RNNs nor convolutions.\\
 As a result, training costs are reduced by 1-2 orders of magnitude.\\\\
-So we want \textbf{parallelization} but RNNs are inherently sequential. They also generally need attention mechanism to deal with long range dependencies: path length between states grows with distance otherwise. We may be able to just use attention and skip the need for the RNN.
-\paragraph{Attention} Given a set of vector values and a vector query, attention is a technique to compute a weighted sum of the values dependent on the query.\\
-The intuition is the following: the weighted sum is a selective summary of the information contained in the values, where the query determines which values to focus on. Attention is a way to obtain a fixed-size representation of an arbitrary set of representations (the values), dependent on some other representation (the query).\\\\
+So we want \textbf{parallelization} but RNNs are inherently sequential. They also generally need attention mechanism to deal with long range dependencies: path length between states grows with distance otherwise. We may be able to just use attention and skip the need for the RNN.\\
 The generic attention, as we have seen before: we have some \textbf{values} $v_1,\ldots,v_N\in R^{d_1}$, some \textbf{keys} $k_1,\ldots,k_N\in R^{d_1}$ and a \textbf{query} $s\in R^{d_2}$\begin{list}{}{}
 	\item Compute the \textbf{attention scores} $e\in R^N$
 	\item Taking softmax to get the \textbf{attention distribution} $\alpha=\hbox{Softmax}(e)\in R^N$
@@ -1563,12 +1563,12 @@ q^Tk_j&j<i\\
 -\infty&j\geq i
 \end{array}\right.$$
 \subsection{Transformers}
-The encoder maps an input sequence of symbol representations $(x_1,\ldots,x_n)$ to a sequence of continuous representations $(z_1,\ldots,z_n)$ Given $z$, the decoder then generates an output sequence $(y_1,\ldots,y_m)$ of symbols one element at a time. At each step, the model is \textbf{auto-regressive}, consuming the previously generated symbols as additional input when generating the next.
+The encoder maps an input sequence of symbol representations $x = (x_1,\ldots,x_n)$ to a sequence of continuous representations $z = (z_1,\ldots,z_n)$. Given $z$, the decoder then generates an output sequence $y = (y_1,\ldots,y_m)$ of symbols one element at a time. At each step, the model is \textbf{auto-regressive}, consuming the previously generated symbols as additional input when generating the next.
 \begin{center}
 	\includegraphics[scale=0.5]{70.png} \includegraphics[scale=0.5]{71.png}
 \end{center}
 The encoding component is a stack of encoders, and the decoding component is a stack of decoders of the same number.
-\paragraph{Self-Attention} The encoder's inputs first flow into a self-attention layer, that helps the encoder look at other words in the input sentence as it encodes a specific word. The outputs of the self-attention layer are fed to a feed-forward neural network: the exact same FFNN in independently applied to each position.\\
+\paragraph{Self-Attention} The encoder's inputs first flow into a self-attention layer, that helps the encoder look at other words in the input sentence as it encodes a specific word. The outputs of the self-attention layer are fed to a feed-forward neural network: the exact same FFNN is independently applied to each position.\\
 The decoder has both those layers, with an attention layer between them that helps the decoder focus on the relevant parts of the input sentence.
 \begin{center}
 	\includegraphics[scale=1]{72.png}
@@ -1607,7 +1607,6 @@ From \textbf{pretrained word embeddings}: start with pretrained word embeddings 
 Issues: the training data we have for our downstream task (like question answering) must be sufficient to teach all contextual aspects of language. Also most of the parameters in our network are randomly initialized.\\\\
 In modern NLP we \textbf{pretrain the whole model}: all (or almost all) NLP networks' \textbf{parameters are initialized via pretraining}. Pretraining methods hide parts of the inputs from the model, and then train the model to reconstruct those parts.\\
 This has been \textbf{effective at building strong representations} of language, parameter initialization for strong NLP models and probability distributions over language that we can sample from.
-\pagebreak
 \paragraph{Pretraining Transformers} Two-step development\begin{center}
 	\includegraphics[scale=0.5]{74.png}
 \end{center}
@@ -1680,7 +1679,6 @@ Replace different-length spans from the input with unique placeholders, then dec
 \paragraph{In-Context Learning} So far, pretrained models have been used mainly by \textbf{sampling} them (with a prompt) or \textbf{finetuning} them on the task we want. Very large language models seem to performe some kind of \textbf{learning without gradient steps}, just using the examples that are provided as context. These examples seem to specify the task to be performed.
 \paragraph{Distillation} Most pretrained language models are extremely large and expensive. The idea of distillation is very simple: train a \textbf{teacher} with pretraining and finetuning techniques to achieve maximum accuracy, then label a large amount of examples with the teacher. The \textbf{student} will be a much smaller model (e.g. 50x smaller) which is trained to mimic the teacher output with MSE or cross entropy.\\
 An hypothesis on why this works well is that large language models tend to be oversized, because modeling language is the "ultimate" NLP task. In most application tasks only a subset of the features are effectively used, and the student focuses on those features.
-\pagebreak
 \section{Analysis of Language Models}
 Aka BERTology
 \paragraph{Questions About Language Models} \begin{list}{}{}
@@ -1706,7 +1704,6 @@ Assign higher probability to the acceptable sentence in the minimal pair. Just l
 	\item 0 attractors: \textit{the chef is here}
 	\item 1 attractor: \textit{the chef who made the \textbf{pizzas} is here}
 	\item 2 attractors: \textit{the chef who made the \textbf{pizzas} and prepped the \textbf{ingredients} is here}
-	\item \ldots
 \end{list}
 Some examples for subject-verb agreement with attractors that a model got wrong:
 \begin{list}{}{}
@@ -1728,12 +1725,12 @@ Another way is analyzing models by breaking them: can we break models by making 
 \begin{center}
 	\includegraphics[scale=0.5]{80.png}
 \end{center}
-Premise: pretrained transformers provide surprisingly good general-purpose language representations?\\
-Question: what do pretrained representations encode about lingustic properties which we have annotated data?
+Premise: pretrained transformers provide surprisingly good general-purpose language representations.\\
+Question: what do pretrained representations encode about lingustic properties, of which we have annotated data?
 \begin{center}
 	\includegraphics[scale=0.5]{81.png}
 \end{center}
-We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in R^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i)$$ with $f\in F$.\\
+We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in R^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i) \:\hbox{ with } f\in F$$
 The extent to which we can predict $y$ from $h_i$ is a measure of the accessibility of that feature in the representation. This helps in gaining a rough understanding into how the model processes its inputs. Also may help in the search for causal mechanisms.
 \paragraph{Contextual Representation of Language} These pretrained embeddings specify a function which maps elements $v$ in a (word) vocabulary $V$ to vectors $h\in R^d$
 $$f_{vocab} : V\rightarrow R^d$$
@@ -2017,7 +2014,7 @@ Each feature vector $\tilde{p}_i$ is comprised of the following parts:
 	\item Word embeddings $f_{emb}(p_i) = E(p_i)$
 	\item Exact match $f_{exact}(p_i) = I(p_i \in q_i)$, three simple binary features indicating whether $p_i$ can be exactly matched to one question word in $q$
 	\item Token features $f_{token}(p_i) = (POS(p_i), NER(p_i), TF(p_i))$
-	\item Aligned question embedding $f_{align}(p_i) = \sum_j a_{ij}E(q_j)$ using attention scores $$a_{ij}=\frac{e^{\alpha(E(p_i))\alpha(E(q_j))}}{\sum_{j'}e^{\alpha(E(p_i))\alpha(E(q_{j'}))}}$$ with $\alpha$ being a ReLU dense layer.
+	\item Aligned question embedding $f_{align}(p_i) = \sum_j a_{ij}E(q_j)$ using attention scores $$\mathlarger{a_{ij}=\frac{e^{\alpha(E(p_i))\cdot\alpha(E(q_j))}}{\sum_{j'}e^{\alpha(E(p_i))\cdot\alpha(E(q_{j'}))}}}$$ with $\alpha$ being a ReLU dense layer.
 \end{list}
 Question encoding $q=\sum_jb_jq_j$ where $b_j$ encodes the importance of each question word $b_j=\frac{e^{wq_j}}{\sum_{j'} e^{wq_{j'}}}$\\
 For the prediction train two classifier\begin{list}{}{}
@@ -2042,7 +2039,7 @@ Large language models can do open-domain question answering as well, without an 
 	\item Find span in $D$ representing the answer
 \end{list}
 \end{multicols}
-\paragraph{Facebook's bAbI Dataset} Collection of 20 tasks, each check one skill that a reasoning skill should have. Aims at systems able to solve all tasks: no task specific engineering.
+\paragraph{Facebook's bAbI Dataset} Collection of 20 tasks, each check one skill that a reasoning model should have. Aims at systems able to solve all tasks: no task specific engineering.
 \begin{list}{}{}
 	\item Task 1: single supporting fact.\\
 	Questions where a single supporting fact, previously give, provides the answer. Simplest case: asking for the location of a person.
@@ -2272,13 +2269,13 @@ The overall score is $$s(i,j) = s_m(i) + s_m(j) + s_a(i,j)$$
 \paragraph{Recap} Standard LMs predict the next word in a sequence of text and can compute the probability of a sequence. Alternatively, masked LMs (e.g. BERT) predict a masked token in a sequence of text using bidirectional context. Both types can be trained over huge amounts of unlabeled text!\\
 Traditionally LMs are used for many tasks involving generating or evaluating the probability of text. Recently, LMs are commonly used to generate pretrained representations of text that encode some notion of language understanding for downstream NLP tasks. \textbf{Can a LM be used as a knowledgebase?}
 \paragraph{Eliciting Knowledge} Prompting can be used to direct LM towards an answer: often the answers look plausible but are incorrect. Alternatively, one can use the LM to extract an answer from text by a reliable source.\\
-Predictions generally makes sens but are not all factually correct. Why?\begin{list}{}{}
+Predictions generally makes sense but are not always factually correct. Why?\begin{list}{}{}
 	\item \textbf{Unseen facts}: some facts may not have occurred in the training corpora
 	\item \textbf{Rare facts}: LM hasn't seen enough examples during training to memorize the fact
-	\item \textbf{Model sensitivity}: LM may have seen the fact during training, but is sensitive to the phrasing of the prompt (e.e. "made" instead of "created")
+	\item \textbf{Model sensitivity}: LM may have seen the fact during training, but is sensitive to the phrasing of the prompt (e.g. using the word "made" instead of "created")
 \end{list}
 \textbf{LMs} have some knowledge but \textbf{fail to reliably recall knowledge}, a serious challenge.\\\\
-Knowledge-aware LMs are important. LM pretrained representations can benefit downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base for a fact, e.g. with SQL, query the LM with a natural language prompt. Of course this requires the LM to have high quality on recalling facts.
+Knowledge-aware LMs are important. LM pretrained representations can be beneficial to downstream tasks that leverage knowledge. For instance, question answering and information extraction are easier with some knowledge of the entities involved. Stretch goal: can LMs ultimately replace traditional knowledgebases? Instead of querying a knowledge base for a fact, e.g. with SQL, query the LM with a natural language prompt. Of course this requires the LM to have high quality on recalling facts.
 \subparagraph{Querying Traditional Knowledgebases}
 \begin{center}
 	\includegraphics[scale=0.33]{104.png}
@@ -2289,18 +2286,18 @@ Knowledge-aware LMs are important. LM pretrained representations can benefit dow
 \end{center}
 \paragraph{Advantages of LMs over traditional KBs} LMs are pretrained over large amounts of unstructured and unlabeled text, while KBs require manual annotation or complex NLP pipelines to populate.\\
 LMs support more flexible natural language queries, while traditional KBs would have more restricted ways of asking queries.\\
-However, there are many open challenges:
+However, there are \textbf{many open challenges}:
 \begin{list}{}{}
-	\item Hard to interpret, i.e. why does the LM produce an answer
-	\item Hard to trust, i.e. the LM may produce a realistic but incorrect answer
-	\item Hard to modify, i.e. not easy to remove or update knowledge in the LM
+	\item \textbf{Hard to interpret}, i.e. why does the LM produce an answer
+	\item \textbf{Hard to trust}, i.e. the LM may produce a realistic but incorrect answer (also called \textbf{hallucinations})
+	\item \textbf{Hard to modify}, i.e. not easy to remove or update knowledge in the LM
 \end{list}
 \subsection{Adding Knowledge to LMs}
 \subsubsection{Add pretrained entity embeddings} ERNIE, QAGNN/GraseLM
 \begin{center}
 	\includegraphics[scale=0.5]{106.png}
 \end{center}
-Facts about the world are usually in terms of entities. Pretrained word embeddings do not have a notion of entities: different word embeddings for the same entity. What if we assign an ambedding per entity? \textbf{Single entity embedding}.\\
+Facts about the world are usually in terms of entities. Pretrained word embeddings do not have a notion of entities: different word embeddings for the same entity. What if we assign an embedding per entity? \textbf{Single entity embedding}.\\
 Goal: get pretrained entity embeddings that encode factual knowledge, and add to language model. To build entity embeddings, one needs to do \textbf{entity linking}.
 \subparagraph{Entity Linking} Links mentions in text to entities in a knowledgebase. Entity linking tells us which entity embeddings are relevant to the text.\\\\
 Entity embeddings are like word embeddings, but for entities in a knowledgebase. Many techniques:
@@ -2516,13 +2513,12 @@ We have template sentences with the mask BLANK on some of the words and input se
 Human-level response generation ability.\\
 \textbf{GenSF} adapts pre-trained DialoGPT model to the slot filling task.
 \begin{center}
-	\includegraphics[scale=0.5]{119.png}
+	\includegraphics[scale=0.4]{119.png}
 \end{center}
 \textbf{TripPy}
 \begin{center}
-	\includegraphics[scale=0.5]{120.png}
+	\includegraphics[scale=0.4]{120.png}
 \end{center}
-\pagebreak
 \subsection{Generation-Oriented}
 \paragraph{Transducer Model} Train machine translation system to perform translation from utterance to response.
 \begin{center}
