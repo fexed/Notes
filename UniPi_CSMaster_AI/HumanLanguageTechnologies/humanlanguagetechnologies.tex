@@ -1370,14 +1370,14 @@ Work by \textbf{hypothesis expansion}: start with an empty hypothesis $\langle e
 Better: computer-aided translation evaluation. \textbf{Edit cost}: measure the number of changes that a human translator must make to correct the MT output (number of words changed, amount of time taken, number of keystrokes\ldots).
 \subparagraph{Scores} Based on similarity to the reference translations:
 \begin{list}{}{}
-	\item \textbf{BLEU} (Bilingual Evaluation Understudy): determine the number of $n$-grams of various sizes that the MT output shares with the reference translations. Compute a modified precision measure of the $n$-grams in MT result, averaging $n$-gram precision over all $n$-grams up to size $N$ (typically 4) using the geometric mean:
-	$$p_n = \frac{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}_{\hbox{clip}}(n\hbox{-gram})}{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}(n\hbox{-gram})}$$
-	$$p = \sqrt[N]{\prod_{n=1}^Np_n}$$
-	\textbf{BP} (Brevity Penalty): uses a penalty for the translations that are shorter than the reference translation. Define the effective reference length $r$ for each sentence as the length of the reference sentence with the largest number of $N$-gram matches. With $c$ the candidate sentence length:
+	\item \textbf{BP} (Brevity Penalty): uses a penalty for the translations that are shorter than the reference translation. Define the effective reference length $r$ for each sentence as the length of the reference sentence with the largest number of $N$-gram matches. With $c$ the candidate sentence length:
 	$$BP = \left\{\begin{array}{l l}
 	1&c > r\\
 	e^{\frac{1-r}{c}}& c\leq r
 	\end{array}\right.$$
+	\item \textbf{BLEU} (Bilingual Evaluation Understudy): determine the number of $n$-grams of various sizes that the MT output shares with the reference translations. Compute a modified precision measure of the $n$-grams in MT result, averaging $n$-gram precision over all $n$-grams up to size $N$ (typically 4) using the geometric mean:
+	$$\mathlarger{p_n = \frac{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}_{\hbox{clip}}(n\hbox{-gram})}{\sum_{C\in\hbox{Corpus}}\sum_{n\hbox{-gram}\in C}\hbox{Count}(n\hbox{-gram})}}$$
+	$$\mathlarger{p = \sqrt[N]{\prod_{n=1}^Np_n}}$$
 	The final BLEU score is 
 	$$BLEU = BP\cdot p$$
 	Correlates with human evaluation when comparing outputs from different SMT systems, but doesn't correlate with human judgments when comparing SMT systems with manually developed MT or MT with human translations.
