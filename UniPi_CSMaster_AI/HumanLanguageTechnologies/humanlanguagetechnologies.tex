@@ -1300,11 +1300,11 @@ But we don't have phrase alignments. We have \textbf{word alignments}.
 \begin{center}
 	\includegraphics[scale=0.5]{43.png}
 \end{center}
-Actually we have more restrictive word alignments. Word alignments are mapping between source and target words in parallel sentence. Restriction: each foreign word come from exactly one source word.
+Actually we have more restrictive word alignments. Word alignments are mapping between source and target words in parallel sentence. Restriction: each foreign word comes from exactly one source word.
 \begin{center}
 	\includegraphics[scale=0.5]{44.png}
 \end{center}
-Advantage: represent alignment by the index of the English word that the french word comes from. The above alignment thus is 2,3,4,5,6,6,6.\\
+Advantage: represent alignment by the index of the English word that the French word comes from. The above alignment thus is 2,3,4,5,6,6,6.\\
 \textbf{Spurious words} are words in the foreign sentence that does not align with any word in the source language. We assume one to many alignment: each word in $F$ aligns with 1 word in $E$, with some words in $F$ coming from NULL.
 \paragraph{Computing Word Alignments} IBM-Model 1. For phrase-based machine translation we need a word-alignment to extract a set of phrases.\\
 A word alignment model gives us $P(F,E)$, and we want this to train our phrase probabilities $\phi(f_j\:|\:e_j)$ as part of $P(F\:|\:E)$.\\
@@ -1320,22 +1320,21 @@ Its goal is to find the most probable alignment given a prameterized model
 $$\hat{A}=\arg\max_A P(F,A\:|\:E) = \arg\max_A\prod_{j=1}^J t(f_j,e_{a_j})$$
 Since translation choice for each position $j$ is independent, the product is maximized by maximizing each term
 $$a_j = \arg\max_{0\leq i\leq l} t(f_j,e_i)\:\:\:\:\:1\leq j\leq l$$
+\pagebreak
 \paragraph{Training Alignment Probabilities}\begin{list}{}{}
-	\item Get a parallel corpus, e.g.: Europarl, Hansards\ldots
-	\item Sentence alignment. Intuition: use length in words or chars, together with dynamic programming. Ora a simpler MT model.
-	\item Use Expectation Maximization to train word alignments.\\
-	We can bootstrap alignment from a sentence-aligned bilingual corpus using the EM algorithm.\\
+	\item First, get a parallel corpus, e.g.: Europarl, Hansards\ldots
+	\item For sentence alignment, an intuition: use length in words or characters, together with dynamic programming, or a simpler MT model.
+	\item For word alignments, use Expectation Maximization. We can bootstrap alignment from a sentence-aligned bilingual corpus using the EM algorithm.\\
 	$P(A\:|\:E,F)$ is the probability of the alignment $A$ given a translated pair of sentences $E$ and $F$
 	$$P(A\:|\:E,F) = \frac{P(F,A\:|\:E)}{P(F\:|\:E)} =\frac{P(F,A\:|\:E)}{\sum_{A'}P(F,A'\:|\:E)}$$
 	Inherent hidden structure is revealed by EM training.
 \end{list}
-\subparagraph{EM Algorithm for Word Alignment}\begin{lstlisting}
-Randomly set model parameters, making sure they represent legal distributions
-Until convergence (i.e. parameter no longer change) do:
-	E Step: compute the probability of all possible alignments
-		of the training data using the current model
-	M Step: use these alignment probability estimates to re-estimate values
-		for all of the parameters
+\subparagraph{EM Algorithm for Word Alignment} A pseudocode example is the following
+\begin{lstlisting}[style=myPython]
+#Randomly set model parameters, making sure they represent legal distributions
+until convergence do: #(i.e. parameter no longer change)
+	EStep() #compute the probability of all possible alignments of the training data using the current model
+	MStep() #use these alignment probability estimates to re-estimate values for all of the parameters
 end
 \end{lstlisting}
 \subsubsection{Phrase-Based Translation Model}
