@@ -650,18 +650,18 @@ To recap, POS tagging can be done in two ways:
 \end{list}
 \subsection{Sequence Tagging} For example classifying each token independently using information about the surrounding tokens (sliding window) as input features.\\
 For sequence tagging, sequence models work better: HMMs, MEMMs, conditional random fields, convolutional neural networks\ldots
+\begin{multicols}{2}
 \paragraph{Discriminative Model} Estimate $P(y\:|\:x)$ in order to predict $y$ directly from $x$
 $$\hat{y}=\arg\max_y P(y\:|\:x)$$
 For example: max entropy, logistic regression, Conditional Random Fields, Support Vector Machines, CNNs\ldots
-\paragraph{Generative Model} Use the Bayes rule to obtain $P(y\:|\:x)$ and use argmax for classification
-$$\hat{y} = \arg\max_y P(y)P(x\:|\:y)$$
-For example: naive Bayes, HMMs\ldots
-\begin{multicols}{2}
-\paragraph{Naive Bayes} Compute $$\hat{c}_j=\arg\max_j P(c_j\:|\:x)$$ using the Bayes rule $$\hat{c}_j = \arg\max_j P(c_j)P(x\:|\:c_j)$$
-\columnbreak
 \paragraph{Logistic Regression} Compute the posterior probability directly
 $$P(c_j\:|\:x) = \frac{e^{w_jx}}{\sum_ie^{w_ix}}=\hbox{Sofmax}_j(w_jx)$$
 $$\hat{c}_j = \arg\max_j P(c_j\:|\:x)$$
+\columnbreak
+\paragraph{Generative Model} Use the Bayes rule to obtain $P(y\:|\:x)$ and use argmax for classification
+$$\hat{y} = \arg\max_y P(y)P(x\:|\:y)$$
+For example: naive Bayes, HMMs\ldots
+\paragraph{Naive Bayes} Compute $$\hat{c}_j=\arg\max_j P(c_j\:|\:x)$$ using the Bayes rule $$\hat{c}_j = \arg\max_j P(c_j)P(x\:|\:c_j)$$
 \end{multicols}
 In the logistic regression we represent the input $x$ as a vector of features $f_i$
 $$P(c_j\:|\:x) = \frac{e^{w_jf}}{\sum_ie^{w_if}}=\hbox{Sofmax}_j(w_jf)$$
@@ -751,10 +751,10 @@ Sentiment Specific Embeddings are learned:
 	$$L_{SS}(x, x^c) = \max(0, 1 - d_s(x)f_\theta(x)_1 + d_s(x^c)f_\theta(x^c)_1)$$
 	$$L(x,x^c) = \alpha L_{CW}(x,x^c)+(1-\alpha)L_{SS}(x,x^c)$$
 	With gradients
-	$$\left(\begin{array}{c}
-	\frac{\partial L}{\partial f_\theta(x)}\\
-	\frac{\partial L}{\partial f_\theta(x^c)}
-	\end{array}\right)_0 = \left\{\begin{array}{cl}
+	$$\mathlarger{\left(\begin{array}{c}
+	\mathlarger{\frac{\partial L}{\partial f_\theta(x)}}\\
+	\mathlarger{\frac{\partial L}{\partial f_\theta(x^c)}}
+	\end{array}\right)_0} = \left\{\begin{array}{cl}
 	\left(\begin{array}{c}
 	-1\\1
 	\end{array}\right)&\hbox{if }L_{CW}(x, x^c) > 0\\
@@ -791,13 +791,20 @@ Weights are shared across timesteps, so representations are shared too.
 \begin{center}
 	\includegraphics[scale=0.4]{25.png}
 \end{center}
+\pagebreak
 \paragraph{Vanilla RNN}
+\begin{multicols}{2}
 \begin{center}
 	\includegraphics[scale=0.5]{26.png}
 \end{center}
+\columnbreak
+
+\null \vfill
 $$h_t = \sigma\left(Wh_{t-1} + Wx_t + b\right)$$
 $$y_t = \sigma\left(Vh_t\right)$$
 Notice that $y$ is computed from the current $h'$ only.
+\vfill \null
+\end{multicols}
 \paragraph{Training} Tasks:
 \begin{list}{}{}
 	\item for each timestep of the input sequence $x$ we predeict the output $y$ synchronously
@@ -923,7 +930,7 @@ Parsing is choosing the highest scoring tree $$F_W(x)=\arg\max_{y\in GEN(x)}\Phi
 Criteria for a syntactic relation between a head $H$ and a dependent $D$ in a construction $C$
 \begin{list}{}{}
 	\item $H$ determines the syntactic category of $C$ ($H$ can replace $C$)
-	\item $H$ determines the semantic category of $C$ ($D$ specifies $H$)
+	\item $H$ determines the semantic category of $D$ ($D$ specifies $H$)
 	\item $H$ is obligatory and $D$ may be optional
 	\item $H$ selects $D$ and determines whether $D$ is obligatory
 	\item The form of $D$ depends on $H$
@@ -990,9 +997,6 @@ $$\hbox{Left-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S, n|B, A
 $$\hbox{Right-Arc}_r\:\:\:\:\:\frac{\langle S|s, n|B, A\rangle}{\langle S|s, s|B, A\cup\{(s,n,r)\}\rangle}$$
 (Connects without removing, to delay decision and keep words on the stack that might need further connections to children)
 $$\hbox{Reduce}\:\:\:\:\:\frac{\langle S|s, B, A\rangle}{\langle S, B, A\rangle}$$
-\paragraph{Non-Projective Transitions} \begin{list}{}{}
-	\item \texttt{todo 12-Parsing.pptx::57}
-\end{list}
 \paragraph{Learning Procedure}
 \begin{list}{}{}
 	\item Go through each sentence in the treebank and extract the sequence of actions suggested by the oracle.
@@ -1135,6 +1139,7 @@ Except for the right headed constructions.
 Keeping the content words as heads promotes parallelism across languages. The main grammatical relations involving a passive verb, a nominal subject and an oblique agent are the same.
 \paragraph{Parsing}
 Can train a parser, also possible to train on multiple languages.
+\pagebreak
 \section{Machine Translation}
 Main task that led to the creation of the field, Machine Translation consist in translating a text from one language to another.
 \paragraph{Issues}
@@ -1148,33 +1153,37 @@ Main task that led to the creation of the field, Machine Translation consist in 
 	\includegraphics[scale=0.5]{61.png}
 \end{center}
 Not just literature! For example, in the European Parliament there are more official languages so all official documents have to be produced in all official languages.
+\begin{multicols}{2}
 \paragraph{MT Already Good for...}\begin{list}{}{}
 	\item Tasks for which a rough translation is fine: extracting informations, web pages, email\ldots
 	\item Tasks for which the MT can be post-edited: MT as first-pass, computer-aided human translation\ldots
 	\item Tasks in sublanguage domain where high-quality MT is possible: FAHQT (Fully Automatic High Quality Translation)
 \end{list}
-\paragraph{MT Not Yet Good Enough for...}\begin{list}{}{}
+\columnbreak
+\paragraph{MT Not Yet Good Enough for...}
+\begin{list}{}{}
 	\item Really hard stuff: literature, natural spoken speech\ldots
 	\item Really important stuff: medical translations in hospitals, emergency phone calls\ldots
 \end{list}
+\vfill \null
+\end{multicols}
 \subsection{Language Similarities and Divergences}
 \paragraph{Typology} \textbf{Some aspects of human language are universal} or near-universal, \textbf{others diverge greatly}. \textbf{Typology is the} systematic \textbf{study of these similarities and divergences}. What are the dimension along which human languages vary?
 \paragraph{Morphology}
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item \textbf{Morpheme}: minimal meaningful unit of language.\\
 	\textbf{Word}: Morpheme + Morpheme + \ldots
-	\item \textbf{Stems} root plus derivational morphemes\\
+	\item \textbf{Stems}: root plus derivational morphemes\\
 	\textbf{Hope}+ing $\Rightarrow$ \textbf{hop}ing
+	\columnbreak
 	\item \textbf{Lemma}: also called base form, root, lexeme\\
 	\textbf{Hoping} $\Rightarrow$ \textbf{Hope}\\
 	\textbf{Hopping} $\Rightarrow$ \textbf{Hop}
-	\item \textbf{Affixes}: \begin{list}{}{}
-		\item Prefixes
-		\item Suffixes
-		\item Infixes
-		\item Circumfixes
-	\end{list}
+	\item \textbf{Affixes}: prefixes, suffixes, infixes, circumfixes
+	\vfill \null
 \end{list}
+\end{multicols}
 \paragraph{Morphological Variation}
 In \textbf{isolating languages} a single word generally have one morpheme, while in \textbf{polysynthetic languages} single words can have many morphemes.\\
 In \textbf{agglunative languages} morphemes have clean boundaries, in \textbf{fusion languages} a single affix can have many morphemes.\\\\
