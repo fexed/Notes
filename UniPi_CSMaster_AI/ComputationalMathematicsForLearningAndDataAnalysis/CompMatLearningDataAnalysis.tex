@@ -111,9 +111,9 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in \mathbb{R
 	\end{array}\right]\cdot 7 + \left[\begin{array}{c}
 	0\\0\\0\\1
 	\end{array}\right]\cdot 9$$
-	\item \textbf{Image} $Im A$ = set of vectors $b$ that we can reach with $A$
-	\item \textbf{Kernel} $Ker A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
-	\item \textbf{Invertible} $A$ if this problem has exactly one solution:\\
+	\item \textbf{Image} $\text{Im} A$ = set of vectors $b$ that we can reach with $A$ as operator, meaning all $y\:|\:\exists\:x\:\:Ax=y$
+	\item \textbf{Kernel} $\text{Ker} A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
+	\item \textbf{Invertible} $A$ is invertible if this problem has exactly one solution:\\
 	$\forall\:b\in \mathbb{R}^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix $|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
 	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A $\setminus$ b}.
 	\item \textbf{Cost}, with $A\in \mathbb{R}^{m\times n}, B\in \mathbb{R}^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
@@ -121,19 +121,18 @@ Solve general problem $\min{x\in S}f(x)$, with Poloni solve $\min{x\in \mathbb{R
 	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
 \end{list}
 \paragraph{} Why a real valued function? Strong assumption, given $x'$ and $x''$, I can always tell which one I like best (\textbf{total order} of R). Often more than one objective function, with contrasting and/or incomparable units (ex: loss function vs regularity in ML).\\
-But $R^k$ with $k > 1$ has no total order $\Rightarrow$ no \textit{best} solution, only non-dominated ones.\\
-Two practical solutions: maximize return with budget on maximum risk or maximize\ldots\\
+But $R^k$ with $k > 1$ has no total order, so there's no \textit{best} solution, only non-dominated ones.\\
 Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, if the problem $P$ is unbounded below). Hardly ever happens in ML, because losses and regularizations are $\geq 0$\\
-Also impossible if $f > -\infty$ but $\not\exists x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions ($\epsilon$-optima). On PC $x\in \mathbb{R}$ is in fact $x\in Q$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
-Anyway finding the exact $x_*$ is impossible in general.
+Also impossible if $f > -\infty$ but $\not\exists\:x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions (\textbf{$\epsilon$-optima}). On PC $x\in \mathbb{R}$ is in fact $x\in \mathbb{Q}$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
+Anyway, \textbf{finding the exact $x_*$ is impossible in general}.
 \paragraph{Norms} Many matrices preserve norm 2
  $$\|x\|_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
 	x_1\\\vdots\\x_b
 	\end{array}\right]$$
-\paragraph{Orthogonal} A square matrix $U\in \mathbb{R}^{n\times n}$ is orthogonal if $U^TU = I \vee UU^T = I \vee U^{-1} = U^T$ equivalently\\
+\paragraph{Orthogonal} A square matrix $U\in \mathbb{R}^{n\times n}$ is orthogonal if $U^TU = I \Leftrightarrow UU^T = I \Leftrightarrow U^{-1} = U^T$ equivalently\\
 \textbf{Theorem}: for an orthogonal matrix $U\in \mathbb{R}^{n\times n}$ and every vector $x$, $\|Ux\| = \|x\|$\\
 More generally, $x^T y = (Ux)^T(Xy)$ for all vectors $x,y\in \mathbb{R}^n$\\
-The columns of a orthogonal matrix are \textbf{orthonormal}: $u_i^Tu_j = \left\{\begin{array}{l l}
+The columns (or the rows) of a orthogonal matrix are \textbf{orthonormal}: $u_i^Tu_j = \left\{\begin{array}{l l}
 1 &\text{if } i = j\\0&\text{otherwise}
 \end{array}\right.$\\
 If $U,V\in \mathbb{R}^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
@@ -146,7 +145,7 @@ $A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda$, with $\Lambda = \l
 \end{array}\right]$\\
 Given $x\in \mathbb{R}^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
 Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
-Eigenvalue decompositions do not exists unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same for $\alpha v+\beta w$ (linear combination). Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a basis.
+Eigenvalue decompositions is not unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same hold for any linear combination $\alpha v+\beta w$. Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a basis.
 \paragraph{Symmetry} $A$ is symmetric if $A = A^T$
 \paragraph{Spectral Theorem} For a symmetric matrix $A\in \mathbb{R}^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
 \paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in \mathbb{R}^{m\times m}$ we can consider the function $x\in \mathbb{R}^m\mapsto f(x) = x^T Qx \in \mathbb{R}$\\
@@ -167,7 +166,7 @@ Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
 v_1^T\\v_2^T\\\vdots\\v_m^T
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
 \subparagraph{Geometric idea} There is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
-$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}\\
+$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}. Singular values are not eigenvalues: they are always positive and usually more "spread apart".\\
 \subparagraph{Rectangular SVD} Each $A\in \mathbb{R}^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in \mathbb{R}^{m\times m}$, $V \in \mathbb{R}^{n\times n}$ are orthogonal and $\Sigma\in \mathbb{R}^{m\times n}$ is diagonal, so there's a padding $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
@@ -183,7 +182,7 @@ The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_
 	\item \textbf{Kernel}\\
 	Any linear combination $y$ of $v_{r+1},\ldots,v_n$ satisfies $Ay = 0$
 \end{list}
-Given $A = U\Sigma V^T$ we can compute $$A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proved that the eigenvalues of $A^T A$ Are the squares of the singular values of $A$ plus additional zeroes for dimension reasons.
+Given $A = U\Sigma V^T$ we can compute $$A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proves that \textbf{the eigenvalues of $A^T A$ are the squares of the singular values of $A$} plus additional zeroes for dimension reasons.
 \paragraph{Norms} The norm of a matrix $A\in \mathbb{R}^{m\times n}$ is 
 $$\|A\|=\max_{z\in \mathbb{R}^n, \|z\|=1}\|Az\| = \max_{x\in\mathbb{R}^n,x\neq 0}\frac{\|Ax\|}{\|x\|}$$
 $$\|Ax\|\leq \|A\|\cdot\|x\|$$
@@ -278,7 +277,7 @@ The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ w
 	\item And so on\ldots
 \end{list}
 The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.
-\paragraph{Latent Semantic Analysis}
+\paragraph{Latent Semantic Analysis} In NLP the SVD is used by attributing the meaning of "concepts" to the columns of $U$ (with a positive/negative score for each word) and counting the occurrence of each concept in each sentence through the columns of $V$.
 \paragraph{Principal Component Analysis} Given columns $x_1,\ldots,x_n$ we define another vector $\mu$ and compute $\hat{x}_i$ for each $i$
 $$\mu = \frac{x_1+\ldots+x_n}{n}$$
 $$\hat{x}_{i} = x_i - \mu$$
