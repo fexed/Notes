@@ -307,9 +307,9 @@ Remark: SVD($\hat{A}$) is more numerically accurate than eig($M$) and eig($A\cdo
 Given 
 \begin{list}{}{}
 	\item vectors $a_1,\ldots,a_n\in \mathbb{R}^m$ so that $A = [a_1|\ldots|a_n]\in \mathbb{R}^{m\times n}$
-	\item targets $b\in \mathbb{R}^m$
+	\item target vector $b\in \mathbb{R}^m$
 \end{list}
-find $x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
+find $$x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$$
 In general $$\min_{x\in \mathbb{R}^m} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^m} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
 Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
 1\\2\\0
@@ -324,14 +324,15 @@ Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
 \end{array}\right]x_2 = \left[\begin{array}{c}
 5\\5\\0
 \end{array}\right]$$
-\paragraph{Geometric View} The closest part on the hyperplane $Im(A)$ to $b$ is its orthogonal projection.
+\paragraph{Geometric View} The closest part on the hyperplane $\text{Im}(A)$ to $b$ is its orthogonal projection.
 \paragraph{Cases} A special case is $m=n$, i.e. \# vectors = length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ or $A$ invertible.\\
 \textbf{Typical case} is $A$ long thin, we cannot get all vectors $b$ but still $\min_{x\in \mathbb{R}^m} \|Ax - b\|_2$ is a question that makes sense. 
 \paragraph{Polynomial Fitting} Find polynomial that best approximates given data points $(x_i,y_i)$ for $i=1,\ldots,m$ of degree $<n$.\\
-\textbf{Statistical version}: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{coeff}\|Ax - y\|_2^2$
+An example: given pairs $(x_i, y_i)$ such that $y_i \simeq ax_i^3 + bx_i^2 + cx_i + d$, find $a,b,c$ and $d$.\\
+\textbf{Statistical version}: given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{\text{coeff}}\|Ax - y\|_2^2$
 \paragraph{Theory of Least-Squares Problems} With $A \in \mathbb{R}^{m\times n}$, when does $\min \|Ax-b\|_2$ have a unique solution?\\
 We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $O = \min\|Ax-b\|$ with unique $x$.\\
-We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $Ker(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n z\neq 0\:|\:Az=0\Leftrightarrow rk(A) = n$ and this can only happen if $m\geq n$
+We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n$ such that $z\neq 0\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
 \subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
 \textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
 \textbf{Proof} $Ax \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
@@ -342,14 +343,15 @@ We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $Ker(
 	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
 \end{list}
 By manipulating the original problem $\min_{x\in \mathbb{R}^n} \|Ax-b\|_2$ we obtain $$\min \|Ax-b\|_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
-$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\\\
+$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)
+\paragraph{Positive definite} A matrix $M$ is positive definite if $\forall\:x\in\mathbb{R}^n\:|\:x\neq0$ we have $x^TMx>0$\\\\
 So the least-squares problem $\min_x \|Ax-b\|$ has unique solution
 \begin{list}{$\Leftrightarrow$}{}
 	\item $f(x)$ has a unique minimum point
 	\item $2A^TA = Q \succ 0$ (positive definite)
 	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
 \end{list}
-The minimum is when $grad\:f(x) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
+The minimum is when $\text{grad}(f(x)) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
 $x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
 \subparagraph{Algorithm}
 \begin{enumerate}
@@ -368,7 +370,10 @@ Possible optimizations:
 As consequences, if $x_1$ is solution of $\min\|Ax - b_1\|$ and $x_2$ is solution of $\min\|Ax - b_2\|$ then $x_1+x_2$ is solution of $\min\|Ax - (b_1 + b_2)\|$\\\\Sometimes ML problems are formulated "from the left side". With $w\in \mathbb{R}^{1\times n}$ row vector of weights, then $X\in \mathbb{R}^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
 $y \in \mathbb{R}^{1\times m}$ row vector "target"\\
 The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
-\section{QR factorization} Given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
+\pagebreak
+\section{QR factorization}
+Different algorithm to solve the least-square problems based on another kind of matrix factorization, the QR.\\
+Given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]$ with $e_1 = \left[\begin{array}{c}
 1\\0\\\vdots\\0
