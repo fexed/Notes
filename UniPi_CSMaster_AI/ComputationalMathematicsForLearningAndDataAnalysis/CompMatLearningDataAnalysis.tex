@@ -372,15 +372,15 @@ $y \in \mathbb{R}^{1\times m}$ row vector "target"\\
 The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
 \pagebreak
 \section{QR factorization}
-Different algorithm to solve the least-square problems based on another kind of matrix factorization, the QR.\\
-Given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $s\cdot e_1 = \left[\begin{array}{c}
+There is a different algorithm to solve the least-square problems, which is based on another kind of matrix factorization: the QR. It factorizes a square matrix $A$ into a product $QR$ with $Q$ orthonormal and $R$ upper triangular.\\
+We start with a subproblem: given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $$s\cdot e_1 = \left[\begin{array}{c}
 s\\0\\\vdots\\0
-\end{array}\right]$ with $e_1 = \left[\begin{array}{c}
+\end{array}\right]\text{ with }e_1 = \left[\begin{array}{c}
 1\\0\\\vdots\\0
-\end{array}\right]$\\
+\end{array}\right]$$
 Since $H$ is orthogonal, $\|Hx\| = \|x\| = \|\left[\begin{array}{c}
 s\\0\\\vdots\\0
-\end{array}\right]\| = |s| \Rightarrow s = \pm\|x\|$. We will find $H$ in a very specific form $$H = \underset{n\times n}{I} - \underset{|x|}{\frac{2}{v^Tv}}\cdot\underset{n\times 1}{v}\cdot\underset{1\times n}{v^T}= I - \frac{2}{\|v\|^2}vv^T = I - 2uu^T$$ for a certain $v\in \mathbb{R}^n$ with $u = \frac{v}{\|v\|}$, so it has norm $=1$ and is parallel to $v$. This form is called \textbf{Householder reflector}.
+\end{array}\right]\| = |s| \Rightarrow s = \pm\|x\|$. We find $H$ in the \textbf{Householder reflector} form $$H = \underset{n\times n}{I} - \underset{|x|}{\frac{2}{v^Tv}}\cdot\underset{n\times 1}{v}\cdot\underset{1\times n}{v^T}= I - \frac{2}{\|v\|^2}vv^T = I - 2uu^T$$ for a certain $v\in \mathbb{R}^n$ with $u = \frac{v}{\|v\|}$, so it has norm $=1$ and is parallel to $v$.
 \paragraph{Geometric Picture} These are reflection (mirror symmetries) with respect to the plane perpendicular to $u$
 \paragraph{Lemma}$\forall\:v\in \mathbb{R}^n$, $H$ is orthogonal \textit{and} symmetric. Proof:
 \begin{list}{}{}
@@ -388,7 +388,8 @@ s\\0\\\vdots\\0
 	\item Orthogonal: $H^TH = H^2 = (I-2uu^T)(I-2uu^T) = I - 2uu^T - 2uu^T + 4uu^Tuu^T$ but $u^Tu = \|u\|^2 = 1$ so $= I - \not 4uu^T + \not 4uu^T = I$
 \end{list}
 By computing $Hx$ as $x - 2u(u^T x)$, you compute $\alpha = u^Tx$ in $O(n)$ and then compute $x-2u\alpha$ in $O(n)$, you can reduce the complexity of $Hx$ from $O(n^2)$ to $O(n)$. By doing the same on every column you reduce $HA$ for an arbitrary $A\in \mathbb{R}^{n\times n}$ from $O(n^3)$ to $O(n^2)$.
-\paragraph{Lemma} Given any two vectors $x,y\in \mathbb{R}^n$ with $\|x\| = \|y\|$, the Householder reflector built with $v = x-y$ is such that $Hx = y$
+\paragraph{Lemma} Given any two vectors $x,y\in \mathbb{R}^n$ with $\|x\| = \|y\|$, the Householder reflector $H = I - \frac{2}{v^Tv}vv^T$ built with $v = x-y$ is such that $Hx = y$. The proof involves simply performing the substitution $x = y + v$ and expanding.\\
+The geometric idea here is reflecting through the plane perpendicular to $x-y$, sending $x$ into $y$.
 \paragraph{Numerical problems} If $x_1$ is close to $s = \|x\|$ there are problems, because we do a subtraction between close numbers. Quick fix: switch to $s = -\|x\|$, then $x_1 - s = x_1 + \sqrt{x_1^2+x_2^2+\ldots+x_n^2}$, an addition between positive numbers whenever $x_1 > 0$. In general, we choose:
 \begin{list}{}{}
 	\item if $x_1 \geq 0$, we take $s = -\|x\|$ and $y = \left[\begin{array}{c}
