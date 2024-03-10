@@ -406,16 +406,16 @@ s\\0\\\vdots\\0
 \end{array}\right] \Leftrightarrow x = H\left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]$ with $x$ being the $m\times 1$ matrix, $H$ orthogonal and the array is upper triangular.\\
-The general case is $A\in \mathbb{R}^{m\times n}$:
+The general case is $A\in \mathbb{R}^{m\times n}$, which follows a process similar to the Gaussian elimination or LU factorization:
 \begin{enumerate}
-	\item $[u_1, s_1]$ \texttt{= householder\_vector($A$(:,1))} $H_1 = I-2u_1u_1^T$\\
-	$H_1A = \left[\begin{array}{c c c c}
+	\item $[u_1, s_1]$ \texttt{= householder\_vector($A$(:,1))}, with $H_1 = I-2u_1u_1^T$
+	$$H_1A = \left[\begin{array}{c c c c}
 	s_1&*&*&*\\
 	0&*&*&*\\
 	0&*&*&*\\
 	0&*&*&*\\
 	0&*&*&*\\
-	\end{array}\right] = A_1$
+	\end{array}\right] = A_1$$
 	\item $A_2 = H_2A_1 = \left[\begin{array}{c c c c}
 	*&s_2&*&*\\
 	**&0&*&*\\
@@ -431,18 +431,19 @@ The general case is $A\in \mathbb{R}^{m\times n}$:
 	B\\\hline\\C
 	\end{array}\right]$ we get $\left[\begin{array}{c}
 	B\\\hline\\H_2\cdot C
-	\end{array}\right]$, so we say that $Q_2 = \left[\begin{array}{c | c}
+	\end{array}\right]$, so we say that $$Q_2 = \left[\begin{array}{c | c}
 	1 & 0\\
 	\hline\\
 	0 & H_2
-	\end{array}\right]$\\and $Q_2A_1 = \left[\begin{array}{c c c c}
+	\end{array}\right]\text{ and }Q_2A_1 = \left[\begin{array}{c c c c}
 	s_1&*&*&*\\
 	0&s_2&*&*\\
 	0&0&*&*\\
 	0&0&*&*\\
 	0&0&*&*\\
-	\end{array}\right] = A_2$
-	\item With $H_3$ from $[u_3,s_3]$ \texttt{= householder\_vector($A_2$(3:$m$,3))} we do\\$Q_3A_2 = \left[\begin{array}{c c | c c c}
+	\end{array}\right] = A_2$$
+	\item With $H_3$ from $[u_3,s_3]$ \texttt{= householder\_vector($A_2$(3:$m$,3))} we do\
+	$$Q_3A_2 = \left[\begin{array}{c c | c c c}
 	1 & 0 & 0 & 0 & 0\\
 	0 & 1 & 0 & 0 & 0\\
 	\hline
@@ -455,8 +456,9 @@ The general case is $A\in \mathbb{R}^{m\times n}$:
 	0&0&s_3&*\\
 	0&0&0&*\\
 	0&0&0&*\\
-	\end{array}\right] = A_3$
-	\item $H_4 = I - 2u_4u_4^T$ from $[u_4,s_4]$ \texttt{= householder\_vector($A_3$(4:$m$,4))}\\$Q_4A_3 = \left[\begin{array}{c | c}
+	\end{array}\right] = A_3$$
+	\item $H_4 = I - 2u_4u_4^T$ from $[u_4,s_4]$ \texttt{= householder\_vector($A_3$(4:$m$,4))}
+	$$Q_4A_3 = \left[\begin{array}{c | c}
 	I_3 & 0\\
 	\hline
 	0 & H_4
@@ -466,7 +468,7 @@ The general case is $A\in \mathbb{R}^{m\times n}$:
 	0&0&s_3&*\\
 	0&0&0&s_4\\
 	0&0&0&0\\
-	\end{array}\right] = A_4$
+	\end{array}\right] = A_4$$
 \end{enumerate}
 So $Q_4Q_3Q_2Q_1A = R$ is an upper triangular matrix.
 $$\not Q_4^T\not Q_4Q_3Q_2Q_1A = Q_4^TR$$
@@ -476,6 +478,7 @@ $$\not Q_1^T\not Q_1A = Q_1^TQ_2^TQ_3^TQ_4^TR$$
 So $A = Q_1^TQ_2^TQ_3^TQ_4^T R$, and $Q_i = Q_i^T$ so we can omit transpose, giving $A = QR$ with $Q$ orthogonal and $R$ triangular.\\\\
 The QR factorization can be used to solve least squares problems $\min \|Ax-b\|_2$ with $A\in \mathbb{R}^{m\times n}$ and $m\geq n$, $b\in \mathbb{R}^m$.
 \paragraph{Optimizations}
+This would have a cost of $O(m^4)$ for a square matrix.
 \begin{enumerate}
 	\item Instead of $HA(j:m,j:n)$ we write
 	$$(I-2u_ju_j^T)A_{j:m,j:n}=\underset{O((m+1-j)(n+1-j))}{\underbrace{A_{j:m,j:n}-\underset{O((m+1-j)(n+1-j))}{\underbrace{2u \underset{O((m+1-j)(n+1-j))}{\underbrace{(u^TA_{j:m,j:n})}}}}}}$$
@@ -483,7 +486,7 @@ The QR factorization can be used to solve least squares problems $\min \|Ax-b\|_
 	At each step of the for loop, giving $O(mn^2)$
 	\item Storing $Q \in \mathbb{R}^{m\times m}$ may be expensive, especially if $A$ is tall thin ($m>>n$)
 \end{enumerate}
-\subparagraph{Thin QR} If $m>n$ $A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
+\subparagraph{Thin QR} Restrict to $Q_1\in\mathbb{R}^{m\times n}, R_1\in\mathbb{R}^{n\times n}$. If $m>n$ $A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
 R_1\\\hline0
 \end{array}\right]$ with $Q_1\in \mathbb{R}^{m\times n}, Q_2\in \mathbb{R}^{m\times m-n}, R_1\in \mathbb{R}^{n\times n} = Q_1R_1+Q_20 = Q_1R_1$ (the last part is made of $n\times m-n$ zeroes).\\
 Much cheaper to store in memory, $O(mn)$ entries instead of $O(m^2)$.\\
@@ -515,7 +518,8 @@ The computational cost of thin QR ($m\geq n$) is $2mn^2-\frac{2}{3}n^3+ O(mn)$ f
 	\item When $m\simeq n \Rightarrow \frac{4}{3}n^3$, twice as much as LU/Gaussian elimination
 	\item When $m>>n\Rightarrow 2mn^2$
 \end{list}
-\paragraph{Least Squares with QR} We can use the QR factorization to solve least squares problems $\min\|Ax-b\|_2$ with $A\in\mathbb{R}^{m\times n}, m\geq n$ and $b\in R^m$
+\section{Least Squares}
+\subsection{Least Squares with QR} We can use the QR factorization to solve least squares problems $\min\|Ax-b\|_2$ with $A\in\mathbb{R}^{m\times n}, m\geq n$ and $b\in R^m$
 $$A = QR = \left[\begin{array}{c c}
 Q_1&Q_2
 \end{array}\right]\cdot\left[\begin{array}{c}
@@ -540,9 +544,19 @@ When is $R_1$ invertible? Recall that the least-squares problem has unique solut
 $$A^TA = (QR)^TQR = R^T\not Q^T\not QR = [R_1^T 0]\left[\begin{array}{c}
 R_1\\0
 \end{array}\right] = R_1^TR_1$$
-So $A^TA$ invertible $\Leftrightarrow R_1$ invertible. Remark: the factorization $A^TA=R_1^TR_1$ is a Cholensky factorization)
-\pagebreak
-\paragraph{Least Squares with SVD}
+So $A^TA$ invertible $\Leftrightarrow R_1$ invertible. Remark: the factorization $A^TA=R_1^TR_1$ is a Cholensky factorization.\\
+We have proven that if $A=QR=\left[Q_1 Q_2\right]\left[\begin{array}{c}R_1\\0\end{array}\right]$ and has a full column rank, then the solution of $\min\|Ax-b\|$ is $x=R_1^{-1}(Q_t^R)b$, with the "thin $QR$" $A=Q_1R_1$ containing everything we need. The cost is \begin{list}{}{}
+	\item Multiplication $c = (Q_1^T)b$ in $O(mn)$
+	\item Triangular system solution $R_1x = c$ in $O(n^2)$ with back-substitution
+\end{list}
+A negligible cost compared to the $O(mn^2)$ required to compute $Q_1$ and $R_1$
+\paragraph{Geometrical Viewpoint} We see that
+\begin{list}{}{}
+	\item $Ax = Q_1R_1R_1^{-1}Q_1^Tb = Q_1Q_1^Tb$ give the projection of $b$ onto $\text{Im}(A)$ and has length of $\|Q_1^Tb\|$
+	\item The residual $\|Ax-b\|$, i.e. the optimum of our optimization problem, is $\|Q_2^Tb\|$
+	\item The vectors $b$, $Ax$ and $Ax-b$ form a \textbf{right triangle} with side lengths $\|b\|$, $\|Q_1^Tb\|$ and $\|Q_2^Tb\|$ respectively.
+\end{list}
+\subsection{Least Squares with SVD}
 The least-squares problem can also be solved with $SVD$. Given $A=USV^T$ we have $$\|Ax-b\| = \|USV^Tx-b\| = \|U^T(USV^Tx - b)\| = \|SV^Tx-U^Tb\| =$$
 With $S =\left[\begin{array}{c c c}
 \sigma_1\\
