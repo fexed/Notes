@@ -650,6 +650,24 @@ By the Eckhart-Young theorem, $$\min_{B\:sing}\|A-B\| = \min_{rk(B)\leq n-1}\|A-
 \section{Floating Point Numbers}
 \paragraph{Quick recap} Binary exponential notation.\\
 \textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
+\paragraph{(Absolute) Condition Number} The (absolute) condition number of a function $f : \mathbb{R}\rightarrow\mathbb{R}$ is the best bound $K$ in the form $$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$
+with $o(\delta)$ representing higher order terms like $\delta^2$, very small. Formally: $$K_{\text{abs}}(f,x) = \lim_{\delta\to 0}\frac{|f(x+\delta)-f(x)|}{|\delta|}$$ which is a close relative of the derivative $|\frac{\partial f}{\partial x}|$
+\paragraph{Relative Condition Number} A relative change for an input is $\frac{|\tilde{x}-x|}{|x|}$, and the same can be computed for an output $\frac{|f(\tilde{x})-f(x)|}{|f(x)|}$. The relative condition number of a function $f$ is $$K_{\text{rel}}(f,x) = \lim_{\delta\to0}\sup_{\|d\|\leq\delta} = \frac{\frac{\|f(x+d)-f(x)\|}{\|f(x)\|}}{\frac{\|d\|}{\|x\|}} = K_{\text{abs}}(f,x)\frac{\|x\|}{\|f(x)\|}$$
+Absolute errors are usually worthless without some reference point, while relative errors are useful indications on the stability of an operation.
+\begin{list}{}{}
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 1$ corresponds to a very bad accuracy
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-3}$ corresponds to about 3 correct significant digits, good enough for certain applications
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-16}$ corresponds to about 16 correct digits, and usually we can't do better than this with double precision arithmetic
+\end{list}
+So, \textbf{use relative errors when you have to measure if something is small or large}. Particularly, in the project\\
+The relative condition number of a solving linear equations with a matrix $A$ is $K(A)=\|A\|\|A^{-1}\|$. We often use an abuse of notation like "condition number of a matrix $A$". By using SVD, we know that $\|A\|=\sigma_1$ (the largest singular value), thus $K(A)=\frac{\sigma_1}{\sigma_n}$.
+\paragraph{Conditioning of Least Squares Problem} More complicated than the one for linear systems, no full proof.\\
+Considering the linear least squares problem $\min\|Ax-b\|$ with $A\in\mathbb{R}^{m\times n}$ with full column rank, its relative condition number with respect to input $b$ is $$K_{\text{rel}, b\to x}\leq\frac{K(A)}{\cos\theta}$$ and with respect to $A$ is $$K_{\text{rel}, A\to x}\leq K(A)+K(A)^2\tan\theta$$ with $\theta$ being the angle such that $\cos\theta=\frac{\|Ax\|}{\|b\|}$\\
+Few intuitions:\begin{list}{}{}
+	\item With $\theta\simeq 90$ degrees we have a $b$ that is almost orthogonal to $\text{Im}A$: a small relative change in $b$ causes a large change in the solution.
+	\item $K(A)$ tells us how well we can extract $\text{Im}A$ from $A$
+	\item $\theta\simeq 0$ gives more well-behaved problems: condition number is $\simeq K(A)$ instead of $\simeq K(A)^2)$
+\end{list}
 \paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
 In general, I can only ask the computer to compute $f(\tilde{x})$ where $\tilde{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\tilde{y}=f(\tilde{x})$ from $y=f(x)$?
 $$\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
