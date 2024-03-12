@@ -668,10 +668,11 @@ Few intuitions:\begin{list}{}{}
 	\item $K(A)$ tells us how well we can extract $\text{Im}A$ from $A$
 	\item $\theta\simeq 0$ gives more well-behaved problems: condition number is $\simeq K(A)$ instead of $\simeq K(A)^2)$
 \end{list}
+\paragraph{Stability of Algorithms} Conditioning alone isn't enough. It can tell you whether or not you are dealing with a bad problem or not, but it doesn't tell you anything about the algorithm you are using to solve it. \textbf{Stability} tells you if your are using a bad algorithm or not.
 \paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
 In general, I can only ask the computer to compute $f(\tilde{x})$ where $\tilde{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\tilde{y}=f(\tilde{x})$ from $y=f(x)$?
 $$\frac{|\tilde{y}-y|}{|y|}\leq K_{rel}(f,x)\cdot\frac{|\tilde{x}-x|}{|x|} + O(u^2)\leq K_{rel}(f,x)\cdot u$$
-This is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\tilde{x}-x}{x} = \delta \Leftrightarrow \tilde{x} - x = x\delta \Leftrightarrow \tilde{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
+The number $K_{rel}(f,x)u$ is called the \textbf{intrinsic error}. Whenever one makes an operation, e.g. $a+b$, the computer stores an approximation of the result which we can denote by $(a+b)(1+\delta)$ with $|\delta|\leq u$, because $$\frac{\tilde{x}-x}{x} = \delta \Leftrightarrow \tilde{x} - x = x\delta \Leftrightarrow \tilde{x} = x(1+\delta) \Leftrightarrow |d|\leq u$$
 $a\oplus b = (a+b)(1+\delta)$, the same for $\ominus$, $\otimes$ ecc: \textbf{error analysis requires keeping track of all these errors}.
 \subparagraph{Example} Error analysis of the scalar product $a\cdot b$ with $a,b \in \mathbb{R}^3$
 $$y = a\cdot b = a^Tb = \left[\begin{array}{c c c}
@@ -705,7 +706,7 @@ Not all algorithms are backward stable: the outer product $ab^T$ isn't. But mult
 $$\tilde{B} = QA + QQ^TE = Q(A+Q^TE)$$ with $F = Q^TE$ backward error, and $$\|F\|=\|Q^TE\|=\|E\|=\|A\|\cdot O(u)$$
 With non-orthogonal $Q$ I'd get an additional factor $K(Q) = \|Q\|\cdot\|Q^{-1}\|$\\\\
 The steps of the QR factorization are backward stable too, also solving least squares via QR is backward stable: it delivers $\tilde{x}$ exact solution of a least squares problems with $\tilde{A} = A +\Delta A, \tilde{b} = b+\Delta b$ with $\frac{\|\tilde{A}-A\|}{\|A\|}=O(u),\frac{\|\tilde{b}-b\|}{\|b\|}=O(u)$, so it delivers an error comparable to that caused by the ill-conditioning of the problem (intrinsic error). Similarly, solving least squares problems with SVD is backward stable.
-Normal equations are not backward stable: of a general linear system with a poisitive definite $C$ \begin{list}{}{}
+Normal equations are not backward stable: of a general linear system with a positive definite $C$ \begin{list}{}{}
 	\item $C = A^TA$
 	\item $d = A^Tb$
 	\item $x = C \backslash d$
