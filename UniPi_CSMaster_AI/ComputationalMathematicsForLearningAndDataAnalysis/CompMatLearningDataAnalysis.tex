@@ -817,7 +817,7 @@ All of them come with sparse variants, with "list of non-zeroes"-based storage.\
 \subsection{Iterative Methods} $x^{(1)}, x^{(2)}, x^{(3)},\ldots$ sequence of vectors that converges to the solution $x$ of $Ax = b$\\
 Black-box methods: they only need a black-box function $\lambda_0v=Av$ that computer $Av$ given $v$. Fast whenever computing $Av$ for a given $v$ is fast, $O(nnz)$ for a sparse matrix $A$ with $nnz$ non-zero elements.
 \paragraph{Idea} If $A$ is positive definite, solving $Ax=b$ is finding $$\min\:\underset{f(x)}{\underbrace{\frac{1}{2}x^TAx - b^Tx}}$$ $$\nabla f(x) = Ax-b$$ with $f(x)$ strongly convex. \\
-Most gradient-based algorithms produce iterates that belong to the same subspace, $x_0 = 0$\begin{list}{}{}
+Most gradient-based algorithms produce iterates that belong to the same subspace, starting from $x_0 = 0$\begin{list}{}{}
 	\item $\nabla f(x_0) = -b$, $x_1 = x_0+\alpha d=$ multiple of $b$
 	\item $\nabla f(x_1) = Ax_1-b=$ linear combination of $Ab$ and $b$, and $x_2=x_1+\alpha\nabla f(x_1) =$ linear combination of $Ab$ and $b$
 	\item $\nabla f(x_2) = Ax_2-b=$ linear combination of $A^2b$, $Ab$ and $b$, and $x_3=x_2+\alpha\nabla f(x_2) =$ linear combination of $A^2b$, $Ab$ and $b$
@@ -832,14 +832,13 @@ $$K_k(A,b) = span(b,Ab,\ldots,A^{k-1}b) = \{\alpha_0b+\alpha_1Ab+\alpha_2A^2b+\l
 For now we assume that $b, Ab, \ldots, A^{n-1}b$ are linearly independent.\\
 $K_n(A,b)$ is a linear subspace means that $$v,w\in K_n(A,b)\Rightarrow \alpha v+\beta w\in K_n(A,b)$$
 $$v\in K_n(A,b)\Rightarrow v=(\alpha_0 I + \alpha_1 A + \ldots + \underset{\neq 0}{\underbrace{\alpha_{n-1}}} A^{n-1})b$$ $$Av = (\alpha_0A + \alpha_1 A^2+\ldots + \underset{\neq 0}{\underbrace{\alpha_{n-1}}} A^n)b \in K_{n+1}(A,b)$$ and also $$v\in K_n(A,b) \setminus K_{n-1}(A,b)\Rightarrow Av \in K_{n+1}(A,b)\setminus K_n(A,b)$$
-\pagebreak
 \paragraph{}
 By composing \begin{enumerate}
 	\item $b$
 	\item linear combinations of already computed vectors
 	\item products of already computed vectors times $A$
 \end{enumerate}
-one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you apply 3.\\
+one only gets vectors in $K_n(A,b)$ where $n-1$ is the number of items you apply point 3.\\
 Can we look for the best approximation of the solution of a certain problem, for instance a linear system $Ax=b$, inside $K_n(A,b)$?
 $$K_n(A,b) = \{\alpha_0b+\ldots + \alpha_{n-1}A^{n-1}b\:|\:\alpha_i\in \mathbb{R}\} =$$ $$= \left\{\underset{V_n}{\underbrace{\left[\begin{array}{c | c | c | c | c}
 b & Ab &A^2b & \ldots & A^{n-1}b
