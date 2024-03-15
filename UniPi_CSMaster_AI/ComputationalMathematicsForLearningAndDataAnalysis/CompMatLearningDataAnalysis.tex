@@ -747,11 +747,10 @@ Q_2^T(A\tilde{x}-\hat{b})
 because $Q_1^TQ_1=I$.\\
 And this $\Rightarrow\tilde{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
 \section{Algorithms for square linear systems $Ax=b$}
+Solving systems of equations $Ax = b$ with $A\in\mathbb{R}^{m\times m}$ large and sparse. Storing $A$ with $m = 100000$ requires circa 80GB of storage, and an algorithm of $O(m^3)$would be unfeasible (circa 10 years on a modern PC).\\
+Luckily, many real-world applications involve sparse matrices with very few non-zero elements per row. Some examples are: adjacency matrices for graphs, matrices describing networks of points joined by forces (engineering applications), KKT matrices in optimization\ldots These sparse matrices are usually stored as lists of non-zero elements $(i, j, a_{ij})$, which can be further compressed if the $j$s are listed increasingly. This format is known as \textbf{CSC}/\textbf{CSR} (compressed space column/row).
+\paragraph{Factorization} This is one of the main tools used to solve linear systems: breaking up a matrix into pieces that are easier to invert. You can use $A=QR$, $A=U\Sigma V^T$, $A=LU$ and more, and sometimes the same factorization can be used to solve more than one linear system.
 \subsection{Gaussian Elimination}
-\paragraph{Complexity} $\frac{2}{3}n^3$ (half of QR)
-\paragraph{Storage problem} $n\times n$ matrix, for example with $n=10^5$ it requires 80GB of RAM. In real life many matrices are sparse, $\simeq$3-10 nonzero elements per row or something like that.\\
-\textbf{Sparse matrices are stored as lists of nonzeros}.
-\paragraph{Idea} Use factorization of $A$ into simpler pieces: $A=QR$ or $A=USV^T$ for example. These can be used to solve linear systems, and the factorization can be reused if you have many systems with different right-hand sides.\\\\
 Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
 Ly=b\\Ux=y
 \end{array}\right.$ is $2n^2$
@@ -762,7 +761,8 @@ $$PA = LU$$
 $$A = P^TLU$$
 With an overhead of $O(n^2)$ swaps and comparisons.
 \subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow \|L\|$ stays bounded. However, in the worst case, $\frac{\|U\|}{\|A\|} = 2^n$ (exponentially larger). The average case is that $\frac{\|U\|}{\|A\|}$ is bounded polynomially.
-\subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure.
+\subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure, a process that is called \textbf{fill-in}. We can try to avoid it by choosing the pivot row to be as sparse as possible at each step in a greedy fashion, or to "predict" sparsity with some heuristic to achieve a better solution. But finding the optimal sparsity pattern is NP-complete, and we already want to choose the pivot row to ensure stability so we need a tradeoff between the two criteria. It's another whole problem that goes in background when considering that we'd need to deal with sparse representation, memory allocation and more.\\
+Anyway, it's often faster to perform a single matrix to matrix multiplication rather than $n$ matrix to vector ones, thanks to cache reuse, vectorization and more, and this even without considering multithreaded code.
 \subsection{Symmetric Gaussian Elimination} Even if $A$ is symmetric, $L_1A$ is not symmetric but $L_1AL_1^T$ is
 $$(L_1AL_1)^T = L_1AL_1^T$$
 After $n-1$ steps we have $$L_{n-1}\ldots L_1AL_1^T\ldots L_{n-1}^T = D$$
@@ -772,7 +772,8 @@ With $L$ lower triangular with $1$ on the diagonal, $D$ diagonal and $L^T$ trans
 \subparagraph{Theorem} For any $A=A^T$, \textbf{if we do not encounter zero pivots} we can find $L,D\:|\:A = L DL^T$ with $L$ lower triangular with $1$ on the diagonal and $D$ diagonal.\\
 Small pivots, even non-zero, brings instability. We will need pivoting (row exchanges).\\
 To preserve symmetry, one needs to exchange not only rows but columns too: $PAP^T$ swaps both rows and columns. Unfortunately this is still not enough to ensure large pivots. To avoid this, one needs to allow for $2\times 2$ blocks in $D$\\
-$(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\\\
+$(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\
+It's not stable unless we do some form of pivoting, that must be symmetric like $P^TAP$. There are pivoting strategies (Bunch-Parlett, Bunch-Kaufman\ldots) that produce $LDL^T$ factorizations which are stable in practice, with $2\times2$ block pivots.\\\\
 Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in \mathbb{R}^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
 \subparagraph{Lemma} If $A\in \mathbb{R}^{n\times n}$ is positive definite, we have two properties:
 \begin{list}{}{}
@@ -785,7 +786,11 @@ Things are better if $A$ is positive definite. Remember that $A = A^T$ and posit
 \end{list}
 Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$.\\
 So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
-\subsection{Cholesky factorization} $D = \left[\begin{array}{c c c}
+\subsection{Cholesky factorization}
+For positive definite matrices.
+$$A=LDL^T=LD^{\frac{1}{2}}(D^{\frac{1}{2}^T}L^T)=CC^T$$
+With $D^{\frac{1}{2}}=\text{diag}(D^{\frac{1}{2}}_{11}, D^{\frac{1}{2}}_{22},\ldots,D^{\frac{1}{2}}_{mm})$ and $C$ lower triangular. Another formulation:
+$$D = \left[\begin{array}{c c c}
 d_{1,1}& & 0\\
 & \ddots & \\
 0 & & d_{n,n}
@@ -797,7 +802,7 @@ d_{1,1}& & 0\\
 \sqrt{d_{1,1}}& & 0\\
 & \ddots & \\
 0 & & \sqrt{d_{n,n}}
-\end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$\\
+\end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$$
 $$A = LDL^T = \underset{R^T}{\underbrace{LD^{\frac{1}{2}}}}\underset{R}{\underbrace{D^{\frac{1}{2}}L^T}} = R^T R$$ with $R$ upper triangular.\\
 Every $A \succ 0$ can be written as $A = R^T R$ where $R$ is upper triangular.\\
 Cholensky and LDL for positive definite matrices are stable even without pivoting $\|R\|=\|A\|^{\frac{1}{2}}$
