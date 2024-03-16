@@ -853,7 +853,7 @@ But this problem is very unstable to solve because $V_n = \left[\begin{array}{c 
 b & Ab &A^2b & \ldots & A^{n-1}b
 \end{array}\right]$ has columns that tend to be all multiples of the same vector as $n$ increases.
 \paragraph{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$
-\subparagraph{Idea} Given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\\\
+\paragraph{Idea} Given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\\\
 The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a deg$(p)=j-1$.
 \begin{enumerate}
 	\item Generate a vector $\in K_{j+1}$ that wasn't already in $K_j$
@@ -867,10 +867,13 @@ The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\
 	$$w = w - q_i\beta_i = q_{i+1}\beta_{i+1} + \ldots + q_{j+1}\beta_{j+1}$$
 	\item After step $i=j$, we're left with $w = \beta_{j+1}q_{j+1}$, and $q_{j+1}$ must have norm 1 so set $q_{j+1}=\frac{1}{\|w\|}w$ and $\beta_{j+1}= \|w\|$
 \end{enumerate}
-\subparagraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
+\paragraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
 \beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
 \end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in \mathbb{R}^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
-\subparagraph{Breakdown} Breakdown in Arnoldi happens if $\|w\|= H_{j+1,j} = \beta_{j+1}$ is zero at some step, giving no information on the next vector of the basis. This happens when $b,Ab,\ldots,A^jb$ are not linearly independent:
+\paragraph{Eigenvalues} Arnoldi can be used to approximate eigenvalues and eigenvectors of large, sparse matrices. Recall that an eigenpair $(\lambda, x)$ (eigenvalue $\lambda$ and eigenvector $x$) is such that $Ax=\lambda x$ for $x\in\mathbb{C}^m,\lambda\in\mathbb{C}$. Eigenvalues are useful for knowing what happens when applying $A$ repeatedly, e.g. the sequence $x, Ax, A^2x,\ldots$ converges to $0$ $\Leftrightarrow$ $|\lambda|<1$ for each eigenvalue of $A$. This is especially useful for example in weight matrices of recurrent neural networks (RNNs).
+\paragraph{Termination} We assumed that $K_n(A,b) = n$, meaning $b, Ab, \ldots, A^{n-1}b$ are linearly independent. For some $n$ this assumption must fail, for example with $m=n$ let's say we reach columns $q_1,\ldots,q_m$ that are columns of a square orthogonal matrix $Q_m\in\mathbb{Q}^{m\times m}$. This means that they are a basis of $\mathbb{R}^m$ and $$Aq_m = \beta_1q_1 + \ldots + \beta_mq_m + 0$$ Note the absence of the additional term $\beta_{m+1}q_{m+1}$. We get a complete factorization of $A$ $$AQ_m=Q_mH_m\Rightarrow A=Q_mH_mQ_m^T$$ We can use it to solve linear systems, and solving systems with $Q,H$ costs $O(m^2)$.\\
+This is not how we use Arnoldi in practice: we want to stop at $n << m$.
+\paragraph{Breakdown} Breakdown in Arnoldi happens if $\|w\|= H_{j+1,j} = \beta_{j+1}$ is zero at some step, giving no information on the next vector of the basis. This happens when $b,Ab,\ldots,A^jb$ are not linearly independent:
 $$A^jb = b\gamma_0+Ab\gamma_1+\ldots+A^{j-1}b\gamma_{j+1}$$
 then you'd get $H_{j+1,j}=0$ and breakdown at step $j$.\\
 Breakdown could happen at each step, even very early. For example, if $b$ is an eigenvector of $A, Ab= \lambda b$, assuming $\|b\|=1$ so that $q_1=b$, the next step would be
@@ -878,10 +881,23 @@ $$Ab = q_1\beta_1+q_2\beta_2 = \lambda q_1$$
 $$\beta_1 = q_1^TAb = q_1^\lambda q_1 = \lambda$$
 $$Ab-q_1b = 0 = q_1\beta_2$$
 encountering breakdown at step 1.\\
-Differently from Gaussian Elimination, where a breakdown would change the algorithm introducing pivoting, in Arnoldi we have a "lucky breakdown", because when there's a breakdown we have all the elements for solving a linear system $Ax=b$. If we get a breakdown $$A_jQ_j = Q_jH_j$$
+Differently from Gaussian Elimination, where a breakdown would change the algorithm introducing pivoting, in Arnoldi we have a "lucky breakdown", because when there's a breakdown we have all the elements for solving a linear system $Ax=b$. A lucky breakdown is in the following form $$A_jQ_j = Q_jH_j$$
 $$A\underset{x}{\underbrace{Q_jH_j^{-1}e_1\|b\|}} = Q_jH_jH_j^{-1}e_1\|b\|=b$$
-\paragraph{Theorem} When lucky breakdown happens in Arnoldi, $x=Q_jH_j^{-1}e_1\|b\|$ is the solution of $Ax = b$
-\subparagraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
+\paragraph{Theorem} When lucky breakdown happens in Arnoldi, $x=Q_jH_j^{-1}e_1\|b\|$ is the solution of $Ax = b$\\
+Even without a lucky breakdown, the pairs $(\lambda, Q_nv)$ (called \textbf{Ritz pairs}) are good approximations of the eigenpairs $(\lambda, v)$. Typically they converge to the largest (in modulus) eigenvalues of $A$ when one increases $n$.
+\paragraph{Convergence of Arnoldi} The space $K_n(A,b)=\text{span}(b, Ab,\ldots, A^{n-1}b)$ contains all the right "features" to represent the eigenvectors of $A$ with the largest eigenvalues (yes, plural!): if $A=V\Lambda V^{-1}$ is diagonalizable, then
+$$A^kb = (V\Lambda V^{-1})\ldots(V\Lambda V^{-1})b = V\Lambda^kV^{-1}b = v_1\lambda_1^kc_1+\ldots+v_m\lambda_m^kc_m$$
+With $c=V^{-1}b$. We have that $A^kb$ is a linear combination of the eigenvectors $v_i$, in which those with the largest $|\lambda_i|$ have larger weights. The exceptions are those $v_i$s that won't appear if the corresponding $c_i$s are small or zero. Note that the $c_i$s are the coefficients in the linear combination $b = v_1c_1+\ldots+v_mc_m$.\\
+To get the other eigenvalues, shift and invert (e.g. to find eigenvalues closest to $1$, or the smallest, and so on.
+\paragraph{Backward Stability} Considering $z=Aw-\lambda w$, note that $(A+E)w = \lambda w$ if $E$ is any matrix such that $Ew = -z$. Hence, $(\tilde{\lambda}, w)$ is an \textbf{exact eigenpair of the perturbed input $A+E$}
+$$\frac{|\tilde{\lambda} - \lambda|}{|\lambda|} \leq k_{\text{rel}}(A)\frac{\|E\|}{\|A\|}$$
+for a true eigenvalue $\lambda$ (and similarly for eigenvectors), and $k_{\text{rel}}$ of the computing eigenvalues operation.\\
+$\|E\|$ is at least large as $\frac{\|z\|}{\|w\|}$, and we can choose it with exactly that norm (e.g. by taking a scaled Householder reflector). So
+$$\frac{\|E\|}{\|A\|} = \frac{\|Aw-\lambda w\|}{\|A\|\:\|w\|}$$
+The condition number is
+$$k_{\text{rel}}(A) \leq \|V\|\:\|V^{-1}\|$$
+with $k_{\text{rel}}$ of the computing eigenvalues operation, $V$ is the matrix of eigenvectors. In particular, $k_{\text{rel}}(A)$ is always $1$ if $A$ is symmetric, but it can be much larger in general.
+\paragraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
 \paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x_n = Q_ny$.\\
 I.e. $$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
 $$=\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
