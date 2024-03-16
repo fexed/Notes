@@ -852,7 +852,7 @@ $$\min_{x_n\in K_n(A,b)} \|Ax_n - b\| = \min_{y\in \mathbb{R}^n} \|(AV_n)y-b\|$$
 But this problem is very unstable to solve because $V_n = \left[\begin{array}{c | c | c | c | c}
 b & Ab &A^2b & \ldots & A^{n-1}b
 \end{array}\right]$ has columns that tend to be all multiples of the same vector as $n$ increases.
-\paragraph{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$
+\subsubsection{Arnoldi Algorithm} Algorithm to compute an orthonormal basis of the Krylov subspace $K_n(A,b)$
 \paragraph{Idea} Given the vectors $q_1,\ldots,q_j$ that are an orthonormal basis of $K_j(A,b)$, we want to compute one more vector $q_{j+1}$ that extends it to an orthonormal basis of $K_{j+1}(A,b)$.\\\\
 The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a deg$(p)=j-1$.
 \begin{enumerate}
@@ -870,7 +870,6 @@ The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\
 \paragraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
 \beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
 \end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in \mathbb{R}^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
-\paragraph{Eigenvalues} Arnoldi can be used to approximate eigenvalues and eigenvectors of large, sparse matrices. Recall that an eigenpair $(\lambda, x)$ (eigenvalue $\lambda$ and eigenvector $x$) is such that $Ax=\lambda x$ for $x\in\mathbb{C}^m,\lambda\in\mathbb{C}$. Eigenvalues are useful for knowing what happens when applying $A$ repeatedly, e.g. the sequence $x, Ax, A^2x,\ldots$ converges to $0$ $\Leftrightarrow$ $|\lambda|<1$ for each eigenvalue of $A$. This is especially useful for example in weight matrices of recurrent neural networks (RNNs).
 \paragraph{Termination} We assumed that $K_n(A,b) = n$, meaning $b, Ab, \ldots, A^{n-1}b$ are linearly independent. For some $n$ this assumption must fail, for example with $m=n$ let's say we reach columns $q_1,\ldots,q_m$ that are columns of a square orthogonal matrix $Q_m\in\mathbb{Q}^{m\times m}$. This means that they are a basis of $\mathbb{R}^m$ and $$Aq_m = \beta_1q_1 + \ldots + \beta_mq_m + 0$$ Note the absence of the additional term $\beta_{m+1}q_{m+1}$. We get a complete factorization of $A$ $$AQ_m=Q_mH_m\Rightarrow A=Q_mH_mQ_m^T$$ We can use it to solve linear systems, and solving systems with $Q,H$ costs $O(m^2)$.\\
 This is not how we use Arnoldi in practice: we want to stop at $n << m$.
 \paragraph{Breakdown} Breakdown in Arnoldi happens if $\|w\|= H_{j+1,j} = \beta_{j+1}$ is zero at some step, giving no information on the next vector of the basis. This happens when $b,Ab,\ldots,A^jb$ are not linearly independent:
@@ -898,38 +897,14 @@ The condition number is
 $$k_{\text{rel}}(A) \leq \|V\|\:\|V^{-1}\|$$
 with $k_{\text{rel}}$ of the computing eigenvalues operation, $V$ is the matrix of eigenvectors. In particular, $k_{\text{rel}}(A)$ is always $1$ if $A$ is symmetric, but it can be much larger in general.
 \paragraph{Complexity of Arnoldi} $n$ multiplications $v\mapsto Av$, worst case $O(m^2)\cdot n$ but could be $O(m)\cdot n$ if sparsity is involved, and $O(mn^2)$ for the orthogonalization inner loop. Total complexity is $O(mn^2+n\cdot$matvec$)$ with matvec being the complexity of $v\mapsto Av$.
-\paragraph{GMRES} Generalized Minimum Residual: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x_n = Q_ny$.\\
-I.e. $$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
-$$=\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
-$$= \|\underline{H}_n y - e_1\|b\|\,\|$$ the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$ being the QR of $\underline{H}_n$, in $O(n^3)$\\
-Actually even cheaper, because $\underline{H}$ is upper triangular, has special structure and we can compute $qr(\underline{H})$ with complexity $O(n^2)$\\
-This can be done incrementally: at each step
-\begin{list}{}{}
-	\item extend $AQ_n=Q_{n+1}\underline{H}_n$ to $AQ_{n+1} = Q_{n+2}\underline{H}_{n+1}$
-	\item extend $\underline{H}_n = U_nR_n$ to $\underline{H}_{n+1}=U_{n+1}R_{n+1}$
-	\item check residual $\|Ax_n-b\|=\|\underline{H}_ny-e_1\|b\|\:\|$ as stopping condition
-\end{list}
-\subparagraph{Convergence of GMRES} $$x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$$ with $\text{deg}(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$, so
-$$\min_{x_n\in K_n(A,b)} \|Ax_n-b\| = \min_{p\:|\:deg(p)<n}\|Ap(A)b - b\| = \|(Ap(A)-I)b\| \leq \|Ap(A)-I\|\cdot\|b\|$$
-And if $A = V\Lambda V^{-1}$ diagonalizable (with $\Lambda = \left[\begin{array}{c c c}
-\lambda_1\\
-& \ddots\\
-& & \lambda_m
-\end{array}\right]$) then $Ap(A)-I = q(A)$ with $q(t) = tp(t)-1$ and $A^k = V\Lambda^kV^{-1}$, then $q(A) = V\left[\begin{array}{c c c}
-q(\lambda_1)\\
-& \ddots\\
-& & q(\lambda_m)
-\end{array}\right] V^{-1}$\\
-First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} \|Ax_n - b\| = 0$\\
-This extends inexactly to matrices that have clustered eigenvalues.\\\\
-Arnoldi can be used to compute eigenvalues too. If there is a lucky breakdown $\Leftrightarrow h_{n+1,n}=0$, $\underline{H}_n=\left[\begin{array}{c c c c}
+\paragraph{Eigenvalues} Arnoldi can be used to compute eigenvalues too. $$\text{Lucky breakdown}\Leftrightarrow h_{n+1,n}=0 \text{ and } \underline{H}_n=\left[\begin{array}{c c c c}
 x & x & \ldots & x\\
 x & x & \ldots & x\\
 0 & x & \ldots & x\\
 \vdots & & \ddots & \vdots\\
 & & x & x\\
 0 & \ldots & \ldots & 0
-\end{array}\right]$\\
+\end{array}\right]$$
 In this case, even if one can figure out $q_{n+1}$ and continue up to step $n=m$, one gets $AQ_m = Q_m\ldots$ which means that the eigenvalues of $H_n$ are a subset of the eigenvalues of $A$. So the lucky breakdown at step $n$ gave me exactly $n$ eigenvalues of $A$.\\
 If $(\lambda_1,w_1),\ldots,(\lambda_n,w_n)$ are the eigenvalues/eigenvectors of $H_n$, then $(\lambda_1,Q_nw_1),\ldots,(\lambda_n,Q_nw_n)$ are the eigenvalues/eigenvectors of $A$. This because $$AQ_n = Q_nH_n \Rightarrow AQ_nw_i = Q_nH_nw_i = Q_nw_i\lambda_i$$
 Even without the breakdown, the quantities $(\lambda_i, Q_nw_i)$ where $(\lambda_i, w_i)$ are eigenpairs of $H_n$, are good approximations of some eigenpairs of $A$, for most matrices, and are called \textbf{Ritz values}/vectors/pairs of $A$.\\
@@ -948,10 +923,35 @@ Computing $w=A^{-1}v \Leftrightarrow$ solving the linear system $Aw=v$. So one c
 Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ by applying Arnoldi to $(A-\alpha I)^{-1}$ with eigenvalues $\mu_i = (\lambda_i-\alpha)^{-1}$ for $i=1,\ldots,m$\\\\
 If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MINRES.
+\subsubsection{GMRES} \textbf{Generalized Minimum Residual}: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x = Q_ny$ $$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
+$$=\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
+$$= \|\:\underline{H}_n y - e_1\|b\|\:\|$$ the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$ being the QR of $\underline{H}_n$, in $O(n^3)$\\
+Actually even cheaper, because $\underline{H}$ is upper triangular, has special structure and we can compute $qr(\underline{H})$ with complexity $O(n^2)$\\
+This can be done incrementally: at each step
+\begin{list}{}{}
+	\item extend $AQ_n=Q_{n+1}\underline{H}_n$ to $AQ_{n+1} = Q_{n+2}\underline{H}_{n+1}$
+	\item extend $\underline{H}_n = U_nR_n$ to $\underline{H}_{n+1}=U_{n+1}R_{n+1}$
+	\item check residual $\|Ax_n-b\|=\|\underline{H}_ny-e_1\|b\|\:\|$ as stopping condition
+\end{list}
+\subparagraph{Convergence of GMRES} $$x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$$ with $\text{deg}(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$, so
+$$\min_{x_n\in K_n(A,b)} \|Ax_n-b\| = \min_{p\:|\:\text{deg}(p)<n}\|Ap(A)b - b\| =  \min_{p\:|\:\text{deg}(p)<n}\|(Ap(A)-I)b\| \leq \|Ap(A)-I\|\cdot\|b\|$$
+And if $A = V\Lambda V^{-1}$ diagonalizable (with $\Lambda = \left[\begin{array}{c c c}
+\lambda_1\\
+& \ddots\\
+& & \lambda_m
+\end{array}\right]$) then $Ap(A)-I = q(A)$ with $q(t) = tp(t)-1$ and $A^k = V\Lambda^kV^{-1}$, then $q(A) = V\left[\begin{array}{c c c}
+q(\lambda_1)\\
+& \ddots\\
+& & q(\lambda_m)
+\end{array}\right] V^{-1}$\\
+First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} \|Ax_n - b\| = 0$\\
+This extends inexactly to matrices that have clustered eigenvalues.
 \subsection{Conjugate Gradient}
-\paragraph{Conjugate} We say that $u,v$ are $A$-orthogonal, or \textbf{conjugate}, if $u^TAv = 0$.\\
-The $A$-norm of $u\in \mathbb{R}^m$ is $\|u\|_A = \sqrt{u^TAv}$
-\paragraph{Conjugate Gradient} Supposing $A=A^T \succ 0$ (symmetric and positive definite), we can find the solution to $Ax = b$ by minimizing the strictly convex function $f(x) = \frac{1}{2}x^TAx-b^Tx + \text{const}$, of which $\nabla f(x) = Ax-b$\\
+\paragraph{Conjugate Gradient} Supposing $A=A^T \succ 0$ (symmetric and positive definite), we can find the solution to $Ax = b$ by minimizing the strictly convex function $f(x) = \frac{1}{2}x^TAx-b^Tx + \text{const}$, of which $\nabla f(x) = Ax-b$. Recall two definitions:
+\begin{list}{}{}
+	\item Two vectors $x, y\in\mathbb{R}^m$ are called $A$-orthogonal if $x^TAy=0$
+	\item The $A$-norm of $x\in\mathbb{R}^m$ is $\|x\|_A=\sqrt{x^TAx}$
+\end{list}
 At each step there are 3 ingredients:
 \begin{list}{}{}
 	\item Current iterate: $x_j\in \mathbb{R}^m$
