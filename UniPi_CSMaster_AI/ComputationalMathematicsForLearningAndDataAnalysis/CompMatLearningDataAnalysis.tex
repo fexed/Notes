@@ -947,6 +947,9 @@ q(\lambda_1)\\
 First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} \|Ax_n - b\| = 0$\\
 This extends inexactly to matrices that have clustered eigenvalues.
 \subsection{Conjugate Gradient}
+\paragraph{Lanczos} Also called \textbf{Symmetric Arnoldi}: if $A$ is symmetric ($A=A^T$), then $H_n$ is symmetric for each $n$ and hence it's \textbf{tridiagonal}.
+$$H_{ji} = q_j^TAq_i = (q_j^TAq_i)^T=q_i^TAq_j=H_{ij}$$
+So the orthogonalization loop can be shortened, we just need to compute a single part and mirror it. This reduces the cost to $n$ matrix products $+O(mn)$. This symmetric Arnoldi is also known as \textbf{Lanczos iteration}, and we can use it like the non-symmetric counterpart to compute eigenpairs of $A$ and solve linear systems $Ax=b$ with GMRES.
 \paragraph{Conjugate Gradient} Supposing $A=A^T \succ 0$ (symmetric and positive definite), we can find the solution to $Ax = b$ by minimizing the strictly convex function $f(x) = \frac{1}{2}x^TAx-b^Tx + \text{const}$, of which $\nabla f(x) = Ax-b$. Recall two definitions:
 \begin{list}{}{}
 	\item Two vectors $x, y\in\mathbb{R}^m$ are called $A$-orthogonal if $x^TAy=0$
@@ -1040,9 +1043,9 @@ R^Ty = b\\Rx=y
 \end{array}\right.$\\
 \textbf{Fill-in reducing permutation} $P^TAP = R^TR\Leftrightarrow A = PR^TRP$\\
 For example, \texttt{symrcm} "reverse Cuthill McKee".
-\paragraph{Preconditioning} $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods.\\
-$P$ "looks like" inv$(A)$, $P =$ deg$(A)^{-1}$
-\subparagraph{Incomplete $LU$} Construct sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute.\begin{list}{}{}
+\paragraph{Preconditioning} The performances of CG and GMRES on $Ax=b$ depends a lot on where the eigenvalues of $A$ are located. $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods. A good choice of $P$ is if it "looks like" $\text{inv}(A)$, $P = \text{deg}(A)^{-1}$. A practical choice would be with $P=\text{diag}(A)^{-1}$, but even better preconditioners are obtained with incomplete LU.
+\subparagraph{Incomplete $LU$} Forcibly construct a sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute. For example, replace small-ish elements with 0 directly.
+\begin{list}{}{}
 	\item $L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$ and take $P = U_I^{-1}L_I^{-1}$
 \end{list}
 If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto PAv$:
@@ -1054,8 +1057,8 @@ If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto 
 \end{lstlisting}
 \texttt{gmres($f, U_I^{-1}L_I^{-1}b$)} solves $PAx=Pb$ with $P = U_I^{-1}L_I^{-1}$ up to a chosen threshold on $\|PAx-Pb\|$. \textbf{Not equivalent} to $\|Ax-b\|$ being below the same threshold.\\\\
 Even if $P$ and $A$ are both symmetric, $PA$ is not symmetric in general. So we need to switch to a non-symmetric solver (\texttt{gmres}).
-\paragraph{Symmetric Preconditioning} Symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" incomplete Cholesky factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
-Instead of solving $(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$, given that $(L^T)^{-1}L^{-1}A$ isn't symmetric, we can solve $L^{-1}A(L^T)^{-1}(L^Tx) = L^{-1}b$ with $L^Tx=y$ and $L^{-1}A(L^T)^{-1}$ symmetric positive definite ($A\simeq LL^T$, so $L^{-1}A(L^T)^{-1}\simeq(L^{-1}L)(L^T(L^T)^{-1}) = T$)\\
+\paragraph{Incomplete Cholesky} For a symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" \textbf{incomplete Cholesky} factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
+Instead of solving $$(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$$ Given that $(L^T)^{-1}L^{-1}A$ isn't symmetric, we can solve $$L^{-1}A(L^T)^{-1}(L^Tx) = L^{-1}b$$ with $L^Tx=y$ and $L^{-1}A(L^T)^{-1}$ symmetric positive definite ($A\simeq LL^T$, so $L^{-1}A(L^T)^{-1}\simeq(L^{-1}L)(L^T(L^T)^{-1}) = T$)\\
 \texttt{pcg($L^{-1}A(L^T)^{-1},L^{-1}b$)} will converge to $y$, where $y=L^Tx$ and $x$ is the solution of \texttt{pcg($A,b$)}, but possibly faster if the eigenvalues of $L^{-1}A(L^T)^{-1}$ have better clustering/condition number than the ones of $A$.
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be:\begin{list}{}{}
