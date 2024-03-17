@@ -1045,9 +1045,7 @@ R^Ty = b\\Rx=y
 For example, \texttt{symrcm} "reverse Cuthill McKee".
 \paragraph{Preconditioning} The performances of CG and GMRES on $Ax=b$ depends a lot on where the eigenvalues of $A$ are located. $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods. A good choice of $P$ is if it "looks like" $\text{inv}(A)$, $P = \text{deg}(A)^{-1}$. A practical choice would be with $P=\text{diag}(A)^{-1}$, but even better preconditioners are obtained with incomplete LU.
 \subparagraph{Incomplete $LU$} Forcibly construct a sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute. For example, replace small-ish elements with 0 directly.
-\begin{list}{}{}
-	\item $L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$ and take $P = U_I^{-1}L_I^{-1}$
-\end{list}
+$$L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$$ $$P = U_I^{-1}L_I^{-1}$$
 If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto PAv$:
 \begin{lstlisting}[style=myPython]
 	def product(v):
