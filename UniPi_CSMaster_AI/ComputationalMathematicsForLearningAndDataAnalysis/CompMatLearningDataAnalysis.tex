@@ -1057,7 +1057,7 @@ If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto 
 \end{lstlisting}
 \texttt{gmres($f, U_I^{-1}L_I^{-1}b$)} solves $PAx=Pb$ with $P = U_I^{-1}L_I^{-1}$ up to a chosen threshold on $\|PAx-Pb\|$. \textbf{Not equivalent} to $\|Ax-b\|$ being below the same threshold.\\\\
 Even if $P$ and $A$ are both symmetric, $PA$ is not symmetric in general. So we need to switch to a non-symmetric solver (\texttt{gmres}).
-\paragraph{Incomplete Cholesky} For a symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" \textbf{incomplete Cholesky} factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
+\subparagraph{Incomplete Cholesky} For a symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" \textbf{incomplete Cholesky} factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
 Instead of solving $$(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$$ Given that $(L^T)^{-1}L^{-1}A$ isn't symmetric, we can solve $$L^{-1}A(L^T)^{-1}(L^Tx) = L^{-1}b$$ with $L^Tx=y$ and $L^{-1}A(L^T)^{-1}$ symmetric positive definite ($A\simeq LL^T$, so $L^{-1}A(L^T)^{-1}\simeq(L^{-1}L)(L^T(L^T)^{-1}) = T$)\\
 \texttt{pcg($L^{-1}A(L^T)^{-1},L^{-1}b$)} will converge to $y$, where $y=L^Tx$ and $x$ is the solution of \texttt{pcg($A,b$)}, but possibly faster if the eigenvalues of $L^{-1}A(L^T)^{-1}$ have better clustering/condition number than the ones of $A$.
 \chapter{Optimization}
