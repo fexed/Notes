@@ -1089,6 +1089,7 @@ $$\min\{f(x) : x\in X\} = -\max\{-f(x) : x\in X\}$$
 Although $\min\{f(x)\}\neq\max\{f(x)\}$, often rather different problems.\\\\
 $x\in X$ is the \textbf{feasible solution}, often $X\subset F, x\in F-X$ \textbf{unfeasible solution}. We want (any) optimal solution $$x_* \in X\:|\:\forall\:x\in X\:\:f(x_*)\leq f(x)$$ and we don't care if $\exists\:x'\neq x_*\:|\:f(x')=f(x_*)$: \textbf{all optimal solutions are equivalent}.\\
 $f_* = f(x_*) = v(P)$ is the \textbf{optimal value} (which is \textbf{unique}) if $x_*$ exists, which it may not.
+\paragraph{Real-Valued functions} Saying that $f : X \rightarrow \mathbb{R}$ is a rather strong assumption, because due to the total ordering of $\mathbb{R}$, given $x'$ and $x''$ I can always tell which one I prefer.
 \paragraph{Multi-objective optimization} Often we have multiple objective function, and often they have incomparable values (for example, loss and regularization in machine learning). There are two practical solutions:
 \begin{multicols}{2}
 \textbf{Scalarization}, maximize one of the losses compared to the others: 	$\min\{f_1(x) + \alpha f_2(x)\:|\:x\in X\}$, but which $\alpha$?
@@ -1106,29 +1107,35 @@ We will assume that this is done at modelling stage.
 \subsection{Optimization is hard}
 Even with single-objective, optimization is hard. It's impossible if $f$ has no minimum in $X$, for example $f(x) = x$: if $(P)$ is unbounded below, then $v(P) = -\infty$. Solving $(P)$ is actually at least two different things:
 \begin{list}{}{}
-	\item finding $x_*$ and \textbf{proving $x_*$ it's optimal} (how?)
-	\item constructively \textbf{proving $f$ unbounded below} on $X$ (how?)
+	\item Finding $x_*$ and \textbf{proving $x_*$ it's optimal} (how?)
+	\item Constructively \textbf{proving $f$ unbounded below} on $X$ (how?)
 \end{list}
 It's also impossible if $f_* > -\infty$ but $\not\exists\:x_*$, for example $f(x) = e^x$ or $f(x)=\left\{\begin{array}{l l}
 1&\text{if }x = 0\\
 |x|&\text{if }x \neq 0
 \end{array}\right.$, but there are plenty of $\epsilon$-approximate solutions ($\epsilon$-optima) $$f(x_\epsilon)\leq f_* + \epsilon\:\:\:\:\forall\:\epsilon>0$$
-and on computers $x\in \mathbb{R}$ is actually $x\in \mathbb{Q}$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but too slow, so ML is actually going the opposite way (float, half, small integers\ldots). And anyway, finding the exact $x_*$ is impossible in general.
-\paragraph{Optimization need to be approximate} \begin{list}{}{}
-	\item \textbf{Absolute gap} $$\left\{a_i = A(x_i) = f(x_i) - f_*\right\}$$ So $A(x) = f(x) - f_*$ ($\geq 0$)
-	\item \textbf{Relative gap} $$\left\{r_i = R(x_i) = \frac{f(x_i) - f_*}{|f_*|} = \frac{A(x_i)}{|f_*|}\right\}$$ So $R(x) = \frac{\displaystyle f(x) - f_*}{\displaystyle |f_*|} = \frac{\displaystyle A(x)}{\displaystyle |f_*|}$ ($\geq 0$)
+and on computers $x\in \mathbb{R}$ is actually $x\in \mathbb{Q}$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but too slow, so ML is actually going the opposite way (float, half, small integers\ldots). In short, \textbf{finding the exact $x_*$ is impossible in general}.
+\paragraph{Optimization needs to be approximate} \begin{list}{}{}
+	\item \textbf{Absolute gap} $$a_i = A(x_i) = f(x_i) - f_* \geq 0$$
+	\item \textbf{Relative gap} $$r_i = R(x_i) = \frac{f(x_i) - f_*}{|f_*|} = \frac{A(x_i)}{|f_*|}\geq 0$$
 \end{list}
-The relative gap is useful because $\forall\:\alpha>0$ we have that $(P)\Leftrightarrow (P_\alpha) = \min\{\alpha f(x)\:|\:x\in X\}$, and for the same $x_*$ we have $v(P_\alpha) = \alpha v(P) \Rightarrow$ same $R(x)$, different $A(x)$\\
-But in general computing the absolute/relative gap is hard because we don't know $f_*$, which is what we want to estimate. So it's hard to estimate how good a solution is. Could argue that this is the "issue" in optimization: compute an estimate of $f_*$.
-\paragraph{Optimization is really hard} Impossible, even, because isolated minima can be anywhere, and restricting to $x\in X=[x_-, x_+]$ with $-\infty<x_-<x_+<+\infty$ doesn't help: still uncountable many points to try. Also $f$ can have isolated downward spike anywhere. Even on $X = [x_-, x_+]$ the spikes can be arbitrarily narrow.
-\paragraph{Optimization at least possible} We can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$, meaning with a fixed finite diameter. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\Leftrightarrow$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\forall x,y\in X\:\:\:|f(x) - f(y)| \leq L|x - y|$$
+The relative gap is useful because $\forall\:\alpha>0$ we have that $$(P)\equiv (P_\alpha) = \min\{\alpha f(x)\:|\:x\in X\}$$ and for the same $x_*$ we have $$v(P_\alpha) = \alpha v(P) \Rightarrow\text{same }R(x)\text{, different }A(x)$$\\
+But in general computing the absolute/relative gap is hard because we don't know $f_*$, which is what we want to estimate. So it's hard to estimate how good a solution is. One could argue that this is the "issue" in optimization: compute an estimate of $f_*$.
+\paragraph{Optimization is really hard} Impossible, even, because \textbf{isolated minima can be anywhere}, and restricting to $x\in X=[x_-, x_+]$ with $-\infty<x_-<x_+<+\infty$ doesn't help: still uncountable many points to try. Also $f$ can have isolated downward spike anywhere. Even on $X = [x_-, x_+]$ \textbf{the spikes can be arbitrarily narrow}.
+\paragraph{Optimization at least possible} We \textbf{can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$}, meaning with a \textbf{fixed finite diameter}. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\Leftrightarrow$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\forall x,y\in X\:\:\:|f(x) - f(y)| \leq L|x - y|$$
 $f$ L-c $\Rightarrow$ doesn't "jump" and one $\epsilon$-optimum can be found with $O(\frac{LD}{\epsilon})$ evaluations by uniformly sampling $X$ with step $\frac{2\epsilon}{L}$. There's a bad news: no algorithm can work in less that $\Omega(\frac{LD}{\epsilon})$, but it's the worst case of $f$ (constant with one spike).\\
 The number of steps is inversely proportional to accuracy: just not doable for small $\epsilon$. Dramatically worse with $X\subset R^n$.\\
 Also generally $L$ is unknown and not easy to estimate, but algorithms actually require/use it.
-\subsection{Local Optimization} Even if I stumble in $x_*$ how do I recognize it? This is the difficult thing. It's simpler to start with a weaker condition: $x_*$ is the \textbf{local minimum} if it solves $$\min\{f(x)\:|\:f\in X(x_*, \epsilon) = [x_* - \epsilon, x_* + \epsilon]\}$$ for some $\epsilon > 0$.\\
+\begin{list}{}{}
+	\item $f$ \textbf{globally} L-c $\Leftrightarrow X=\mathbb{R}$
+	\item $f$ \textbf{locally} L-c at $x \Leftrightarrow \exists\epsilon >0\:|\:X=[x-\epsilon,x+\epsilon]$
+	\item Locally L-c at $x \not\Rightarrow$ globally L-c
+	\item Locally L-c at $x \Rightarrow$ continuous at $x$
+\end{list}
+\subsection{Local Optimization} Even if I stumble in $x_*$ how do I recognize it? This is the difficult thing, which corresponds to knowing $f_*$. It's simpler to start with a weaker condition: $x_*$ is the \textbf{local minimum} if it solves $$\min\{f(x)\:|\:f\in X(x_*, \epsilon) = [x_* - \epsilon, x_* + \epsilon]\}$$ for some $\epsilon > 0$.\\
 Stronger notion: \textbf{strict local minimum} if $$f(x_*) < f(y)\:\:\:\forall\:y\in X(x_*,\epsilon) - \{x_*\}$$
-$f$ (strictly) \textbf{unimodal} on X if has minimum $x_* \in X$ and it is (strictly) decreasing on the left $[x_-, x_*]$ and (strictly) increasing on the right $[x_*, x_+]$. If $x_*$, then typically $\exists\:\epsilon>0\:|\:f$ is (strictly) unimodal on $X(x_*,\epsilon)$
-Most functions are not unimodal, but they are if you focus on the attraction basin of $x_*$ and restrict there. Unfortunately it's true for every local optimum, they all look the same.
+$f$ (strictly) \textbf{unimodal} on X if has minimum $x_* \in X$ and it is (strictly) decreasing on the left $[x_-, x_*]$ and (strictly) increasing on the right $[x_*, x_+]$. If $x_*$, then typically $\exists\:\epsilon>0\:|\:f$ is (strictly) unimodal on $X(x_*,\epsilon)$.\\
+\textbf{Most functions are not unimodal, but they are if you focus on the attraction basin of $x_*$ and restrict there}. Unfortunately it's true for every local optima, and that's why they all look the same: all local optima are similar, including the global one, but this makes it finding some local optimum a lot easier. But finding the right one, the global optimum, is another matter entirely.
 \begin{center}
 	\includegraphics[scale=0.5]{5.png}
 \end{center}
@@ -1141,7 +1148,7 @@ Faster if $r$ larger $\Rightarrow$ $r = \frac{D}{2} + \epsilon = x'_\pm = x_- + 
 \paragraph{Optimally choosing the iterates} A generally powerful concept is to optimize the worst-case behavior $\Rightarrow$ shrink the intervals as quickly as possible.\\
 Each iteration dumps either $[x_-, x_-']$ or $[x_+', x_+]$, we don't know which so they should be of equal size $\Rightarrow$ select $r\in (\frac{1}{2},1)$ so that $x_-' = x_- + (1-r)D$ and $x_+' = x_- + rD$\\
 $r$ larger $\Rightarrow$ faster convergence, so $r = \frac{D}{2} + \epsilon \Leftrightarrow x_\pm' = x_- + \frac{D}{2}\pm\epsilon$ but next iteration will have two entirely different $x_-', x_+'$ to evaluate $f$ on.\\
-So we actually want to minimize function evaluations by reusing the surviving point. $$r : 1 = (1 - r) : r \Leftrightarrow r\cdot r = 1 - r \Leftrightarrow r = \frac{\sqrt{5} - 1}{2} = 0.618 = \frac{1}{g}$$ with $g$ being the golden ratio, $g = \frac{\sqrt{5} + 1}{2} = 1.618 \Rightarrow g = 1 + r = 1 + \frac{1}{g}$\\
+So we actually want to \textbf{minimize function evaluations by reusing the surviving point}. $$r : 1 = (1 - r) : r \Leftrightarrow r\cdot r = 1 - r \Leftrightarrow r = \frac{\sqrt{5} - 1}{2} = 0.618 = \frac{1}{g}$$ with $g$ being the golden ratio, $g = \frac{\sqrt{5} + 1}{2} = 1.618 \Rightarrow g = 1 + r = 1 + \frac{1}{g}$\\
 Theorems breed algorithms: \textbf{golden ratio search}\\
 \begin{lstlisting}[style=myPython]
 procedure x = GRS(f, xl, xr, delta)
@@ -1166,19 +1173,20 @@ After $k$ iterations, $x_+^k - x_-^k = Dr^k$ stops when $Dr^k \leq \delta$, so w
 Asymptotically optimal if no other information is available. $\delta \neq \epsilon$ but $f$ L-c $\Rightarrow A(x^k) \leq \epsilon$ when $k = 2\log\frac{LD}{\epsilon}$\\
 First example of linear convergence $A(x^k) \leq Sr^k \leq \epsilon$ with $r < 1$, as fast as a negative exponential $\Rightarrow k \geq \frac{\displaystyle \log\frac{S}{\epsilon}}{\displaystyle \log\frac{1}{r}}$\\\\
 $O(\log(\frac{1}{\epsilon}))$ is good, but the constant $\rightarrow\infty$ as $r\rightarrow 1$
+\subsection{Faster Local Optimization}
 \paragraph{To make it go faster, give it more information} Two points are needed to see in which direction $f$ is decreasing. If we could see this directly we could make it with one point, faster. Look at the linear function that best locally approximates $f$, trusty old first derivative $f'(x)$: slope of the tangent line to the graph of $f$ in $x$\\
 First order model of $f$ at $x$: $$L_x(y)=f'(x)(y-x) + f(x)$$ $L_x(y) \simeq f(y)$ $\forall\:y\in[x-\epsilon, x+\epsilon]$ for some small $\epsilon > 0$.\\
-$x_*$ local minimum $\Rightarrow f'(x_*) = 0 \Leftrightarrow$ root of $f' \Leftrightarrow$ stationary point. If $f'(x) < 0$ or $f'(x) > 0$, then $x$ is clearly not a local minimum. Hence, $f'(x) = 0$ for the all local minima (hence in the global minimum as well) but this is true for the local maxima (hence global maximum as well), as well in the plateau and saddle points. To tell them apart, look at the second derivative $f''$.
+$x_*$ local minimum $\Rightarrow f'(x_*) = 0 \Leftrightarrow$ root of $f' \Leftrightarrow$ stationary point. If $f'(x) < 0$ or $f'(x) > 0$, then $x$ is clearly not a local minimum. Hence, \textbf{$f'(x) = 0$ for the all local minima} (hence in the global minimum as well) but this is \textbf{true for the local maxima} (hence global maximum as well), as well in the plateau and saddle points. \textbf{To tell them apart, look at the second derivative $f''$}.
 \begin{center}
 	\includegraphics[scale=0.5]{1.png}
 \end{center}
 In simple cases we get the answer by a closed formula. In $f = bx + c$ linear, if $b > 0$ then the minimum is $x_-$ and maximum is $x_+$, viceversa if $b < 0$. For $f = ax^2 + bx + c$, quadratic, then if $a > 0$ the minimum is $\min\{ x_+, \max\{x_*, x_-\}\}$ and the maximum is $\arg\max\{f(x_-), f(x_+)\}$, and viceversa if $a < 0$.\\
 Only polynomial whose roots have a closed formula (degree 3 and some degree 4), with basically no hope for most trascendental, trigonometric and mixed equations. We need an algorithm for solving non-linear equations.
-\paragraph{Dichotomic Search} $f'$ continuous and the intermediate value theorem gives that $$f'(x_-) < 0 \wedge f'(x_+) > 0 \Rightarrow \exists\:x\in[x_-, x_+]\:|\: f'(x) = 0$$
+\paragraph{Dichotomic Search} With $f'$ continuous, the \textbf{intermediate value theorem proves} that  $$f'(x_-) < 0 \wedge f'(x_+) > 0 \Rightarrow \exists\:x\in[x_-, x_+]\:|\: f'(x) = 0$$
 Theorems breed algorithms $\rightarrow$ \textbf{Dichotomic Search}.
 \begin{lstlisting}[style=myPython]
 procedure x = DS(f, xl, xr, eps)
-	while (true) do:  # invariant: df(xl)<-eps, df(xr)>eps
+	while (true):  # invariant: df(xl)<-eps, df(xr)>eps
 		x = in_middle_of(xl, xr)
 		compute df(x)
 		if (abs(df(x)) <= eps): break
@@ -1189,12 +1197,25 @@ procedure x = DS(f, xl, xr, eps)
 \end{lstlisting}
 With \texttt{df} meaning $f'$\\
 For \texttt{in\_middle\_of(xl, xr)} the obvious choice is \texttt{return (xl + xr)/2;}. We have linear convergence with $\gamma = 0.5 < 0.618 \Rightarrow k = 1.45\log(\frac{LD}{\epsilon}) < 2 \log(\frac{LD}{\epsilon})$\\
-The condition $f'(x_-) < -\epsilon, f'(x_+) > \epsilon$ is important. What if is not satisfied? Obvious solution, moving the interval more and more to the right until the derivative is possible.\\
+The condition $f'(x_-) < -\epsilon, f'(x_+) > \epsilon$ is important. If this is not satisfied, we move the interval more and more to the right until the derivative is possible.
+\begin{lstlisting}[style=myPython]
+delta_x = 1  # or whatever value > 0
+while (df(r) <= -eps):
+	xr = xr + delta_x
+	delta_x = 2 * delta_x  # or whatever factor > 1
+\end{lstlisting}
 The same in reverse of $x_-$ with $\Delta x = -1$. This works in practice for all "reasonable" functions. Works if $f$ coercive ($\lim_{|x| \to \infty} f(x) = \infty$)\\
+The definition of derivative is
+$$f'(x) = \lim_{t\to 0} \frac{f(x+t)-f(x)}{t}$$
+Provided that the limit is finite and that it exists at all, and given the left and right derivatives
+$$f'_-(x) = \lim_{t\to 0_-} \frac{f(x+t)-f(x)}{t}$$
+$$f'_+(x) = \lim_{t\to 0_+} \frac{f(x+t)-f(x)}{t}$$
+We say that $f$ is \textbf{differentiable} at $x$ $\Leftrightarrow f'(x)$ exists $\Leftrightarrow f'_-(x)=f'_+(x)$ both finite.\\
+There exists easy closed-forms for most functions (with notable exceptions such as $\max\{\}$). Also, $f$ differentiable in $x \Rightarrow f$ continuous in $x$ (but the opposite is not true).
 \begin{list}{}{}
 	\item $f' \in C^0 \Leftrightarrow f \in C^1 \Leftrightarrow$ continuously differentiable $\Rightarrow f\in C^0$
 	\item $f'' \in C^0 \Leftrightarrow f\in C^2 \Leftrightarrow f' \in C^1 \Rightarrow f' \in C^0 \Rightarrow f \in C^1 \Rightarrow f \in C^0$
-	\item $f \in C^1$ globally L-c on $X \Rightarrow |f'(x)| \leq L \forall\: x \in X$
+	\item $f \in C^1$ globally L-c on $X \Rightarrow |f'(x)| \leq L\:\:\forall\: x \in X$
 \end{list}
 \paragraph{Extreme value theorem} $f \in C^0$ on $X = [x_-, x_+]$ finite $\Rightarrow$ max$\{f(x)\:|\: x\in X\} < \infty$, min$\{f(x)\:|\: x\in X\} > -\infty$\\\\
 $f\in C^1$ on $X$ finite $\Rightarrow f$ globally L-c on $X$\\
@@ -1202,29 +1223,31 @@ Best possible case is $f\in C^2$ on finite $X\Rightarrow$ both $f$ and $f'$ glob
 \paragraph{Fastest local optimization} Interpolation, for improving the dichotomic search. Choosing $x$ "right in the middle" is the dumbest possible approach, because we know a lot about $f$: $f(x_-), f(x_+), f'(x_-), f'(x_+)\ldots$. So let's use that, by constructing a model of $f$ based on known information. Much better choosing $x$ close to $x_*$.\\
 But remember that \textbf{the model is an estimate}, so never completely trust the model, but regularize, stabilize\ldots in this case, the minimum guaranteed decrease is with $\sigma < 0.5$, and the worst case is linear convergence with $r = 1 - \sigma$, but hopefully is much faster than that when the model is "right".
 \subsection{Measuring algorithms speed} Given the sequences \begin{list}{}{}
-	\item $\{x_i\}$
-	\item $\{d_i = |x_i - x_*|\}$
-	\item $\{f_i = f(x_i)\}$
-	\item $\{a_i = A(x_i) = f(x_i) - f_*\}$ absolute gap
-	\item $\{r_i = R(x_i) = \frac{f(x_i) - f(x)}{|f_*|} ) \frac{A(x_i)}{|f_*|}\}$ relative gap
+	\item Iterates: $\{x_i\}$
+	\item Distances from $x_*$: $\{d_i = |x_i - x_*|\}$
+	\item $f$-values: $\{f_i = f(x_i)\}$
+	\item Absolute gaps: $\{a_i = A(x_i) = f(x_i) - f_*\}$
+	\item Relative gaps: $\{r_i = R(x_i) = \frac{f(x_i) - f(x)}{|f_*|} ) \frac{A(x_i)}{|f_*|}\}$
 \end{list}
 We have convergence when $\{a_i\} \rightarrow 0, \{r_i\} \rightarrow 0 \Leftarrow \{d_i\} \rightarrow 0$ (but $\not\Rightarrow)$, but how rapidly? \textbf{Rate of convergence}
 $$\lim_{i\to\infty} \left(\frac{f_{i+1} - f_*}{f_i - f_*}\right)^p = \lim_{i\to\infty} \left(\frac{a_{i+1}}{a_i}\right)^p = \lim_{i\to\infty} \left(\frac{r_{i+1}}{r_i}\right)^p = r$$
 \begin{list}{}{}
 	\item[$p = 1$]\begin{list}{}{}
-		\item $r = 1\Rightarrow$ sublinear \begin{list}{}{}
+		\item $r = 1\Rightarrow$ \textbf{sublinear} \begin{list}{}{}
 			\item $\frac{1}{i} \Rightarrow k \in O(\frac{1}{\epsilon})$ (bad)
 			\item $\frac{1}{i^2} \Rightarrow k \in O(\frac{1}{\sqrt{\epsilon}})$ (a bit better)
 			\item $\frac{1}{\sqrt{i}} \Rightarrow k \in O(\frac{1}{\epsilon^2})$ (horrible)
 		\end{list}
-		\item $r < 1\Rightarrow$ linear, $r_i \rightarrow i \in O(\log(\frac{1}{\epsilon}))$, good unless $r = 1$
+		\item $r = 0\Rightarrow$ \textbf{superlinear}
+		\item $r < 1\Rightarrow$ \textbf{linear}, $r_i \rightarrow i \in O(\log(\frac{1}{\epsilon}))$, good unless $r = 1$
 	\end{list}
-	\item[$p \in (1,2)$] $p = 1, r = 0\Rightarrow$ superlinear
-	\item[$p = 2$] $r > 0\Rightarrow$ quadratic, best we can reasonably hope for\\
+	\item[$p = 2$]\begin{list}{}{}
+		\item $r > 0\Rightarrow$ \textbf{quadratic}, best we can reasonably hope for\\
 	$\frac{1}{2^{2^i}} \Rightarrow i \in O(\log(\log(\frac{1}{\epsilon})))$, which is basically $O(1)$: the number of correct digits doubles at each iteration
+	\end{list}
 \end{list}
 \paragraph{Improving dichotomic search} Quadratic interpolation has superlinear convergence if started "close enough".\\
-$f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$ with $p = \frac{1 + \sqrt{5}}{2}$ exponent of superlinear convergence.\\$x_0$ is the starting point of the algorithm.\\\\
+$$f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0 \Rightarrow \exists\:\delta > 0\:|\:x_0 \in [x_* - \delta, x_* + \delta] \Rightarrow \{x_i\} \rightarrow x_*$$ with $p = \frac{1 + \sqrt{5}}{2}$ exponent of superlinear convergence, and $x_0$ the starting point of the algorithm.\\\\
 Four conditions $\Rightarrow$ can fit a cubic polynomial and use its minima. Theoretically pays: quadratic convergence ($p = 2$) and seems to work well in practice.
 \paragraph{Newton's method} More derivatives, so same information with less points. First order model of $f'$ at $x_i$ $$L_i'(x) = L_{x_i}'(x) = f'(x_i) + f''(x_i)(x-x_i)\simeq f'(x)$$ and solve $L'_i(x) = 0 \simeq f'(x) = 0 \Rightarrow x = x_i-\frac{f'(x_i)}{f''(x_i)}$
 \begin{lstlisting}[style=myPython]
@@ -1236,7 +1259,7 @@ With \texttt{df} meaning $f'$ and \texttt{ddf} meaning $f''$.\\
 Alternatively construct a second order model $$Q_i(x) = Q_{x^i}(x) = f(x^i) + f'(x^i)(x - x^i) + f''(x^i)\frac{(x - x^i)^2}{2}$$ and then minimize it.\\\\
 Numerically delicate: what if $f''(x) \simeq 0$? Converges (at all) only if started close enough to $x_*$.\\
 If we get within a short enough distance $\delta$, then it will converges extremely fast with $p = 2$. Mathematically, $f\in C^3, f'(x_*) = 0 \wedge f''(x_*)\neq 0\Rightarrow \exists\:\delta>0\:|\:x_0\in[x_*-\delta, x_*+\delta]\Rightarrow \{x_i\} \rightarrow x_*$ with $p = 2$.
-
+\pagebreak
 \subsection{Global optimization} Unless strong assumptions are made, we can't say much about global optimization.\\
 The obvious one would be unimodal, but not easy to verify/construct. Workable alternative: $f$ convex ($\Rightarrow$ unimodal).
 \paragraph{Convexity} Convex means that $f'$ monotone non decreasing and $f'' \geq 0$. But convexity $\not\Rightarrow C^1$. Some functions are convex and a few operators preserve convexity. Many models are purposely constructed convex $\Rightarrow$  \textbf{Spatial Branch-and-Bound approach}: sift through all $X = [x_-, x_+]$ using clever guide, convex lower approximation \underline{$f$} of nonconvex $f$ on $X$.
