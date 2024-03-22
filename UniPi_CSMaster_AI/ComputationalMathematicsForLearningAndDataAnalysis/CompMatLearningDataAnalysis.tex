@@ -1123,7 +1123,7 @@ The relative gap is useful because $\forall\:\alpha>0$ we have that $$(P)\equiv 
 But in general computing the absolute/relative gap is hard because we don't know $f_*$, which is what we want to estimate. So it's hard to estimate how good a solution is. One could argue that this is the "issue" in optimization: compute an estimate of $f_*$.
 \paragraph{Optimization is really hard} Impossible, even, because \textbf{isolated minima can be anywhere}, and restricting to $x\in X=[x_-, x_+]$ with $-\infty<x_-<x_+<+\infty$ doesn't help: still uncountable many points to try. Also $f$ can have isolated downward spike anywhere. Even on $X = [x_-, x_+]$ \textbf{the spikes can be arbitrarily narrow}.
 \paragraph{Optimization at least possible} We \textbf{can impose $X=[x_-,x_+]$ with $D = x_+-x_-<\infty$}, meaning with a \textbf{fixed finite diameter}. We can also impose that the $f$'s spikes can't be arbitrarily narrow, so $f$ cannot change too fast $\Leftrightarrow$ $f$ Lipschitz continuous (L-c) on $X$: $$\exists\: L > 0\:|\:\forall x,y\in X\:\:\:|f(x) - f(y)| \leq L|x - y|$$
-$f$ L-c $\Rightarrow$ doesn't "jump" and one $\epsilon$-optimum can be found with $O(\frac{LD}{\epsilon})$ evaluations by uniformly sampling $X$ with step $\frac{2\epsilon}{L}$. There's a bad news: no algorithm can work in less that $\Omega(\frac{LD}{\epsilon})$, but it's the worst case of $f$ (constant with one spike).\\
+$f$ L-c $\Rightarrow$ doesn't "jump" and one $\epsilon$-optimum can be found with $O(\frac{L\cdot D}{\epsilon})$ evaluations by uniformly sampling $X$ with step $\frac{2\epsilon}{L}$. There's a bad news: no algorithm can work in less that $\Omega(\frac{L\cdot D}{\epsilon})$, but it's the worst case of $f$ (constant with one spike).\\
 The number of steps is inversely proportional to accuracy: just not doable for small $\epsilon$. Dramatically worse with $X\subset R^n$.\\
 Also generally $L$ is unknown and not easy to estimate, but algorithms actually require/use it.
 \begin{list}{}{}
@@ -1272,9 +1272,14 @@ In the worst case, exponential complexity because you keep dicing and slicing $X
 \section{Unconstrained optimization}
 From now on we'll use $$f:\mathbb{R}^n\rightarrow \mathbb{R}$$ $$f(x_1,x_2,\ldots,x_n) = f(x)$$ $$x = [x_i]_{i=1}^n = [x_1,\ldots,x_n]\in \mathbb{R}^n$$
 Note that $\mathbb{R}^n = \mathbb{R}\times \mathbb{R} \times\ldots\times \mathbb{R}$, which is \textbf{exponentially larger} than $\mathbb{R}$.\\
-$I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal). A lot more space to look at, meaning much more difficult task.\\\\
-We need $f$ to be L-c, and sadly no algorithm can work in less than $\Omega\left(\left(\frac{LD}{\epsilon}\right)^n\right)$.\\\textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O\left(\left(\frac{LD}{\epsilon}\right)^n\right)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
-\subparagraph{Unconstraint global optimization} If $f$ is convex, then global $\Leftrightarrow$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
+$I = [x_-, x_+], X = I\times I \times\ldots\times I$ hypercube (or hyperrectangle if intervals are disequal). A lot more space to look at, meaning much more difficult task.\\
+We need $f$ to be L-c, and sadly no algorithm can work in less than $$\Omega\left(\left(\frac{LD}{\epsilon}\right)^n\right)$$
+Recall that $L$ comes from the L-c property
+$$\exists\:L>0\:|\:\:|f(x)-f(y)\leq L|x-y|$$
+and $D$ comes from the diameter of the interval, e.g. with $X=[x_-,x_+]$ we have
+$$D=x_+-x_- < \infty$$
+\textbf{Curse of dimensionality}: not really doable unless $n = 3, 5, 10$ tops. Can make to $O\left(\left(\frac{LD}{\epsilon}\right)^n\right)$, with multidimensional grid and small enough step (standard approach to hyperparameter optimization). If $f$ analytic, clever B\&B can give global optimum. If $f$ black-box (typically, no derivatives), many heuristics can give good solutions, probably not optimal.
+\paragraph{Unconstraint global optimization} If $f$ is convex, then global $\Leftrightarrow$ local which is much better: most (but not all) convergence results are dimension independent and if there's dependence it is not exponential. Doesn't mean that all local algorithms are fast: speed may be low (badly linear), cost of $f$ or derivatives computation increases with $n$ dimension (for large n even $O(n^2)$ may be too much) and some dependency on $n$ may be hidden in $O(\:)$ constraints. Yet, large scale optimization can be done.
 \paragraph{Notation}\begin{list}{}{}
 	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
 	\item \textbf{Norm} $\|x\| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
@@ -1302,13 +1307,14 @@ $\phi_{x,d}$ can always be pictured, but there are infinitely many of them: whic
 	Tomography $f(x) = \langle b,x\rangle, x = 0, \|d\|=1$: $\phi(\alpha) = \alpha\langle b, d\rangle = \alpha\|b\|\cos(\theta)$\\
 	Plotting this gives a line, increasing because "$b$ same direction as $d$", more collinear $\Rightarrow$ steeper. Collinear means steepest line, less collinear means less steap. 90° angle means a flat line. Decreasing if opposite directions.\\
 	$\min f(x)$ when $\not\exists\:x_*$ if $b \neq 0$ ($\Rightarrow \exists\: d\:|\:\langle b,d\rangle \neq 0$), $\forall\:x$ if $b = 0$
-	\item \textbf{Quadratic} with fixed $Q\in \mathbb{R}^{n\times n}, q\in \mathbb{R}^n$ we have $f(x) = \frac{1}{2}x^TQx + qx$. If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
+	\item \textbf{Quadratic} with fixed $Q\in \mathbb{R}^{n\times n}, q\in \mathbb{R}^n$ we have $$f(x) = \frac{1}{2}x^TQx + qx$$
+	If $q=0$ (no linear term), then \textbf{homogeneous quadratic}.\\
 	Tomography $\phi(\alpha) = f(\alpha d) = \alpha^2(d^TQd)\Rightarrow$ sign and steepness depend on $d^TQd$, so we need to know about signs of $d^TQd$. Steeper when $d$ along one axe, least steep when $d$ along the other axe and intermediate steepness when "in between". Again, steeper along the opposite of one axe and least steep along the opposite of the other axe.\\
 	With $q\neq 0$ but $Q$ nonsingular then $\lambda_i\neq 0\:\:\:\forall\:i$, then $f(x)=\frac{1}{2}(x-x_*)^TQ(x-x_*) [+c]$ for $x_* = -Q^{-1}q$ and $x_* \neq 0$ center of the level sets (which shapes are determined by the eigenvalues).\\
 	$y = x - x_*, f_*(y) = y^TQy [+c]$
 \end{list}
 \paragraph{Directional/partial derivatives} The directional derivative of $f:\mathbb{R}^n\rightarrow \mathbb{R}$ at $x\in \mathbb{R}^n$ along the direction $d\in \mathbb{R}^n$ is $$\frac{\partial f}{\partial d}(x) = \lim_{t\to 0}\frac{f(x+td) - f(x)}{t} = \phi_{x,d}'(0)$$
-How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial d}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in \mathbb{R}^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
+How can $\phi_{x,d}'(0)$, the derivative of the $(x,d)$-tomography (in 0), be computed? A special case is $\frac{\partial f}{\partial x_i}(x)$, partial derivative of $f$ with respect to $x_i$ at $x\in \mathbb{R}^n$, easy to compute by just treating $x_j$ for $j\neq i$ as constants.\\
 The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f(x) = \left[\begin{array}{c}
 \frac{\partial f}{\partial x_1}(x)\\
 \vdots\\
@@ -1316,14 +1322,14 @@ The \textbf{gradient} is the column vector of all partial derivatives $$\nabla f
 \end{array}\right]$$
 $$f(x) = \langle b,x\rangle \Rightarrow\nabla f(x) = b$$
 $$f(x) = \frac{1}{2}x^TQx + qx \Rightarrow\nabla f(x) = Qx + q$$
-$f$ differentiable at $x$ if $\exists$ linear function $\psi(h) =\langle b,h\rangle + f(x)$ such that $$\lim_{\|h\|\to 0}\frac{|f(x+h) - \psi(h)}{\|h\|} = 0$$ $$\Rightarrow \psi(0) = f(x) \Rightarrow c = f(x)$$
+$f$ differentiable at $x$ if $\exists$ linear function $\psi(h) =\langle b,h\rangle + f(x)$ such that $$\lim_{\|h\|\to 0}\frac{|f(x+h) - \psi(h)|}{\|h\|} = 0$$ $$\Rightarrow \psi(0) = f(x) \Rightarrow c = f(x)$$
 $\psi$ is equivalent to the first order model of $f$ at $x$, the error of this equivalence vanishes faster than linearity. So $f$ differentiable at $x\Rightarrow b = \nabla f(x)$ and\begin{list}{}{}
 	\item $\Rightarrow \frac{\partial f}{\partial x_i}(x)$ exists for every $i$ (but $\Leftrightarrow$ not true)
 	\item $\Rightarrow$ first order model of $f$ at $x$ is $L_x(y) = \nabla f(x)(y-x)$
 \end{list}
 $f$ differentiable $\Rightarrow$ all relevant objects in $\mathbb{R}^{n+1}$ and $\mathbb{R}^n$ are smooth. If $f$ is non differentiable $\Rightarrow$ kinks appear and things break,
 \paragraph{Jacobian} Given a vector-valued function $f:\mathbb{R}^n\rightarrow \mathbb{R}^m$, $f(x) = [f_1(x), f_2(x),\ldots,f_m(x)]$, the partial derivatives are the same with extra index $$\frac{\partial f_j}{\partial x_i}(x) = \lim_{t\rightarrow 0}\frac{f_j(x_1,\ldots,x_{i-1},x_i+t,x_{i+1},\ldots,x_n) - f_j(x)}{t}$$
-The \textbf{Jacobian} is the matrix of all $mn$ partial derivatives
+The \textbf{Jacobian} is the matrix of all $n\cdot m$ partial derivatives
 $$Jf(X) = \left[ \begin{array}{c c c}
 \frac{\partial f_1}{\partial x_1}(x) & \ldots & \frac{\partial f_1}{\partial x_n}(x)\\
 \vdots&\ddots&\vdots\\
@@ -1331,7 +1337,7 @@ $$Jf(X) = \left[ \begin{array}{c c c}
 \end{array}\right] = \left[\begin{array}{c}
 \nabla f_1(x)^T\\\vdots\\\nabla f_m(x)^T
 \end{array}\right]$$
-A $m\times n$ matrix with gradients as rows.
+A $n\times m$ matrix with gradients as rows.
 \paragraph{Hessian} The $\frac{\partial f}{\partial x_i}:\mathbb{R}^n\rightarrow \mathbb{R}$ have partial derivatives themselves. \textbf{Second order partial derivative}, just do it twice $$\frac{\partial^2 f}{\partial x_i \partial x_j}$$ $$\frac{\partial^2 f}{\partial x_i \partial x_i}=\frac{\partial^2 f}{\partial x_i^2}$$
 So $\nabla f(x) : \mathbb{R}^n \rightarrow \mathbb{R}^n$ have a Jacobian and it's called \textbf{Hessian} of $f$ at $x$
 $$\nabla^2 f(x) = J\nabla f(x) = \left[ \begin{array}{c c c c}
