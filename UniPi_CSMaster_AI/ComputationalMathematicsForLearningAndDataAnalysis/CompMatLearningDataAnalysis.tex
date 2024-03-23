@@ -1371,7 +1371,8 @@ $f\in C^1$ convex $\Leftrightarrow\nabla f$ monotone $\Leftrightarrow L_x(y) = f
 \end{list}
 %end 2-uncostrained optimality.pdf
 \subsection{Gradient Methods}
-\paragraph{Multivariate optimization algorithms} These are iterative procedures: start from an initial guess $x_0$ and compute some process $x_i \longrightarrow x_{i+1}$ to get a \textbf{sequence} $\{x_i\}$ that \textbf{\textit{should} go towards an optimal solution}. $\{x_i\}\rightarrow x_*$ is one option, the best one, but not the only possibility.\\
+\paragraph{Multivariate optimization algorithms} These are \textbf{iterative} procedures: start from an initial guess $x_0$ and compute some process $x_i \longrightarrow x_{i+1}$ to get a \textbf{sequence} $\{x_i\}$ that \textbf{\textit{should} go towards an optimal solution}.\\
+$\{x_i\}\rightarrow x_*$ is one option, the best one, but not the only possibility.\\
 At least $\{f_i = f(x_i)\} \rightarrow f_*$: \textbf{minimizing sequence}, and clearly $\{x_i\}\rightarrow x_* \Rightarrow \{f_i\}$ minimizing sequence, but $\not\Leftarrow$\\
 Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 \begin{list}{}{}
@@ -1379,6 +1380,12 @@ Two general forms of the process $x_{i+1} = x_i + \alpha_id_i$:
 	\item \textbf{Trust region}: first choose $\alpha_i\in \mathbb{R}$ (\textbf{trust radius}), then $d_i\in \mathbb{R}^n$
 \end{list}
 The crucial concept is that the \textbf{model} $f_i \simeq f$ is used to construct $x_{i+1}$ from $x_i$
+\paragraph{Compactness}
+With $\{n^i\}\subset\{1,2,3,\ldots\}$ we have the \textbf{subsequence} $\{x^{n^i}\}\subseteq\{x^i\}$\\
+$x$ is an \textbf{accumulation point} of $\{x^i\}$ if $\exists\:\{x^{n^i}\}\rightarrow x$\\
+$X\subseteq\mathbb{R}^n$ is \textbf{closed} if $\forall\:\{x^i\}\subset X$ we have $\{x^i\}\rightarrow x\Rightarrow x\in X$\\
+$X\subseteq\mathbb{R}^n$ is \textbf{bounded} if $\exists\:r>0\:|\:X\subseteq B(0,r)$\\
+If $X\subseteq\mathbb{R}^n$ is closed and bounded, then it's \textbf{compact} (\textbf{Bolzano-Weierstrass Theorem}), which means $\{x^i\}\subset X\Rightarrow\exists$ accumulation point of $\{x^i\}$.
 \paragraph{First order model $\Leftrightarrow$ gradient method} The first order model is the simplest model $$L_i(x) = L_{x_i}(x) = f(x_i) + \nabla f(x_i)(x-x_i)$$ Idea: $x_{i+1} \in \arg\min\{L_i(x)\:|\:x\in \mathbb{R}^n\} = \emptyset$, $L_i$ unbounded below on $\mathbb{R}^n$\\
 It shouldn't move too far from $x_i$, $L_i$ is only "good" as $\alpha_i\rightarrow 0 \Rightarrow d_i = \arg\min\left\{\lim_{t\to 0} \frac{f(x+td)}{t}\right\} = -\nabla f(x_i) =$ steepest descent direction.\\
 $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(x_i + \alpha d_i)$ likely $> 0$ when $\alpha$ grows $\Rightarrow f$ grows instead of decreasing $\Rightarrow$ very long steps are bad unless $f_* = -\infty$. Very short steps are bad too: $f$ decreases, but very slowly.
@@ -1391,7 +1398,6 @@ $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(
 \end{list}
 Of course, something in the middle is better. $\phi'_i$ low-degree polynomial
 $$\phi_i(\alpha) = f(x_i+\alpha d_i) = \phi_{x_i,d_i}(\alpha)$$
-So that $\phi'_i$ is a low-degree polynomial
 \paragraph{Gradient for quadratic functions} $f(x) = \frac{1}{2}x^TQx + qx$ with $Q\succeq 0$ otherwise $f$ is unbounded below. $x_*$ solves $Qx = -q$ if it exists, which is linear algebra but the linear system requires at most $O(n^3)$ while computing $d_i = -\nabla f(x_i) = -Qx_i - q$ is $O(n^2)$\\
 Line search is easy, $O(n^2)$ with $\alpha_i = \frac{\|d_i\|^2}{d_i^TQd_i}$
 \begin{lstlisting}[style=myPython]
@@ -1424,8 +1430,8 @@ procedure x = SDQ(f, x, eps):
 \end{lstlisting}
 \texttt{stepsize} is the crucial part: FS or (inexact) LS. Need to avoid two opposite problems:
 \begin{list}{}{}
-	\item Scylla: $\alpha_i$ not too large to avoid $f(x_{i+1}) > f(x_i)$
-	\item Charybdis: $\alpha_i$ not too small to avoid stalling
+	\item \textbf{Scylla}: $\alpha_i$ not too large to avoid $f(x_{i+1}) > f(x_i)$
+	\item \textbf{Charybdis}: $\alpha_i$ not too small to avoid stalling
 \end{list}
 With $\frac{\partial f}{\partial d_i}(x_i)<0$ hence $\alpha_i\rightarrow 0$ we avoid Scylla but may hit Charybdis.\\
 \texttt{stepsize(f, x, d)} $= LS(\phi_{x,d}, [0,\infty], \epsilon')$ is attractive but $\epsilon' = 0$ in general is not possible: how to choose it? Depends on the stopping criterion in $LS()$, let's assume $|\phi_{x,d}(\alpha)| \leq \epsilon'$. A fundamental property is $$\phi'_i(\alpha) = \frac{\partial f}{\partial d_i}(x_i + \alpha d_i) = \langle\nabla f(x_i+\alpha d_i), d_i\rangle$$
@@ -1454,7 +1460,7 @@ $f$ convex means that $\forall\:x,y\in \mathbb{R}^n$ we have $$\alpha f(x) + (1-
 \textbf{Strictly} convex means $$\alpha f(x) + (1-\alpha)f(y)\underset{\uparrow}{>} f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\underset{\uparrow}{>} f(x) + \langle \nabla f(x), y-x\rangle$$
 $$\Leftrightarrow\nabla^2f(x)\succeq 0$$
 Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n\|x\|_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\Leftrightarrow \lambda_n$-convex.\\
-$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $f(x)-\frac{\tau}{2}\|x\|_2^2$ is convex $\Leftrightarrow$ $$\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
+$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $$f(x)\geq f(x^i)+\nabla f(x^i)(x-x^i)+\frac{\tau\|x-x^i\|^2}{2}\Leftrightarrow$$ $$\Leftrightarrow\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
 $f \in C^2,$ $L$-smooth and $\tau$-convex $\Leftrightarrow \tau I \preceq \nabla^2 f\preceq LI \Leftrightarrow \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
 \paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{\|\nabla f(x_i)\|^2}{2\tau} \Rightarrow \|\nabla f(x_i)\|^2\geq 2\tau(f(x_i)-f(x_*))$$
 "If $a_i = f(x_i) - f_*$ is large then the gradient must also be large."\\
@@ -1463,25 +1469,16 @@ A small difference in $f$ makes a big difference in convergence $\Rightarrow$ pr
 \subsubsection{Inexact Line Search}
 \paragraph{Armijo} If FS works, then any rough LS also should work provided that $f_i$ decreases enough.\\
 The \textbf{Armijo condition} is $0 < m_1 < 1$
-\begin{list}{}{}
-	\item[$(A)$] $\phi(\alpha)\leq \phi(0)+m_1\alpha\phi'(0)$
-\end{list}
+$$(A)\:\:\:\:\:\phi(\alpha)\leq \phi(0)+m_1\alpha\phi'(0)$$
 $\alpha \rightarrow 0$ satisfies $(A)$. But if we avoid Charybdis then we "converge".\\
 $\alpha_i\geq \tilde{\alpha} > 0$ and $(A)$ holds $\forall\:i\Rightarrow$ either $\{f_i\}\rightarrow -\infty$ or $\{\|\nabla f(x_i)\|\}\rightarrow 0$\\
-All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = \|\nabla f(x_i)\|^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\tilde{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\tilde{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \tilde{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a Charybdis avoiding condition to $(A)$
+All accumulation points (if any) of $\{x_i\}$ are stationary. The proof: assume $-\phi_i'(0) = \|\nabla f(x_i)\|^2\geq \epsilon > 0$ and $(A)$ hold $\forall\:i\Rightarrow$ $$f_{i+1} \leq f_i + m_1\alpha_i\phi_i'(0)\leq f_i - m_1\tilde{\alpha}\epsilon \Rightarrow f_i \leq f_0 - m_1\tilde{\alpha}\epsilon \Rightarrow \{f_i\}\rightarrow -\infty$$ Don't even need $\alpha_i\geq \tilde{\alpha} > 0$, just $\sum_{i=1}^\infty \alpha_i = \infty$ (meaning $\alpha_i\rightarrow 0$ "slow enough"), but how do we ensure that $\alpha_i$ does not get too small? We need to add a "Charybdis-avoiding condition" to $(A)$
 \paragraph{Wolfe} \textbf{Goldstein condition} $m_1 < m_2 < 1$
-\begin{list}{}{}
-	\item[$(G)$] $\phi(\alpha)\geq \phi(0) + m_2\alpha\phi'(0)$
-\end{list}
-Issue: $(A)\cap (G)$ can exclude all local minima
-\textbf{Wolfe condition} $m_1 < m_3 < 1$
-\begin{list}{}{}
-	\item[$(W)$] $\phi'(\alpha)\geq m_3\phi'(0)$
-\end{list}
+	$$(G)\:\:\:\:\:\phi(\alpha)\geq \phi(0) + m_2\alpha\phi'(0)$$
+Issue: $(A)\cap (G)$ can exclude all local minima. \textbf{Wolfe condition} $m_1 < m_3 < 1$
+	$$(W)\:\:\:\:\:\phi'(\alpha)\geq m_3\phi'(0)$$
 The derivative has to be a bit closer to $0$, but can be $>>0$: there's a strong Wolfe, too
-\begin{list}{}{}
-	\item[$(W')$] $|\phi'(\alpha)|\leq m_3|\phi'(0)| = -m_3\phi'(0) [\Rightarrow (W)]$
-\end{list}
+	$$(W')\:\:\:\:\:|\phi'(\alpha)|\leq m_3|\phi'(0)| = -m_3\phi'(0)\:\:\:\Rightarrow (W)$$
 We have that $(A)\cap (W)$ captures all local minima (and maxima), usually $m_1$ close to $1$, and $(A)\cap(W')$ ensures $\phi'(\alpha) \cancel{>>}0$\\
 Such points always exists.
 \paragraph{Armijo-Wolfe in practice} $m_1$ small enough so that local minima are not cut: just go for the local minima and stop whenever $(A)\cap (W)$ or $(W')$ holds. Hard to say when $m_1$ is small enough, usually $m_1 = 0.0001$ is enough. Specialized LS can be constructed for the odd case it's not, with some more logic for the nasty cases.\\
