@@ -1512,12 +1512,11 @@ The crucial convergence arguments are:
 So that there's a significant decrease at each step unless $\|\nabla f(x_i)\|\rightarrow 0$.\\
 There are \textbf{many other directions} that ensure the first argument. The \textbf{twisted gradient algorithm}: $d_i = -\nabla f(x_i)$ rotated by 45 degrees $\Leftrightarrow \phi_i'(0) = -\|\nabla f(x_i)\|^2\cos(\frac{\pi}{4}) < 0 \Rightarrow$ convergence proofs carry over.\\
 In $\mathbb{R}^n$ there are many other such vectors and many other feasible angles: basically, $\theta$ not too close to $\frac{\pi}{2}$ so that $\cos(\theta)$ is not too small.
-\subparagraph{Convergence of general descent methods} \textbf{Descent direction} is $$\frac{\partial f(x_i)}{\partial d_i} < 0 \Leftrightarrow \langle d_i,\nabla f(x_i)\rangle < 0 \Leftrightarrow \cos(\theta_i) > 0$$ Meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.\\
-\textbf{Zoutendijk's Theorem}: $f\in C^1 L$-smooth, $f_*>-\infty$ $$(A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$$
+\paragraph{Convergence of general descent methods} \textbf{Descent direction} is $$\frac{\partial f(x_i)}{\partial d_i} < 0 \equiv \langle d_i,\nabla f(x_i)\rangle < 0 \equiv \cos(\theta_i) > 0$$ Meaning that $d_i$ points roughly in the same direction as $-\nabla f(x_i)$. There's a whole half space of descent directions, a lot of flexibility.
+\subparagraph{Zoutendijk's Theorem}  $$f\in C^1 L\text{-smooth}\land f_*>-\infty\land (A)\cap(W)\Rightarrow\sum_{i=1}^\infty\cos^2(\theta_i)\|\nabla f(x_i)\|^2<\infty$$
 A consequence is that $\sum_{i=1}^\infty\cos^2(\theta_i) = \infty \Rightarrow \{\|\nabla f(x_i)\|\}\rightarrow 0 \Leftrightarrow d_i$ doesn't get perpendicular to $\nabla f(x_i)$ "too fast" $\Rightarrow$ convergence.\\
-Very many $d_i$, but which is better than $-\nabla f$? Need to look farther than the first order model.
-\paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)$\\$\Rightarrow$ \textbf{Newton's direction} $d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$ (just $\mathbb{R}^n$ version). No problem with the step, we use $\alpha_i = 1$.\\
-The \textbf{Newton's Method} is $x_{i+1} = x_i + d_i$ (step of $\alpha_i = 1$ along $d_i$)\\
+Very many $d_i$, but which is better than $-\nabla f$? Need to look further than the first order model.
+\paragraph{Newton's Method} For a faster convergence we want a better direction, so a better model. The next better model to the linear (gradient) is the quadratic. $\nabla^2 f(x_i)\succ 0 \Rightarrow \exists$ minimum of second order model $Q_{x_i}(y)$\\$\Rightarrow$ \textbf{Newton's direction} $$d_i = -[\nabla^2 f(x_i)]^{-1}\nabla f(x_i)$$ No problem with the step, we use $\alpha_i = 1$. The \textbf{Newton's Method} is $$x_{i+1} = x_i + d_i$$ meaning a step of $\alpha_i = 1$ along $d_i$\\
 It's not globally convergent, needs to be globalised. Easy as $\nabla^2 f(x_i) \succ 0 \Rightarrow [\nabla^2 f(x_i)]^{-1} \succ 0 \Rightarrow d_i$ is of descent.
 $$\langle \nabla f(x_i), d_i\rangle = -\nabla f(x_i)^T[\nabla^2f(x_i)]^{-1}\nabla f(x_i) < 0$$
 but it's not enough, we need it "negative enough".
@@ -1563,17 +1562,15 @@ Having computed $x_{i+1}$ and $\nabla f(x_{i+1})$, new model
 $$m_{i+1}(x) = \nabla f(x_{i+1})(x-x_{i+1})+\frac{1}{2}(x-x_{i+1})^TH_{i+1}(x-x_{i+1})$$\\
 We would like $H_{i+1}$ to have the following properties:
 \begin{list}{}{}
-	\item $H_{i+1}\succ 0$ (new model is strongly convex)
-	\item $\nabla m_{i+1}(x_i) = \nabla f(x_i)$ (new model agrees with old information)\\
+	\item \textbf{New model is strongly convex} $H_{i+1}\succ 0$
+	\item \textbf{New model agrees with old information} $\nabla m_{i+1}(x_i) = \nabla f(x_i)$\\
 	Secant equation $H_{i+1}(x_{i+1}-x_i)=\nabla f(x_{i+1})-\nabla f(x_i)$
-	\item $\|H_{i+1} - H_i\|$ "small" (new model is not too different)
+	\item \textbf{New model is not too different} $\|H_{i+1} - H_i\|$ "small"
 \end{list}
 Depending on the choices at iteration $i$, it may not be possible to achieve both the first and second properties.\\
 \textbf{Notation} $s_i = x_{i+1}- x_i = \alpha_id_i$, $y_i = \nabla f(x_{i+1}) -\nabla f(x_i)$\\
 Secant equation 
-\begin{list}{}{}
-	\item[$(S)$] $H_{i+1}s_i = y_i$
-\end{list}
+$$(S)\:\:\:\:\:H_{i+1}s_i = y_i$$
 $(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$, the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
 So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
 Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$.
@@ -1582,22 +1579,17 @@ $$\Rightarrow \langle\nabla f(x_{i+1})-\nabla f(x_i),d_i\rangle\geq (m_3-1)\phi'
 Assuming an AWLS, $(C)$ can always be satisfied.
 \paragraph{DFP} With the three properties we have $$H_{i+1} = \arg\min\{\|H-H_i\|\:|\:(S), H\succeq 0\}$$
 Needs appropriate $\|\:\:\|$: \textbf{Davidon-Fletcher-Powell formula}
-\begin{list}{}{}
-	\item[$(DFP)$] $H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$
-\end{list}
+	$$(DFP)\:\:\:\:\:H_{i+1} = (I - \rho_iy_is_i^T)H_i(I-\rho_is_iy_i^T)+\rho_iy_iy_i^T$$
 So $H_{i+1}$ is a rank-two correction of $H_i$, $O(n^2)$ to produce $H_{i+1}$ from $H_i$\\
 Actually need $B_{i+1} = H_{i+1}^{-1}$: \textbf{Sherman-Morrison-Woodbury formula}
-\begin{list}{}{}
-	\item[$(SMW)$] $[A+ab^T]^{-1} = \frac{\displaystyle A^{-1} - A^{-1}ab^TA^{-1}}{\displaystyle 1-b^TA^{-1}a}$
-	\item[$\Rightarrow (DFP)^{-1}$] $B_{i+1} = \frac{\displaystyle B_i + \rho_is_is_i^T - B_iy_iy_i^TB_i}{\displaystyle y_i^TB_iy_i}$
-\end{list}
+$$(SMW)\:\:\:\:\:[A+ab^T]^{-1} = \frac{\displaystyle A^{-1} - A^{-1}ab^TA^{-1}}{\displaystyle 1-b^TA^{-1}a}$$
+$$\Rightarrow (DFP)^{-1}\:\:\:\:\:B_{i+1} = \frac{\displaystyle B_i + \rho_is_is_i^T - B_iy_iy_i^TB_i}{\displaystyle y_i^TB_iy_i}$$
 $O(n^2)$ per iteration, just matrix-vector products and no inverses.\\
 This is kind of a learning of $\nabla^2 f$ out of samples of $\nabla f$. Efficient but can do better.
 \paragraph{BFGS} $(S)$ for $B_{i+1}$ is symmetric, just $B \leftrightarrow H$ and $s \leftrightarrow y$: $s_i = B_{i+1}y_i \Rightarrow B_{i+1} = \arg\min\{\|B-B_i\|\:|\:(S),B\succeq 0\}$\\
-\textbf{Broyden-Felcther-Goldfarb-Shanno formulae} still $O(n^2)$\begin{list}{}{}
-	\item[$(BFGS)$] $H_{i+1} = \frac{\displaystyle H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{\displaystyle s_i^TH_is_i}$
-	\item[$(BFGS)$] $B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T=$\\$= B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$
-\end{list}
+\textbf{Broyden-Fletcher-Goldfarb-Shanno formulae} still $O(n^2)$
+	$$(BFGS)\:\:\:\:\:H_{i+1} = \frac{\displaystyle H_i + \rho_iy_iy_i^T - H_is_is_i^TH_i}{\displaystyle s_i^TH_is_i}$$
+	$$(BFGS)\:\:\:\:\:B_{i+1} = (I-\rho_is_iy_i^T)B_i(I-\rho_iy_is_i^T)+\rho_is_is_i^T=$$ $$= B_i+\rho_i((1+\rho_iy_i^TB_iy_i)s_is_i^T - (B_iy_is_i^T+s_iy_i^TB_i))$$
 \paragraph{Conjugate gradient method for quadratic functions} Gradient method + exact LS $\Rightarrow \langle \nabla f(x_{i+1}, d_i\rangle = 0$ resulting in $d_{i+1} \perp d_i$. Property is lost at $i+2$: $x_{i+2}$ is not the minimum over all the small subspace of $d_i$, it zig-zags.\\
 Would be nice if $x_{i+1}$ minimum on the subspace of $\{d_1,\ldots,d_i\}$, getting larger with every iteration.\\
 Possible with quadratic $f\Leftrightarrow$ linear systems, with two conditions:
@@ -1607,9 +1599,7 @@ Possible with quadratic $f\Leftrightarrow$ linear systems, with two conditions:
 \end{list}
 Can't use $d_i = -\nabla f(x_i)$, have to deflect $-\nabla f(x_i)$ using $d_{i-1}$: $d_0 = 0$ and $d_i = -\nabla f(x_i) + \beta_id_{i-1}$\\
 The crucial, but only, decision is $\beta_i$: \textbf{Fletcher-Reeves} (closed) \textbf{formula}
-\begin{list}{}{}
-	\item $\beta_i = \frac{\displaystyle \nabla f(x_i)^T Qd_{i-1}}{\displaystyle d_{i-1}^TQd_{i-1}} = \frac{\displaystyle \|\nabla f(x_i)\|^2}{\displaystyle \|\nabla f(x_{i-1})\|^2}$
-\end{list}
+$$\beta_i = \frac{\nabla f(x_i)^T Qd_{i-1}}{d_{i-1}^TQd_{i-1}} = \frac{\|\nabla f(x_i)\|^2}{\|\nabla f(x_{i-1})\|^2}$$
 $f$ quadratic + exact LS $\Rightarrow$ quadratic conjugate gradient (CG): $\nabla f(x) = 0 \Leftrightarrow Qx = -q$ in at most $n$ iterations. If properly preconditioned $<< n$ iterations.\\
 Also many $\beta$ formulae, all equivalent for quadratic $f$ but not so here.\\
 LS only exact with quadratic $f$, otherwise AWLS.
@@ -1627,6 +1617,7 @@ $$\|x_{i+1} - x_*\|\leq\left[\frac{\sqrt{L} - \sqrt{\tau}}{\sqrt{L} + \sqrt{t}}\
 Gridsearch required to find $\alpha_i$ and $\beta_i$ in practice. For non-convex $f$, converges if $\beta\in[0,1), \alpha\in(0,2\frac{1-\beta}{L})$
 \subparagraph{Accelerated Gradient} Similar to Heavy Ball, with $\nabla f$ computed after momentum but before descent: not at all a gradient-like method, almost entirely different.\\
 It's \textbf{optimal} $O(\frac{LD^2}{\sqrt{\epsilon}}$ for $L$-smooth not $\tau$-convex.
+%end 4-unconstrained optimization II.pdf
 \subsection{Less-Than-Gradient Methods}
 \paragraph{Stochastic Gradient} The motivation comes from the incremental aka stochastic gradient in ML.\\
 We have $I=\{1,\ldots,m\}$ indexes, $X=\{X_i\in \mathbb{R}^h\}_{i\in I}$ inputs and $y=\{y_i\in \mathbb{R}^k\}_{i\in I}$ outputs and a arbitrarily complex predictor $\pi(x;w):\mathbb{R}^h\rightarrow \mathbb{R}^k$ parametric on $w\in \mathbb{R}^n$ with $l:\mathbb{R}^k\times \mathbb{R}^k \rightarrow \mathbb{R}$ \textbf{loss function} (could be $l_i$), fitting $$\min\left\{f(w) = \sum_{i\in I}\left(f_i(w) = l(y_i, \pi(X_i;w)) \right)\:|\:w\in \mathbb{R}^n\right\}$$
