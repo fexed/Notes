@@ -1734,9 +1734,8 @@ So the practical convergence is often horrible, can be $O\left( \left(\frac{1}{\
 It's unavoidable: linear functions have no curvature, and we need many linear functions to make a quadratic one. Pruning $\mathscr{B}$ is possible but not easy, and no a priori bound on $\# \mathscr{B}$.
 \subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_\mathscr{B}$ is a good model of $f$).\\
 Stabilized master problem $$\min\left\{f_\mathscr{B}(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\right\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
-%TODO from here
 \section{Constrained Optimality and Duality}
-\paragraph{Constrained Optimization} Back to the full $$(P)\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset R^n$\begin{list}{}{}
+\paragraph{Constrained Optimization} Back to the full $$(P)\:\:\:\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset R^n$\begin{list}{}{}
 	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
 	\item $x\in X$ feasible solution, $x\not\in X$ unfeasible solution
 	\item $x_*\in X\:|\:f(x_*)\leq f(x)\:\:\forall\:x\in X$ optimal solution $\Leftrightarrow$ global optimum
@@ -1745,7 +1744,7 @@ Constraints can be hidden in the objective $\chi_X : \mathbb{R}^n\rightarrow \ov
 0&\text{if }x\in X\\
 \infty&\text{if }x\not\in X
 \end{array}\right.$$ Convex if $X$ is, but extended-valued.
-$$(P)\Leftrightarrow \min\{f_X(x)=f(x)+\chi_X(x)\}\:\:\text{(essential objective)}$$ But very bad idea, $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
+$$(P)\Leftrightarrow \min\{f_X(x)=f(x)+\chi_X(x)\}$$ Which is essential the objective, a very bad idea: $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
 $$(P)\Leftrightarrow\min\{v\:|\:v\geq f(x), x\in X\}$$
 \paragraph{(Local) minima vs. optima} Note that $X=\emptyset\Rightarrow v(P) = +\infty$, so solving $(P)$ includes constructively proving $X=\emptyset$. Almost never happens in ML, so we will forget about this but the issue exists. The model is our choice, we choose it simple/nice/nonempty if we can.\\
 Global optimum obviously hard, hence $x_*$ local optimum solves $$\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$$ for some $\epsilon>0$.\\
@@ -1803,7 +1802,7 @@ with $I$ set of inequality constraints and $J$ set of equality constraints. Ofte
 	\item $H(x) = [h_j(x)]_{j\in J} : R^n\rightarrow R^{|J|}$
 	\item $X=\{x\in \mathbb{R}^n\:|\:G(x)\leq 0, H(x) = 0\}$
 \end{list}
-\textbf{There are many different ways to express the same $X$}. Often, choosing the right formulation is crucial for being able to solve a problem. We will not see this, but a few trivial observation are useful:
+There are \textbf{many different ways to express the same $X$}, a concept called \textbf{reformulation}. Often, choosing the right formulation is crucial for being able to solve a problem. We will not see this, but a few trivial observation are useful:
 \begin{list}{}{}
 	\item Could always assume $|J|=0$, no equality constraints: $h_j(x) = 0\Leftrightarrow h_j(x)\leq 0, -h_j(x)\leq 0$\\
 	One equality constraints $\Leftrightarrow$ two "opposite" inequality constraints
@@ -1819,14 +1818,25 @@ Sublevel sets of convex functions are convex $\Rightarrow g_i(x)\leq 0$ with $g_
 	\item $g_i(x) = 0$ convex only if $g_i(x)\leq 0$ convex and $g_i(x) \geq 0$ convex, so $g_i$ is both convex and concave, meaning $g_i$ is linear
 \end{list}
 So, \textbf{to have a convex $X$ all equality constraints must be linear}.
-\paragraph{Linear Equality Constraints} $(P)\:\:\min\{f(x)\:|\:Ax=b\}$\\
-$x\in X \Leftrightarrow x\in \partial X$ plus "$\partial X$ looks the same everywhere".\\
-$S(f,\cdot)$ and $X=\{x\in \mathbb{R}^n\:|\:Ax=b\}$: optimum touches the inner level set.\\
-$F_X(x) = \{d\in \mathbb{R}^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$\\
-(TCC) $\Leftrightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$\\
-$d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\Leftrightarrow\nabla f(x)\in $ range$(A)\Leftrightarrow\exists\:\mu\in \mathbb{R}^m\:|\:\nabla f(x) = \mu A$\\
-Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in \mathbb{R}^m\:|\:\mu A = \nabla f(x)$\\
-$f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
+\paragraph{Linear Equality Constraints} $$(P)\:\:\:\:\:\min\{f(x)\:|\:Ax=b\}$$
+With $g_i(x) = \langle A_i, x\rangle$ linear (affine), $\nabla g_i(x) = A_i \perp S(g_i,\:)$
+\begin{list}{}{}
+	\item \textbf{Half space} $\langle A_i, x\rangle + b_i\leq 0$\\
+	It's full dimensional, thus it has an "interior".
+	\item \textbf{Hyperplane} $\langle A_i, x\rangle + b_i\equiv 0$, which is the same as $\langle A_i, x\rangle + b_i\leq 0\land \langle -A_i, x\rangle + b_i\leq 0$\\
+	It's not full dimensional, due to having $n-1$ dimensions, thus it has no interior.
+\end{list}
+$k$ constraints form a subspace, a polyhedral cone in the case of inequality constraints, unless they are linearly dependant or with same solutions.\\
+In a simple case, $(P)$ defined by $\min\{f(x)\:|\:Ax=b\}$
+\begin{list}{}{}
+	\item $x\in X \Leftrightarrow x\in \partial X$ plus "$\partial X$ looks the same everywhere".
+	\item $S(f,\cdot)$ and $X=\{x\in \mathbb{R}^n\:|\:Ax=b\}$: optimum touches the inner level set.
+	\item $F_X(x) = \{d\in \mathbb{R}^n\:|\:Ad=0\}\:\:\forall\:x$: for any $y\in X$ necessarily $y-x = d\perp A$
+	\item (TCC) $\Leftrightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in F$ as $d\in F\Rightarrow -d\in F$
+	\item $d\perp A$ and $\nabla f(x)\perp d$ means $\nabla f(x)$ parallel to $A\Leftrightarrow\nabla f(x)\in $ range$(A)\Leftrightarrow\exists\:\mu\in \mathbb{R}^m\:|\:\nabla f(x) = \mu A$
+	\item Poorman's KKT conditions: $Ax = b \wedge \exists\:\mu\in \mathbb{R}^m\:|\:\mu A = \nabla f(x)$
+	\item $f$ convex $\Rightarrow$ (P-KKT) sufficient for global optimality.
+\end{list}
 \paragraph{Nonlinear Inequalities} $T_X(x) = T_{X\cap B(x,\epsilon)}(x)$: only what happens as $x_i\rightarrow x$ matters $\Rightarrow$ if $x\not\in \partial S(g_i,0)$ then constraint $g_i(\cdot)\leq 0$ has no impact on $T_X(x)$\\
 $x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
 Active constraints at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
@@ -1858,8 +1868,6 @@ For $(P)$ convex, (KKT) $\Rightarrow x$ global optimum: (KKT) $\Rightarrow \lang
 If $(P)$ is not convex then (KKT) is not sufficient, need to use second order but clearly not just "$\nabla^2 f(x_*)\succeq 0$". Fundamental concept: \textbf{Lagrangian function} $$L(x;\lambda, \mu)=f(x) + \sum_{i\in I} \lambda_ig_i(x) + \sum_{j\in J}\mu_jh_j(x)$$ with $x$ variables and $\lambda,\mu$ parameters. Fundamental observation $(x,\lambda,\mu)$ satisfies (KKT-G) $\Leftrightarrow \nabla L(x;\lambda,\mu) = 0$ (gradient on $x$ alone) $\Rightarrow x$ stationary point of $L(\cdot;\lambda,\mu)$. When a stationary point is also a minimum?
 \paragraph{Lagrangian Relaxation} Lagrangian function is objective and constraints together. (KKT-G) $\Leftrightarrow x$ stationary point of $L()$ for the right $\lambda\geq 0$ and $\mu$. Assume we know them, can we find $x$?\\
 Natural idea: solve the Lagrangian relaxation $$(R_{\lambda,\mu})\:\:\psi(\lambda,\mu) = \min_x\{L(x;\lambda, \mu)\:|\:x\in \mathbb{R}^n\}$$
-\pagebreak
-
 The relaxation is another optimization problem carefully constructed in order to provide a lower bound on $v(P)$ for $(P)\:\:\min\{f(x)\:|\:x\in X\}$\\
 $(\underline{P})\:\:\min\{\underline{f}(x)\:|\:x\in \underline{X}\}$ relaxation of $(P) \Rightarrow v(\underline{P})\leq v(P)$ if $\underline{X}\supseteq X$ and $\underline{f}(x)\leq f(x)\:\:\forall\:x\in X$\\
 $(R_{\lambda,\mu})$ is a relaxation of $(P)\:\:\forall\:\lambda\geq 0$ and $\mu\Rightarrow$ weak duality $\forall\:\:x\in X$, $\psi(\lambda,\mu)\leq v(P)\leq f(x)$\\
