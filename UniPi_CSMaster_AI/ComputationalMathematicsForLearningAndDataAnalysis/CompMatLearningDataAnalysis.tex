@@ -310,7 +310,7 @@ Given
 	\item target vector $b\in \mathbb{R}^m$
 \end{list}
 find $$x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$$
-In general $$\min_{x\in \mathbb{R}^m} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^m} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
+In general $$\min_{x\in \mathbb{R}^n} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^n} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
 Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
 1\\2\\0
 \end{array}\right]}x_1 + \underset{a_2}{\left[\begin{array}{c}
@@ -335,7 +335,7 @@ We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ 
 We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n$ such that $z\neq 0\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
 \subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
 \textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
-\textbf{Proof} $Ax \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+\textbf{Proof} $Az \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
 \begin{list}{$\Leftrightarrow$}{}
 	\item $\|Az\|_2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
 	\item $\|Az\|_2^2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
@@ -366,7 +366,7 @@ Possible optimizations:
 	\item Already a cheap step
 	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
 \end{enumerate}
-\paragraph{Pseudoinverse} $x = A^TA^{-1}b$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in \mathbb{R}^{m\times n}$ then $A^+ \in \mathbb{R}^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in \mathbb{R}^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in \mathbb{R}^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
+\paragraph{Pseudoinverse} $x = A^TA^{-1}A^Tb$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in \mathbb{R}^{m\times n}$ then $A^+ \in \mathbb{R}^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in \mathbb{R}^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in \mathbb{R}^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
 As consequences, if $x_1$ is solution of $\min\|Ax - b_1\|$ and $x_2$ is solution of $\min\|Ax - b_2\|$ then $x_1+x_2$ is solution of $\min\|Ax - (b_1 + b_2)\|$\\\\Sometimes ML problems are formulated "from the left side". With $w\in \mathbb{R}^{1\times n}$ row vector of weights, then $X\in \mathbb{R}^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
 $y \in \mathbb{R}^{1\times m}$ row vector "target"\\
 The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
