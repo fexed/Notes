@@ -666,7 +666,7 @@ Considering the linear least squares problem $\min\|Ax-b\|$ with $A\in\mathbb{R}
 Few intuitions:\begin{list}{}{}
 	\item With $\theta\simeq 90$ degrees we have a $b$ that is almost orthogonal to $\text{Im}A$: a small relative change in $b$ causes a large change in the solution.
 	\item $K(A)$ tells us how well we can extract $\text{Im}A$ from $A$
-	\item $\theta\simeq 0$ gives more well-behaved problems: condition number is $\simeq K(A)$ instead of $\simeq K(A)^2)$
+	\item $\theta\simeq 0$ gives more well-behaved problems: condition number is $\simeq K(A)$ instead of $\simeq K(A)^2$
 \end{list}
 \paragraph{Stability of Algorithms} Conditioning alone isn't enough. It can tell you whether or not you are dealing with a bad problem or not, but it doesn't tell you anything about the algorithm you are using to solve it. \textbf{Stability} tells you if your are using a bad algorithm or not.
 \paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
@@ -857,7 +857,7 @@ b & Ab &A^2b & \ldots & A^{n-1}b
 The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\cdot b$, and the generic step is $j\rightarrow j+1$. The additional invariant is that the last vector $q_j$ satisfies $q_j=p(A)b$ with a deg$(p)=j-1$.
 \begin{enumerate}
 	\item Generate a vector $\in K_{j+1}$ that wasn't already in $K_j$
-	$$w = Aq_j = q_1\beta_1+\ldots + q_j\beta_j + q_{j+q}\beta_{j+1}$$
+	$$w = Aq_j = q_1\beta_1+\ldots + q_j\beta_j + q_{j+1}\beta_{j+1}$$
 	The $\beta_i$ are the coordinates of $w$ in the basis $q_1,\ldots,q_{j+1}$
 	\item Subtract $q_1$ component, as the $q_i$ are orthonormal
 	$$q_1^Tw = q_1^Tq_1\beta_1+\ldots+q_1^Tq_{j+1}\beta_{j+1} = \beta_1$$
@@ -867,7 +867,7 @@ The base step is that an orthonormal basis of $span(b)$ is $q_1=\frac{1}{\|b\|}\
 	$$w = w - q_i\beta_i = q_{i+1}\beta_{i+1} + \ldots + q_{j+1}\beta_{j+1}$$
 	\item After step $i=j$, we're left with $w = \beta_{j+1}q_{j+1}$, and $q_{j+1}$ must have norm 1 so set $q_{j+1}=\frac{1}{\|w\|}w$ and $\beta_{j+1}= \|w\|$
 \end{enumerate}
-\paragraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+q}\beta_{j+1,j} = Q\left[\begin{array}{c}
+\paragraph{Factorization} For $j=1,2,\ldots,n$ we have written $w = Aq_j = q_1\beta_{1,j}+\ldots + q_j\beta_{j,j} + q_{j+1}\beta_{j+1,j} = Q\left[\begin{array}{c}
 \beta_{1,j}\\\vdots\\\beta_{j+1,j}\\0\\\vdots\\0
 \end{array}\right]$ and writing them down one next to the other $A[q_1\:\ldots\:q_n] = [q_1\:\ldots\:q_{n+1}]$ so $AQ_n = Q_{n+1}\underline{H}_n$ for some matrix $\underline{H}_n\in \mathbb{R}^{(n+1)\times n}$ that contains the coefficients $\beta_{i,j} = (\underline{H}_n)_{i,j}$
 \paragraph{Termination} We assumed that $K_n(A,b) = n$, meaning $b, Ab, \ldots, A^{n-1}b$ are linearly independent. For some $n$ this assumption must fail, for example with $m=n$ let's say we reach columns $q_1,\ldots,q_m$ that are columns of a square orthogonal matrix $Q_m\in\mathbb{Q}^{m\times m}$. This means that they are a basis of $\mathbb{R}^m$ and $$Aq_m = \beta_1q_1 + \ldots + \beta_mq_m + 0$$ Note the absence of the additional term $\beta_{m+1}q_{m+1}$. We get a complete factorization of $A$ $$AQ_m=Q_mH_m\Rightarrow A=Q_mH_mQ_m^T$$ We can use it to solve linear systems, and solving systems with $Q,H$ costs $O(m^2)$.\\
@@ -877,7 +877,7 @@ $$A^jb = b\gamma_0+Ab\gamma_1+\ldots+A^{j-1}b\gamma_{j+1}$$
 then you'd get $H_{j+1,j}=0$ and breakdown at step $j$.\\
 Breakdown could happen at each step, even very early. For example, if $b$ is an eigenvector of $A, Ab= \lambda b$, assuming $\|b\|=1$ so that $q_1=b$, the next step would be
 $$Ab = q_1\beta_1+q_2\beta_2 = \lambda q_1$$
-$$\beta_1 = q_1^TAb = q_1^\lambda q_1 = \lambda$$
+$$\beta_1 = q_1^TAb = q_1^T q_1 = \lambda$$
 $$Ab-q_1b = 0 = q_1\beta_2$$
 encountering breakdown at step 1.\\
 Differently from Gaussian Elimination, where a breakdown would change the algorithm introducing pivoting, in Arnoldi we have a "lucky breakdown", because when there's a breakdown we have all the elements for solving a linear system $Ax=b$. A lucky breakdown is in the following form $$A_jQ_j = Q_jH_j$$
@@ -966,11 +966,11 @@ And $r_0,d_0,x_1\in K_1(A,b) \rightarrow r_1,d_1,x_2\in K_2(A,b)=span(b,Ab)\ldot
 	\item $x_0=0, r_0=b, d_0=b$
 	\item \texttt{for} $j=1,\ldots,n$
 	\begin{list}{}{}
-		\item $\alpha_j = \frac{r^T_{j-1}r_{j-1}}{d^T_{j-1}d_{j-1}}$ ($\alpha$ from exact line search)
-		\item $x_j = x_{j-1}+\alpha_jd_{j-1}$
-		\item $r_j = b-Ax_j = b-Ax_{j-1}-A(x_j-x_{j-1}) = r_{j-1}-\alpha_jAd_{j-1}$
-		\item $\beta_j=\frac{r_j^Tr_j}{r_{j-1}^Tr_{j-1}}$ (with this $\beta_j$ we have $d_{j-1}^TAd_j=0$)
-		\item $d_j = r_j+\beta_jd_{j-1}$
+		\item $\alpha_j = \frac{r^T_{j-1}r_{j-1}}{d^T_{j-1}d_{j-1}}$ ($\alpha$ from exact line search, meaning \textbf{how much to move})
+		\item $x_j = x_{j-1}+\alpha_jd_{j-1}$ (the \textbf{new iterate})
+		\item $r_j = b-Ax_j = b-Ax_{j-1}-A(x_j-x_{j-1}) = r_{j-1}-\alpha_jAd_{j-1}$ (\textbf{new residual})
+		\item $\beta_j=\frac{r_j^Tr_j}{r_{j-1}^Tr_{j-1}}$ (with this $\beta_j$ we have $d_{j-1}^TAd_j=0$, and means \textbf{how much to change direction})
+		\item $d_j = r_j+\beta_jd_{j-1}$ (\textbf{new direction})
 	\end{list}
 \end{list}
 Costs $O(m)+ 1\text{matvec}$ per step, so $O(mn+n\text{matvec})$ (same as minres)
