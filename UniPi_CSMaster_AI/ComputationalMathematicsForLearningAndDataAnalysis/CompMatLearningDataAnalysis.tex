@@ -1284,7 +1284,7 @@ $$D=x_+-x_- < \infty$$
 	\item \textbf{Scalar product} $\langle x,y\rangle = x^Ty = \sum_{i=1}^n x_iy_i = x_1y_1+\ldots+x_ny_n$
 	\item \textbf{Norm} $\|x\| = \sqrt{x_1^2+\ldots+x_n^2} = \sqrt{\langle x,x\rangle}$
 	\item \textbf{Distance} $d(x,y) = \|x-y\| = \sqrt{(x_1-y_1)^2+\ldots+(x_n-y_n)^2}$
-	\item \textbf{Ball} with center $r\in \mathbb{R}^n$ and radius $r > 0$ is $B(x,r) = \{y\in \mathbb{R}^n\:|\:\|y-x\|\leq r\}$
+	\item \textbf{Ball} with center $x\in \mathbb{R}^n$ and radius $r > 0$ is $B(x,r) = \{y\in \mathbb{R}^n\:|\:\|y-x\|\leq r\}$
 \end{list}
 Usually $f:D\rightarrow \mathbb{R}$ with $D = dom(f)$ domain of $f$ which may not be all $\mathbb{R}^n$, but usually ok to ignore $dom(f)$ and assume $f(x)=\infty$ for $x\not\in D$
 \begin{list}{}{}
@@ -1393,7 +1393,7 @@ $\frac{\partial f}{\partial d_i}(x_i) < 0$ but $\frac{\partial f}{\partial d_i}(
 \begin{list}{}{}
 	\item \textbf{Fixed Stepsize} (FS): $\forall\:i\:\:\:\alpha_i = \tilde{\alpha}$ (how is chosen?)\\
 	Most inexpensive.
-	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in \arg\min\{f(x_i+\alpha d_i\}\:|\:\alpha\geq 0\}$\\
+	\item \textbf{(Exact) Line Search} (LS): $\alpha_i\in \arg\min\{f(x_i+\alpha d_i)\:|\:\alpha\geq 0\}$\\
 	Most expensive but may converge faster.
 \end{list}
 Of course, something in the middle is better. $\phi'_i$ low-degree polynomial
@@ -1460,7 +1460,7 @@ $f$ convex means that $\forall\:x,y\in \mathbb{R}^n$ we have $$\alpha f(x) + (1-
 \textbf{Strictly} convex means $$\alpha f(x) + (1-\alpha)f(y)\underset{\uparrow}{>} f(\alpha x+ (1-\alpha)y)\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow f(y)\underset{\uparrow}{>} f(x) + \langle \nabla f(x), y-x\rangle$$
 $$\Leftrightarrow\nabla^2f(x)\succeq 0$$
 Quadratic with $\lambda_n > 0$ more than that: it grows at least as fast as $\lambda_n\|x\|_2^2$, meaning \textbf{strongly convex modulus $\lambda_n$} $\Leftrightarrow \lambda_n$-convex.\\
-$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $$f(x)\geq f(x^i)+\nabla f(x^i)(x-x^i)+\frac{\tau\|x-x^i\|^2}{2}\Leftrightarrow$$ $$\Leftrightarrow\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
+$f$ \textbf{strongly convex modulus $\tau > 0$} ($\tau$-convex) if $$f(x)\geq f(x_i)+\nabla f(x_i)(x-x_i)+\frac{\tau\|x-x_i\|^2}{2}\Leftrightarrow$$ $$\Leftrightarrow\alpha f(x) + (1-\alpha)f(y)\geq f(\alpha x+ (1-\alpha)y)+\frac{\tau}{2}\alpha(1-\alpha)\|y-x\|^2\:\:\:\:\forall\:\alpha\in[0,1] \Leftrightarrow$$ $$\Leftrightarrow f(y)> f(x) + \langle \nabla f(x), y-x\rangle+\frac{\tau}{2}\|y-x\|^2 \Leftrightarrow\nabla^2 f(x) \succeq \tau I$$
 $f \in C^2,$ $L$-smooth and $\tau$-convex $\Leftrightarrow \tau I \preceq \nabla^2 f\preceq LI \Leftrightarrow \tau \leq \lambda_n \leq \lambda_1 \leq L$, eigenvalues of $\nabla^2 f$ are bounded both below and above.
 \paragraph{Convergence rate with strong convexity} Minimize on $x$ both sides independently $$f(x_*)\geq f(x_i) - \frac{\|\nabla f(x_i)\|^2}{2\tau} \Rightarrow \|\nabla f(x_i)\|^2\geq 2\tau(f(x_i)-f(x_*))$$
 "If $a_i = f(x_i) - f_*$ is large then the gradient must also be large."\\
@@ -1489,8 +1489,8 @@ procedure alpha = BLS(phi, alpha, m1, tau)  # tau < 1
 		alpha = tau*alpha
 \end{lstlisting}
 With \texttt{dphi(0)} meaning $\phi'(0)$\\
-%Recall that $\exists\:\tilde{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\tilde{\alpha}_i]$.\\Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with $h_i\geq \min\{k\:|\:\tau^k\leq \tilde{\alpha}_i\}$
-$$\tilde{\alpha}_i \geq \tilde{\alpha} > 0 \forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \text{\textbf{convergence}}$$
+Recall that $\exists\:\tilde{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\tilde{\alpha}_i]$.\\Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with $h_i\geq \min\{k\:|\:\tau^k\leq \tilde{\alpha}_i\}$
+$$\tilde{\alpha}_i \geq \tilde{\alpha} > 0\:\:\:\:\forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \text{\textbf{convergence}}$$
 We need conditions on $f$ to get it:
 \begin{list}{}{}
 	\item $f$ $L$-smooth $\Rightarrow \phi$ is $[L\|d\|^2]$-smooth
@@ -1535,7 +1535,7 @@ Translate $g$ from $y$-space to $x$-space
 $$R^{-1}g=R^{-1}(-y-R^{-1}q) = -x-Q^{-1}q = d$$
 $y = Rx$ is not the only choice, $y\simeq Rx$ (very $\simeq$) also works.
 \subparagraph{Nonconvex case} The Newton's method is a space dilation: a linear map making $\nabla^2 f$ "simple", but not necessarily $\nabla^2f(x_i)^{-1}$ especially when $\not\succeq 0$
-$$d_i=-H_{i}\nabla f(x_i),\tau I\preceq H_i\preceq LI, (A)\cap (W)\Rightarrow\text{Global convergence}$$
+$$d_i=-H_{i}\nabla f(x_i)\:\:\land\:\: \tau I\preceq H_i\preceq LI\:\:\land\:\: (A)\cap (W)\Rightarrow\text{Global convergence}$$
 Any $\epsilon_i > -\lambda_n$ works (but numerical issues). Also algorithmic issues: $\lambda_n(\nabla^2 f(x_i)+\epsilon I)$ is very small, so the axes of $S(Q_{x_i},\:)$ are very elongated and $x_{i+1}$ far from $x_i$ (not good for a local model)\\
 Simple form $$\epsilon = \max\{0,\delta - \lambda_n\}$$ for appropriately chosen small $\delta$. This solves $$\min\{\|H-\nabla^2 f(x_i)\|_2\:|\:H\succeq \delta I\}$$ Works for other norms too.\\
 In every case, $\{x_i\}\rightarrow x_*$ with $\nabla^2 f(x_*)\succeq \delta I\Rightarrow \epsilon_i = 0 \Leftrightarrow H_i = \nabla^2 f(x_i)$ eventually (quadratic convergence in the tail)
@@ -1574,7 +1574,7 @@ $$(S)\:\:\:\:\:H_{i+1}s_i = y_i$$
 $(S)\Rightarrow s_iy_i = s_i^TH_{i+1}s_i$, the first and second properties $\Rightarrow s_iy_i > 0$ \textbf{curvature condition} $(C)$ (often written as $\rho_i = \frac{1}{y_is_i} > 0$)\\
 So $s_i$ needs to be properly chosen at iteration $i$ for things to work at $i+1$.\\
 Quasi-Newton: $d_i$ fixed, but $s_i$ also depends on $\alpha_i$ (free). A good news $(W)\Rightarrow (C)$.
-$$\phi'(\alpha_i)=\langle\nabla f(x_{i+1},d_i\rangle\geq m_3\phi'(0)=m_3\langle\nabla f(x_i), d_i\rangle\Rightarrow$$
+$$\phi'(\alpha_i)=\langle\nabla f(x_{i+1}),d_i\rangle\geq m_3\phi'(0)=m_3\langle\nabla f(x_i), d_i\rangle\Rightarrow$$
 $$\Rightarrow \langle\nabla f(x_{i+1})-\nabla f(x_i),d_i\rangle\geq (m_3-1)\phi'(0)> 0$$
 Assuming an AWLS, $(C)$ can always be satisfied.
 \paragraph{DFP} With the three properties we have $$H_{i+1} = \arg\min\{\|H-H_i\|\:|\:(S), H\succeq 0\}$$
@@ -1781,7 +1781,7 @@ Meaning, respectively, "iterated convex hull of all $x,y\in S$" = "smallest conv
 	\item $x_*$ global optimum $\Rightarrow x_*$ local optimum $\Rightarrow$ (TCC)
 \end{list}
 (TCC) sufficient in the convex case, but is always necessary. Not always sufficient because it holds in saddle point of $\partial X$, for example, despite not being a minimum.\\
-$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in \mathbb{R}^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = R^n$ hence (TCC) $\Leftrightarrow\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in \mathbb{R}^n\Leftrightarrow \nabla f(x) = 0$\\
+$\nabla f(x) = 0\Rightarrow \langle\nabla f(x),d\rangle = 0\:\:\forall\:d\in \mathbb{R}^n \Rightarrow$ (TCC), so a feasible local minimum is a local optimum regardless of $X$. Conversely, $x\in$ int$(X)\Rightarrow T_X(x) = F_X(x) = \mathbb{R}^n$ hence (TCC) $\Leftrightarrow\langle\nabla f(x),d\rangle \geq 0\:\:\forall\:d\in \mathbb{R}^n\Leftrightarrow \nabla f(x) = 0$\\
 In fact, $f,X$ convex $\Rightarrow$ (TCC) $\Leftrightarrow \not\exists$ feasible descent direction: every direction is feasible, hence only descent matters. So "$x$ satifies (TCC)" is a direct constrained generalization of "$x$ stationary point".\\
 Necessary, \textbf{not sufficient} but the only one you can reasonably check. But how to compute this in practice? How to prove something doesn't exists? How to characterize $T_X$ depends on how you characterize $X$.
 \subsubsection{Algebraic Version}
@@ -1841,7 +1841,7 @@ In a simple case, $(P)$ defined by $\min\{f(x)\:|\:Ax=b\}$
 $x\in\partial s(g_i,0)\Rightarrow g_i(x)=0$ (but $\not\Leftarrow$)\\
 Active constraints at $x\in X$: $\mathscr{A}(x) = \{i\in I\:|\:g_i(x)=0\}\subseteq I$\\
 \textbf{First-order feasible direction cone} at $x\in X$: $$D_X(x) = \{d\in \mathbb{R}^n\:|\:\langle\nabla g_i(x), d\rangle\leq 0\:\:i\in A(x),\langle\nabla h_j(x),d\rangle = 0\:\:j\in J\}=$$ $$=\{d\in \mathbb{R}^n\:|\:(JG_{A(x)}(x))d\leq 0, (JH(x))d=0\}$$
-\paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in \mathbb{R}^n\:|\:Ad\leq 0\}$ for some $A\in \mathbb{R}^{k\times n}$, very close by $\partial X$ looks like a polyhedron.\\
+\paragraph{Farkas' Lemma} $D_X$ is a polyhedral cone: $C=\{d\in \mathbb{R}^n\:|\:Ad\leq 0\}$ for some $A\in \mathbb{R}^{k\times n}$, very close to $\partial X$ looks like a polyhedron.\\
 Dual cone $C^*=\{c=\sum_{i=1}^k\lambda_iA_i\:|\:\lambda \geq 0\}$\\
 \textbf{Farkas' Lemma}: $\forall\:c\in \mathbb{R}^n$:
 \begin{list}{}{}
