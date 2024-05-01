@@ -90,7 +90,7 @@ During 2010s: deep learning, neural machine translation\ldots
 The paradigm is composed of the following:
 \begin{list}{}{}
 	\item \textbf{Training set}, composed of labeled data $\{x_i,y_y\}$
-	\item \textbf{Representation}: choose a set of features to represent data $x\mapsto \phi(x) \in R^D$
+	\item \textbf{Representation}: choose a set of features to represent data $x\mapsto \phi(x) \in \mathbb{R}^D$
 	\item \textbf{Model}: choose an hypothesis function to compute $f(x) = F_\Theta(\phi(x))$
 	\item \textbf{Evaluation}: define the cost function on error with respect to examples $J(\Theta) = \sum_i (f(x_i) - y_i)^2$
 	\item \textbf{Optimization}: find parameters $\Theta$ that minimize $J(\Theta)$
@@ -238,8 +238,8 @@ When a word $w$ appears in a text, its context is the set of words that appear n
 \subparagraph{Co-Occurrence Matrix} Words $\equiv$ Context words. Rows of $X$ capture similarity yet $X$ is still high dimensional and sparse. One row per word with counts of occurrencies of any other word.\\
 We can compute the distance vectors between words, but neighboring words are not semantically related.
 \subsection{Word Embeddings}
-\paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $R^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddings})
-$$\hbox{Embed} : R^{|V|}\rightarrow R^k$$
+\paragraph{Dense Representations} Project word vectors $v(t)$ into a low dimensional space $\mathbb{R}^k$ with $k<<|V|$ of continuous space word representations (a.k.a. \textbf{embeddings})
+$$\hbox{Embed} : \mathbb{R}^{|V|}\rightarrow \mathbb{R}^k$$
 $$\hbox{Embed} : v(t) \mapsto e(t)$$
 This space should be able to represent the most salient features, so the words with syntactic/semantic similarities are grouped close in space.
 \paragraph{Collobert} Build embeddings and estimate whether the word is in the proper context using a neural network. Positive examples from text, and \textbf{negative examples made replacing center word with random one}. The loss for the training is $$\mathlarger{Loss(\Theta) = \sum_{x\in X}\sum_{w\in W} \max(0, 1-f_\Theta(x) + f_\Theta(x^{(w)}))}$$
@@ -268,10 +268,10 @@ Usual context size is 5 words before and after. Features can be multi-word expre
 \subparagraph{Skip-Gram}
 \begin{multicols}{2}
 \begin{list}{}{}
-	\item Inputs are one-hot representation of the word, so $w\in R^{|Voc|}$ is high dimensional as the Vocabulary may be very big
-	\item The input word matrix is $V\in R^{|Voc|\times d}$ for an embedding space of size $d$: an embedding $v\in R^d$ is low dimensional.\\
+	\item Inputs are one-hot representation of the word, so $w\in \mathbb{R}^{|Voc|}$ is high dimensional as the Vocabulary may be very big
+	\item The input word matrix is $V\in \mathbb{R}^{|Voc|\times d}$ for an embedding space of size $d$: an embedding $v\in \mathbb{R}^d$ is low dimensional.\\
 	Row $t$ of $V$ is the input vector, representation for the \textbf{center} word $w_t$
-	\item The output matrix $U\in R^{d\times|Voc|}$ and each column $o$, the output vectors, is the representation for a \textbf{context} word $w_o$
+	\item The output matrix $U\in \mathbb{R}^{d\times|Voc|}$ and each column $o$, the output vectors, is the representation for a \textbf{context} word $w_o$
 	\item $v_t = w_tV$ embedding of word $w_t$
 	\item $z=v_tU$, $z_i$ is the similarity of $w_t$ with $w_i$
 	\item Softmax converts $z$ to a probability distribution $p_i$ $$p_i=\frac{e^{z_i}}{\sum_{j\in V}e^{z_j}}$$
@@ -283,7 +283,7 @@ Usual context size is 5 words before and after. Features can be multi-word expre
 \end{multicols}
 \pagebreak
 \begin{list}{}{Procedure}
-	\item Lookup the embedded word vector for the center word $v_c = V[c] \in R^n$
+	\item Lookup the embedded word vector for the center word $v_c = V[c] \in \mathbb{R}^n$
 	\item Generate score vector $z = v_cU$
 	\item Turn the score vector into probabilities $\hat{y} =$ softmax$(z)$
 \end{list}
@@ -329,7 +329,7 @@ $$\mathlarger{v_{pike} = \alpha_1v_{pike_1} + \alpha_2v_{pike_3} + \alpha_3v_3}$
 \begin{center}
 with $\alpha_i = \mathlarger{\frac{f_i}{f_1+f_2+f_3}}$ for the frequencies $f_i$
 \end{center}
-\paragraph{Extrinsic Vector Evaluation} The proof of the pudding is in the eating. Test on a task, e.g. NER (Named Entity Recognition)
+\paragraph{Extrinsic Vector Evaluation} \textit{The proof of the pudding is in the eating}: \textbf{test on a task}, e.g. NER (Named Entity Recognition)
 \subsubsection{Embeddings in Neural Networks} An embedding layer is often used as first layer in a neural network for processing text.\\
 It consists of a matrix $W$ of size $|V|\times d$ where $d$ is the size of the embedding space. $W$ maps words to dense representations.\\
 It is initialized either with random weights or pretrained embeddings. During learning, weights can be:
@@ -484,7 +484,8 @@ Terminology:
 	\item \textbf{Wordform}: full inflected surface form.\\
 	\textit{Cat} and \textit{cats} have a different wordform
 	\item \textbf{Type}/Form: element of the vocabulary
-	\item \textbf{Token}: an instance of that type during text
+	\item \textbf{Token}: an instance of that type during text\\
+	"My \textit{cat} and your \textit{cat}", two different tokens of the same word
 \end{list}
 \textbf{How many words?} $N$ tokens and $V$ vocabulary, a set of types, of size $|V| \Rightarrow |V| > O(N^{\frac{1}{2}})$\\
 Google N-grams has $N = 1$ trillion and $|V| = 13$ million.
@@ -523,7 +524,7 @@ But DTs are \textbf{prone to errors in classification problems with many classes
 \paragraph{Linear vs non-linear algorithms} We can find out if data is linearly or non linearly separable \textbf{only empirically}.\\
 Linear algorithms, when data is linearly separable, are simpler and uses less parameters, but high dimensional data (like for NLP) usually isn't linearly separable. For non linearly separable data, non linear algorithms are more accurate, although more complicated and with more parameters, like kernel methods.
 \subsubsection{Linear Binary Classification}
-Data: $\{(x_i,y_i)\}$ for $i=1,\ldots,n$ with $x \in R^d$ and $y \in \{-1,+1\}$. Question: find a \textbf{linear decision boundary} $wx + b$, an \textbf{hyperplane}, such that the classification rule associated with it has minimal probability of error.\\
+Data: $\{(x_i,y_i)\}$ for $i=1,\ldots,n$ with $x \in \mathbb{R}^d$ and $y \in \{-1,+1\}$. Question: find a \textbf{linear decision boundary} $wx + b$, an \textbf{hyperplane}, such that the classification rule associated with it has minimal probability of error.\\
 Classification rule: $$y = \hbox{sign}(wx+b)$$
 In \textbf{online fashion}: given one datapoint at the time, update the weights as necessary (to lower the classification error)
 \paragraph{Perceptron} Compute a weighted sum and output 1 if it exceeds a threshold:
@@ -687,7 +688,7 @@ $$H(p) = \mathbb{E}_p\left(\log\frac{1}{p_x}\right) = -\sum_xp_x\log p_x$$
 The problem is modeled as such:
 \begin{list}{}{}
 	\item \textbf{Objective function}: $H(p)$
-	\item \textbf{Goal}: among all the distributions that satisfy the constraints,choose $p^*$ such that it maximizes $H(p)$
+	\item \textbf{Goal}: among all the distributions that satisfy the constraints, choose $p^*$ such that it maximizes $H(p)$
 \end{list}
 $$p^* = \arg\max_{p\in P} H(p)$$
 How to represent constraints? We need that the observed feature expectations equals the predicted ones.
@@ -900,23 +901,23 @@ Also called phrase structure grammar or \textbf{context free grammar}.
 \begin{center}
 	\includegraphics[scale=0.5]{36.png}
 \end{center}
-\paragraph{Context Free Grammars} $G = (N,\Sigma, R, S)$
+\paragraph{Context Free Grammars} $G = (N,\Sigma, \mathbb{R}, S)$
 \begin{list}{}{}
 	\item Set of \textbf{non-terminal symbols} $N$
 	\item Set of \textbf{terminal symbols} $\Sigma$ disjoint from $N$
-	\item \textbf{Set of rules}/productions $R$ in the form $A\rightarrow\beta$ with $A$ non-terminal, $\beta$ string of symbols from the infinte set of strings $(\Sigma\cup N)^*$
+	\item \textbf{Set of rules}/productions $\mathbb{R}$ in the form $A\rightarrow\beta$ with $A$ non-terminal, $\beta$ string of symbols from the infinte set of strings $(\Sigma\cup N)^*$
 	\item A designated \textbf{start symbol} $S \in N$
 \end{list}
-The language that $G$ generates, $L(G)$, is the set of every string that can be produced starting from $S$ with the rules in $R$. Formally:
+The language that $G$ generates, $L(G)$, is the set of every string that can be produced starting from $S$ with the rules in $\mathbb{R}$. Formally:
 $$L(G) = \{w\in \Sigma^*, S\rightarrow w\}$$
 \paragraph{Constituency Parsing} Requires phase structure grammar and produces phrase structure parse tree.
 \subparagraph{Statistical Parsing} Three components \begin{list}{}{}
 	\item GEN is a function from a string to a set of candidate trees.\\
 	GEN enumerates a set of candidates for a sentence. It can be a context-free grammar, a finite-state machine, the top N most probable analyses from a probabilistic grammar\ldots
-	\item $\Phi$ maps a candidate to a feature vector $\in\mathbb{R}^d$ and defines the representation of a candidate.\\
+	\item $\Phi$ maps a candidate to a feature vector $\in\mathbb{\mathbb{R}}^d$ and defines the representation of a candidate.\\
 	A \textbf{feature} is a function on a structure, e.g. $h(x) =$ the number of times that a particular structure is seen in $x$.\\
 	A \textbf{feature vector} is $\phi(x)=\langle h_1(x),\ldots,h_d(x)\rangle$ defined by a set of functions $h_1,\ldots,h_d$
-	\item $W$ is a parameter vector $\in\mathbb{R}^d$ and maps a candidate to a real-valued score.
+	\item $W$ is a parameter vector $\in\mathbb{\mathbb{R}}^d$ and maps a candidate to a real-valued score.
 \end{list}
 Training by giving a set of sentences $X$ and the set of possible outputs (trees) $Y$ to learn a function $F_W:X\rightarrow Y$.\\
 Parsing is choosing the highest scoring tree $$F_W(x)=\arg\max_{y\in GEN(x)}\Phi(y)\cdot W$$
@@ -947,15 +948,15 @@ The single-head constraints causes problems in handling certain linguistic pheno
 \begin{list}{}{}
 	\item \textbf{Graph Based}: consider the possible dependency graphs and define a score selecting the best scoring one.
 	\item \textbf{Transition Based}: define a transition system that leads to a parse tree while analyzing a sentence one word at a time.
-	\item \textbf{Constraint Satisfaction}: edges are deleted that don't satisfy hard constraints.
+	\item \textbf{Constraint Satisfaction}: edges that don't satisfy hard constraints are deleted.
 \end{list}
 \subparagraph{Transition-Based Shift-Reduce Parsing}
 Traditional statistical parsers are trained directly on the task of tagging a sentence. Instead, a shift-reduce parser \textbf{learns the sequence of parse actions required to build the parse tree}. An inductive parser \textbf{doesn't require grammar}, while a traditional parser requires a grammar for generating candidate trees.
 \paragraph{Parsing as Classification} Inductive dependency parsing, based on Shift/Reduce actions: learn from annotated corpus which action to perform at each step.
-\paragraph{Dependency Graph} Let $R = \{r_1,\ldots,r_m\}$ the set of dependency types (the tags we'll put on the links).\\
+\paragraph{Dependency Graph} Let $\mathbb{R} = \{r_1,\ldots,r_m\}$ the set of dependency types (the tags we'll put on the links).\\
 A dependency graph for a sequence of words $W = w_1,\ldots,w_n$ is a labeled directed graph $D = (W,A)$ where\begin{list}{}{}
 	\item $W$ is the set of nodes, i.e. the word tokens in the input sequence
-	\item $A$ is a set of labeled arcs $(w_i, w_j, r)$ with $w_i,w_j\in W$ and $r \in R$
+	\item $A$ is a set of labeled arcs $(w_i, w_j, r)$ with $w_i,w_j\in W$ and $r \in \mathbb{R}$
 	\item $\forall\:w_j\in W$ there is at most one arc $(w_i, w_j, r)\in A$
 \end{list}
 The parser build such a graph. Its state at each time is a triple $(S, B, A)$ where
@@ -1300,7 +1301,7 @@ $P(F\:|\:E)$ is modeled by translating phrases in $E$ to phrases in $F$. First s
 \paragraph{Translation Probabilities} Assuming a phrase aligned parallel corpus is available or constructed that show matching between phrases in $E$ and $F$. With that, compute (MLE) the estimate of $\phi$ based on simple frequency counts $$\phi(\overline{f},\overline{e})=\frac{\hbox{Count}(\overline{f},\overline{e})}{\sum_{f} \hbox{Count}(f,\overline{e})}$$
 \paragraph{Distortion probability} The probability that a phrase in position $X$ in the original sentence moves to position $Y$ in the translation.\\
 Distortion is the measure of distance between positions of corresponding phrases in the 2 languages. Distortion of phrase $i$ is the distance between the start of the foreign phrase generated by $\overline{e}_i$ ($a_i$) and the end of the foreign phrase generated by the previous phrase $\overline{e}_{i-1}$ ($b_{i-1}$). Typically we assume the probability of a distortion decreases exponentially with the distance of the movement $$d(i) = c\alpha^{|a_i-b_{i-1}|}$$
-Set $0<\alpha<1$ base on fit to phrase-aligned training data. Then set $c$ to normalize $d(i)$ so that it sums to 1.
+We set $0<\alpha<1$ based on a fitting process to phrase-aligned training data, then set $c$ to normalize $d(i)$ so that it sums to 1.
 \paragraph{Training $P(F\:|\:E)$} What we mainly need to train is $\phi(f_j\:|\:e_i)$\\
 Suppose we had a large bilingual training corpus: a \textbf{bitext}. Suppose also to know exactly which phrase in the target language was the tranlsation of which phrase in the source language: \textbf{phrase alignment}.\\
 If we had this, we could just count-and-divide
@@ -1474,25 +1475,25 @@ The intuition is the following: the weighted sum is a selective summary of the i
 	\includegraphics[scale=0.6]{67.png}
 \end{center}
 \subparagraph{In equations}\begin{list}{}{}
-	\item We have the hidden states in the encoder $h_1,\ldots,h_N\in R^h$
-	\item On timestep $t$ we have the decoder hidden state $s_t \in R^h$
+	\item We have the hidden states in the encoder $h_1,\ldots,h_N\in \mathbb{R}^h$
+	\item On timestep $t$ we have the decoder hidden state $s_t \in \mathbb{R}^h$
 	\item We get the attention scores $e^t$ for this step 
-	$$e^t=[s_t^Th_1,\ldots,s_t^Th_N]\in R^N$$
+	$$e^t=[s_t^Th_1,\ldots,s_t^Th_N]\in \mathbb{R}^N$$
 	\item We take the softmax to get the attention distribution for this step (probability distribution that sums to 1)
-	$$\alpha^t=\hbox{Softmax}(e^t) \in R^N$$
+	$$\alpha^t=\hbox{Softmax}(e^t) \in \mathbb{R}^N$$
 	\item We use $\alpha^t$ to take a weighted sum of the encoder hidden states to get the attention output $a^t$
-	$$a^t = \sum_{i=1}^N \alpha_i^th_i\in R^h$$
+	$$a^t = \sum_{i=1}^N \alpha_i^th_i\in \mathbb{R}^h$$
 	\item Finally, we concatenate the attention output with the decoder hidden state and proceed as in the non-attention seq2seq model
-	$$[a_t, s_t]\in R^{2h}$$
+	$$[a_t, s_t]\in \mathbb{R}^{2h}$$
 \end{list}
 Attention \textbf{significantly improves NMT performance}, solving the bottleneck problem and helping with vanishing gradient problem. Also \textbf{provides some interpretability}, and we get alignment for free: we never explicitly trained an alignment system, the network just learned alignment by itself.
-\subparagraph{Attention Variants} We have some values $h_i\in R^h$ and a query $s\in R^h$. Attention involves:
+\subparagraph{Attention Variants} We have some values $h_i\in \mathbb{R}^h$ and a query $s\in \mathbb{R}^h$. Attention involves:
 \begin{list}{}{}
-	\item Computing the attention scores $e\in R^N$
+	\item Computing the attention scores $e\in \mathbb{R}^N$
 	\item Taking softmax to get a attention distribution
-	$$\alpha=\hbox{Softmax}(e) \in R^NJ$$
+	$$\alpha=\hbox{Softmax}(e) \in \mathbb{R}^NJ$$
 	\item Using $\alpha$ to take the weighted sum of values
-	$$\alpha = \sum_{i=1}^N\alpha_ih_i\in R^h$$
+	$$\alpha = \sum_{i=1}^N\alpha_ih_i\in \mathbb{R}^h$$
 	Thus obtaining the \textbf{attention output} $\alpha$ (sometimes called the \textbf{context vector})
 \end{list}
 We've seen it in translation, but this can be applied to other NLP tasks. It has becomes a general deep learning technique as well.\\
@@ -1503,20 +1504,20 @@ A more general definition of attention is: given a set of vector values, and a v
 Sequence to sequence models with attention are quite effective in transduction tasks, but their sequential nature limits parallelism. The \textbf{transformer} transduction model relies entirely on self-attention to compute representations of its input and output: it doesn't use sequence aligned RNNs nor convolutions.\\
 As a result, training costs are reduced by 1-2 orders of magnitude.\\\\
 So we want \textbf{parallelization} but RNNs are inherently sequential. They also generally need attention mechanism to deal with long range dependencies: path length between states grows with distance otherwise. We may be able to just use attention and skip the need for the RNN.\\
-The generic attention, as we have seen before: we have some \textbf{values} $v_1,\ldots,v_N\in R^{d_1}$, some \textbf{keys} $k_1,\ldots,k_N\in R^{d_1}$ and a \textbf{query} $s\in R^{d_2}$\begin{list}{}{}
-	\item Compute the \textbf{attention scores} $e\in R^N$
-	\item Taking softmax to get the \textbf{attention distribution} $\alpha=\hbox{Softmax}(e)\in R^N$
-	\item Using the attention distribution to take the weighted sum of values $$a = \sum_{i=1}^N\alpha_iv_i\in R^{d_1}$$
+The generic attention, as we have seen before: we have some \textbf{values} $v_1,\ldots,v_N\in \mathbb{R}^{d_1}$, some \textbf{keys} $k_1,\ldots,k_N\in \mathbb{R}^{d_1}$ and a \textbf{query} $s\in \mathbb{R}^{d_2}$\begin{list}{}{}
+	\item Compute the \textbf{attention scores} $e\in \mathbb{R}^N$
+	\item Taking softmax to get the \textbf{attention distribution} $\alpha=\hbox{Softmax}(e)\in \mathbb{R}^N$
+	\item Using the attention distribution to take the weighted sum of values $$a = \sum_{i=1}^N\alpha_iv_i\in \mathbb{R}^{d_1}$$
 	Thus obtaining the \textbf{attention output} or context vector $a$
 \end{list}
-There are variants, several ways to compute $e\in R^{d_1}$:
+There are variants, several ways to compute $e\in \mathbb{R}^{d_1}$:
 \begin{list}{}{}
-	\item Basic dot-product attention $e_i=s^Tk_i\in R$\\
+	\item Basic dot-product attention $e_i=s^Tk_i\in \mathbb{R}$\\
 	This assumes $d_1=d_2$, and is the version used in NMT
-	\item Multiplicative attention $e_i=s^TWk_i\in R$\\
-	Where $W\in R^{d_1\times d_2}$ is a weight matrix
-	\item Additive attention $e_i=w^T\tanh(W_1k_1+W_2s)\in R$\\
-	Where $W_1\in R^{d_3\times d_1}$, $W_2\in R^{d_3\times d_2}$ are weight matrices and $w\in R^{d_3}$ is a weight vector.\\$d_3$ is the attention dimensionality, hyperparameter.
+	\item Multiplicative attention $e_i=s^TWk_i\in \mathbb{R}$\\
+	Where $W\in \mathbb{R}^{d_1\times d_2}$ is a weight matrix
+	\item Additive attention $e_i=w^T\tanh(W_1k_1+W_2s)\in \mathbb{R}$\\
+	Where $W_1\in \mathbb{R}^{d_3\times d_1}$, $W_2\in \mathbb{R}^{d_3\times d_2}$ are weight matrices and $w\in \mathbb{R}^{d_3}$ is a weight vector.\\$d_3$ is the attention dimensionality, hyperparameter.
 \end{list}
 \paragraph{Issues with Recurrent Models}\begin{list}{}{}
 	\item O(sequence length) steps for distant word pairs to interact. This means: hard to learn long-distance dependencies (because gradient problems!) and linear order of words "baked in" (and we already know that linear order isn't the right way to think about sentences
@@ -1532,7 +1533,7 @@ We can think of attention as an approximated hashtable:
 	\item In a hashtable: each query (hash) maps to exactly one key-value pair
 	\item In (self-)attention: each query matches each key to varying degrees. We return a sum of values weighted by the query-key match.
 \end{list}
-Given the \textbf{queries} $q_1,\ldots,q_T\in R^d$, the \textbf{keys} $k_1,\ldots,k_T\in R^d$ and the \textbf{values} $v_1,\ldots,v_T\in R^d$ (but in practice the number of queries can differ from the number of keys and values), in self-attention \textbf{the queries, keys and values are drawn from the same source}. E.g.: if the output of the previous layer is $x_1,\ldots,x_T$ (one vector per word), we could use $v_i=k_i=q_i=x_i$ (same vector for all of them).\\
+Given the \textbf{queries} $q_1,\ldots,q_T\in \mathbb{R}^d$, the \textbf{keys} $k_1,\ldots,k_T\in \mathbb{R}^d$ and the \textbf{values} $v_1,\ldots,v_T\in \mathbb{R}^d$ (but in practice the number of queries can differ from the number of keys and values), in self-attention \textbf{the queries, keys and values are drawn from the same source}. E.g.: if the output of the previous layer is $x_1,\ldots,x_T$ (one vector per word), we could use $v_i=k_i=q_i=x_i$ (same vector for all of them).\\
 The dot product self-attention operation is:
 \begin{list}{}{}
 	\item Compute key-query quantities $$e_{ij} = q_i^Tk_jk$$
@@ -1553,11 +1554,11 @@ $$\hbox{Output}=\hbox{Softmax}(QK^T)V$$
 \end{center}
 This shows a stack of self-attention blocks like we might stack LSTM layers. Self-attention though cannot be a drop-in replacement for recurrence, for it has few issues.
 \subparagraph{No Notion of Order} Self-attention is an operation on sets, meaning it has no inherent notion of order. Self-attention doesn't know the order of its inputs.\\
-We need to encode the order of the sentence in our keys, queries and values. Consider representing each sequence index as a vector: $p_i\in R^d$, for $i\in\{1,\ldots,T\}$ are position vectors. It's easy to incorporate this info into our self-attention block: just add the $p_i$ into our inputs. With $\tilde{v}_i, \tilde{q}_i, \tilde{k}_i$ our old values, queries and keys
+We need to encode the order of the sentence in our keys, queries and values. Consider representing each sequence index as a vector: $p_i\in \mathbb{R}^d$, for $i\in\{1,\ldots,T\}$ are position vectors. It's easy to incorporate this info into our self-attention block: just add the $p_i$ into our inputs. With $\tilde{v}_i, \tilde{q}_i, \tilde{k}_i$ our old values, queries and keys
 $$v_i = \tilde{v}_i+p_i$$
 $$q_i = \tilde{q}_i+p_i$$
 $$k_i = \tilde{k}_i+p_i$$
-The $p_i$ can be \textbf{sinusoidal position representations}: concatenate sinusoidal functions of varying periods. Periodicity indicates that maybe an "absolute position" isn't important, but it's not learnable. So the $p_i$ can be all learnable: learn a matrix $p\in R^{d\times T}$ and the $p_i$s are columns of that matrix. It's flexible, because each position gets to be learned to fit the data, but can't be used to extrapolate indexes outside $1,\ldots,T$.
+The $p_i$ can be \textbf{sinusoidal position representations}: concatenate sinusoidal functions of varying periods. Periodicity indicates that maybe an "absolute position" isn't important, but it's not learnable. So the $p_i$ can be all learnable: learn a matrix $p\in \mathbb{R}^{d\times T}$ and the $p_i$s are columns of that matrix. It's flexible, because each position gets to be learned to fit the data, but can't be used to extrapolate indexes outside $1,\ldots,T$.
 \subparagraph{Adding Non-Linearities} Therea re no elementwise nonlinearieis in self-attention, so stacking more self-attention layers just re-averages value records. A simple fix: we add feed-forward network to post process each output vector:
 \begin{center}
 	\includegraphics[scale=0.5]{69.png}
@@ -1718,14 +1719,14 @@ Some examples for subject-verb agreement with attractors that a model got wrong:
 	\item[$\surd$] The \textbf{lead} is also rather long; 5 paragraphs \textbf{is} pretty lengthy\ldots\\
 	The \textbf{lead} is also rather long; 5 paragraphs \textbf{\textit{are}} pretty lengthy\ldots
 \end{list}
-\subparagraph{Prediction Explanations} What in the input led to this output? For a single example, what parts of the input led to the observed prediction? \textbf{Saliency maps}: a score for each input word indicating its importance to the model's prediction.\\
+\subparagraph{Prediction Explanations} What in the input led to this output? For a single example, what parts of the input led to the observed prediction?\\ One way is via\textbf{saliency maps}: a score for each input word indicating its importance to the model's prediction.\\
 To make a saliency map, there are many ways to encode the intuition of "importance".\begin{list}{}{}
 	\item \textbf{Simple gradient method}: for words $x_1,\ldots,x_n$ and the model's score for a given class (output label) $s_c(x_1,\ldots,x_n)$ take the norm of the gradient of the score with respect to each word
 	$$\hbox{Salience}(x_i)=\|\nabla_{x_i}s_c(x_1,\ldots,x_n)\|$$
 	High gradient norm means changing the word locally would affect the score a lot, so it's very important. Not perfect: linear approximation may not hold well. There are many more methods proposed.
 \end{list}
-Another way is explanation by input reduction, making changes to the document and judge how much it would affect the result. What is the smallest part of the input I could keep and still get the same answer? Idea: run an input saliency method, iteratively removing the less important words.\\
-Another way is analyzing models by breaking them: can we break models by making seemingly innocuous changes to the input?
+Another method is \textbf{explanation by input reduction}: making changes to the document and measure how much it affects the result. What is the smallest part of the input I could keep and still get the same answer? Idea: run an \textbf{input saliency method}, iteratively removing the less important words.\\
+Another way is \textbf{analyzing models by breaking them}: can we break models by making seemingly innocuous changes to the input?
 \subsection{Probes}
 \paragraph{Probing} Supervised analysis of neural networks.
 \begin{center}
@@ -1736,10 +1737,10 @@ Question: what do pretrained representations encode about lingustic properties, 
 \begin{center}
 	\includegraphics[scale=0.5]{81.png}
 \end{center}
-We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in R^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i) \:\hbox{ with } f\in F$$
+We have some property $y$ (like POS). We have the model's word representations at fixed layer $h_1,\ldots,h_T$ where $h_i\in \mathbb{R}^d$ where the words are at indices $1,\ldots,T$. We also have a function family $F$ like the set of linear models, or 1-layer FFNN with fixed hyperparameters. We \textbf{freeze} the  parameters of the model, so its not finetuned, then we train our probe: a function $$\hat{y}\simeq f(h_i) \:\hbox{ with } f\in F$$
 The extent to which we can predict $y$ from $h_i$ is a measure of the accessibility of that feature in the representation. This helps in gaining a rough understanding into how the model processes its inputs. Also may help in the search for causal mechanisms.
-\paragraph{Contextual Representation of Language} These pretrained embeddings specify a function which maps elements $v$ in a (word) vocabulary $V$ to vectors $h\in R^d$
-$$f_{vocab} : V\rightarrow R^d$$
+\paragraph{Contextual Representation of Language} These pretrained embeddings specify a function which maps elements $v$ in a (word) vocabulary $V$ to vectors $h\in \mathbb{R}^d$
+$$f_{vocab} : V\rightarrow \mathbb{R}^d$$
 $$v\mapsto h$$
 Subword methods consider also literal character sequence, mapping from tuples of vocabulary item $v$ and character sequence $(c_1,\ldots,c_t)$ to vectors
 $$f_{subword} : (v, (c_1,\ldots,c_t))\mapsto h$$
@@ -1752,7 +1753,7 @@ $$f_{contextual} : (w_1,\ldots,w_N)\mapsto(h_1,\ldots,h_N)$$
 Our first intuition is that vector spaces and graphs both have natural distance metrics. For a parse tree, we have the \textbf{path metric} $d(w_i, w_j)$, which is the number of edges in the path between words $w_i$ and $w_j$ in the tree.
 \subparagraph{Syntax Distance Hypothesis} There exists a linear transformation $B$ of the word representation space under which vector distance encodes parse trees.\\
 Equivalently, there exists an inner product on the word representation space such that distance under the inner product encodes parse trees. This (indefinite) inner product is specified by $B^TB$.
-\subparagraph{Finding a Parse Tree Encoding Distance Metric} Our potentially tree-encoding distances are parametrized by the linear transformations $B\in R^{k\times n}$
+\subparagraph{Finding a Parse Tree Encoding Distance Metric} Our potentially tree-encoding distances are parametrized by the linear transformations $B\in \mathbb{R}^{k\times n}$
 $$\|h_i-h_j\|^2_B = B(h_i-h_j)^TB(h_i-h_j)$$
 $Bh$ is the linear transformation of the word representation, or equivalently it is the parse tree node representation. This is equivalent to finding an L2 distance on the original vector space, parametrized by the positive semi-definite matrix $A=B^TB$
 $$\|h_u-h_j\|^2_A = (h_i-h_j)^TA(h_i-h_j)$$
@@ -1853,7 +1854,7 @@ Mort state-of-the-art question answering systems are built on top of end-to-end 
 \paragraph{Machine Comprehension} "A machine comprehends a passage of text if, for any question regarding that text that can be answered correctly by a majority of native speakers, that machine can \textbf{provide a string which} those speakers would agree both \textbf{answers that question} and \textbf{does not contain information irrelevant} to the question."\\
 It's a useful technique for many practical applications, and an important testbed for evaluating how well computer systems understand human language. Also, many NLP tasks can be reduced to reading comprehension.\\
 "Since questions can be devised to query any aspect of text comprehension, the ability to answer questions is the strongest possible demonstration of understanding."
-\paragraph{SQuAD} Stanford Question Answering Dataset: 100k annotated (passage, question, answer) triples. Passages are selected from English Wikipedia, 100-150 words, and questions are crowd-sourced. Each answer is a short segment of text in the passage: this is a \textbf{limitation}, not all questions can be answered this way.\\
+\paragraph{SQuAD} Stanford Question Answering Dataset: 100k annotated $\langle$passage, question, answer$\rangle$ triples. Passages are selected from English Wikipedia, 100-150 words, and questions are crowd-sourced. Each answer is a short segment of text in the passage: this is a \textbf{limitation}, not all questions can be answered this way.\\
 Large scale supervised datasets are also a key ingredient for training effective neural models for reading comprehension. SQuAD is a popular reading comprehension dataset. It's "almost solved" today, and the state-of-the-art exceeds the estimated human performance.
 \subparagraph{Evaluation} Authors collected 3 gold answers. Systems are scored on two metrics:
 \begin{list}{}{}
@@ -1907,15 +1908,15 @@ $$e(q_i) = f([\hbox{GloVe}(q_i);\hbox{charEmb}(q_i)])$$
 Then use two \textbf{bidirectional} LSTMs separately to produce contextual embeddings for both context and query.
 \begin{multicols}{2}
 \vfill
-$$\overrightarrow{c}_i = \hbox{LSTM}(\overrightarrow{c}_{i-1}, e(c_i))\in R^H$$
-$$\overleftarrow{c}_i = \hbox{LSTM}(\overleftarrow{c}_{i-1}, e(c_i))\in R^H$$
-$$c_i = [\overrightarrow{c_i};\overleftarrow{c_i}]\in R^{2H}$$
+$$\overrightarrow{c}_i = \hbox{LSTM}(\overrightarrow{c}_{i-1}, e(c_i))\in \mathbb{R}^H$$
+$$\overleftarrow{c}_i = \hbox{LSTM}(\overleftarrow{c}_{i-1}, e(c_i))\in \mathbb{R}^H$$
+$$c_i = [\overrightarrow{c_i};\overleftarrow{c_i}]\in \mathbb{R}^{2H}$$
 \vfill
 \columnbreak
 \vfill
-$$\overrightarrow{q}_i = \hbox{LSTM}(\overrightarrow{q}_{i-1}, e(q_i))\in R^H$$
-$$\overleftarrow{q}_i = \hbox{LSTM}(\overleftarrow{q}_{i-1}, e(q_i))\in R^H$$
-$$q_i = [\overrightarrow{q_i};\overleftarrow{q_i}]\in R^{2H}$$
+$$\overrightarrow{q}_i = \hbox{LSTM}(\overrightarrow{q}_{i-1}, e(q_i))\in \mathbb{R}^H$$
+$$\overleftarrow{q}_i = \hbox{LSTM}(\overleftarrow{q}_{i-1}, e(q_i))\in \mathbb{R}^H$$
+$$q_i = [\overrightarrow{q_i};\overleftarrow{q_i}]\in \mathbb{R}^{2H}$$
 \vfill
 \end{multicols}
 \paragraph{Attention} 
@@ -1924,17 +1925,17 @@ $$q_i = [\overrightarrow{q_i};\overleftarrow{q_i}]\in R^{2H}$$
 \end{center}
 Context-to-query attention: for each context word, choose the most relevant words from the query words.
 \begin{list}{}{}
-	\item First, compute a similarity score for every pair $(c_i,q_i)$ with $w_{sim}\in R^{6H}$
-	$$S_{ij} = w^T_{sim}[c_i;q_i;c_i\odot q_i] \in R$$
+	\item First, compute a similarity score for every pair $(c_i,q_i)$ with $w_{sim}\in \mathbb{R}^{6H}$
+	$$S_{ij} = w^T_{sim}[c_i;q_i;c_i\odot q_i] \in \mathbb{R}$$
 	\item Context-to-query attention (which question words are more relevant to $c_i$)
-	$$\alpha_{ij} = \hbox{Softmax}_i(S_{ij})\in R$$
-	$$a_i = \sum_{j=1}^M \alpha_{ij}q_j \in R^{2H}$$
+	$$\alpha_{ij} = \hbox{Softmax}_i(S_{ij})\in \mathbb{R}$$
+	$$a_i = \sum_{j=1}^M \alpha_{ij}q_j \in \mathbb{R}^{2H}$$
 	\item Query-to-context attention (which context words are relevant to some question words):
-	$$\beta_i = \hbox{Softmax}_i\left(\max_{j=1}^M(S_{ij})\right) \in R^N$$
-	$$b = \sum_{i=1}^N\beta_ic_j\in R^{2H}$$
+	$$\beta_i = \hbox{Softmax}_i\left(\max_{j=1}^M(S_{ij})\right) \in \mathbb{R}^N$$
+	$$b = \sum_{i=1}^N\beta_ic_j\in \mathbb{R}^{2H}$$
 \end{list}
 The final output is
-$$g_i=[c_i;q_i;c_i\odot a_i;c_i\odot b]\in R^{8H}$$
+$$g_i=[c_i;q_i;c_i\odot a_i;c_i\odot b]\in \mathbb{R}^{8H}$$
 \paragraph{Modeling and Output Layers}
 \begin{center}
 	\includegraphics[scale=0.5]{127.png}
@@ -1942,12 +1943,12 @@ $$g_i=[c_i;q_i;c_i\odot a_i;c_i\odot b]\in R^{8H}$$
 \begin{list}{}{}
 	\item \textbf{Modeling Layer} pass $g_i$ to another two layers of bidirectional LSTMs.\\
 	Attention layer is modeling interaction between query and context, while modeling layer is modeling interaction within context words
-	$$m_i=\hbox{BiLSTM}(g_i) \in R^{2H}$$
+	$$m_i=\hbox{BiLSTM}(g_i) \in \mathbb{R}^{2H}$$
 	\item \textbf{Output Layer} two classifiers predicting the start and end positions
 	$$p_{start} = \hbox{Softmax}_i(w_{start}^T[g_i;m_i])$$
 	$$p_{end} = \hbox{Softmax}_i(w_{end}^T[g_i;m'_i])$$
-	$$m'_i = \hbox{BiLSTM}(m_i)\in R^{2H}$$
-	$$w_{start},w_{end}\in R^{10H}$$
+	$$m'_i = \hbox{BiLSTM}(m_i)\in \mathbb{R}^{2H}$$
+	$$w_{start},w_{end}\in \mathbb{R}^{10H}$$
 \end{list}
 The final training loss is
 $$L= - \log p_{start}(s^*) - \log p_{end}(e^*)$$
@@ -2012,7 +2013,7 @@ Output: an answer string $A$
 	\item Retriever $f(D,Q) = P_1,\ldots,P_k$ (with $k$ predefined and small, e.g. 100)
 	\item Reader $g(Q, \{P_1,\ldots,P_k\}) = A$, reading comprehension problem
 \end{list}
-The retriever is a standard TF-IDF information retrieval sparse model (a fixed module). The reader is a neural reading comprehension model trained on SQuAD an other distantly-supervised QA dataset.\\
+The retriever is a standard TF-IDF information retrieval sparse model (a fixed module). The reader is a neural reading comprehension model trained on SQuAD and other distantly-supervised QA dataset.\\
 Distantly supervised examples $(Q,A)\rightarrow (P,Q,A)$.
 \subparagraph{Document Reader} Each token $p_i$ in a paragraph $\{p_1,\ldots,p_m\}=RNN(\{\tilde{p}_1,\ldots,\tilde{p}_m\})$.\\
 Each feature vector $\tilde{p}_i$ is comprised of the following parts:
@@ -2074,10 +2075,10 @@ Large language models can do open-domain question answering as well, without an 
 The idea is to \textbf{include the question $q$ in the memorization process}.
 \subparagraph{Input encoder} Set of sentences $\{s_1,\ldots,s_t\}$ and a question $q$
 \begin{list}{}{}
-	\item $E\in R^{|V|\times d}$ embedding matrix, $E(w) = e\in R^d$
+	\item $E\in \mathbb{R}^{|V|\times d}$ embedding matrix, $E(w) = e\in \mathbb{R}^d$
 	\item $\{e_1^{(s_t)},\ldots,e_m^{(s_t)}\}$ vectors for the words in $s_t$
 	\item $\{e_1^{(q)},\ldots,e_k^{(q)}\}$ vectors for the words in $q$
-	\item $f^{(s/q)} = \{f_1,\ldots,f_m\}$ multiplicative mask with $f_i\in R^d$
+	\item $f^{(s/q)} = \{f_1,\ldots,f_m\}$ multiplicative mask with $f_i\in \mathbb{R}^d$
 \end{list}
 $$s_t = \sum_{i=1}^m e_i^{(s)}\odot f_i^{(s)}$$
 $$q_t = \sum_{i=1}^k e_i^{(q)}\odot f_i^{(q)}$$
@@ -2092,11 +2093,11 @@ $$h_i^{(t)}= \frac{h_i^{(t)}}{\|h_i^{(t)}\|}$$
 \begin{center}
 	\includegraphics[scale=0.5]{99.png}
 \end{center}
-\subparagraph{Output Module} Scores memories $h_i$ using $q$, with an embedding matrix $E\in R^{|V|\times d}$ to generate the output $\hat{y}$
+\subparagraph{Output Module} Scores memories $h_i$ using $q$, with an embedding matrix $E\in \mathbb{R}^{|V|\times d}$ to generate the output $\hat{y}$
 $$p_i = \hbox{Softmax}(q^Th_i)$$
 $$u = \sum_{j=1}^z p_ih_i$$
-$$\hat{y} = R\phi(q + Hu)$$
-where $\hat{y}\in R^{|V|}$ represents the model answer.
+$$\hat{y} = \mathbb{R}\phi(q + Hu)$$
+where $\hat{y}\in \mathbb{R}^{|V|}$ represents the model answer.
 \subparagraph{Training} Given $\{(x_i,y_i)\}_{i=1}^n$, use the Cross Entropy loss function $H(y,\hat{y})$ in an end-to-end training with standard backpropagation through time (BPTT) algorithm.
 \pagebreak
 \subparagraph{Architecture}
@@ -2180,7 +2181,7 @@ $$J = -\sum_{i=2}^N\sum_{j=1}^i y_{ij}p(m_j,m_i)$$
 	\includegraphics[scale=0.5]{111.png}
 \end{center}
 \paragraph{Coreference Models}
-\subparagraph{Mention Ranking} Assign each mention its highest scoring candidate antecedent according to the model. Dummy NA mention allows model to decline linking the current mention to anything ("singleton" or "first" mention.
+\subparagraph{Mention Ranking} Assign each mention its highest scoring candidate antecedent according to the model. Dummy NA mention allows model to decline linking the current mention to anything ("singleton" or "first" mention).
 \begin{center}
 	\includegraphics[scale=0.5]{110.png}
 \end{center}
@@ -2262,7 +2263,7 @@ It's intractable to score every pair of spans: $O(T^2)$ spans of text in a docum
 \subparagraph{Mention Proposal} Consider all span up to a given length and prune the candidate spans greedily during both training and evaluation. The mention score is $$s_m(i) = \hbox{FFNN}_m([x_{\hbox{FIRST}(i)}, x_{\hbox{LAST}(i)}])$$
 \subparagraph{Mention Linking} Use the question answering framework to compute $s_a(i,j)$. Transformer input triple: $\{$context, query, answers$\}=\{X,q,a\}$\begin{list}{}{}
 	\item $X$ context: input document
-	\item $q(e_i)$ query: sentence containing $e_i$ replace by $<$mention$>e_i<$/mention$>$
+	\item $q(e_i)$ query: sentence containing $e_i$ replaced by $<$mention$>e_i<$/mention$>$
 	\item $a$ answers: coreferent mentions of $e_i$
 \end{list}
 IOB tagging for mention words $$p_i^{tag}=\hbox{Softmax}(\hbox{FFNN}_{tag}(x_i))$$
@@ -2310,12 +2311,12 @@ Entity embeddings are like word embeddings, but for entities in a knowledgebase.
 \begin{list}{}{}
 	\item Knowledge graph embeddings methods
 	\item Word-entity embeddings methods
-	\item transformer encodings of entity descriptions
+	\item Transformer encodings of entity descriptions
 \end{list}
 \paragraph{Incorporate Entity Embeddings from a Different Embeddings Space} Learn a \textbf{fusion layer} to combine context and embedding information
 $$h_j  = F(W_tw_j + E_we_k + b)$$
 With $w_j$ embedding of word $j$ in a sequence of words and $e_k$ the corresponding entity embedding.\\
-Intuition: there's an alignment between entities and words i nthe sentence, such that projections $W_tw_j$ and $W_ee_k$ are in the same vector space.
+Intuition: there's an alignment between entities and words in the sentence, such that projections $W_tw_j$ and $W_ee_k$ are in the same vector space.
 \subparagraph{ERNIE} Enhanced Language Representation with Informative Entities
 \begin{list}{}{}
 	\item Text encoder: multi-layer bidirectional transformer encoder over the words in the sentence
