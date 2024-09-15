@@ -69,7 +69,7 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 \chapter{Numerical Analysis}
 \section{Quick recap of linear algebra}
 \begin{list}{}{}
-	\item \textbf{Matrix - Vector multiplication}, with $A\in \mathbb{R}^{4\times 3}, c\in \mathbb{R}^3, b\in \mathbb{R}^4$
+	\item \textbf{Matrix - Vector multiplication}, with $A\in \mathbb{R}^{4\times 3}, c\in \mathbb{R}^3, b\in \mathbb{R}^4$ \textbf{row-by-column}
 	$$\left[\begin{array}{c c c}
 		A_{11} & A_{12} & A_{13}\\
 		\vdots & \vdots & \vdots\\
@@ -79,8 +79,8 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 	\end{array}\right] = \left[\begin{array}{c}
 		b_1\\b_2\\b_3\\b_4
 	\end{array}\right]\:\:\:\:\:\:\begin{array}{l}
-		b_i = \sum_{j=1}^3 A_{ij}c_j\\
-		A_{11}c_1 + A_{12}c_2 + A_{13}c_3 = b_1
+		b_i = \sum_{j} A_{ij}c_j\\
+		\text{e.g. }A_{11}c_1 + A_{12}c_2 + A_{13}c_3 = b_1
 	\end{array}$$
 	or linear combination of the columns
 	$$\left[\begin{array}{c}
@@ -95,7 +95,10 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 	b_1\\b_2\\b_3\\b_4
 	\end{array}\right]$$
 	with $c_1, c_2, c_3$ and $c_4$ called coordinates.
-	\item \textbf{Basis}: tuple of vectors $v_1, v_2, \ldots, v_n\:|$ you can write all vectors $b$ in a certain space as a linear combination $v_1\alpha_1 + v_2\alpha_2 + \ldots + v_n\alpha_n$ with \textbf{unique} $a_1,\ldots,a_n$. The canonical basis is 
+	\item \textbf{Matrix - Matrix multiplication}, with a useful mnemonic: if the inner dimensions agree, the product is well-defined and removes them. An example:
+	$$A\in\mathbb{R}^{4\times3}, B\in\mathbb{R}^{3\times2} \Rightarrow AB\in\mathbb{R}^{4\times2}$$
+	So the ordering is very important as well as the use of the parenthesis. Keep in mind this, as $AB=AC \not\Rightarrow B=C$ and $AB\neq BA$ in general.
+	\item \textbf{Basis}: tuple of vectors $v_1, v_2, \ldots, v_n$ such that you can write all vectors $b$ in a certain space as a linear combination of $v_i$: $v_1\alpha_1 + v_2\alpha_2 + \ldots + v_n\alpha_n$ with \textbf{unique} $a_1,\ldots,a_n$. The canonical basis is 
 	$$c_1 = \left[\begin{array}{c}
 	1\\0\\0\\0
 	\end{array}\right]\:\:\:c_2 = \left[\begin{array}{c}
@@ -118,18 +121,22 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 	\end{array}\right]\cdot 9$$
 	\item \textbf{Image} $\text{Im} A$ = set of vectors $b$ that we can reach with $A$ as operator, meaning all $y\:|\:\exists\:x\:\:Ax=y$
 	\item \textbf{Kernel} $\text{Ker} A$ = set of vectors $x\:|\: Ax = 0$ ($x = 0$ is certainly one, there may be others)
-	\item \textbf{Invertible} $A$ is invertible if this problem has exactly one solution:\\
-	$\forall\:b\in \mathbb{R}^m$, $A$ must be square and the columns of $A$ are a basis of $R^m \Rightarrow x=A^{-1}b$ where $A^{-1}$ is another square matrix $|\: A\cdot A^{-1} = A^{-1}\cdot A = I$ identity matrix (1 on the diagonal, 0 otherwise)\\
-	Implementation detail: \texttt{inv(A) * b} is not the best choice. Better: in Python \texttt{scipy.linalg.solv(A, b)} or, in Matlab, \texttt{A $\setminus$ b}.
-	\item \textbf{Cost}, with $A\in \mathbb{R}^{m\times n}, B\in \mathbb{R}^{n\times p}, C\in R^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
+	\item \textbf{Rank} $\text{rk}A$ has a precise meaning in linear algebra: the rank of a matrix is the minimum $r$ so that we can find vectors $v_1,\ldots,v_r$ such that all columns (or rows) of $A$ are linear combinations of these vectors.
+	\item \textbf{Invertible} $A$ is invertible if $Ax=y$ has exactly one solution.\\
+	This means that $A$ must be square and the columns of $A$ are a basis of $\mathbb{R}^m$.\\
+	We can derive $x=A^{-1}b$ where $A^{-1}$ is another square matrix such that $A\cdot A^{-1} = A^{-1}\cdot A = I$, the identity matrix (1 on the diagonal, 0 otherwise)
+	\item \textbf{Cost}, with $A\in \mathbb{R}^{m\times n}, B\in \mathbb{R}^{n\times p}, C\in \mathbb{R}^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
 	In particular, $A, B$ squared $\Rightarrow AB$ costs $O(m^3)$. With $A, v$ vector $\Rightarrow$ $Av$ costs $O(m^2)$. Faster alternatives are not worth it usually. And remember that $AB \neq BA$ generally, and also that $CA = CB \not\Rightarrow A = B$ with $C$ matrix.\\
 	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
 \end{list}
-\paragraph{} Why a real valued function? Strong assumption, given $x'$ and $x''$, I can always tell which one I like best (\textbf{total order} of R). Often more than one objective function, with contrasting and/or incomparable units (ex: loss function vs regularity in ML).\\
-But $R^k$ with $k > 1$ has no total order, so there's no \textit{best} solution, only non-dominated ones.\\
-Even with a single objective function optimization is hard, impossible if $f$ has no minimum in $X$ (so, if the problem $P$ is unbounded below). Hardly ever happens in ML, because losses and regularizations are $\geq 0$\\
-Also impossible if $f > -\infty$ but $\not\exists\:x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions (\textbf{$\epsilon$-optima}). On PC $x\in \mathbb{R}$ is in fact $x\in \mathbb{Q}$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
-Anyway, \textbf{finding the exact $x_*$ is impossible in general}.
+\paragraph{Why a real valued function?} Strong assumption, given $x'$ and $x''$, I can always tell which one I like best (a consequence of the \textbf{total order} property of $\mathbb{R}$). Often more than one objective function, with contrasting and/or incomparable units (ex: loss function vs regularity in ML).\\
+But $\mathbb{R}^k$ with $k > 1$ has no total order, so there's no \textit{best} solution, only non-dominated ones.\\
+Even with a single objective function, optimization is hard, impossible if $f$ has no minimum in $X$ (meaning that the problem $P$ is unbounded below). Hardly ever happens in ML, because losses and regularizations are $\geq 0$\\
+Also impossible if $f > -\infty$ but $\not\exists\:x$, for example in $f(x) = e^x$. However plenty of $\epsilon$-approximate solutions (\textbf{$\epsilon$-optima}). On computers, $x\in \mathbb{R}$ is in fact $x\in \mathbb{Q}$ with up to 16 digits precision, so approximation errors are unavoidable anyway. Exact algebraic computation is possible but usually slow, and ML is going the opposite way (less precision: floats, half, small integer weights\ldots).\\
+Anyway, \textbf{finding the exact $x_*$ is impossible in general}, and more often than not we are happy with a "good enough" solution.
+
+% END 1-linalg
+
 \paragraph{Norms} Many matrices preserve norm 2
  $$\|x\|_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
 	x_1\\\vdots\\x_b
