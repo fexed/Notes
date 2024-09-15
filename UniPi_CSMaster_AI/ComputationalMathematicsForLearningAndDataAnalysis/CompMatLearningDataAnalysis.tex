@@ -137,38 +137,46 @@ Anyway, \textbf{finding the exact $x_*$ is impossible in general}, and more ofte
 
 % END 1-linalg
 
-\paragraph{Norms} Many matrices preserve norm 2
- $$\|x\|_2 = \sqrt{x_1^2 + x_2^2 + \ldots + x_n^2} = \sqrt{x^T x} = \left[x_1 \ldots x_n\right]\cdot\left[\begin{array}{c}
-	x_1\\\vdots\\x_b
-	\end{array}\right]$$
-\paragraph{Orthogonal} A square matrix $U\in \mathbb{R}^{n\times n}$ is orthogonal if $U^TU = I \Leftrightarrow UU^T = I \Leftrightarrow U^{-1} = U^T$ equivalently\\
-\textbf{Theorem}: for an orthogonal matrix $U\in \mathbb{R}^{n\times n}$ and every vector $x$, $\|Ux\| = \|x\|$\\
-More generally, $x^T y = (Ux)^T(Xy)$ for all vectors $x,y\in \mathbb{R}^n$\\
+\paragraph{Norms} A norm is a way to measure the length or the distance from $0$ of a vector. A norm has the following properties:
+\begin{list}{}{}
+	\item $\|v\| \geq 0$, and $\|v\|=0\Leftrightarrow v = 0$
+	\item $\|v\alpha\|=\|v\|\cdot|\alpha|$ for $\alpha\in\mathbb{C}$
+	\item $\|v+w\| \leq \|v\|+\|w\|$
+\end{list}
+There are many kinds of norm:
+\begin{list}{}{}
+	\item $\|v\|_{\infty} = \max_i|v_i|$
+	\item $\|v\|_1 = \sum_i|v_i|$
+	\item $\|v\|_2 = \sqrt{v_1^2+\ldots+v_m^2} = \sqrt{v^Tv} = \sqrt{\langle x,x\rangle}$
+\end{list}
+The last one is our preferred one, and often the index $_2$ is omitted. Many matrices preserve norm 2.
+\paragraph{Orthogonal} A square matrix $U\in \mathbb{R}^{n\times n}$ is orthogonal if $U^TU = I \Leftrightarrow UU^T = I \Leftrightarrow U^{-1} = U^T$ equivalently.
+\subparagraph{Theorem} For an orthogonal matrix $U\in \mathbb{R}^{n\times n}$ and every vector $x$, $\|Ux\| = \|x\|$ (meaning norm $_2$ with the index omitted, like from here onward).\\
+More generally, $x^T y = (Ux)^T(Uy)$ for all vectors $x,y\in \mathbb{R}^n$.\\
 The columns (or the rows) of a orthogonal matrix are \textbf{orthonormal}: $u_i^Tu_j = \left\{\begin{array}{l l}
 1 &\text{if } i = j\\0&\text{otherwise}
 \end{array}\right.$\\
 If $U,V\in \mathbb{R}^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
 \paragraph{Eigenvalues and eigenvectors} Given a square matrix $A\in \mathbb{R}^{m\times m}$, if $Av = \lambda v$ for $v\in \mathbb{R}^m, \lambda\in \mathbb{R}$ then we call $\lambda$ and \textbf{eigenvalue} and $v$ an \textbf{eigenvector} of $A$.\\
 For many matrices we can find $v_1,\ldots,v_m$ eigenvectors that are a basis of $R^m$, i.e. $[v_1|\ldots|v_m] = V$ is invertible.\\
-$A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda$, with $\Lambda = \left[\begin{array}{c c c}
+$$A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda\text{, with }\Lambda = \left[\begin{array}{c c c}
 \lambda_1 & & 0\\
 & \ddots \\
 0& & \lambda_m
-\end{array}\right]$\\
-Given $x\in \mathbb{R}^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$\\
-Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
+\end{array}\right]$$
+Given $x\in \mathbb{R}^m$ I can write $x = v_1\alpha_1 + \ldots + v_m\alpha_m$ then it's easy to compute the coordinates $Ax = A(v_1\alpha_1 + \ldots + v_m\alpha_m) = v_1(\lambda_1\alpha_1) + \ldots + v_m(\lambda_m\alpha_m)$. Also $A^kx = v_1(\lambda_1^k\alpha_1) + \ldots + v_m(\lambda_m^k\alpha_m)$\\
 Eigenvalue decompositions is not unique for all matrices. If $v$ is an eigenvector, then $v\cdot\alpha$ is still one, and if $v,w$ are eigenvectors of the same eigenvalue then $v+w$ is still an eigenvector of the same eigenvalue, and the same hold for any linear combination $\alpha v+\beta w$. Some matrices have complex eigenvalues/eigenvectors only, and some do not have enough eigenvectors to make a basis.
 \paragraph{Symmetry} $A$ is symmetric if $A = A^T$
 \paragraph{Spectral Theorem} For a symmetric matrix $A\in \mathbb{R}^{m\times m}$ we can always write $A = U\Lambda U^{-1}$
-\paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in \mathbb{R}^{m\times m}$ we can consider the function $x\in \mathbb{R}^m\mapsto f(x) = x^T Qx \in \mathbb{R}$\\
-\textbf{Theorem} For all symmetric matrix $Q \in \mathbb{R}^{m\times m}$, $\lambda_{\min}\|x\|^2 \leq x^TQx\leq \lambda_{\max}\|x\|^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
+\paragraph{Quadratic form} Given a symmetric matrix $Q = Q^T \in \mathbb{R}^{m\times m}$ we can consider the function $$x\in \mathbb{R}^m\mapsto f(x) = x^T Qx \in \mathbb{R}$$
+\subparagraph{Theorem} For all symmetric matrix $Q \in \mathbb{R}^{m\times m}$, $\lambda_{\min}\|x\|^2 \leq x^TQx\leq \lambda_{\max}\|x\|^2$, where $\lambda_{\min}, \lambda_{\max}$ are the smallest and largest eigenvalue of $Q$.
 \paragraph{Positive Semidefinite} $Q = Q^T$ is positive semidefinite ($Q \succeq 0$) if all eigenvalues $\lambda_i \geq 0 \Leftrightarrow \lambda_{\min} \geq 0$ hence $x^T Q x\geq 0$ for all $x\in \mathbb{R}^m$\\
 Positive definite ($Q \succ 0$) if all eigenvalues $\lambda_i > 0 \Leftrightarrow \lambda_{\min} > 0$ hence $x^TQx > 0$ for all $x \in \mathbb{R}^m, x\neq 0$
 \paragraph{Recall theorem} $\lambda_{\min}(x^T x) \leq x^T Q x \leq \lambda_{\max}(x^T x)$ for all symmetric $Q$ so $\lambda_{\min} \leq \frac{x^T Q x}{x^T x} \leq \lambda_{\max}$\\
 Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for all vectors $z$ with $\|z\| = 1$. Equivalent to the other form with $x = \alpha z$, for $\alpha = \|x\|$ and a vector $z$ with $\|z\| = 1$
 $$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
 \paragraph{Generalization for complex matrices} $\|x\|^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
-% fine recap lin alg
+% END 1-linalg
 \section{SVD}
 \paragraph{Singular Value Decomposition} Each $A\in \mathbb{R}^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
 The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
