@@ -175,6 +175,133 @@ Slightly different form $\lambda_{\min} \leq z^T Q z \leq \lambda_{\max}$ for al
 $$ \frac{x^T Q x}{x^T x} = \frac{(\not\alpha z)^T Q (\not\alpha z)}{\not\alpha^{\not 2}}$$
 \paragraph{Generalization for complex matrices} $\|x\|^2 = |x_1|^2 + \ldots + |x_n|^2$, $x^T \longrightarrow \overline{x^T} = x^*$. For orthogonal matrices $U^*U=I \Rightarrow U$ is unitary. For symmetry $Q^* = Q \Rightarrow Q$ is Hermitian.
 % END 2-orthogonality
+\section{(Linear) Least Squares problems}
+Given 
+\begin{list}{}{}
+	\item Some \textbf{vectors} $a_1,\ldots,a_n\in \mathbb{R}^m$ so that $A = [a_1|\ldots|a_n]\in \mathbb{R}^{m\times n}$
+	\item A \textbf{target vector} $b\in \mathbb{R}^m$
+\end{list}
+find $x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
+In general, the classic formulation of the \textbf{linear least squares} problem: $$\min_{x\in \mathbb{R}^n} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^n} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
+Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
+1\\2\\0
+\end{array}\right]}x_1 + \underset{a_2}{\left[\begin{array}{c}
+1\\3\\0
+\end{array}\right]}x_2 = \underset{b}{\left[\begin{array}{c}
+5\\5\\1
+\end{array}\right]}$$ is not solvable because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? In this case, I can get $$\left[\begin{array}{c}
+1\\2\\0
+\end{array}\right]x_1 + \left[\begin{array}{c}
+1\\3\\0
+\end{array}\right]x_2 = \left[\begin{array}{c}
+5\\5\\0
+\end{array}\right]$$
+\paragraph{Geometric View} On the hyperplane $\text{Im}(A)$, the closest part to $b$ is its orthogonal projection.
+\paragraph{Solvability} When $m=n$, i.e. $A$ is square and the number of vectors is equal to their length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ the vectors are linearly independent $\Leftrightarrow$ $A$ is invertible.\\
+\textbf{Typical case} is $A$ long thin, we cannot get all vectors $b$ but still $\min_{x\in \mathbb{R}^m} \|Ax - b\|_2$ is a question that makes sense. 
+\paragraph{Polynomial Fitting} Find a polynomial that best approximates some given data points, the pairs $(x_i,y_i)$,\\for $i=1,\ldots,m$ of degree $<n$.\\
+An example: given pairs $(x_i, y_i)$ such that $y_i \simeq ax_i^3 + bx_i^2 + cx_i + d$, find $a,b,c$ and $d$. Note that our unknowns are $a,b,c$ and $d$, and not $x_i$, thus our problem is linear.
+\subparagraph{Statistical version} Given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{\text{coeff}}\|Ax - y\|_2^2$
+% END 3-intro-leastsquares
+\paragraph{Theory of Least-Squares Problems} With $A \in \mathbb{R}^{m\times n}$, when does $\min \|Ax-b\|_2$ have a unique solution?\\
+We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $0 = \min\|Ax-b\|$ with unique $x$.\\
+We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n$ such that $z\neq 0\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
+\subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
+\textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
+\textbf{Proof} $Az \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+\begin{list}{$\Leftrightarrow$}{}
+	\item $\|Az\|_2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $\|Az\|_2^2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
+	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
+\end{list}
+By manipulating the original problem $\min_{x\in \mathbb{R}^n} \|Ax-b\|_2$ we obtain $$\min \|Ax-b\|_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
+$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)
+\paragraph{Positive definite} A matrix $M$ is positive definite if $\forall\:x\in\mathbb{R}^n\:|\:x\neq0$ we have $x^TMx>0$\\\\
+So the least-squares problem $\min_x \|Ax-b\|$ has unique solution
+\begin{list}{$\Leftrightarrow$}{}
+	\item $f(x)$ has a unique minimum point
+	\item $2A^TA = Q \succ 0$ (positive definite)
+	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
+\end{list}
+The minimum is when $\text{grad}(f(x)) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
+$x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
+\subparagraph{Algorithm}
+\begin{enumerate}
+	\item Form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
+	\item Form $A^Tb$, costs $2mn$ flops plus lower order terms
+	\item Solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
+\end{enumerate}
+If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD.\\
+Possible optimizations:
+\begin{enumerate}
+	\item $A^TA$ symmetric so can compute only upper triangle then mirror the rest so from $2mn^2$ becomes $mn^2$ flops
+	\item Already a cheap step
+	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
+\end{enumerate}
+\paragraph{Pseudoinverse} $x = A^TA^{-1}A^Tb$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in \mathbb{R}^{m\times n}$ then $A^+ \in \mathbb{R}^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in \mathbb{R}^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in \mathbb{R}^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
+As consequences, if $x_1$ is solution of $\min\|Ax - b_1\|$ and $x_2$ is solution of $\min\|Ax - b_2\|$ then $x_1+x_2$ is solution of $\min\|Ax - (b_1 + b_2)\|$\\\\Sometimes ML problems are formulated "from the left side". With $w\in \mathbb{R}^{1\times n}$ row vector of weights, then $X\in \mathbb{R}^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
+$y \in \mathbb{R}^{1\times m}$ row vector "target"\\
+The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
+% END 4-leastsquares-normal
+\pagebreak
+\section{Conjugate Gradient}
+Given a $n\times n$ matrix $Q\succ 0$, and a vector $v = -q\in\mathbb{R}^n$, suppose we wish to minimize $$\min f(x) = \frac{1}{2}x^TQx-v^Tx+\text{ const}$$
+We know that's equivalent to solving $g = Qx-v = 0$, a linear system described also by $Qx = v$. Let's see an algorithm that uses these concepts.
+\subsection{Krylov Spaces}
+Given $Q\in\mathbb{R}^{m\times m}, v\in\mathbb{R}^m$ and $n\leq m$, the \textbf{Krylov space} $K_n(Q,v)$ is the linear subspace $$K_n(Q,v) = \text{span}(v, Qv, Q^2v,\ldots, Q^{n-1}v)$$
+That's the set of vectors that can be written as $$w = (c_0I+c_1Q+\ldots+c_{n-1}Q^{n-1})\cdot v=p(Q)\cdot v$$
+a \textbf{polynomial} of degree $d<n$ in $Q$, multiplied by $v$.\\
+A property is $w\in K_n(Q,v)\Rightarrow Qw\in K_{n+1}(Q, v)$\\\\
+If $v, Qv,\ldots,Q^{n-1}v$ are linearly independent, then the coordinates $c_i$ of any vector $w\in K_n(Q,v)$ are unique.\\
+For each $w$ the degree $d$ of the polynomial, such that $w=p(Q)\cdot v$ is well defined, gives that $v\in K_{d+1}(Q,v)\setminus K_d(Q,v)$.\\
+If at some $n_*$ we have $Q^{n_*}v \in K_{n_*}(Q,v)$ then we can prove that also $Q^{n_*+1}v, Q^{n_*+2}v,\ldots \in K_{n_*}(Q,v)$, then the concept of degree breaks down. This means that \textbf{dimensions increase up to a certain $n_*$, then stabilize}
+$$\underset{\text{dim = 1}}{\underbrace{K_1(Q,v)}}\subset\underset{\text{dim = 2}}{\underbrace{K_2(Q,v)}}\subset\ldots\subset\underset{\text{dim = }n_*}{\underbrace{K_{n_*}(Q,v)}}=\underset{\text{dim = }n_*}{\underbrace{K_{n_*+1}(Q,v)}}=\ldots$$
+Starting from $S=\{v\}$, the Krylov space $K_n(Q,v)$ is the set of vectors that I can obtain by\begin{list}{}{}
+	\item \textbf{Multiplying by} $Q \rightarrow$ add $Qw$ to the set with $w$ being any element of $S$
+	\item \textbf{Linear combination} $\rightarrow$ add $\sum_i w_i\alpha_i$ with $w_i$ being elements from $S$
+\end{list}
+The first operation is performed \textbf{fewer that $n$ times}.
+\subparagraph{Observation} This reflects the structure of many optimization algorithms.\\
+Suppose we are looking for $$\min f(x)=\frac{1}{2}x^TQx - v^Tx+\text{const}$$ and $x_0 = 0$. At each step, we take the gradient $g_k=Qx_k-v$ and use it to compute $x_{k+1}$. This results in\begin{list}{}{}
+	\item $x_1$ being a multiple of $g_0 = -v$
+	\item $x_2$ a linear combination of $x_1 = \alpha v$ and $g_1=Qx_1-v$
+	\item $x_3$ a linear combination of $x_1, x_2$ and $g_2=Qx_2-v$
+	\item \ldots
+\end{list}
+This means\begin{list}{}{}
+	\item $g_0, x_1\in K_1(Q,v)$
+	\item $g_1, x_2\in K_2(Q,v)\setminus K_1(Q,v)$
+	\item $g_2, x_3\in K_3(Q,v)\setminus K_2(Q,v))$
+	\item \ldots
+\end{list}
+We want an algorithm that solves linear systems, or equivalently minimizes quadratic functions, that at each step $k$ computes the best possible $x_k\in K(Q,v)$.
+\subsection{Conjugate Gradient}
+Let's start from an example with $Q=I$
+$$\min\frac{1}{2}\|y-w\|^2=\frac{1}{2}y^Ty-w^Ty+\text{const}=$$
+$$=\min\frac{1}{2}(y_1^2+y_2^2+\ldots+y_m^2) - (w_1y_1+w_2y_2+\ldots+w_my_m)+\text{const}$$
+Starting from $y_0=0$ we optimize each coordinate independently, obtaining
+$$y_1=\left[\begin{array}{c}
+w_1\\0\\\vdots\\0
+\end{array}\right]\:y_2=\left[\begin{array}{c}
+w_1\\w_2\\\vdots\\0
+\end{array}\right]\:\ldots$$
+At each step adding a multiple of a \textbf{search direction} $e_1,e_2,\ldots$, all \textbf{orthogonal} to each other.
+\paragraph{Orthogonal Directions} We can use any orthogonal set $U=[u_1,\ldots,u_m]$ as the orthogonal directions, instead of the canonical basis $e_1,\ldots,e_m$.\\
+We write $$w=U\left[\begin{array}{c}
+c_1\\\vdots\\c_m
+\end{array}\right]\:\:\|w\|=\|c\|$$
+to find $$y_k=\min f(y)\text{ over }U\left[\begin{array}{c}
+c_1\\\vdots\\c_{k-1}\\\text{*}\\0\\\vdots\\0
+\end{array}\right]=\{y_{k+1} + \alpha u_k\:|\:\alpha\in\mathbb{R}\}\:\:\text{Line search}$$
+or alternatively $$y_k=\min f(y)\text{ over }U\left[\begin{array}{c}
+\text{*}\\\vdots\\\text{*}\\\text{*}\\0\\\vdots\\0
+\end{array}\right]=\text{span}(u_1,\ldots,u_m)\:\:\text{Better property}$$
+\paragraph{Change of variable} This simple problem, with $Q=I$, is equivalent to any other quadratic problem via a change of variable.\\
+Given $R\in\mathbb{R}^{m\times m}$ invertible, $y=Rx$
+$$\min\frac{1}{2}y^Ty - w^Ty+\text{const} = \min\frac{1}{2}x^T\underset{=Q}{\underbrace{R^TR}}x - \underset{=v^T}{\underbrace{w^TR}}x+\text{const}$$
+We can solve this difficult problem on the $x$-space by looking at the easier problem in the $y$-space.
+% END 5-CG
 \section{SVD}
 \paragraph{Singular Value Decomposition} Each $A\in \mathbb{R}^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
 The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
@@ -321,76 +448,6 @@ $$\hat{A} = USV^T \Rightarrow M = \frac{1}{n}US\underset{=I}{\underbrace{V^TV}}S
 \end{array}\right]U^T$$
 which is an eigenvalue decomposition of matrix $M$: it has eigenvector matrix $U$, the same as the SVD of $\hat{A}$.\\
 Remark: SVD($\hat{A}$) is more numerically accurate than eig($M$) and eig($A\cdot A^T$)
-\section{(Linear) Least Squares problems}
-Given 
-\begin{list}{}{}
-	\item Some \textbf{vectors} $a_1,\ldots,a_n\in \mathbb{R}^m$ so that $A = [a_1|\ldots|a_n]\in \mathbb{R}^{m\times n}$
-	\item A \textbf{target vector} $b\in \mathbb{R}^m$
-\end{list}
-find $x_1,\ldots,x_n\in \mathbb{R}\:|\: a_1x_1 + \ldots + a_n x_n = b$\\
-In general, the classic formulation of the \textbf{linear least squares} problem: $$\min_{x\in \mathbb{R}^n} \|Ax - b\|_2 = \min_{x\in \mathbb{R}^n} \sqrt{\sum \left((Ax)_i - b_i\right)^2}$$
-Not always solvable, for example $$\underset{a_1}{\left[\begin{array}{c}
-1\\2\\0
-\end{array}\right]}x_1 + \underset{a_2}{\left[\begin{array}{c}
-1\\3\\0
-\end{array}\right]}x_2 = \underset{b}{\left[\begin{array}{c}
-5\\5\\1
-\end{array}\right]}$$ is not solvable because the third component is always $0 \neq 1$. As a backup question, how close can I get to $b$? In this case, I can get $$\left[\begin{array}{c}
-1\\2\\0
-\end{array}\right]x_1 + \left[\begin{array}{c}
-1\\3\\0
-\end{array}\right]x_2 = \left[\begin{array}{c}
-5\\5\\0
-\end{array}\right]$$
-\paragraph{Geometric View} On the hyperplane $\text{Im}(A)$, the closest part to $b$ is its orthogonal projection.
-\paragraph{Solvability} When $m=n$, i.e. $A$ is square and the number of vectors is equal to their length, then the problem is solvable $\Leftrightarrow$ the vectors are a basis $\Leftrightarrow$ the vectors are linearly independent $\Leftrightarrow$ $A$ is invertible.\\
-\textbf{Typical case} is $A$ long thin, we cannot get all vectors $b$ but still $\min_{x\in \mathbb{R}^m} \|Ax - b\|_2$ is a question that makes sense. 
-\paragraph{Polynomial Fitting} Find a polynomial that best approximates some given data points, the pairs $(x_i,y_i)$,\\for $i=1,\ldots,m$ of degree $<n$.\\
-An example: given pairs $(x_i, y_i)$ such that $y_i \simeq ax_i^3 + bx_i^2 + cx_i + d$, find $a,b,c$ and $d$. Note that our unknowns are $a,b,c$ and $d$, and not $x_i$, thus our problem is linear.
-\subparagraph{Statistical version} Given $(x_i, y_i)$, what is the choice of coefficients that "most likely" generated them? I can get $(x_i, y_i)$ starting from every polynomial, with the right set of random numbers. The \textbf{maximum likelihood estimator} on this problem is $\min_{\text{coeff}}\|Ax - y\|_2^2$
-% END 3-intro-leastsquares
-\paragraph{Theory of Least-Squares Problems} With $A \in \mathbb{R}^{m\times n}$, when does $\min \|Ax-b\|_2$ have a unique solution?\\
-We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $0 = \min\|Ax-b\|$ with unique $x$.\\
-We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n$ such that $z\neq 0\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
-\subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
-\textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
-\textbf{Proof} $Az \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
-\begin{list}{$\Leftrightarrow$}{}
-	\item $\|Az\|_2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
-	\item $\|Az\|_2^2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
-	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
-	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
-\end{list}
-By manipulating the original problem $\min_{x\in \mathbb{R}^n} \|Ax-b\|_2$ we obtain $$\min \|Ax-b\|_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
-$f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)
-\paragraph{Positive definite} A matrix $M$ is positive definite if $\forall\:x\in\mathbb{R}^n\:|\:x\neq0$ we have $x^TMx>0$\\\\
-So the least-squares problem $\min_x \|Ax-b\|$ has unique solution
-\begin{list}{$\Leftrightarrow$}{}
-	\item $f(x)$ has a unique minimum point
-	\item $2A^TA = Q \succ 0$ (positive definite)
-	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
-\end{list}
-The minimum is when $\text{grad}(f(x)) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
-$x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
-\subparagraph{Algorithm}
-\begin{enumerate}
-	\item Form $A^TA$, $n\times m\cdot m\times n$ product so it costs $2mn^2$ floating point operations (flops) plus lower order terms
-	\item Form $A^Tb$, costs $2mn$ flops plus lower order terms
-	\item Solve $A^TAx = A^Tb$ (for example with gaussian elimination or LU factorization) costs $\frac{2}{3}n^3$ flops plus lower order terms
-\end{enumerate}
-If $m \geq n$ then the overall complexity is $O(mn^2)$ same as SVD.\\
-Possible optimizations:
-\begin{enumerate}
-	\item $A^TA$ symmetric so can compute only upper triangle then mirror the rest so from $2mn^2$ becomes $mn^2$ flops
-	\item Already a cheap step
-	\item Other algorithms to solve this linear system because the matrix $A^TA$ is positive definite (example: Cholesky factorization, complexity is $\frac{1}{3}n^3$ flops, half the cost)
-\end{enumerate}
-\paragraph{Pseudoinverse} $x = A^TA^{-1}A^Tb$ can be denoted as the product of $A^+ = A^TA^{-1}A^T$ and $b$. $A^+$ is the pseudoinverse, or \textbf{Moore-Penrose pseudoinverse}. The definition is valid only when $A$ has full column rank. If $A\in \mathbb{R}^{m\times n}$ then $A^+ \in \mathbb{R}^{n\times m}$. Note that $A^+A = (A^TA)^{-1}(A^TA) = I\in \mathbb{R}^{n\times n}$, while $AA^+ = A(A^TA)^{-1}A^T \neq I\in \mathbb{R}^{m\times m}$. The latter is impossible, because the columns of $AA^+$ are linear combinations of the columns of $A$, so $AA^+$ has rank of at most $n$.\\
-As consequences, if $x_1$ is solution of $\min\|Ax - b_1\|$ and $x_2$ is solution of $\min\|Ax - b_2\|$ then $x_1+x_2$ is solution of $\min\|Ax - (b_1 + b_2)\|$\\\\Sometimes ML problems are formulated "from the left side". With $w\in \mathbb{R}^{1\times n}$ row vector of weights, then $X\in \mathbb{R}^{n\times m}$ short-fat ($n\leq m$) that has a row for each "feature" in the input pattern.\\
-$y \in \mathbb{R}^{1\times m}$ row vector "target"\\
-The problem is $\min\|wX - y\|$, same problem just transposed. Solution $w = yX^+$ with $X^+ = X^T(XX^T)^{-1}$ if $X$ has full row rank.
-% END 4-leastsquares-normal
-\pagebreak
 \section{QR factorization}
 There is a different algorithm to solve the least-square problems, which is based on another kind of matrix factorization: the QR. It factorizes a square matrix $A$ into a product $QR$ with $Q$ orthonormal and $R$ upper triangular.\\
 We start with a subproblem: given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $$s\cdot e_1 = \left[\begin{array}{c}
@@ -667,6 +724,7 @@ By the Eckhart-Young theorem, $$\min_{B\:sing}\|A-B\| = \min_{rk(B)\leq n-1}\|A-
 \paragraph{Theorem} The condition number of the least-squares problem $\min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
 \paragraph{Condition Number} "Local" bound of the form $$\frac{\|\tilde{y} - y\|}{\|y\|} \leq k\frac{\|\tilde{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\tilde{x}$ of $x$, $\tilde{y} = f(\tilde{x})$
 \pagebreak
+
 \section{Floating Point Numbers}
 \paragraph{Quick recap} Binary exponential notation.\\
 \textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
