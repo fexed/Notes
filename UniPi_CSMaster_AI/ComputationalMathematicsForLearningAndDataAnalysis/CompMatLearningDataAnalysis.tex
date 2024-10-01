@@ -303,36 +303,44 @@ $$\min\frac{1}{2}y^Ty - w^Ty+\text{const} = \min\frac{1}{2}x^T\underset{=Q}{\und
 We can solve this difficult problem on the $x$-space by looking at the easier problem in the $y$-space.
 % END 5-CG
 \section{SVD}
-\paragraph{Singular Value Decomposition} Each $A\in \mathbb{R}^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
-The first notable difference is it exists for every square matrix. The second difference is $V^T$ which is not the inverse of $U$.\\
+\paragraph{Singular Value Decomposition} Variant of the eigenvalue decomposition that is well-defined for every matrix: each $A\in \mathbb{R}^{n\times n}$ can be decomposed as $A = U\Sigma V^T$ with $U, V$ orthogonal and $\Sigma$ diagonal with $\sigma_1 \geq \ldots \geq \sigma_n \geq 0$.\\
+Note that $V^T$ is not the inverse of $U$, and we lose the property of expressing matrix powers through the decomposition (because $A^2=A\cdot A=U\Sigma V^T\cdot U\Sigma V^T\neq U\Sigma^2 V^T$)\\
 Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
 \sigma_1\\ & \sigma_2\\ & & \ddots\\ & & & \sigma_m
 \end{array} \right]\left[\begin{array}{c}
 v_1^T\\v_2^T\\\vdots\\v_m^T
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
 \subparagraph{Geometric idea} There is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
-$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}. Singular values are not eigenvalues: they are always positive and usually more "spread apart".\\
+$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}. Singular values are not eigenvalues: they are always positive and usually more "spread apart" Singular vectors $u_i, v_i$ are not unique.
 \subparagraph{Rectangular SVD} Each $A\in \mathbb{R}^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in \mathbb{R}^{m\times m}$, $V \in \mathbb{R}^{n\times n}$ are orthogonal and $\Sigma\in \mathbb{R}^{m\times n}$ is diagonal, so there's a padding $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_{\min(m, n)} \sigma_{\min(m, n)} v_{\min(m, n)}^T$
+\subparagraph{Thin SVD} The sum-of-rank-1 matrices form uses only the first $\min(m,n)$ columns of $U$ and $V$: this suggest a more compact form, the thin or economy-sized SVD, for all tall-thin matrices
+$$A= \left[\begin{array}{c c}
+U_0 & U_C
+\end{array}\right]\left[\begin{array}{c}
+\Sigma_0\\0
+\end{array}\right]V^T=U_0\Sigma_0V^T$$
+with $U_0\in\mathbb{R}^{m\times n},\Sigma_0\in\mathbb{R}^{n\times n}$
 \subparagraph{Cost in Malab} \texttt{svd(A, 'econ')} costs $\max(m,n)\cdot \min(m,n)^2$, still cubic but linear in the largest dimension.\\
 The full \texttt{[U, S, V] = svd(A)} cannot be linear because one of the outputs will be a huge orthogonal matrix of $\max(m,n)\times \max(m,n)$, so it will cost more in time and memory.
-\subparagraph{Properties} The SVD reveals rank, image and kernel of a matrix.
+\paragraph{Properties} The SVD reveals rank, image and kernel of a matrix.
 \begin{list}{}{}
 	\item \textbf{Rank}\\
-The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$. $\sigma_1\geq \ldots\geq\sigma_r > \sigma_{r+1} = \ldots = \sigma_{\min(m,n)} = 0$
+The rank of a matrix $A$ is equal to the number of non-zero $\sigma_i$ $$\sigma_1\geq \ldots\geq\sigma_r > \sigma_{r+1} = \ldots = \sigma_{\min(m,n)} = 0$$
 	\item \textbf{Image}\\
 	For each $x\in\mathbb{R}^n, Ax$ is a linear combination of $u_1,\ldots,u_r$
 	\item \textbf{Kernel}\\
 	Any linear combination $y$ of $v_{r+1},\ldots,v_n$ satisfies $Ay = 0$
 \end{list}
 Given $A = U\Sigma V^T$ we can compute $$A^T A = (U\Sigma V^T)^T(U\Sigma V^T) = V\Sigma^T U^T U \Sigma VV^T = V\Sigma^T \Sigma V^T$$ with $\Sigma^T \Sigma$ diagonal and $V\Sigma^T \Sigma V^T$ is both an eigenvalue decomposition and an SVD. This proves that \textbf{the eigenvalues of $A^T A$ are the squares of the singular values of $A$} plus additional zeroes for dimension reasons.
-\paragraph{Norms} The norm of a matrix $A\in \mathbb{R}^{m\times n}$ is 
+% END 6-SVD
+\section{Norms} The \textbf{induced norm} of a matrix $A\in \mathbb{R}^{m\times n}$ is 
 $$\|A\|=\max_{z\in \mathbb{R}^n, \|z\|=1}\|Az\| = \max_{x\in\mathbb{R}^n,x\neq 0}\frac{\|Ax\|}{\|x\|}$$
 $$\|Ax\|\leq \|A\|\cdot\|x\|$$
 With $\|x\|_2 = \sqrt{x^Tx}$ and $\|Ux\|=\|x\|$ for orthogonal $U$.\\
-Note that this definition is different from the \textbf{Frobenius norm}
+This definition is different from the \textbf{Frobenius norm}, a non-induced norm:
 $$\|A\|_F=\sqrt{a_{11}^2+a_{12}^2+\ldots+a_{21}^2+a_{22}^2+\ldots+a_{mn}^2}$$
 \subparagraph{Properties of the Norms}
 \begin{list}{}{}
@@ -352,8 +360,8 @@ $$\|A\|_F = \|U\Sigma U^T\|_F = \|\left[\begin{array}{c c c}
 && \sigma_{\min(m,n)}
 \end{array}\right]\|_F = \sqrt{\sigma_1^2+\ldots+\sigma_{\min(m,n)}^2}$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
-We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{rank(X) \leq K}\|A - X\|$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $\min{rank(X) \leq X}\|A - X\|$ is $$X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T = \left[\begin{array}{c c c}
+We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{\text{rank}(X) \leq K}\|A - X\|$. The theorem states that the solution is related to SVD.\\
+The optimal solution of $\min{\text{rank}(X) \leq X}\|A - X\|$ is $$X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T = \left[\begin{array}{c c c}
 \\
 u_1&\ldots&u_k\\
 \\
@@ -367,7 +375,8 @@ u_1&\ldots&u_k\\
 where $$A = u_1\sigma_1 v_1^T + \ldots + u_{\min(m,n)}\sigma_{\min(m,n)} v_{\min(m,n)}^T$$ is an SVD, $A = U\Sigma V^T$.
 \paragraph{Ranks} If $A$ has rank 1, then $A = u\cdot v^T$ and $A_{ij} = u_i\cdot v_j$\\
 If $A$ has rank 2, then $A= u_1\cdot v_1^T + u_2\cdot v_2^T$ and $A_{ij} = (u_1)_i\cdot (v_1)_j + (u_2)_i\cdot (v_2)_j$
-\paragraph{Excercise}
+% END 7-matrixnorm
+\paragraph{Exercise}
 $$\left(\sum(a_{ij}-x_{ij})^2\right)^{\frac{1}{2}} = \|A-X_k\|_F=\|U\Sigma V^T-U\left[\begin{array}{c c c c c c}
 \sigma_1\\
 &\ddots\\
@@ -406,10 +415,11 @@ $$\|U\left[\begin{array}{c c c c c c}
 &&&&\ddots\\
 &&&&&\sigma_{\min(m,n)}
 \end{array}\right]\|=\sqrt{\sum_{i=k+1}^{\min(m,n)}\sigma_i^2}$$
-\subsection{SVD Approximation} $X_1 = u_i\sigma_1 v_1^T =$ best approximation score of student $i \cdot n \cdot$ best approximation difficulty of exercise $j$\\
-As a statistical estimator: suppose my scores are of the form $A_{ij} = u_i v_j + \epsilon_{ij}$ with $\epsilon_{ij}$ being the error in the score for instance gaussian with variance $\lambda$.\\
-The rank 1 approx of $(u_1\sigma_1)$, $v_1$ given by SVD is the one that minimizes $\sum (A_{ij} - u_iv_j)^2 = \|A-X_1\|_F^2 = \sum \epsilon_{ji}^2$. This is the maximum-likelihood estimation of abilities $(u_1)_i, (v_1)_j$.\\\\
-The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which can be viewed as first approximation plus corrections.
+\subsection{SVD Approximation}
+Truncated SVD provides the \textbf{best rank-1 approximation} of given values $$A\simeq A_1 = u_1\sigma_1v_1^T$$
+The scalar $\sigma_1$ is just a scaling factor and may be incorporated into $u_1$ or $v_1$. The rank-1 approximation $A_1$ is the one that minimizes
+$$\|A-A_1\|_F^2 = \Sigma(A_{ij}-(A_1)_{ij})$$
+The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ which \textbf{can be viewed as the rank-1 approximation plus corrections}, so that $u_2$ and $v_2$ may have mixed signs.
 \begin{list}{}{}
 	\item $\sigma_1 >> \sigma_2,\ldots$ then $A$ very close to rank 1
 	\item $\sigma_1, \sigma_2 >> \sigma_3,\ldots$ then $A$ very close to rank 2, and so on
@@ -423,7 +433,8 @@ The best rank 2 approximation is $X_2 = u_1\sigma_1 v_1^T + u_2\sigma_2 v_2^T$ w
 \end{list}
 The original image was 256$\times$256 $= 2^{16}$ reals. The compressed version, with $k = 25$ we have $256\cdot5\cdot2 + 25$ which is about a factor of 5 less.
 \paragraph{Latent Semantic Analysis} In NLP the SVD is used by attributing the meaning of "concepts" to the columns of $U$ (with a positive/negative score for each word) and counting the occurrence of each concept in each sentence through the columns of $V$.
-\paragraph{Principal Component Analysis} Given columns $x_1,\ldots,x_n$ we define another vector $\mu$ and compute $\hat{x}_i$ for each $i$
+\paragraph{Principal Component Analysis} Application of the usage of $u_k, v_k$ from the SVD decomposition.\\
+Given columns $x_1,\ldots,x_n$ we define another vector $\mu$ and compute $\hat{x}_i$ for each $i$
 $$\mu = \frac{x_1+\ldots+x_n}{n}$$
 $$\hat{x}_{i} = x_i - \mu$$
 $$\hat{A} = \left[\begin{array}{c c c}
@@ -448,6 +459,10 @@ $$\hat{A} = USV^T \Rightarrow M = \frac{1}{n}US\underset{=I}{\underbrace{V^TV}}S
 \end{array}\right]U^T$$
 which is an eigenvalue decomposition of matrix $M$: it has eigenvector matrix $U$, the same as the SVD of $\hat{A}$.\\
 Remark: SVD($\hat{A}$) is more numerically accurate than eig($M$) and eig($A\cdot A^T$)
+\subparagraph{Usage of PCA} PCA returns a \textbf{basis} that allows to write each data point $\hat{x}_j = x_j - \mu$ as
+$$x_j - \mu = u_1 \alpha_{1j} + u_2\alpha_{2j} + \ldots + u_n\alpha_{nj}$$
+with the property that $u_1$ is the \textbf{direction of the largest variation in the data}, $u_2$ of the second largest variation and so on.
+% END 8-lab-SVD
 \section{QR factorization}
 There is a different algorithm to solve the least-square problems, which is based on another kind of matrix factorization: the QR. It factorizes a square matrix $A$ into a product $QR$ with $Q$ orthonormal and $R$ upper triangular.\\
 We start with a subproblem: given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $$s\cdot e_1 = \left[\begin{array}{c}
