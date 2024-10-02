@@ -463,9 +463,10 @@ Remark: SVD($\hat{A}$) is more numerically accurate than eig($M$) and eig($A\cdo
 $$x_j - \mu = u_1 \alpha_{1j} + u_2\alpha_{2j} + \ldots + u_n\alpha_{nj}$$
 with the property that $u_1$ is the \textbf{direction of the largest variation in the data}, $u_2$ of the second largest variation and so on.
 % END 8-lab-SVD
-\section{QR factorization}
-There is a different algorithm to solve the least-square problems, which is based on another kind of matrix factorization: the QR. It factorizes a square matrix $A$ into a product $QR$ with $Q$ orthonormal and $R$ upper triangular.\\
-We start with a subproblem: given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $$s\cdot e_1 = \left[\begin{array}{c}
+\section{QR}
+There is a different algorithm to solve the least-square problems, which is based on another kind of matrix factorization: the QR. It \textbf{factorizes a square matrix $A$ into a product $QR$ with $Q$ orthonormal and $R$ upper triangular}.\\
+The main difference is that is not as powerful or revealing as SVD, but it's much easier to compute.
+\paragraph{Householder Reflectors} We start with a subproblem: given $x\in \mathbb{R}^n$, find an orthogonal matrix $H$ such that $Hx$ is a vector of the form $$s\cdot e_1 = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right]\text{ with }e_1 = \left[\begin{array}{c}
 1\\0\\\vdots\\0
@@ -492,7 +493,8 @@ The geometric idea here is reflecting through the plane perpendicular to $x-y$, 
 	\end{array}\right]$
 \end{list}
 This way $x_1 - s$ is never a "true subtraction", because $x_1$ and $s$ have different signs.
-\paragraph{Theorem} $\forall\:A\in \mathbb{R}^{m\times n}\:\:\exists\:Q\in \mathbb{R}^{m\times m}$ orthogonal, $R\in \mathbb{R}^{m\times n}$ upper triangular $|\:A = QR$\\
+\paragraph{QR Factorization} The factorization follows from the following \textbf{theorem}.\\
+$\forall\:A\in \mathbb{R}^{m\times n}\:\:\exists\:Q\in \mathbb{R}^{m\times m}$ orthogonal, $R\in \mathbb{R}^{m\times n}$ upper triangular $|\:A = QR$\\
 When $n = 1$ we already solved: $\forall\:x\in \mathbb{R}^{m\times 1}\:\:\exists$ a Householder reflector $H\:|\:Hx = \left[\begin{array}{c}
 s\\0\\\vdots\\0
 \end{array}\right] \Leftrightarrow x = H\left[\begin{array}{c}
@@ -578,6 +580,7 @@ This would have a cost of $O(m^4)$ for a square matrix.
 	At each step of the for loop, giving $O(mn^2)$
 	\item Storing $Q \in \mathbb{R}^{m\times m}$ may be expensive, especially if $A$ is tall thin ($m>>n$)
 \end{enumerate}
+% END 9-QR
 \subparagraph{Thin QR} Restrict to $Q_1\in\mathbb{R}^{m\times n}, R_1\in\mathbb{R}^{n\times n}$. If $m>n$ $A=QR = [Q_1\:|\:Q_2]\cdot\left[\begin{array}{c}
 R_1\\\hline0
 \end{array}\right]$ with $Q_1\in \mathbb{R}^{m\times n}, Q_2\in \mathbb{R}^{m\times m-n}, R_1\in \mathbb{R}^{n\times n} = Q_1R_1+Q_20 = Q_1R_1$ (the last part is made of $n\times m-n$ zeroes).\\
@@ -632,12 +635,12 @@ Algorithm:
 	\item Solve the linear system $R_1x=c$ with back-substitution, $n^2$ operations
 \end{enumerate}
 Step 1 is the most expensive, cubic.\\
-When is $R_1$ invertible? Recall that the least-squares problem has unique solution $\Leftrightarrow$ A has full column rank $\Leftrightarrow$ $A^TA$ is positive definite $\Leftrightarrow$ $A^TA$ invertible $\Leftrightarrow$ $R_1$ invertible
+\textbf{When is $R_1$ invertible}? Recall that the least-squares problem has unique solution $\Leftrightarrow$ A has full column rank $\Leftrightarrow$ $A^TA$ is positive definite $\Leftrightarrow$ $A^TA=R_1^TR_1$ invertible $\Leftrightarrow$ $R_1$ invertible
 $$A^TA = (QR)^TQR = R^T\not Q^T\not QR = [R_1^T 0]\left[\begin{array}{c}
 R_1\\0
 \end{array}\right] = R_1^TR_1$$
-So $A^TA$ invertible $\Leftrightarrow R_1$ invertible. Remark: the factorization $A^TA=R_1^TR_1$ is a Cholensky factorization.\\
-We have proven that if $A=QR=\left[Q_1 Q_2\right]\left[\begin{array}{c}R_1\\0\end{array}\right]$ and has a full column rank, then the solution of $\min\|Ax-b\|$ is $x=R_1^{-1}(Q_t^R)b$, with the "thin $QR$" $A=Q_1R_1$ containing everything we need. The cost is \begin{list}{}{}
+So $A^TA$ invertible $\Leftrightarrow R_1$ invertible. Remark: the factorization $A^TA=R_1^TR_1$ is a \textbf{Cholensky factorization}.\\
+We have proven that if $$A=QR=\left[Q_1 Q_2\right]\left[\begin{array}{c}R_1\\0\end{array}\right]$$ and has a full column rank, then the solution of $$\min\|Ax-b\| \Leftrightarrow x=R_1^{-1}(Q_t^R)b$$ with the "thin $QR$" $A=Q_1R_1$ containing everything we need. The cost is \begin{list}{}{}
 	\item Multiplication $c = (Q_1^T)b$ in $O(mn)$
 	\item Triangular system solution $R_1x = c$ in $O(n^2)$ with back-substitution
 \end{list}
@@ -648,6 +651,8 @@ A negligible cost compared to the $O(mn^2)$ required to compute $Q_1$ and $R_1$
 	\item The residual $\|Ax-b\|$, i.e. the optimum of our optimization problem, is $\|Q_2^Tb\|$
 	\item The vectors $b$, $Ax$ and $Ax-b$ form a \textbf{right triangle} with side lengths $\|b\|$, $\|Q_1^Tb\|$ and $\|Q_2^Tb\|$ respectively.
 \end{list}
+% END 10-leastsquares-QR
+\pagebreak
 \subsection{Least Squares with SVD}
 The least-squares problem can also be solved with $SVD$. Given $A=USV^T$ we have $$\|Ax-b\| = \|USV^Tx-b\| = \|U^T(USV^Tx - b)\| = \|SV^Tx-U^Tb\| =$$
 With $S =\left[\begin{array}{c c c}
@@ -666,11 +671,11 @@ u_1^Tb\\\vdots\\u_n^Tb\\u_{n+1}^Tb\\\vdots\\u_m^Tb
 The first $n$ entries become $0$ if $y_i = \frac{u_i^Tb}{\sigma_i}$\\
 $$x = Vy = v_1y_1 + \ldots + v_ny_n = v_1\frac{u_1^Tb}{\sigma_1} + \ldots + v_n\frac{u_n^Tb}{\sigma_n}$$
 $$x = VS_1^{-1}U_1^Tb = A^+b$$
-The solution of $\min \|Ax-b\|$ is unique $\Leftrightarrow A^TA$ is invertible $\Leftrightarrow A^TA=(USV^T)^TUSV^T = VS^T\cancel{U^TU}SV^T = V\left[\begin{array}{c c c}
+The solution of $\min \|Ax-b\|$ is unique $\Leftrightarrow A^TA$ is invertible $\Leftrightarrow$ $$\Leftrightarrow A^TA=(USV^T)^TUSV^T = VS^T\cancel{U^TU}SV^T = V\left[\begin{array}{c c c}
 \sigma_1^2\\
 & \ddots\\
 & & \sigma_n^2
-\end{array}\right]V^T$ which is the eigenvalue decomposition for $A^TA$\\
+\end{array}\right]V^T$$ which is the eigenvalue decomposition for $A^TA$\\
 So $A^TA$ is invertible $\Leftrightarrow$ none of the $\sigma_i$ are zeroes $\Leftrightarrow S_1$ is invertible.\\
 What happens if $\sigma_1\geq \sigma_2 \geq \ldots \sigma_r > \sigma_{r+1} = \ldots \sigma_n = 0$? We would have $$\|Ax-b\|=\|\left[\begin{array}{c}
 \sigma_1y_1-u_1^Tb\\\vdots\\\sigma_ry_r-u_r^Tb\\\cancel{\sigma_{r+1}y_{r+1}}-u_{r+1}^Tb\\\vdots\\\cancel{\sigma_ny_n}-u_n^Tb\\-u_{n+1}^Tb\\\vdots\\-u_m^Tb
@@ -678,6 +683,7 @@ What happens if $\sigma_1\geq \sigma_2 \geq \ldots \sigma_r > \sigma_{r+1} = \ld
 Which is minimized if $y_1=\frac{u_1^Tb}{\sigma_1},\ldots,y_r=\frac{u_r^Tb}{\sigma_r},y_{r+1}=$ anything,$\ldots,y_n =$ anything.
 \paragraph{Special Solution} How to choose a special solution here? Let's define another problem: $$\min_{x\in\text{ solutions of }\min\|Ax-b\|} \|x\|$$
 $\|x\|=\|y\|$ minimized if $y_{r+1} = 0,\ldots,y_n = 0$. The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
+\pagebreak
 \paragraph{Effect of noise in data} Suppose to know $A+E = \tilde{A}$, with $A$ exact data, $E$ error/noise/etc. and $\tilde{A}$ the observed data. We have
 \begin{list}{}{}
 	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
@@ -690,6 +696,7 @@ A\\\lambda I
 \end{array}\right]x - \left[\begin{array}{c}
 b\\0
 \end{array}\right]\|^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
+% END 11-leastsqares-SVD
 \paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $A,b\mapsto X=A^{-1}b$ or $(x_i,y_i)\mapsto$ weights\ldots\\
 If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
 $$f(x+\delta) = f(x)+\delta\cdot f'(x) + O(\delta^2)$$
