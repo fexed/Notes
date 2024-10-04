@@ -685,6 +685,8 @@ Which is minimized if $y_1=\frac{u_1^Tb}{\sigma_1},\ldots,y_r=\frac{u_r^Tb}{\sig
 $\|x\|=\|y\|$ minimized if $y_{r+1} = 0,\ldots,y_n = 0$. The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
 \pagebreak
 \section{Conditioning and Stability}
+\paragraph{Quick recap of Floating Point arithmetic} Binary exponential notation.\\
+\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
 \paragraph{Effect of noise in data} Suppose to know $A+E = \tilde{A}$, with $A$ exact data, $E$ error/noise/etc. and $\tilde{A}$ the observed data. We have
 \begin{list}{}{}
 	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
@@ -740,10 +742,20 @@ The \textbf{relative condition number} of a function $f$ is
 $$K_{rel}(f,x)=\lim_{\delta\to0}\sup_{\|d\|<\delta} \frac{\frac{\|f(x+d)-f(x)\|}{\|f(x)\|}}{\frac{\|d\|}{\|x\|}} = K_{abs}(f,x)\frac{\|x\|}{\|f(x)\|}$$
 It's also a Ballpark Estimate of the number of significant digits that are correct: if you change $x=1$ to $\tilde{x}=1.001$, $3$ significative digits are correct $\frac{|\tilde{x}-x|}{|x|}=0.001 = 10^{-3}$\\
 Remember that the condition number measure the sensitivity of a \textbf{problem} to changes in input, emphasis on "problem" and not the specific \textit{instance} of that problem. It's \textbf{important to use relative errors whenever we need to measure if something is small or large}: thresholds in algorithms, error measures, stability checks, etc.
+\begin{list}{}{}
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 1$ corresponds to a very bad accuracy
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-3}$ corresponds to about 3 correct significant digits, good enough for certain applications
+	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-16}$ corresponds to about 16 correct digits, and usually we can't do better than this with double precision arithmetic
+\end{list}
+The relative condition number of a solving linear equations with a matrix $A$ is $K(A)=\|A\|\|A^{-1}\|$. We often use an abuse of notation like "condition number of a matrix $A$". By using SVD, we know that $\|A\|=\sigma_1$ (the largest singular value), thus $K(A)=\frac{\sigma_1}{\sigma_n}$.
 % END 12-conditioning
-\paragraph{Condition Numbers in Linear Systems}
-$Ax = b, A\in \mathbb{R}^{n\times n}, b\in \mathbb{R}^n$, we perturb input $b$ to $\tilde{b}\in \mathbb{R}^n$ and call $\tilde{x}$ the solution of $A\tilde{x} = \tilde{b}$, while $x$ solution of $Ax=b$.\\
-The absolute bound is $$\|\tilde{x}-x\| = \|A^{-1}\tilde{b} - A^{-1}b\| = \|A^{-1}(\tilde{b}-b)\|\leq \|A^{-1}\|\cdot \|\tilde{b}-b\|$$ and $$\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$$Putting all together gives $$\frac{\|\tilde{x} - x\|}{\|x\|} \leq \|A^{-1}\|\cdot\|A\|\cdot\frac{\|\tilde{b}-b\|}{\|b\|}$$ because $K(A) = \|A\|\cdot\|A^{-1}\|$ the condition number of $A$ matrix.\\\\
+\subsubsection{Condition Numbers in Linear Systems}
+\paragraph{Linear Equations} With $A$ a fixed square invertible matrix, we want the variation in the output of $f(A,y) = A^{-1}y$ with respect to $y$ input. For a certain $\tilde{y}$ let $\tilde{x}=A^{-1}\tilde{y}$ be the solution of $A\tilde{x}=\tilde{y}$, thus
+$$\|\tilde{x}-x\|=\|A^{-1}\tilde{y}-A^{-1}y\| = \|A^{-1}(\tilde{y}-y)\|\leq\|A^{-1}\|\cdot\|\tilde{y}-y\|$$
+$$\|y\|=\|Ax\|\leq\|A\|\|x\|$$
+And combining we get $$\frac{\|\tilde{x} - x\|}{\|x\|}\leq \frac{\|A^{-1}\|\|\tilde{y}-y\|}{\frac{\|y\|}{\|A\|}} = \|A\|\|A^{-1}\|\frac{\|\tilde{y}-y\|}{\|y\|}$$
+And the bound hold $\forall\tilde{y}$ thus even for the limit $\|\tilde{y}-y\|\rightarrow 0$.
+\subparagraph{Theorem} The \textbf{relative} condition number of solving linear equations with $A$ fixed and $y$ as input is $$K(A)=\|A\|\cdot\|A^{-1}\|$$ This is also called the \textbf{condition number of the matrix $A$}.\\
 What if we perturb $\tilde{A} = A + \Delta$? One can prove, if $\tilde{x}$ is solution of $\tilde{A}\tilde{x} = b$, that $$\frac{\|\tilde{x} - x\|}{\|x\|} \leq \|A\|\cdot\|A^{-1}\|\cdot\frac{\|\tilde{A}-A\|}{\|A\|}+o(\|\Delta\|)$$
 In terms of SVD we know that $\|A\| = \sigma_1$. For a square invertible matrix $A=USV^T$ we have that $\|A^{-1}\| = \frac{1}{\sigma_n}$, so $K(A) = \|A\|\cdot\|A^{-1}\| = \frac{\sigma_1}{\sigma_n}$.\\
 A related quantity is the distance between $A$ and the closest singular matrix. A matrix $B\in \mathbb{R}^{n\times n}$ is singular if $rk(B)<n$.\\
@@ -751,20 +763,6 @@ By the Eckhart-Young theorem, $$\min_{B\:sing}\|A-B\| = \min_{rk(B)\leq n-1}\|A-
 \paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in \mathbb{R}^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
 \paragraph{Theorem} The condition number of the least-squares problem $\min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
 \paragraph{Condition Number} "Local" bound of the form $$\frac{\|\tilde{y} - y\|}{\|y\|} \leq k\frac{\|\tilde{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\tilde{x}$ of $x$, $\tilde{y} = f(\tilde{x})$
-\subsection{Floating Point Numbers}
-\paragraph{Quick recap} Binary exponential notation.\\
-\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
-\paragraph{(Absolute) Condition Number} The (absolute) condition number of a function $f : \mathbb{R}\rightarrow\mathbb{R}$ is the best bound $K$ in the form $$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$
-with $o(\delta)$ representing higher order terms like $\delta^2$, very small. Formally: $$K_{\text{abs}}(f,x) = \lim_{\delta\to 0}\frac{|f(x+\delta)-f(x)|}{|\delta|}$$ which is a close relative of the derivative $|\frac{\partial f}{\partial x}|$
-\paragraph{Relative Condition Number} A relative change for an input is $\frac{|\tilde{x}-x|}{|x|}$, and the same can be computed for an output $\frac{|f(\tilde{x})-f(x)|}{|f(x)|}$. The relative condition number of a function $f$ is $$K_{\text{rel}}(f,x) = \lim_{\delta\to0}\sup_{\|d\|\leq\delta} = \frac{\frac{\|f(x+d)-f(x)\|}{\|f(x)\|}}{\frac{\|d\|}{\|x\|}} = K_{\text{abs}}(f,x)\frac{\|x\|}{\|f(x)\|}$$
-Absolute errors are usually worthless without some reference point, while relative errors are useful indications on the stability of an operation.
-\begin{list}{}{}
-	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 1$ corresponds to a very bad accuracy
-	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-3}$ corresponds to about 3 correct significant digits, good enough for certain applications
-	\item $\frac{|\tilde{x}-x|}{|x|}\simeq 10^{-16}$ corresponds to about 16 correct digits, and usually we can't do better than this with double precision arithmetic
-\end{list}
-So, \textbf{use relative errors when you have to measure if something is small or large}. Particularly, in the project\\
-The relative condition number of a solving linear equations with a matrix $A$ is $K(A)=\|A\|\|A^{-1}\|$. We often use an abuse of notation like "condition number of a matrix $A$". By using SVD, we know that $\|A\|=\sigma_1$ (the largest singular value), thus $K(A)=\frac{\sigma_1}{\sigma_n}$.
 \paragraph{Conditioning of Least Squares Problem} More complicated than the one for linear systems, no full proof.\\
 Considering the linear least squares problem $\min\|Ax-b\|$ with $A\in\mathbb{R}^{m\times n}$ with full column rank, its relative condition number with respect to input $b$ is $$K_{\text{rel}, b\to x}\leq\frac{K(A)}{\cos\theta}$$ and with respect to $A$ is $$K_{\text{rel}, A\to x}\leq K(A)+K(A)^2\tan\theta$$ with $\theta$ being the angle such that $\cos\theta=\frac{\|Ax\|}{\|b\|}$\\
 Few intuitions:\begin{list}{}{}
@@ -772,6 +770,8 @@ Few intuitions:\begin{list}{}{}
 	\item $K(A)$ tells us how well we can extract $\text{Im}A$ from $A$
 	\item $\theta\simeq 0$ gives more well-behaved problems: condition number is $\simeq K(A)$ instead of $\simeq K(A)^2$
 \end{list}
+% END 13-conditioning-least-squares
+\subsection{Stability}
 \paragraph{Stability of Algorithms} Conditioning alone isn't enough. It can tell you whether or not you are dealing with a bad problem or not, but it doesn't tell you anything about the algorithm you are using to solve it. \textbf{Stability} tells you if your are using a bad algorithm or not.
 \paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
 In general, I can only ask the computer to compute $f(\tilde{x})$ where $\tilde{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\tilde{y}=f(\tilde{x})$ from $y=f(x)$?
