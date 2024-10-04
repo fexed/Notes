@@ -684,6 +684,7 @@ Which is minimized if $y_1=\frac{u_1^Tb}{\sigma_1},\ldots,y_r=\frac{u_r^Tb}{\sig
 \paragraph{Special Solution} How to choose a special solution here? Let's define another problem: $$\min_{x\in\text{ solutions of }\min\|Ax-b\|} \|x\|$$
 $\|x\|=\|y\|$ minimized if $y_{r+1} = 0,\ldots,y_n = 0$. The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
 \pagebreak
+\section{Conditioning and Stability}
 \paragraph{Effect of noise in data} Suppose to know $A+E = \tilde{A}$, with $A$ exact data, $E$ error/noise/etc. and $\tilde{A}$ the observed data. We have
 \begin{list}{}{}
 	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
@@ -697,14 +698,16 @@ A\\\lambda I
 b\\0
 \end{array}\right]\|^2$ with solution $x = (A^TA+\lambda^2 I)^{-1}A^Tb$
 % END 11-leastsqares-SVD
-\paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $A,b\mapsto X=A^{-1}b$ or $(x_i,y_i)\mapsto$ weights\ldots\\
-If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
+\paragraph{Sensitivity or conditioning of a problem} A problem maps input to output: $$A,b\mapsto X=A^{-1}b$$ $$(x_i,y_i)\mapsto\text{weights}$$ or many other examples. If $f(x,y) = x+y$ then $f(x+\delta, y) = x+y+\delta$, the input change is $\delta$ and the output change is $|x+y+\delta - (x+y)| = \delta$
 $$f(x+\delta) = f(x)+\delta\cdot f'(x) + O(\delta^2)$$
-The (absolute) condition number of a function $f$ (of an input $x$) is the best possible bound $K$ of the form
-$$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$ with $K$ being the \textbf{condition number}\\
-The absolute condition number of (differentiable) $f$ in $x$ is $|f'(x)| = K_{abs}(f,x)$. E.g. for $f(x)=x^2$\\$f(x+\delta)=(x+\delta)^2 = x^2+2x\delta+\delta^2$ and $|\frac{f(x+\delta)-f(x)}{\delta}|=|2x+\delta|$ which can be ignored for small enough changes.\\\\
-For \textbf{multivariate functions} there are possibly different notes of change across different directions. So, the \textbf{condition number} of a function $f:\mathbb{R}^m\rightarrow \mathbb{R}^n$ is the best constant $K$ that I can use to bound $$\|f(x+\delta)-f(x)\| \leq K\cdot\|\delta\| + o(\|\delta\|)$$
-The absolute condition number $K_{abs}$ is $$K_{abs}(f,x) = \lim_{\delta\to 0} \sup_{\|d\|\leq \delta}\frac{\|f(x+\delta)-f(x)\|}{\|d\|}$$ $$K_{abs}(f,x) = \|\nabla_x f\|$$ 2-norm of the gradient, or \textbf{Jacobian}, if $f$ differentiable.\\
+\subsection{Condition Number}
+The \textbf{(absolute) condition number} of a function $f$ (of an input $x$) is the best possible bound $K$ of the form
+$$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$ 
+E.g. for $f(x)=x^2$ we have $f(x+\delta)=(x+\delta)^2 = x^2+2x\delta+\delta^2$ and $|\frac{f(x+\delta)-f(x)}{\delta}|=|2x+\delta|$ which can be ignored for small enough changes.\\\\
+For \textbf{multivariate functions} there are possibly different notes of change across different directions.\\
+So, more formally, the \textbf{condition number} of a function $f:\mathbb{R}^m\rightarrow \mathbb{R}^n$ is the best constant $K$ that I can use to bound $$\|f(x+\delta)-f(x)\| \leq K\cdot\|\delta\| + o(\|\delta\|)$$
+The absolute condition number $K_{abs}$ is $$K_{abs}(f,x) = \lim_{\delta\to 0}\sup_{\|d\|<\delta}\frac{\|f(x+\delta) - f(x)\|}{\|\delta\|}$$ For differentiable real-valued function, this means $K_{abs}(f,x) = \|\nabla_x f\|$ for the 2-norm of the gradient, or \textbf{Jacobian} for a general norm.\\
+For scalar-valued functions, this is the norm of the derivative $$K_{abs}(f,x) = \:\vline\frac{df}{dx}\:\vline$$
 The \textbf{condition number measures the sensitivity of a problem to changes in input}.
 \subparagraph{Example} $x\in \mathbb{R}^2, x=\left[\begin{array}{c}
 x_1\\x_2
@@ -733,8 +736,11 @@ A better way is to use relative errors to measure the change.
 	\item Relative change in input: $\frac{\|\tilde{x}-x\|}{\|x\|}$
 	\item Relative change in output: $\frac{\|f(\tilde{x})-f(x)\|}{\|f(x)\|}$
 \end{list}
+The \textbf{relative condition number} of a function $f$ is 
+$$K_{rel}(f,x)=\lim_{\delta\to0}\sup_{\|d\|<\delta} \frac{\frac{\|f(x+d)-f(x)\|}{\|f(x)\|}}{\frac{\|d\|}{\|x\|}} = K_{abs}(f,x)\frac{\|x\|}{\|f(x)\|}$$
 It's also a Ballpark Estimate of the number of significant digits that are correct: if you change $x=1$ to $\tilde{x}=1.001$, $3$ significative digits are correct $\frac{|\tilde{x}-x|}{|x|}=0.001 = 10^{-3}$\\
-Remember that the condition number measure the sensitivity of a \textbf{problem} to changes in input.
+Remember that the condition number measure the sensitivity of a \textbf{problem} to changes in input, emphasis on "problem" and not the specific \textit{instance} of that problem. It's \textbf{important to use relative errors whenever we need to measure if something is small or large}: thresholds in algorithms, error measures, stability checks, etc.
+% END 12-conditioning
 \paragraph{Condition Numbers in Linear Systems}
 $Ax = b, A\in \mathbb{R}^{n\times n}, b\in \mathbb{R}^n$, we perturb input $b$ to $\tilde{b}\in \mathbb{R}^n$ and call $\tilde{x}$ the solution of $A\tilde{x} = \tilde{b}$, while $x$ solution of $Ax=b$.\\
 The absolute bound is $$\|\tilde{x}-x\| = \|A^{-1}\tilde{b} - A^{-1}b\| = \|A^{-1}(\tilde{b}-b)\|\leq \|A^{-1}\|\cdot \|\tilde{b}-b\|$$ and $$\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$$Putting all together gives $$\frac{\|\tilde{x} - x\|}{\|x\|} \leq \|A^{-1}\|\cdot\|A\|\cdot\frac{\|\tilde{b}-b\|}{\|b\|}$$ because $K(A) = \|A\|\cdot\|A^{-1}\|$ the condition number of $A$ matrix.\\\\
@@ -745,9 +751,7 @@ By the Eckhart-Young theorem, $$\min_{B\:sing}\|A-B\| = \min_{rk(B)\leq n-1}\|A-
 \paragraph{Least Squares Problem} \textbf{Theorem}: if $A\in \mathbb{R}^{m\times n}, m\geq n$ we define $K(A)=\frac{\sigma_1}{\sigma_n}$
 \paragraph{Theorem} The condition number of the least-squares problem $\min\|Ax-b\|$ for a full column rank matrix $A\in \mathbb{R}^{m\times n},b\in \mathbb{R}^m$ $$K_{rel,b\rightarrow x }\leq \frac{K(A)}{\cos\theta}$$ $$K_{rel,A\rightarrow x} \leq K(A) + K(A)^2\cdot\tan\theta$$ where $$\theta=\arccos\frac{\|Ax\|}{\|b\|}$$
 \paragraph{Condition Number} "Local" bound of the form $$\frac{\|\tilde{y} - y\|}{\|y\|} \leq k\frac{\|\tilde{x} - x\|}{\|x\|}$$ for a function $y=f(x)$ and a \textbf{small} perturbation $\tilde{x}$ of $x$, $\tilde{y} = f(\tilde{x})$
-\pagebreak
-
-\section{Floating Point Numbers}
+\subsection{Floating Point Numbers}
 \paragraph{Quick recap} Binary exponential notation.\\
 \textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
 \paragraph{(Absolute) Condition Number} The (absolute) condition number of a function $f : \mathbb{R}\rightarrow\mathbb{R}$ is the best bound $K$ in the form $$|f(x+\delta)-f(x)|\leq K|\delta| + o(\delta)$$
