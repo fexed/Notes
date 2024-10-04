@@ -685,8 +685,6 @@ Which is minimized if $y_1=\frac{u_1^Tb}{\sigma_1},\ldots,y_r=\frac{u_r^Tb}{\sig
 $\|x\|=\|y\|$ minimized if $y_{r+1} = 0,\ldots,y_n = 0$. The problem is that on computers the zeroes are very often not zeroes. Even including a term $v_{r+1}\frac{u_{r+1}^Tb}{\sigma_{r+1}}$ with a small $\sigma_{r+1}$ gives a huge contribution to the sum. In many case, stopping the sum early is beneficial: \textbf{truncated SVD}, with $i=1,\ldots,k$ and $k<m$. The Eckart-Young aproximation theorem can help too.
 \pagebreak
 \section{Conditioning and Stability}
-\paragraph{Quick recap of Floating Point arithmetic} Binary exponential notation.\\
-\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
 \paragraph{Effect of noise in data} Suppose to know $A+E = \tilde{A}$, with $A$ exact data, $E$ error/noise/etc. and $\tilde{A}$ the observed data. We have
 \begin{list}{}{}
 	\item $\sigma_1,\ldots,\sigma_n =$ SVD$(A)$
@@ -772,6 +770,9 @@ Few intuitions:\begin{list}{}{}
 \end{list}
 % END 13-conditioning-least-squares
 \subsection{Stability}
+\paragraph{Quick recap of Floating Point arithmetic} Binary exponential notation.\\
+\textbf{Theorem} $\forall\:x\in[-10^{308},-10^{-308}]\cup[10^{-308},10^{308}]$ there is a double precision floating point $\tilde{x}$ such that $$\frac{|\tilde{x} - x|}{|x|}\leq 2^{-52} \simeq 2.2\cdot10^{-16}=u$$
+$u$ is a value called \textbf{machine precision} or \textbf{accuracy}.
 \paragraph{Stability of Algorithms} Conditioning alone isn't enough. It can tell you whether or not you are dealing with a bad problem or not, but it doesn't tell you anything about the algorithm you are using to solve it. \textbf{Stability} tells you if your are using a bad algorithm or not.
 \paragraph{Error analysis} Given a function $y = f(x)$ and $x\in \mathbb{R}$, how accurately can I compute $y=f(x)$ on a computer?\\
 In general, I can only ask the computer to compute $f(\tilde{x})$ where $\tilde{x} =$ \texttt{floor}$(x)$, the closest floating point number to $x$. How far is $\tilde{y}=f(\tilde{x})$ from $y=f(x)$?
@@ -818,6 +819,7 @@ Normal equations are not backward stable: of a general linear system with a posi
 $A^T$ is not orthogonal. Even if the first two steps are perfectly accurate, the third causes error.
 $C=A^TA\Rightarrow K(C) = \frac{\sigma_1^2}{\sigma_n^2} = K(A)^2) \Rightarrow K_{LS,A\rightarrow x} = K(A)+K(A)^2\cdot\tan\theta$\\
 This may be larger than the condition number of the problem, especially for $\theta\simeq 0$.
+% END 14-stability
 \paragraph{Residuals and A-Posteriori Stability Checks} Let us start from square linear systems $Ax=b$. Suppose we have a computed $\tilde{x}$ that (approximately) solves the problem. How low can $\|r\| = \|Ax-b\|$ be?\\ Backward stable algorithms usually get residuals of the order of $u$, e.g.: $[\tilde{Q},\tilde{R}]=qr(A)$, $\tilde{Q}\tilde{R}=\hat{A}=A+F$ with $\|F\|=\|A\|\cdot O(u)$, the \textbf{residual of the QR factorization} is $$\frac{\|\tilde{Q}\tilde{R}-A\|}{\|A\|}=\frac{\|F\|}{\|A\|} = \frac{\cancel{\|A\|}\cdot O(u)}{\cancel{\|A\|}} = O(u)$$
 If I have a backward stable algorithm to solve $Ax=b$ (square linear system), then $\tilde{x}$ is the exact solution of $\tilde{A}\tilde{x}=\hat{b}$, i.e. $(A+E)\tilde{x}=b+f$ with $\frac{\|E\|}{\|A\|},\frac{\|f\|}{\|b\|} = O(u)$, so $A\tilde{x}+E\tilde{x}=b+f$ and $\|b\| = \|Ax\| \leq \|A\|\cdot\|x\|$
 $$\|A\tilde{x}-b\|=\|f-E\tilde{x}\|\leq \|f\|+\|E\|\cdot\|\tilde{x}\|=O(u)\cdot[\|b\|+\|A\|\cdot\|x\|]=O(u)\cdot\|A\|\cdot\|x\|$$
