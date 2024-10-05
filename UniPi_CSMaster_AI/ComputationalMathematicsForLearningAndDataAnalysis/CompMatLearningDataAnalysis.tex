@@ -852,8 +852,15 @@ Q_2^T(A\tilde{x}-\hat{b})
 \end{array}\right]\|$$
 because $Q_1^TQ_1=I$.\\
 And this $\Rightarrow\tilde{x}$ is the exact solution of $\min\|Ax-\hat{b}\|$
-% END 14-stability
 % END 15-stability-and-residual
+\paragraph{Stability of Matrix Products} Analogously to the scalar product, we can bound the error of the product of two matrices $C = AB$ with $$\|\tilde{C}-C\|\leq O(u)\|A\|\|B\|$$
+With $O(u)$ containing the polynomial factors. This is \textbf{not a small relative error} as $\|A\|\|B\|$ can be much larger than $\|C\|$.\\
+The computed result is \textbf{not backward stable}: $\tilde{C} = AB + F$ with $\|F\|\leq O(u)\|A\|\|B\|$ becomes
+$$\tilde{C} = A\underset{\tilde{B}}{\underbrace{(B+A^{-1}F)}}\:\:\:\:\:\:\|\tilde{B}-B\| = \|A^{-1}F\| \leq O(u)\|A^{-1}\|\|A\|\|B\|$$
+If $A = Q$ is \textbf{orthogonal} we have that $C = QB$ is backward stable
+$$\tilde{C} = Q\tilde{B}\:\:\:\:\:\:\:\:\|\tilde{B}-B\|\leq O(u)\|B\|$$
+And the same holds if $QB$ is computed with Householder transformations. A bound for the forward error $F$ can be obtained via stability analysis of computing $u$ and $HB = B - 2uu^TB$.
+% END 16-stability-least-squares
 \section{Algorithms for square linear systems $Ax=b$}
 Solving systems of equations $Ax = b$ with $A\in\mathbb{R}^{m\times m}$ large and sparse. Storing $A$ with $m = 100000$ requires circa 80GB of storage, and an algorithm of $O(m^3)$would be unfeasible (circa 10 years on a modern PC).\\
 Luckily, many real-world applications involve sparse matrices with very few non-zero elements per row. Some examples are: adjacency matrices for graphs, matrices describing networks of points joined by forces (engineering applications), KKT matrices in optimization\ldots These sparse matrices are usually stored as lists of non-zero elements $(i, j, a_{ij})$, which can be further compressed if the $j$s are listed increasingly. This format is known as \textbf{CSC}/\textbf{CSR} (compressed space column/row).
