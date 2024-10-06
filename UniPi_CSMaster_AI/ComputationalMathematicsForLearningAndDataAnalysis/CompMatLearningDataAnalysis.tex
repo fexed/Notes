@@ -864,63 +864,7 @@ And the same holds if $QB$ is computed with Householder transformations. A bound
 \section{Algorithms for square linear systems $Ax=b$}
 Solving systems of equations $Ax = b$ with $A\in\mathbb{R}^{m\times m}$ large and sparse. Storing $A$ with $m = 100000$ requires circa 80GB of storage, and an algorithm of $O(m^3)$would be unfeasible (circa 10 years on a modern PC).\\
 Luckily, many real-world applications involve sparse matrices with very few non-zero elements per row. Some examples are: adjacency matrices for graphs, matrices describing networks of points joined by forces (engineering applications), KKT matrices in optimization\ldots These sparse matrices are usually stored as lists of non-zero elements $(i, j, a_{ij})$, which can be further compressed if the $j$s are listed increasingly. This format is known as \textbf{CSC}/\textbf{CSR} (compressed space column/row).
-\paragraph{Factorization} This is one of the main tools used to solve linear systems: breaking up a matrix into pieces that are easier to invert. You can use $A=QR$, $A=U\Sigma V^T$, $A=LU$ and more, and sometimes the same factorization can be used to solve more than one linear system.
-\subsection{Gaussian Elimination}
-Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
-Ly=b\\Ux=y
-\end{array}\right.$ is $2n^2$
-\paragraph{Stability} Stability can be a problem. Error analysis with $\tilde{L}\,\tilde{U} = \tilde{A}$, we have $\|\tilde{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max_i|b_i|$ for $i=k,k+1,\ldots,n$\\
-Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
-$$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
-$$PA = LU$$
-$$A = P^TLU$$
-With an overhead of $O(n^2)$ swaps and comparisons.
-\subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow \|L\|$ stays bounded. However, in the worst case, $\frac{\|U\|}{\|A\|} = 2^n$ (exponentially larger). The average case is that $\frac{\|U\|}{\|A\|}$ is bounded polynomially.
-\subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure, a process that is called \textbf{fill-in}. We can try to avoid it by choosing the pivot row to be as sparse as possible at each step in a greedy fashion, or to "predict" sparsity with some heuristic to achieve a better solution. But finding the optimal sparsity pattern is NP-complete, and we already want to choose the pivot row to ensure stability so we need a tradeoff between the two criteria. It's another whole problem that goes in background when considering that we'd need to deal with sparse representation, memory allocation and more.\\
-Anyway, it's often faster to perform a single matrix to matrix multiplication rather than $n$ matrix to vector ones, thanks to cache reuse, vectorization and more, and this even without considering multithreaded code.
-\subsection{Symmetric Gaussian Elimination} Even if $A$ is symmetric, $L_1A$ is not symmetric but $L_1AL_1^T$ is
-$$(L_1AL_1)^T = L_1AL_1^T$$
-After $n-1$ steps we have $$L_{n-1}\ldots L_1AL_1^T\ldots L_{n-1}^T = D$$
-$$A = \underset{L}{\underbrace{L_{n-1}^{-1}\ldots L_1^{-1}}}\cdot D\cdot \underset{L^T}{\underbrace{(L_{n-1}^T)^{-1}\ldots(L_1^T)^{-1}}}$$
-$$A = L D L^T$$
-With $L$ lower triangular with $1$ on the diagonal, $D$ diagonal and $L^T$ transpose of $L$. This is called \textbf{LDL factorization}.
-\subparagraph{Theorem} For any $A=A^T$, \textbf{if we do not encounter zero pivots} we can find $L,D\:|\:A = L DL^T$ with $L$ lower triangular with $1$ on the diagonal and $D$ diagonal.\\
-Small pivots, even non-zero, brings instability. We will need pivoting (row exchanges).\\
-To preserve symmetry, one needs to exchange not only rows but columns too: $PAP^T$ swaps both rows and columns. Unfortunately this is still not enough to ensure large pivots. To avoid this, one needs to allow for $2\times 2$ blocks in $D$\\
-$(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\
-It's not stable unless we do some form of pivoting, that must be symmetric like $P^TAP$. There are pivoting strategies (Bunch-Parlett, Bunch-Kaufman\ldots) that produce $LDL^T$ factorizations which are stable in practice, with $2\times2$ block pivots.\\\\
-Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in \mathbb{R}^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
-\subparagraph{Lemma} If $A\in \mathbb{R}^{n\times n}$ is positive definite, we have two properties:
-\begin{list}{}{}
-	\item $A_{k,k}>0$ for $k=1,\ldots,n$
-	\item For all invertible $M\in \mathbb{R}^{n\times n}$, $MAM^T$ is also positive definite
-\end{list}
-\textbf{Proof}: \begin{list}{}{}
-	\item $A_{k,k}=e_k^TAe_k > 0$ with $e_k$ array of zeroes with 1 in $k$
-	\item $x^TMAM^Tx = y^TAy > 0$ for all $x\in \mathbb{R}^n, x\neq 0\Rightarrow y= M^Tx \neq 0$
-\end{list}
-Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$.\\
-So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
-\subsection{Cholesky factorization}
-For positive definite matrices.
-$$A=LDL^T=LD^{\frac{1}{2}}(D^{\frac{1}{2}^T}L^T)=CC^T$$
-With $D^{\frac{1}{2}}=\text{diag}(D^{\frac{1}{2}}_{11}, D^{\frac{1}{2}}_{22},\ldots,D^{\frac{1}{2}}_{mm})$ and $C$ lower triangular. Another formulation:
-$$D = \left[\begin{array}{c c c}
-d_{1,1}& & 0\\
-& \ddots & \\
-0 & & d_{n,n}
-\end{array}\right] = \left[\begin{array}{c c c}
-\sqrt{d_{1,1}}& & 0\\
-& \ddots & \\
-0 & & \sqrt{d_{n,n}}
-\end{array}\right]\cdot\left[\begin{array}{c c c}
-\sqrt{d_{1,1}}& & 0\\
-& \ddots & \\
-0 & & \sqrt{d_{n,n}}
-\end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$$
-$$A = LDL^T = \underset{R^T}{\underbrace{LD^{\frac{1}{2}}}}\underset{R}{\underbrace{D^{\frac{1}{2}}L^T}} = R^T R$$ with $R$ upper triangular.\\
-Every $A \succ 0$ can be written as $A = R^T R$ where $R$ is upper triangular.\\
-Cholensky and LDL for positive definite matrices are stable even without pivoting $\|R\|=\|A\|^{\frac{1}{2}}$
+
 \subsection{Algorithms for solving linear systems}
 \begin{list}{}{}
 	\item Symmetric Positive Definite $\Rightarrow$ Cholensky, $\frac{1}{3}n^3$
@@ -995,7 +939,7 @@ $$Ab = q_1\beta_1+q_2\beta_2 = \lambda q_1$$
 $$\beta_1 = q_1^TAb = q_1^T q_1 = \lambda$$
 $$Ab-q_1b = 0 = q_1\beta_2$$
 encountering breakdown at step 1.\\
-Differently from Gaussian Elimination, where a breakdown would change the algorithm introducing pivoting, in Arnoldi we have a "lucky breakdown", because when there's a breakdown we have all the elements for solving a linear system $Ax=b$. A lucky breakdown is in the following form $$A_jQ_j = Q_jH_j$$
+Differently from Gaussian Elimination, where a breakdown would change the algorithm introducing pivoting, \textbf{in Arnoldi we have a "lucky breakdown"} because when there's a breakdown we have all the elements for solving a linear system $Ax=b$. A lucky breakdown is in the following form $$A_jQ_j = Q_jH_j$$
 $$A\underset{x}{\underbrace{Q_jH_j^{-1}e_1\|b\|}} = Q_jH_jH_j^{-1}e_1\|b\|=b$$
 \paragraph{Theorem} When lucky breakdown happens in Arnoldi, $x=Q_jH_j^{-1}e_1\|b\|$ is the solution of $Ax = b$\\
 Even without a lucky breakdown, the pairs $(\lambda, Q_nv)$ (called \textbf{Ritz pairs}) are good approximations of the eigenpairs $(\lambda, v)$. Typically they converge to the largest (in modulus) eigenvalues of $A$ when one increases $n$.
@@ -1039,7 +983,8 @@ Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ b
 If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MINRES.
 % END 17-arnoldi
-\subsubsection{GMRES} \textbf{Generalized Minimum Residual}: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x = Q_ny$ $$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
+\subsubsection{GMRES} \textbf{Generalized Minimum Residual}: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x = Q_ny$. In other words, we \textbf{look for the best approximate solution inside $K_n(A,y)$}
+$$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
 $$=\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
 $$= \|\:\underline{H}_n y - e_1\|b\|\:\|$$ the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$ being the QR of $\underline{H}_n$, in $O(n^3)$\\
 Actually even cheaper, because $\underline{H}$ is upper triangular, has special structure and we can compute $qr(\underline{H})$ with complexity $O(n^2)$\\
@@ -1062,7 +1007,7 @@ q(\lambda_1)\\
 \end{array}\right] V^{-1}$\\
 First interesting result: if $A$ has at most $n$ distinct eigenvalues, then by interpolation there exists a polynomial $p$ of degree $< n$ such that $p(\lambda_i)=\frac{1}{\lambda_i}\Leftrightarrow q(\lambda_i)=\lambda_ip(\lambda_i)-1 = 0$ for all $i$, which implies that $q(A) = 0\Rightarrow \min_{x_n\in K_n(A,b)} \|Ax_n - b\| = 0$\\
 This extends inexactly to matrices that have clustered eigenvalues.
-\subsection{Conjugate Gradient}
+\subsubsection{Conjugate Gradient}
 \paragraph{Lanczos} Also called \textbf{Symmetric Arnoldi}: if $A$ is symmetric ($A=A^T$), then $H_n$ is symmetric for each $n$ and hence it's \textbf{tridiagonal}.
 $$H_{ji} = q_j^TAq_i = (q_j^TAq_i)^T=q_i^TAq_j=H_{ij}$$
 So the orthogonalization loop can be shortened, we just need to compute a single part and mirror it. This reduces the cost to $n$ matrix products $+O(mn)$. This symmetric Arnoldi is also known as \textbf{Lanczos iteration}, and we can use it like the non-symmetric counterpart to compute eigenpairs of $A$ and solve linear systems $Ax=b$ with GMRES.
@@ -1152,6 +1097,7 @@ Similarly convergence is fast if the eigenvalues are clustered in location far a
 	\end{list}
 \end{list}
 Also, in machine arithmetic, orthogonality properties such as $q_i^Tq_j=0$ and $r_i^Tr_j=0$ can degrade as $j$ grows. This might slow down convergence.
+% END 18-GMRES
 \subsection{Solving Sparse Linear Systems}
 Be careful if you're using dense or sparse format! $K(A) = \|A\|\cdot\|A\|^{-1}$ and $\|A\|=\rho(A^TA)^{\frac{1}{2}}$\\
 $A=R^TR$, $Ax=b\Leftrightarrow R^TRx=b$ with $Rx=y \Rightarrow\left\{\begin{array}{l}
@@ -1160,6 +1106,63 @@ R^Ty = b\\Rx=y
 \textbf{Fill-in reducing permutation} $P^TAP = R^TR\Leftrightarrow A = PR^TRP$\\
 For example, \texttt{symrcm} "reverse Cuthill McKee".
 \paragraph{Preconditioning} The performances of CG and GMRES on $Ax=b$ depends a lot on where the eigenvalues of $A$ are located. $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods. A good choice of $P$ is if it "looks like" $\text{inv}(A)$, $P = \text{deg}(A)^{-1}$. A practical choice would be with $P=\text{diag}(A)^{-1}$, but even better preconditioners are obtained with incomplete LU.
+\paragraph{Factorization} This is one of the main tools used to solve linear systems: breaking up a matrix into pieces that are easier to invert. You can use $A=QR$, $A=U\Sigma V^T$, $A=LU$ and more, and sometimes the same factorization can be used to solve more than one linear system.
+\subsection{Gaussian Elimination}
+Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
+Ly=b\\Ux=y
+\end{array}\right.$ is $2n^2$
+\paragraph{Stability} Stability can be a problem. Error analysis with $\tilde{L}\,\tilde{U} = \tilde{A}$, we have $\|\tilde{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max_i|b_i|$ for $i=k,k+1,\ldots,n$\\
+Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
+$$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
+$$PA = LU$$
+$$A = P^TLU$$
+With an overhead of $O(n^2)$ swaps and comparisons.
+\subparagraph{Is LU plus pivoting stable?} If you ensure at step $k$ that $|b_k|\geq |b_i|$ for all $i>k$, then $|L_{i,k}| = \:\vline\frac{b_i}{b_k}\:\vline\:\leq 1 \Rightarrow \|L\|$ stays bounded. However, in the worst case, $\frac{\|U\|}{\|A\|} = 2^n$ (exponentially larger). The average case is that $\frac{\|U\|}{\|A\|}$ is bounded polynomially.
+\subparagraph{Another problem} With sparse matrices, the gaussian elimination often destroys sparsity structure, a process that is called \textbf{fill-in}. We can try to avoid it by choosing the pivot row to be as sparse as possible at each step in a greedy fashion, or to "predict" sparsity with some heuristic to achieve a better solution. But finding the optimal sparsity pattern is NP-complete, and we already want to choose the pivot row to ensure stability so we need a tradeoff between the two criteria. It's another whole problem that goes in background when considering that we'd need to deal with sparse representation, memory allocation and more.\\
+Anyway, it's often faster to perform a single matrix to matrix multiplication rather than $n$ matrix to vector ones, thanks to cache reuse, vectorization and more, and this even without considering multithreaded code.
+\subsection{Symmetric Gaussian Elimination} Even if $A$ is symmetric, $L_1A$ is not symmetric but $L_1AL_1^T$ is
+$$(L_1AL_1)^T = L_1AL_1^T$$
+After $n-1$ steps we have $$L_{n-1}\ldots L_1AL_1^T\ldots L_{n-1}^T = D$$
+$$A = \underset{L}{\underbrace{L_{n-1}^{-1}\ldots L_1^{-1}}}\cdot D\cdot \underset{L^T}{\underbrace{(L_{n-1}^T)^{-1}\ldots(L_1^T)^{-1}}}$$
+$$A = L D L^T$$
+With $L$ lower triangular with $1$ on the diagonal, $D$ diagonal and $L^T$ transpose of $L$. This is called \textbf{LDL factorization}.
+\subparagraph{Theorem} For any $A=A^T$, \textbf{if we do not encounter zero pivots} we can find $L,D\:|\:A = L DL^T$ with $L$ lower triangular with $1$ on the diagonal and $D$ diagonal.\\
+Small pivots, even non-zero, brings instability. We will need pivoting (row exchanges).\\
+To preserve symmetry, one needs to exchange not only rows but columns too: $PAP^T$ swaps both rows and columns. Unfortunately this is still not enough to ensure large pivots. To avoid this, one needs to allow for $2\times 2$ blocks in $D$\\
+$(L,D)$ has half the storage costs of $(L,U)$. Also the computational cost is halved: $\frac{1}{3}n^3$ versus $\frac{2}{3}n^3$ for $LU$, this because we operate on only the lower triangular parts given that $A_{k+1:n,k+1:n} = A_{k+1:n,k+1:n}-L_{k+1:n,k}\cdot A_{k,k+1:n}$ involves only symmetric elements.\\
+It's not stable unless we do some form of pivoting, that must be symmetric like $P^TAP$. There are pivoting strategies (Bunch-Parlett, Bunch-Kaufman\ldots) that produce $LDL^T$ factorizations which are stable in practice, with $2\times2$ block pivots.\\\\
+Things are better if $A$ is positive definite. Remember that $A = A^T$ and positive definite means $x^TAx>0$ for all $x\in \mathbb{R}^n,x\neq 0\Leftrightarrow$ all eigenvalues of $A$ are $>0$.
+\subparagraph{Lemma} If $A\in \mathbb{R}^{n\times n}$ is positive definite, we have two properties:
+\begin{list}{}{}
+	\item $A_{k,k}>0$ for $k=1,\ldots,n$
+	\item For all invertible $M\in \mathbb{R}^{n\times n}$, $MAM^T$ is also positive definite
+\end{list}
+\textbf{Proof}: \begin{list}{}{}
+	\item $A_{k,k}=e_k^TAe_k > 0$ with $e_k$ array of zeroes with 1 in $k$
+	\item $x^TMAM^Tx = y^TAy > 0$ for all $x\in \mathbb{R}^n, x\neq 0\Rightarrow y= M^Tx \neq 0$
+\end{list}
+Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$.\\
+So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
+\subsection{Cholesky factorization}
+For positive definite matrices.
+$$A=LDL^T=LD^{\frac{1}{2}}(D^{\frac{1}{2}^T}L^T)=CC^T$$
+With $D^{\frac{1}{2}}=\text{diag}(D^{\frac{1}{2}}_{11}, D^{\frac{1}{2}}_{22},\ldots,D^{\frac{1}{2}}_{mm})$ and $C$ lower triangular. Another formulation:
+$$D = \left[\begin{array}{c c c}
+d_{1,1}& & 0\\
+& \ddots & \\
+0 & & d_{n,n}
+\end{array}\right] = \left[\begin{array}{c c c}
+\sqrt{d_{1,1}}& & 0\\
+& \ddots & \\
+0 & & \sqrt{d_{n,n}}
+\end{array}\right]\cdot\left[\begin{array}{c c c}
+\sqrt{d_{1,1}}& & 0\\
+& \ddots & \\
+0 & & \sqrt{d_{n,n}}
+\end{array}\right] = D^{\frac{1}{2}}D^{\frac{1}{2}}$$
+$$A = LDL^T = \underset{R^T}{\underbrace{LD^{\frac{1}{2}}}}\underset{R}{\underbrace{D^{\frac{1}{2}}L^T}} = R^T R$$ with $R$ upper triangular.\\
+Every $A \succ 0$ can be written as $A = R^T R$ where $R$ is upper triangular.\\
+Cholensky and LDL for positive definite matrices are stable even without pivoting $\|R\|=\|A\|^{\frac{1}{2}}$
 \subparagraph{Incomplete $LU$} Forcibly construct a sparse $L_I, U_I$ such that $L_IU_I\simeq A$ but faster/sparser to compute. For example, replace small-ish elements with 0 directly.
 $$L_IU_I\simeq A \Rightarrow I \simeq U_I^{-1}L_I^{-1}A$$ $$P = U_I^{-1}L_I^{-1}$$
 If we want to solve $PAx=Pb$ all we need is a black-box function that $v\mapsto PAv$:
