@@ -1106,11 +1106,14 @@ R^Ty = b\\Rx=y
 \textbf{Fill-in reducing permutation} $P^TAP = R^TR\Leftrightarrow A = PR^TRP$\\
 For example, \texttt{symrcm} "reverse Cuthill McKee".
 \paragraph{Preconditioning} The performances of CG and GMRES on $Ax=b$ depends a lot on where the eigenvalues of $A$ are located. $Ax=b$ has the same solutions as $PAx = Pb$ for any $P\in \mathbb{R}^{m\times n}$ non singular. $PA$ may have a better eigenvalue distribution than $A\Rightarrow$ faster convergence in Krylov space methods. A good choice of $P$ is if it "looks like" $\text{inv}(A)$, $P = \text{deg}(A)^{-1}$. A practical choice would be with $P=\text{diag}(A)^{-1}$, but even better preconditioners are obtained with incomplete LU.
-\paragraph{Factorization} This is one of the main tools used to solve linear systems: breaking up a matrix into pieces that are easier to invert. You can use $A=QR$, $A=U\Sigma V^T$, $A=LU$ and more, and sometimes the same factorization can be used to solve more than one linear system.
+\paragraph{Factorization} This is one of the main tools used to solve linear systems: \textbf{breaking up a matrix into pieces that are easier to invert}. You can use $A=QR$, $A=U\Sigma V^T$, $A=LU$ and more, and sometimes the same factorization can be used to solve more than one linear system.
 \subsection{Gaussian Elimination}
 Gaussian elimination $\leftrightarrow$ LU factorization, $L$ lower triangular and $U$ upper triangular matrices. $A = LU$ is $\frac{2}{3}n^3$, but $Ax=b\Leftrightarrow LUx = b\Leftrightarrow\left\{\begin{array}{l}
 Ly=b\\Ux=y
 \end{array}\right.$ is $2n^2$
+\paragraph{Theorem} Any matrix $A\in\mathbb{R}^{m\times m}$ for which we do not encounter pivots equal to 0 in the algorithm, admits a factorization $A=LU$ where $L$ is lower triangular with 1 on the diagonal and $U$ is upper triangular.
+$$A = L_1^{-1}L_2^{-1}\ldots L_{m-1}^{-1}U$$
+
 \paragraph{Stability} Stability can be a problem. Error analysis with $\tilde{L}\,\tilde{U} = \tilde{A}$, we have $\|\tilde{A}-A\|\leq O(u)\cdot\|L\|\cdot\|U\|$, so all fine if $\|L\|$ and $\|U\|$ are not too larger than $\|A\|$. A fix can be using partial pivoting: at step $k$ of $LU$, swap rows $k$ and\\$p\:|\:|b_p|=\max_i|b_i|$ for $i=k,k+1,\ldots,n$\\
 Swapping rows is equivalent to multiplying by $P_k$, an $I$ matrix with the $k$th and $p$th rows swapped.
 $$P_{n-1}\ldots P_1A=L_1^{-1}\ldots L_{n-1}^{-1}U$$
@@ -1143,6 +1146,9 @@ Things are better if $A$ is positive definite. Remember that $A = A^T$ and posit
 \end{list}
 Hence, at each step $L_k\ldots L_1AL_1^T\ldots L_k^T$ is positive definite and its diagonal entries are $>0\Rightarrow$ all pivots are $>0$.\\
 So for a positive definite $A$, $LDL^T$ can be performed without breakdown even without row and columns exchanges. In addition, $d_{k,k}>0$ for every $k$.
+\paragraph{In practice} LU factorization is the go-to algorithm to solve linear equations. It costs half as much as QR and is stable in practice. When L and U are too large for the computer's memory, then it's time to look for alternative algorithms.\\
+In real life, always use library implementations.
+% END 19-lu
 \subsection{Cholesky factorization}
 For positive definite matrices.
 $$A=LDL^T=LD^{\frac{1}{2}}(D^{\frac{1}{2}^T}L^T)=CC^T$$
@@ -1177,6 +1183,7 @@ Even if $P$ and $A$ are both symmetric, $PA$ is not symmetric in general. So we 
 \subparagraph{Incomplete Cholesky} For a symmetric positive definite $A$ $\Rightarrow$ "\texttt{ichol}" \textbf{incomplete Cholesky} factorization. Produces $L$ sparse such that $LL^T\simeq A$, and $(LL^T)^{-1}=(L^T)^{-1}L^{-1}$\\
 Instead of solving $$(L^T)^{-1}L^{-1}Ax = (L^T)^{-1}L^{-1}b$$ Given that $(L^T)^{-1}L^{-1}A$ isn't symmetric, we can solve $$L^{-1}A(L^T)^{-1}(L^Tx) = L^{-1}b$$ with $L^Tx=y$ and $L^{-1}A(L^T)^{-1}$ symmetric positive definite ($A\simeq LL^T$, so $L^{-1}A(L^T)^{-1}\simeq(L^{-1}L)(L^T(L^T)^{-1}) = T$)\\
 \texttt{pcg($L^{-1}A(L^T)^{-1},L^{-1}b$)} will converge to $y$, where $y=L^Tx$ and $x$ is the solution of \texttt{pcg($A,b$)}, but possibly faster if the eigenvalues of $L^{-1}A(L^T)^{-1}$ have better clustering/condition number than the ones of $A$.
+% END 20-chol
 \chapter{Optimization}
 Making sense of the huge amounts of data generated and collected means taking something big and unwieldy and producing something small and nimble that can be used: a \textbf{mathematical model}. It should be:\begin{list}{}{}
 	\item \textbf{Accurate} (describes well the process)
