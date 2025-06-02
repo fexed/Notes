@@ -89,9 +89,7 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 	A_{12}\\A_{22}\\A_{32}\\A_{42}
 	\end{array}\right]c_2 + \left[\begin{array}{c}
 	A_{13}\\A_{23}\\A_{33}\\A_{43}
-	\end{array}\right]c_3 + \left[\begin{array}{c}
-	A_{14}\\A_{24}\\A_{34}\\A_{44}
-	\end{array}\right]c_4 = \left[\begin{array}{c}
+	\end{array}\right]c_3 = \left[\begin{array}{c}
 	b_1\\b_2\\b_3\\b_4
 	\end{array}\right]$$
 	with $c_1, c_2, c_3$ and $c_4$ called coordinates.
@@ -124,7 +122,7 @@ Solve general problem $$\min_{x\in S}f(x)$$ or a particular version $$\min_{x\in
 	\item \textbf{Rank} $\text{rk}A$ has a precise meaning in linear algebra: the rank of a matrix is the minimum $r$ so that we can find vectors $v_1,\ldots,v_r$ such that all columns (or rows) of $A$ are linear combinations of these vectors.
 	\item \textbf{Invertible} $A$ is invertible if $Ax=y$ has exactly one solution.\\
 	This means that $A$ must be square and the columns of $A$ are a basis of $\mathbb{R}^m$.\\
-	We can derive $x=A^{-1}b$ where $A^{-1}$ is another square matrix such that $A\cdot A^{-1} = A^{-1}\cdot A = I$, the identity matrix (1 on the diagonal, 0 otherwise)
+	We can derive $x=A^{-1}y$ where $A^{-1}$ is another square matrix such that $A\cdot A^{-1} = A^{-1}\cdot A = I$, the identity matrix (1 on the diagonal, 0 otherwise)
 	\item \textbf{Cost}, with $A\in \mathbb{R}^{m\times n}, B\in \mathbb{R}^{n\times p}, C\in \mathbb{R}^{m\times p}$ (vectors $\Leftrightarrow n\times 1$ matrices), then the cost of multiplication is $mp(2n-1)$ floating point ops (\textit{flops}), or $O(mnp)$.\\
 	In particular, $A, B$ squared $\Rightarrow AB$ costs $O(m^3)$. With $A, v$ vector $\Rightarrow$ $Av$ costs $O(m^2)$. Faster alternatives are not worth it usually. And remember that $AB \neq BA$ generally, and also that $CA = CB \not\Rightarrow A = B$ with $C$ matrix.\\
 	If there's $M\:|\: MC = I$, then $A = (MC)A = (MC)B = B$ (multiplying \textit{on the left} by $M$ on both sides)
@@ -155,7 +153,7 @@ The columns (or the rows) of a orthogonal matrix are \textbf{orthonormal}: $u_i^
 \end{array}\right.$\\
 If $U,V\in \mathbb{R}^{n\times n}$ are orthogonal $\Rightarrow UV$ is orthogonal
 \paragraph{Eigenvalues and eigenvectors} Given a square matrix $A\in \mathbb{R}^{m\times m}$, if $Av = \lambda v$ for $v\in \mathbb{R}^m, \lambda\in \mathbb{R}$ then we call $\lambda$ and \textbf{eigenvalue} and $v$ an \textbf{eigenvector} of $A$.\\
-For many matrices we can find $v_1,\ldots,v_m$ eigenvectors that are a basis of $R^m$, i.e. $[v_1|\ldots|v_m] = V$ is invertible.\\
+For many matrices we can find $v_1,\ldots,v_m$ eigenvectors that are a basis of $\mathbb{R}^m$, i.e. $[v_1|\ldots|v_m] = V$ is invertible.\\
 $$A = V\cdot\Lambda\cdot V^{-1}\Leftrightarrow AV = V\Lambda\text{, with }\Lambda = \left[\begin{array}{c c c}
 \lambda_1 & & 0\\
 & \ddots \\
@@ -205,7 +203,7 @@ An example: given pairs $(x_i, y_i)$ such that $y_i \simeq ax_i^3 + bx_i^2 + cx_
 % END 3-intro-leastsquares
 \paragraph{Theory of Least-Squares Problems} With $A \in \mathbb{R}^{m\times n}$, when does $\min \|Ax-b\|_2$ have a unique solution?\\
 We know that if $m=n$ then $Ax = b$ has a unique solution $\Leftrightarrow$ $A$ is an invertible matrix. If this happens, then $0 = \min\|Ax-b\|$ with unique $x$.\\
-We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow$ there is no $z\in \mathbb{R}^n$ such that $z\neq 0\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
+We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\text{Ker}(A) = \{0\} \Leftrightarrow \not\exists\:z\neq 0\in \mathbb{R}^n\:|\:Az=0\Leftrightarrow \text{rank}(A) = n$ and this can only happen if $m\geq n$
 \subparagraph{Theorem} The least-squares problem $\min \|Ax-b\|$ has unique solution $x\Leftrightarrow A$ has full column rank.\\
 \textbf{Lemma}: $A$ has full column rank $\Leftrightarrow A^TA$ is positive definite.\\
 \textbf{Proof} $Az \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
@@ -213,7 +211,7 @@ We say that $A\in \mathbb{R}^{m\times n}$ has \textbf{full column rank} if $\tex
 	\item $\|Az\|_2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
 	\item $\|Az\|_2^2 \neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
 	\item $(Az)^T(Az)\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0$
-	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA > 0$
+	\item $z^TA^TAz\neq 0\:\:\forall\:z\in \mathbb{R}^n, z\neq 0 \longleftarrow$ definition of $A^TA \succ 0$
 \end{list}
 By manipulating the original problem $\min_{x\in \mathbb{R}^n} \|Ax-b\|_2$ we obtain $$\min \|Ax-b\|_2 = \min x^TA^TAx - 2b^TAx + b^Tb \Leftrightarrow f(x) = x^TQx + q^Tx + c$$ which is a quadratic problem and find that it has a unique minimum $x \Leftrightarrow$ it is strongly convex $\Leftrightarrow Q \succ 0$ (positive definite)\\
 $f(x)$ convex $\Leftrightarrow Q \geq 0$, strongly/strictly convex $\Leftrightarrow Q \succ 0$ (positive definite)
@@ -222,7 +220,7 @@ So the least-squares problem $\min_x \|Ax-b\|$ has unique solution
 \begin{list}{$\Leftrightarrow$}{}
 	\item $f(x)$ has a unique minimum point
 	\item $2A^TA = Q \succ 0$ (positive definite)
-	\item $A^TA > 0 \Leftrightarrow A$ has full column rank (for the lemma)
+	\item $A^TA \succ 0 \Leftrightarrow A$ has full column rank (for the lemma)
 \end{list}
 The minimum is when $\text{grad}(f(x)) = 0 \Leftrightarrow 2Qx + q = 0 \Leftrightarrow 2A^TAx - 2A^Tb = 0$ so when $A^TAx = A^Tb$ square linear system, with $A^TA$ invertible (because positive definite).\\
 $x$ is obtained (intuitively) from multiplying $Ax=b$ on the left with $A^T$.
@@ -254,8 +252,8 @@ That's the set of vectors that can be written as $$w = (c_0I+c_1Q+\ldots+c_{n-1}
 a \textbf{polynomial} of degree $d<n$ in $Q$, multiplied by $v$.\\
 A property is $w\in K_n(Q,v)\Rightarrow Qw\in K_{n+1}(Q, v)$\\\\
 If $v, Qv,\ldots,Q^{n-1}v$ are linearly independent, then the coordinates $c_i$ of any vector $w\in K_n(Q,v)$ are unique.\\
-For each $w$ the degree $d$ of the polynomial, such that $w=p(Q)\cdot v$ is well defined, gives that $v\in K_{d+1}(Q,v)\setminus K_d(Q,v)$.\\
-If at some $n_*$ we have $Q^{n_*}v \in K_{n_*}(Q,v)$ then we can prove that also $Q^{n_*+1}v, Q^{n_*+2}v,\ldots \in K_{n_*}(Q,v)$, then the concept of degree breaks down. This means that \textbf{dimensions increase up to a certain $n_*$, then stabilize}
+$\forall\:w=p(Q)\cdot v$ with $d$ degree of the polynomial, we have $v\in K_{d+1}(Q,v)\setminus K_d(Q,v)$.\\
+If at some $n_*$ we have $Q^{n_*}v \in K_{n_*}(Q,v)$ if we can prove that also $Q^{n_*+1}v, Q^{n_*+2}v,\ldots \in K_{n_*}(Q,v)$, then the concept of degree breaks down. This means that \textbf{dimensions increase up to a certain $n_*$, then stabilize}
 $$\underset{\text{dim = 1}}{\underbrace{K_1(Q,v)}}\subset\underset{\text{dim = 2}}{\underbrace{K_2(Q,v)}}\subset\ldots\subset\underset{\text{dim = }n_*}{\underbrace{K_{n_*}(Q,v)}}=\underset{\text{dim = }n_*}{\underbrace{K_{n_*+1}(Q,v)}}=\ldots$$
 Starting from $S=\{v\}$, the Krylov space $K_n(Q,v)$ is the set of vectors that I can obtain by\begin{list}{}{}
 	\item \textbf{Multiplying by} $Q \rightarrow$ add $Qw$ to the set with $w$ being any element of $S$
@@ -311,7 +309,7 @@ Another notation is $[u_1|u_2|\ldots|u_m]\left[\begin{array}{c c c c}
 v_1^T\\v_2^T\\\vdots\\v_m^T
 \end{array} \right] = u_1\sigma_1 v_1^T + \ldots + u_m\sigma_m v_m^T$ sum of $m$ rank-1 matrices\\
 \subparagraph{Geometric idea} There is an orthogonal basis $v_1,\ldots, v_m$ so that $A$ maps $\{v_i\}$ into multiples of another orthogonal basis $A v_i = u_i \sigma_i$\\
-$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}. Singular values are not eigenvalues: they are always positive and usually more "spread apart" Singular vectors $u_i, v_i$ are not unique.
+$\{\sigma_i\}$: singular values of $A$, \textbf{defined uniquely for each $A$}. Singular values are not eigenvalues: they are always positive and usually more "spread apart".\\Singular vectors $u_i, v_i$ are not unique.
 \subparagraph{Rectangular SVD} Each $A\in \mathbb{R}^{m\times n}$ can be decomposed as $A = U\Sigma V^T$ where $U\in \mathbb{R}^{m\times m}$, $V \in \mathbb{R}^{n\times n}$ are orthogonal and $\Sigma\in \mathbb{R}^{m\times n}$ is diagonal, so there's a padding $\sigma_{i,j} = 0$ whenever $i\neq j$ again with $\sigma_1 \geq \ldots \geq \sigma_{\min(m, n)} \geq 0$\\
 So only the first $n$ vectors of $U$ matches with non-zero values in $\Sigma$, all the last $n-m$ columns combine with zeroes.\\
 $= u_i\sigma_1 v_1^T + \ldots + u_n \sigma_n v_n^T$ with $u_{n+1},\ldots, u_m$ not used. So we can "chop off" the unused parts and get the same result.\\
@@ -342,15 +340,18 @@ $$\|Ax\|\leq \|A\|\cdot\|x\|$$
 With $\|x\|_2 = \sqrt{x^Tx}$ and $\|Ux\|=\|x\|$ for orthogonal $U$.\\
 This definition is different from the \textbf{Frobenius norm}, a non-induced norm:
 $$\|A\|_F=\sqrt{a_{11}^2+a_{12}^2+\ldots+a_{21}^2+a_{22}^2+\ldots+a_{mn}^2}$$
+\pagebreak
 \subparagraph{Properties of the Norms}
+\begin{multicols}{2}
 \begin{list}{}{}
 	\item $\|A\|\geq 0$ and $\|A\|=0\Leftrightarrow A=0$
 	\item $\|\alpha A\|=|\alpha|\cdot\|A\|$
 	\item $\|A+B\| \leq \|A\|+\|B\|$
 	\item $\|AB\| \leq \|A\|\cdot\|B\|$
 	\item $\|Av\| \leq \|A\|\cdot\|v\|$
-	\item For the 2-norm ($\|x\|_2\rightarrow \|A\|_2$) it holds that for every $A$ and for every orthogonal matrix $U$, $\|AU\| = \|A\|$ and $\|UA\|=\|A\|$
 \end{list}
+\end{multicols}
+For the 2-norm ($\|x\|_2\rightarrow \|A\|_2$) it holds that for every $A$ and for every orthogonal matrix $U$, $\|AU\| = \|A\|$ and $\|UA\|=\|A\|$\\
 Given $A$ with SVD $A=U\Sigma V^T$
 $$\|A\|_2 = \|U\Sigma V^T\|_2 = \|\Sigma V^T\|_2 = \|\Sigma\|_2 = \sigma_1$$
 $$\|A\| = \max_{\|z\| = 1} \|\Sigma V^T\| = \sqrt{\sigma_1^2 z_1^2 + \ldots + \sigma_n^2 z_n^2} \leq \sigma_1 \sqrt{z_1^2 +\ldots + z_n^2} = \sigma_1\|z\| = \sigma_1$$
@@ -361,7 +362,7 @@ $$\|A\|_F = \|U\Sigma U^T\|_F = \|\left[\begin{array}{c c c}
 \end{array}\right]\|_F = \sqrt{\sigma_1^2+\ldots+\sigma_{\min(m,n)}^2}$$
 \paragraph{Eckart-Young Theorem} Most important property of the SVD decomposition.\\
 We are interested in approximating $A$ with matrices of rank $\leq K$, if $K = 1$ this means find two vectors $u, v$ so that $A = u^T v$, with $K=2$ then $A = u_1^T v_1 + u_2^T v_2$. What is "how close": $\min{\text{rank}(X) \leq K}\|A - X\|$. The theorem states that the solution is related to SVD.\\
-The optimal solution of $\min{\text{rank}(X) \leq X}\|A - X\|$ is $$X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T = \left[\begin{array}{c c c}
+The optimal solution of $\min \text{rank}(X) \leq K\|A - X\|$ is $$X = u_1\sigma_1 v_1^T + \ldots + u_k\sigma_k v_k^T = \left[\begin{array}{c c c}
 \\
 u_1&\ldots&u_k\\
 \\
@@ -983,10 +984,10 @@ Recall that one can also "target" eigenvalues closest to a given $\alpha\in C$ b
 If $A$ is symmetric, then $H_n$ is also symmetric for each $n$, becoming a \textbf{tridiagional}, reducing the cost from $O(mn^2+n\cdot$matvet$)$ to $O(mn+n\cdot$matvet$)$\\
 Arnoldi for symmetric matrices = Lanczos iteration. GMRES for symmetric matrices = MINRES.
 % END 17-arnoldi
-\subsubsection{GMRES} \textbf{Generalized Minimum Residual}: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x = Q_ny$. In other words, we \textbf{look for the best approximate solution inside $K_n(A,y)$}
+\subsubsection{GMRES} \textbf{Generalized Minimum Residual}: after computing $n$ steps of Arnoldi, $AQ_n = Q_{n+1}\underline{H}_n$, we look for the vector $x_n\in K_n(A,b)$ that minimizes the residual $\|Ax_n-b\|$ with $x = Q_ny$. In other words, we \textbf{look for the best approximate solution inside $K_n(A,b)$}
 $$\min_{x_n\in K_n(A,b)}\|Ax_n-b\| = \min_{y\in \mathbb{R}^n} \|AQ_ny -b\|=$$ the least squares problem with the matrix $AQ_n\in \mathbb{R}^{m\times n}$, in $O(mn^2)$
-$$=\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
-$$= \|\:\underline{H}_n y - e_1\|b\|\:\|$$ the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$ being the QR of $\underline{H}_n$, in $O(n^3)$\\
+$$=\min\|Q_{n+1}\underline{H}_ny-Q_{n+1}e_1\|b\|\:\|=\min\|Q_{n+1}\left(\underline{H}_ny-e_1\|b\|\right)\|=$$
+$$= \min\|\:\underline{H}_n y - e_1\|b\|\:\|$$ the least squares problem with matrix $\underline{H}\in \mathbb{R}^{(n+1)\times n}$ being the QR of $\underline{H}_n$, in $O(n^3)$\\
 Actually even cheaper, because $\underline{H}$ is upper triangular, has special structure and we can compute $qr(\underline{H})$ with complexity $O(n^2)$\\
 This can be done incrementally: at each step
 \begin{list}{}{}
@@ -995,7 +996,7 @@ This can be done incrementally: at each step
 	\item check residual $\|Ax_n-b\|=\|\underline{H}_ny-e_1\|b\|\:\|$ as stopping condition
 \end{list}
 \subparagraph{Convergence of GMRES} $$x_n\in K_n(A,b)\Leftrightarrow x_n = p(A)b$$ with $\text{deg}(p)<n$ and $p(A) = \alpha_0 I + \alpha_1 A + \ldots + \alpha_{n-1}A^{n-1}b$, so
-$$\min_{x_n\in K_n(A,b)} \|Ax_n-b\| = \min_{p\:|\:\text{deg}(p)<n}\|Ap(A)b - b\| =  \min_{p\:|\:\text{deg}(p)<n}\|(Ap(A)-I)b\| \leq \|Ap(A)-I\|\cdot\|b\|$$
+$$\min_{x_n\in K_n(A,b)} \|Ax_n-b\| = \min_{p\:|\:\text{deg}(p)<n}\|Ap(A)b - b\| =  \min_{p\:|\:\text{deg}(p)<n}\|(Ap(A)-I)b\| \leq \min_{p\:|\:\text{deg}(p)<n}\|Ap(A)-I\|\cdot\|b\|$$
 And if $A = V\Lambda V^{-1}$ diagonalizable (with $\Lambda = \left[\begin{array}{c c c}
 \lambda_1\\
 & \ddots\\
@@ -1343,9 +1344,9 @@ There exists easy closed-forms for most functions (with notable exceptions such 
 	\item $f'' \in C^0 \Leftrightarrow f\in C^2 \Leftrightarrow f' \in C^1 \Rightarrow f' \in C^0 \Rightarrow f \in C^1 \Rightarrow f \in C^0$
 	\item $f \in C^1$ globally L-c on $X \Rightarrow |f'(x)| \leq L\:\:\forall\: x \in X$
 \end{list}
-\paragraph{Extreme value theorem} $f \in C^0$ on $X = [x_-, x_+]$ finite $\Rightarrow$ max$\{f(x)\:|\: x\in X\} < \infty$, min$\{f(x)\:|\: x\in X\} > -\infty$\\\\
 $f\in C^1$ on $X$ finite $\Rightarrow f$ globally L-c on $X$\\
 Best possible case is $f\in C^2$ on finite $X\Rightarrow$ both $f$ and $f'$ globally L-c on $X$
+\paragraph{Extreme value theorem} $f \in C^0$ on $X = [x_-, x_+]$ finite $\Rightarrow$ max$\{f(x)\:|\: x\in X\} < \infty$, min$\{f(x)\:|\: x\in X\} > -\infty$
 \paragraph{Fastest local optimization} Interpolation, for improving the dichotomic search. Choosing $x$ "right in the middle" is the dumbest possible approach, because we know a lot about $f$: $f(x_-), f(x_+), f'(x_-), f'(x_+)\ldots$. So let's use that, by constructing a model of $f$ based on known information. Much better choosing $x$ close to $x_*$.\\
 But remember that \textbf{the model is an estimate}, so never completely trust the model, but regularize, stabilize\ldots in this case, the minimum guaranteed decrease is with $\sigma < 0.5$, and the worst case is linear convergence with $r = 1 - \sigma$, but hopefully is much faster than that when the model is "right".
 \subsection{Measuring algorithms speed} Given the sequences \begin{list}{}{}
@@ -1615,7 +1616,7 @@ procedure alpha = BLS(phi, alpha, m1, tau)  # tau < 1
 		alpha = tau*alpha
 \end{lstlisting}
 With \texttt{dphi(0)} meaning $\phi'(0)$\\
-Recall that $\exists\:\tilde{\alpha} > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\tilde{\alpha}_i]$.\\Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with $h_i\geq \min\{k\:|\:\tau^k\leq \tilde{\alpha}_i\}$
+Recall that $\exists\:\tilde{\alpha}_i > 0\:|\:(A)$ is satisfied $\forall\:\alpha\in(0,\tilde{\alpha}_i]$.\\Assuming as input $\alpha = 1$, BLS produces $\alpha\geq \tau^{h_i}$ with $h_i\geq \min\{k\:|\:\tau^k\leq \tilde{\alpha}_i\}$
 $$\tilde{\alpha}_i \geq \tilde{\alpha} > 0\:\:\:\:\forall\:i\Rightarrow\exists\:h\:|\:\alpha\geq\tau^h\:\:\:\:\forall\:i\Rightarrow \text{\textbf{convergence}}$$
 We need conditions on $f$ to get it:
 \begin{list}{}{}
@@ -1861,8 +1862,8 @@ It's unavoidable: linear functions have no curvature, and we need many linear fu
 \subparagraph{Stabilizing} $\overline{x}$ as stability center (the best $x_i$ so far) with $\mu$ stability parameter (how far from $\overline{x} f_\mathscr{B}$ is a good model of $f$).\\
 Stabilized master problem $$\min\left\{f_\mathscr{B}(x)+\mu\frac{\|x-\overline{x}\|^2}{2}\right\}$$ Keeps $\{x_*\}$ "close" to $\overline{x}$ (perhaps too close if $\mu$ too large). When $\mu$ too small, unstabilized cutting plane.
 \section{Constrained Optimality and Duality}
-\paragraph{Constrained Optimization} Back to the full $$(P)\:\:\:\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset R^n$\begin{list}{}{}
-	\item $x\in X$ are \textbf{constraints}, hence constrained optimization
+\paragraph{Constrained Optimization} Back to the full $$(P)\:\:\:\:\:f_* = \min\{f(x)\:|\:x\in X\}$$ with $x\subset \mathbb{R}^n$\begin{list}{}{}
+	\item $X$ is the set of the \textbf{constraints}, hence constrained optimization
 	\item $x\in X$ feasible solution, $x\not\in X$ unfeasible solution
 	\item $x_*\in X\:|\:f(x_*)\leq f(x)\:\:\forall\:x\in X$ optimal solution $\Leftrightarrow$ global optimum
 \end{list}
@@ -1870,7 +1871,7 @@ Constraints can be hidden in the objective $\chi_X : \mathbb{R}^n\rightarrow \ov
 0&\text{if }x\in X\\
 \infty&\text{if }x\not\in X
 \end{array}\right.$$ Convex if $X$ is, but extended-valued.
-$$(P)\Leftrightarrow \min\{f_X(x)=f(x)+\chi_X(x)\}$$ Which is essential the objective, a very bad idea: $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
+$$(P)\Leftrightarrow \min\{f_X(x)=f(x)+\chi_X(x)\}$$ Which is essentially the objective, a very bad idea: $\chi_X\not\in C^1$! Conversely, objective "complex" $\rightarrow$ "simple" by "hiding it in the constraints".
 $$(P)\Leftrightarrow\min\{v\:|\:v\geq f(x), x\in X\}$$
 \paragraph{(Local) minima vs. optima} Note that $X=\emptyset\Rightarrow v(P) = +\infty$, so solving $(P)$ includes constructively proving $X=\emptyset$. Almost never happens in ML, so we will forget about this but the issue exists. The model is our choice, we choose it simple/nice/nonempty if we can.\\
 Global optimum obviously hard, hence $x_*$ local optimum solves $$\min\{f(x)\:|\:x\in B(x_*,\epsilon)\cap X\}$$ for some $\epsilon>0$.\\
@@ -1985,7 +1986,7 @@ $\Leftrightarrow\lambda\in \mathbb{R}_+^{|A(x)|}$ and $\mu \in \mathbb{R}^{|J|}\
 So a constructive way to prove the conditions is to find $\lambda$ and $\mu$.
 \paragraph{KKT Conditions} $\exists\:\lambda\in \mathbb{R}_+^{|I|}$ and $\mu\in \mathbb{R}^{|J|}\:|$\begin{list}{}{}
 	\item[(KKT-F)] $g_i(x)\leq 0\:\:i\in I$, $h_j(x) = 0\:\:j\in J$
-	\item[(KKT-G)] $\nabla f(x) + \sum_{i\in I}\lambda_i\nabla g_i(x) + \sum_{j\in J}\mu_h\nabla h_j(x) = 0$
+	\item[(KKT-G)] $\nabla f(x) + \sum_{i\in I}\lambda_i\nabla g_i(x) + \sum_{j\in J}\mu_j\nabla h_j(x) = 0$
 	\item[(KKT-CS)] $\sum_{i\in I}\lambda_i(-g_i(x)) = 0$ \textbf{complementary slackness} $\Leftrightarrow \lambda_ig_i(x) = 0\:\:\forall\:i\in I$
 \end{list}
 \paragraph{KKT Theorem} $T_X(x)=D_X(x)\wedge x$ local optimum $\Rightarrow$ (KKT)\\
@@ -2063,7 +2064,7 @@ Exploit information from previous iteration to speed up KKT system solution: upd
 No more exact solution but hopefully fast iterative approaches, e.g. (quasi-)Newton on the reduced problem.\\
 Which $\epsilon$? How many iterations? How about one of the gradient methods?
 \subsubsection{Projected Gradient Method} Nonlinear problem with linear constraints $(P)\:\:\min\{f(x)\:|\:Ax\leq b\}$, feasible $x$: if $-\nabla f(x)\in F_X(x)$ trivial, just LS/FS along $d=-\nabla f(x)$. In general, find $d\in F_X(x)$ "closer" to $-\nabla f(x)$ then FS/LS along $d$.\\
-Projection of $d\in \mathbb{R}^n$ on $S\subset R^n$: $$p_S(d)=\min\left\{\|d-x\|\:|\:x\in S\right\}$$ $$p_{F_X(x)}(-\nabla f(x))=\min\left\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\right\}$$
+Projection of $d\in \mathbb{R}^n$ on $S\subset \mathbb{R}^n$: $$p_S(d)=\min\left\{\|d-x\|\:|\:x\in S\right\}$$ $$p_{F_X(x)}(-\nabla f(x))=\min\left\{\frac{\|d+\nabla f(x)\|^2}{2}\:|\:A_{\mathscr{A}(x)}d\leq 0\right\}$$
 a convex quadratic program with simple function on a polyhedral cone. Non trivial but clearly doable, for example ASMQP. $d_*=0\Rightarrow \lambda_*A_{\mathscr{A}(x)}+\nabla f(x) = 0, \lambda_* \geq 0\Leftrightarrow x$ optimal for $(P)\Rightarrow$ stopping condition $\|d_*\|\leq \epsilon$ (norm of projected gradient).\\
 $p_{F_X(x)}(\:)$ potentially costly but can be very cheap with appropriate $X$.
 \paragraph{Special Forms of Constraints} Always exploit all the structure of your problem: box constraints $\underline{x}\leq x\leq \tilde{x}$: $X$ decomposable $= X_1\times \ldots \times X_n$ with $X_i=[\underline{x}_i, \tilde{x}_i] \Rightarrow$ $$F_X(x) = \bigotimes_{i=1}^n F_{X_i}(x_i)$$ $$F_{[\underline{x},\tilde{x}]}(x) = \left\{\begin{array}{cl}
